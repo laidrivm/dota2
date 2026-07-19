@@ -14,6 +14,8 @@
   code, walk the ladder — does this need to exist → is it already in the
   codebase → does the stdlib do it → does the platform do it natively.
 - Prefer deleting code over abstracting it. No speculative flexibility (YAGNI).
+- `openspec/specs/` describe product behaviour (what the system does), never
+  code style or conventions — those live only in this file.
 <!-- Add concrete project conventions here as they emerge -->
 
 ## Review workflow
