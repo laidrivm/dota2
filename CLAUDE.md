@@ -51,8 +51,40 @@ repo — edit them there, not here). They are user-invoked slash commands:
 
 ## Lessons learned (fix & capture)
 
-Every time a review catches a real mistake, add a one-line rule here so it
-does not happen again. Keep rules concrete and checkable.
+### The loop — agent responsibilities
+
+Whenever a mistake is confirmed — a bug the user reports, a failed test, a
+review finding (human, /triage, /zombies, /warm, or CodeRabbit) the user
+agrees with, or a mistake you catch in your own earlier output — do BOTH:
+
+1. Fix the code.
+2. Capture the lesson, in the same turn, before treating the task as done:
+   - If it's about how code should be written here → propose a one-line rule
+     for the "Rules" list below and add it after the user confirms.
+   - If it's about how reviews should be run → say the fix belongs in the
+     corresponding skill in the shared skills repo, and propose the exact
+     wording (do not edit the skill from this project).
+   - If it's a one-off (typo, misread requirement, wrong file) → say
+     "not capturing this" and why. Not every bug becomes a rule.
+
+Rule quality bar — a rule must be:
+- **Checkable**: pass/fail is obvious from reading a diff.
+  Good: "Invalidate previously issued OTP codes when generating a new one."
+  Bad: "Be careful with auth logic."
+- **One line**, imperative mood, no rationale (rationale lives in git blame).
+- **Non-duplicate**: before adding, re-read the list; if a similar rule
+  exists, tighten that rule instead of appending a variant.
+
+### Maintenance
+
+- When this list exceeds ~20 rules, propose merging or promoting stable
+  clusters into "Code style" / "Testing" sections above.
+- If a rule stops applying (dependency removed, approach changed), propose
+  deleting it — a stale rule costs trust in the whole list.
+
+### Rules
+
+<!-- newest first; added via the loop above -->
 
 <!-- Examples of the expected shape:
 - Always invalidate previously issued OTP codes when generating a new one.
