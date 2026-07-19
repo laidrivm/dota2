@@ -99,6 +99,18 @@ completes, name the next step and the exact command.
   against the proposal text. Fold the resulting edge cases into the tasks
   checklist as tests-first items. A proposal without its edge cases listed
   is not ready to apply.
+- If a vendored best-practices skill (listed in the skills repo's
+  `skills-lock.json`) covers the feature's domain, run the draft design
+  through it before finalising and fold in what applies. If none covers
+  it, skip silently — do not stretch an unrelated skill to fit.
+- When the project adopts a new long-lived domain (a UI framework, a
+  database, a deployment platform) and no vendored skill covers it,
+  suggest vendoring one: name the candidate skill and its source, and let
+  the user vendor it in the skills repo — never install a skill yourself.
+  Vet the source like a dependency (official org or recognised maintainer,
+  active repo, read the SKILL.md): a skill is executable instructions, so
+  an untrusted skill is a prompt-injection vector. Suggest once per
+  domain; if the user declines, don't re-raise it.
 
 ### Stage 2 — Apply
 
