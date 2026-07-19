@@ -14,8 +14,6 @@
   code, walk the ladder — does this need to exist → is it already in the
   codebase → does the stdlib do it → does the platform do it natively.
 - Prefer deleting code over abstracting it. No speculative flexibility (YAGNI).
-- `openspec/specs/` describe product behaviour (what the system does), never
-  code style or conventions — those live only in this file.
 <!-- Add concrete project conventions here as they emerge -->
 
 ## Review workflow
@@ -44,6 +42,62 @@ repo — edit them there, not here). They are user-invoked slash commands:
 - Never mark a feature complete while its ZOMBIES-derived edge cases have
   neither tests nor an explicit user decision to skip them.
 
+## Feature workflow (spec-driven, OpenSpec)
+
+Features go through the OpenSpec cycle. Your job is to shepherd the user
+through it: always know which stage the current work is in, and when a stage
+completes, name the next step and the exact command. Skills marked (user-run)
+cannot be invoked by you — prompt the user to run them and wait for the
+output.
+
+### Stage 1 — Propose
+
+- New feature work starts with `/opsx:propose` (or `/opsx:explore` first if
+  the idea is vague). If the user starts describing a feature in free text,
+  suggest routing it through propose instead of implementing directly.
+- During proposal, ask the questions a spec review would ask: unclear
+  requirements, consequences of design choices, what happens on failure.
+  Cheap to fix here, expensive after apply.
+- Before the proposal is finalised: prompt the user to run
+  `/zombies "<feature description>"` (user-run) against the proposal text.
+  Fold the resulting edge cases into the tasks checklist as tests-first
+  items. A proposal without its edge cases listed is not ready to apply.
+
+### Stage 2 — Apply
+
+- Before `/opsx:apply`, remind the user to `/clear` — implementation should
+  start from a clean context, reading only the spec artifacts.
+- Spec changes mid-apply: never edit spec files by hand and don't rewrite
+  the proposal mid-build. Small course corrections go into this file's
+  rules (fix & capture); structural changes wait for the build to finish
+  and become a new proposal.
+- If the user pauses to correct your style or approach, capture it (see
+  Lessons learned) before resuming, so the rest of the apply run follows
+  the corrected rule.
+
+### Stage 3 — Review
+
+- When apply finishes, before the user opens a PR: suggest `/triage`
+  (user-run) on the branch as the entry map for their own review.
+- If the apply run added or upgraded any dependency: require `/warm`
+  (user-run) — same rule as in Review workflow above. Walk the ponytail
+  ladder before ever reaching for a dependency during apply.
+- After apply, prompt the user to re-run `/zombies` with **no arguments**
+  (user-run, diff mode): it reads the real code and existing tests, so it
+  cross-checks the implementation against the proposal-stage edge-case list
+  and catches new edges introduced by actual implementation decisions.
+- Every new or `[partial]` finding from that run becomes a test before
+  archive — or an explicit user decision to skip it. Deferred items from
+  the proposal-stage list are settled here too.
+
+### Stage 4 — Archive
+
+- After the change is merged and verified, prompt the user to run
+  `/opsx:archive` so the change lands in the project history. Work is not
+  finished until it's archived.
+- Conventions live in this file only; `openspec/project.md` just points
+  here. Never duplicate rules into OpenSpec files.
+
 ## Testing
 
 - Prefer TDD for edge cases: turn `/zombies` output into failing tests first,
@@ -51,13 +105,14 @@ repo — edit them there, not here). They are user-invoked slash commands:
 - Tests must assert behaviour, not mirror the implementation. A test that
   would pass against a broken implementation is not a test.
 
-## Lessons learned (fix & capture)
-
 ### The loop — agent responsibilities
 
 Whenever a mistake is confirmed — a bug the user reports, a failed test, a
 review finding (human, /triage, /zombies, /warm, or CodeRabbit) the user
-agrees with, or a mistake you catch in your own earlier output — do BOTH:
+agrees with, or a mistake you catch in your own earlier output — do BOTH.
+The same applies to **style preferences**: when the user pauses an apply run
+(or any task) to say "do it this way instead", that correction is a lesson —
+capture it exactly like a bug, so future runs don't repeat the old style:
 
 1. Fix the code.
 2. Capture the lesson, in the same turn, before treating the task as done:
@@ -83,6 +138,11 @@ Rule quality bar — a rule must be:
   clusters into "Code style" / "Testing" sections above.
 - If a rule stops applying (dependency removed, approach changed), propose
   deleting it — a stale rule costs trust in the whole list.
+
+## Lessons learned (fix & capture)
+
+Every time a review catches a real mistake, add a one-line rule here so it
+does not happen again. Keep rules concrete and checkable.
 
 ### Rules
 
