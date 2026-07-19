@@ -1,20 +1,27 @@
+---
 schema: spec-driven
-
 context: |
-  Conventions live in /CLAUDE.md — follow it. Do not restate them here.
+  Conventions and contract rules live in /CLAUDE.md — follow it. Do not
+  restate them here. This file owns architecture choices only.
 
+  Architecture defaults — apply when drafting proposals; a deviation must
+  be argued in the design artifact:
+  - Realtime: unidirectional server→client streams (notifications,
+    progress, live updates) use SSE — Bun.serve streaming + native
+    EventSource, zero packages. WebSockets only when the client genuinely
+    sends frequent upstream messages.
+  - Response shaping is BFF-style: each endpoint is designed from the
+    screen that consumes it — one flight per view, no client-side
+    waterfalls of dependent requests.
+  - Expensive aggregates (stats, analytics) are computed server-side
+    behind a cache, never recomputed per page load.
+  - N+1 is a UI defect: eager-load/dataloader hints are part of an
+    endpoint's definition and get checked at review.
 rules:
   proposal:
     - Include a "Non-goals" section
+  design:
+    - For every endpoint, fix the exact response shape per the API design rules
+      in /CLAUDE.md
   tasks:
     - Include a test task derived from /zombies output
-
-# Per-artifact rules (optional)
-# Add custom rules for specific artifacts.
-# Example:
-#   rules:
-#     proposal:
-#       - Keep proposals under 500 words
-#       - Always include a "Non-goals" section
-#     tasks:
-#       - Break tasks into chunks of max 2 hours
