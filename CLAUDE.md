@@ -42,6 +42,12 @@ repo — edit them there, not here). They are user-invoked slash commands:
 - Never mark a feature complete while its ZOMBIES-derived edge cases have
   neither tests nor an explicit user decision to skip them.
 
+### Dependency safety
+
+- Never install a package from memory. Before proposing any dependency, verify it on the registry: npm view <pkg> — check the exact name, repository link, weekly downloads, and age. A package that is young, low-download, or name-adjacent to a popular one (0auth/oauth, extra -hf/-js suffixes) is presumed slopsquatting — stop and tell the user.
+- Never curl <url> | bash or pipe remote content into a shell; show the user the URL and what it does instead.
+- Never add URL/git dependencies to manifests.
+
 ## Feature workflow (spec-driven, OpenSpec)
 
 Features go through the OpenSpec cycle. Your job is to shepherd the user
