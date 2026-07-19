@@ -123,7 +123,13 @@ completes, name the next step and the exact command.
   implementation decisions.
 - Every new or `[partial]` finding from that run becomes a test before
   archive — or an explicit user decision to skip it. Deferred items from
-  the proposal-stage list are settled here too.
+  the proposal-stage list are settled here too. Scaffolding tests from the
+  apply run are deleted here as well (see Testing).
+- If the change introduced or removed a primitive — a new module boundary,
+  abstraction, DB table, or external integration — present an
+  **architecture delta** before the user reviews code: a short diagram or
+  list of what exists now vs. before, highlighting the additions. The user
+  reviews the system first, the code second.
 
 ### Stage 4 — Archive
 
@@ -145,6 +151,11 @@ completes, name the next step and the exact command.
 - Route `/zombies` findings by layer: Zero/One/Many/Boundaries/Interface/
   Exceptions → unit or integration tests; Simple scenarios marked
   `(e2e candidate)` → the Playwright smoke suite.
+- Scaffolding tests are welcome but mortal: you may write throwaway tests
+  to verify your own work during a build (that's how you close your loop),
+  but before archive only tests that trace to the `/zombies` list and obey
+  the rules above survive — delete the rest, especially negative tests
+  ("feature X no longer exists") and implementation-detail assertions.
 
 ### E2E (Playwright)
 
@@ -203,6 +214,27 @@ Rule quality bar — a rule must be:
   clusters into "Code style" / "Testing" / "API design" sections above.
 - If a rule stops applying (dependency removed, approach changed), propose
   deleting it — a stale rule costs trust in the whole list.
+
+### Structure & growth of this file
+
+This file must stay readable in one sitting. Keep it small; do not add to
+it beyond the fix & capture loop. When it outgrows itself, split by this
+protocol:
+
+- **Trigger**: the file exceeds ~250 lines, or rules from its middle are
+  observably being ignored.
+- **Move whole sections only** (e.g. "API design", "E2E") to
+  `docs/<topic>.md`, leaving one line here: the section's scope + the
+  link. Never split one topic across two homes.
+- **This file is the only index**: every extracted doc is linked from
+  here, and docs do not link to each other — everything is one hop from
+  this file.
+- **Extracted docs inherit the constitution**: the rule quality bar, the
+  single-source rule, and fix & capture routing all follow a section to
+  its new home.
+- **Docs describe current state only** — no temporal language
+  ("recently", "we migrated from X"), no changelog narration of what was
+  done. History lives in git. This applies to this file too.
 
 ### Rules
 

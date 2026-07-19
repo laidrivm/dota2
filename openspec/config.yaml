@@ -18,10 +18,12 @@ context: |
   - N+1 is a UI defect: eager-load/dataloader hints are part of an
     endpoint's definition and get checked at review.
 rules:
-  proposal:
+proposal:
     - Include a "Non-goals" section
+    - When gathering requirements, ask questions one at a time — an answer
+      may invalidate the questions that would have followed
   design:
-    - For every endpoint, fix the exact response shape per the API design rules
-      in /CLAUDE.md
+    - For every endpoint, fix the exact response shape per the API design
+      rules in /CLAUDE.md
   tasks:
     - Include a test task derived from /zombies output
