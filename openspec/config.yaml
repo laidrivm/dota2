@@ -18,12 +18,17 @@ context: |
   - N+1 is a UI defect: eager-load/dataloader hints are part of an
     endpoint's definition and get checked at review.
 rules:
-proposal:
+  proposal:
     - Include a "Non-goals" section
     - When gathering requirements, ask questions one at a time — an answer
       may invalidate the questions that would have followed
+    - Write acceptance criteria in EARS form (WHEN <trigger> / IF <unwanted
+      condition> THEN / WHILE <state> — the system SHALL <behaviour>), with
+      measurable values, not adjectives
   design:
     - For every endpoint, fix the exact response shape per the API design
       rules in /CLAUDE.md
   tasks:
     - Include a test task derived from /zombies output
+    - Each task cites the requirement(s) or acceptance criteria it fulfils;
+      every criterion is cited by at least one task
