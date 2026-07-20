@@ -20,8 +20,9 @@ below.
 
 - [x] **Task 1** — bun supply-chain hardening (commit `b2cd96d`)
 - [x] **Task 3** — Biome + tsc + YAML check + actionlint (staged)
-- [ ] **Task 2** — Renovate + CI audit ← next step
-- [ ] **Task 6** — git hooks (simple-git-hooks)
+- [x] **Task 2** — Dependabot + CI audit (`dependabot.yml`, `audit.yml`);
+      awaits manual repo-settings enablement — see checklist below
+- [ ] **Task 6** — git hooks (simple-git-hooks) ← next step
 - [ ] **Phase 1** — OpenSpec: model module (`types.ts` + the 6 acceptance
       tests of model-spec §7 against the fixture; camelCase fix on import)
 - [ ] **Phase 2** — OpenSpec: draft board UI on Preact + design-token
@@ -44,7 +45,13 @@ below.
   https://stratz.com/knowledge-base/API/Are%20there%20any%20rate%20limits%3F;
   pick phases: extract via GraphQL or defer to v2.
 - GitHub Actions: pin by full commit SHA + version comment; bun pinned to
-  1.3.14 in CI; Renovate maintains the hashes after Task 2.
+  1.3.14 in CI.
+- Dependency bot: **Dependabot**, not Renovate — it meets every Task 2
+  requirement (bun ecosystem, 3-day `cooldown`, security updates bypass
+  cooldown, keeps actions SHA-pinned) and is first-party, so no third-party
+  GitHub App gets write access to this hardening-focused repo. Trade-off:
+  no Dependency Dashboard and no lockFileMaintenance; the nightly
+  `bun audit` compensates for the latter.
 - IBM Plex fonts: self-hosted (decided in favour of offline operation).
 - Hooks: simple-git-hooks, not husky; e2e never runs in hooks.
 - All repo artifacts are in English (CLAUDE.md rule).

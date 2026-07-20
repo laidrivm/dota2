@@ -1,0 +1,28 @@
+version: 2
+
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    # Match bunfig.toml minimumReleaseAge (3 days): let poisoned releases
+    # be caught and unpublished before an update PR adopts them.
+    cooldown:
+      default-days: 3
+    groups:
+      actions:
+        patterns: ["*"]
+
+  - package-ecosystem: "bun"
+    directory: "/"
+    # Raise the exact pin to the new version (bunfig.toml exact = true).
+    versioning-strategy: "increase"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    cooldown:
+      default-days: 3
+    groups:
+      dependencies:
+        update-types: ["minor", "patch"]

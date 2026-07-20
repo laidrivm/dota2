@@ -1,4 +1,16 @@
-# Task 2 — Automated dependency monitoring: Renovate + CI audit
+# Task 2 — Automated dependency monitoring: Dependabot + CI audit
+
+> **Status: DONE — implemented with Dependabot, not Renovate.**
+> Dependabot meets every requirement below (bun ecosystem, 3-day `cooldown`,
+> security updates that bypass the cooldown, SHA-pinned actions) while
+> keeping a hardening-focused repo free of a third-party GitHub App with
+> write access. Trade-off: no Dependency Dashboard, no lockFileMaintenance
+> (the nightly `bun audit` compensates for the latter). See `PLAN.md`
+> "Accepted decisions". The Renovate-specific steps 1/5 below are kept as
+> the original rationale; the live config is `.github/dependabot.yml` and
+> `.github/workflows/audit.yml`. Mend Renovate App install is NOT required;
+> instead enable Dependabot version updates + alerts + security updates in
+> repo settings (see the manual checklist).
 
 ## Context
 
