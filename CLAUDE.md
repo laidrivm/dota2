@@ -16,6 +16,20 @@
 - Prefer deleting code over abstracting it. No speculative flexibility (YAGNI).
 <!-- Add concrete project conventions here as they emerge -->
 
+### Accessibility
+
+- Semantic HTML first: native elements (button, select, dialog, details)
+  over ARIA-patched divs. Reach for ARIA only where no native element
+  exists. Style natives (appearance: base-select) instead of rebuilding
+  them.
+- Every interactive element is keyboard-reachable and operable; scrollable
+  regions get ::scroll-button or are focusable.
+- Every image has an alt (empty alt="" for decorative); every form control
+  has an associated label.
+- Dynamic announcements via role="status" (role="alert" only for
+  genuinely urgent interruptions); migrate to aria-notify when it ships.
+- Visible focus states are never removed without an equal replacement.
+
 ### Dependency safety
 
 - Never install a package from memory. Before proposing any dependency,
