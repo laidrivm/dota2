@@ -1,5 +1,12 @@
 # Task 6 — Git hooks: fast local gates via simple-git-hooks
 
+> **Status: DONE.** Two deviations from the steps below, both deliberate:
+> pre-commit is `biome check --staged` **without `--write`** (simple-git-hooks
+> can't re-stage autofixes, so `--write` would let an unformatted blob into
+> the commit while CI catches it — block instead); pre-push uses the native
+> `bun test --pass-with-no-tests` flag as the zero-tests guard (no wrapper
+> script). Live config: `package.json` → `simple-git-hooks`. `/warm` → Keep.
+
 ## Context
 
 CI (lint.yml, audit.yml) catches problems minutes after push. Hooks catch
