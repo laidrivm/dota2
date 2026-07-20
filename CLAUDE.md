@@ -278,5 +278,8 @@ protocol:
 - This repo is public: before anything is staged or committed, check the
   diff for secrets, tokens, capability URLs, internal identifiers, and
   machine-local files — flag anything questionable instead of committing it.
+- Before the first dependency install or tool run in a repo, verify
+  `.gitignore` covers its outputs (`node_modules/`, build dirs, local
+  settings).
 
 <!-- newest first; added via the loop above -->
