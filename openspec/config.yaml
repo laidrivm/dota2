@@ -25,6 +25,9 @@ rules:
     - Write acceptance criteria in EARS form (WHEN <trigger> / IF <unwanted
       condition> THEN / WHILE <state> — the system SHALL <behaviour>), with
       measurable values, not adjectives
+    - Scope a proposal to one reviewable cycle. If the feature needs more,
+      split it into sequenced proposals, each independently applyable and
+      testable — state the sequence in the first proposal's design
   design:
     - For every endpoint, fix the exact response shape per the API design
       rules in /CLAUDE.md
