@@ -11,6 +11,15 @@
 
 One fact lives in exactly one file; everything else links to it.
 
+## Tooling
+
+- `bun run lint` — Biome check (format + lint, CI mode)
+- `bun run lint:fix` — Biome with autofix
+- `bun run lint:yaml` — YAML syntax check via `Bun.YAML` (no deps)
+- `bun run typecheck` — `tsc --noEmit`, strict
+- actionlint validates `.github/workflows/*` in CI (pinned Docker image);
+  locally: `brew install actionlint` if you want the same check.
+
 ## Dependency hygiene
 
 - Install via `bun add <pkg>` — the exact version gets written

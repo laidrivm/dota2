@@ -1,5 +1,16 @@
 {
-  "name": "d2ass",
-  "private": true,
-  "type": "module"
+	"name": "d2ass",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"lint": "biome ci .",
+		"lint:fix": "biome check --write .",
+		"lint:yaml": "bun scripts/check-yaml.ts",
+		"typecheck": "tsc --noEmit"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.5.4",
+		"@types/bun": "1.3.14",
+		"typescript": "7.0.2"
+	}
 }
