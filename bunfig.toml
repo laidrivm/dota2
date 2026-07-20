@@ -1,0 +1,12 @@
+[install]
+# Pin exact versions in package.json (no ^ ranges) — malicious releases
+# ship as patch/minor bumps that carets would auto-adopt.
+exact = true
+
+# Only install versions published at least 3 days ago, so poisoned
+# releases get caught and unpublished before they can reach us.
+minimumReleaseAge = 259200 # seconds = 3 days
+
+# Packages exempt from the age gate. Keep empty; add entries only with
+# an explicit user decision.
+minimumReleaseAgeExcludes = []

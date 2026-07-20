@@ -37,9 +37,16 @@
   weekly downloads, and age. A package that is young, low-download, or
   name-adjacent to a popular one (0auth/oauth, extra -hf/-js suffixes) is
   presumed slopsquatting — stop and tell the user.
+- Never run `bunx`/`npx` with a package that hasn't passed the check
+  above — `bunx` bypasses the release-age gate.
 - Never pipe remote content into a shell (`curl … | bash`); show the user
   the URL and what it does instead.
 - Never add URL or git dependencies to manifests.
+- If a package needs its install scripts, never add it to
+  `trustedDependencies` yourself — surface `bun pm untrusted` output and
+  let the user decide.
+- CI and hooks install with `bun install --frozen-lockfile`, never plain
+  `bun install`.
 - Never call an unfamiliar framework/library API from memory — check the
   docs; models invent methods.
 
