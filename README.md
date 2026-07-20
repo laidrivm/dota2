@@ -5,6 +5,8 @@
 | File | Owns | Read |
 |------|------|------|
 | `CLAUDE.md` | agent rules, code style, API contract, fix & capture loop | every session |
+| `PLAN.md` | implementation queue, statuses, accepted decisions | every session |
+| `tasks/*.md` | infra task specs (outside the OpenSpec cycle) | when a task starts |
 | `openspec/config.yaml` → `context:` | architecture choices (SSE, BFF, cache, N+1) | on artifact generation |
 | `openspec/config.yaml` → `rules:` | artifact shape requirements (referencing CLAUDE.md) | on artifact generation |
 | skills repo (private, symlinked into `.claude/skills/`) | how reviews are run (triage/zombies/warm) | on skill invocation |

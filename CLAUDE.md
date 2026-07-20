@@ -271,4 +271,12 @@ protocol:
 
 ### Rules
 
+- Maintain `PLAN.md`: read it at session start; update its queue, statuses
+  and decisions in the same turn a task or stage completes.
+- All repo artifacts — docs, plans, specs, code comments, commit messages —
+  are written in English by default.
+- This repo is public: before anything is staged or committed, check the
+  diff for secrets, tokens, capability URLs, internal identifiers, and
+  machine-local files — flag anything questionable instead of committing it.
+
 <!-- newest first; added via the loop above -->
