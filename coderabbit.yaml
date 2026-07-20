@@ -1,0 +1,39 @@
+# CodeRabbit config for d2ass.
+# Principle: this file stays thin — review rules live in /CLAUDE.md
+# (single-source). CodeRabbit auto-detects CLAUDE.md as a code-guidelines
+# file; this config only tunes behaviour and adds checks an automated
+# scanner can't do.
+
+language: "en-US"
+
+reviews:
+  profile: "assertive"
+  high_level_summary: true
+  poem: false
+  auto_review:
+    enabled: true
+    drafts: false # drafts are pre-Stage-3 work in progress; review on ready
+  path_instructions:
+    - path: "**/*.{ts,tsx}"
+      instructions: |
+        Apply the rules from /CLAUDE.md, especially the "API design",
+        "Accessibility", and "Testing" sections. Flag violations of those
+        rules explicitly, quoting the rule. Do not restate general style
+        opinions the linters already cover.
+    - path: "e2e/**"
+      instructions: |
+        Enforce the "E2E (Playwright)" rules from /CLAUDE.md: locator
+        priority, no waitForTimeout, no serial mode without justification,
+        no cleanup of what Playwright cleans itself.
+    - path: "**/*.{tsx,html,css}"
+      instructions: |
+        For UI markup: check that alt texts and accessible names are
+        semantically meaningful for the content they describe, not merely
+        present — automated scanners verify presence; you verify meaning.
+    - path: ".github/workflows/**"
+      instructions: |
+        Verify actions are pinned to full commit SHAs and no
+        github.event.* value is interpolated into run: blocks.
+
+chat:
+  auto_reply: true

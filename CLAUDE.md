@@ -16,20 +16,6 @@
 - Prefer deleting code over abstracting it. No speculative flexibility (YAGNI).
 <!-- Add concrete project conventions here as they emerge -->
 
-### Accessibility
-
-- Semantic HTML first: native elements (button, select, dialog, details)
-  over ARIA-patched divs. Reach for ARIA only where no native element
-  exists. Style natives (appearance: base-select) instead of rebuilding
-  them.
-- Every interactive element is keyboard-reachable and operable; scrollable
-  regions get ::scroll-button or are focusable.
-- Every image has an alt (empty alt="" for decorative); every form control
-  has an associated label.
-- Dynamic announcements via role="status" (role="alert" only for
-  genuinely urgent interruptions); migrate to aria-notify when it ships.
-- Visible focus states are never removed without an equal replacement.
-
 ### Dependency safety
 
 - Never install a package from memory. Before proposing any dependency,
@@ -42,6 +28,9 @@
 - Never pipe remote content into a shell (`curl … | bash`); show the user
   the URL and what it does instead.
 - Never add URL or git dependencies to manifests.
+- Never add or change a registry (or scoped registry override) in
+  bunfig.toml / .npmrc — a registry is a supply-chain root of trust;
+  adding one is a user decision, made outside any coding task.
 - If a package needs its install scripts, never add it to
   `trustedDependencies` yourself — surface `bun pm untrusted` output and
   let the user decide.
@@ -49,6 +38,20 @@
   `bun install`.
 - Never call an unfamiliar framework/library API from memory — check the
   docs; models invent methods.
+
+### Accessibility
+
+- Semantic HTML first: native elements (button, select, dialog, details)
+  over ARIA-patched divs. Reach for ARIA only where no native element
+  exists. Style natives (`appearance: base-select`) instead of rebuilding
+  them.
+- Every interactive element is keyboard-reachable and operable; scrollable
+  regions get `::scroll-button` or are focusable.
+- Every image has an `alt` (empty `alt=""` for decorative); every form
+  control has an associated label.
+- Dynamic announcements via `role="status"` (`role="alert"` only for
+  genuinely urgent interruptions); migrate to `aria-notify` when it ships.
+- Visible focus states are never removed without an equal replacement.
 
 ## API design
 
@@ -80,6 +83,18 @@ Architecture defaults (SSE vs WebSockets, BFF response shaping, caching,
 N+1 policy) live in the `context:` field of `openspec/config.yaml` — apply
 them at propose time.
 
+## Git & PRs
+
+- One OpenSpec proposal = one branch = one PR. Branch name:
+  `feat/<proposal-slug>` (`fix/`, `chore/` for non-feature work).
+- Commits: imperative subject ≤ 72 chars, body only when the diff doesn't
+  explain itself. Commit per completed task-list item, not per file.
+- Never commit directly to main; never force-push a branch after its PR
+  is open (review comments lose their anchors).
+- Open PRs as drafts; mark ready only after Stage 3 gates pass.
+- The PR description links the proposal and states the EARS criteria the
+  change fulfils — reviewers (human or bot) check against the contract.
+
 ## Review toolkit
 
 Review skills live in `.claude/skills/` (symlinked from the shared skills
@@ -103,8 +118,12 @@ suggestion before a PR is opened.
 
 ## Feature workflow (spec-driven, OpenSpec)
 
-Features go through the OpenSpec cycle. Your job is to shepherd the user
-through it: always know which stage the current work is in, and when a stage
+Features go through the OpenSpec cycle. So does any infrastructure change
+that adds a tool, workflow, service, or dependency, or changes how an
+existing gate behaves. Exempt from the cycle: the bootstrap tasks
+(task-1..task-5), Renovate version bumps, single-value config edits, and
+docs-only changes. Your job is to shepherd the user through the cycle:
+always know which stage the current work is in, and when a stage
 completes, name the next step and the exact command.
 
 ### Stage 1 — Propose
@@ -135,8 +154,9 @@ completes, name the next step and the exact command.
 
 ### Stage 2 — Apply
 
-- Before `/opsx:apply`, remind the user to `/clear` — implementation should
-  start from a clean context, reading only the spec artifacts.
+- Before `/opsx:apply`: create the branch per Git & PRs (never apply on
+  main), then remind the user to `/clear` — implementation should start
+  from a clean context, reading only the spec artifacts.
 - Never edit spec files by hand and don't rewrite the proposal mid-build.
   Small course corrections go into this file's rules (fix & capture);
   structural changes wait for the build to finish and become a new proposal.
@@ -163,6 +183,10 @@ completes, name the next step and the exact command.
   **architecture delta** before the user reviews code: a short diagram or
   list of what exists now vs. before, highlighting the additions. The user
   reviews the system first, the code second.
+
+- When all Stage 3 gates pass: push the branch and offer to open a draft
+  PR (`gh pr create --draft`) with the description per Git & PRs. Wait for
+  the user's go-ahead before opening it.
 
 ### Stage 4 — Archive
 
@@ -268,6 +292,13 @@ protocol:
 - **Docs describe current state only** — no temporal language
   ("recently", "we migrated from X"), no changelog narration of what was
   done. History lives in git. This applies to this file too.
+- **Exception — `docs/context/`**: session save-points (debug findings,
+  library research, incident notes) live in `docs/context/<topic>-<yyyy-mm>.md`,
+  written for an LLM reader, narrative and dated by design. They are
+  committed but NOT indexed here and never loaded automatically — the
+  user passes one in explicitly when starting a session on the same
+  topic. A save-point is a snapshot, not a source of truth: it never
+  overrides this file, config.yaml, or the OpenSpec archive.
 
 ### Rules
 
