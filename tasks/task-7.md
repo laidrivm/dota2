@@ -18,8 +18,9 @@ Facts you must respect:
   third-party: vet it like a dependency before pinning (repo activity,
   usage, known issues) and report the vetting.
 - Base images are pinned by digest (`oven/bun:1-alpine@sha256:…`), same
-  rationale as action SHAs; Renovate (`config:best-practices`) keeps
-  digests updated.
+  rationale as action SHAs. Keeping them updated needs a `docker`
+  ecosystem entry in `.github/dependabot.yml` — add it as part of this
+  task, it does not exist yet.
 - The production stage installs with
   `--frozen-lockfile --production --ignore-scripts` and runs as the
   non-root `bun` user (mellon pattern).
