@@ -38,35 +38,8 @@ Facts you must respect:
 ### 1. Create `.github/dependabot.yml`
 
 Two ecosystems — `github-actions` and `bun` — both weekly, both with a
-3-day `cooldown`, each grouped into a single PR:
-
-```yaml
-version: 2
-
-updates:
-  - package-ecosystem: "github-actions"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-      day: "monday"
-    cooldown:
-      default-days: 3
-    groups:
-      actions:
-        patterns: ["*"]
-
-  - package-ecosystem: "bun"
-    directory: "/"
-    versioning-strategy: "increase"
-    schedule:
-      interval: "weekly"
-      day: "monday"
-    cooldown:
-      default-days: 3
-    groups:
-      dependencies:
-        update-types: ["minor", "patch"]
-```
+3-day `cooldown`, each grouped into a single PR. The live file is
+`.github/dependabot.yml`; read it there rather than from a copy here.
 
 Rationale to preserve if you adjust wording: `versioning-strategy: increase`
 matches `exact = true` from task 1; the weekly schedule keeps PR noise low

@@ -65,9 +65,6 @@ a moved section.
 
 - Do NOT rewrite rule text while moving it — a move is a move. Wording
   changes are a separate commit with their own rationale.
-- Do NOT create `docs/` subdirectories beyond `docs/context/`.
-- Do NOT let an extracted doc grow a "see also" link to another extracted
-  doc — one hop from `CLAUDE.md`, always.
 
 ## Acceptance criteria
 

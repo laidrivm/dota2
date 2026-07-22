@@ -25,13 +25,8 @@ below.
 - [x] **Task 6** — git hooks (simple-git-hooks): pre-commit `biome check
       --staged` (block, no autofix), pre-push `typecheck && bun test
       --pass-with-no-tests`; both demonstrated firing; `/warm` → Keep
-- [ ] **Task 8** — split `CLAUDE.md` per its own growth protocol (319 lines
-      vs the ~250 trigger); repoints the CodeRabbit `path_instructions`
-      that cite sections by name
-- [ ] **Task 9** — unit test setup: conventions into `docs/testing.md`,
-      drop `--pass-with-no-tests`, put `bun test` in CI (needs task 8 for
-      the file, phase 1 for real subjects; enters the OpenSpec cycle —
-      it changes a gate)
+- [ ] **Task 8** — split `CLAUDE.md` per its own growth protocol
+- [ ] **Task 9** — unit test setup (blocked: task 8, phase 1)
 - [ ] **Phase 1** — OpenSpec: model module (`types.ts` + the 6 acceptance
       tests of model-spec §7 against the fixture; camelCase fix on import)
       ← next step (enters the OpenSpec cycle: `/opsx:propose`)
@@ -65,13 +60,9 @@ below.
 - IBM Plex fonts: self-hosted (decided in favour of offline operation).
 - Hooks: simple-git-hooks, not husky; e2e never runs in hooks.
 - All repo artifacts are in English (CLAUDE.md rule).
-- **No OpenSpec exemptions**: the criterion in CLAUDE.md ("Feature
-  workflow") is the only test — features and infra that adds a tool,
-  workflow, service or dependency, or changes a gate. Task size and task
-  number grant nothing.
-- Unsorted product specs live in `spec-inbox/` — gitignored except its
-  README, so a public repo carries the pointer without the content and no
-  machine-local path is ever committed.
+- No OpenSpec exemptions: the criterion in CLAUDE.md is the only test.
+- Unsorted product specs live in `spec-inbox/`, gitignored except its
+  README — the public repo carries the pointer, never the content.
 
 ## Gates (reminder)
 
