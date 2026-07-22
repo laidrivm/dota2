@@ -79,6 +79,9 @@ VPS), how to roll back (previous SHA tag), where secrets live.
 
 - [ ] Multistage Dockerfile: digest-pinned base, frozen+production+
       ignore-scripts install, non-root user; local build and run proven.
+- [ ] `.github/dependabot.yml` has a `docker` ecosystem entry matching the
+      existing ones — weekly, 3-day `cooldown`, grouped — so pinned base
+      digests keep getting updated.
 - [ ] `.dockerignore` present; image contains no .git/.env/node_modules
       from context.
 - [ ] `docker-compose.yml` with app service, named network/volume.
