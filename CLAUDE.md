@@ -68,8 +68,10 @@ Response contract rules for every endpoint — see
 - Never commit directly to main; never force-push a branch after its PR
   is open (review comments lose their anchors).
 - Open PRs as drafts; mark ready only after Stage 3 gates pass.
-- The PR description links the proposal and states the EARS criteria the
-  change fulfils — reviewers (human or bot) check against the contract.
+- Keep the PR description to what the diff can't say: a link to the
+  proposal, decisions taken, anything the reviewer must check by hand.
+  Never write a walkthrough, a file-by-file summary, or a restatement of
+  the acceptance criteria — CodeRabbit generates those on every run.
 
 ## Review toolkit
 
