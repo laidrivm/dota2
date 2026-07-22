@@ -22,6 +22,21 @@ One fact lives in exactly one file; everything else links to it.
 - actionlint validates `.github/workflows/*` in CI (pinned Docker image);
   locally: `brew install actionlint` if you want the same check.
 
+## Git hooks
+
+Installed automatically by `bun install` (the `prepare` script runs
+`simple-git-hooks`); config lives in `package.json`.
+
+- **pre-commit** — `biome check --staged`: blocks the commit if any staged
+  file has format/lint problems. It does **not** autofix (simple-git-hooks
+  can't re-stage) — run `bun run lint:fix`, re-stage, commit again.
+- **pre-push** — `tsc --noEmit` then `bun test`. `--pass-with-no-tests`
+  lets the push through while the repo has zero test files; drop that flag
+  once phase-1 tests land if you want an empty suite to block a push.
+- `--no-verify` bypasses a hook — an emergency exit, not a workflow. CI
+  (`lint.yml`) re-runs the whole-repo checks when a PR is opened or updated,
+  so a bypassed hook only delays the failure until then.
+
 ## Dependency hygiene
 
 - Install via `bun add <pkg>` — the exact version gets written

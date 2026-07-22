@@ -22,9 +22,12 @@ below.
 - [x] **Task 3** — Biome + tsc + YAML check + actionlint (staged)
 - [x] **Task 2** — Dependabot + CI audit (`dependabot.yml`, `audit.yml`);
       awaits manual repo-settings enablement — see checklist below
-- [ ] **Task 6** — git hooks (simple-git-hooks) ← next step
+- [x] **Task 6** — git hooks (simple-git-hooks): pre-commit `biome check
+      --staged` (block, no autofix), pre-push `typecheck && bun test
+      --pass-with-no-tests`; both demonstrated firing; `/warm` → Keep
 - [ ] **Phase 1** — OpenSpec: model module (`types.ts` + the 6 acceptance
       tests of model-spec §7 against the fixture; camelCase fix on import)
+      ← next step (enters the OpenSpec cycle: `/opsx:propose`)
 - [ ] **Phase 2** — OpenSpec: draft board UI on Preact + design-token
       import; likely 2 sequenced proposals (board shell → picker/hotkeys/
       edge cases)

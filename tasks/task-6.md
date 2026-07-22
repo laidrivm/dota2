@@ -1,5 +1,12 @@
 # Task 6 — Git hooks: fast local gates via simple-git-hooks
 
+> **Status: DONE.** Two deviations from the steps below, both deliberate:
+> pre-commit is `biome check --staged` **without `--write`** (simple-git-hooks
+> can't re-stage autofixes, so `--write` would let an unformatted blob into
+> the commit while CI catches it — block instead); pre-push uses the native
+> `bun test --pass-with-no-tests` flag as the zero-tests guard (no wrapper
+> script). Live config: `package.json` → `simple-git-hooks`. `/warm` → Keep.
+
 ## Context
 
 CI (lint.yml, audit.yml) catches problems minutes after push. Hooks catch
@@ -71,11 +78,13 @@ emergency exit, not a workflow.
 
 ## Acceptance criteria
 
-- [ ] `simple-git-hooks` is an exact devDependency; `/warm` report produced.
-- [ ] package.json has `prepare` + `simple-git-hooks` config as in step 1.
-- [ ] `.git/hooks/pre-commit` and `.git/hooks/pre-push` exist after
+- [x] `simple-git-hooks` is an exact devDependency; `/warm` report produced.
+- [x] package.json has `prepare` + `simple-git-hooks` config: pre-commit
+      `biome check --staged` (no `--write`), pre-push
+      `bun run typecheck && bun test --pass-with-no-tests`.
+- [x] `.git/hooks/pre-commit` and `.git/hooks/pre-push` exist after
       `bun install`.
-- [ ] Both hooks demonstrated firing (step 3), scratch artifacts removed.
-- [ ] Pre-push passes cleanly on a repo with zero test files, with a
-      comment marking the guard for removal.
-- [ ] README documents the hooks.
+- [x] Both hooks demonstrated firing (step 3), scratch artifacts removed.
+- [x] Pre-push passes cleanly on a repo with zero test files, via
+      `--pass-with-no-tests` (drop the flag once phase-1 tests land).
+- [x] README documents the hooks.
