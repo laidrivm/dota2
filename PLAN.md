@@ -30,8 +30,10 @@ below.
       `docs/feature-workflow.md`)
 - [ ] **Task 9** — unit test setup (blocked: task 8, phase 1)
 - [ ] **Phase 1** — OpenSpec: model module (`types.ts` + the 6 acceptance
-      tests of model-spec §7 against the fixture; camelCase fix on import)
-      ← next step (enters the OpenSpec cycle: `/opsx:propose`)
+      tests of model-spec §7 against the fixture; camelCase fix on import).
+      Proposed on `feat/model-module` (`openspec/changes/model-module/`:
+      proposal, design, specs/draft-model, tasks — validated). Next:
+      `/opsx:apply`. ← current step
 - [ ] **Phase 2** — OpenSpec: draft board UI on Preact + design-token
       import; likely 2 sequenced proposals (board shell → picker/hotkeys/
       edge cases)
@@ -73,4 +75,4 @@ below.
 - `/zombies` after non-trivial code; in the OpenSpec cycle — at propose
   (from the description) and at review (diff mode).
 - `/triage` — suggested to the user before every PR, never self-run.
-- Commits/pushes — only when the user asks.
+- Commit per completed task-list item without being asked
