@@ -34,8 +34,9 @@
 - If a package needs its install scripts, never add it to
   `trustedDependencies` yourself — surface `bun pm untrusted` output and
   let the user decide.
-- CI and hooks install with `bun install --frozen-lockfile`, never plain
-  `bun install`.
+- Automated installs — CI jobs, hooks, scripts — use `bun install
+  --frozen-lockfile`; plain `bun install` is only a developer resolving
+  versions locally on purpose (it is also what installs the git hooks).
 - Never call an unfamiliar framework/library API from memory — check the
   docs; models invent methods.
 
@@ -120,9 +121,9 @@ suggestion before a PR is opened.
 
 Features go through the OpenSpec cycle. So does any infrastructure change
 that adds a tool, workflow, service, or dependency, or changes how an
-existing gate behaves. Exempt from the cycle: the bootstrap tasks
-(task-1..task-5), Renovate version bumps, single-value config edits, and
-docs-only changes. Your job is to shepherd the user through the cycle:
+existing gate behaves. There are no exemptions: anything matching that
+description enters the cycle regardless of size or which task it belongs
+to. Your job is to shepherd the user through the cycle:
 always know which stage the current work is in, and when a stage
 completes, name the next step and the exact command.
 
