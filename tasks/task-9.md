@@ -9,9 +9,8 @@ that must die the moment real tests exist, or the gate protects nothing.
 bypasses.
 
 Policy (what a test may assert, how `/zombies` findings route) already
-lives in the Testing section of `CLAUDE.md`, moving to `docs/testing.md`
-in task 8. This task adds mechanics, and only the mechanics the first
-tests actually force.
+lives in `docs/testing.md`. This task adds mechanics, and only the
+mechanics the first tests actually force.
 
 Facts you must respect:
 
@@ -19,8 +18,8 @@ Facts you must respect:
   dependency, no runner config file, no coverage tool.
 - Phase 1 supplies the first subjects (the 6 acceptance tests of
   model-spec §7 against the fixture). Do not invent test subjects here.
-- This task changes how an existing gate behaves, so per CLAUDE.md
-  "Feature workflow" it enters the OpenSpec cycle.
+- This task changes how an existing gate behaves, so per
+  `docs/feature-workflow.md` it enters the OpenSpec cycle.
 
 ## Steps
 

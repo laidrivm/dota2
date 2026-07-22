@@ -1,5 +1,11 @@
 # Task 8 — Split CLAUDE.md per its own growth protocol
 
+> **Status: DONE.** `CLAUDE.md` 321 → 186 lines. Extracted:
+> `docs/api-design.md`, `docs/testing.md`, `docs/feature-workflow.md`.
+> "Accessibility" stayed in "Code style" — a subsection, not a section.
+> `.coderabbit.yaml` now sets `knowledge_base.code_guidelines.filePatterns`
+> because a custom list replaces the defaults that matched `**/CLAUDE.md`.
+
 ## Context
 
 `CLAUDE.md` is 319 lines against its own ~250-line trigger in "Structure &
@@ -68,11 +74,11 @@ a moved section.
 
 ## Acceptance criteria
 
-- [ ] `CLAUDE.md` under 250 lines; each extracted section replaced by one
+- [x] `CLAUDE.md` under 250 lines; each extracted section replaced by one
       scope line + link.
-- [ ] `docs/api-design.md`, `docs/testing.md`, `docs/feature-workflow.md`
+- [x] `docs/api-design.md`, `docs/testing.md`, `docs/feature-workflow.md`
       exist, each containing its section verbatim.
-- [ ] `.coderabbit.yaml` cites the new paths, and the extracted docs are
+- [x] `.coderabbit.yaml` cites the new paths, and the extracted docs are
       covered by CodeRabbit's code-guidelines patterns.
-- [ ] `README.md` map and `openspec/config.yaml` reference the new homes.
-- [ ] No extracted doc links to another extracted doc.
+- [x] `README.md` map and `openspec/config.yaml` reference the new homes.
+- [x] No extracted doc links to another extracted doc.

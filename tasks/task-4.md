@@ -8,7 +8,7 @@ thinnest vertical slice that runs green in CI — and only then expand.
 Big-bang test-infrastructure setups fail in ways that are impossible to
 debug; one file proving the pipeline works is the whole deliverable here.
 
-The CLAUDE.md "E2E (Playwright)" rules apply from the first line: locator
+The /docs/testing.md "E2E (Playwright)" rules apply from the first line: locator
 priority, no waitForTimeout, no serial mode, parallel-safe, fixtures over
 copy-paste, no invented cleanup. This is a greenfield — anti-patterns are
 forbidden at birth, not refactored later.
