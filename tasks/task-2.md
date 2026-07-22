@@ -6,30 +6,27 @@
 > keeping a hardening-focused repo free of a third-party GitHub App with
 > write access. Trade-off: no Dependency Dashboard, no lockFileMaintenance
 > (the nightly `bun audit` compensates for the latter). See `PLAN.md`
-> "Accepted decisions". The Renovate-specific steps 1/5 below are kept as
-> the original rationale; the live config is `.github/dependabot.yml` and
-> `.github/workflows/audit.yml`. Mend Renovate App install is NOT required;
-> instead enable Dependabot version updates + alerts + security updates in
-> repo settings (see the manual checklist).
+> "Accepted decisions". Live config: `.github/dependabot.yml` and
+> `.github/workflows/audit.yml`.
 
 ## Context
 
 Task 1 hardened installs at the moment they happen (exact versions,
 3-day release-age gate, blocked install scripts). This task adds the
-continuous side: Renovate to keep dependencies from rotting on old
+continuous side: an update bot to keep dependencies from rotting on old
 vulnerable versions, and a CI audit so known advisories surface on every
 dependency change and nightly — not only when someone remembers to run
 `bun audit`.
 
 Facts you must respect:
 
-- Renovate runs as the Mend Renovate GitHub App. Installing the app on the
-  repository is a **user action** — you cannot do it. Your job is to
-  prepare the config so the first run behaves correctly.
+- Dependabot is first-party: it needs no third-party GitHub App with write
+  access, but version updates, alerts and security updates are enabled in
+  **repo settings** — a user action you cannot do.
 - The 3-day cooldown must be consistent across the stack: `bunfig.toml`
-  gates local installs, Renovate's `minimumReleaseAge` gates update PRs.
-  Same value, same rationale. Exception: PRs fixing a known vulnerability
-  may bypass the cooldown — a public advisory changes the risk balance.
+  gates local installs, Dependabot's `cooldown` gates update PRs. Same
+  value, same rationale. Exception: security updates bypass the cooldown —
+  a public advisory changes the risk balance.
 - The bun age gate does not re-check versions already in `bun.lock`
   (known limitation, see task 1). The nightly audit in this task is the
   compensating control for exactly that gap.
@@ -38,42 +35,16 @@ Facts you must respect:
 
 ## Steps
 
-### 1. Create `renovate.json` in the repo root
+### 1. Create `.github/dependabot.yml`
 
-```json
-{
-  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "config:best-practices",
-    ":dependencyDashboard"
-  ],
-  "minimumReleaseAge": "3 days",
-  "rangeStrategy": "pin",
-  "osvVulnerabilityAlerts": true,
-  "vulnerabilityAlerts": {
-    "minimumReleaseAge": null,
-    "labels": ["security"]
-  },
-  "schedule": ["before 6am on monday"],
-  "packageRules": [
-    {
-      "matchUpdateTypes": ["minor", "patch"],
-      "matchCurrentVersion": "!/^0/",
-      "groupName": "non-major dependencies"
-    }
-  ],
-  "lockFileMaintenance": {
-    "enabled": true,
-    "schedule": ["before 6am on monday"]
-  }
-}
-```
+Two ecosystems — `github-actions` and `bun` — both weekly, both with a
+3-day `cooldown`, each grouped into a single PR. The live file is
+`.github/dependabot.yml`; read it there rather than from a copy here.
 
-Rationale to preserve if you adjust wording: `config:best-practices` pins
-GitHub Action digests and enables config migration; `rangeStrategy: pin`
+Rationale to preserve if you adjust wording: `versioning-strategy: increase`
 matches `exact = true` from task 1; the weekly schedule keeps PR noise low
-for a solo project; vulnerability PRs are exempt from both the cooldown and
-the schedule so fixes arrive immediately.
+for a solo project; grouping keeps one PR per ecosystem; security updates
+(enabled in repo settings) bypass the cooldown so fixes arrive immediately.
 
 ### 2. Create `.github/workflows/audit.yml`
 
@@ -99,7 +70,7 @@ jobs:
       - uses: actions/checkout@<PINNED_SHA> # v4/v5 — resolve, see step 3
       - uses: oven-sh/setup-bun@<PINNED_SHA> # v2 — resolve, see step 3
         with:
-          bun-version: latest
+          bun-version: 1.3.14 # pinned, see PLAN.md "Accepted decisions"
       - run: bun install --frozen-lockfile
       - run: bun audit
 ```
@@ -118,8 +89,8 @@ Replace each `<PINNED_SHA>` with the full commit SHA of the latest stable
 release of that action. Resolve them by fetching the action's releases
 from the GitHub API (`repos/{owner}/{repo}/releases/latest`, then the tag's
 commit SHA). Keep the human-readable version in the trailing comment.
-Renovate (`config:best-practices`) will keep these digests updated from
-now on.
+Dependabot's `github-actions` ecosystem keeps these SHAs updated from now
+on, rewriting both the digest and the version comment.
 
 ### 4. Verify against existing workflows
 
@@ -131,35 +102,35 @@ pinned by SHA) and report violations. Fix only if the user confirms.
 
 End your run with exactly this checklist for the user:
 
-1. Install the Mend Renovate GitHub App on this repository
-   (github.com/apps/renovate) — without it, `renovate.json` is inert.
-2. After the first Renovate run, open the Dependency Dashboard issue it
-   creates and confirm the config was parsed without errors.
-3. Optionally enable GitHub's own Dependabot *alerts* (Settings →
-   Advanced Security) — alerts only, not Dependabot PRs; Renovate is the
-   single source of update PRs.
+1. Enable Dependabot **version updates** in repo settings — without it,
+   `.github/dependabot.yml` is inert.
+2. Enable Dependabot **alerts** and **security updates** (Settings →
+   Advanced Security) — security PRs bypass the 3-day cooldown.
+3. After the first run, check Insights → Dependency graph → Dependabot for
+   config parse errors.
 
 ## Constraints
 
 - Do NOT install any packages or modify package.json / bun.lock.
-- Do NOT create Dependabot config files (`.github/dependabot.yml`) — one
-  update bot only.
-- Do NOT add extra Renovate presets, automerge rules, or notification
-  integrations beyond the config above.
+- Do NOT add a Renovate config (`renovate.json`) — one update bot only.
+- Do NOT add automerge rules or notification integrations beyond the
+  config above.
 - Do NOT modify the triage workflow or other CI files except as reported
   in step 4 with user confirmation.
 
 ## Acceptance criteria
 
-- [ ] `renovate.json` exists at repo root, valid JSON, cooldown "3 days",
-      vulnerability alerts exempt from cooldown and schedule.
-- [ ] `.github/workflows/audit.yml` exists with both triggers
+- [x] `.github/dependabot.yml` exists, valid YAML, 3-day `cooldown` on
+      both ecosystems; security updates bypass it via repo settings.
+- [x] `.github/workflows/audit.yml` exists with both triggers
       (path-filtered PR + nightly cron), `--frozen-lockfile`, and
       `bun audit`.
-- [ ] Both actions in audit.yml are pinned to full commit SHAs with a
+- [x] Both actions in audit.yml are pinned to full commit SHAs with a
       version comment.
-- [ ] No `github.event.*` interpolation inside any `run:` block you
+- [x] No `github.event.*` interpolation inside any `run:` block you
       created.
-- [ ] The manual checklist (Renovate app install) was shown to the user.
-- [ ] No packages installed, no other workflows modified without
+- [x] The manual checklist (Dependabot settings) was shown to the user.
+- [x] Dependabot version updates + alerts + security updates enabled in
+      repo settings — confirmed by the merged grouped-actions update PR.
+- [x] No packages installed, no other workflows modified without
       confirmation.

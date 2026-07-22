@@ -2,3 +2,7 @@
 .claude/skills/
 node_modules/
 .claude/settings.local.json
+
+# Private product specs in a public repo
+spec-inbox/*
+!spec-inbox/README.md

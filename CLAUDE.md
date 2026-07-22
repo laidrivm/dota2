@@ -34,8 +34,9 @@
 - If a package needs its install scripts, never add it to
   `trustedDependencies` yourself — surface `bun pm untrusted` output and
   let the user decide.
-- CI and hooks install with `bun install --frozen-lockfile`, never plain
-  `bun install`.
+- Automated installs — CI jobs, hooks, scripts — use `bun install
+  --frozen-lockfile`; plain `bun install` is only a developer resolving
+  versions locally on purpose (it is also what installs the git hooks).
 - Never call an unfamiliar framework/library API from memory — check the
   docs; models invent methods.
 
@@ -120,9 +121,9 @@ suggestion before a PR is opened.
 
 Features go through the OpenSpec cycle. So does any infrastructure change
 that adds a tool, workflow, service, or dependency, or changes how an
-existing gate behaves. Exempt from the cycle: the bootstrap tasks
-(task-1..task-5), Renovate version bumps, single-value config edits, and
-docs-only changes. Your job is to shepherd the user through the cycle:
+existing gate behaves. There are no exemptions: anything matching that
+description enters the cycle regardless of size or which task it belongs
+to. Your job is to shepherd the user through the cycle:
 always know which stage the current work is in, and when a stage
 completes, name the next step and the exact command.
 
@@ -302,15 +303,17 @@ protocol:
 
 ### Rules
 
-- Maintain `PLAN.md`: read it at session start; update its queue, statuses
-  and decisions in the same turn a task or stage completes.
-- All repo artifacts — docs, plans, specs, code comments, commit messages —
-  are written in English by default.
-- This repo is public: before anything is staged or committed, check the
-  diff for secrets, tokens, capability URLs, internal identifiers, and
-  machine-local files — flag anything questionable instead of committing it.
+- Never re-run a check to confirm what a completed command already proved —
+  a push that succeeded means its pre-push hook passed.
 - Before the first dependency install or tool run in a repo, verify
   `.gitignore` covers its outputs (`node_modules/`, build dirs, local
   settings).
+- This repo is public: before anything is staged or committed, check the
+  diff for secrets, tokens, capability URLs, internal identifiers, and
+  machine-local files — flag anything questionable instead of committing it.
+- All repo artifacts — docs, plans, specs, code comments, commit messages —
+  are written in English by default.
+- Maintain `PLAN.md`: read it at session start; update its queue, statuses
+  and decisions in the same turn a task or stage completes.
 
 <!-- newest first; added via the loop above -->
