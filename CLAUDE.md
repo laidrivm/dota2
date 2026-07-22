@@ -169,6 +169,12 @@ protocol:
 
 ### Rules
 
+- Before calling a tracked file a duplicate, check whether its twin is
+  tracked — a gitignored copy does not ship with the repo.
+- When a rule's wording changes, grep for every site that restates it
+  before calling the change done.
+- Check a branch's PR state before adding commits — a squash merge strands
+  anything pushed after it.
 - Never post to a PR, issue, or any external service on the user's behalf —
   report the reply here and let them send it.
 - Never re-run a check to confirm what a completed command already proved —
