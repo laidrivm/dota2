@@ -1,6 +1,6 @@
 # Task 6 — Git hooks: fast local gates via simple-git-hooks
 
-> **Status: DONE.** Two deviations from the steps below, both deliberate:
+> **Status: DONE.** Two deviations from the original plan, both deliberate:
 > pre-commit is `biome check --staged` **without `--write`** (simple-git-hooks
 > can't re-stage autofixes, so `--write` would let an unformatted blob into
 > the commit while CI catches it — block instead); pre-push uses the native
@@ -29,45 +29,6 @@ Facts you must respect:
 - e2e never runs in hooks (task 4 constraint) — that's what CI is for.
 - Hooks install with `bun install --frozen-lockfile` semantics — CLAUDE.md
   rule applies to anything a hook itself installs (nothing, ideally).
-
-## Steps
-
-### 1. Install and wire
-
-- `bun add --dev --exact simple-git-hooks` (Dependency safety check first,
-  `/warm` after).
-- In package.json:
-  - `"prepare": "simple-git-hooks"` script, so hooks reinstall on
-    `bun install`.
-  - ```json
-    "simple-git-hooks": {
-      "pre-commit": "bunx biome check --staged --write --no-errors-on-unmatched",
-      "pre-push": "bun run typecheck && bun test"
-    }
-    ```
-- Run `bunx simple-git-hooks` once and verify `.git/hooks/pre-commit` and
-  `.git/hooks/pre-push` exist and are the generated stubs.
-
-### 2. Guard the no-tests state
-
-If no unit test files exist yet, `bun test` exits non-zero ("no tests
-found") — guard the pre-push command so it passes cleanly until the first
-test lands (e.g. `bun test 2>/dev/null || [ $? -eq 1 ]` is NOT acceptable —
-find the precise bun behaviour and handle exactly that case, with a comment
-to remove the guard when phase-1 tests land).
-
-### 3. Verify both hooks fire
-
-- Make a whitespace-broken staged change → commit → confirm Biome fixed or
-  blocked it.
-- Break a type in a scratch file → push attempt → confirm the push is
-  rejected. Clean up the scratch file afterwards.
-
-### 4. Document
-
-README tooling section: one line — hooks are installed automatically by
-`bun install` (prepare), what each hook runs, and that `--no-verify` is an
-emergency exit, not a workflow.
 
 ## Constraints
 

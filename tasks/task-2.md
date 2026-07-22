@@ -33,82 +33,6 @@ Facts you must respect:
 - Per CLAUDE.md workflow rules: never interpolate `github.event.*` values
   into `run:` blocks; pin third-party actions by commit SHA, not by tag.
 
-## Steps
-
-### 1. Create `.github/dependabot.yml`
-
-Two ecosystems — `github-actions` and `bun` — both weekly, both with a
-3-day `cooldown`, each grouped into a single PR. The live file is
-`.github/dependabot.yml`; read it there rather than from a copy here.
-
-Rationale to preserve if you adjust wording: `versioning-strategy: increase`
-matches `exact = true` from task 1; the weekly schedule keeps PR noise low
-for a solo project; grouping keeps one PR per ecosystem; security updates
-(enabled in repo settings) bypass the cooldown so fixes arrive immediately.
-
-### 2. Create `.github/workflows/audit.yml`
-
-```yaml
-name: Dependency audit
-
-on:
-  pull_request:
-    paths:
-      - package.json
-      - bun.lock
-      - bunfig.toml
-  schedule:
-    - cron: "0 4 * * *" # nightly
-
-permissions:
-  contents: read
-
-jobs:
-  audit:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@<PINNED_SHA> # v4/v5 — resolve, see step 3
-      - uses: oven-sh/setup-bun@<PINNED_SHA> # v2 — resolve, see step 3
-        with:
-          bun-version: 1.3.14 # pinned, see PLAN.md "Accepted decisions"
-      - run: bun install --frozen-lockfile
-      - run: bun audit
-```
-
-Notes:
-- The PR trigger is path-filtered: audits run when the dependency surface
-  changes, not on every code PR.
-- The nightly schedule catches advisories published for versions already
-  in the lockfile.
-- `--frozen-lockfile` is mandatory (CLAUDE.md rule) — CI must never
-  resolve new versions.
-
-### 3. Pin the action SHAs
-
-Replace each `<PINNED_SHA>` with the full commit SHA of the latest stable
-release of that action. Resolve them by fetching the action's releases
-from the GitHub API (`repos/{owner}/{repo}/releases/latest`, then the tag's
-commit SHA). Keep the human-readable version in the trailing comment.
-Dependabot's `github-actions` ecosystem keeps these SHAs updated from now
-on, rewriting both the digest and the version comment.
-
-### 4. Verify against existing workflows
-
-If `.github/workflows/` contains other workflow files, check them against
-the same two rules (no `github.event.*` interpolation in `run:`, actions
-pinned by SHA) and report violations. Fix only if the user confirms.
-
-### 5. Tell the user what they must do by hand
-
-End your run with exactly this checklist for the user:
-
-1. Enable Dependabot **version updates** in repo settings — without it,
-   `.github/dependabot.yml` is inert.
-2. Enable Dependabot **alerts** and **security updates** (Settings →
-   Advanced Security) — security PRs bypass the 3-day cooldown.
-3. After the first run, check Insights → Dependency graph → Dependabot for
-   config parse errors.
-
 ## Constraints
 
 - Do NOT install any packages or modify package.json / bun.lock.
@@ -130,7 +54,9 @@ End your run with exactly this checklist for the user:
 - [x] No `github.event.*` interpolation inside any `run:` block you
       created.
 - [x] The manual checklist (Dependabot settings) was shown to the user.
-- [x] Dependabot version updates + alerts + security updates enabled in
-      repo settings — confirmed by the merged grouped-actions update PR.
+- [x] Dependabot version updates enabled — proved by the merged
+      grouped-actions update PR.
+- [x] Dependabot alerts + security updates enabled; repo settings are
+      not visible from the working tree.
 - [x] No packages installed, no other workflows modified without
       confirmation.
