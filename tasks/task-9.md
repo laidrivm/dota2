@@ -29,8 +29,8 @@ Facts you must respect:
    "Git hooks" bullet and the note in `tasks/task-6.md` that mark the flag
    for removal.
 2. Add a `bun test` job to `lint.yml` — same pinned bun version and
-   `--frozen-lockfile` install as its neighbours — or argue in the design
-   why the hook alone suffices.
+   `--frozen-lockfile` install as its neighbours. The hook alone is not an
+   option: `--no-verify` bypasses it, so CI is the only gate that holds.
 3. Record in `docs/testing.md` what the first tests settled: where test
    files live, how the fixture is loaded, how to run one file or one test
    by name. Mechanics only — do not restate the policy already there.

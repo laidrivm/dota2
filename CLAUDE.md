@@ -303,6 +303,8 @@ protocol:
 
 ### Rules
 
+- Never post to a PR, issue, or any external service on the user's behalf —
+  report the reply here and let them send it.
 - Never re-run a check to confirm what a completed command already proved —
   a push that succeeded means its pre-push hook passed.
 - Before the first dependency install or tool run in a repo, verify

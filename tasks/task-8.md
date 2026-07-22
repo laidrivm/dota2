@@ -18,7 +18,7 @@ Facts you must respect:
   rule, fix & capture routing follow the section to its new home.
 - `docs/context/` is out of scope: those are session save-points, not
   extracted sections.
-- `coderabbit.yaml` (`path_instructions`) cites CLAUDE.md sections by name
+- `.coderabbit.yaml` (`path_instructions`) cites CLAUDE.md sections by name
   — "API design", "Accessibility", "Testing", "E2E (Playwright)". Moving a
   section silently breaks those citations; CodeRabbit will not report a
   missing target.
@@ -42,7 +42,7 @@ scope plus the link.
 
 ### 2. Repoint the CodeRabbit citations
 
-Update `path_instructions` in `coderabbit.yaml` to cite the new paths
+Update `path_instructions` in `.coderabbit.yaml` to cite the new paths
 (`/docs/testing.md` etc.) instead of section names inside `/CLAUDE.md`.
 Verify CodeRabbit's code-guidelines auto-detection covers the new files —
 its default patterns match `**/CLAUDE.md`, not `docs/*.md`, so the
@@ -72,7 +72,7 @@ a moved section.
       scope line + link.
 - [ ] `docs/api-design.md`, `docs/testing.md`, `docs/feature-workflow.md`
       exist, each containing its section verbatim.
-- [ ] `coderabbit.yaml` cites the new paths, and the extracted docs are
+- [ ] `.coderabbit.yaml` cites the new paths, and the extracted docs are
       covered by CodeRabbit's code-guidelines patterns.
 - [ ] `README.md` map and `openspec/config.yaml` reference the new homes.
 - [ ] No extracted doc links to another extracted doc.
