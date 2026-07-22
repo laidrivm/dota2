@@ -130,7 +130,9 @@ End your run with exactly this checklist for the user:
 - [x] No `github.event.*` interpolation inside any `run:` block you
       created.
 - [x] The manual checklist (Dependabot settings) was shown to the user.
-- [x] Dependabot version updates + alerts + security updates enabled in
-      repo settings — confirmed by the merged grouped-actions update PR.
+- [x] Dependabot version updates enabled — proved by the merged
+      grouped-actions update PR.
+- [x] Dependabot alerts + security updates enabled — confirmed by the
+      user; repo settings are not visible from the working tree.
 - [x] No packages installed, no other workflows modified without
       confirmation.
