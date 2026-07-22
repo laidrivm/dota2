@@ -25,7 +25,9 @@ below.
 - [x] **Task 6** — git hooks (simple-git-hooks): pre-commit `biome check
       --staged` (block, no autofix), pre-push `typecheck && bun test
       --pass-with-no-tests`; both demonstrated firing; `/warm` → Keep
-- [ ] **Task 8** — split `CLAUDE.md` per its own growth protocol
+- [x] **Task 8** — split `CLAUDE.md` per its own growth protocol (321 →
+      186 lines; `docs/api-design.md`, `docs/testing.md`,
+      `docs/feature-workflow.md`)
 - [ ] **Task 9** — unit test setup (blocked: task 8, phase 1)
 - [ ] **Phase 1** — OpenSpec: model module (`types.ts` + the 6 acceptance
       tests of model-spec §7 against the fixture; camelCase fix on import)
@@ -60,7 +62,8 @@ below.
 - IBM Plex fonts: self-hosted (decided in favour of offline operation).
 - Hooks: simple-git-hooks, not husky; e2e never runs in hooks.
 - All repo artifacts are in English (CLAUDE.md rule).
-- No OpenSpec exemptions: the criterion in CLAUDE.md is the only test.
+- No OpenSpec exemptions: the criterion in `docs/feature-workflow.md` is
+  the only test.
 - Unsorted product specs live in `spec-inbox/`, gitignored except its
   README — the public repo carries the pointer, never the content.
 

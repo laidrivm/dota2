@@ -4,7 +4,10 @@
 
 | File | Owns | Read |
 |------|------|------|
-| `CLAUDE.md` | agent rules, code style, API contract, fix & capture loop | every session |
+| `CLAUDE.md` | agent rules, code style, fix & capture loop; indexes `docs/` | every session |
+| `docs/api-design.md` | endpoint response contract | when an endpoint changes |
+| `docs/testing.md` | what tests assert, e2e rules | when tests change |
+| `docs/feature-workflow.md` | the four OpenSpec stages and their gates | on any feature |
 | `PLAN.md` | implementation queue, statuses, accepted decisions | every session |
 | `tasks/*.md` | infra task specs — scope, steps, acceptance criteria | when a task starts |
 | `spec-inbox/` | raw product specs not yet in the repo — contents gitignored, its README tracked | when a task cites one |

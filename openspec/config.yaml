@@ -1,8 +1,9 @@
 ---
 schema: spec-driven
 context: |
-  Conventions and contract rules live in /CLAUDE.md — follow it. Do not
-  restate them here. This file owns architecture choices only.
+  Conventions and contract rules live in /CLAUDE.md and the docs it
+  indexes — follow them. Do not restate them here. This file owns
+  architecture choices only.
 
   Architecture defaults — apply when drafting proposals; a deviation must
   be argued in the design artifact:
@@ -29,8 +30,8 @@ rules:
       split it into sequenced proposals, each independently applyable and
       testable — state the sequence in the first proposal's design
   design:
-    - For every endpoint, fix the exact response shape per the API design
-      rules in /CLAUDE.md
+    - For every endpoint, fix the exact response shape per
+      /docs/api-design.md
   tasks:
     - Include a test task derived from /zombies output
     - Each task cites the requirement(s) or acceptance criteria it fulfils;

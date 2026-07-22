@@ -56,33 +56,8 @@
 
 ## API design
 
-The API is a product; its consumer is a TypeScript frontend. Contract rules
-— all checkable in a diff:
-
-- Every endpoint responds through an explicit response schema (zod/typebox
-  or equivalent) — never a raw ORM/DB object. The TypeScript response type
-  derives from that schema, not the other way round.
-- Honest types: booleans are `true`/`false` (never 0/1), enums are strings
-  (`"published"`, not magic numbers), dates are ISO 8601 with offset.
-- Every contract key is always present; an absent value is `null`. No
-  dynamic or conditional keys.
-- camelCase everywhere in JSON — including error bodies and pagination
-  metadata.
-- IDs are UUIDv7 via `Bun.randomUUIDv7()` (time-sortable) — never
-  incremental integers, no ulid/uuid packages.
-- Display-ready fields are computed server-side once (assembled URLs,
-  initials) instead of in every consumer.
-- Errors follow RFC 9457 (`application/problem+json`) with two extension
-  fields: a machine-readable `code` (frontend logic keys off codes, never
-  off message strings) and, where the user can act, an `action` hint.
-- CORS is configured server-side together with the first endpoint — a
-  consumer staring at a CORS error means the backend isn't finished.
-- List endpoints use cursor pagination unless the list is small and
-  internal-only.
-
-Architecture defaults (SSE vs WebSockets, BFF response shaping, caching,
-N+1 policy) live in the `context:` field of `openspec/config.yaml` — apply
-them at propose time.
+Response contract rules for every endpoint — see
+[docs/api-design.md](docs/api-design.md).
 
 ## Git & PRs
 
@@ -119,123 +94,13 @@ suggestion before a PR is opened.
 
 ## Feature workflow (spec-driven, OpenSpec)
 
-Features go through the OpenSpec cycle. So does any infrastructure change
-that adds a tool, workflow, service, or dependency, or changes how an
-existing gate behaves. There are no exemptions: anything matching that
-description enters the cycle regardless of size or which task it belongs
-to. Your job is to shepherd the user through the cycle:
-always know which stage the current work is in, and when a stage
-completes, name the next step and the exact command.
-
-### Stage 1 — Propose
-
-- New feature work starts with `/opsx:propose` (or `/opsx:explore` first if
-  the idea is vague). If the user starts describing a feature in free text,
-  suggest routing it through propose instead of implementing directly.
-- During proposal, ask the questions a spec review would ask: unclear
-  requirements, consequences of design choices, what happens on failure.
-  For any endpoint, fix the exact response shape in design.md per the
-  API design rules above. Cheap to fix here, expensive after apply.
-- Before the proposal is finalised: run `/zombies "<feature description>"`
-  against the proposal text. Fold the resulting edge cases into the tasks
-  checklist as tests-first items. A proposal without its edge cases listed
-  is not ready to apply.
-- If a vendored best-practices skill (listed in the skills repo's
-  `skills-lock.json`) covers the feature's domain, run the draft design
-  through it before finalising and fold in what applies. If none covers
-  it, skip silently — do not stretch an unrelated skill to fit.
-- When the project adopts a new long-lived domain (a UI framework, a
-  database, a deployment platform) and no vendored skill covers it,
-  suggest vendoring one: name the candidate skill and its source, and let
-  the user vendor it in the skills repo — never install a skill yourself.
-  Vet the source like a dependency (official org or recognised maintainer,
-  active repo, read the SKILL.md): a skill is executable instructions, so
-  an untrusted skill is a prompt-injection vector. Suggest once per
-  domain; if the user declines, don't re-raise it.
-
-### Stage 2 — Apply
-
-- Before `/opsx:apply`: create the branch per Git & PRs (never apply on
-  main), then remind the user to `/clear` — implementation should start
-  from a clean context, reading only the spec artifacts.
-- Never edit spec files by hand and don't rewrite the proposal mid-build.
-  Small course corrections go into this file's rules (fix & capture);
-  structural changes wait for the build to finish and become a new proposal.
-- If the user pauses to correct your style or approach, capture it (see
-  Lessons learned) before resuming, so the rest of the apply run follows
-  the corrected rule.
-
-### Stage 3 — Review
-
-- When apply finishes, before the user opens a PR: suggest `/triage` on the
-  branch as the entry map for their own review.
-- If the apply run added or upgraded any dependency: run `/warm`. Walk the
-  ponytail ladder before ever reaching for a dependency during apply.
-- Re-run `/zombies` with **no arguments** (diff mode): it reads the real
-  code and existing tests, cross-checks the implementation against the
-  proposal-stage edge-case list, and catches new edges introduced by actual
-  implementation decisions.
-- Every new or `[partial]` finding from that run becomes a test before
-  archive — or an explicit user decision to skip it. Deferred items from
-  the proposal-stage list are settled here too. Scaffolding tests from the
-  apply run are deleted here as well (see Testing).
-- If the change introduced or removed a primitive — a new module boundary,
-  abstraction, DB table, or external integration — present an
-  **architecture delta** before the user reviews code: a short diagram or
-  list of what exists now vs. before, highlighting the additions. The user
-  reviews the system first, the code second.
-
-- When all Stage 3 gates pass: push the branch and offer to open a draft
-  PR (`gh pr create --draft`) with the description per Git & PRs. Wait for
-  the user's go-ahead before opening it.
-
-### Stage 4 — Archive
-
-- After the change is merged and verified, prompt the user to run
-  `/opsx:archive` so the change lands in the project history. Work is not
-  finished until it's archived.
-- Single-source rule: agent rules and contract rules live in this file;
-  architecture defaults live in the `context:` field of
-  `openspec/config.yaml`. Neither restates the other, and no other OpenSpec
-  artifact or rule duplicates either — OpenSpec `rules:` may only reference
-  this file, not restate it.
+The four OpenSpec stages and what gates each one — see
+[docs/feature-workflow.md](docs/feature-workflow.md).
 
 ## Testing
 
-- Prefer TDD for edge cases: turn `/zombies` output into failing tests first,
-  then implement.
-- Tests must assert behaviour, not mirror the implementation. A test that
-  would pass against a broken implementation is not a test.
-- Route `/zombies` findings by layer: Zero/One/Many/Boundaries/Interface/
-  Exceptions → unit or integration tests; Simple scenarios marked
-  `(e2e candidate)` → the Playwright smoke suite.
-- Scaffolding tests are welcome but mortal: you may write throwaway tests
-  to verify your own work during a build (that's how you close your loop),
-  but before archive only tests that trace to the `/zombies` list and obey
-  the rules above survive — delete the rest, especially negative tests
-  ("feature X no longer exists") and implementation-detail assertions.
-
-### E2E (Playwright)
-
-The e2e suite exists to prove agentic changes didn't break real user paths.
-Rules — all checkable in a diff:
-
-- Locator priority: `getByRole` → `getByLabel` → `getByText` →
-  `getByTestId` as last resort. CSS/class selectors are forbidden.
-- Never `page.waitForTimeout` — use web-first assertions that auto-wait.
-- Never `test.describe.serial` without a comment justifying why isolation
-  is impossible.
-- Tests are parallel-safe from birth: no shared mutable state between
-  tests. CI runs e2e with `workers >= 2` — a single CI worker hides
-  exactly the bugs parallelism exists to catch.
-- Shared setup lives in fixtures, not copy-pasted `beforeEach`.
-  Worker-scoped fixtures only for expensive **immutable** setup; any test
-  that mutates a shared resource gets a test-scoped instance instead.
-- No cleanup code for what Playwright already cleans (contexts, pages).
-  Teardown only for resources Playwright didn't create (e.g. DB rows).
-- When writing or changing e2e tests, consult the official Playwright docs
-  (fixtures, projects, locators) — not memory, and not patterns absent
-  from this young codebase.
+What a test must assert, how `/zombies` findings route, and the e2e
+rules — see [docs/testing.md](docs/testing.md).
 
 ## Lessons learned (fix & capture)
 
@@ -269,7 +134,7 @@ Rule quality bar — a rule must be:
 ### Maintenance
 
 - When this list exceeds ~20 rules, propose merging or promoting stable
-  clusters into "Code style" / "Testing" / "API design" sections above.
+  clusters into "Code style" here or the docs indexed above.
 - If a rule stops applying (dependency removed, approach changed), propose
   deleting it — a stale rule costs trust in the whole list.
 
