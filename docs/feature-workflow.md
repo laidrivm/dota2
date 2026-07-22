@@ -5,9 +5,11 @@ single-source rule this file inherits.
 
 Features go through the OpenSpec cycle. So does any infrastructure change
 that adds a tool, workflow, service, or dependency, or changes how an
-existing gate behaves. There are no exemptions: anything matching that
-description enters the cycle regardless of size or which task it belongs
-to. Your job is to shepherd the user through the cycle:
+existing gate behaves. Anything matching that description enters the cycle
+regardless of size or which task it belongs to — no exemption is granted
+for being small, being a chore, or belonging to a bootstrap task. Work
+matching none of it skips the stages (see the gates in `CLAUDE.md`).
+Your job is to shepherd the user through the cycle:
 always know which stage the current work is in, and when a stage
 completes, name the next step and the exact command.
 
