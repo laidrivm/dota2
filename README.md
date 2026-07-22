@@ -6,7 +6,8 @@
 |------|------|------|
 | `CLAUDE.md` | agent rules, code style, API contract, fix & capture loop | every session |
 | `PLAN.md` | implementation queue, statuses, accepted decisions | every session |
-| `tasks/*.md` | infra task specs (outside the OpenSpec cycle) | when a task starts |
+| `tasks/*.md` | infra task specs — scope, steps, acceptance criteria | when a task starts |
+| `spec-inbox/` (gitignored) | raw product specs not yet in the repo | when a task cites one |
 | `openspec/config.yaml` → `context:` | architecture choices (SSE, BFF, cache, N+1) | on artifact generation |
 | `openspec/config.yaml` → `rules:` | artifact shape requirements (referencing CLAUDE.md) | on artifact generation |
 | skills repo (private, symlinked into `.claude/skills/`) | how reviews are run (triage/zombies/warm) | on skill invocation |

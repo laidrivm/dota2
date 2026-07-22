@@ -7,14 +7,14 @@ below.
 
 ## Requirement sources
 
-- `tasks/task-1..7.md` — infrastructure tasks (outside the OpenSpec cycle).
-- `~/Downloads/`: `user-stories.md`, `model-spec.md`, `data-model.md`,
-  `screens-spec.md`, `types.ts`, `fixture-snapshot.json`,
-  `generate_fixture.py` — product specs; they enter the repo in phases 1–2
-  (via OpenSpec artifacts and source files).
-- Design: claude.ai/design project `1a85e755-2bd6-4a75-8f43-c80c62e786a1`
-  ("Draft board screen design"), accessed via DesignSync: `tokens/`,
-  `styles.css`, Draft Board / Mobile Board mocks, `uploads/design-brief.md`.
+- `tasks/task-1..9.md` — infrastructure tasks.
+- `spec-inbox/` (gitignored, see its README) — unsorted product specs:
+  `user-stories.md`, `model-spec.md`, `data-model.md`, `screens-spec.md`,
+  `types.ts`, `fixture-snapshot.json`, `generate_fixture.py`. They enter
+  the repo in phases 1–2 via OpenSpec artifacts and source files.
+- Design: the private claude.ai/design project "Draft board screen design",
+  accessed via DesignSync: `tokens/`, `styles.css`, Draft Board / Mobile
+  Board mocks, `uploads/design-brief.md`.
 
 ## Queue
 
@@ -25,6 +25,13 @@ below.
 - [x] **Task 6** — git hooks (simple-git-hooks): pre-commit `biome check
       --staged` (block, no autofix), pre-push `typecheck && bun test
       --pass-with-no-tests`; both demonstrated firing; `/warm` → Keep
+- [ ] **Task 8** — split `CLAUDE.md` per its own growth protocol (319 lines
+      vs the ~250 trigger); repoints the CodeRabbit `path_instructions`
+      that cite sections by name
+- [ ] **Task 9** — unit test setup: conventions into `docs/testing.md`,
+      drop `--pass-with-no-tests`, put `bun test` in CI (needs task 8 for
+      the file, phase 1 for real subjects; enters the OpenSpec cycle —
+      it changes a gate)
 - [ ] **Phase 1** — OpenSpec: model module (`types.ts` + the 6 acceptance
       tests of model-spec §7 against the fixture; camelCase fix on import)
       ← next step (enters the OpenSpec cycle: `/opsx:propose`)
@@ -58,6 +65,13 @@ below.
 - IBM Plex fonts: self-hosted (decided in favour of offline operation).
 - Hooks: simple-git-hooks, not husky; e2e never runs in hooks.
 - All repo artifacts are in English (CLAUDE.md rule).
+- **No OpenSpec exemptions**: the criterion in CLAUDE.md ("Feature
+  workflow") is the only test — features and infra that adds a tool,
+  workflow, service or dependency, or changes a gate. Task size and task
+  number grant nothing.
+- Unsorted product specs live in `spec-inbox/` — gitignored except its
+  README, so a public repo carries the pointer without the content and no
+  machine-local path is ever committed.
 
 ## Gates (reminder)
 

@@ -2,3 +2,8 @@
 .claude/skills/
 node_modules/
 .claude/settings.local.json
+
+# Unsorted product specs — public repo, private specs. The README explains
+# what belongs here and is the only tracked file.
+spec-inbox/*
+!spec-inbox/README.md
