@@ -87,10 +87,11 @@ repo — edit them there, not here):
   **Agent-run**: invoke it yourself after any dependency manifest change and
   show the report; the change is not done until its dependencies are vetted.
 
-These gates apply to ALL work. Non-feature changes (bugfixes, chores,
-config) skip the OpenSpec stages but still get: `/zombies` after any
-non-trivial change, `/warm` after any manifest change, and a `/triage`
-suggestion before a PR is opened.
+These gates apply to ALL work. Changes that match none of the cycle
+criteria in [docs/feature-workflow.md](docs/feature-workflow.md) — a
+bugfix, a chore, a single-value config edit — skip the OpenSpec stages but
+still get: `/zombies` after any non-trivial change, `/warm` after any
+manifest change, and a `/triage` suggestion before a PR is opened.
 
 ## Feature workflow (spec-driven, OpenSpec)
 

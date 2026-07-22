@@ -21,7 +21,8 @@ The API is a product; its consumer is a TypeScript frontend. Contract rules
   initials) instead of in every consumer.
 - Errors follow RFC 9457 (`application/problem+json`) with two extension
   fields: a machine-readable `code` (frontend logic keys off codes, never
-  off message strings) and, where the user can act, an `action` hint.
+  off message strings) and an `action` hint, `null` when the user can do
+  nothing about the error.
 - CORS is configured server-side together with the first endpoint — a
   consumer staring at a CORS error means the backend isn't finished.
 - List endpoints use cursor pagination unless the list is small and
