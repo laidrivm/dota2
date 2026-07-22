@@ -302,15 +302,17 @@ protocol:
 
 ### Rules
 
-- Maintain `PLAN.md`: read it at session start; update its queue, statuses
-  and decisions in the same turn a task or stage completes.
-- All repo artifacts — docs, plans, specs, code comments, commit messages —
-  are written in English by default.
-- This repo is public: before anything is staged or committed, check the
-  diff for secrets, tokens, capability URLs, internal identifiers, and
-  machine-local files — flag anything questionable instead of committing it.
+- Never re-run a check to confirm what a completed command already proved —
+  a push that succeeded means its pre-push hook passed.
 - Before the first dependency install or tool run in a repo, verify
   `.gitignore` covers its outputs (`node_modules/`, build dirs, local
   settings).
+- This repo is public: before anything is staged or committed, check the
+  diff for secrets, tokens, capability URLs, internal identifiers, and
+  machine-local files — flag anything questionable instead of committing it.
+- All repo artifacts — docs, plans, specs, code comments, commit messages —
+  are written in English by default.
+- Maintain `PLAN.md`: read it at session start; update its queue, statuses
+  and decisions in the same turn a task or stage completes.
 
 <!-- newest first; added via the loop above -->
