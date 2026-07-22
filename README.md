@@ -34,7 +34,8 @@ Installed automatically by `bun install` (the `prepare` script runs
   lets the push through while the repo has zero test files; drop that flag
   once phase-1 tests land if you want an empty suite to block a push.
 - `--no-verify` bypasses a hook — an emergency exit, not a workflow. CI
-  (`lint.yml`) re-runs the whole-repo checks regardless.
+  (`lint.yml`) re-runs the whole-repo checks when a PR is opened or updated,
+  so a bypassed hook only delays the failure until then.
 
 ## Dependency hygiene
 

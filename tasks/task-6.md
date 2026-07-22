@@ -78,11 +78,13 @@ emergency exit, not a workflow.
 
 ## Acceptance criteria
 
-- [ ] `simple-git-hooks` is an exact devDependency; `/warm` report produced.
-- [ ] package.json has `prepare` + `simple-git-hooks` config as in step 1.
-- [ ] `.git/hooks/pre-commit` and `.git/hooks/pre-push` exist after
+- [x] `simple-git-hooks` is an exact devDependency; `/warm` report produced.
+- [x] package.json has `prepare` + `simple-git-hooks` config: pre-commit
+      `biome check --staged` (no `--write`), pre-push
+      `bun run typecheck && bun test --pass-with-no-tests`.
+- [x] `.git/hooks/pre-commit` and `.git/hooks/pre-push` exist after
       `bun install`.
-- [ ] Both hooks demonstrated firing (step 3), scratch artifacts removed.
-- [ ] Pre-push passes cleanly on a repo with zero test files, with a
-      comment marking the guard for removal.
-- [ ] README documents the hooks.
+- [x] Both hooks demonstrated firing (step 3), scratch artifacts removed.
+- [x] Pre-push passes cleanly on a repo with zero test files, via
+      `--pass-with-no-tests` (drop the flag once phase-1 tests land).
+- [x] README documents the hooks.
