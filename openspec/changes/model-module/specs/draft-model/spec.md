@@ -68,13 +68,14 @@ the weights in `MODEL_CONSTANTS.weights`, and SHALL return the top
 score, with my own role's block first. Each entry SHALL carry the
 per-component breakdown (weights already applied).
 
-#### Scenario: Empty draft ordering (model-spec §7.1)
+#### Scenario: Empty draft components (model-spec §7.1)
 
-- **WHEN** the session has no picks, no bans, and no side/role set relevant
-  to matchups (`enemyPicks` empty)
-- **THEN** each suggestion block's ordering SHALL equal the ordering of
-  candidates by `meta(h, r) + side + phase("p1")` alone, since the matchup
-  and counter-risk components are zero when no enemies are entered
+- **WHEN** the session has no allies picked and no enemies entered
+- **THEN** every suggestion entry's `matchups` and `synergy` components
+  SHALL be exactly 0 (both sums are empty). Counter-risk is NOT zero
+  pre-draft — with no enemies, `open(r)=1` and `pop(c)=contest(c)`, so it
+  still perturbs ordering; the §7.1 "pure meta+side" reading holds only up
+  to that term.
 
 #### Scenario: Counter-risk monotonic in bans (model-spec §7.2)
 
@@ -97,10 +98,12 @@ system SHALL compute draft advantage `Δ` per model-spec §4 and return
 
 #### Scenario: Antisymmetry (model-spec §7.3)
 
-- **WHEN** a full draft and its mirror (teams and side swapped) are both
-  scored
+- **WHEN** a full draft and its mirror (teams swapped, side disabled to
+  remove the side-delta term) are both scored
 - **THEN** `winProbability(mirror)` SHALL equal `1 − winProbability(original)`
-  within 1e-6, up to the side-delta term
+  to ~1 decimal place. Exact antisymmetry does not hold: the model treats
+  my roles as known and enemy roles as inferred, so the residual is the
+  role-inference impurity, not floating-point error.
 
 ### Requirement: Insufficient-data handling
 
