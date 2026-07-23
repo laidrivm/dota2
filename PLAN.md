@@ -39,8 +39,8 @@ below.
       import. Split into three sequenced proposals:
   - [ ] **2a `ui-foundation`** — entry point + Bun bundling, tokens +
         self-hosted fonts, snapshot delivery, session store, Setup screen.
-        Stages 1–2 done on `feat/ui-foundation`: 35/35 tasks, 127 tests.
-        ← next step is Stage 3 review (`/triage`, then a draft PR)
+        Stages 1–3 done on `feat/ui-foundation`: 36/36 tasks, 128 tests;
+        draft PR #10. ← next step is review, then merge and `/opsx:archive`
   - [ ] **2b `draft-board`** — board panels: bans, team slots, enemy slots
         with role probabilities, suggestion blocks, result block, mobile
         layout. First `computeModel` call.
