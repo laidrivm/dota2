@@ -53,8 +53,10 @@ also Task 9's unit-test setup — no framework added, `bun:test` is native.
 - **Floating-point equality in §7.6 determinism** → the invariant is
   "same input → same output", so exact `===` on serialized output is valid
   (same code path, same order of operations); no tolerance needed there.
-  §7.3 antisymmetry crosses two different computations, so it uses a 1e-6
-  tolerance.
+  §7.3 antisymmetry crosses two different computations *and* the model's
+  known-vs-inferred role asymmetry, so it holds only to ~1 decimal place
+  (the authoritative threshold, `toBeCloseTo(…, 1)`), not floating-point
+  error.
 - **§7.2 fixture may not contain a clean troll/Razor case** → if the
   shipped fixture lacks heroes with the needed advantage structure, the
   test constructs the minimal draft that exercises counter-risk
