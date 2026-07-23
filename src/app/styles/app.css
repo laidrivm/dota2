@@ -78,6 +78,7 @@
 }
 
 .chip {
+	position: relative;
 	display: inline-flex;
 	align-items: center;
 	gap: var(--sp-3);
@@ -95,13 +96,18 @@
 	background: var(--bg-3);
 }
 
-/* The radio itself is invisible but still the thing being operated: it keeps
-   the group semantics, the checked state and the keyboard behaviour. */
+/* The radio is transparent but covers the whole chip, so it keeps a real
+   hit area and a real size — a zero-sized control reads as hidden to some
+   tooling — while the group semantics, checked state and keyboard
+   behaviour stay the platform's. */
 .chip input {
 	appearance: none;
+	position: absolute;
+	inset: 0;
 	margin: 0;
-	width: 0;
-	height: 0;
+	border-radius: var(--r-control);
+	opacity: 0;
+	cursor: pointer;
 	outline: none;
 }
 

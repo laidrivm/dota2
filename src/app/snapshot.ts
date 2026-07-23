@@ -40,7 +40,21 @@ const MONTHS = [
 	"Dec",
 ];
 
-/** A payload we cannot render from is no better than no payload at all. */
+/** Leading `YYYY-MM-DD` of an ISO timestamp, with a real month and day. */
+const ISO_DATE = /^\d{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12]\d|3[01])/;
+
+function isHeroEntry(value: unknown): boolean {
+	if (typeof value !== "object" || value === null) return false;
+	const hero = value as { id?: unknown; name?: unknown };
+	return typeof hero.id === "number" && typeof hero.name === "string";
+}
+
+/**
+ * A payload we cannot render from is no better than no payload at all. The
+ * date is checked against the calendar because the header formats it by
+ * reading the digits, and a hero list is checked entry by entry because a
+ * truncated response is otherwise indistinguishable from a real one.
+ */
 export function isBundle(value: unknown): value is SnapshotBundle {
 	if (typeof value !== "object" || value === null || Array.isArray(value)) {
 		return false;
@@ -49,9 +63,11 @@ export function isBundle(value: unknown): value is SnapshotBundle {
 	return (
 		typeof b.snapshotId === "number" &&
 		typeof b.createdAt === "string" &&
+		ISO_DATE.test(b.createdAt) &&
 		typeof b.patch?.id === "string" &&
 		Array.isArray(b.heroes) &&
-		b.heroes.length > 0
+		b.heroes.length > 0 &&
+		b.heroes.every(isHeroEntry)
 	);
 }
 

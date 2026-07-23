@@ -6,7 +6,13 @@
  */
 
 import { useEffect, useState } from "preact/hooks";
-import { EMPTY_SESSION, type Role, type Session, type Side } from "../types.ts";
+import {
+	EMPTY_SESSION,
+	ROLES,
+	type Role,
+	type Session,
+	type Side,
+} from "../types.ts";
 import { read, write } from "./storage.ts";
 
 export const SESSION_KEY = "draft.session";
@@ -58,13 +64,21 @@ export function applyHotkey(session: Session, hotkey: Hotkey): Session {
 		: { ...session, myRole: hotkey.role };
 }
 
+/**
+ * A stored session is only usable if every field the UI indexes is there —
+ * a `{"v":1}` fragment would restore fine and then break the first slot
+ * that reads `teamPicks`.
+ */
 function isSession(value: unknown): value is Session {
-	return (
-		typeof value === "object" &&
-		value !== null &&
-		!Array.isArray(value) &&
-		(value as Session).v === 1
-	);
+	if (typeof value !== "object" || value === null || Array.isArray(value)) {
+		return false;
+	}
+	const s = value as Partial<Session>;
+	if (s.v !== 1) return false;
+	if (!Array.isArray(s.bans) || !Array.isArray(s.enemyPicks)) return false;
+	const picks: unknown = s.teamPicks;
+	if (typeof picks !== "object" || picks === null) return false;
+	return ROLES.every((role) => `${role}` in picks);
 }
 
 /** Anything we cannot read back as a v1 session is treated as no session. */

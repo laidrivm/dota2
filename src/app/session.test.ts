@@ -62,6 +62,15 @@ describe("restore", () => {
 		["an array", "[]"],
 		["a number", "7"],
 		["a future schema version", '{"v":2,"side":"dire"}'],
+		["a v1 fragment with no teamPicks", '{"v":1,"bans":[],"enemyPicks":[]}'],
+		[
+			"a v1 session missing a role slot",
+			'{"v":1,"bans":[],"enemyPicks":[],"teamPicks":{"1":null,"2":null,"3":null,"4":null}}',
+		],
+		[
+			"a v1 session whose bans are not a list",
+			'{"v":1,"bans":null,"enemyPicks":[],"teamPicks":{"1":null,"2":null,"3":null,"4":null,"5":null}}',
+		],
 	])("discards %s for an empty session", (_label, raw) => {
 		store.set(SESSION_KEY, raw);
 
