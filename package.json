@@ -3,6 +3,8 @@
 	"private": true,
 	"type": "module",
 	"scripts": {
+		"dev": "bun --hot server.ts",
+		"build": "rm -rf dist && bun build ./index.html --outdir=dist --minify && cp -R src/app/styles/fonts dist/fonts",
 		"lint": "biome ci .",
 		"lint:fix": "biome check --write .",
 		"lint:yaml": "bun scripts/check-yaml.ts",
@@ -18,5 +20,8 @@
 		"@types/bun": "1.3.14",
 		"simple-git-hooks": "2.13.1",
 		"typescript": "7.0.2"
+	},
+	"dependencies": {
+		"preact": "10.29.7"
 	}
 }

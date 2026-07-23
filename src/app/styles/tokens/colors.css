@@ -1,0 +1,84 @@
+:root {
+	/* surfaces (cool near-black, used beside a dark game client) */
+	--bg-0: #0e1013; /* page */
+	--bg-1: #12151b; /* panel */
+	--bg-2: #171b22; /* control / chip */
+	--bg-3: #1c212a; /* control hover */
+	/* borders */
+	--border-0: #1b202a; /* row divider */
+	--border-1: #20252e; /* panel */
+	--border-2: #262b34; /* chip */
+	--border-3: #333a46; /* control */
+	--border-hover: #3f4856;
+	/* text */
+	--text-1: #e8ecf2; /* primary: hero names */
+	--text-2: #c3ccd8; /* strong secondary: primary role prob, button labels */
+	--text-3: #9aa4b2; /* secondary: role labels */
+	--text-4: #8a93a3; /* controls at rest, kbd */
+	--text-5: #5c6572; /* section labels, meta */
+	--text-6: #4d5665; /* separators, faintest */
+	/* accent — "my pick" emphasis (gold) */
+	--accent: #e8b656;
+	--accent-hi: #f2cd82;
+	--accent-row-bg: rgba(232, 182, 86, 0.05);
+	--accent-banner-bg: rgba(232, 182, 86, 0.07);
+	--accent-border: rgba(232, 182, 86, 0.25);
+	/* teams & data */
+	--radiant: #7fd694;
+	--dire: #e0705f;
+	--score-pos: #7dd490; /* suggestion score */
+	/* hero tile */
+	--tile-inset: inset 0 0 0 1px rgba(255, 255, 255, 0.14);
+	/* hero placeholder palette (one unique color per hero) */
+	--hero-abaddon: #45c4b4;
+	--hero-anti-mage: #7761d8;
+	--hero-axe: #c53b30;
+	--hero-bane: #4a3d85;
+	--hero-batrider: #b5622e;
+	--hero-bloodseeker: #8f2430;
+	--hero-bounty-hunter: #9aa646;
+	--hero-bristleback: #8a6a4a;
+	--hero-clinkz: #c24e1a;
+	--hero-clockwerk: #a86a3c;
+	--hero-crystal-maiden: #8fd4f0;
+	--hero-dawnbreaker: #e8b545;
+	--hero-dazzle: #e87ab0;
+	--hero-doom: #a63c1e;
+	--hero-drow-ranger: #7ec2cf;
+	--hero-earthshaker: #7a5230;
+	--hero-enigma: #584bb5;
+	--hero-faceless-void: #776aa8;
+	--hero-invoker: #cdb464;
+	--hero-io: #dce8f2;
+	--hero-juggernaut: #dd8a2e;
+	--hero-keeper-of-the-light: #f0e3b2;
+	--hero-lich: #5fc8e8;
+	--hero-lifestealer: #b8ab96;
+	--hero-lina: #f28c3f;
+	--hero-lion: #9c4438;
+	--hero-luna: #8598d8;
+	--hero-magnus: #5a7a9e;
+	--hero-mars: #d1543c;
+	--hero-mirana: #c4d6f0;
+	--hero-night-stalker: #3f62b0;
+	--hero-oracle: #52c29a;
+	--hero-phantom-assassin: #566180;
+	--hero-phantom-lancer: #3aa8c0;
+	--hero-puck: #c77de0;
+	--hero-pudge: #a97a63;
+	--hero-shadow-fiend: #66323e;
+	--hero-slark: #2f8a6e;
+	--hero-snapfire: #e0693a;
+	--hero-spectre: #9a5fd0;
+	--hero-spirit-breaker: #5c6bd6;
+	--hero-storm-spirit: #2e7fd0;
+	--hero-sven: #46628f;
+	--hero-tidehunter: #4f9e5f;
+	--hero-tiny: #8a94a0;
+	--hero-treant-protector: #4e8a3a;
+	--hero-undying: #8fa83e;
+	--hero-winter-wyvern: #a9c3e6;
+	--hero-witch-doctor: #b3812f;
+	--hero-wraith-king: #2fbf7f;
+	--hero-zeus: #4da3e8;
+}
