@@ -263,12 +263,8 @@ export function computeModel(
 	// --- §4 win estimate: only at a full 5v5 draft.
 	let winEstimate: ModelOutput["winEstimate"] = null;
 	if (teamSlots.length === 5 && enemyHeroes.length === 5) {
-		const enemySide: Side | null =
-			session.side === null
-				? null
-				: session.side === "radiant"
-					? "dire"
-					: "radiant";
+		const enemySide =
+			session.side && (session.side === "radiant" ? "dire" : "radiant");
 
 		let delta = 0;
 		for (const { role, hero } of teamSlots) {
