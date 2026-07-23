@@ -31,7 +31,8 @@ already-fixed `SnapshotBundle` type.
 
 **Goals:**
 - A Preact app that builds and runs with Bun alone — no bundler dependency,
-  no framework, no dev-server code.
+  no framework, and no server code beyond the static routes the bundler
+  cannot cover.
 - Design tokens imported verbatim, so a design change is a re-copy and not a
   re-interpretation.
 - Snapshot obtained through a URL boundary that Phase 4 can take over
@@ -46,12 +47,24 @@ already-fixed `SnapshotBundle` type.
 
 ## Decisions
 
-**Bun's native bundler, not Vite.** `bun ./index.html` is the dev server
-(bundles the referenced TS/JSX/CSS, hot reload); `bun build ./index.html
---outdir=dist --minify` is the production build. Vite/Rspack/Parcel were
-rejected at ladder rung 4: they add a dependency and a config file to do
-what the runtime already does natively, and this project's whole hardening
-posture argues against a build-tool dependency tree.
+**Bun's native bundler, not Vite.** `bun build ./index.html --outdir=dist
+--minify` is the production build, plus a copy step each for the fonts and
+the snapshot. Vite/Rspack/Parcel were rejected at ladder rung 4: they add a
+dependency and a config file to do what the runtime already does natively,
+and this project's whole hardening posture argues against a build-tool
+dependency tree.
+
+**A server after all — `server.ts` under `--hot` for dev, and the thing Task
+7 containerises.** The intended design was `bun ./index.html` alone, with no
+server code. Two measured facts killed it: Bun's CSS bundler inlines every
+`url()` asset as base64 with no threshold or loader override (four woff2
+faces became a 108 KB render-blocking stylesheet), and its HTML dev server
+answers every path with the HTML, so no static file can be served beside it.
+`server.ts` therefore composes `staticRoutes()` — the font files and the
+snapshot, each with its own content type and cache policy — with the bundled
+homepage. The font faces live in `src/app/styles/fonts/fonts.css`, which
+never enters the bundler; `index.html` pulls it in with an inline `<style>
+@import`, the one construct Bun passes through untouched.
 
 **Preact with `useState`, no state library.** One `useSession()` hook owns
 the session value, its setters, and its persistence; the app is a handful of
@@ -61,16 +74,16 @@ tree needs no machinery. JSX is configured in `tsconfig.json` with
 `"jsx": "react-jsx"` and `"jsxImportSource": "preact"`; `lib` gains `DOM`
 and `DOM.Iterable`.
 
-**Snapshot as a bundled file URL, not an import.** `src/app/snapshot.ts`
-does `import snapshotUrl from "../fixtures/snapshot.json" with { type:
-"file" }` — Bun's file loader copies the JSON into the output and resolves
-the import to its URL — then `fetch(snapshotUrl)`. This keeps the client on
-a network boundary (so Phase 4 replaces one constant with the pipeline's
-URL) while costing zero server code and zero copy step in the build.
-Alternatives rejected: importing the JSON as a module (erases the boundary,
-inlines ~50 KB into the bundle, and makes the offline/error requirements
-untestable); a `Bun.serve` dev server with a `/snapshot.json` route (real
-code to maintain, and a second serving path that production would not use).
+**Snapshot at a fixed URL, not a bundler asset.** `src/app/snapshot.ts`
+fetches the constant `/snapshot.json`; `server.ts` serves the fixture there
+and the build copies it into `dist/`. Importing the JSON as a module was
+rejected — it erases the network boundary, inlines ~50 KB into the bundle,
+and makes the offline and error requirements untestable. Bun's file loader
+(`with { type: "file" }`) was tried and rejected too: it emits a
+content-hashed filename, so publishing a new snapshot would mean rebuilding
+the client, which is the opposite of what the Phase 4 pipeline needs — and
+the dev server does not serve the emitted asset at all. A plain constant is
+also the smaller change for Phase 4: one string, no cast, no bundler.
 
 **Last-good cache in `localStorage`, not a service worker.** One key holds
 the last successfully fetched bundle. A service worker is the "correct"
@@ -81,13 +94,15 @@ breaking startup — the same wrapper the session store uses.
 
 **Self-hosted IBM Plex, replacing the design system's Google Fonts
 `@import`.** This is the one deliberate deviation from the imported token
-files (accepted decision: offline operation). The variable `woff2` files for
-IBM Plex Sans and IBM Plex Mono are committed under
-`src/app/styles/fonts/` next to their OFL licence, and `typography.css`
-declares them with `@font-face` + `font-display: swap`. `url()` references
-let the bundler hash and emit them. A font package (`@fontsource-variable/*`)
-was rejected at ladder rung 5: two `@font-face` rules are fewer moving parts
-than two dependencies.
+files (accepted decision: offline operation). IBM Plex Mono has no variable
+release — neither `@fontsource-variable/ibm-plex-mono` (does not exist) nor
+IBM's own `@ibm/plex-mono` ships one — so the faces are static Latin1
+`woff2` files, one per weight actually used: Sans 400/600 and Mono 400/600.
+They come from IBM's own packages rather than a repackager, and sit under
+`src/app/styles/fonts/` next to their OFL licence, declared with
+`@font-face` + `font-display: swap`. A font package was rejected at ladder
+rung 5: four `@font-face` rules are fewer moving parts than two
+dependencies.
 
 **Native radios styled as buttons for side and role.** Each group is a
 `fieldset` + `legend` with `input[type=radio]` and a `label`, styled with
@@ -113,11 +128,17 @@ the e2e set that Task 4's Playwright smoke suite picks up first.
   mapping, fetch/cache are all testable functions), leaving components as
   markup with no branching logic; the e2e set is enumerated in tasks so
   Task 4 has a written target rather than a blank page.
-- **Content-hashed snapshot URL means a new snapshot needs a rebuild** →
-  acceptable while the fixture *is* the snapshot; Phase 4 changes
-  `snapshot.ts` to a stable pipeline URL, which is exactly the boundary this
-  design preserves.
-- **Committed binary font files in a public repo** → two `woff2` files under
+- **The font arrangement rests on undocumented bundler behaviour** → Bun
+  leaving an inline `<style>` untouched is observed, not promised, so a Bun
+  upgrade could start rewriting it and silently inline the faces again;
+  `build.test.ts` asserts the `@import` survives and that no `data:font`
+  appears in the built CSS, so the regression fails the suite rather than
+  the page.
+- **`server.ts` is now on the deployment path** → Task 7 containerises a
+  process instead of shipping a directory. `bun run build` still emits a
+  fully static `dist/` (fonts and snapshot copied in), so a static host
+  remains a working fallback.
+- **Committed binary font files in a public repo** → four `woff2` files under
   OFL 1.1 with the licence committed beside them; the alternative (a CDN)
   breaks the no-third-party-requests requirement.
 - **Design tokens are copied, not linked** → they drift if the design

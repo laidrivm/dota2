@@ -54,6 +54,21 @@ describe("payload validation", () => {
 			expect(isBundle(value)).toBe(false);
 		}
 	});
+
+	test.each(["", "20260719", "2026-13-19T00:00:00Z", "2026-07-45T00:00:00Z"])(
+		"rejects createdAt %p, which the header could not format",
+		(createdAt) => {
+			expect(isBundle({ ...fixture, createdAt })).toBe(false);
+		},
+	);
+
+	test.each([
+		["a null entry", [null]],
+		["an entry without an id", [{ name: "Clinkz" }]],
+		["an entry without a name", [{ id: 56 }]],
+	])("rejects a heroes array with %s", (_label, heroes) => {
+		expect(isBundle({ ...fixture, heroes })).toBe(false);
+	});
 });
 
 describe("fetch and cache", () => {

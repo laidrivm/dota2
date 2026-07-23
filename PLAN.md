@@ -39,9 +39,8 @@ below.
       import. Split into three sequenced proposals:
   - [ ] **2a `ui-foundation`** — entry point + Bun bundling, tokens +
         self-hosted fonts, snapshot delivery, session store, Setup screen.
-        Stage 1 done: `openspec/changes/ui-foundation/` (proposal, 3 specs,
-        design, tasks) ← next step is Stage 2 (branch + `/clear` +
-        `/opsx:apply`)
+        Stages 1–2 done on `feat/ui-foundation`: 35/35 tasks, 127 tests.
+        ← next step is Stage 3 review (`/triage`, then a draft PR)
   - [ ] **2b `draft-board`** — board panels: bans, team slots, enemy slots
         with role probabilities, suggestion blocks, result block, mobile
         layout. First `computeModel` call.
@@ -83,14 +82,24 @@ below.
   GitHub App gets write access to this hardening-focused repo. Trade-off:
   no Dependency Dashboard and no lockFileMaintenance; the nightly
   `bun audit` compensates for the latter.
-- IBM Plex fonts: self-hosted (decided in favour of offline operation) —
-  variable `woff2` + OFL committed under `src/app/styles/fonts/`, replacing
-  the design system's Google Fonts `@import`; no font package.
-- Build tooling: **Bun's native bundler only** — `bun ./index.html` for dev,
-  `bun build ./index.html --outdir=dist` for production. No Vite.
-- Snapshot reaches the client through a **URL**, never a module import:
-  `import … with { type: "file" }` + `fetch`, so Phase 4 replaces the
-  producer and nothing else. Last good bundle cached in `localStorage`.
+- Build tooling: **Bun's native bundler only**, no Vite. `bun run build` is
+  `bun build ./index.html --outdir=dist` plus copy steps for the fonts and
+  the snapshot; `bun run dev` is `server.ts` under `--hot`.
+- `server.ts` + `static-routes.ts` serve the app in dev and production; Task
+  7 containerises them. Bun's CSS bundler inlines every `url()` asset as
+  base64 and its HTML dev server serves no static files, so the font faces
+  and the snapshot are served from their own routes instead.
+- IBM Plex fonts: self-hosted (decided in favour of offline operation).
+  Mono has no variable release, so weights are separate Latin1 `woff2` faces
+  taken from IBM's own packages — Sans 400/600, Mono 400/600 so far — with
+  the OFL licence beside them in `src/app/styles/fonts/`. `fonts.css` holds
+  the `@font-face` rules, stays out of the bundler, and index.html pulls it
+  in with an inline `@import`, which Bun leaves alone. No font package.
+- Snapshot reaches the client through a **URL** — the constant
+  `/snapshot.json` in `src/app/snapshot.ts` — never a module import, so
+  Phase 4 replaces the producer and nothing else. Not a hashed bundler
+  asset either: that would force a rebuild to publish a snapshot. Last good
+  bundle cached in `localStorage`.
 - No DOM test environment: pure modules get `bun:test`, DOM-level scenarios
   are e2e (Task 4). No `happy-dom` dependency.
 - Hooks: simple-git-hooks, not husky; e2e never runs in hooks.

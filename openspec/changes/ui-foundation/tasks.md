@@ -142,14 +142,27 @@ Task 4's Playwright smoke suite.
 - [x] 6.5 Verify choosing side then role collapses Setup into the strip in
       one update, and that a reload restores both. **(e2e)** (Reqs:
       draft-session — Setup collapses; Session persists across reloads)
+- [x] 6.6 Verify that with the snapshot route unreachable and no cache, the
+      error state appears and retry recovers without a page reload.
+      **(e2e)** (Req: snapshot-delivery — Fetch fails with a cold cache)
 
 ## 7. Gates
 
-- [ ] 7.1 `bun test` green; `tsc --noEmit` clean; `biome check` clean.
+- [x] 7.1 `bun test` green; `tsc --noEmit` clean; `biome check` clean.
 - [x] 7.2 `/warm` report on `preact` shown and accepted (from 1.1).
-- [ ] 7.3 `/zombies` in diff mode over the branch; every new or `[partial]`
-      finding becomes a test or an explicit user decision to skip.
-- [ ] 7.4 Architecture delta presented (the app is a new module boundary),
+- [x] 7.3 `/zombies` in diff mode over the branch; every new or `[partial]`
+      finding becomes a test or an explicit user decision to skip. Four
+      findings were real defects and were fixed at the root (snapshot date
+      and hero-entry validation, stored-session shape validation, radio hit
+      area); ten became tests (`static-routes.test.ts`, `build.test.ts`, and
+      additions to the snapshot and session suites); three went to Task 4 as
+      **(e2e)**. Two were deliberately skipped:
+      - IME composition (`event.isComposing`) is not checked by the hotkey
+        layer — no text input exists until the picker, and proposal 3 owns
+        hotkey context routing, which supersedes a per-key guard.
+      - The double-retry race cannot occur: activating retry clears the
+        result, which unmounts the error state and its button.
+- [x] 7.4 Architecture delta presented (the app is a new module boundary),
       then `/triage` suggested to the user before the PR is opened.
-- [ ] 7.5 `PLAN.md` updated: Phase 2 split into three proposals, this one
+- [x] 7.5 `PLAN.md` updated: Phase 2 split into three proposals, this one
       marked done, Task 4's e2e set pointed at the **(e2e)** tasks above.
