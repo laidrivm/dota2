@@ -21,24 +21,15 @@ const SNAPSHOT_URL = "/snapshot.json";
 
 export const CACHE_KEY = "snapshot.bundle";
 
-export type SnapshotResult =
-	| { ok: true; bundle: SnapshotBundle }
-	| { ok: false };
-
-const MONTHS = [
-	"Jan",
-	"Feb",
-	"Mar",
-	"Apr",
-	"May",
-	"Jun",
-	"Jul",
-	"Aug",
-	"Sep",
-	"Oct",
-	"Nov",
-	"Dec",
-];
+/**
+ * Formats as `Jul 19`. Pinned to UTC so the viewer's timezone cannot shift
+ * the date by a day; the pipeline writes `createdAt` with a `Z`.
+ */
+const SNAPSHOT_DATE = new Intl.DateTimeFormat("en-US", {
+	month: "short",
+	day: "numeric",
+	timeZone: "UTC",
+});
 
 /** Leading `YYYY-MM-DD` of an ISO timestamp, with a real month and day. */
 const ISO_DATE = /^\d{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12]\d|3[01])/;
@@ -98,20 +89,17 @@ function readCache(): SnapshotBundle | null {
  * One fetch per call — the app calls this once at startup, and again only
  * when the user activates retry from the error state.
  */
-export async function loadSnapshot(): Promise<SnapshotResult> {
+export async function loadSnapshot(): Promise<SnapshotBundle | null> {
 	const fetched = await fetchBundle();
 	if (fetched) {
 		write(CACHE_KEY, JSON.stringify(fetched));
-		return { ok: true, bundle: fetched };
+		return fetched;
 	}
-	const cached = readCache();
-	return cached ? { ok: true, bundle: cached } : { ok: false };
+	return readCache();
 }
 
-/** `patch 7.41d · snapshot Jul 19` — read off the date as written, so the
- * viewer's timezone cannot shift it by a day. */
+/** `patch 7.41d · snapshot Jul 19` */
 export function formatProvenance(bundle: SnapshotBundle): string {
-	const [, month, day] = bundle.createdAt.slice(0, 10).split("-");
-	const name = MONTHS[Number(month) - 1] ?? "?";
-	return `patch ${bundle.patch.id} · snapshot ${name} ${Number(day)}`;
+	const date = SNAPSHOT_DATE.format(new Date(bundle.createdAt));
+	return `patch ${bundle.patch.id} · snapshot ${date}`;
 }

@@ -21,13 +21,12 @@ export type Hotkey =
 	| { kind: "side"; side: Side }
 	| { kind: "role"; role: Role };
 
-/** Keystroke as the hotkey layer sees it — a KeyboardEvent satisfies it. */
-export interface Keystroke {
-	key: string;
-	ctrlKey: boolean;
-	metaKey: boolean;
-	altKey: boolean;
-}
+/** Just the parts of a keystroke the hotkey layer reads, so it is testable
+ * without a DOM. */
+export type Keystroke = Pick<
+	KeyboardEvent,
+	"key" | "ctrlKey" | "metaKey" | "altKey"
+>;
 
 const SIDE_KEYS: Record<string, Side> = { r: "radiant", d: "dire" };
 

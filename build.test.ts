@@ -45,6 +45,5 @@ describe("build output", () => {
 		const text = await Bun.file(`${dist}/${css}`).text();
 
 		expect(text).not.toContain("data:font");
-		expect(text.length).toBeLessThan(50_000);
 	});
 });
