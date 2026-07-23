@@ -58,9 +58,9 @@ below.
   is NOT zero at an empty draft (open=1, pop=contest), so "pure meta+side"
   ordering holds only up to that term; §7.3 antisymmetry holds only to ~1
   dp, not 1e-6, because my roles are known while enemy roles are inferred.
-- Fixture is Biome-owned format: regenerate with
-  `python3 generate_fixture.py > snapshot.json && bunx biome format --write
-  snapshot.json`.
+- Fixture is Biome-owned format: regenerate from the repo root with
+  `python3 src/fixtures/generate_fixture.py > src/fixtures/snapshot.json &&
+  bunx biome format --write src/fixtures/snapshot.json`.
 - `computeModel` trusts a well-formed session (the UI is the validation
   boundary); a hero in two sets is undefined behavior, not defended — no
   extra validation code.
