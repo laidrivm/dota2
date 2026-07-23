@@ -2,11 +2,12 @@
 
 ## Project overview
 
-<!-- TODO: fill in as the project takes shape -->
-- What it is: TBD
-- Stack: TypeScript on Bun
-- Run locally: TBD
-- Run tests: TBD
+- What it is: a single-page draft assistant for Dota 2 ranked All Pick —
+  the player mirrors a live draft into it and gets per-role pick
+  suggestions and a win-probability estimate.
+- Stack: TypeScript on Bun, Preact, no build tool beyond Bun's bundler.
+- Run locally: `bun run dev` (see README for what it serves).
+- Run tests: `bun test`.
 
 ## Code style
 
