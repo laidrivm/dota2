@@ -59,6 +59,9 @@ below.
   dp, not 1e-6, because my roles are known while enemy roles are inferred.
 - Fixture is Biome-owned format: regenerate with
   `python3 generate_fixture.py > snapshot.json && bunx biome format --write`.
+- `computeModel` trusts a well-formed session (the UI is the validation
+  boundary); a hero in two sets is undefined behavior, not defended — no
+  extra validation code.
 - STRATZ: the user provides the API key; rate limits —
   https://stratz.com/knowledge-base/API/Are%20there%20any%20rate%20limits%3F;
   pick phases: extract via GraphQL or defer to v2.
