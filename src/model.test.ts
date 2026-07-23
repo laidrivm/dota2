@@ -11,6 +11,12 @@ import {
 
 const bundle = rawSnapshot as unknown as SnapshotBundle;
 
+/** Assert a lookup the test knows must succeed; throws instead of `!`. */
+function def<T>(v: T | null | undefined): T {
+	if (v == null) throw new Error("expected a defined value");
+	return v;
+}
+
 // Fixture hero ids used across tests.
 const H = {
 	antiMage: 1,
@@ -84,7 +90,7 @@ describe("enemy role inference (§1)", () => {
 
 	test("single enemy: probs sum to 1 and follow position share", () => {
 		const out = computeModel(bundle, session({ enemyPicks: [H.undying] }));
-		const probs = out.enemyRoles[0]!.probs;
+		const probs = def(out.enemyRoles[0]).probs;
 		const sum = Object.values(probs).reduce((a, b) => a + b, 0);
 		expect(sum).toBeCloseTo(1, 9);
 		// Undying: pos5 share .6 > pos4 .4 > others (ε floor).
@@ -100,15 +106,15 @@ describe("enemy role inference (§1)", () => {
 			bundle,
 			session({ enemyPicks: [H.lich, H.oracle] }),
 		);
-		expect(two.enemyRoles[0]!.probs["5"]).toBeLessThan(
-			one.enemyRoles[0]!.probs["5"],
+		expect(def(two.enemyRoles[0]).probs["5"]).toBeLessThan(
+			def(one.enemyRoles[0]).probs["5"],
 		);
 	});
 
 	test("ε floor: a 0-share role still gets nonzero marginal", () => {
 		// Anti-Mage is pos1-only; role 3 has zero share but must stay > 0.
 		const out = computeModel(bundle, session({ enemyPicks: [H.antiMage] }));
-		expect(out.enemyRoles[0]!.probs["3"]).toBeGreaterThan(0);
+		expect(def(out.enemyRoles[0]).probs["3"]).toBeGreaterThan(0);
 	});
 
 	test("five enemies: every enemy's probs sum to 1 and carry all five keys", () => {
@@ -153,8 +159,8 @@ describe("suggestions (§3)", () => {
 
 	test("my-role block is first and flagged", () => {
 		const out = computeModel(bundle, session({ myRole: 3 }));
-		expect(out.suggestions[0]!.role).toBe(3);
-		expect(out.suggestions[0]!.isMyRole).toBe(true);
+		expect(def(out.suggestions[0]).role).toBe(3);
+		expect(def(out.suggestions[0]).isMyRole).toBe(true);
 		expect(out.suggestions.filter((b) => b.isMyRole)).toHaveLength(1);
 	});
 
@@ -164,7 +170,9 @@ describe("suggestions (§3)", () => {
 			expect(block.entries.length).toBeLessThanOrEqual(5);
 		}
 		// The carry pool has >5 candidates, so role 1 fills.
-		expect(out.suggestions.find((b) => b.role === 1)!.entries).toHaveLength(5);
+		expect(def(out.suggestions.find((b) => b.role === 1)).entries).toHaveLength(
+			5,
+		);
 	});
 
 	test("components sum to score", () => {
@@ -186,9 +194,11 @@ describe("suggestions (§3)", () => {
 		// Axe hard-counters Clinkz (adv 3.0); Clinkz tops the role-1 block, so it
 		// stays observable whether or not Axe is banned.
 		const clinkz = (s: Session) =>
-			computeModel(bundle, s)
-				.suggestions.find((b) => b.role === 1)!
-				.entries.find((e) => e.hero === H.clinkz)!;
+			def(
+				def(
+					computeModel(bundle, s).suggestions.find((b) => b.role === 1),
+				).entries.find((e) => e.hero === H.clinkz),
+			);
 		const base = clinkz(session({ myRole: 1, side: "radiant" }));
 		const banned = clinkz(
 			session({ myRole: 1, side: "radiant", bans: [H.axe] }),
@@ -241,7 +251,7 @@ describe("insufficient-data hero (§7.5)", () => {
 		// Largo is insufficient with positions {1, 3}; share collapses to uniform,
 		// so roles 1 and 3 are symmetric and dominate 2/4/5.
 		const out = computeModel(bundle, session({ enemyPicks: [H.largo] }));
-		const p = out.enemyRoles[0]!.probs;
+		const p = def(out.enemyRoles[0]).probs;
 		expect(p["1"]).toBeCloseTo(p["3"], 9);
 		expect(p["1"]).toBeGreaterThan(p["2"]);
 		expect(p["1"]).toBeGreaterThan(p["4"]);
@@ -276,7 +286,7 @@ describe("win estimate (§4)", () => {
 	});
 
 	test("winProbability is a logistic of advantage", () => {
-		const out = computeModel(bundle, full("radiant")).winEstimate!;
+		const out = def(computeModel(bundle, full("radiant")).winEstimate);
 		expect(out.winProbability).toBeCloseTo(
 			1 / (1 + Math.exp(-0.1 * out.advantage)),
 			9,
@@ -301,8 +311,8 @@ describe("win estimate (§4)", () => {
 			}),
 			enemyPicks: [H.antiMage, H.invoker, H.tidehunter, H.pudge, H.lich],
 		});
-		const a = computeModel(bundle, original).winEstimate!;
-		const b = computeModel(bundle, mirror).winEstimate!;
+		const a = def(computeModel(bundle, original).winEstimate);
+		const b = def(computeModel(bundle, mirror).winEstimate);
 		// Not 1e-6: the model treats my roles as known and enemy roles as
 		// inferred, so antisymmetry holds only up to that asymmetry.
 		expect(b.winProbability).toBeCloseTo(1 - a.winProbability, 1);
