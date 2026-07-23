@@ -36,9 +36,20 @@ below.
       `src/fixtures/`, `src/model.test.ts` (31 tests). Two §7 scenarios
       corrected mid-apply — see decisions.
 - [ ] **Phase 2** — OpenSpec: draft board UI on Preact + design-token
-      import; likely 2 sequenced proposals (board shell → picker/hotkeys/
-      edge cases) ← next step
-- [ ] **Task 4** — Playwright smoke (precondition: a UI exists)
+      import. Split into three sequenced proposals:
+  - [ ] **2a `ui-foundation`** — entry point + Bun bundling, tokens +
+        self-hosted fonts, snapshot delivery, session store, Setup screen.
+        Stage 1 done: `openspec/changes/ui-foundation/` (proposal, 3 specs,
+        design, tasks) ← next step is Stage 2 (branch + `/clear` +
+        `/opsx:apply`)
+  - [ ] **2b `draft-board`** — board panels: bans, team slots, enemy slots
+        with role probabilities, suggestion blocks, result block, mobile
+        layout. First `computeModel` call.
+  - [ ] **2c `hero-picker`** — picker overlay (search/aliases/grid/keyboard),
+        board hotkeys + context routing, New/reset dialog, undo toast,
+        screens-spec §6 edge cases.
+- [ ] **Task 4** — Playwright smoke (precondition: a UI exists); its first
+      scenarios are the tasks marked **(e2e)** in `ui-foundation/tasks.md`
 - [ ] **Task 7** — Docker + VPS deploy (open decisions: registry
       GHCR/Docker Hub, same VPS or a new one)
 - [ ] **Phase 4** — OpenSpec: STRATZ → Postgres → snapshot bundle pipeline
@@ -72,7 +83,16 @@ below.
   GitHub App gets write access to this hardening-focused repo. Trade-off:
   no Dependency Dashboard and no lockFileMaintenance; the nightly
   `bun audit` compensates for the latter.
-- IBM Plex fonts: self-hosted (decided in favour of offline operation).
+- IBM Plex fonts: self-hosted (decided in favour of offline operation) —
+  variable `woff2` + OFL committed under `src/app/styles/fonts/`, replacing
+  the design system's Google Fonts `@import`; no font package.
+- Build tooling: **Bun's native bundler only** — `bun ./index.html` for dev,
+  `bun build ./index.html --outdir=dist` for production. No Vite.
+- Snapshot reaches the client through a **URL**, never a module import:
+  `import … with { type: "file" }` + `fetch`, so Phase 4 replaces the
+  producer and nothing else. Last good bundle cached in `localStorage`.
+- No DOM test environment: pure modules get `bun:test`, DOM-level scenarios
+  are e2e (Task 4). No `happy-dom` dependency.
 - Hooks: simple-git-hooks, not husky; e2e never runs in hooks.
 - All repo artifacts are in English (CLAUDE.md rule).
 - No OpenSpec exemptions: the criterion in `docs/feature-workflow.md` is
