@@ -20,7 +20,7 @@ Task 4's Playwright smoke suite.
       ./index.html --outdir=dist --minify`) scripts; add `dist/` to
       `.gitignore` before the first build runs. (Req: app-shell — Static
       production build)
-- [ ] 1.5 Verify `dist/` served by a plain static file server loads and
+- [x] 1.5 Verify `dist/` served by a plain static file server loads and
       reaches Setup with no other process running. **(e2e)** (Req:
       app-shell — Static production build / Build output is self-contained)
 
@@ -96,28 +96,28 @@ Task 4's Playwright smoke suite.
 
 ## 5. Session store
 
-- [ ] 5.1 Tests for restore: no stored value → `EMPTY_SESSION()`; a stored
+- [x] 5.1 Tests for restore: no stored value → `EMPTY_SESSION()`; a stored
       v1 session round-trips deeply equal; unparseable JSON, a non-object
       (`"null"`, `"[]"`, `"7"`), and `v: 2` are each discarded for an empty
       session without throwing. (Req: draft-session — Session state shape;
       Session persists across reloads / Corrupt stored value)
-- [ ] 5.2 Tests for the persisted shape: the written value carries `v`,
+- [x] 5.2 Tests for the persisted shape: the written value carries `v`,
       `createdAt`, `side`, `myRole`, `bans`, all five `teamPicks` keys, and
       `enemyPicks` — no key omitted when its value is `null` or empty.
       (Req: draft-session — Session persists across reloads)
-- [ ] 5.3 Tests for hotkey mapping: `R`/`r` → radiant and `D`/`d` → dire;
+- [x] 5.3 Tests for hotkey mapping: `R`/`r` → radiant and `D`/`d` → dire;
       each digit `1`–`5` and each letter `C M O S F` maps to its role, and
       digit and letter agree for every role; `6` and `X` change nothing;
       re-pressing the selected side leaves it selected; Ctrl-, Meta-, and
       Alt-held keystrokes change nothing and are not `preventDefault`ed.
       (Reqs: draft-session — Side selection; Role selection)
-- [ ] 5.4 Test: two changes in sequence (side then role) both survive to
+- [x] 5.4 Test: two changes in sequence (side then role) both survive to
       storage — the second write does not drop the first field. (Req:
       draft-session — Session persists across reloads)
-- [ ] 5.5 Test: setting `side` leaves `bans`, `teamPicks`, and `enemyPicks`
+- [x] 5.5 Test: setting `side` leaves `bans`, `teamPicks`, and `enemyPicks`
       untouched. (Req: draft-session — Setup collapses / Side and role stay
       editable)
-- [ ] 5.6 Implement `src/app/session.ts`: the pure hotkey→action mapping,
+- [x] 5.6 Implement `src/app/session.ts`: the pure hotkey→action mapping,
       the setters, restore/validate, and the write-through-3.2 persistence;
       plus the `useSession()` hook wrapping it. (Reqs: draft-session —
       Session state shape; Side selection; Role selection; Session persists
@@ -125,28 +125,28 @@ Task 4's Playwright smoke suite.
 
 ## 6. Setup screen and session-editor strip
 
-- [ ] 6.1 Side and role controls as `fieldset` + `legend` +
+- [x] 6.1 Side and role controls as `fieldset` + `legend` +
       `input[type=radio]` + `label`, styled with `appearance: none` to the
       design's chip look, hotkey hint in a `kbd`-styled `span`. (Reqs:
       draft-session — Side selection; Role selection)
-- [ ] 6.2 Document-level `keydown` listener wired to the 5.6 mapping,
+- [x] 6.2 Document-level `keydown` listener wired to the 5.6 mapping,
       ignoring events that carry Ctrl, Meta, or Alt. (Reqs: draft-session —
       Side selection / Modified keystrokes are ignored; Role selection)
-- [ ] 6.3 Centered Setup block while `side` or `myRole` is `null`; the same
+- [x] 6.3 Centered Setup block while `side` or `myRole` is `null`; the same
       controls as the inline header strip once both are set, with no
       confirm step and no other session field touched. (Req: draft-session
       — Setup collapses into the session-editor strip, both scenarios)
-- [ ] 6.4 Verify the controls expose a named radio group to assistive
+- [x] 6.4 Verify the controls expose a named radio group to assistive
       technology, are operable by keyboard alone, and keep a visible focus
       state. **(e2e)** (Req: app-shell — Single screen)
-- [ ] 6.5 Verify choosing side then role collapses Setup into the strip in
+- [x] 6.5 Verify choosing side then role collapses Setup into the strip in
       one update, and that a reload restores both. **(e2e)** (Reqs:
       draft-session — Setup collapses; Session persists across reloads)
 
 ## 7. Gates
 
 - [ ] 7.1 `bun test` green; `tsc --noEmit` clean; `biome check` clean.
-- [ ] 7.2 `/warm` report on `preact` shown and accepted (from 1.1).
+- [x] 7.2 `/warm` report on `preact` shown and accepted (from 1.1).
 - [ ] 7.3 `/zombies` in diff mode over the branch; every new or `[partial]`
       finding becomes a test or an explicit user decision to skip.
 - [ ] 7.4 Architecture delta presented (the app is a new module boundary),
