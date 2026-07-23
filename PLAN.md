@@ -33,9 +33,10 @@ below.
 - [~] **Phase 1** — OpenSpec: model module. Applied on `feat/model-module`:
       `src/types.ts` (camelCase), `src/fixtures/{snapshot.json,
       generate_fixture.py}` (tab-indent, Biome-owned format), `src/model.ts`
-      (`computeModel`, §1–§4), `src/model.test.ts` (30 tests: §7.1–§7.6 +
+      (`computeModel`, §1–§4), `src/model.test.ts` (31 tests: §7.1–§7.6 +
       /zombies edges). tsc/biome/test green. Two spec scenarios corrected
-      mid-apply — see decisions. Next: open draft PR, then `/opsx:archive`.
+      mid-apply — see decisions. In review as PR #8 (ready, not draft);
+      CodeRabbit pass folded in. Next: `/opsx:archive` after merge.
       ← current step
 - [ ] **Phase 2** — OpenSpec: draft board UI on Preact + design-token
       import; likely 2 sequenced proposals (board shell → picker/hotkeys/
@@ -58,7 +59,8 @@ below.
   ordering holds only up to that term; §7.3 antisymmetry holds only to ~1
   dp, not 1e-6, because my roles are known while enemy roles are inferred.
 - Fixture is Biome-owned format: regenerate with
-  `python3 generate_fixture.py > snapshot.json && bunx biome format --write`.
+  `python3 generate_fixture.py > snapshot.json && bunx biome format --write
+  snapshot.json`.
 - `computeModel` trusts a well-formed session (the UI is the validation
   boundary); a hero in two sets is undefined behavior, not defended — no
   extra validation code.

@@ -256,6 +256,22 @@ describe("insufficient-data hero (§7.5)", () => {
 		expect(p["1"]).toBeGreaterThan(p["2"]);
 		expect(p["1"]).toBeGreaterThan(p["4"]);
 	});
+
+	test("a sufficient hero with an insufficient position is dropped from that role", () => {
+		// Spectre is a top-5 role-1 candidate; flag its pos-1 as insufficient and
+		// it must leave the role-1 block (share → 0), independent of hero.sufficient.
+		const s = session({ myRole: 1, side: "radiant" });
+		const inRole1 = (b: SnapshotBundle) =>
+			def(
+				computeModel(b, s).suggestions.find((x) => x.role === 1),
+			).entries.some((e) => e.hero === H.spectre);
+		expect(inRole1(bundle)).toBe(true);
+
+		const patched = structuredClone(bundle);
+		const spectre = def(patched.heroes.find((h) => h.id === H.spectre));
+		def(spectre.positions["1"]).sufficient = false;
+		expect(inRole1(patched)).toBe(false);
+	});
 });
 
 describe("win estimate (§4)", () => {

@@ -1,3 +1,5 @@
+# Model module — tasks
+
 ## 1. Import the contract into the repo (camelCase)
 
 - [x] 1.1 Add `src/types.ts` from the spec-inbox draft with all JSON keys
