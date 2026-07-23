@@ -6,20 +6,12 @@ const SIDES: { side: Side; label: string; hotkey: string }[] = [
 	{ side: "dire", label: "Dire", hotkey: "D" },
 ];
 
-const ROLE_LABELS: Record<Role, string> = {
-	1: "Carry",
-	2: "Mid",
-	3: "Offlane",
-	4: "Semi-support",
-	5: "Full-support",
-};
-
-const ROLE_LETTERS: Record<Role, string> = {
-	1: "C",
-	2: "M",
-	3: "O",
-	4: "S",
-	5: "F",
+const ROLE_UI: Record<Role, { label: string; letter: string }> = {
+	1: { label: "Carry", letter: "C" },
+	2: { label: "Mid", letter: "M" },
+	3: { label: "Offlane", letter: "O" },
+	4: { label: "Semi-support", letter: "S" },
+	5: { label: "Full-support", letter: "F" },
 };
 
 /**
@@ -67,8 +59,8 @@ export function SessionControls({
 								checked={session.myRole === role}
 								onChange={() => apply({ kind: "role", role })}
 							/>
-							<span class="kbd">{`${role} ${ROLE_LETTERS[role]}`}</span>
-							{ROLE_LABELS[role]}
+							<span class="kbd">{`${role} ${ROLE_UI[role].letter}`}</span>
+							{ROLE_UI[role].label}
 						</label>
 					))}
 				</div>

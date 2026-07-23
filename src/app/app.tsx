@@ -1,27 +1,30 @@
 import { useEffect, useState } from "preact/hooks";
+import type { SnapshotBundle } from "../types.ts";
 import { Header } from "./header.tsx";
 import { useSession } from "./session.ts";
 import { SessionControls } from "./session-controls.tsx";
-import { loadSnapshot, type SnapshotResult } from "./snapshot.ts";
+import { loadSnapshot } from "./snapshot.ts";
 
 export function App() {
-	const [result, setResult] = useState<SnapshotResult | null>(null);
+	const [snapshot, setSnapshot] = useState<SnapshotBundle | null | "pending">(
+		"pending",
+	);
 	const { session, apply } = useSession();
 
 	// One automatic fetch per page; anything further is the user's retry.
 	useEffect(() => {
-		loadSnapshot().then(setResult);
+		loadSnapshot().then(setSnapshot);
 	}, []);
 
 	// Nothing to show until the snapshot resolves — the design has no spinners.
-	if (result === null) return null;
+	if (snapshot === "pending") return null;
 
-	if (!result.ok) {
+	if (snapshot === null) {
 		return (
 			<SnapshotError
 				onRetry={() => {
-					setResult(null);
-					loadSnapshot().then(setResult);
+					setSnapshot("pending");
+					loadSnapshot().then(setSnapshot);
 				}}
 			/>
 		);
@@ -32,7 +35,7 @@ export function App() {
 
 	return (
 		<>
-			<Header bundle={result.bundle} />
+			<Header bundle={snapshot} />
 			{isSetUp ? (
 				<div class="session-strip">
 					<SessionControls session={session} apply={apply} />

@@ -75,10 +75,9 @@ describe("fetch and cache", () => {
 	test("a valid response becomes the active bundle and is cached", async () => {
 		stubFetch(() => Response.json(fixture));
 
-		const result = await loadSnapshot();
+		const bundle = await loadSnapshot();
 
-		expect(result.ok).toBe(true);
-		expect(result.ok && result.bundle.snapshotId).toBe(fixture.snapshotId);
+		expect(bundle?.snapshotId).toBe(fixture.snapshotId);
 		expect(JSON.parse(store.get(CACHE_KEY) as string).snapshotId).toBe(
 			fixture.snapshotId,
 		);
@@ -90,27 +89,21 @@ describe("fetch and cache", () => {
 			throw new TypeError("network error");
 		});
 
-		const result = await loadSnapshot();
-
-		expect(result.ok && result.bundle.patch.id).toBe(fixture.patch.id);
+		expect((await loadSnapshot())?.patch.id).toBe(fixture.patch.id);
 	});
 
 	test("a non-JSON body falls back to the cache", async () => {
 		store.set(CACHE_KEY, JSON.stringify(fixture));
 		stubFetch(() => new Response("<html>502</html>"));
 
-		const result = await loadSnapshot();
-
-		expect(result.ok && result.bundle.patch.id).toBe(fixture.patch.id);
+		expect((await loadSnapshot())?.patch.id).toBe(fixture.patch.id);
 	});
 
 	test("an HTTP error falls back to the cache", async () => {
 		store.set(CACHE_KEY, JSON.stringify(fixture));
 		stubFetch(() => new Response("nope", { status: 500 }));
 
-		const result = await loadSnapshot();
-
-		expect(result.ok && result.bundle.patch.id).toBe(fixture.patch.id);
+		expect((await loadSnapshot())?.patch.id).toBe(fixture.patch.id);
 	});
 
 	test("a corrupt cached value counts as no cache", async () => {
@@ -119,7 +112,7 @@ describe("fetch and cache", () => {
 			throw new TypeError("network error");
 		});
 
-		expect((await loadSnapshot()).ok).toBe(false);
+		expect(await loadSnapshot()).toBeNull();
 	});
 
 	test("a cached value of the wrong shape counts as no cache", async () => {
@@ -128,7 +121,7 @@ describe("fetch and cache", () => {
 			throw new TypeError("network error");
 		});
 
-		expect((await loadSnapshot()).ok).toBe(false);
+		expect(await loadSnapshot()).toBeNull();
 	});
 
 	test("a cold cache with a dead network is the error state", async () => {
@@ -136,7 +129,7 @@ describe("fetch and cache", () => {
 			throw new TypeError("network error");
 		});
 
-		expect((await loadSnapshot()).ok).toBe(false);
+		expect(await loadSnapshot()).toBeNull();
 	});
 
 	test("a rejected cache write leaves the fetched bundle usable", async () => {
@@ -148,9 +141,7 @@ describe("fetch and cache", () => {
 		};
 		stubFetch(() => Response.json(fixture));
 
-		const result = await loadSnapshot();
-
-		expect(result.ok && result.bundle.snapshotId).toBe(fixture.snapshotId);
+		expect((await loadSnapshot())?.snapshotId).toBe(fixture.snapshotId);
 	});
 
 	test("a new snapshotId becomes active and leaves the session alone", async () => {
@@ -159,9 +150,7 @@ describe("fetch and cache", () => {
 		store.set(CACHE_KEY, JSON.stringify(fixture));
 		stubFetch(() => Response.json({ ...fixture, snapshotId: 99 }));
 
-		const result = await loadSnapshot();
-
-		expect(result.ok && result.bundle.snapshotId).toBe(99);
+		expect((await loadSnapshot())?.snapshotId).toBe(99);
 		expect(store.get("draft.session")).toBe(session);
 	});
 });
@@ -178,8 +167,15 @@ describe("provenance line", () => {
 
 	test("uses the date the field carries, not the viewer's day", () => {
 		// 23:30 UTC is already the next day east of UTC and the previous day
-		// west of it; the line must read the date as written.
+		// west of it; the line must read the same everywhere.
 		const bundle = { ...fixture, createdAt: "2026-07-19T23:30:00Z" };
 		expect(formatProvenance(bundle)).toBe("patch 7.41d · snapshot Jul 19");
+	});
+
+	test("normalises a non-UTC offset to UTC", () => {
+		// The pipeline writes `Z`; if it ever stops, this is what happens
+		// rather than a silent per-viewer difference.
+		const bundle = { ...fixture, createdAt: "2026-07-19T02:00:00+05:00" };
+		expect(formatProvenance(bundle)).toBe("patch 7.41d · snapshot Jul 18");
 	});
 });
