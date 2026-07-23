@@ -30,17 +30,14 @@ below.
       `docs/feature-workflow.md`)
 - [x] **Task 9** — unit test setup: native `bun:test`, no framework;
       landed with the model tests (`src/model.test.ts`).
-- [~] **Phase 1** — OpenSpec: model module. Applied on `feat/model-module`:
-      `src/types.ts` (camelCase), `src/fixtures/{snapshot.json,
-      generate_fixture.py}` (tab-indent, Biome-owned format), `src/model.ts`
-      (`computeModel`, §1–§4), `src/model.test.ts` (31 tests: §7.1–§7.6 +
-      /zombies edges). tsc/biome/test green. Two spec scenarios corrected
-      mid-apply — see decisions. In review as PR #8 (ready, not draft);
-      CodeRabbit pass folded in. Next: `/opsx:archive` after merge.
-      ← current step
+- [x] **Phase 1** — OpenSpec: model module. Merged (PR #8) and archived
+      (`openspec/changes/archive/2026-07-23-model-module`; capability spec
+      at `openspec/specs/draft-model/`). Shipped `src/{types,model}.ts`,
+      `src/fixtures/`, `src/model.test.ts` (31 tests). Two §7 scenarios
+      corrected mid-apply — see decisions.
 - [ ] **Phase 2** — OpenSpec: draft board UI on Preact + design-token
       import; likely 2 sequenced proposals (board shell → picker/hotkeys/
-      edge cases)
+      edge cases) ← next step
 - [ ] **Task 4** — Playwright smoke (precondition: a UI exists)
 - [ ] **Task 7** — Docker + VPS deploy (open decisions: registry
       GHCR/Docker Hub, same VPS or a new one)
