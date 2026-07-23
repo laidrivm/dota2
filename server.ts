@@ -38,10 +38,24 @@ for (const name of new Bun.Glob("*.{woff2,css}").scanSync(fontDir.pathname)) {
 	);
 }
 
+// Until Phase 4 publishes a real bundle, the fixture is the snapshot. It is
+// revalidated rather than cached, because the pipeline will republish this
+// same URL.
+const snapshot = new Response(
+	Bun.file(new URL("./src/fixtures/snapshot.json", import.meta.url)),
+	{
+		headers: {
+			"content-type": "application/json; charset=utf-8",
+			"cache-control": "no-cache",
+		},
+	},
+);
+
 const server = serve({
 	development: { hmr: true },
 	routes: {
 		...fontRoutes,
+		"/snapshot.json": snapshot,
 		"/": homepage,
 	},
 });

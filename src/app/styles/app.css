@@ -1,0 +1,68 @@
+/* Component styles. Every value is a token reference — literals belong in
+   tokens/ only. */
+
+.header {
+	display: flex;
+	align-items: center;
+	gap: var(--sp-6);
+	flex-wrap: wrap;
+	padding: 0 var(--sp-7);
+	min-height: var(--row-h);
+	border-bottom: 1px solid var(--border-0);
+}
+
+.brand {
+	font-weight: 600;
+	color: var(--text-2);
+}
+
+.provenance {
+	font-family: var(--font-mono);
+	font-size: var(--fs-meta);
+	color: var(--text-5);
+}
+
+.banner {
+	margin: 0;
+	padding: var(--sp-1) var(--sp-3);
+	border: 1px solid var(--accent-border);
+	border-radius: var(--r-kbd);
+	background: var(--accent-banner-bg);
+	font-family: var(--font-mono);
+	font-size: var(--fs-meta);
+	color: var(--accent);
+}
+
+.snapshot-error {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: var(--sp-5);
+	margin: var(--sp-8) auto;
+	padding: var(--sp-7);
+	max-width: 36rem;
+	border: 1px solid var(--border-1);
+	border-radius: var(--r-panel);
+	background: var(--bg-1);
+	color: var(--text-3);
+}
+
+.snapshot-error p {
+	margin: 0;
+}
+
+.snapshot-error button {
+	padding: var(--sp-2) var(--sp-6);
+	border: 1px solid var(--border-3);
+	border-radius: var(--r-control);
+	background: var(--bg-2);
+	color: var(--text-2);
+	font-family: var(--font-ui);
+	font-size: var(--fs-control);
+	font-weight: 600;
+}
+
+.snapshot-error button:hover {
+	border-color: var(--border-hover);
+	background: var(--bg-3);
+}

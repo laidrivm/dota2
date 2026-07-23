@@ -46,51 +46,51 @@ Task 4's Playwright smoke suite.
 
 ## 3. Storage wrapper
 
-- [ ] 3.1 Tests for the wrapper: `getItem` throwing returns absent rather
+- [x] 3.1 Tests for the wrapper: `getItem` throwing returns absent rather
       than propagating; `setItem` throwing (quota, disabled storage) is
       swallowed; a round-trip returns the stored value. (Reqs:
       draft-session — Session persists / Storage unavailable;
       snapshot-delivery — Last good snapshot cached / Cache write is
       rejected)
-- [ ] 3.2 Implement the wrapper both the session store and the snapshot
+- [x] 3.2 Implement the wrapper both the session store and the snapshot
       cache use — every `localStorage` access in the app goes through it.
       (Reqs: same as 3.1)
 
 ## 4. Snapshot delivery
 
-- [ ] 4.1 Tests for shape validation: a payload missing `snapshotId`,
+- [x] 4.1 Tests for shape validation: a payload missing `snapshotId`,
       missing `patch.id`, missing `createdAt`, or with an empty `heroes`
       array is rejected; the shipped fixture is accepted. (Req:
       snapshot-delivery — Snapshot is fetched from a URL / Malformed
       payload)
-- [ ] 4.2 Tests for fetch-and-cache: a valid response becomes the active
+- [x] 4.2 Tests for fetch-and-cache: a valid response becomes the active
       bundle and is written to the cache key; a fetch rejection with a warm
       cache yields the cached bundle; a non-JSON body falls back to the
       cache; a corrupt cached value is treated as no cache; a rejection
       with a cold cache yields the error state. (Req: snapshot-delivery —
       Last good snapshot cached, all three scenarios)
-- [ ] 4.3 Tests for the header formatter: `patch.id = "7.41d"` +
+- [x] 4.3 Tests for the header formatter: `patch.id = "7.41d"` +
       `createdAt = "2026-07-19T03:00:00Z"` → `patch 7.41d · snapshot Jul
       19`; the 1st of a month renders `Jul 1`, not `Jul 01`; a
       `createdAt` near a UTC day boundary formats from the date the field
       carries, not the viewer's local shift. (Req: snapshot-delivery —
       Header shows snapshot provenance)
-- [ ] 4.4 Implement `src/app/snapshot.ts`: `import snapshotUrl from
+- [x] 4.4 Implement `src/app/snapshot.ts`: `import snapshotUrl from
       "../fixtures/snapshot.json" with { type: "file" }`, one fetch per
       page lifetime, shape validation, cache read/write through the 3.2
       wrapper, and the `{ bundle | error }` result the app renders from.
       (Reqs: snapshot-delivery — Snapshot is fetched from a URL; Last good
       snapshot cached)
-- [ ] 4.5 Header component: product name in plain type (no logo asset
+- [x] 4.5 Header component: product name in plain type (no logo asset
       exists), the provenance line, and the `new patch — stats are still
       stabilizing` banner rendered only while `stabilizing` is `true`.
       (Reqs: snapshot-delivery — Header shows snapshot provenance;
       Stabilizing banner)
-- [ ] 4.6 Error state: message plus a retry control that re-runs the fetch
+- [x] 4.6 Error state: message plus a retry control that re-runs the fetch
       without reloading the page, announced with `role="status"`. (Req:
       snapshot-delivery — Last good snapshot cached / Fetch fails with a
       cold cache)
-- [ ] 4.7 Test: a bundle whose `snapshotId` differs from the cached one
+- [x] 4.7 Test: a bundle whose `snapshotId` differs from the cached one
       becomes active and leaves the stored session untouched. (Req:
       snapshot-delivery — A newer snapshot never destroys the session)
 
