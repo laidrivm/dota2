@@ -7,16 +7,16 @@ Task 4's Playwright smoke suite.
 
 ## 1. Toolchain and entry point
 
-- [ ] 1.1 Add `preact` as the first runtime dependency (`bun add preact`);
+- [x] 1.1 Add `preact` as the first runtime dependency (`bun add preact`);
       run `/warm` on the manifest change before anything else lands. (Req:
       app-shell — Single screen, state derived from data)
-- [ ] 1.2 Add `index.html` at the repo root plus `src/app/main.tsx` mounting
+- [x] 1.2 Add `index.html` at the repo root plus `src/app/main.tsx` mounting
       a Preact root; `bun ./index.html` serves it. (Req: app-shell — Single
       screen, state derived from data / No navigation surface)
-- [ ] 1.3 Set `tsconfig.json` `"jsx": "react-jsx"`, `"jsxImportSource":
+- [x] 1.3 Set `tsconfig.json` `"jsx": "react-jsx"`, `"jsxImportSource":
       "preact"`, and add `DOM` + `DOM.Iterable` to `lib`; `tsc --noEmit`
       stays clean. (Req: app-shell — Single screen)
-- [ ] 1.4 Add `dev` (`bun ./index.html`) and `build` (`bun build
+- [x] 1.4 Add `dev` (`bun ./index.html`) and `build` (`bun build
       ./index.html --outdir=dist --minify`) scripts; add `dist/` to
       `.gitignore` before the first build runs. (Req: app-shell — Static
       production build)
@@ -26,21 +26,21 @@ Task 4's Playwright smoke suite.
 
 ## 2. Design tokens and self-hosted fonts
 
-- [ ] 2.1 Copy `styles.css` and `tokens/{colors,typography,spacing}.css`
+- [x] 2.1 Copy `styles.css` and `tokens/{colors,typography,spacing}.css`
       from the design project into `src/app/styles/` verbatim. (Req:
       app-shell — Style values come from design tokens)
-- [ ] 2.2 Commit IBM Plex Sans and IBM Plex Mono variable `woff2` files
+- [x] 2.2 Commit IBM Plex Sans and IBM Plex Mono variable `woff2` files
       under `src/app/styles/fonts/` with their OFL licence; replace the
       Google Fonts `@import` in `typography.css` with `@font-face` rules
       using `url()` + `font-display: swap`. (Req: app-shell — No
       third-party runtime requests / Fonts are self-hosted)
-- [ ] 2.3 Add the base page styles (page background, UI font, dark colour
+- [x] 2.3 Add the base page styles (page background, UI font, dark colour
       scheme) using only `var(--token)` references. (Req: app-shell — Style
       values come from design tokens)
-- [ ] 2.4 Test: no hex, `rgb()`, or `rgba()` literal exists in any CSS
+- [x] 2.4 Test: no hex, `rgb()`, or `rgba()` literal exists in any CSS
       outside `src/app/styles/tokens/`. (Req: app-shell — Style values /
       No literal colours outside the token files)
-- [ ] 2.5 Test: no `@import` or `url()` in the app's CSS names a host other
+- [x] 2.5 Test: no `@import` or `url()` in the app's CSS names a host other
       than the app's own origin. (Req: app-shell — No third-party runtime
       requests)
 

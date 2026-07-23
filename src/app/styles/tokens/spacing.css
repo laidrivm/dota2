@@ -1,0 +1,19 @@
+:root {
+	--sp-1: 4px;
+	--sp-2: 6px;
+	--sp-3: 8px;
+	--sp-4: 10px;
+	--sp-5: 14px;
+	--sp-6: 16px;
+	--sp-7: 20px;
+	--sp-8: 28px;
+	--r-kbd: 4px;
+	--r-tile-sm: 6px;
+	--r-control: 7px;
+	--r-tile: 8px;
+	--r-panel: 10px;
+	--row-h: 54px;
+	--tile-lg: 40px; /* bans, picker grid */
+	--tile-md: 34px; /* team slots */
+	--tile-sm: 26px; /* suggestion chips */
+}

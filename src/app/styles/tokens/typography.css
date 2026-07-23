@@ -1,0 +1,15 @@
+/* The @font-face rules live in ../fonts/fonts.css — see the note there. */
+:root {
+	--font-ui: "IBM Plex Sans", "Helvetica Neue", sans-serif;
+	--font-mono: "IBM Plex Mono", ui-monospace, monospace;
+	/* scale (dense, desktop-first) */
+	--fs-kbd: 10px; /* hotkey hints, mono */
+	--fs-label: 11px; /* SECTION LABELS, 600, letter-spacing 1.5px */
+	--ls-label: 1.5px;
+	--fs-meta: 12px; /* mono data: patch, probs, scores; role labels */
+	--fs-control: 13px; /* buttons */
+	--fs-body: 14px; /* hero names, 600 */
+	--fs-tile-lg: 11px;
+	--fs-tile-md: 10px;
+	--fs-tile-sm: 8px;
+}
