@@ -28,12 +28,15 @@ below.
 - [x] **Task 8** — split `CLAUDE.md` per its own growth protocol (321 →
       186 lines; `docs/api-design.md`, `docs/testing.md`,
       `docs/feature-workflow.md`)
-- [ ] **Task 9** — unit test setup (blocked: task 8, phase 1)
-- [ ] **Phase 1** — OpenSpec: model module (`types.ts` + the 6 acceptance
-      tests of model-spec §7 against the fixture; camelCase fix on import).
-      Proposed on `feat/model-module` (`openspec/changes/model-module/`:
-      proposal, design, specs/draft-model, tasks — validated). Next:
-      `/opsx:apply`. ← current step
+- [x] **Task 9** — unit test setup: native `bun:test`, no framework;
+      landed with the model tests (`src/model.test.ts`).
+- [~] **Phase 1** — OpenSpec: model module. Applied on `feat/model-module`:
+      `src/types.ts` (camelCase), `src/fixtures/{snapshot.json,
+      generate_fixture.py}` (tab-indent, Biome-owned format), `src/model.ts`
+      (`computeModel`, §1–§4), `src/model.test.ts` (30 tests: §7.1–§7.6 +
+      /zombies edges). tsc/biome/test green. Two spec scenarios corrected
+      mid-apply — see decisions. Next: open draft PR, then `/opsx:archive`.
+      ← current step
 - [ ] **Phase 2** — OpenSpec: draft board UI on Preact + design-token
       import; likely 2 sequenced proposals (board shell → picker/hotkeys/
       edge cases)
@@ -50,6 +53,12 @@ below.
 - Deploy: **Docker on a VPS**.
 - **camelCase in all JSON** — types.ts / fixture / generator get renamed
   keys when imported into the repo (phase 1); the bundle contract too.
+- Phase 1 corrections (found during apply, spec updated): §7.1 counter-risk
+  is NOT zero at an empty draft (open=1, pop=contest), so "pure meta+side"
+  ordering holds only up to that term; §7.3 antisymmetry holds only to ~1
+  dp, not 1e-6, because my roles are known while enemy roles are inferred.
+- Fixture is Biome-owned format: regenerate with
+  `python3 generate_fixture.py > snapshot.json && bunx biome format --write`.
 - STRATZ: the user provides the API key; rate limits —
   https://stratz.com/knowledge-base/API/Are%20there%20any%20rate%20limits%3F;
   pick phases: extract via GraphQL or defer to v2.
