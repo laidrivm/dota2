@@ -1,3 +1,5 @@
+# Model module — proposal
+
 ## Why
 
 The pick assistant's entire value is a single client-side computation:
@@ -27,6 +29,7 @@ tested module. It is the first piece of product code in the repo.
 ## Capabilities
 
 ### New Capabilities
+
 - `draft-model`: the pure function mapping a snapshot bundle plus a draft
   session to the model output (enemy roles, suggestions, win estimate),
   and the determinism/insufficient-data invariants it must hold.

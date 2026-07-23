@@ -1,3 +1,5 @@
+# Model module — design
+
 ## Context
 
 First product code in the repo. The model is fully specified in

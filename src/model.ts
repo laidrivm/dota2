@@ -31,7 +31,9 @@ function share(hero: HeroEntry, role: Role): number {
 		const keys = Object.keys(hero.positions);
 		return keys.includes(String(role)) ? 1 / keys.length : 0;
 	}
-	return hero.positions[`${role}`]?.share ?? 0;
+	// An insufficient position contributes no share (§0), matching meta().
+	const pos = hero.positions[`${role}`];
+	return pos?.sufficient ? pos.share : 0;
 }
 
 function meta(hero: HeroEntry, role: Role): number {
