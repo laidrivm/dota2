@@ -147,6 +147,9 @@ function inferEnemyRoles(enemyHeroes: HeroEntry[]): EnemyInference {
 
 // --- main ------------------------------------------------------------------
 
+// Trusts a well-formed session (the UI is the validation boundary): a hero
+// id appearing in two sets — both teams, or picked and banned — is undefined
+// behavior, not defended against.
 export function computeModel(
 	bundle: SnapshotBundle,
 	session: Session,

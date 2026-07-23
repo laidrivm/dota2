@@ -191,5 +191,7 @@ protocol:
   are written in English by default.
 - Maintain `PLAN.md`: read it at session start; update its queue, statuses
   and decisions in the same turn a task or stage completes.
+- Fix code a linter or type-checker flags; never suppress a finding with an
+  ignore comment or config override unless the user approves the suppression.
 
 <!-- newest first; added via the loop above -->
