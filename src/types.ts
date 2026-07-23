@@ -33,14 +33,6 @@ export type PickPhase = "p1" | "p2" | "last";
 
 export const ROLES: readonly Role[] = [1, 2, 3, 4, 5] as const;
 
-export const ROLE_LABELS: Record<Role, string> = {
-	1: "Carry",
-	2: "Mid",
-	3: "Offlane",
-	4: "Semi-support",
-	5: "Full-support",
-};
-
 // ---------------------------------------------------------------------------
 // 1. Snapshot bundle (published data, immutable)
 
