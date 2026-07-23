@@ -74,4 +74,6 @@ provenance record; the in-repo camelCase copies become the source of truth.
 ## Open Questions
 
 - Pick-phase granularity vs. STRATZ (`phase` deltas) is a Phase 4 data
-  question, not blocking: the model consumes `phase` as given by the bundle.
+  question, not blocking: the current phase (`ModelOutput.phase`) is derived
+  from my team's filled-pick count (§2); the bundle only supplies the
+  per-phase `phase` deltas, consumed as given.
