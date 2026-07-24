@@ -42,14 +42,14 @@ below.
         specs at `openspec/specs/{app-shell,snapshot-delivery,draft-session}`).
         Shipped `index.html`, `server.ts`, `static-routes.ts`, `src/app/**`,
         133 tests. Two design decisions reversed mid-apply — see decisions.
-  - [ ] **2b `draft-board`** — applied, 51/51 tasks, 234 tests; draft PR #13
-        open. Stays unchecked until it merges and is archived, as 2a did.
-        Shipped the bans row, team and enemy slots, suggestion blocks, the
-        result block, the collapsed header + editor, the 390px one-column
-        layout, and the first `computeModel` call. Two corrections mid-apply —
-        see decisions.
-  - [ ] **2c `hero-picker`** ← next after 2b merges. Deletes the temporary
-        `<select>` and points `applyAction` at the overlay.
+  - [x] **2b `draft-board`** — merged (PR #13) and archived
+        (`openspec/changes/archive/2026-07-24-draft-board`; capability specs at
+        `openspec/specs/{draft-board,draft-session}`). Shipped the bans row,
+        team and enemy slots, suggestion blocks, the result block, the
+        collapsed header + editor, the 390px one-column layout, and the first
+        `computeModel` call. 244 tests. Corrections mid-apply — see decisions.
+  - [ ] **2c `hero-picker`** ← next step is Stage 1 (`/opsx:propose`). Deletes
+        the temporary `<select>` and points `applyAction` at the overlay.
         Picker overlay (search/aliases/grid/keyboard),
         board hotkeys + context routing, New/reset dialog, undo toast,
         screens-spec §6 edge cases.
