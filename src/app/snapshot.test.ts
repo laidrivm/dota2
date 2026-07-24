@@ -55,12 +55,27 @@ describe("payload validation", () => {
 		}
 	});
 
-	test.each(["", "20260719", "2026-13-19T00:00:00Z", "2026-07-45T00:00:00Z"])(
-		"rejects createdAt %p, which the header could not format",
-		(createdAt) => {
-			expect(isBundle({ ...fixture, createdAt })).toBe(false);
-		},
-	);
+	test.each([
+		"",
+		"20260719",
+		"2026-13-19T00:00:00Z",
+		"2026-07-45T00:00:00Z",
+		"2026-07-19T99:00:00Z",
+		"2026-07-19T00:99:00Z",
+		"2026-07-19Txx",
+	])("rejects createdAt %p, which the header could not format", (createdAt) => {
+		expect(isBundle({ ...fixture, createdAt })).toBe(false);
+	});
+
+	test("every accepted createdAt can actually be formatted", () => {
+		// isBundle is the only thing standing between a payload and
+		// Intl.format, which throws on an unparseable date.
+		for (const createdAt of ["2026-07-19T03:00:00Z", "2026-02-28T23:59:59Z"]) {
+			const bundle = { ...fixture, createdAt };
+			expect(isBundle(bundle)).toBe(true);
+			expect(() => formatProvenance(bundle)).not.toThrow();
+		}
+	});
 
 	test.each([
 		["a null entry", [null]],
@@ -122,6 +137,22 @@ describe("fetch and cache", () => {
 		});
 
 		expect(await loadSnapshot()).toBeNull();
+	});
+
+	test("a stalled fetch does not hang the app forever", async () => {
+		stubFetch(
+			() =>
+				new Promise<Response>((_, reject) =>
+					// What AbortSignal.timeout does once the deadline passes.
+					setTimeout(
+						() => reject(new DOMException("timed out", "TimeoutError")),
+						10,
+					),
+				),
+		);
+		store.set(CACHE_KEY, JSON.stringify(fixture));
+
+		expect((await loadSnapshot())?.patch.id).toBe(fixture.patch.id);
 	});
 
 	test("a cold cache with a dead network is the error state", async () => {

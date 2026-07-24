@@ -31,8 +31,13 @@ const SNAPSHOT_DATE = new Intl.DateTimeFormat("en-US", {
 	timeZone: "UTC",
 });
 
-/** Leading `YYYY-MM-DD` of an ISO timestamp, with a real month and day. */
+/** Leading `YYYY-MM-DD` of an ISO timestamp, with a real month and day. The
+ * shape check alone is not enough — `2026-07-19T99:00:00Z` matches it and
+ * then parses to an invalid Date, which `Intl.format` throws on. */
 const ISO_DATE = /^\d{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12]\d|3[01])/;
+
+const isTimestamp = (value: string) =>
+	ISO_DATE.test(value) && !Number.isNaN(Date.parse(value));
 
 function isHeroEntry(value: unknown): boolean {
 	if (typeof value !== "object" || value === null) return false;
@@ -54,7 +59,7 @@ export function isBundle(value: unknown): value is SnapshotBundle {
 	return (
 		typeof b.snapshotId === "number" &&
 		typeof b.createdAt === "string" &&
-		ISO_DATE.test(b.createdAt) &&
+		isTimestamp(b.createdAt) &&
 		typeof b.patch?.id === "string" &&
 		Array.isArray(b.heroes) &&
 		b.heroes.length > 0 &&
@@ -64,7 +69,11 @@ export function isBundle(value: unknown): value is SnapshotBundle {
 
 async function fetchBundle(): Promise<SnapshotBundle | null> {
 	try {
-		const response = await fetch(SNAPSHOT_URL);
+		// Without a deadline a stalled connection never resolves, and the app
+		// sits on a blank page instead of falling back to the cache.
+		const response = await fetch(SNAPSHOT_URL, {
+			signal: AbortSignal.timeout(8000),
+		});
 		if (!response.ok) return null;
 		const payload = await response.json();
 		return isBundle(payload) ? payload : null;

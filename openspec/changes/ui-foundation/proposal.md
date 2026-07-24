@@ -12,8 +12,10 @@ pixel is drawn: where the snapshot comes from, and where the session lives.
 ## What Changes
 
 - Add a browser entry point built by Bun's native bundler: `index.html` +
-  a Preact app under `src/app/`. `bun ./index.html` for dev, `bun build
-  ./index.html --outdir=dist` for production. No Vite, no build framework.
+  a Preact app under `src/app/`. `bun build ./index.html --outdir=dist` for
+  production; `bun run dev` runs `server.ts`, which composes the bundled
+  entry point with routes for the files the bundler cannot serve (see
+  design.md). No Vite, no build framework.
 - Add `preact` as the first runtime dependency; JSX via tsconfig
   `jsxImportSource`.
 - Import the design system's `tokens/{colors,typography,spacing}.css` and

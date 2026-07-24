@@ -33,29 +33,28 @@ export function App() {
 	// The board expands as soon as both are chosen — no confirm step.
 	const isSetUp = session.side !== null && session.myRole !== null;
 
+	// Setup is the same controls as the header strip, only centered — so the
+	// two states differ by a class, not by markup.
 	return (
 		<>
 			<Header bundle={snapshot} />
-			{isSetUp ? (
-				<div class="session-strip">
-					<SessionControls session={session} apply={apply} />
-				</div>
-			) : (
-				<main class="setup">
-					<SessionControls session={session} apply={apply} />
-				</main>
-			)}
+			<main class={isSetUp ? "session-strip" : "setup"}>
+				<SessionControls session={session} apply={apply} />
+			</main>
 		</>
 	);
 }
 
 function SnapshotError({ onRetry }: { onRetry: () => void }) {
 	return (
-		<div class="snapshot-error" role="status">
-			<p>No snapshot could be loaded, and nothing is cached from before.</p>
+		<main class="snapshot-error">
+			{/* role lives on the message, not on <main>, so the landmark survives */}
+			<p role="status">
+				No snapshot could be loaded, and nothing is cached from before.
+			</p>
 			<button type="button" onClick={onRetry}>
 				Retry
 			</button>
-		</div>
+		</main>
 	);
 }
