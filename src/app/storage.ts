@@ -24,3 +24,11 @@ export function write(key: string, value: string): void {
 		// Quota exceeded or storage disabled — the session stays in memory.
 	}
 }
+
+export function remove(key: string): void {
+	try {
+		storage()?.removeItem(key);
+	} catch {
+		// Nothing to do: an unreachable key is already as gone as we need.
+	}
+}

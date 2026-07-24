@@ -14,9 +14,10 @@ import {
 	type Session,
 	type Side,
 } from "../types.ts";
-import { read, write } from "./storage.ts";
+import { read, remove, write } from "./storage.ts";
 
 export const SESSION_KEY = "draft.session";
+export const BACKUP_KEY = "draft.backup";
 
 /** Every way the draft can change. The picker in proposal 2c dispatches
  * these same actions, so it adds a trigger and not a second write path. */
@@ -232,6 +233,35 @@ export function applyAction(
 }
 
 /**
+ * What `New` leaves behind (screens-spec §4): the draft is gone, the setup
+ * stays — which is what the confirmation dialog promises, and what the next
+ * game needs.
+ */
+export const resetDraft = (session: Session): Session => ({
+	...EMPTY_SESSION(),
+	side: session.side,
+	myRole: session.myRole,
+});
+
+const PICKS_IN_A_DRAFT = 10;
+
+/** A finished draft resets without asking; an unfinished one is worth a
+ * dialog, because it is work the user cannot get back except through undo. */
+export function confirmsReset(session: Session): boolean {
+	const mine = ROLES.filter(
+		(role) => session.teamPicks[`${role}`] !== null,
+	).length;
+	return mine + session.enemyPicks.length < PICKS_IN_A_DRAFT;
+}
+
+/** The actions that start the next draft, and so close the undo window. A
+ * side or role change does not: a reset keeps the setup on purpose. */
+export const endsUndoWindow = (action: Action): boolean =>
+	action.kind === "banAdd" ||
+	action.kind === "teamSet" ||
+	action.kind === "enemyAdd";
+
+/**
  * A stored session is only usable if every field the UI indexes is there —
  * a `{"v":1}` fragment would restore fine and then break the first slot
  * that reads `teamPicks`.
@@ -264,6 +294,28 @@ export function persist(session: Session): void {
 	write(SESSION_KEY, JSON.stringify(session));
 }
 
+/**
+ * The one draft an undo can bring back (US-24). Persisted rather than held in
+ * memory so a reload inside the toast window does not strand the draft; read
+ * back through the same check as the session, because an undo offering a
+ * broken draft is worse than no undo.
+ */
+export function readBackup(): Session | null {
+	const raw = read(BACKUP_KEY);
+	if (raw === null) return null;
+	try {
+		const parsed: unknown = JSON.parse(raw);
+		return isSession(parsed) ? parsed : null;
+	} catch {
+		return null;
+	}
+}
+
+export const writeBackup = (session: Session): void =>
+	write(BACKUP_KEY, JSON.stringify(session));
+
+export const clearBackup = (): void => remove(BACKUP_KEY);
+
 export function useSession({
 	banLimit,
 	editorOpen,
@@ -276,14 +328,40 @@ export function useSession({
 	openPicker: (target: PickTarget) => void;
 }) {
 	const [session, setSession] = useState(restore);
+	// Read back at startup, so a reload inside the undo window still offers it.
+	const [backup, setBackup] = useState(readBackup);
+
+	const forget = () => {
+		clearBackup();
+		setBackup(null);
+	};
 
 	/** Every change is written through, so a reload loses nothing. */
-	const apply = (action: Action) =>
+	const apply = (action: Action) => {
+		if (backup !== null && endsUndoWindow(action)) forget();
 		setSession((previous) => {
 			const next = applyAction(previous, action, banLimit);
 			persist(next);
 			return next;
 		});
+	};
+
+	/** The outgoing draft becomes the one thing `Undo` can bring back. */
+	const reset = () =>
+		setSession((previous) => {
+			const next = resetDraft(previous);
+			writeBackup(previous);
+			setBackup(previous);
+			persist(next);
+			return next;
+		});
+
+	const undo = () => {
+		if (backup === null) return;
+		persist(backup);
+		setSession(backup);
+		forget();
+	};
 
 	// What the listener below needs and cannot capture: re-subscribing on every
 	// context change loses the first keystroke after the editor opens, because
@@ -322,5 +400,5 @@ export function useSession({
 		return () => document.removeEventListener("keydown", onKeyDown);
 	}, []);
 
-	return { session, apply };
+	return { session, apply, reset, undo, canUndo: backup !== null };
 }

@@ -3,16 +3,23 @@ import { EMPTY_SESSION, type Role, type Session } from "../types.ts";
 import {
 	type Action,
 	applyAction,
+	BACKUP_KEY,
+	clearBackup,
 	closesEditor,
+	confirmsReset,
+	endsUndoWindow,
 	type HotkeyContext,
 	hotkeyContext,
 	hotkeyFor,
 	ownsKeystroke,
 	persist,
 	pickerHotkey,
+	readBackup,
+	resetDraft,
 	restore,
 	SESSION_KEY,
 	usedAs,
+	writeBackup,
 } from "./session.ts";
 
 /** Every test that is not about the ban limit works far below it. */
@@ -29,6 +36,9 @@ beforeEach(() => {
 		getItem: (k: string) => store.get(k) ?? null,
 		setItem: (k: string, v: string) => {
 			store.set(k, v);
+		},
+		removeItem: (k: string) => {
+			store.delete(k);
 		},
 	};
 });
@@ -599,6 +609,137 @@ describe("single occupancy", () => {
 		expect(after.teamPicks["1"]).toBe(9);
 		expect(after.bans).toEqual([1, 2]);
 	});
+});
+
+describe("reset", () => {
+	const drafted: Session = {
+		...EMPTY_SESSION(),
+		side: "dire",
+		myRole: 2,
+		bans: [1, 2],
+		teamPicks: { "1": 3, "2": 4, "3": null, "4": null, "5": null },
+		enemyPicks: [5],
+	};
+
+	test("clears the draft and keeps the setup", () => {
+		const after = resetDraft(drafted);
+
+		expect(after.bans).toEqual([]);
+		expect(after.enemyPicks).toEqual([]);
+		expect(Object.values(after.teamPicks)).toEqual([
+			null,
+			null,
+			null,
+			null,
+			null,
+		]);
+		expect(after.side).toBe("dire");
+		expect(after.myRole).toBe(2);
+	});
+
+	test("does not mutate the session it clears", () => {
+		const snapshot = structuredClone(drafted);
+		resetDraft(drafted);
+		expect(drafted).toEqual(snapshot);
+	});
+
+	// screens-spec §4: ten picks is a finished draft, and finishing one is the
+	// normal reason to start the next.
+	test.each([
+		["an empty draft", EMPTY_SESSION(), true],
+		["a part-filled draft", drafted, true],
+		[
+			"a complete draft",
+			{
+				...drafted,
+				teamPicks: { "1": 3, "2": 4, "3": 6, "4": 7, "5": 8 },
+				enemyPicks: [9, 10, 11, 12, 13],
+			},
+			false,
+		],
+		[
+			"five team picks and four enemies",
+			{
+				...drafted,
+				teamPicks: { "1": 3, "2": 4, "3": 6, "4": 7, "5": 8 },
+				enemyPicks: [9, 10, 11, 12],
+			},
+			true,
+		],
+	] satisfies [string, Session, boolean][])(
+		"%s asks before resetting: %p",
+		(_label, session, asks) => {
+			expect(confirmsReset(session)).toBe(asks);
+		},
+	);
+});
+
+describe("the undo backup", () => {
+	const drafted: Session = {
+		...EMPTY_SESSION(),
+		side: "radiant",
+		myRole: 5,
+		bans: [1, 2, 3, 4],
+		teamPicks: { "1": 5, "2": 6, "3": null, "4": null, "5": null },
+		enemyPicks: [7],
+	};
+
+	test("round-trips the draft it was handed", () => {
+		writeBackup(drafted);
+		expect(readBackup()).toEqual(drafted);
+	});
+
+	test("is absent until a reset writes one", () => {
+		expect(readBackup()).toBeNull();
+	});
+
+	test("a second reset replaces it instead of stacking", () => {
+		const later: Session = { ...drafted, bans: [9] };
+		writeBackup(drafted);
+		writeBackup(later);
+
+		expect(readBackup()).toEqual(later);
+	});
+
+	test("is gone once cleared", () => {
+		writeBackup(drafted);
+		clearBackup();
+
+		expect(readBackup()).toBeNull();
+	});
+
+	test.each([
+		["unparseable JSON", "{not json"],
+		["null", "null"],
+		["a future schema version", '{"v":2,"side":"dire"}'],
+		["a v1 fragment with no teamPicks", '{"v":1,"bans":[],"enemyPicks":[]}'],
+	])("discards %s rather than offering a broken undo", (_label, raw) => {
+		store.set(BACKUP_KEY, raw);
+
+		let backup: Session | null | undefined;
+		expect(() => {
+			backup = readBackup();
+		}).not.toThrow();
+		expect(backup).toBeNull();
+	});
+
+	// The window closes when the next draft starts, not when the setup is
+	// edited — a reset keeps side and role on purpose.
+	test.each([
+		["banAdd", { kind: "banAdd", hero: 9 }, true],
+		["teamSet", { kind: "teamSet", role: 1, hero: 9 }, true],
+		["enemyAdd", { kind: "enemyAdd", hero: 9 }, true],
+		["side", { kind: "side", side: "dire" }, false],
+		["role", { kind: "role", role: 4 }, false],
+		["banRemove", { kind: "banRemove", index: 0 }, false],
+		["teamClear", { kind: "teamClear", role: 1 }, false],
+		["enemyRemove", { kind: "enemyRemove", index: 0 }, false],
+	] satisfies [string, Action, boolean][])(
+		"%s ends the undo window: %p",
+		(_label, action, ends) => {
+			expect(endsUndoWindow(action)).toBe(ends);
+		},
+	);
 });
 
 describe("the reducer contract", () => {

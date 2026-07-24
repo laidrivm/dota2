@@ -70,25 +70,25 @@ Playwright target.
 
 ## 4. Reset and undo
 
-- [ ] 4.1 Tests for `reset`: clears `bans`, `enemyPicks`, and all five
+- [x] 4.1 Tests for `reset`: clears `bans`, `enemyPicks`, and all five
       `teamPicks` entries; keeps `side` and `myRole`. (Req: draft-session —
       Reset clears the draft and keeps the setup / Reset keeps side and role)
-- [ ] 4.2 Test: confirmation is required at nine picks and not at ten. (Req:
+- [x] 4.2 Test: confirmation is required at nine picks and not at ten. (Req:
       draft-session — Reset / Complete draft resets immediately)
-- [ ] 4.3 Tests for `undo`: restores a session deeply equal to the one before
+- [x] 4.3 Tests for `undo`: restores a session deeply equal to the one before
       the reset; with no stored backup it changes nothing. (Req: draft-session
       — One level of undo after a reset / Undo restores the draft)
-- [ ] 4.4 Test: a second reset replaces the backup rather than stacking it —
+- [x] 4.4 Test: a second reset replaces the backup rather than stacking it —
       undo returns the draft from before the second reset only. (Req:
       draft-session — One level of undo, backup replacement)
-- [ ] 4.5 Tests: each of `banAdd`, `teamSet`, and `enemyAdd` after a reset
+- [x] 4.5 Tests: each of `banAdd`, `teamSet`, and `enemyAdd` after a reset
       clears `draft.backup`; a `side` or `role` change does not. (Req:
       draft-session — One level of undo / Entering a hero ends the undo window;
       Editing the setup keeps the undo window)
-- [ ] 4.6 Test: a `draft.backup` value that is not valid JSON or not a `v: 1`
+- [x] 4.6 Test: a `draft.backup` value that is not valid JSON or not a `v: 1`
       session is discarded, no undo is offered, and nothing throws. (Req:
       draft-session — One level of undo / Unreadable backup)
-- [ ] 4.7 Implement the `reset` and `undo` reducer cases and the
+- [x] 4.7 Implement the `reset` and `undo` reducer cases and the
       `draft.backup` read/write in `session.ts`. (Req: draft-session — Reset;
       One level of undo)
 
