@@ -54,8 +54,10 @@ completes, name the next step and the exact command.
 
 ## Stage 3 — Review
 
-- When apply finishes, before the user opens a PR: suggest `/triage` on the
-  branch as the entry map for their own review.
+- Run the pre-PR sequence in the order the Review toolkit sets out, and act
+  on every finding rather than reporting it: `/zombies` → fix → `/warm` (only
+  when a manifest changed) → `/ponytail-review` → `/triage` last, so it maps
+  the diff the reviewer will actually see.
 - If the apply run added or upgraded any dependency: run `/warm`. Walk the
   ponytail ladder before ever reaching for a dependency during apply.
 - Re-run `/zombies` with **no arguments** (diff mode): it reads the real

@@ -5,6 +5,9 @@ single-source rule this file inherits.
 
 - Prefer TDD for edge cases: turn `/zombies` output into failing tests first,
   then implement.
+- A unit test arranges once, acts once, then asserts — a second act or a
+  second arrange means it is two tests. A `test.each` row is one such test,
+  not a second act, and repeated assertions about one act are one assert step.
 - Tests must assert behaviour, not mirror the implementation. A test that
   would pass against a broken implementation is not a test — before trusting
   a new test, break the code it guards and watch it fail.

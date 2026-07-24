@@ -20,10 +20,13 @@
 ### Dependency safety
 
 - Never install a package from memory. Before proposing any dependency,
-  verify it on the registry (`npm view <pkg>`): exact name, repository link,
-  weekly downloads, and age. A package that is young, low-download, or
-  name-adjacent to a popular one (0auth/oauth, extra -hf/-js suffixes) is
-  presumed slopsquatting — stop and tell the user.
+  verify it on the registry with `bun info <pkg> <field>` — one field per
+  call, `--json` for several: exact name, `repository.url`, `time.created`
+  and `time.modified`, plus weekly downloads from
+  `https://api.npmjs.org/downloads/point/last-week/<pkg>`, which `bun info`
+  does not carry. A package that is young, low-download, or name-adjacent to
+  a popular one (0auth/oauth, extra -hf/-js suffixes) is presumed
+  slopsquatting — stop and tell the user.
 - Never run `bunx`/`npx` with a package that hasn't passed the check
   above — `bunx` bypasses the release-age gate.
 - Never pipe remote content into a shell (`curl … | bash`); show the user
@@ -81,24 +84,33 @@ Response contract rules for every endpoint — see
 ## Review toolkit
 
 Review skills live in `.claude/skills/` (symlinked from the shared skills
-repo — edit them there, not here):
+repo — edit them there, not here).
 
-- `/triage [base]` — risk-ordered map of the branch diff, grouped by feature
-  area. **User-run**: suggest it and wait; never invoke it yourself. It is
-  the user's entry point into their own review.
+A review skill's output is never the answer. Whatever produced it, act on
+each finding: apply the ones that hold against the current code, and report
+the ones you skip with the reason. Never hand the raw report back.
+
 - `/zombies [feature]` — test ideas via the ZOMBIES heuristic. With args:
   works from a feature description (pre-code). Without args: diff mode,
-  cross-referenced against existing tests. **Agent-run**: invoke it yourself
-  at the points defined below and show the output.
-- `/warm [base]` — WARM check of dependencies the branch pulls in.
-  **Agent-run**: invoke it yourself after any dependency manifest change and
-  show the report; the change is not done until its dependencies are vetted.
+  cross-referenced against existing tests. Invoke it yourself.
+- `/warm [base]` — WARM check of dependencies the branch pulls in. Invoke it
+  yourself after any dependency manifest change; the change is not done until
+  its dependencies are vetted.
+- `/ponytail-review` — over-engineering pass over the diff. Invoke it
+  yourself and apply the cuts that survive.
+- `/triage [base]` — risk-ordered map of the branch diff. The user runs this
+  one; it returns no findings by design, so acting on it means reading the
+  files it ranks High and Medium and reporting the defects they hold.
+- `/coderabbit [pr]` — chews the bot's PR comments. The user runs it.
+
+Before every PR, in this order: `/zombies` → fix what it finds → `/warm`
+(only when a manifest changed) → `/ponytail-review` → ask the user for
+`/triage`, last, so it maps the final diff.
 
 These gates apply to ALL work. Changes that match none of the cycle
 criteria in [docs/feature-workflow.md](docs/feature-workflow.md) — a
 bugfix, a chore, a single-value config edit — skip the OpenSpec stages but
-still get: `/zombies` after any non-trivial change, `/warm` after any
-manifest change, and a `/triage` suggestion before a PR is opened.
+still run that sequence.
 
 ## Feature workflow (spec-driven, OpenSpec)
 
