@@ -42,7 +42,9 @@ below.
         specs at `openspec/specs/{app-shell,snapshot-delivery,draft-session}`).
         Shipped `index.html`, `server.ts`, `static-routes.ts`, `src/app/**`,
         133 tests. Two design decisions reversed mid-apply — see decisions.
-  - [ ] **2b `draft-board`** ← next step is Stage 1 (`/opsx:propose`)
+  - [ ] **2b `draft-board`** ← Stage 1 done (`openspec/changes/draft-board`,
+        4/4 artifacts, validates); next step is Stage 2 (`/opsx:apply`) on a
+        `feat/draft-board` branch.
         Board panels: bans, team slots, enemy slots with role probabilities,
         suggestion blocks, result block. First `computeModel` call. Owns the
         390px one-column layout — no `@media` rule exists yet, and the Setup
@@ -114,6 +116,19 @@ below.
   the only test.
 - Unsorted product specs live in `spec-inbox/`, gitignored except its
   README — the public repo carries the pointer, never the content.
+- Hero tiles take their background from the `--hero-<short>` token and derive
+  their ink from that colour's relative luminance (threshold 0.22), so the
+  palette is never restated in TypeScript. CSS `contrast-color()` was rejected
+  — it flips the palette's mid-tone blues to black. The derived ink differs
+  from the mock on exactly one hero (Wraith King), in favour of contrast.
+  `tokens/colors.css` gains `--tile-ink-dark`, `--tile-ink-light`, and
+  `--hero-fallback`, pushed back to the design project to keep the copy
+  verbatim.
+- Proposal 2b enters picks through a temporary native `<select>` so the board
+  is usable and testable before the picker exists; 2c deletes it and points
+  the same `applyAction` seam at the picker overlay.
+- Side/role hotkeys become context-scoped in 2b (Setup or the open header
+  editor only), because 2c reuses `1`–`5` on the board for the picker.
 
 ## Gates (reminder)
 
