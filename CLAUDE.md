@@ -62,13 +62,17 @@ Response contract rules for every endpoint — see
 
 ## Git & PRs
 
-- One OpenSpec proposal = one branch = one PR. Branch name:
-  `feat/<proposal-slug>` (`fix/`, `chore/` for non-feature work).
+- One reviewable unit = one branch = one PR. The unit is the proposal, unless
+  it decomposes into stages or steps tracked in `PLAN.md` — then each of those
+  gets its own branch and PR. Branch name: `feat/<proposal-slug>` for the
+  whole thing, `feat/<proposal-slug>-<step>` for one step (`fix/`, `chore/`
+  for non-feature work).
 - Commits: imperative subject ≤ 72 chars, body only when the diff doesn't
   explain itself. Commit per completed task-list item, not per file.
 - Never commit directly to main; never force-push a branch after its PR
   is open (review comments lose their anchors).
-- Open PRs as drafts; mark ready only after Stage 3 gates pass.
+- Open PRs ready for review, not as drafts — CodeRabbit's auto-review skips
+  drafts, so a draft is a PR nobody reviews.
 - Keep the PR description to what the diff can't say: a link to the
   proposal, decisions taken, anything the reviewer must check by hand.
   Never write a walkthrough, a file-by-file summary, or a restatement of
@@ -172,6 +176,10 @@ protocol:
 
 ### Rules
 
+- A verification claim names the environment it actually ran in — viewport,
+  browser, data — not the one it was aimed at.
+- Before inlining a single-caller helper, grep for the logic it duplicates
+  elsewhere.
 - Gate a side effect on the reducer's result, not on the action that asked
   for it.
 - A default action bound to a key applies to the first *enabled* candidate,

@@ -19,7 +19,7 @@ reviews:
   poem: false
   auto_review:
     enabled: true
-    drafts: false # drafts are pre-Stage-3 work in progress; review on ready
+    drafts: false # PRs here open ready for review; a draft is deliberate silence
   path_instructions:
     - path: "**/*.{ts,tsx}"
       instructions: |
