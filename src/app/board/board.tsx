@@ -12,10 +12,11 @@ import type {
 	Session,
 	Side,
 	SnapshotBundle,
+	WinEstimate,
 } from "../../types.ts";
 import { ROLES } from "../../types.ts";
 import { type Action, isUsed } from "../session.ts";
-import { ROLE_UI } from "../session-controls.tsx";
+import { ROLE_UI, SIDE_LABEL } from "../session-controls.tsx";
 import {
 	formatAdvantage,
 	formatPhase,
@@ -40,10 +41,6 @@ export function availableHeroes(
 		.filter((hero) => !isUsed(session, hero.id))
 		.sort((a, b) => a.name.localeCompare(b.name, "en"));
 }
-
-const SIDE_NAME: Record<Side, string> = { radiant: "Radiant", dire: "Dire" };
-
-const other = (side: Side): Side => (side === "radiant" ? "dire" : "radiant");
 
 /**
  * The stand-in for the hero picker of proposal 2c: a native select, so the
@@ -154,7 +151,7 @@ function BansRow({
 				{session.bans.map((id, index) => {
 					const hero = byId.get(id);
 					return (
-						<div class="ban" key={`${id}-${index}`}>
+						<div class="ban" key={id}>
 							<HeroTile
 								hero={hero}
 								size="lg"
@@ -201,7 +198,7 @@ function TeamPanel({
 		<section class="panel my-team" aria-label="My team">
 			<h2 class="panel-head">
 				<span class="section-label">My team</span>
-				<span class={`side-name side-${side}`}>{SIDE_NAME[side]}</span>
+				<span class={`side-name side-${side}`}>{SIDE_LABEL[side]}</span>
 			</h2>
 			{ROLES.map((role) => {
 				const id = session.teamPicks[`${role}`];
@@ -257,7 +254,7 @@ function EnemyPanel({
 	available: HeroEntry[];
 	apply: Apply;
 }) {
-	const side = other(session.side as Side);
+	const side: Side = session.side === "radiant" ? "dire" : "radiant";
 	const roles = new Map(
 		model.enemyRoles.map((entry) => [entry.hero, entry.probs]),
 	);
@@ -268,14 +265,14 @@ function EnemyPanel({
 		<section class="panel enemy-team" aria-label="Enemy team">
 			<h2 class="panel-head">
 				<span class="section-label">Enemy team</span>
-				<span class={`side-name side-${side}`}>{SIDE_NAME[side]}</span>
+				<span class={`side-name side-${side}`}>{SIDE_LABEL[side]}</span>
 			</h2>
 			{session.enemyPicks.map((id, index) => {
 				const hero = byId.get(id);
 				const probs = roles.get(id);
 
 				return (
-					<div class="slot" key={`${id}-${index}`}>
+					<div class="slot" key={id}>
 						<div class="slot-hero">
 							<HeroTile hero={hero} size="md" />
 							<div class="enemy-text">
@@ -367,7 +364,7 @@ function Suggestions({
 	);
 }
 
-const Result = ({ model }: { model: ModelOutput }) => (
+const Result = ({ estimate }: { estimate: WinEstimate }) => (
 	<section class="panel result" aria-label="Result">
 		<h2 class="panel-head">
 			<span class="section-label">Result</span>
@@ -375,14 +372,12 @@ const Result = ({ model }: { model: ModelOutput }) => (
 		<p class="result-line">
 			<span class="result-label">Draft advantage:</span>
 			{/* A draft that is behind must not be printed in the winning colour. */}
-			<span
-				class={`result-advantage score-${scoreTone(model.winEstimate?.advantage ?? 0)}`}
-			>
-				{formatAdvantage(model.winEstimate?.advantage ?? 0)}
+			<span class={`result-advantage score-${scoreTone(estimate.advantage)}`}>
+				{formatAdvantage(estimate.advantage)}
 			</span>
 			<span class="result-arrow">→</span>
 			<span class="result-win">
-				{formatWinProbability(model.winEstimate?.winProbability ?? 0)}
+				{formatWinProbability(estimate.winProbability)}
 			</span>
 		</p>
 	</section>
@@ -432,7 +427,7 @@ export function Board({
 				/>
 			</div>
 			{model.winEstimate !== null ? (
-				<Result model={model} />
+				<Result estimate={model.winEstimate} />
 			) : model.suggestions.length === 0 ? (
 				<p class="board-hint" role="status">
 					Add enemy picks to see win probability

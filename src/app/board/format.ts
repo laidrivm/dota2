@@ -91,8 +91,9 @@ export function topRoles(probs: Record<`${Role}`, number>): string {
 	return ROLES.map((role) => ({ role, probability: probs[`${role}`] ?? 0 }))
 		.sort((a, b) => b.probability - a.probability || a.role - b.role)
 		.slice(0, 2)
-		.map((entry) => ({ ...entry, pct: Math.round(entry.probability * 100) }))
-		.filter((entry) => entry.pct > 0)
-		.map((entry) => `p${entry.role} ${entry.pct}%`)
+		.flatMap(({ role, probability }) => {
+			const pct = Math.round(probability * 100);
+			return pct > 0 ? [`p${role} ${pct}%`] : [];
+		})
 		.join(" · ");
 }
