@@ -8,26 +8,27 @@ Playwright target.
 
 ## 1. Hero search
 
-- [ ] 1.1 Tests for `matchHeroes`: an empty query returns every hero in
+- [x] 1.1 Tests for `matchHeroes`: an empty query returns every hero in
       ascending name order; a whitespace-only query does the same. (Req:
       hero-picker — Search filters from the first character / Whitespace-only
       query)
-- [ ] 1.2 Tests for matching: `cli` → Clinkz first; `bone` → Clinkz through
+- [x] 1.2 Tests for matching: `cli` → Clinkz first; `bone` → Clinkz through
       the alias `bone fletcher`; `wk` → Wraith King; `king` → Wraith King on a
       word that is not the first; `WK` in upper case matches. (Req:
       hero-picker — Search filters from the first character, alias and word
       scenarios)
-- [ ] 1.3 Tests for what must not match: `ing` matches no hero (prefix, never
+- [x] 1.3 Tests for what must not match: `ing` matches no hero (prefix, never
       substring); a query one character longer than a full name matches
       nothing; a query of regex metacharacters (`.`, `*`, `(`) matches
       literally and does not throw. (Req: hero-picker — Search / Not a
       substring search)
-- [ ] 1.4 Test: `ni` returns both Night Stalker and Nature's Prophet in name
-      order, not in the snapshot's own order. (Req: hero-picker — Search,
-      match ordering)
-- [ ] 1.5 Test: a hero with an empty `aliases` array is matched by name alone.
+- [x] 1.4 Test: `ni` returns two heroes matched by different routes, in name
+      order, not in the snapshot's own order. (The fixture has no Nature's
+      Prophet, so the pair is Enigma via the alias `nigma` and Night Stalker
+      via its name.) (Req: hero-picker — Search, match ordering)
+- [x] 1.5 Test: a hero with an empty `aliases` array is matched by name alone.
       (Req: hero-picker — Search filters from the first character)
-- [ ] 1.6 Implement `matchHeroes(heroes, query)` in `src/app/picker/search.ts`.
+- [x] 1.6 Implement `matchHeroes(heroes, query)` in `src/app/picker/search.ts`.
       (Req: hero-picker — Search filters from the first character)
 
 ## 2. Used-hero lookup
