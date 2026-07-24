@@ -172,6 +172,8 @@ protocol:
 
 ### Rules
 
+- A default action bound to a key applies to the first *enabled* candidate,
+  never the first rendered one.
 - Read state a document-level listener depends on through a ref, never by
   re-subscribing the listener when that state changes.
 - A guard against malformed input must cover the whole value, not a prefix —
