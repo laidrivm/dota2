@@ -20,9 +20,10 @@
 ### Dependency safety
 
 - Never install a package from memory. Before proposing any dependency,
-  verify it on the registry with `bun info <pkg> <field>` — one field per
-  call, `--json` for several: exact name, `repository.url`, `time.created`
-  and `time.modified`, plus weekly downloads from
+  verify it on the registry with `bun info <pkg> <field>`, one property path
+  per call — for several values take the whole document with `bun info <pkg>
+  --json` and filter it yourself: exact name, `repository.url`,
+  `time.created` and `time.modified`, plus weekly downloads from
   `https://api.npmjs.org/downloads/point/last-week/<pkg>`, which `bun info`
   does not carry. A package that is young, low-download, or name-adjacent to
   a popular one (0auth/oauth, extra -hf/-js suffixes) is presumed
