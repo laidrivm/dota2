@@ -47,23 +47,23 @@ Playwright target.
 
 ## 3. Board hotkeys and routing
 
-- [ ] 3.1 Tests for `pickerHotkey`: `B` → `{ kind: "ban" }`; `E` →
+- [x] 3.1 Tests for `pickerHotkey`: `B` → `{ kind: "ban" }`; `E` →
       `{ kind: "enemy" }`; `3` and `o` both → `{ kind: "team", role: 3 }`,
       whether or not the slot is filled. (Req: hero-picker — Board hotkeys
       open the picker)
-- [ ] 3.2 Boundary tests: `B` → `null` at exactly `heroes.length - 10` bans
+- [x] 3.2 Boundary tests: `B` → `null` at exactly `heroes.length - 10` bans
       and a target one below; `E` → `null` at exactly five enemy picks and a
       target at four. (Req: hero-picker — Board hotkeys / ban limit and full
       enemy team)
-- [ ] 3.3 Tests for refusals: `B` with Ctrl, Meta, or Alt held → `null`; an
+- [x] 3.3 Tests for refusals: `B` with Ctrl, Meta, or Alt held → `null`; an
       unmapped key (`6`, `X`) → `null`. (Req: hero-picker — Board hotkeys /
       Modified keystroke)
-- [ ] 3.4 Tests for `hotkeyContext`: returns `"modal"` while the picker or the
+- [x] 3.4 Tests for `hotkeyContext`: returns `"modal"` while the picker or the
       confirmation dialog is open, including when the header editor is also
       open — the dialog outranks the editor; `hotkeyFor` yields no side/role
       action in that context. (Req: draft-session — Keystrokes route to the
       topmost context)
-- [ ] 3.5 Implement `pickerHotkey(event, session, banLimit)` and the `"modal"`
+- [x] 3.5 Implement `pickerHotkey(event, session, banLimit)` and the `"modal"`
       context, and wire `useSession` to pick between the two hotkey functions.
       (Reqs: hero-picker — Board hotkeys open the picker; draft-session —
       Keystrokes route to the topmost context)

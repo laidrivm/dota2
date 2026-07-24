@@ -3,7 +3,7 @@ import { computeModel } from "../model.ts";
 import type { SnapshotBundle } from "../types.ts";
 import { Board } from "./board/board.tsx";
 import { Header } from "./header.tsx";
-import { closesEditor, useSession } from "./session.ts";
+import { closesEditor, type PickTarget, useSession } from "./session.ts";
 import { SessionControls } from "./session-controls.tsx";
 import { loadSnapshot } from "./snapshot.ts";
 
@@ -12,13 +12,21 @@ export function App() {
 		"pending",
 	);
 	const [editorOpen, setEditorOpen] = useState(false);
+	// The picker is ephemeral: it lives here and never reaches the session or
+	// storage, so a reload with it open comes back to the board (screens-spec §3).
+	const [pickTarget, setPickTarget] = useState<PickTarget | null>(null);
 	// No snapshot, no board, so no ban is possible — the limit is US-7's
 	// "hero count minus the ten that get picked".
 	const banLimit =
 		snapshot === "pending" || snapshot === null
 			? 0
 			: snapshot.heroes.length - 10;
-	const { session, apply } = useSession(banLimit, editorOpen);
+	const { session, apply } = useSession({
+		banLimit,
+		editorOpen,
+		modalOpen: pickTarget !== null,
+		openPicker: setPickTarget,
+	});
 
 	// The session is replaced whole on every change, so identity comparison is
 	// exact and the whole model is recomputed synchronously — screens-spec §2.6

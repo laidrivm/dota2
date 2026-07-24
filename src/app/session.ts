@@ -57,18 +57,21 @@ const ROLE_KEYS: Record<string, Role> = {
 
 /**
  * Where a keystroke lands (screens-spec §5). Side and role keys belong to
- * Setup and to the header editor; on the board the same keys are reserved for
- * the picker proposal 2c adds, which is why they do nothing here rather than
- * silently moving the player's role.
+ * Setup and to the header editor; on the board the same keys open the picker
+ * for a slot instead, and while a modal is up nothing outside it fires.
  */
-export type HotkeyContext = "setup" | "editor" | "board";
+export type HotkeyContext = "modal" | "setup" | "editor" | "board";
 
-/** The topmost active context, which is all §5's routing amounts to until
- * proposal 2c adds the picker and the dialog above it. */
+/**
+ * The topmost active context. A modal `<dialog>` still bubbles its keystrokes
+ * to the document listener underneath, so it has to be asked about first.
+ */
 export function hotkeyContext(
 	session: Session,
 	editorOpen: boolean,
+	modalOpen: boolean,
 ): HotkeyContext {
+	if (modalOpen) return "modal";
 	if (editorOpen) return "editor";
 	return session.side === null || session.myRole === null ? "setup" : "board";
 }
@@ -108,7 +111,9 @@ export function hotkeyFor(
 	event: Keystroke,
 	context: HotkeyContext,
 ): Hotkey | null {
-	if (context === "board" || !unmodified(event)) return null;
+	if ((context !== "setup" && context !== "editor") || !unmodified(event)) {
+		return null;
+	}
 	const key = event.key.toLowerCase();
 	const side = SIDE_KEYS[key];
 	if (side) return { kind: "side", side };
@@ -137,6 +142,39 @@ export const isUsed = (session: Session, hero: HeroId): boolean =>
 	usedAs(session, hero) !== null;
 
 const MAX_ENEMY_PICKS = 5;
+
+/** Which position the picker is being opened for (screens-spec §3). */
+export type PickTarget =
+	| { kind: "ban" }
+	| { kind: "team"; role: Role }
+	| { kind: "enemy" };
+
+/**
+ * What the board's own keys do (screens-spec §5): open the picker for a
+ * position rather than change the session. A position that cannot take a hero
+ * opens nothing — the picker would have no action to dispatch.
+ *
+ * Kept apart from `hotkeyFor` because a UI intent and a session mutation are
+ * different things; the caller picks between them on the context.
+ */
+export function pickerHotkey(
+	event: Keystroke,
+	session: Session,
+	banLimit: number,
+): PickTarget | null {
+	if (!unmodified(event)) return null;
+	const key = event.key.toLowerCase();
+	if (key === "b") {
+		return session.bans.length >= banLimit ? null : { kind: "ban" };
+	}
+	if (key === "e") {
+		return session.enemyPicks.length >= MAX_ENEMY_PICKS
+			? null
+			: { kind: "enemy" };
+	}
+	const role = ROLE_KEYS[key];
+	return role ? { kind: "team", role } : null;
+}
 
 const removeAt = <T>(list: T[], index: number): T[] =>
 	index < 0 || index >= list.length ? list : list.filter((_, i) => i !== index);
@@ -226,7 +264,17 @@ export function persist(session: Session): void {
 	write(SESSION_KEY, JSON.stringify(session));
 }
 
-export function useSession(banLimit: number, editorOpen: boolean) {
+export function useSession({
+	banLimit,
+	editorOpen,
+	modalOpen,
+	openPicker,
+}: {
+	banLimit: number;
+	editorOpen: boolean;
+	modalOpen: boolean;
+	openPicker: (target: PickTarget) => void;
+}) {
 	const [session, setSession] = useState(restore);
 
 	/** Every change is written through, so a reload loses nothing. */
@@ -240,8 +288,20 @@ export function useSession(banLimit: number, editorOpen: boolean) {
 	// What the listener below needs and cannot capture: re-subscribing on every
 	// context change loses the first keystroke after the editor opens, because
 	// effects flush a frame late and the key arrives before the new listener.
-	const latest = useRef({ context: "setup" as HotkeyContext, apply });
-	latest.current = { context: hotkeyContext(session, editorOpen), apply };
+	const latest = useRef({
+		context: "setup" as HotkeyContext,
+		apply,
+		session,
+		banLimit,
+		openPicker,
+	});
+	latest.current = {
+		context: hotkeyContext(session, editorOpen, modalOpen),
+		apply,
+		session,
+		banLimit,
+		openPicker,
+	};
 
 	// Hotkeys are listened for on the document so they work without anything
 	// being focused. Installed once, reading both the context and the current
@@ -249,8 +309,14 @@ export function useSession(banLimit: number, editorOpen: boolean) {
 	useEffect(() => {
 		const onKeyDown = (event: KeyboardEvent) => {
 			if (ownsKeystroke(event.target as HTMLElement | null)) return;
-			const hotkey = hotkeyFor(event, latest.current.context);
-			if (hotkey) latest.current.apply(hotkey);
+			const current = latest.current;
+			if (current.context === "board") {
+				const target = pickerHotkey(event, current.session, current.banLimit);
+				if (target) current.openPicker(target);
+				return;
+			}
+			const hotkey = hotkeyFor(event, current.context);
+			if (hotkey) current.apply(hotkey);
 		};
 		document.addEventListener("keydown", onKeyDown);
 		return () => document.removeEventListener("keydown", onKeyDown);
