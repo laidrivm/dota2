@@ -172,10 +172,13 @@ protocol:
 
 ### Rules
 
+- A guard against malformed input must cover the whole value, not a prefix —
+  anchor both ends or parse it.
 - Before calling a tracked file a duplicate, check whether its twin is
   tracked — a gitignored copy does not ship with the repo.
-- When a rule's wording changes, grep for every site that restates it
-  before calling the change done.
+- When a rule or a recorded decision changes, grep every site that restates
+  it — rules list, docs, OpenSpec artifacts, README — before calling the
+  change done.
 - Check a branch's PR state before adding commits — a squash merge strands
   anything pushed after it.
 - Never post to a PR, issue, or any external service on the user's behalf —
