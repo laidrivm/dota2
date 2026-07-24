@@ -14,7 +14,7 @@ import type {
 	SnapshotBundle,
 } from "../../types.ts";
 import { ROLES } from "../../types.ts";
-import type { Action } from "../session.ts";
+import { type Action, isUsed } from "../session.ts";
 import { ROLE_UI } from "../session-controls.tsx";
 import {
 	formatAdvantage,
@@ -27,6 +27,19 @@ import {
 import { HeroTile } from "./hero-tile.tsx";
 
 type Apply = (action: Action) => void;
+
+/**
+ * What every pick-entry control offers: the heroes not already banned or
+ * picked, by name. The picker of proposal 2c filters this same list.
+ */
+export function availableHeroes(
+	bundle: SnapshotBundle,
+	session: Session,
+): HeroEntry[] {
+	return bundle.heroes
+		.filter((hero) => !isUsed(session, hero.id))
+		.sort((a, b) => a.name.localeCompare(b.name, "en"));
+}
 
 const SIDE_NAME: Record<Side, string> = { radiant: "Radiant", dire: "Dire" };
 
@@ -366,16 +379,7 @@ export function Board({
 	apply: Apply;
 }) {
 	const byId = new Map(bundle.heroes.map((hero) => [hero.id, hero]));
-	const used = new Set<HeroId>([
-		...session.bans,
-		...session.enemyPicks,
-		...ROLES.map((role) => session.teamPicks[`${role}`]).filter(
-			(id): id is HeroId => id !== null,
-		),
-	]);
-	const available = bundle.heroes
-		.filter((hero) => !used.has(hero.id))
-		.sort((a, b) => a.name.localeCompare(b.name));
+	const available = availableHeroes(bundle, session);
 
 	// My team reads left on Radiant and right on Dire, as the game client puts it.
 	const teams = `teams${session.side === "dire" ? " teams-mirrored" : ""}`;
