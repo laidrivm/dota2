@@ -735,8 +735,18 @@ dialog::backdrop {
 }
 
 .picker-tile[aria-disabled="true"] {
-	opacity: 0.35;
 	cursor: not-allowed;
+}
+
+/* The design fades the whole cell; fading the words with it would leave the
+   one thing a taken tile has to say — where the hero already sits — below any
+   readable contrast. Only the artwork dims. */
+.picker-tile[aria-disabled="true"] .tile {
+	opacity: 0.35;
+}
+
+.picker-tile[aria-disabled="true"] .picker-name {
+	color: var(--text-5);
 }
 
 .picker-used {
@@ -900,6 +910,8 @@ dialog::backdrop {
 	/* Full-screen picker: the search field has to be reachable with a thumb
 	   and the grid still has to show whole rows (screens-spec §3). */
 	.picker {
+		display: flex;
+		flex-direction: column;
 		width: 100%;
 		max-width: none;
 		height: 100%;
@@ -909,9 +921,16 @@ dialog::backdrop {
 		border-radius: 0;
 	}
 
+	/* The grid is the only part that may shrink, so the hint bar stays on
+	   screen and the heroes scroll inside instead of being clipped away. */
 	.picker-grid {
 		grid-template-columns: repeat(4, 1fr);
+		min-height: 0;
 		max-height: none;
+	}
+
+	.picker-hints {
+		margin-top: auto;
 	}
 
 	.picker-hints {

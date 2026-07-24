@@ -271,6 +271,33 @@ Playwright target.
       it to. The board's hotkeys work from `body`, which is where they were
       pressed.
 
+## 10b. CodeRabbit findings on the implementation PR
+
+- [x] 10b.1 The DOM position contract lived in two spellings — the board wrote
+      `team-3`, `focusAfterPick` rebuilt it. `Position` and `positionOf` now
+      sit beside `PickTarget` in `session.ts`, and a template-literal type
+      fails the build on a typo.
+- [x] 10b.2 The bans trigger at the limit announced only `Add ban`: a disabled
+      control's `title` is not read out. The reason is in the accessible name.
+- [x] 10b.3 `New` and `Undo` carry accessible names (`New draft`, `Undo the
+      reset`) that keep their visible labels as a prefix.
+- [x] 10b.4 Roving tab stops in the grid: the first selectable tile is the one
+      tab stop, the rest are `tabIndex={-1}`, and where nothing is selectable
+      the first tile keeps the stop so the grid is never unreachable. This
+      reverses design.md's "every tile stays tabbable" — the cost it named was
+      state the picker does not need, and the stop is derived from the `first`
+      it already computes. Verified: Tab enters at Anti-Mage, `ArrowDown`
+      moves a full row.
+- [x] 10b.5 A taken tile faded its own label to 0.35, which is the one thing
+      it has to say. Only the artwork dims now; the name drops to `--text-5`
+      and the `ban`/`team`/`enemy` label keeps the accent. Diverges from the
+      mock, which fades the whole cell.
+- [x] 10b.6 Real bug on a phone: the full-screen picker clipped its own hint
+      bar and the last rows of heroes, because the dialog is `overflow: hidden`
+      and the grid grew past the viewport. The dialog is a flex column with
+      `min-height: 0` on the grid, so the heroes scroll and the hints stay put.
+      Verified at 390px.
+
 ## 10. Gates
 
 - [x] 10.1 `bun test` green; `tsc --noEmit` clean; `biome check` clean.

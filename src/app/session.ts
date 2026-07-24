@@ -151,6 +151,15 @@ export type PickTarget =
 	| { kind: "enemy" };
 
 /**
+ * How a position is named in the DOM, so the board's controls and the focus
+ * redirect after a pick cannot drift into two spellings of the same slot.
+ */
+export type Position = "ban" | "enemy" | `team-${Role}`;
+
+export const positionOf = (target: PickTarget): Position =>
+	target.kind === "team" ? `team-${target.role}` : target.kind;
+
+/**
  * What the board's own keys do (screens-spec §5): open the picker for a
  * position rather than change the session. A position that cannot take a hero
  * opens nothing — the picker would have no action to dispatch.

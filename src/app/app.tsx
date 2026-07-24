@@ -9,6 +9,7 @@ import {
 	closesEditor,
 	confirmsReset,
 	type PickTarget,
+	positionOf,
 	usedAs,
 	useSession,
 } from "./session.ts";
@@ -185,7 +186,7 @@ const pickAction = (target: PickTarget, hero: HeroId): Action =>
  * and the new entry's removal control where it does not.
  */
 function focusAfterPick(target: PickTarget): void {
-	const position = target.kind === "team" ? `team-${target.role}` : target.kind;
+	const position = positionOf(target);
 	setTimeout(() => {
 		// The last removal control of the position is the entry just added — the
 		// first would hand a keyboard user the ✕ of somebody else's hero.

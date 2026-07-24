@@ -79,6 +79,10 @@ export function Picker({
 	const matches = matchHeroes(bundle.heroes, query);
 	// What `Enter` takes: never a hero the grid will not let a click choose.
 	const first = matches.find((hero) => usedOf(hero.id) === null);
+	// The grid is one tab stop, not 126: Tab reaches it, arrows move inside it.
+	// Where nothing is selectable the first tile still takes the stop, so the
+	// grid never becomes unreachable.
+	const tabStop = (first ?? matches[0])?.id;
 
 	const choose = (hero: HeroEntry) => {
 		if (usedOf(hero.id) !== null) return;
@@ -177,6 +181,7 @@ export function Picker({
 								// Taken heroes stay focusable so the arrow keys keep the grid's
 								// geometry; `aria-disabled` is what tells everyone they are out.
 								aria-disabled={used !== null}
+								tabIndex={hero.id === tabStop ? 0 : -1}
 								onClick={() => choose(hero)}
 							>
 								<HeroTile hero={hero} size="lg" />

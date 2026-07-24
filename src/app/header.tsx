@@ -35,12 +35,22 @@ export function Header({
 			<div class="header-bar">
 				{isSetUp && (
 					<>
-						<button type="button" class="header-button" onClick={onNew}>
+						<button
+							type="button"
+							class="header-button"
+							aria-label="New draft"
+							onClick={onNew}
+						>
 							New
 						</button>
 						{/* Lives exactly as long as the backup does (screens-spec §4). */}
 						{onUndo !== undefined && (
-							<button type="button" class="header-button" onClick={onUndo}>
+							<button
+								type="button"
+								class="header-button"
+								aria-label="Undo the reset"
+								onClick={onUndo}
+							>
 								Undo
 							</button>
 						)}

@@ -148,7 +148,12 @@ below.
   test was dropped: with `isUsed` defined as the wrapper it passes against any
   implementation.
 - 2c: taken tiles use `aria-disabled`, not `disabled`, so the arrow keys keep
-  the grid's geometry and a screen reader still reads them out.
+  the grid's geometry and a screen reader still reads them out. Only their
+  artwork dims — fading the `ban`/`team`/`enemy` label with it would hide the
+  one thing a taken tile says, which is where the mock is departed from.
+- 2c: the picker grid is one tab stop with roving `tabIndex`, reversing
+  design.md — the state that decision priced in turned out to be the `first`
+  match the grid already computes.
 - 2b corrections found during apply: the planned contrast-floor test for the
   tile ink guards nothing (with two fixed inks the worst case is pinned at
   the threshold), so the suite guards the palette tokens parsing instead; and

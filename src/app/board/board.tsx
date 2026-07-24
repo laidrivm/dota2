@@ -15,7 +15,7 @@ import type {
 	WinEstimate,
 } from "../../types.ts";
 import { ROLES } from "../../types.ts";
-import type { Action, PickTarget } from "../session.ts";
+import type { Action, PickTarget, Position } from "../session.ts";
 import { ROLE_UI, SIDE_LABEL } from "../session-controls.tsx";
 import {
 	formatAdvantage,
@@ -44,7 +44,7 @@ function PickEntry({
 }: {
 	label: string;
 	placeholder: string;
-	position: string;
+	position: Position;
 	onOpen: () => void;
 	disabled?: boolean;
 	title?: string;
@@ -75,7 +75,7 @@ function RemoveButton({
 	onClick,
 }: {
 	label: string;
-	position: string;
+	position: Position;
 	onClick: () => void;
 }) {
 	return (
@@ -152,7 +152,13 @@ function BansRow({
 					);
 				})}
 				<PickEntry
-					label="Add ban"
+					// A disabled control's `title` is not announced, so the reason
+					// rides along in the name a screen reader does read.
+					label={
+						atLimit
+							? `Add ban — limit reached, ${banLimit} for this snapshot`
+							: "Add ban"
+					}
 					placeholder="+ Add ban"
 					position="ban"
 					disabled={atLimit}
