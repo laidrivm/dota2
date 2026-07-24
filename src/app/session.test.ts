@@ -11,6 +11,7 @@ import {
 	persist,
 	restore,
 	SESSION_KEY,
+	usedAs,
 } from "./session.ts";
 
 /** Every test that is not about the ban limit works far below it. */
@@ -450,6 +451,24 @@ describe("single occupancy", () => {
 		teamPicks: { "1": 2, "2": null, "3": null, "4": null, "5": null },
 		enemyPicks: [3],
 	};
+
+	// The picker labels a taken tile with what `usedAs` answers, so the label
+	// and the reducer's refusal above can never disagree about the same hero.
+	test.each([
+		["ban", 1],
+		["team", 2],
+		["enemy", 3],
+	])("a hero in the draft is used as %p", (where, hero) => {
+		expect(usedAs(picked, hero)).toBe(where as "ban" | "team" | "enemy");
+	});
+
+	test("a hero nowhere in the draft is used nowhere", () => {
+		expect(usedAs(picked, 9)).toBeNull();
+	});
+
+	test("an empty session uses no hero at all", () => {
+		expect(usedAs(EMPTY_SESSION(), 1)).toBeNull();
+	});
 
 	test.each([
 		["a banned hero", 1],

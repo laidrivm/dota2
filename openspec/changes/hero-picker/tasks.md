@@ -33,14 +33,15 @@ Playwright target.
 
 ## 2. Used-hero lookup
 
-- [ ] 2.1 Tests for `usedAs`: `"ban"`, `"team"`, `"enemy"` for a hero in each
+- [x] 2.1 Tests for `usedAs`: `"ban"`, `"team"`, `"enemy"` for a hero in each
       set, `null` for a hero in none. (Req: hero-picker — Grid shows taken
       heroes as taken)
-- [ ] 2.2 Test: `isUsed` equals `usedAs !== null` for every hero of the
-      fixture, so the reducer guard and the grid label cannot diverge. (Reqs:
-      hero-picker — Grid shows taken heroes as taken; draft-session — A hero
-      occupies at most one position)
-- [ ] 2.3 Replace `isUsed` with `usedAs` in `session.ts` and keep `isUsed` as
+- [x] 2.2 Dropped during apply: `isUsed` is now literally
+      `usedAs(...) !== null`, so a test comparing them passes against any
+      implementation and guards nothing (docs/testing.md). What it was meant
+      to protect — that the label and the reducer's refusal agree — is covered
+      by 2.1 sharing the fixture session with the single-occupancy tests.
+- [x] 2.3 Replace `isUsed` with `usedAs` in `session.ts` and keep `isUsed` as
       its `!== null` wrapper. (Req: hero-picker — Grid shows taken heroes as
       taken)
 

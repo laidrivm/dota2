@@ -117,14 +117,24 @@ export function hotkeyFor(
 	return null;
 }
 
-/** A hero is on the board once — as a ban, on my team, or on theirs. */
-export function isUsed(session: Session, hero: HeroId): boolean {
-	return (
-		session.bans.includes(hero) ||
-		session.enemyPicks.includes(hero) ||
-		ROLES.some((role) => session.teamPicks[`${role}`] === hero)
-	);
+/**
+ * Where a hero sits on the board, if anywhere. One lookup answers both the
+ * reducer's single-occupancy guard and the label the picker puts on a tile it
+ * will not let you choose.
+ */
+export function usedAs(
+	session: Session,
+	hero: HeroId,
+): "ban" | "team" | "enemy" | null {
+	if (session.bans.includes(hero)) return "ban";
+	if (ROLES.some((role) => session.teamPicks[`${role}`] === hero))
+		return "team";
+	return session.enemyPicks.includes(hero) ? "enemy" : null;
 }
+
+/** A hero is on the board once — as a ban, on my team, or on theirs. */
+export const isUsed = (session: Session, hero: HeroId): boolean =>
+	usedAs(session, hero) !== null;
 
 const MAX_ENEMY_PICKS = 5;
 
