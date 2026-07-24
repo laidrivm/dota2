@@ -327,6 +327,11 @@ describe("bans", () => {
 		const after = applyAction(before, { kind: "banAdd", hero: 4 }, 3);
 		expect(after).toEqual(before);
 	});
+
+	test("no snapshot means no limit to ban against, so nothing is banned", () => {
+		const before = EMPTY_SESSION();
+		expect(applyAction(before, { kind: "banAdd", hero: 1 }, 0)).toEqual(before);
+	});
 });
 
 describe("team picks", () => {
@@ -399,6 +404,16 @@ describe("enemy picks", () => {
 		const before = { ...EMPTY_SESSION(), enemyPicks: [1, 2, 3, 4, 5] };
 		expect(applied(before, { kind: "enemyAdd", hero: 6 })).toEqual(before);
 	});
+
+	test.each([-1, 3])(
+		"removing at out-of-range index %p changes nothing",
+		(index) => {
+			const before = { ...EMPTY_SESSION(), enemyPicks: [1, 2, 3] };
+			expect(
+				applied(before, { kind: "enemyRemove", index }).enemyPicks,
+			).toEqual(before.enemyPicks);
+		},
+	);
 });
 
 describe("single occupancy", () => {
@@ -415,6 +430,15 @@ describe("single occupancy", () => {
 		["a hero on the enemy team", 3],
 	])("%s cannot be banned again", (_label, hero) => {
 		expect(applied(picked, { kind: "banAdd", hero })).toEqual(picked);
+	});
+
+	// Single occupancy makes this a no-op rather than a rewrite. It is what the
+	// picker of 2c will hit when a slot is "replaced" with the hero already in
+	// it, and it must stay harmless.
+	test("setting a slot to the hero it already holds changes nothing", () => {
+		expect(applied(picked, { kind: "teamSet", role: 1, hero: 2 })).toEqual(
+			picked,
+		);
 	});
 
 	test("a banned hero cannot be set as a team pick", () => {

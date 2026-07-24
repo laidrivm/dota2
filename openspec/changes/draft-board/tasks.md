@@ -174,13 +174,26 @@ Playwright target.
 - [x] 7.6 Verify `3` on the board changes nothing and `3` with the editor open
       changes the role. **(e2e)** (Req: draft-session — Role selection / Board
       is not an active context)
+- [x] 7.7 Verify the *first* side/role keystroke after the editor opens is
+      applied — the regression found during apply, and the only guard against
+      it returning. **(e2e)** (Req: draft-session — Side selection)
+- [x] 7.8 Verify picking a hero for one slot removes it from every other
+      pick-entry control. **(e2e)** (Req: draft-board — Pick entry / Used
+      heroes are not offered)
+- [x] 7.9 Verify the ban control is disabled at the limit and re-enabled when
+      a ban is removed. **(e2e)** (Req: draft-board — Bans row / Ban limit)
+- [x] 7.10 Verify the `insufficient data` badge appears on a team slot holding
+      a hero with `sufficient: false`. **(e2e)** (Req: draft-board — My-team
+      slots / Thin statistics are flagged)
 
 ## 8. Gates
 
-- [ ] 8.1 `bun test` green; `tsc --noEmit` clean; `biome check` clean.
-- [ ] 8.2 `/zombies` in diff mode over the branch; every new or `[partial]`
-      finding becomes a test or an explicit user decision to skip.
-- [ ] 8.3 No `/warm` gate — this change adds no dependency; state that in the
+- [x] 8.1 `bun test` green; `tsc --noEmit` clean; `biome check` clean.
+- [x] 8.2 `/zombies` in diff mode over the branch: nine findings became tests
+      (`board.test.ts` for the candidate list, plus parser, `topRoles`,
+      win-probability and reducer cases), four became the **(e2e)** bullets
+      7.7–7.10. Nothing was skipped.
+- [x] 8.3 No `/warm` gate — this change adds no dependency; state that in the
       PR rather than running it.
 - [ ] 8.4 `/triage` suggested to the user before the PR is opened.
 - [ ] 8.5 `PLAN.md` updated: 2b marked done, 2c named as next, any decision

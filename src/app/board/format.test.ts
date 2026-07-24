@@ -21,7 +21,8 @@ describe("heroAbbr", () => {
 		["Anti-Mage", "ANTI"],
 		["Io", "IO"],
 		["Nature's Prophet", "NATU"],
-	])("%s → %s", (name, abbr) => {
+		["", ""],
+	])("%p → %p", (name, abbr) => {
 		expect(heroAbbr(name)).toBe(abbr);
 	});
 });
@@ -41,10 +42,14 @@ describe("tile ink", () => {
 		expect(inkFor(INK_THRESHOLD - 0.0001)).toBe("light");
 	});
 
-	test("an unresolvable colour falls back to light lettering", () => {
-		expect(tileInk("")).toBe("light");
-		expect(tileInk("not a colour")).toBe("light");
-	});
+	/** The palette test below is what catches these for real; this pins what
+	 * the parser does with them so the two stay in step. */
+	test.each(["", "not a colour", "#fff", "rgb(69, 196, 180)", "#45c4b4;"])(
+		"a colour the parser cannot read (%p) falls back to light lettering",
+		(value) => {
+			expect(tileInk(value)).toBe("light");
+		},
+	);
 
 	test("black and white anchor the luminance scale", () => {
 		expect(relativeLuminance("#000000")).toBe(0);
@@ -107,6 +112,7 @@ describe("score and estimate formatting", () => {
 		[0.585, "~59% win"],
 		[0.5, "~50% win"],
 		[0.999, "~100% win"],
+		[0.004, "~0% win"],
 	])("a win probability of %p renders %s", (probability, text) => {
 		expect(formatWinProbability(probability)).toBe(text);
 	});
@@ -150,6 +156,10 @@ describe("topRoles", () => {
 				]),
 			),
 		).toBe("p5 100%");
+	});
+
+	test("an enemy with no inferred role at all renders nothing", () => {
+		expect(topRoles(probs([]))).toBe("");
 	});
 
 	test("equal probabilities are ordered by role", () => {
