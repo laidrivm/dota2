@@ -42,14 +42,15 @@ below.
         specs at `openspec/specs/{app-shell,snapshot-delivery,draft-session}`).
         Shipped `index.html`, `server.ts`, `static-routes.ts`, `src/app/**`,
         133 tests. Two design decisions reversed mid-apply — see decisions.
-  - [ ] **2b `draft-board`** ← Stage 1 done (`openspec/changes/draft-board`,
-        4/4 artifacts, validates); next step is Stage 2 (`/opsx:apply`) on a
-        `feat/draft-board` branch.
-        Board panels: bans, team slots, enemy slots with role probabilities,
-        suggestion blocks, result block. First `computeModel` call. Owns the
-        390px one-column layout — no `@media` rule exists yet, and the Setup
-        strip has never been rendered at that width.
-  - [ ] **2c `hero-picker`** — picker overlay (search/aliases/grid/keyboard),
+  - [ ] **2b `draft-board`** ← applied on `feat/draft-board`: 49/51 tasks,
+        only the `/triage` suggestion and this entry left. 234 tests.
+        Shipped the bans row, team and enemy slots, suggestion blocks, the
+        result block, the collapsed header + editor, the 390px one-column
+        layout, and the first `computeModel` call. Two corrections mid-apply —
+        see decisions.
+  - [ ] **2c `hero-picker`** ← next after 2b merges. Deletes the temporary
+        `<select>` and points `applyAction` at the overlay.
+        Picker overlay (search/aliases/grid/keyboard),
         board hotkeys + context routing, New/reset dialog, undo toast,
         screens-spec §6 edge cases.
 - [ ] **Task 4** — Playwright smoke (precondition: a UI exists); its first
@@ -128,7 +129,15 @@ below.
   is usable and testable before the picker exists; 2c deletes it and points
   the same `applyAction` seam at the picker overlay.
 - Side/role hotkeys become context-scoped in 2b (Setup or the open header
-  editor only), because 2c reuses `1`–`5` on the board for the picker.
+  editor only), because 2c reuses `1`–`5` on the board for the picker. The
+  document listener reads that context through a ref and is installed once:
+  re-subscribing per context change dropped the first keystroke after the
+  editor opened, because effects flush a frame later than the click.
+- 2b corrections found during apply: the planned contrast-floor test for the
+  tile ink guards nothing (with two fixed inks the worst case is pinned at
+  the threshold), so the suite guards the palette tokens parsing instead; and
+  a tile carries an accessible name only where its row does not already name
+  the hero, so a screen reader hears it once.
 
 ## Gates (reminder)
 
