@@ -48,13 +48,13 @@ below.
         team and enemy slots, suggestion blocks, the result block, the
         collapsed header + editor, the 390px one-column layout, and the first
         `computeModel` call. 244 tests. Corrections mid-apply — see decisions.
-  - [ ] **2c `hero-picker`** — Stage 1 done on `feat/hero-picker`:
-        `openspec/changes/hero-picker/` holds proposal, design, tasks and the
-        three spec deltas (`hero-picker` new; `draft-board` and `draft-session`
-        modified). Next step is Stage 2 (`/opsx:apply`). Deletes the temporary
-        `<select>` and points `applyAction` at the overlay. Picker overlay
-        (search/aliases/grid/keyboard), board hotkeys + context routing,
-        New/reset dialog, undo toast, screens-spec §6.4.
+  - [ ] **2c `hero-picker`** — Stage 1 merged (PR #15). Stage 2 applied on
+        `feat/hero-picker-apply`: 65 of 66 tasks done, 324 tests, every
+        **(e2e)** bullet walked by hand in Chrome. Shipped `src/app/picker/`,
+        the reset dialog and undo toast, board hotkeys with the `modal`
+        context, `usedAs`, the `re-pick` marker, and three overlay tokens
+        pushed to the design project. Open: Stage 3 gates — `/triage` is the
+        user's to run, then the PR.
 - [ ] **Task 4** — Playwright smoke (precondition: a UI exists); its first
       scenarios are the tasks marked **(e2e)** in `ui-foundation/tasks.md`
 - [ ] **Task 7** — Docker + VPS deploy (open decisions: registry
@@ -139,6 +139,16 @@ below.
   inert background, Esc); reset keeps side and role and clears only the draft,
   as the design's own dialog copy promises; undo is one level, stored under
   `draft.backup`, dropped by the first draft action after a reset.
+- 2c corrections found during apply: `apply` closed the undo window on the
+  action's kind, so a refused ban dropped the backup — the decision now reads
+  the reducer's result; Space on a grid tile was swallowed by the
+  printable-key branch instead of pressing the tile; the post-pick focus
+  redirect took the first removal control of a region, which after a fifth
+  enemy pick is somebody else's hero. A planned `isUsed`/`usedAs` equality
+  test was dropped: with `isUsed` defined as the wrapper it passes against any
+  implementation.
+- 2c: taken tiles use `aria-disabled`, not `disabled`, so the arrow keys keep
+  the grid's geometry and a screen reader still reads them out.
 - 2b corrections found during apply: the planned contrast-floor test for the
   tile ink guards nothing (with two fixed inks the worst case is pinned at
   the threshold), so the suite guards the palette tokens parsing instead; and

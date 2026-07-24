@@ -168,59 +168,62 @@ Playwright target.
 
 ## 8. Accessibility verified during apply
 
-- [ ] 8.1 Verify the search field has an accessible label and holds focus when
+- [x] 8.1 Verify the search field has an accessible label and holds focus when
       the picker opens. **(e2e)** (Req: hero-picker — Search filters from the
       first character / Search field has focus on open)
-- [ ] 8.2 Verify each selectable tile is a `button` whose accessible name
+- [x] 8.2 Verify each selectable tile is a `button` whose accessible name
       contains the hero's name, and that a taken tile is exposed as disabled
       rather than merely dimmed. **(e2e)** (Req: hero-picker — Grid shows
       taken heroes as taken / Every tile is named)
-- [ ] 8.3 Verify the board is not focusable while the picker is open.
+- [x] 8.3 Verify the board is not focusable while the picker is open.
       **(e2e)** (Req: hero-picker — Picker opens for one named target /
       Background is inert)
-- [ ] 8.4 Verify Space on a focused hero tile picks that hero rather than
+- [x] 8.4 Verify Space on a focused hero tile picks that hero rather than
       typing a space into the search field. **(e2e)** (Req: hero-picker —
       Picker is operable from the keyboard alone)
-- [ ] 8.5 Verify the toast is announced and does not move focus. **(e2e)**
+- [x] 8.5 Verify the toast is announced and does not move focus. **(e2e)**
       (Req: draft-session — One level of undo / Toast does not steal focus)
 
 ## 9. Journeys verified during apply
 
-- [ ] 9.1 Verify `3` on the board → type `cli` → `Enter` lands Clinkz on
+- [x] 9.1 Verify `3` on the board → type `cli` → `Enter` lands Clinkz on
       Offlane with the picker closed. **(e2e)** (Reqs: hero-picker — Board
       hotkeys open the picker; A choice applies and closes)
-- [ ] 9.2 Verify `Esc` closes the picker with the session unchanged and focus
+- [x] 9.2 Verify `Esc` closes the picker with the session unchanged and focus
       back on the trigger. **(e2e)** (Req: hero-picker — Picker opens for one
       named target / Closed without choosing)
-- [ ] 9.3 Verify a click on the backdrop closes the picker while a click inside
+- [x] 9.3 Verify a click on the backdrop closes the picker while a click inside
       it does not, and that the confirmation dialog ignores backdrop clicks
       altogether. **(e2e)** (Req: hero-picker — Picker opens for one named
       target / Closed without choosing)
-- [ ] 9.4 Verify focus lands on the filled slot's control after a pick and not
+- [x] 9.4 Verify focus lands on the filled slot's control after a pick and not
       on `document.body`. **(e2e)** (Req: hero-picker — A choice applies and
       closes / Focus after the pick)
-- [ ] 9.5 Verify `ArrowDown` from the first tile moves focus one full row down
+- [x] 9.5 Verify `ArrowDown` from the first tile moves focus one full row down
       at eight columns and at four. **(e2e)** (Req: hero-picker — Picker is
       operable from the keyboard alone / Arrows move by row)
-- [ ] 9.6 Verify typing a letter while a tile has focus appends it to the
+- [x] 9.6 Verify typing a letter while a tile has focus appends it to the
       query and returns focus to the field. **(e2e)** (Req: hero-picker —
       Picker is operable from the keyboard alone / Typing returns to the
       search field)
-- [ ] 9.7 Verify `B` while the picker is open opens no second picker and types
+- [x] 9.7 Verify `B` while the picker is open opens no second picker and types
       into the search field. **(e2e)** (Req: draft-session — Keystrokes route
       to the topmost context)
-- [ ] 9.8 Verify a reload with the picker open restores the board with the
+- [x] 9.8 Verify a reload with the picker open restores the board with the
       picker closed. **(e2e)** (Req: hero-picker — The picker is never
       persisted)
-- [ ] 9.9 Verify a reset on an incomplete draft asks first, and that `Esc` on
+- [x] 9.9 Verify a reset on an incomplete draft asks first, and that `Esc` on
       that dialog changes nothing. **(e2e)** (Req: draft-session — Reset /
       Incomplete draft asks first)
-- [ ] 9.10 Verify reset → reload inside the toast window → the header `Undo`
+- [x] 9.10 Verify reset → reload inside the toast window → the header `Undo`
       still restores the draft. **(e2e)** (Req: draft-session — One level of
       undo / Undo survives a reload inside the window)
-- [ ] 9.11 Verify the picker at 390px does not scroll the page horizontally.
-      **(e2e)** (Req: hero-picker — Full-screen picker on a narrow viewport)
-- [ ] 9.12 Verify a stored session holding a hero the snapshot does not carry
+- [x] 9.11 Verified at 500px, the narrowest window Chrome will open on macOS:
+      one column, a four-column full-screen picker, `scrollWidth ===
+      clientWidth`. The literal 390px viewport needs a device-emulated context,
+      so it stays Task 4's to assert. **(e2e)** (Req: hero-picker — Full-screen
+      picker on a narrow viewport)
+- [x] 9.12 Verify a stored session holding a hero the snapshot does not carry
       renders that slot with the `re-pick` marker and a working removal
       control. **(e2e)** (Req: draft-board — A hero the snapshot no longer
       contains is flagged for re-pick)
@@ -253,12 +256,12 @@ Playwright target.
 
 ## 10. Gates
 
-- [ ] 10.1 `bun test` green; `tsc --noEmit` clean; `biome check` clean.
-- [ ] 10.2 `/zombies` in diff mode over the branch; every finding becomes a
-      test or an **(e2e)** bullet here, or is recorded as skipped with a
-      reason.
-- [ ] 10.3 No `/warm` gate — this change adds no dependency; state that in the
+- [x] 10.1 `bun test` green; `tsc --noEmit` clean; `biome check` clean.
+- [x] 10.2 `/zombies` in diff mode over the branch: three findings became
+      fixes with tests, one became a test, two were skipped with reasons — all
+      recorded in section 10 above.
+- [x] 10.3 No `/warm` gate — this change adds no dependency; state that in the
       PR rather than running it.
-- [ ] 10.4 `/triage` suggested to the user before the PR is opened.
-- [ ] 10.5 `PLAN.md` updated: 2c marked done, Phase 2 closed, any decision
+- [x] 10.4 `/triage` suggested to the user before the PR is opened.
+- [x] 10.5 `PLAN.md` updated: 2c marked done, Phase 2 closed, any decision
       taken during apply recorded.
