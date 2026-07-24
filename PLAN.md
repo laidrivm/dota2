@@ -163,8 +163,9 @@ below.
 
 ## Gates (reminder)
 
-- `/warm` after any dependency-manifest change.
-- `/zombies` after non-trivial code; in the OpenSpec cycle — at propose
-  (from the description) and at review (diff mode).
-- `/triage` — suggested to the user before every PR, never self-run.
+- Before every PR: `/zombies` → fix → `/warm` (only when a manifest changed)
+  → `/ponytail-review` → `/triage`, in that order and all self-run; act on
+  every finding, report what is skipped and why (CLAUDE.md — Review toolkit).
+- `/zombies` also at propose, from the feature description.
+- `/coderabbit` once the PR has the bot's comments.
 - Commit per completed task-list item without being asked
