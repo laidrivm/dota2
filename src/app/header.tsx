@@ -16,12 +16,17 @@ export function Header({
 	apply,
 	editorOpen,
 	onToggleEditor,
+	onNew,
+	onUndo,
 }: {
 	bundle: SnapshotBundle;
 	session: Session;
 	apply: (action: Action) => void;
 	editorOpen: boolean;
 	onToggleEditor: () => void;
+	onNew: () => void;
+	/** Absent while there is nothing to undo — the control goes with it. */
+	onUndo?: () => void;
 }) {
 	const isSetUp = session.side !== null && session.myRole !== null;
 
@@ -30,16 +35,15 @@ export function Header({
 			<div class="header-bar">
 				{isSetUp && (
 					<>
-						{/* Reset is proposal 2c's. The control sits here now because the
-						    header is built now, and it says so rather than pretending. */}
-						<button
-							type="button"
-							class="header-button"
-							disabled
-							title="Reset arrives with the hero picker"
-						>
+						<button type="button" class="header-button" onClick={onNew}>
 							New
 						</button>
+						{/* Lives exactly as long as the backup does (screens-spec §4). */}
+						{onUndo !== undefined && (
+							<button type="button" class="header-button" onClick={onUndo}>
+								Undo
+							</button>
+						)}
 						<button
 							type="button"
 							class="session-summary"

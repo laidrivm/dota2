@@ -27,6 +27,10 @@
 	--radiant: #7fd694;
 	--dire: #e0705f;
 	--score-pos: #7dd490; /* suggestion score */
+	/* overlays */
+	--backdrop: rgba(0, 0, 0, 0.55); /* behind a modal dialog */
+	--shadow-modal: 0 24px 64px rgba(0, 0, 0, 0.6);
+	--shadow-toast: 0 12px 32px rgba(0, 0, 0, 0.5);
 	/* hero tile */
 	--tile-inset: inset 0 0 0 1px rgba(255, 255, 255, 0.14);
 	--tile-ink-dark: #1b1d12; /* abbreviation on a light tile */

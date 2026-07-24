@@ -1,9 +1,17 @@
-import { useEffect, useMemo, useState } from "preact/hooks";
+import { useEffect, useMemo, useRef, useState } from "preact/hooks";
 import { computeModel } from "../model.ts";
-import type { SnapshotBundle } from "../types.ts";
+import type { HeroId, SnapshotBundle } from "../types.ts";
 import { Board } from "./board/board.tsx";
 import { Header } from "./header.tsx";
-import { closesEditor, type PickTarget, useSession } from "./session.ts";
+import { Picker } from "./picker/picker.tsx";
+import {
+	type Action,
+	closesEditor,
+	confirmsReset,
+	type PickTarget,
+	usedAs,
+	useSession,
+} from "./session.ts";
 import { SessionControls } from "./session-controls.tsx";
 import { loadSnapshot } from "./snapshot.ts";
 
@@ -21,10 +29,12 @@ export function App() {
 		snapshot === "pending" || snapshot === null
 			? 0
 			: snapshot.heroes.length - 10;
-	const { session, apply } = useSession({
+	const [confirming, setConfirming] = useState(false);
+	const [toast, setToast] = useState(false);
+	const { session, apply, reset, undo, canUndo } = useSession({
 		banLimit,
 		editorOpen,
-		modalOpen: pickTarget !== null,
+		modalOpen: pickTarget !== null || confirming,
 		openPicker: setPickTarget,
 	});
 
@@ -45,6 +55,14 @@ export function App() {
 	useEffect(() => {
 		loadSnapshot().then(setSnapshot);
 	}, []);
+
+	// The toast is the transient half of the undo window; the header control is
+	// the durable half, so this timer hides one and never touches the backup.
+	useEffect(() => {
+		if (!toast) return;
+		const timer = setTimeout(() => setToast(false), 5000);
+		return () => clearTimeout(timer);
+	}, [toast]);
 
 	// The editor is the one modal state on this screen, so Esc leaves it. The
 	// listener is unconditional — closing a closed editor is a no-op, and
@@ -74,6 +92,16 @@ export function App() {
 	// The board expands as soon as both are chosen — no confirm step.
 	const isSetUp = session.side !== null && session.myRole !== null;
 
+	/** A finished draft is reset on the spot; anything less is worth asking. */
+	const onNew = () => {
+		if (confirmsReset(session)) {
+			setConfirming(true);
+			return;
+		}
+		reset();
+		setToast(true);
+	};
+
 	return (
 		<>
 			<Header
@@ -82,6 +110,8 @@ export function App() {
 				apply={apply}
 				editorOpen={editorOpen}
 				onToggleEditor={() => setEditorOpen((open) => !open)}
+				onNew={onNew}
+				onUndo={canUndo ? undo : undefined}
 			/>
 			{isSetUp && model !== null ? (
 				<Board
@@ -90,13 +120,118 @@ export function App() {
 					model={model}
 					banLimit={banLimit}
 					apply={apply}
+					onPick={setPickTarget}
 				/>
 			) : (
 				<main class="setup">
 					<SessionControls session={session} apply={apply} />
 				</main>
 			)}
+			{confirming && (
+				<ResetDialog
+					onAnswer={(confirmed) => {
+						setConfirming(false);
+						if (!confirmed) return;
+						reset();
+						setToast(true);
+					}}
+				/>
+			)}
+			{toast && canUndo && (
+				<p class="toast" role="status">
+					Draft reset
+					<span class="separator">·</span>
+					<button
+						type="button"
+						class="link-button"
+						onClick={() => {
+							undo();
+							setToast(false);
+						}}
+					>
+						Undo
+					</button>
+				</p>
+			)}
+			{pickTarget !== null && (
+				<Picker
+					bundle={snapshot}
+					target={pickTarget}
+					usedOf={(hero) => usedAs(session, hero)}
+					onPick={(hero) => {
+						apply(pickAction(pickTarget, hero));
+						setPickTarget(null);
+						focusAfterPick(pickTarget);
+					}}
+					onClose={() => setPickTarget(null)}
+				/>
+			)}
 		</>
+	);
+}
+
+const pickAction = (target: PickTarget, hero: HeroId): Action =>
+	target.kind === "ban"
+		? { kind: "banAdd", hero }
+		: target.kind === "enemy"
+			? { kind: "enemyAdd", hero }
+			: { kind: "teamSet", role: target.role, hero };
+
+const positionOf = (target: PickTarget): string =>
+	target.kind === "team" ? `team-${target.role}` : target.kind;
+
+/**
+ * The dialog hands focus back to the trigger that opened it, and a filled slot
+ * no longer has one. The replacement is focused after Preact commits — a
+ * macrotask, because `rAF` runs before the commit and never fires in a hidden
+ * tab — preferring the trigger where it survives (bans and enemies keep one)
+ * and the new entry's removal control where it does not.
+ */
+function focusAfterPick(target: PickTarget): void {
+	const position = positionOf(target);
+	setTimeout(() => {
+		const next =
+			document.querySelector(`[data-pick="${position}"]:not(:disabled)`) ??
+			document.querySelector(`[data-remove="${position}"]`);
+		if (next instanceof HTMLElement) next.focus();
+	}, 0);
+}
+
+/**
+ * `Reset draft?` (screens-spec §4). A `form method="dialog"` closes the dialog
+ * with the pressed button's value, so `Esc` (a native cancel, empty value) and
+ * `Cancel` land in the same branch; `Reset` holds focus, which is what makes
+ * `Enter` confirm without a key handler of our own.
+ */
+function ResetDialog({ onAnswer }: { onAnswer: (confirmed: boolean) => void }) {
+	const dialog = useRef<HTMLDialogElement>(null);
+	const confirm = useRef<HTMLButtonElement>(null);
+
+	useEffect(() => {
+		dialog.current?.showModal();
+		confirm.current?.focus();
+	}, []);
+
+	return (
+		<dialog
+			class="confirm"
+			ref={dialog}
+			aria-labelledby="reset-title"
+			onClose={() => onAnswer(dialog.current?.returnValue === "reset")}
+		>
+			<form method="dialog">
+				<h2 id="reset-title">Reset draft?</h2>
+				<p>Bans and all picks will be cleared. Side and role stay.</p>
+				<div class="confirm-actions">
+					<button type="submit" value="cancel">
+						Cancel
+					</button>
+					<button type="submit" value="reset" class="danger" ref={confirm}>
+						Reset
+					</button>
+				</div>
+			</form>
+		</dialog>
 	);
 }
 

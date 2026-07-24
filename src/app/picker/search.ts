@@ -6,7 +6,7 @@
  * nothing — a substring search on 126 heroes returns a wall.
  */
 
-import type { HeroEntry } from "../../types.ts";
+import type { HeroEntry, HeroId } from "../../types.ts";
 
 /** Hyphens separate words too, so `mage` reaches Anti-Mage. */
 const words = (value: string): string[] => value.toLowerCase().split(/[\s-]+/);
@@ -31,3 +31,13 @@ export function matchHeroes(heroes: HeroEntry[], query: string): HeroEntry[] {
 				);
 	return matches.sort(byName);
 }
+
+/**
+ * What `Enter` takes: the first match the grid will actually let you choose.
+ * A hero already banned or picked is shown, dimmed, and skipped here — Enter
+ * must never apply what a click cannot.
+ */
+export const firstSelectable = (
+	matches: HeroEntry[],
+	isTaken: (hero: HeroId) => boolean,
+): HeroEntry | undefined => matches.find((hero) => !isTaken(hero.id));

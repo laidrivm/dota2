@@ -1,6 +1,11 @@
 import { describe, expect, test } from "bun:test";
-import type { SnapshotBundle } from "../../types.ts";
-import { matchHeroes } from "./search.ts";
+import {
+	EMPTY_SESSION,
+	type Session,
+	type SnapshotBundle,
+} from "../../types.ts";
+import { isUsed } from "../session.ts";
+import { firstSelectable, matchHeroes } from "./search.ts";
 
 const bundle = (await Bun.file(
 	new URL("../../fixtures/snapshot.json", import.meta.url),
@@ -60,5 +65,49 @@ describe("matching", () => {
 
 	test("a hero with no aliases is matched by its name alone", () => {
 		expect(names("larg")).toEqual(["Largo"]);
+	});
+});
+
+describe("what Enter takes", () => {
+	const named = (name: string) => {
+		const hero = heroes.find((entry) => entry.name === name);
+		if (hero === undefined) throw new Error(`${name} is not in the fixture`);
+		return hero.id;
+	};
+	const taken = (session: Session) => (hero: number) => isUsed(session, hero);
+
+	test("is the first match on an untouched draft", () => {
+		const matches = matchHeroes(heroes, "cl");
+
+		expect(matches.map((hero) => hero.name)).toEqual(["Clinkz", "Clockwerk"]);
+		expect(firstSelectable(matches, taken(EMPTY_SESSION()))?.name).toBe(
+			"Clinkz",
+		);
+	});
+
+	test("skips a hero already on the board", () => {
+		const session: Session = { ...EMPTY_SESSION(), bans: [named("Clinkz")] };
+
+		expect(
+			firstSelectable(matchHeroes(heroes, "cl"), taken(session))?.name,
+		).toBe("Clockwerk");
+	});
+
+	test("is nothing when every match is taken", () => {
+		const session: Session = {
+			...EMPTY_SESSION(),
+			bans: [named("Clinkz")],
+			enemyPicks: [named("Clockwerk")],
+		};
+
+		expect(
+			firstSelectable(matchHeroes(heroes, "cl"), taken(session)),
+		).toBeUndefined();
+	});
+
+	test("is nothing when the query matches nothing", () => {
+		expect(
+			firstSelectable(matchHeroes(heroes, "zzz"), taken(EMPTY_SESSION())),
+		).toBeUndefined();
 	});
 });

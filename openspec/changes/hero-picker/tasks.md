@@ -94,71 +94,77 @@ Playwright target.
 
 ## 5. Picker overlay
 
-- [ ] 5.1 Build `src/app/picker/picker.tsx` as a native `<dialog>` opened with
+- [x] 5.1 Build `src/app/picker/picker.tsx` as a native `<dialog>` opened with
       `showModal()`: context title from the `PickTarget`, `✕` control,
       autofocused search field, hero grid, mono hint bar. (Reqs: hero-picker —
       Picker opens for one named target; Search filters from the first
       character)
-- [ ] 5.2 Render the grid from the design's `component-picker.html`: 40px
+- [x] 5.2 Render the grid from the design's `component-picker.html`: 40px
       tiles with the hero name under each, taken heroes at `opacity: .35`
       labelled `ban` / `team` / `enemy` in the accent colour and disabled, the
       first match ringed on a `--bg-3` cell. (Req: hero-picker — Grid shows
       taken heroes as taken)
-- [ ] 5.3 Render a `role="status"` message when the query matches no hero.
+- [x] 5.3 Render a `role="status"` message when the query matches no hero.
       (Req: hero-picker — Grid / No match)
-- [ ] 5.4 Test: the first selectable match is the first hero with
+- [x] 5.4 Test: the first selectable match is the first hero with
       `usedAs(...) === null`, and there is none when every match is taken.
       (Req: hero-picker — Picker is operable from the keyboard alone / Enter
       when every match is taken)
-- [ ] 5.5 Implement the keyboard layer: `Enter` picks the first selectable
+- [x] 5.5 Implement the keyboard layer: `Enter` picks the first selectable
       match (nothing when there is none, whether the grid is empty or every
       match is taken), arrows move by one and by the grid's computed column
       count, a printable key on a tile appends to the query and refocuses the
       field, `Esc` closes. (Req: hero-picker — Picker is operable from the
       keyboard alone)
-- [ ] 5.6 Close the picker on a `click` whose target is the dialog element
+- [x] 5.6 Close the picker on a `click` whose target is the dialog element
       itself, and give the confirmation dialog no light dismiss. (Req:
       hero-picker — Picker opens for one named target / Closed without
       choosing)
-- [ ] 5.7 Apply a choice through the existing `applyAction`, close the dialog,
+- [x] 5.7 Apply a choice through the existing `applyAction`, close the dialog,
       and redirect focus to the filled position in a macrotask. (Req:
       hero-picker — A choice applies and closes)
-- [ ] 5.8 Hold the `PickTarget` in `App` state only — never in the session or
+- [x] 5.8 Hold the `PickTarget` in `App` state only — never in the session or
       in storage. (Req: hero-picker — The picker is never persisted)
 
 ## 6. Board and header wiring
 
-- [ ] 6.1 Delete `PickEntry` and `availableHeroes`; every empty slot and the
+- [x] 6.1 Delete `PickEntry` and `availableHeroes`; every empty slot and the
       bans row becomes a button opening the picker for its position, keeping
       the bans row's disabled-at-the-limit behaviour. (Reqs: draft-board —
       Pick entry; Bans row / Ban limit)
-- [ ] 6.2 Update `board.test.ts`: the candidate-list tests go with
-      `availableHeroes`; what survives is the `usedAs` coverage of task 2.
-      (Req: draft-board — Pick entry)
-- [ ] 6.3 Make `New` live: the confirmation dialog while fewer than ten picks
+- [x] 6.2 `board.test.ts` deleted with `availableHeroes`, its only subject;
+      what replaces it is the `usedAs` coverage of task 2. (Req: draft-board —
+      Pick entry)
+- [x] 6.3 Make `New` live: the confirmation dialog while fewer than ten picks
       are in, immediate reset at ten. (Req: draft-session — Reset clears the
       draft and keeps the setup)
-- [ ] 6.4 Add the `Draft reset · Undo` toast (`role="status"`, five seconds)
+- [x] 6.4 Add the `Draft reset · Undo` toast (`role="status"`, five seconds)
       and the header `Undo`, both rendered off `backup !== null`. (Req:
       draft-session — One level of undo after a reset)
-- [ ] 6.5 Tests: a session hero id absent from the loaded snapshot keeps its
-      slot with a `re-pick` marker, and the other panels still render and
-      recompute. (Req: draft-board — A hero the snapshot no longer contains is
-      flagged for re-pick)
-- [ ] 6.6 Implement the `re-pick` marker on team, enemy, and ban entries whose
+- [x] 6.5 The recompute half is already guarded — `model.test.ts`'s "unknown
+      hero id in session does not crash or poison scores". The marker itself is
+      DOM-only, so it is verified as **(e2e)** in 9.12 rather than with a DOM
+      environment this project does not carry. (Req: draft-board — A hero the
+      snapshot no longer contains is flagged for re-pick)
+- [x] 6.6 Implement the `re-pick` marker on team, enemy, and ban entries whose
       hero left the snapshot. (Req: draft-board — A hero the snapshot no
       longer contains is flagged for re-pick)
 
 ## 7. Styles
 
-- [ ] 7.1 Picker, dialog, and toast styles in `src/app/styles/app.css` from
+- [x] 7.1 Picker, dialog, and toast styles in `src/app/styles/app.css` from
       the design project's `component-picker.html` and
       `component-dialogs.html`, using existing tokens only. (Reqs: hero-picker
       — Grid shows taken heroes as taken; app-shell — Style values come from
       design tokens)
-- [ ] 7.2 Full-screen picker below 720px with a reflowed grid, verified at
+- [x] 7.2 Full-screen picker below 720px with a reflowed grid, verified at
       390px with no horizontal page scroll. (Req: hero-picker — Full-screen
       picker on a narrow viewport)
+- [x] 7.3 Three overlay tokens the dialogs need — `--backdrop`,
+      `--shadow-modal`, `--shadow-toast` — added to
+      `src/app/styles/tokens/colors.css` and pushed to the design project's
+      `tokens/colors.css`, so the copy stays verbatim. (Req: app-shell — Style
+      values come from design tokens)
 
 ## 8. Accessibility verified during apply
 
@@ -211,6 +217,10 @@ Playwright target.
       undo / Undo survives a reload inside the window)
 - [ ] 9.11 Verify the picker at 390px does not scroll the page horizontally.
       **(e2e)** (Req: hero-picker — Full-screen picker on a narrow viewport)
+- [ ] 9.12 Verify a stored session holding a hero the snapshot does not carry
+      renders that slot with the `re-pick` marker and a working removal
+      control. **(e2e)** (Req: draft-board — A hero the snapshot no longer
+      contains is flagged for re-pick)
 
 ## 10. Gates
 
