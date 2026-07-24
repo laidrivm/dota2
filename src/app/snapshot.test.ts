@@ -24,8 +24,11 @@ function installStorage() {
 	};
 }
 
-function stubFetch(respond: () => Response | Promise<Response>) {
-	globalThis.fetch = (() => respond()) as unknown as typeof fetch;
+function stubFetch(
+	respond: (init?: RequestInit) => Response | Promise<Response>,
+) {
+	globalThis.fetch = ((_url: string, init?: RequestInit) =>
+		respond(init)) as unknown as typeof fetch;
 }
 
 beforeEach(installStorage);
@@ -139,20 +142,25 @@ describe("fetch and cache", () => {
 		expect(await loadSnapshot()).toBeNull();
 	});
 
-	test("a stalled fetch does not hang the app forever", async () => {
-		stubFetch(
-			() =>
-				new Promise<Response>((_, reject) =>
-					// What AbortSignal.timeout does once the deadline passes.
-					setTimeout(
-						() => reject(new DOMException("timed out", "TimeoutError")),
-						10,
-					),
+	test("a stalled fetch is given a deadline, then falls back", async () => {
+		let signal: AbortSignal | null | undefined;
+		stubFetch((init) => {
+			signal = init?.signal;
+			// What AbortSignal.timeout does once the deadline passes.
+			return new Promise<Response>((_, reject) =>
+				setTimeout(
+					() => reject(new DOMException("timed out", "TimeoutError")),
+					10,
 				),
-		);
+			);
+		});
 		store.set(CACHE_KEY, JSON.stringify(fixture));
 
-		expect((await loadSnapshot())?.patch.id).toBe(fixture.patch.id);
+		const bundle = await loadSnapshot();
+
+		// Without this the test would pass on a fetch that can hang forever.
+		expect(signal).toBeInstanceOf(AbortSignal);
+		expect(bundle?.patch.id).toBe(fixture.patch.id);
 	});
 
 	test("a cold cache with a dead network is the error state", async () => {
