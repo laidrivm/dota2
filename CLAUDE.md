@@ -172,6 +172,8 @@ protocol:
 
 ### Rules
 
+- Read state a document-level listener depends on through a ref, never by
+  re-subscribing the listener when that state changes.
 - A guard against malformed input must cover the whole value, not a prefix —
   anchor both ends or parse it.
 - Before calling a tracked file a duplicate, check whether its twin is
