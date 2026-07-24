@@ -178,7 +178,10 @@ Playwright target.
 - [ ] 8.3 Verify the board is not focusable while the picker is open.
       **(e2e)** (Req: hero-picker — Picker opens for one named target /
       Background is inert)
-- [ ] 8.4 Verify the toast is announced and does not move focus. **(e2e)**
+- [ ] 8.4 Verify Space on a focused hero tile picks that hero rather than
+      typing a space into the search field. **(e2e)** (Req: hero-picker —
+      Picker is operable from the keyboard alone)
+- [ ] 8.5 Verify the toast is announced and does not move focus. **(e2e)**
       (Req: draft-session — One level of undo / Toast does not steal focus)
 
 ## 9. Journeys verified during apply
