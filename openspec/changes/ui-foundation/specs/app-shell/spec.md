@@ -37,8 +37,9 @@ bundle.
 
 - **WHILE** the browser is offline and a previously fetched snapshot is
   present in `localStorage`
-- **THEN** the app SHALL render the board shell with that snapshot rather
-  than an error screen
+- **THEN** the app SHALL render the screen its session derives — Setup while
+  `side` or `myRole` is `null`, the header strip once both are set — using
+  that snapshot, rather than an error screen
 
 ### Requirement: Style values come from design tokens
 

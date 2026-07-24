@@ -75,12 +75,12 @@ Task 4's Playwright smoke suite.
       `createdAt` near a UTC day boundary formats from the date the field
       carries, not the viewer's local shift. (Req: snapshot-delivery —
       Header shows snapshot provenance)
-- [x] 4.4 Implement `src/app/snapshot.ts`: `import snapshotUrl from
-      "../fixtures/snapshot.json" with { type: "file" }`, one fetch per
-      page lifetime, shape validation, cache read/write through the 3.2
-      wrapper, and the `{ bundle | error }` result the app renders from.
-      (Reqs: snapshot-delivery — Snapshot is fetched from a URL; Last good
-      snapshot cached)
+- [x] 4.4 Implement `src/app/snapshot.ts`: the stable `/snapshot.json` URL as
+      a plain constant (not a bundler asset import — see design.md), one
+      automatic fetch with a timeout and no polling, further fetches only on
+      an explicit retry, shape validation, and cache read/write through the
+      3.2 wrapper. (Reqs: snapshot-delivery — Snapshot is fetched from a
+      URL; Last good snapshot cached)
 - [x] 4.5 Header component: product name in plain type (no logo asset
       exists), the provenance line, and the `new patch — stats are still
       stabilizing` banner rendered only while `stabilizing` is `true`.
