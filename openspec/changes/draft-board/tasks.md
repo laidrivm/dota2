@@ -195,6 +195,6 @@ Playwright target.
       7.7–7.10. Nothing was skipped.
 - [x] 8.3 No `/warm` gate — this change adds no dependency; state that in the
       PR rather than running it.
-- [ ] 8.4 `/triage` suggested to the user before the PR is opened.
+- [x] 8.4 `/triage` suggested to the user before the PR is opened.
 - [x] 8.5 `PLAN.md` updated: 2b marked done, 2c named as next, any decision
       taken during apply recorded.
