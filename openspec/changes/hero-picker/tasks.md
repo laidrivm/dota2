@@ -79,9 +79,10 @@ Playwright target.
 - [ ] 4.4 Test: a second reset replaces the backup rather than stacking it —
       undo returns the draft from before the second reset only. (Req:
       draft-session — One level of undo, backup replacement)
-- [ ] 4.5 Test: the first draft mutation after a reset clears `draft.backup`.
-      (Req: draft-session — One level of undo / Entering a hero ends the undo
-      window)
+- [ ] 4.5 Tests: each of `banAdd`, `teamSet`, and `enemyAdd` after a reset
+      clears `draft.backup`; a `side` or `role` change does not. (Req:
+      draft-session — One level of undo / Entering a hero ends the undo window;
+      Editing the setup keeps the undo window)
 - [ ] 4.6 Test: a `draft.backup` value that is not valid JSON or not a `v: 1`
       session is discarded, no undo is offered, and nothing throws. (Req:
       draft-session — One level of undo / Unreadable backup)
@@ -103,15 +104,24 @@ Playwright target.
       taken heroes as taken)
 - [ ] 5.3 Render a `role="status"` message when the query matches no hero.
       (Req: hero-picker — Grid / No match)
-- [ ] 5.4 Implement the keyboard layer: `Enter` picks the first match (nothing
-      when there is none), arrows move by one and by the grid's computed
-      column count, a printable key on a tile appends to the query and
-      refocuses the field, `Esc` closes. (Req: hero-picker — Picker is
-      operable from the keyboard alone)
-- [ ] 5.5 Apply a choice through the existing `applyAction`, close the dialog,
+- [ ] 5.4 Test: the first selectable match is the first hero with
+      `usedAs(...) === null`, and there is none when every match is taken.
+      (Req: hero-picker — Picker is operable from the keyboard alone / Enter
+      when every match is taken)
+- [ ] 5.5 Implement the keyboard layer: `Enter` picks the first selectable
+      match (nothing when there is none, whether the grid is empty or every
+      match is taken), arrows move by one and by the grid's computed column
+      count, a printable key on a tile appends to the query and refocuses the
+      field, `Esc` closes. (Req: hero-picker — Picker is operable from the
+      keyboard alone)
+- [ ] 5.6 Close the picker on a `click` whose target is the dialog element
+      itself, and give the confirmation dialog no light dismiss. (Req:
+      hero-picker — Picker opens for one named target / Closed without
+      choosing)
+- [ ] 5.7 Apply a choice through the existing `applyAction`, close the dialog,
       and redirect focus to the filled position in a macrotask. (Req:
       hero-picker — A choice applies and closes)
-- [ ] 5.6 Hold the `PickTarget` in `App` state only — never in the session or
+- [ ] 5.8 Hold the `PickTarget` in `App` state only — never in the session or
       in storage. (Req: hero-picker — The picker is never persisted)
 
 ## 6. Board and header wiring
@@ -171,29 +181,33 @@ Playwright target.
 - [ ] 9.2 Verify `Esc` closes the picker with the session unchanged and focus
       back on the trigger. **(e2e)** (Req: hero-picker — Picker opens for one
       named target / Closed without choosing)
-- [ ] 9.3 Verify focus lands on the filled slot's control after a pick and not
+- [ ] 9.3 Verify a click on the backdrop closes the picker while a click inside
+      it does not, and that the confirmation dialog ignores backdrop clicks
+      altogether. **(e2e)** (Req: hero-picker — Picker opens for one named
+      target / Closed without choosing)
+- [ ] 9.4 Verify focus lands on the filled slot's control after a pick and not
       on `document.body`. **(e2e)** (Req: hero-picker — A choice applies and
       closes / Focus after the pick)
-- [ ] 9.4 Verify `ArrowDown` from the first tile moves focus one full row down
+- [ ] 9.5 Verify `ArrowDown` from the first tile moves focus one full row down
       at eight columns and at four. **(e2e)** (Req: hero-picker — Picker is
       operable from the keyboard alone / Arrows move by row)
-- [ ] 9.5 Verify typing a letter while a tile has focus appends it to the
+- [ ] 9.6 Verify typing a letter while a tile has focus appends it to the
       query and returns focus to the field. **(e2e)** (Req: hero-picker —
       Picker is operable from the keyboard alone / Typing returns to the
       search field)
-- [ ] 9.6 Verify `B` while the picker is open opens no second picker and types
+- [ ] 9.7 Verify `B` while the picker is open opens no second picker and types
       into the search field. **(e2e)** (Req: draft-session — Keystrokes route
       to the topmost context)
-- [ ] 9.7 Verify a reload with the picker open restores the board with the
+- [ ] 9.8 Verify a reload with the picker open restores the board with the
       picker closed. **(e2e)** (Req: hero-picker — The picker is never
       persisted)
-- [ ] 9.8 Verify a reset on an incomplete draft asks first, and that `Esc` on
+- [ ] 9.9 Verify a reset on an incomplete draft asks first, and that `Esc` on
       that dialog changes nothing. **(e2e)** (Req: draft-session — Reset /
       Incomplete draft asks first)
-- [ ] 9.9 Verify reset → reload inside the toast window → the header `Undo`
+- [ ] 9.10 Verify reset → reload inside the toast window → the header `Undo`
       still restores the draft. **(e2e)** (Req: draft-session — One level of
       undo / Undo survives a reload inside the window)
-- [ ] 9.10 Verify the picker at 390px does not scroll the page horizontally.
+- [ ] 9.11 Verify the picker at 390px does not scroll the page horizontally.
       **(e2e)** (Req: hero-picker — Full-screen picker on a narrow viewport)
 
 ## 10. Gates

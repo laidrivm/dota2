@@ -50,6 +50,15 @@ mobile because the dialog always opens from a tap or a keystroke. Rejected: a
 positioned `div` with `role="dialog"` and manual focus management, which is the
 ARIA-patched-div pattern the accessibility rules exclude.
 
+**Light dismiss is the picker's only extra handler, and the confirm dialog has
+none.** A modal `<dialog>` does not close on a backdrop click by itself; the
+backdrop is the dialog element's own box, so a `click` whose `target` is the
+dialog element itself — never a child — closes the picker, and nothing else
+does. The
+`closedby="any"` attribute would replace the handler but is too young to rely
+on here. The confirmation dialog deliberately keeps no light dismiss: a stray
+click next to a destructive `Reset` must not answer it.
+
 **One `PickTarget` for every position.** `{ kind: "ban" } | { kind: "team";
 role: Role } | { kind: "enemy" }` is what opens the picker, names it in the
 title (`Pick for: Offlane (my team)`), and decides which existing action a
@@ -58,11 +67,12 @@ choice dispatches — `banAdd`, `teamSet`, `enemyAdd`. Held in `App` as
 ephemeral, so a reload with it open restores the board (screens-spec §3).
 
 **Matching is one pure function over words.** `matchHeroes(heroes, query)`
-lowercases the query and keeps a hero when any word of its name or any of its
-`aliases` starts with it — `bone` reaches Clinkz through `bone fletcher`, `wk`
-through the alias itself, `ni` reaches Night Stalker and Nature's Prophet.
-Empty query keeps everything. Order stays alphabetical, so the first match is
-positional and needs no scoring. Rejected: substring matching (`ar` would hit
+trims and lowercases the query and keeps a hero when any word of its name or
+any of its `aliases` starts with it — `bone` reaches Clinkz through `bone
+fletcher`, `wk` through the alias itself, `ni` reaches Night Stalker and
+Nature's Prophet. A query that is empty after trimming keeps everything. Order
+stays alphabetical, so the first *selectable* match — the first the grid does
+not disable — is positional and needs no scoring. Rejected: substring matching (`ar` would hit
 half the pool), and Levenshtein/fuzzy ranking (a scoring function to tune, for
 a 126-item list the user can see).
 
@@ -109,15 +119,19 @@ entered; a complete draft resets straight away (screens-spec §4).
 
 **Undo is the previous session under `draft.backup`.** The key `types.ts`
 already documents. `reset` writes the outgoing session there, `undo` restores it
-whole, and the backup is dropped by the first draft mutation after a reset —
-which is what "until input on the new session starts" means and what keeps the
-undo one level deep (US-24). It is persisted rather than kept in memory so a
+whole, and the backup is dropped by the first action that puts a hero on the
+board again — `banAdd`, `teamSet`, or `enemyAdd`, whichever comes first. Side
+and role changes do not drop it: they are the setup a reset deliberately keeps,
+so editing them is not "input on the new session" (US-24). It is persisted rather than kept in memory so a
 reload inside the toast window does not strand the draft.
 
 **The toast is a `role="status"` strip on a five-second timer; the header
-`Undo` lives as long as the backup does.** Both render off the same `backup !==
-null`, so there is one condition and no way for them to disagree. The timer is
-cleared on undo and on a second reset.
+`Undo` lives as long as the backup does.** They are two conditions, not one:
+the header reads `backup !== null`, the toast a `toastVisible` flag the reset
+raises and the timer lowers. Collapsing them into one flag would either kill
+the header control after five seconds or leave the toast up for the whole undo
+window. Both are cleared by an undo and re-raised by a second reset, so the
+toast can never outlive the backup it offers.
 
 **A hero the snapshot no longer knows marks its slot.** At load, any id in the
 session missing from `bundle.heroes` renders the fallback tile with a `re-pick`
@@ -140,11 +154,12 @@ in a hidden tab. This is the same rule `RemoveButton` already follows.
 - **`<dialog>` focus restoration fights the redirect** → the redirect runs in
   the macrotask after `close()`, so it lands last; the test for it is an e2e
   scenario, listed in `tasks.md`.
-- **Two surfaces for one undo** (toast and header button) → both are specified,
-  and both read one flag, so they cannot drift.
+- **Two surfaces for one undo** (toast and header button) → both are specified;
+  the toast's timer only hides the toast, and neither surface can offer an undo
+  the backup no longer holds.
 - **The backup outlives the tab** → one extra `localStorage` key holding one
-  session; it is replaced by the next reset and cleared by the first pick after
-  one.
+  session; it is replaced by the next reset and cleared by the first hero
+  entered after one.
 - **Column count via `getComputedStyle` on a key press** → one read per arrow
   key on an element already in layout.
 - **No DOM-level test until Task 4** → the same boundary the two previous

@@ -43,8 +43,9 @@ WHEN a reset is applied, the client SHALL store the outgoing session under the
 `localStorage` key `draft.backup` and SHALL offer an `Undo` control in the
 header and in a `role="status"` toast reading `Draft reset · Undo` that appears
 for five seconds. Activating `Undo` SHALL restore the stored session whole.
-The backup SHALL be discarded by the first action that changes the draft after
-the reset, and SHALL be replaced by the next reset.
+The backup SHALL be discarded by the first ban or pick entered after the reset,
+and SHALL be replaced by the next reset. A change of side or role SHALL NOT
+discard it — a reset keeps the setup, so editing it does not start a new draft.
 
 #### Scenario: Undo restores the draft
 
@@ -63,6 +64,12 @@ the reset, and SHALL be replaced by the next reset.
 
 - **WHEN** a hero is banned or picked after a reset
 - **THEN** the `Undo` control SHALL be gone and `draft.backup` SHALL be cleared
+
+#### Scenario: Editing the setup keeps the undo window
+
+- **WHEN** the side or the role is changed after a reset and before any hero is
+  entered
+- **THEN** the `Undo` control SHALL still be offered
 
 #### Scenario: Unreadable backup
 

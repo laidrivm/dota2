@@ -61,7 +61,8 @@ undo. It is the last of the three sequenced Phase 2 proposals.
   aliases only, as specified. No scoring, no ranking beyond alphabetical.
 - **No multi-level undo, no redo**: one backup, replaced by each reset
   (US-24).
-- **No recently-picked or favourites list**, no picker for enemy roles.
+- **No recently-picked or favourites list**, and no way to assign a role to an
+  enemy pick — enemy roles stay inferred by the model.
 - **No e2e tests**: Task 4 owns the Playwright suite; the DOM-level scenarios
   this change adds are listed in `tasks.md` as its target.
 - **No model or snapshot-contract change**: `src/model.ts`, `src/types.ts`, and
