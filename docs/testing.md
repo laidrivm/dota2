@@ -6,7 +6,8 @@ single-source rule this file inherits.
 - Prefer TDD for edge cases: turn `/zombies` output into failing tests first,
   then implement.
 - Tests must assert behaviour, not mirror the implementation. A test that
-  would pass against a broken implementation is not a test.
+  would pass against a broken implementation is not a test — before trusting
+  a new test, break the code it guards and watch it fail.
 - Route `/zombies` findings by layer: Zero/One/Many/Boundaries/Interface/
   Exceptions → unit or integration tests; Simple scenarios marked
   `(e2e candidate)` → the Playwright smoke suite.

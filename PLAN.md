@@ -44,8 +44,9 @@ below.
         133 tests. Two design decisions reversed mid-apply — see decisions.
   - [ ] **2b `draft-board`** ← next step is Stage 1 (`/opsx:propose`)
         Board panels: bans, team slots, enemy slots with role probabilities,
-        suggestion blocks, result block, mobile layout. First `computeModel`
-        call.
+        suggestion blocks, result block. First `computeModel` call. Owns the
+        390px one-column layout — no `@media` rule exists yet, and the Setup
+        strip has never been rendered at that width.
   - [ ] **2c `hero-picker`** — picker overlay (search/aliases/grid/keyboard),
         board hotkeys + context routing, New/reset dialog, undo toast,
         screens-spec §6 edge cases.
@@ -104,6 +105,9 @@ below.
   bundle cached in `localStorage`.
 - No DOM test environment: pure modules get `bun:test`, DOM-level scenarios
   are e2e (Task 4). No `happy-dom` dependency.
+- `build.test.ts` stays in the default `bun test` run (and so in the pre-push
+  hook), not CI-only: the copy steps and the inline-`@import` behaviour it
+  guards fail silently, and catching that at push is worth ~200 ms.
 - Hooks: simple-git-hooks, not husky; e2e never runs in hooks.
 - All repo artifacts are in English (CLAUDE.md rule).
 - No OpenSpec exemptions: the criterion in `docs/feature-workflow.md` is
