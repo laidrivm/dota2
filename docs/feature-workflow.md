@@ -58,10 +58,10 @@ completes, name the next step and the exact command.
   each report and acting on it in the same turn: `/zombies` with **no
   arguments** — diff mode reads the real code and existing tests, cross-checks
   the implementation against the proposal-stage edge-case list, and catches
-  the edges only implementation decisions create → fix → `/warm`, if the apply
-  run added or upgraded a dependency, having walked the ponytail ladder before
-  ever reaching for one → `/ponytail-review` → `/triage` last, so it maps the
-  diff the reviewer will actually see. Once the PR is open and CodeRabbit has
+  the edges only implementation decisions create → fix → `/warm`, whenever a
+  dependency manifest changed, having walked the ponytail ladder before ever
+  reaching for a dependency → `/ponytail-review` → `/triage` last, so it maps
+  the diff the reviewer will actually see. Once the PR is open and CodeRabbit has
   commented, `/coderabbit` closes that loop the same way.
 - Every new or `[partial]` finding from that run becomes a test before
   archive — or an explicit user decision to skip it. Deferred items from
