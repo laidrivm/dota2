@@ -128,7 +128,9 @@ dimmed, unselectable, and labelled with where it sits — `ban`, `team`, or
 
 ### Requirement: Picker is operable from the keyboard alone
 
-WHILE the picker is open, `Enter` SHALL choose the first match, the arrow keys
+WHILE the picker is open, `Enter` SHALL choose the first match the grid does
+not disable — a hero already in the session is never chosen this way — the
+arrow keys
 SHALL move focus within the grid — left and right by one tile, up and down by
 one row — `Esc` SHALL close without choosing, and a printable character pressed
 while focus is in the grid SHALL be appended to the search query with focus
@@ -140,14 +142,20 @@ returning to the search field.
 - **THEN** Clinkz SHALL be applied to the picker's target and the picker SHALL
   close
 
-#### Scenario: First match is marked
+#### Scenario: First selectable match is marked
 
-- **WHILE** the grid has at least one match
-- **THEN** the first match SHALL be visually distinguished from the rest
+- **WHILE** the grid has at least one match that is not disabled
+- **THEN** that match SHALL be visually distinguished from the rest
 
 #### Scenario: Enter with no match
 
 - **IF** the query matches no hero and `Enter` is pressed
+- **THEN** the picker SHALL stay open and the session SHALL be unchanged
+
+#### Scenario: Enter when every match is taken
+
+- **IF** every hero matching the query is already in the session and `Enter` is
+  pressed
 - **THEN** the picker SHALL stay open and the session SHALL be unchanged
 
 #### Scenario: Arrows move by row
