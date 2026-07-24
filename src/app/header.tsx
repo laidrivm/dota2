@@ -1,6 +1,6 @@
 import type { Session, SnapshotBundle } from "../types.ts";
 import type { Action } from "./session.ts";
-import { ROLE_UI, SessionControls } from "./session-controls.tsx";
+import { ROLE_UI, SessionControls, SIDE_LABEL } from "./session-controls.tsx";
 import { formatProvenance } from "./snapshot.ts";
 
 /**
@@ -47,7 +47,7 @@ export function Header({
 							onClick={onToggleEditor}
 						>
 							<span class={`side-name side-${session.side}`}>
-								{session.side === "radiant" ? "Radiant" : "Dire"}
+								{session.side === null ? "" : SIDE_LABEL[session.side]}
 							</span>
 							<span class="separator">·</span>
 							<span class="role-name">

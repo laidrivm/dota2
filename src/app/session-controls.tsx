@@ -1,9 +1,14 @@
 import { ROLES, type Role, type Session, type Side } from "../types.ts";
 import type { Action } from "./session.ts";
 
-const SIDES: { side: Side; label: string; hotkey: string }[] = [
-	{ side: "radiant", label: "Radiant", hotkey: "R" },
-	{ side: "dire", label: "Dire", hotkey: "D" },
+export const SIDE_LABEL: Record<Side, string> = {
+	radiant: "Radiant",
+	dire: "Dire",
+};
+
+const SIDES: { side: Side; hotkey: string }[] = [
+	{ side: "radiant", hotkey: "R" },
+	{ side: "dire", hotkey: "D" },
 ];
 
 export const ROLE_UI: Record<Role, { label: string; letter: string }> = {
@@ -31,7 +36,7 @@ export function SessionControls({
 			<fieldset class="control-group">
 				<legend>Side</legend>
 				<div class="chips">
-					{SIDES.map(({ side, label, hotkey }) => (
+					{SIDES.map(({ side, hotkey }) => (
 						<label key={side} class={`chip chip-${side}`}>
 							<input
 								type="radio"
@@ -41,7 +46,7 @@ export function SessionControls({
 								onChange={() => apply({ kind: "side", side })}
 							/>
 							<span class="kbd">{hotkey}</span>
-							{label}
+							{SIDE_LABEL[side]}
 						</label>
 					))}
 				</div>
