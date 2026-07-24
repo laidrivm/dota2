@@ -24,9 +24,9 @@ pixel is drawn: where the snapshot comes from, and where the session lives.
   Sans/Mono `@font-face` rules (accepted decision — offline operation).
 - Add snapshot delivery: fetch the bundle at startup, keep the last good
   one in `localStorage`, and surface patch id / snapshot date / the
-  stabilizing banner in the header. Until Phase 4 ships a pipeline, the
+  stabilizing banner in the header. Until Phase 3 ships a pipeline, the
   served bundle is `src/fixtures/snapshot.json` copied to the build output —
-  the client sees a URL, not an import, so Phase 4 swaps the producer only.
+  the client sees a URL, not an import, so Phase 3 swaps the producer only.
 - Add the draft session store: `Session` state per `src/types.ts`, side and
   role selection with their desktop hotkeys, persistence to
   `localStorage["draft.session"]`, and restore on reload.
@@ -61,7 +61,7 @@ pixel is drawn: where the snapshot comes from, and where the session lives.
 - **No pipeline**: the snapshot is the in-repo fixture, served at a fixed
   URL by `server.ts` (which also serves the font files, because Bun's
   bundler cannot — see design.md) and copied into `dist/` by the build.
-  Phase 4 owns the producer; Task 7 owns the host.
+  Phase 3 owns the producer; Task 7 owns the host.
 - **No e2e tests**: the Playwright smoke suite is Task 4, unblocked by this
   change but not part of it.
 - **No mobile board layout** beyond what the setup strip needs — the mobile

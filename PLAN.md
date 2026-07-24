@@ -60,7 +60,7 @@ below.
       scenarios are the tasks marked **(e2e)** in `ui-foundation/tasks.md`
 - [ ] **Task 7** — Docker + VPS deploy (open decisions: registry
       GHCR/Docker Hub, same VPS or a new one)
-- [ ] **Phase 4** — OpenSpec: STRATZ → Postgres → snapshot bundle pipeline
+- [ ] **Phase 3** — OpenSpec: STRATZ → Postgres → snapshot bundle pipeline
       (blockers: API key, pick-phase granularity in STRATZ)
 - [ ] **Task 5** — error tracking (precondition: product is deployed)
 
@@ -106,7 +106,7 @@ below.
   in with an inline `@import`, which Bun leaves alone. No font package.
 - Snapshot reaches the client through a **URL** — the constant
   `/snapshot.json` in `src/app/snapshot.ts` — never a module import, so
-  Phase 4 replaces the producer and nothing else. Not a hashed bundler
+  Phase 3 replaces the producer and nothing else. Not a hashed bundler
   asset either: that would force a rebuild to publish a snapshot. Last good
   bundle cached in `localStorage`.
 - No DOM test environment: pure modules get `bun:test`, DOM-level scenarios
