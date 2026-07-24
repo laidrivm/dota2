@@ -106,10 +106,11 @@ Playwright target.
       taken heroes as taken)
 - [x] 5.3 Render a `role="status"` message when the query matches no hero.
       (Req: hero-picker — Grid / No match)
-- [x] 5.4 Test: the first selectable match is the first hero with
-      `usedAs(...) === null`, and there is none when every match is taken.
-      (Req: hero-picker — Picker is operable from the keyboard alone / Enter
-      when every match is taken)
+- [x] 5.4 Was a unit test over an extracted `firstSelectable`; the
+      ponytail-review pass cut that wrapper back to the `matches.find(...)` it
+      always was, and its tests with it. The behaviour is guarded by the
+      **(e2e)** bullets 9.1 and 8.4. (Req: hero-picker — Picker is operable
+      from the keyboard alone / Enter when every match is taken)
 - [x] 5.5 Implement the keyboard layer: `Enter` picks the first selectable
       match (nothing when there is none, whether the grid is empty or every
       match is taken), arrows move by one and by the grid's computed column

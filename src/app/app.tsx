@@ -177,9 +177,6 @@ const pickAction = (target: PickTarget, hero: HeroId): Action =>
 			? { kind: "enemyAdd", hero }
 			: { kind: "teamSet", role: target.role, hero };
 
-const positionOf = (target: PickTarget): string =>
-	target.kind === "team" ? `team-${target.role}` : target.kind;
-
 /**
  * The dialog hands focus back to the trigger that opened it, and a filled slot
  * no longer has one. The replacement is focused after Preact commits — a
@@ -188,7 +185,7 @@ const positionOf = (target: PickTarget): string =>
  * and the new entry's removal control where it does not.
  */
 function focusAfterPick(target: PickTarget): void {
-	const position = positionOf(target);
+	const position = target.kind === "team" ? `team-${target.role}` : target.kind;
 	setTimeout(() => {
 		// The last removal control of the position is the entry just added — the
 		// first would hand a keyboard user the ✕ of somebody else's hero.
@@ -208,11 +205,9 @@ function focusAfterPick(target: PickTarget): void {
  */
 function ResetDialog({ onAnswer }: { onAnswer: (confirmed: boolean) => void }) {
 	const dialog = useRef<HTMLDialogElement>(null);
-	const confirm = useRef<HTMLButtonElement>(null);
 
 	useEffect(() => {
 		dialog.current?.showModal();
-		confirm.current?.focus();
 	}, []);
 
 	return (
@@ -229,7 +224,9 @@ function ResetDialog({ onAnswer }: { onAnswer: (confirmed: boolean) => void }) {
 					<button type="submit" value="cancel">
 						Cancel
 					</button>
-					<button type="submit" value="reset" class="danger" ref={confirm}>
+					{/* `showModal()` honours `autofocus`, which is what makes `Enter`
+					    confirm — without it the first control, Cancel, would answer. */}
+					<button type="submit" value="reset" class="danger" autofocus>
 						Reset
 					</button>
 				</div>

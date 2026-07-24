@@ -123,15 +123,15 @@ export function hotkeyFor(
 	return null;
 }
 
+/** Where a hero sits, if anywhere — and the word the picker prints on it. */
+export type Used = "ban" | "team" | "enemy" | null;
+
 /**
  * Where a hero sits on the board, if anywhere. One lookup answers both the
  * reducer's single-occupancy guard and the label the picker puts on a tile it
  * will not let you choose.
  */
-export function usedAs(
-	session: Session,
-	hero: HeroId,
-): "ban" | "team" | "enemy" | null {
+export function usedAs(session: Session, hero: HeroId): Used {
 	if (session.bans.includes(hero)) return "ban";
 	if (ROLES.some((role) => session.teamPicks[`${role}`] === hero))
 		return "team";
@@ -254,23 +254,21 @@ export function confirmsReset(session: Session): boolean {
 	return mine + session.enemyPicks.length < PICKS_IN_A_DRAFT;
 }
 
-/** The actions that start the next draft, and so close the undo window. A
- * side or role change does not: a reset keeps the setup on purpose. */
-export const endsUndoWindow = (action: Action): boolean =>
-	action.kind === "banAdd" ||
-	action.kind === "teamSet" ||
-	action.kind === "enemyAdd";
-
 /**
- * Whether the undo window closes — which is decided by what the reducer did,
- * not by what was asked. A ban refused at the limit enters no hero, so it must
- * leave the backup alone.
+ * Whether the undo window closes: a hero entered starts the next draft, and
+ * only the reducer knows whether one was — a ban refused at the limit enters
+ * nothing. A side or role change never closes it; a reset keeps the setup on
+ * purpose.
  */
 export const closesUndoWindow = (
 	before: Session,
 	after: Session,
 	action: Action,
-): boolean => after !== before && endsUndoWindow(action);
+): boolean =>
+	after !== before &&
+	(action.kind === "banAdd" ||
+		action.kind === "teamSet" ||
+		action.kind === "enemyAdd");
 
 /**
  * A stored session is only usable if every field the UI indexes is there —

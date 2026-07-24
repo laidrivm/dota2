@@ -6,13 +6,10 @@
  * nothing — a substring search on 126 heroes returns a wall.
  */
 
-import type { HeroEntry, HeroId } from "../../types.ts";
+import type { HeroEntry } from "../../types.ts";
 
 /** Hyphens separate words too, so `mage` reaches Anti-Mage. */
 const words = (value: string): string[] => value.toLowerCase().split(/[\s-]+/);
-
-const byName = (a: HeroEntry, b: HeroEntry) =>
-	a.name.localeCompare(b.name, "en");
 
 /**
  * Heroes whose name or any alias has a word starting with `query`, in
@@ -29,15 +26,5 @@ export function matchHeroes(heroes: HeroEntry[], query: string): HeroEntry[] {
 						words(value).some((word) => word.startsWith(q)),
 					),
 				);
-	return matches.sort(byName);
+	return matches.sort((a, b) => a.name.localeCompare(b.name, "en"));
 }
-
-/**
- * What `Enter` takes: the first match the grid will actually let you choose.
- * A hero already banned or picked is shown, dimmed, and skipped here — Enter
- * must never apply what a click cannot.
- */
-export const firstSelectable = (
-	matches: HeroEntry[],
-	isTaken: (hero: HeroId) => boolean,
-): HeroEntry | undefined => matches.find((hero) => !isTaken(hero.id));

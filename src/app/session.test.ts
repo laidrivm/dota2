@@ -8,7 +8,6 @@ import {
 	closesEditor,
 	closesUndoWindow,
 	confirmsReset,
-	endsUndoWindow,
 	type HotkeyContext,
 	hotkeyContext,
 	hotkeyFor,
@@ -724,8 +723,8 @@ describe("the undo backup", () => {
 		expect(backup).toBeNull();
 	});
 
-	// The window closes when the next draft starts, not when the setup is
-	// edited — a reset keeps side and role on purpose.
+	// The window closes on a hero entered, not on a key pressed: only the
+	// reducer knows whether one was, and the setup a reset keeps is not a draft.
 	test.each([
 		["banAdd", { kind: "banAdd", hero: 9 }, true],
 		["teamSet", { kind: "teamSet", role: 1, hero: 9 }, true],
@@ -736,14 +735,22 @@ describe("the undo backup", () => {
 		["teamClear", { kind: "teamClear", role: 1 }, false],
 		["enemyRemove", { kind: "enemyRemove", index: 0 }, false],
 	] satisfies [string, Action, boolean][])(
-		"%s ends the undo window: %p",
+		"an accepted %s ends the undo window: %p",
 		(_label, action, ends) => {
-			expect(endsUndoWindow(action)).toBe(ends);
+			const session: Session = {
+				...EMPTY_SESSION(),
+				bans: [1],
+				teamPicks: { "1": 2, "2": null, "3": null, "4": null, "5": null },
+				enemyPicks: [3],
+			};
+			const after = applyAction(session, action, NO_LIMIT);
+
+			expect(after).not.toBe(session);
+			expect(closesUndoWindow(session, after, action)).toBe(ends);
 		},
 	);
 
-	// The window closes on a hero entered, not on a key pressed: the reducer
-	// hands back the session it was given whenever it refuses.
+	// The reducer hands back the session it was given whenever it refuses.
 	test.each([
 		[
 			"a ban at the limit",
@@ -768,14 +775,6 @@ describe("the undo backup", () => {
 
 		expect(after).toBe(session);
 		expect(closesUndoWindow(session, after, action)).toBe(false);
-	});
-
-	test("an accepted ban closes the window", () => {
-		const session = EMPTY_SESSION();
-		const action: Action = { kind: "banAdd", hero: 9 };
-		const after = applyAction(session, action, NO_LIMIT);
-
-		expect(closesUndoWindow(session, after, action)).toBe(true);
 	});
 });
 

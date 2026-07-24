@@ -9,20 +9,16 @@
 import { useEffect, useRef, useState } from "preact/hooks";
 import type { HeroEntry, HeroId, SnapshotBundle } from "../../types.ts";
 import { HeroTile } from "../board/hero-tile.tsx";
-import type { PickTarget } from "../session.ts";
+import type { PickTarget, Used } from "../session.ts";
 import { ROLE_UI } from "../session-controls.tsx";
-import { firstSelectable, matchHeroes } from "./search.ts";
+import { matchHeroes } from "./search.ts";
 
 /** What the header says we are picking for. */
-export function targetLabel(target: PickTarget): string {
+function targetLabel(target: PickTarget): string {
 	if (target.kind === "ban") return "ban";
 	if (target.kind === "enemy") return "enemy";
 	return `${ROLE_UI[target.role].label} (my team)`;
 }
-
-const USED_LABEL = { ban: "ban", team: "team", enemy: "enemy" } as const;
-
-type Used = keyof typeof USED_LABEL | null;
 
 /** How many tiles a row holds, straight from the grid that lays them out —
  * eight on the desktop, fewer on a phone, and no breakpoint restated here. */
@@ -57,7 +53,6 @@ export function Picker({
 		if (element === null) return;
 
 		element.showModal();
-		search.current?.focus();
 
 		// The backdrop is the dialog's own box, so a click that reaches no child
 		// is a click outside the panel.
@@ -82,7 +77,8 @@ export function Picker({
 	// ponytail: the whole grid re-renders per keystroke — 126 static buttons,
 	// well inside a frame. A `useMemo` goes here if a profile ever says otherwise.
 	const matches = matchHeroes(bundle.heroes, query);
-	const first = firstSelectable(matches, (hero) => usedOf(hero) !== null);
+	// What `Enter` takes: never a hero the grid will not let a click choose.
+	const first = matches.find((hero) => usedOf(hero.id) === null);
 
 	const choose = (hero: HeroEntry) => {
 		if (usedOf(hero.id) !== null) return;
@@ -151,6 +147,9 @@ export function Picker({
 					// clears the field and never reaches the dialog, so the first `Esc`
 					// after typing would not close the picker the hint bar promises.
 					type="text"
+					// `showModal()` honours this, so the field takes focus without a
+					// call of ours — the ✕ would otherwise take it as the first control.
+					autofocus
 					value={query}
 					placeholder="Search heroes — try 'bone' or 'wk'"
 					onInput={(event) => setQuery(event.currentTarget.value)}
@@ -182,9 +181,7 @@ export function Picker({
 							>
 								<HeroTile hero={hero} size="lg" />
 								<span class="picker-name">{hero.name}</span>
-								{used !== null && (
-									<span class="picker-used">{USED_LABEL[used]}</span>
-								)}
+								{used !== null && <span class="picker-used">{used}</span>}
 							</button>
 						);
 					})}
