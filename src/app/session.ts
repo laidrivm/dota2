@@ -56,11 +56,39 @@ const ROLE_KEYS: Record<string, Role> = {
 };
 
 /**
+ * Where a keystroke lands (screens-spec §5). Side and role keys belong to
+ * Setup and to the header editor; on the board the same keys are reserved for
+ * the picker proposal 2c adds, which is why they do nothing here rather than
+ * silently moving the player's role.
+ */
+export type HotkeyContext = "setup" | "editor" | "board";
+
+/** The topmost active context, which is all §5's routing amounts to until
+ * proposal 2c adds the picker and the dialog above it. */
+export function hotkeyContext(
+	session: Session,
+	editorOpen: boolean,
+): HotkeyContext {
+	if (editorOpen) return "editor";
+	return session.side === null || session.myRole === null ? "setup" : "board";
+}
+
+const unmodified = (event: Keystroke) =>
+	!(event.ctrlKey || event.metaKey || event.altKey);
+
+/** `Esc` leaves the header editor; 2c gives it the picker and the dialog. */
+export const closesEditor = (event: Keystroke): boolean =>
+	event.key === "Escape" && unmodified(event);
+
+/**
  * A modified keystroke belongs to the browser, not to us — Cmd+R has to stay
  * a reload.
  */
-export function hotkeyFor(event: Keystroke): Hotkey | null {
-	if (event.ctrlKey || event.metaKey || event.altKey) return null;
+export function hotkeyFor(
+	event: Keystroke,
+	context: HotkeyContext,
+): Hotkey | null {
+	if (context === "board" || !unmodified(event)) return null;
 	const key = event.key.toLowerCase();
 	const side = SIDE_KEYS[key];
 	if (side) return { kind: "side", side };
@@ -168,8 +196,9 @@ export function persist(session: Session): void {
 	write(SESSION_KEY, JSON.stringify(session));
 }
 
-export function useSession(banLimit: number) {
+export function useSession(banLimit: number, editorOpen: boolean) {
 	const [session, setSession] = useState(restore);
+	const context = hotkeyContext(session, editorOpen);
 
 	/** Every change is written through, so a reload loses nothing. */
 	const apply = (action: Action) =>
@@ -180,16 +209,18 @@ export function useSession(banLimit: number) {
 		});
 
 	// Hotkeys are listened for on the document so they work without anything
-	// being focused. The listener is installed once: `apply` only ever reads
-	// the session through the state updater, so it needs no fresh closure.
+	// being focused. Re-subscribing when the context or the limit changes is
+	// cheaper than a ref: it happens twice a draft, not twice a keystroke.
+	// `apply` reads the session through the state updater, so its closure
+	// cannot go stale.
 	useEffect(() => {
 		const onKeyDown = (event: KeyboardEvent) => {
-			const hotkey = hotkeyFor(event);
+			const hotkey = hotkeyFor(event, context);
 			if (hotkey) apply(hotkey);
 		};
 		document.addEventListener("keydown", onKeyDown);
 		return () => document.removeEventListener("keydown", onKeyDown);
-	}, []);
+	}, [context, banLimit]);
 
 	return { session, apply };
 }

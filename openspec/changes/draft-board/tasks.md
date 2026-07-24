@@ -80,22 +80,22 @@ Playwright target.
 
 ## 4. Header, editor, and hotkey context
 
-- [ ] 4.1 Test: side and role hotkeys change the session while the Setup block
+- [x] 4.1 Test: side and role hotkeys change the session while the Setup block
       is shown or the editor is open, and change nothing while the board is
       shown with the editor closed. (Reqs: draft-session — Side selection /
       Board is not an active context; Role selection / Board is not an active
       context)
-- [ ] 4.2 Test: `Esc` closes the editor and touches no session field. (Req:
+- [x] 4.2 Test: `Esc` closes the editor and touches no session field. (Req:
       draft-session — Setup collapses into the session-editor strip / Editor
       closes on Esc)
-- [ ] 4.3 Rebuild the header: `New` (disabled — 2c owns reset), side · role as
+- [x] 4.3 Rebuild the header: `New` (disabled — 2c owns reset), side · role as
       text with the `edit` affordance, provenance and the stabilizing banner
       as before. (Req: draft-session — Setup collapses into the
       session-editor strip)
-- [ ] 4.4 Editor panel toggled by the affordance, reusing `SessionControls`,
+- [x] 4.4 Editor panel toggled by the affordance, reusing `SessionControls`,
       closing on `Esc`. (Req: draft-session — Setup collapses / Side and role
       stay editable)
-- [ ] 4.5 Scope the document-level `keydown` listener to the active context
+- [x] 4.5 Scope the document-level `keydown` listener to the active context
       per 4.1. (Reqs: draft-session — Side selection; Role selection)
 
 ## 5. Board panels
