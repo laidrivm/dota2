@@ -172,6 +172,9 @@ protocol:
 
 ### Rules
 
+- Restore focus after an action that unmounts the active element in a
+  macrotask (`setTimeout(…, 0)`), not `requestAnimationFrame` — rAF runs
+  before the framework commits and never fires in a hidden tab.
 - Read state a document-level listener depends on through a ref, never by
   re-subscribing the listener when that state changes.
 - A guard against malformed input must cover the whole value, not a prefix —
