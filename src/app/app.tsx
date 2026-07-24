@@ -1,5 +1,7 @@
-import { useEffect, useState } from "preact/hooks";
+import { useEffect, useMemo, useState } from "preact/hooks";
+import { computeModel } from "../model.ts";
 import type { SnapshotBundle } from "../types.ts";
+import { Board } from "./board/board.tsx";
 import { Header } from "./header.tsx";
 import { closesEditor, useSession } from "./session.ts";
 import { SessionControls } from "./session-controls.tsx";
@@ -18,20 +20,34 @@ export function App() {
 			: snapshot.heroes.length - 10;
 	const { session, apply } = useSession(banLimit, editorOpen);
 
+	// The session is replaced whole on every change, so identity comparison is
+	// exact and the whole model is recomputed synchronously — screens-spec §2.6
+	// wants the new numbers in the same frame, and there are no spinners.
+	// ponytail: recomputes everything every time; if a full 126-hero snapshot
+	// misses the frame budget, a worker goes behind this same memo.
+	const model = useMemo(
+		() =>
+			snapshot === "pending" || snapshot === null
+				? null
+				: computeModel(snapshot, session),
+		[snapshot, session],
+	);
+
 	// One automatic fetch per page; anything further is the user's retry.
 	useEffect(() => {
 		loadSnapshot().then(setSnapshot);
 	}, []);
 
-	// The editor is the one modal state on this screen, so Esc leaves it.
+	// The editor is the one modal state on this screen, so Esc leaves it. The
+	// listener is unconditional — closing a closed editor is a no-op, and
+	// subscribing only while it is open loses the first Esc after it opens.
 	useEffect(() => {
-		if (!editorOpen) return;
 		const onKeyDown = (event: KeyboardEvent) => {
 			if (closesEditor(event)) setEditorOpen(false);
 		};
 		document.addEventListener("keydown", onKeyDown);
 		return () => document.removeEventListener("keydown", onKeyDown);
-	}, [editorOpen]);
+	}, []);
 
 	// Nothing to show until the snapshot resolves — the design has no spinners.
 	if (snapshot === "pending") return null;
@@ -59,7 +75,15 @@ export function App() {
 				editorOpen={editorOpen}
 				onToggleEditor={() => setEditorOpen((open) => !open)}
 			/>
-			{isSetUp ? null : (
+			{isSetUp && model !== null ? (
+				<Board
+					bundle={snapshot}
+					session={session}
+					model={model}
+					banLimit={banLimit}
+					apply={apply}
+				/>
+			) : (
 				<main class="setup">
 					<SessionControls session={session} apply={apply} />
 				</main>

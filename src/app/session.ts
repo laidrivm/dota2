@@ -5,7 +5,7 @@
  * without a DOM; `useSession` is the thin Preact wrapper around it.
  */
 
-import { useEffect, useState } from "preact/hooks";
+import { useEffect, useRef, useState } from "preact/hooks";
 import {
 	EMPTY_SESSION,
 	type HeroId,
@@ -198,7 +198,6 @@ export function persist(session: Session): void {
 
 export function useSession(banLimit: number, editorOpen: boolean) {
 	const [session, setSession] = useState(restore);
-	const context = hotkeyContext(session, editorOpen);
 
 	/** Every change is written through, so a reload loses nothing. */
 	const apply = (action: Action) =>
@@ -208,19 +207,28 @@ export function useSession(banLimit: number, editorOpen: boolean) {
 			return next;
 		});
 
+	// What the listener below needs and cannot capture: re-subscribing on every
+	// context change loses the first keystroke after the editor opens, because
+	// effects flush a frame late and the key arrives before the new listener.
+	const latest = useRef({ context: "setup" as HotkeyContext, banLimit });
+	latest.current = { context: hotkeyContext(session, editorOpen), banLimit };
+
 	// Hotkeys are listened for on the document so they work without anything
-	// being focused. Re-subscribing when the context or the limit changes is
-	// cheaper than a ref: it happens twice a draft, not twice a keystroke.
-	// `apply` reads the session through the state updater, so its closure
-	// cannot go stale.
+	// being focused. Installed once: the session is read through the state
+	// updater, and everything else through the ref above.
 	useEffect(() => {
 		const onKeyDown = (event: KeyboardEvent) => {
-			const hotkey = hotkeyFor(event, context);
-			if (hotkey) apply(hotkey);
+			const hotkey = hotkeyFor(event, latest.current.context);
+			if (hotkey === null) return;
+			setSession((previous) => {
+				const next = applyAction(previous, hotkey, latest.current.banLimit);
+				persist(next);
+				return next;
+			});
 		};
 		document.addEventListener("keydown", onKeyDown);
 		return () => document.removeEventListener("keydown", onKeyDown);
-	}, [context, banLimit]);
+	}, []);
 
 	return { session, apply };
 }
