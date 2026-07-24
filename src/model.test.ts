@@ -273,9 +273,8 @@ describe("insufficient-data hero (§7.5)", () => {
 
 	test("a sufficient hero with an insufficient position is dropped from that role", () => {
 		const patched = structuredClone(bundle);
-		def(
-			def(patched.heroes.find((h) => h.id === H.spectre)).positions["1"],
-		).sufficient = false;
+		const spectre = def(patched.heroes.find((h) => h.id === H.spectre));
+		def(spectre.positions["1"]).sufficient = false;
 
 		expect(spectreInRole1(patched)).toBe(false);
 	});

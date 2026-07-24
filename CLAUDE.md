@@ -106,17 +106,13 @@ The report alone is never the deliverable.
   PR has them; it drops Trivial and Minor with a reason and holds Major and
   above for the user's approval before applying anything.
 
-Before every PR that changes code, in this order: `/zombies` → fix what it
-finds → `/warm` (only when a manifest changed) → `/ponytail-review` →
-`/triage` last, over the final diff. After the PR is open, `/coderabbit` on
-its comments.
-
-A branch that changes only documentation, rules or config runs `/triage` and
-`/coderabbit` alone: what it needs instead of the code gates is a grep for
-every site that restates what it changes.
-
-These gates apply to ALL work — a bugfix and a chore skip the OpenSpec stages
-of [docs/feature-workflow.md](docs/feature-workflow.md), never the sequence.
+Before every PR that changes code — a feature, a bugfix, a chore alike, and
+whether or not it goes through the OpenSpec stages of
+[docs/feature-workflow.md](docs/feature-workflow.md): `/zombies` → fix what
+it finds → `/warm` (only when a manifest changed) → `/ponytail-review` →
+`/triage` last, over the final diff, then `/coderabbit` once the PR has
+comments. A branch of documentation, rules or config runs `/triage` and
+`/coderabbit` alone, plus a grep for every site restating what it changes.
 
 ## Feature workflow (spec-driven, OpenSpec)
 
