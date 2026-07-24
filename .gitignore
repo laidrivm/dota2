@@ -4,6 +4,11 @@ node_modules/
 dist/
 .claude/settings.local.json
 
+# Playwright run output
+test-results/
+playwright-report/
+blob-report/
+
 # Private product specs in a public repo
 spec-inbox/*
 !spec-inbox/README.md

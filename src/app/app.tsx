@@ -239,6 +239,9 @@ function ResetDialog({ onAnswer }: { onAnswer: (confirmed: boolean) => void }) {
 function SnapshotError({ onRetry }: { onRetry: () => void }) {
 	return (
 		<main class="snapshot-error">
+			{/* The header never renders in this state, so the screen carries its
+			    own h1 — a page with no heading names nothing. */}
+			<h1 class="brand">Dota 2 Pick Assistant</h1>
 			{/* role lives on the message, not on <main>, so the landmark survives */}
 			<p role="status">
 				No snapshot could be loaded, and nothing is cached from before.

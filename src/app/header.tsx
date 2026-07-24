@@ -71,7 +71,9 @@ export function Header({
 						</button>
 					</>
 				)}
-				<span class="brand">Dota 2 Pick Assistant</span>
+				{/* The page's one h1: the product names this screen, and the
+				    panels' h2s have nothing else above them. */}
+				<h1 class="brand">Dota 2 Pick Assistant</h1>
 				<span class="provenance">{formatProvenance(bundle)}</span>
 			</div>
 

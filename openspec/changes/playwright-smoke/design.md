@@ -69,7 +69,14 @@ lost.
 resolution, reporter output — the fallback is `setup-node` in CI and `npx`
 locally, with bun kept for everything else. Working around runner internals
 is not an option: a patched runner is worse than a second toolchain.
-Whichever wins is recorded in this file's decision list before the PR.
+**Resolved: bun wins.** `bunx playwright test` runs the suite, spawns its
+workers, starts the `webServer` and reports normally; no node toolchain is
+introduced anywhere.
+
+`e2e/*.spec.ts` does match bun's own test glob, though, so `bunfig.toml`
+gains `[test] pathIgnorePatterns = ["e2e/**"]` — set there rather than on a
+script, so a bare `bun test` and the pre-push hook are covered by the same
+line.
 
 ### No fixtures file: each test builds its own state
 
@@ -120,6 +127,40 @@ decision recorded as a comment at the exclusion site.
 exist, so the no-op guard task-4.md describes for an empty suite is not
 needed. No threshold: a threshold set before anyone has looked at the
 numbers is a number someone will lower.
+
+### What the scans found, and what was changed for them
+
+The first green scan cost three app changes, all of them defects the suite
+was built to find:
+
+- **No `<h1>` anywhere** (`page-has-heading-one`). The product name was a
+  `<span>`; it is now the page's one `h1`, sized by `font-size: inherit` so
+  nothing moves. The snapshot error state renders without the header, so it
+  carries its own — a page with no heading names nothing.
+- **`--text-5` at 3.10:1** on panels (WCAG AA wants 4.5:1), across section
+  labels, provenance and the edit hint. Raised to `#7e8897`, which clears
+  4.5:1 on every surface in the palette including `--bg-3`.
+- **Hero tile lettering below AA on 13 of 52 colours**, worst 3.98:1. No
+  threshold could rescue them: the softened ink pair simply cannot reach
+  4.5:1 on a mid-tone. The inks become pure `#000`/`#fff` and
+  `INK_THRESHOLD` moves 0.22 → 0.18, the luminance where the two contrast
+  equally. Every hero colour then clears AA, worst 4.64:1.
+
+The threshold move also revives a test PLAN.md records as deliberately
+dropped: with two fixed inks the worst case was pinned at the threshold, so
+a contrast floor guarded nothing. It guards something now, and
+`format.test.ts` asserts it over the whole palette — which is where a new
+hero colour that cannot reach AA will fail, long before a browser sees it.
+
+All three token values are design-owned and get pushed back to the design
+project, following the precedent set by `--tile-ink-*` in proposal 2b.
+
+### Two ZOMBIES findings that stay unautomated
+
+A 200 response carrying a malformed body stays a unit case —
+`snapshot.test.ts` already covers `isBundle` against every shape. And a
+double-retry race cannot occur: activating retry clears the result, which
+unmounts the error state along with its button.
 
 ## Risks / Trade-offs
 

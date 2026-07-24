@@ -10,3 +10,10 @@ minimumReleaseAge = 259200 # seconds = 3 days
 # Packages exempt from the age gate. Keep empty; add entries only with
 # an explicit user decision.
 minimumReleaseAgeExcludes = []
+
+[test]
+# `e2e/*.spec.ts` matches bun's test glob, but the files are Playwright's —
+# bun's runner would import @playwright/test and fail. `bunx playwright test`
+# owns that directory. Set here rather than on a script, so a bare `bun test`
+# and the pre-push hook are covered too.
+pathIgnorePatterns = ["e2e/**"]

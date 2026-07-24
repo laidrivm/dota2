@@ -30,7 +30,9 @@ describe("heroAbbr", () => {
 describe("tile ink", () => {
 	test.each([
 		["#4a3d85", "light"],
-		["#2e7fd0", "light"],
+		["#2f3b52", "light"],
+		// Just above the crossover: black reads better on it than white does.
+		["#2e7fd0", "dark"],
 		["#dce8f2", "dark"],
 		["#f0e3b2", "dark"],
 	])("%s takes %s lettering", (color, ink) => {
@@ -78,6 +80,40 @@ describe("the shipped palette", () => {
 			.filter(([, , value]) => relativeLuminance(value ?? "") === null)
 			.map(([, name]) => name);
 		expect(unparseable).toEqual([]);
+	});
+
+	/**
+	 * Previously skipped: with the softened ink pair the worst case was pinned
+	 * at the threshold, so a floor test guarded nothing. The pure inks moved
+	 * the worst case to 4.64:1, which leaves room for a real floor — and this
+	 * is what fails when a new hero colour, or a softer ink, drops below it.
+	 */
+	test("every hero colour clears 4.5:1 with the ink the threshold picks", async () => {
+		const css = await read();
+		const inkLuminance = (name: string) =>
+			relativeLuminance(
+				css.match(new RegExp(`--${name}:\\s*([^;]+);`))?.[1] ?? "",
+			);
+		const dark = inkLuminance("tile-ink-dark");
+		const light = inkLuminance("tile-ink-light");
+		if (dark === null || light === null) throw new Error("ink tokens missing");
+
+		const contrast = (a: number, b: number) =>
+			(Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+
+		const failures = [
+			...css.matchAll(/--(hero-[a-z0-9-]+):\s*([^;]+);/g),
+		].flatMap(([, name, value]) => {
+			const luminance = relativeLuminance(value ?? "");
+			if (luminance === null) return [];
+			const ratio = contrast(
+				luminance,
+				inkFor(luminance) === "dark" ? dark : light,
+			);
+			return ratio < 4.5 ? [`${name} ${ratio.toFixed(2)}:1`] : [];
+		});
+
+		expect(failures).toEqual([]);
 	});
 
 	test("the fallback colour exists, so a hero off the palette still renders", async () => {
