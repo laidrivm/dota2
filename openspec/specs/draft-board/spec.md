@@ -234,16 +234,15 @@ sits in already names that hero.
 ### Requirement: Pick entry
 
 Every empty team slot, every empty enemy slot, and the bans row SHALL offer a
-labelled control that enters a hero into that position. The control SHALL
-offer only heroes that are not already banned or picked on either team, in
-ascending name order, and choosing one SHALL apply it and recompute the model
-in the same update.
+labelled control that opens the hero picker for that position. Entering a hero
+SHALL go through the picker only; the board SHALL NOT offer a second entry
+path.
 
-#### Scenario: Used heroes are not offered
+#### Scenario: Control opens the picker for its own position
 
-- **WHEN** a hero is banned
-- **THEN** it SHALL NOT be offered by any pick-entry control until the ban is
-  removed
+- **WHEN** the pick-entry control of the empty Carry slot is activated
+- **THEN** the picker SHALL open with target role 1, and no other position
+  SHALL be affected by the hero then chosen
 
 #### Scenario: Every control is labelled
 
@@ -291,3 +290,23 @@ its row has focus within it, not only on pointer hover.
 - **THEN** focus SHALL move to the pick-entry control that replaces it —
   the same slot's where the slot survives, the region's first otherwise —
   and SHALL NOT fall back to the document body
+
+### Requirement: A hero the snapshot no longer contains is flagged for re-pick
+
+WHEN a restored session holds a hero id absent from the loaded snapshot, the
+board SHALL keep that entry in place, render it with a visible `re-pick`
+marker, and keep its removal control operable. The rest of the board SHALL
+render and recompute without throwing.
+
+#### Scenario: Stale team pick
+
+- **WHEN** the stored session holds a hero on role 2 that the loaded snapshot
+  does not contain
+- **THEN** the role 2 slot SHALL show the fallback tile with a `re-pick`
+  marker, its removal control SHALL work, and the other panels SHALL render
+
+#### Scenario: Re-picking clears the marker
+
+- **WHEN** the flagged slot is filled from the picker with a hero the snapshot
+  contains
+- **THEN** the marker SHALL be gone and the model SHALL be recomputed

@@ -35,8 +35,8 @@ below.
       at `openspec/specs/draft-model/`). Shipped `src/{types,model}.ts`,
       `src/fixtures/`, `src/model.test.ts` (31 tests). Two §7 scenarios
       corrected mid-apply — see decisions.
-- [ ] **Phase 2** — OpenSpec: draft board UI on Preact + design-token
-      import. Split into three sequenced proposals:
+- [x] **Phase 2** — OpenSpec: draft board UI on Preact + design-token
+      import. Split into three sequenced proposals, all merged and archived:
   - [x] **2a `ui-foundation`** — merged (PR #10) and archived
         (`openspec/changes/archive/2026-07-24-ui-foundation`; capability
         specs at `openspec/specs/{app-shell,snapshot-delivery,draft-session}`).
@@ -48,13 +48,14 @@ below.
         team and enemy slots, suggestion blocks, the result block, the
         collapsed header + editor, the 390px one-column layout, and the first
         `computeModel` call. 244 tests. Corrections mid-apply — see decisions.
-  - [ ] **2c `hero-picker`** — Stage 1 merged (PR #15). Stage 2 applied on
-        `feat/hero-picker-apply`: 65 of 66 tasks done, 324 tests, every
-        **(e2e)** bullet walked by hand in Chrome. Shipped `src/app/picker/`,
-        the reset dialog and undo toast, board hotkeys with the `modal`
-        context, `usedAs`, the `re-pick` marker, and three overlay tokens
-        pushed to the design project. Open: Stage 3 gates — `/triage` is the
-        user's to run, then the PR.
+  - [x] **2c `hero-picker`** — merged (PR #15 for the proposal, PR #16 for the
+        implementation) and archived
+        (`openspec/changes/archive/2026-07-24-hero-picker`; capability specs at
+        `openspec/specs/{hero-picker,draft-board,draft-session}`). Shipped
+        `src/app/picker/`, the reset dialog and undo toast, board hotkeys with
+        the `modal` context, `usedAs`, the `re-pick` marker, and three overlay
+        tokens pushed to the design project. 319 tests; every **(e2e)** bullet
+        walked by hand in Chrome. Corrections mid-apply — see decisions.
 - [ ] **Task 4** — Playwright smoke (precondition: a UI exists); its first
       scenarios are the tasks marked **(e2e)** in `ui-foundation/tasks.md`
 - [ ] **Task 7** — Docker + VPS deploy (open decisions: registry
