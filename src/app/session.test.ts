@@ -273,7 +273,7 @@ describe("hotkey context", () => {
 	test.each([
 		["a select, which types ahead on the same letters", { tagName: "SELECT" }],
 		["a text field", { tagName: "INPUT", type: "text" }],
-		["the picker's search field of 2c", { tagName: "INPUT", type: "search" }],
+		["a search field", { tagName: "INPUT", type: "search" }],
 		["a textarea", { tagName: "TEXTAREA" }],
 		["a contenteditable region", { tagName: "DIV", isContentEditable: true }],
 	])("%s owns its keystrokes", (_label, target) => {

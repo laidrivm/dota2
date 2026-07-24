@@ -125,11 +125,14 @@ export function Picker({
 		<dialog
 			class="picker"
 			ref={dialog}
+			aria-labelledby="picker-title"
 			// `close` covers every way out — `Esc`, the ✕, the backdrop, a pick.
 			onClose={onClose}
 		>
 			<div class="picker-head">
-				<h2 class="picker-title">Pick for: {targetLabel(target)}</h2>
+				<h2 class="picker-title" id="picker-title">
+					Pick for: {targetLabel(target)}
+				</h2>
 				<button
 					type="button"
 					class="picker-close"
@@ -144,7 +147,10 @@ export function Picker({
 				<span class="visually-hidden">Search heroes</span>
 				<input
 					ref={search}
-					type="search"
+					// Not `type="search"`: Chrome gives that one its own `Esc`, which
+					// clears the field and never reaches the dialog, so the first `Esc`
+					// after typing would not close the picker the hint bar promises.
+					type="text"
 					value={query}
 					placeholder="Search heroes — try 'bone' or 'wk'"
 					onInput={(event) => setQuery(event.currentTarget.value)}

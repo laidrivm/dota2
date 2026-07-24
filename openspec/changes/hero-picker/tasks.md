@@ -254,6 +254,22 @@ Playwright target.
       alternative is a second emptiness rule to keep in sync with
       `confirmsReset`.
 
+## 10a. Findings from reading the high-risk files after /triage
+
+- [x] 10a.1 Fixed: the picker dialog had no accessible name — the confirmation
+      dialog carries `aria-labelledby`, the picker did not, so it announced as
+      an unnamed dialog. Its `<h2>` is now its label. (Req: hero-picker —
+      Picker opens for one named target)
+- [x] 10a.2 Fixed: the search field was `type="search"`, whose native `Esc`
+      Chrome spends on clearing the text — after typing, the first `Esc` did
+      not close the picker the hint bar promises. It is a `type="text"` field
+      now; verified in Chrome that one `Esc` closes it with a query typed.
+      (Req: hero-picker — Picker is operable from the keyboard alone)
+- [x] 10a.3 Noted, not fixed: a picker opened by hotkey with nothing focused
+      returns focus to `body` on close, because there was no trigger to return
+      it to. The board's hotkeys work from `body`, which is where they were
+      pressed.
+
 ## 10. Gates
 
 - [x] 10.1 `bun test` green; `tsc --noEmit` clean; `biome check` clean.
