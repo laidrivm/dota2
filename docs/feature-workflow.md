@@ -54,10 +54,11 @@ completes, name the next step and the exact command.
 
 ## Stage 3 — Review
 
-- Run the pre-PR sequence in the order the Review toolkit sets out, and act
-  on every finding rather than reporting it: `/zombies` → fix → `/warm` (only
-  when a manifest changed) → `/ponytail-review` → `/triage` last, so it maps
-  the diff the reviewer will actually see.
+- Run the pre-PR sequence in the order the Review toolkit sets out, showing
+  each report and acting on it in the same turn: `/zombies` → fix → `/warm`
+  (only when a manifest changed) → `/ponytail-review` → `/triage` last, so it
+  maps the diff the reviewer will actually see. Once the PR is open and
+  CodeRabbit has commented, `/coderabbit` closes that loop the same way.
 - If the apply run added or upgraded any dependency: run `/warm`. Walk the
   ponytail ladder before ever reaching for a dependency during apply.
 - Re-run `/zombies` with **no arguments** (diff mode): it reads the real

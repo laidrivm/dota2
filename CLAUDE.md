@@ -84,11 +84,12 @@ Response contract rules for every endpoint — see
 ## Review toolkit
 
 Review skills live in `.claude/skills/` (symlinked from the shared skills
-repo — edit them there, not here).
+repo — edit them there, not here); `/ponytail-review` comes from the ponytail
+plugin.
 
-A review skill's output is never the answer. Whatever produced it, act on
-each finding: apply the ones that hold against the current code, and report
-the ones you skip with the reason. Never hand the raw report back.
+Show a review skill's report, then act on it in the same turn: apply the
+findings that hold against the current code, and say which you skip and why.
+The report alone is never the deliverable.
 
 - `/zombies [feature]` — test ideas via the ZOMBIES heuristic. With args:
   works from a feature description (pre-code). Without args: diff mode,
@@ -98,19 +99,24 @@ the ones you skip with the reason. Never hand the raw report back.
   its dependencies are vetted.
 - `/ponytail-review` — over-engineering pass over the diff. Invoke it
   yourself and apply the cuts that survive.
-- `/triage [base]` — risk-ordered map of the branch diff. The user runs this
-  one; it returns no findings by design, so acting on it means reading the
-  files it ranks High and Medium and reporting the defects they hold.
-- `/coderabbit [pr]` — chews the bot's PR comments. The user runs it.
+- `/triage [base]` — risk-ordered map of the branch diff. Invoke it yourself.
+  It returns no findings by design, so acting on it means reading the files it
+  ranks High and Medium and reporting the defects they hold.
+- `/coderabbit [pr]` — chews the bot's PR comments. Invoke it yourself once a
+  PR has them; it drops Trivial and Minor with a reason and holds Major and
+  above for the user's approval before applying anything.
 
-Before every PR, in this order: `/zombies` → fix what it finds → `/warm`
-(only when a manifest changed) → `/ponytail-review` → ask the user for
-`/triage`, last, so it maps the final diff.
+Before every PR that changes code, in this order: `/zombies` → fix what it
+finds → `/warm` (only when a manifest changed) → `/ponytail-review` →
+`/triage` last, over the final diff. After the PR is open, `/coderabbit` on
+its comments.
 
-These gates apply to ALL work. Changes that match none of the cycle
-criteria in [docs/feature-workflow.md](docs/feature-workflow.md) — a
-bugfix, a chore, a single-value config edit — skip the OpenSpec stages but
-still run that sequence.
+A branch that changes only documentation, rules or config runs `/triage` and
+`/coderabbit` alone: what it needs instead of the code gates is a grep for
+every site that restates what it changes.
+
+These gates apply to ALL work — a bugfix and a chore skip the OpenSpec stages
+of [docs/feature-workflow.md](docs/feature-workflow.md), never the sequence.
 
 ## Feature workflow (spec-driven, OpenSpec)
 
