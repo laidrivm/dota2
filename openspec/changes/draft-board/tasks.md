@@ -100,76 +100,78 @@ Playwright target.
 
 ## 5. Board panels
 
-- [ ] 5.1 Call `computeModel` in a `useMemo` keyed on the session and snapshot
+- [x] 5.1 Call `computeModel` in a `useMemo` keyed on the session and snapshot
       identities, with the `ponytail:` comment naming the worker upgrade path.
       (Req: draft-board — Model output is recomputed on every session change,
       both scenarios)
-- [ ] 5.2 Board composition: header → bans → team panels → suggestions or
+- [x] 5.2 Board composition: header → bans → team panels → suggestions or
       result, with panel order and panel headers driven by `session.side`.
       (Req: draft-board — Board composition, all three scenarios)
-- [ ] 5.3 Bans row: tiles in insertion order, per-ban removal, pick-entry
+- [x] 5.3 Bans row: tiles in insertion order, per-ban removal, pick-entry
       control disabled with a title at `heroes.length - 10`. (Req:
       draft-board — Bans row, all three scenarios)
-- [ ] 5.4 My-team panel: five role slots, star and accent on `myRole`, filled
+- [x] 5.4 My-team panel: five role slots, star and accent on `myRole`, filled
       slot with tile + name + removal, empty slot with the pick-entry control,
       `insufficient data` badge on a thin hero. (Req: draft-board — My-team
       slots, all four scenarios)
-- [ ] 5.5 Enemy panel: five slots, filled slot with tile + name + `topRoles`
+- [x] 5.5 Enemy panel: five slots, filled slot with tile + name + `topRoles`
       + removal, empty slot with the pick-entry control. (Req: draft-board —
       Enemy slots with inferred roles, all three scenarios)
-- [ ] 5.6 Suggestions panel: one block per open role, `myRole` first with the
+- [x] 5.6 Suggestions panel: one block per open role, `myRole` first with the
       star and accent row, chips of tile + signed score, chip activation picks
       that hero for that role, phase indicator. (Req: draft-board —
       Suggestion blocks, all four scenarios)
-- [ ] 5.7 Result block and the `Add enemy picks to see win probability` hint.
+- [x] 5.7 Result block and the `Add enemy picks to see win probability` hint.
       (Req: draft-board — Result block, all three scenarios)
-- [ ] 5.8 Test: a session holding a hero id absent from the snapshot renders
-      the board without throwing and falls back on that slot. (Req:
-      draft-board — Hero tile / Hero missing from the snapshot)
-- [ ] 5.9 Pick-entry control: a labelled native `<select>` per empty slot and
+- [x] 5.8 Verify a session holding a hero id absent from the snapshot renders
+      the board without throwing and falls back on that slot. **(e2e)** — the
+      branch is `getComputedStyle` and markup, so there is nothing a
+      DOM-less test can assert (docs/testing.md routing). (Req: draft-board —
+      Hero tile / Hero missing from the snapshot)
+- [x] 5.9 Pick-entry control: a labelled native `<select>` per empty slot and
       for the bans row, offering only unused heroes in ascending name order
       and dispatching the 2.6 actions. Marked in code as replaced by the
       picker in proposal 2c. (Req: draft-board — Pick entry, both scenarios)
 
 ## 6. Layout and accessibility
 
-- [ ] 6.1 Desktop two-column board styles from the design tokens only — no
+- [x] 6.1 Desktop two-column board styles from the design tokens only — no
       literal values outside `tokens/`. (Reqs: draft-board — Board
       composition; app-shell — Style values come from design tokens)
-- [ ] 6.2 One-column layout at `max-width: 720px`: stacked team panels, enemy
+- [x] 6.2 One-column layout at `max-width: 720px`: stacked team panels, enemy
       probabilities under the hero name, bans row and suggestion rows as
       `overflow-x: auto` strips with `::scroll-button`s and no entry omitted.
       (Req: draft-board — One-column layout on a narrow viewport, both
       scenarios)
-- [ ] 6.3 Removal controls: real buttons with hero-naming accessible names,
+- [x] 6.3 Removal controls: real buttons with hero-naming accessible names,
       revealed on `:hover, :focus-within`, always-visible corner badge in the
       one-column layout. (Req: draft-board — Removal controls are reachable)
-- [ ] 6.4 Verify at 390px that the page has no horizontal scroll and the bans
+- [x] 6.4 Verify at 390px that the page has no horizontal scroll and the bans
       strip scrolls on its own. **(e2e)** (Req: draft-board — One-column
       layout / 390px board)
-- [ ] 6.5 Verify tabbing to a filled slot's removal control makes it visible
+- [x] 6.5 Verify tabbing to a filled slot's removal control makes it visible
       with a focus ring. **(e2e)** (Req: draft-board — Removal controls are
       reachable / Keyboard reveal)
-- [ ] 6.6 Verify a suggestion row that overflows is scrollable by keyboard.
+- [x] 6.6 Verify a suggestion row that overflows is scrollable by keyboard.
       **(e2e)** (Req: draft-board — One-column layout / Scroll strips are
       operable without a pointer)
 
 ## 7. Journeys verified during apply
 
-- [ ] 7.1 Verify picking from the Carry block lands the hero in the Carry slot
+- [x] 7.1 Verify picking from the Carry block lands the hero in the Carry slot
       and removes that block. **(e2e)** (Req: draft-board — Suggestion blocks
       / A suggestion is a one-click pick)
-- [ ] 7.2 Verify the tenth pick replaces suggestions with the result block.
+- [x] 7.2 Verify the tenth pick replaces suggestions with the result block.
       **(e2e)** (Req: draft-board — Result block / Full draft)
-- [ ] 7.3 Verify five team picks with incomplete enemies show the hint and no
+- [x] 7.3 Verify five team picks with incomplete enemies show the hint and no
       win probability. **(e2e)** (Req: draft-board — Result block / Team
       complete, enemies not)
-- [ ] 7.4 Verify switching side on a full board keeps every pick, swaps panel
+- [x] 7.4 Verify switching side on a full board keeps every pick, swaps panel
       order, and recomputes the result. **(e2e)** (Req: draft-board — Model
       output is recomputed / Editing side with a full board)
-- [ ] 7.5 Verify a reload restores every ban, team pick, and enemy pick.
+- [x] 7.5 Verify a reload restores every ban, team pick, and enemy pick.
       **(e2e)** (Req: draft-session — Session persists across reloads)
-- [ ] 7.6 Verify `3` on the board changes nothing and `3` with the editor open
+- [x] 7.6 Verify `3` on the board changes nothing and `3` with the editor open
       changes the role. **(e2e)** (Req: draft-session — Role selection / Board
       is not an active context)
 
