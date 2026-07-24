@@ -1,12 +1,12 @@
 import { ROLES, type Role, type Session, type Side } from "../types.ts";
-import type { Hotkey } from "./session.ts";
+import type { Action } from "./session.ts";
 
 const SIDES: { side: Side; label: string; hotkey: string }[] = [
 	{ side: "radiant", label: "Radiant", hotkey: "R" },
 	{ side: "dire", label: "Dire", hotkey: "D" },
 ];
 
-const ROLE_UI: Record<Role, { label: string; letter: string }> = {
+export const ROLE_UI: Record<Role, { label: string; letter: string }> = {
 	1: { label: "Carry", letter: "C" },
 	2: { label: "Mid", letter: "M" },
 	3: { label: "Offlane", letter: "O" },
@@ -24,7 +24,7 @@ export function SessionControls({
 	apply,
 }: {
 	session: Session;
-	apply: (hotkey: Hotkey) => void;
+	apply: (action: Action) => void;
 }) {
 	return (
 		<div class="session-controls">

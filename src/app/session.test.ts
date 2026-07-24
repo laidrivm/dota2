@@ -3,6 +3,9 @@ import { EMPTY_SESSION, type Role, type Session } from "../types.ts";
 import {
 	type Action,
 	applyAction,
+	closesEditor,
+	type HotkeyContext,
+	hotkeyContext,
 	hotkeyFor,
 	persist,
 	restore,
@@ -31,14 +34,19 @@ afterEach(() => {
 	(globalThis as { localStorage?: unknown }).localStorage = undefined;
 });
 
-const press = (key: string, modifiers: Partial<KeyboardEvent> = {}) =>
-	hotkeyFor({
-		key,
-		ctrlKey: false,
-		metaKey: false,
-		altKey: false,
-		...modifiers,
-	});
+const keystroke = (key: string, modifiers: Partial<KeyboardEvent> = {}) => ({
+	key,
+	ctrlKey: false,
+	metaKey: false,
+	altKey: false,
+	...modifiers,
+});
+
+const press = (
+	key: string,
+	modifiers: Partial<KeyboardEvent> = {},
+	context: HotkeyContext = "setup",
+) => hotkeyFor(keystroke(key, modifiers), context);
 
 describe("restore", () => {
 	test("no stored value starts an empty session", () => {
@@ -177,6 +185,59 @@ describe("hotkeys", () => {
 			expect(press("3", { [modifier]: true })).toBeNull();
 		},
 	);
+});
+
+describe("hotkey context", () => {
+	const ready: Session = { ...EMPTY_SESSION(), side: "dire", myRole: 2 };
+
+	test.each([
+		["an empty session", EMPTY_SESSION(), false, "setup"],
+		[
+			"a session with only a side",
+			{ ...EMPTY_SESSION(), side: "dire" },
+			false,
+			"setup",
+		],
+		["a set-up session", ready, false, "board"],
+		["a set-up session with the editor open", ready, true, "editor"],
+		["an empty session with the editor open", EMPTY_SESSION(), true, "editor"],
+	] satisfies [string, Session, boolean, HotkeyContext][])(
+		"%s routes to %s",
+		(_label, session, editorOpen, context) => {
+			expect(hotkeyContext(session, editorOpen)).toBe(context);
+		},
+	);
+
+	test.each(["setup", "editor"] as const)(
+		"side and role keys are live in the %s context",
+		(context) => {
+			expect(press("r", {}, context)).toEqual({
+				kind: "side",
+				side: "radiant",
+			});
+			expect(press("3", {}, context)).toEqual({ kind: "role", role: 3 });
+		},
+	);
+
+	test.each(["r", "d", "1", "2", "3", "4", "5", "c", "m", "o", "s", "f"])(
+		"%s does nothing on the board — proposal 2c owns those keys",
+		(key) => {
+			expect(press(key, {}, "board")).toBeNull();
+		},
+	);
+
+	test("Esc closes the editor and is not a session change", () => {
+		expect(closesEditor(keystroke("Escape"))).toBe(true);
+		expect(press("Escape", {}, "editor")).toBeNull();
+	});
+
+	test.each(["Enter", "e", "b", " "])("%s does not close the editor", (key) => {
+		expect(closesEditor(keystroke(key))).toBe(false);
+	});
+
+	test("a modified Esc belongs to the browser", () => {
+		expect(closesEditor(keystroke("Escape", { metaKey: true }))).toBe(false);
+	});
 });
 
 describe("side and role", () => {
