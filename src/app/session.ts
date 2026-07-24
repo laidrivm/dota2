@@ -262,6 +262,17 @@ export const endsUndoWindow = (action: Action): boolean =>
 	action.kind === "enemyAdd";
 
 /**
+ * Whether the undo window closes — which is decided by what the reducer did,
+ * not by what was asked. A ban refused at the limit enters no hero, so it must
+ * leave the backup alone.
+ */
+export const closesUndoWindow = (
+	before: Session,
+	after: Session,
+	action: Action,
+): boolean => after !== before && endsUndoWindow(action);
+
+/**
  * A stored session is only usable if every field the UI indexes is there —
  * a `{"v":1}` fragment would restore fine and then break the first slot
  * that reads `teamPicks`.
@@ -337,14 +348,14 @@ export function useSession({
 	};
 
 	/** Every change is written through, so a reload loses nothing. */
-	const apply = (action: Action) => {
-		if (backup !== null && endsUndoWindow(action)) forget();
+	const apply = (action: Action) =>
 		setSession((previous) => {
 			const next = applyAction(previous, action, banLimit);
+			if (next === previous) return previous;
 			persist(next);
+			if (backup !== null && closesUndoWindow(previous, next, action)) forget();
 			return next;
 		});
-	};
 
 	/** The outgoing draft becomes the one thing `Undo` can bring back. */
 	const reset = () =>

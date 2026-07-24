@@ -222,6 +222,32 @@ Playwright target.
       control. **(e2e)** (Req: draft-board — A hero the snapshot no longer
       contains is flagged for re-pick)
 
+## 10. Findings from the diff-mode /zombies run
+
+- [x] 10.0 Fixed: `apply` closed the undo window on the action's kind, so a ban
+      refused at the limit — or a pick of an already-used hero — dropped
+      `draft.backup` without entering anything. The decision now reads the
+      reducer's result (`closesUndoWindow`), guarded by four tests. (Req:
+      draft-session — One level of undo / Entering a hero ends the undo window)
+- [x] 10.0a Fixed: Space on a focused grid tile was swallowed by the
+      printable-key branch and typed into the search field instead of pressing
+      the tile. (Req: hero-picker — Picker is operable from the keyboard alone)
+- [x] 10.0b Fixed: after the fifth enemy pick no trigger survives, and the
+      focus redirect landed on the *first* enemy's removal control — one Enter
+      away from deleting the wrong hero. It now takes the last. (Req:
+      hero-picker — A choice applies and closes / Focus after the pick)
+- [x] 10.0c Added: `remove` swallowing a throwing `removeItem`, the third door
+      into storage. (Req: draft-session — Session persists across reloads /
+      Storage unavailable)
+- [x] 10.0d Skipped: `columns()` returning 1 when `grid-template-columns`
+      resolves to `none`. It cannot resolve to `none` while the grid is laid
+      out inside an open dialog, and the degradation is `ArrowDown` behaving as
+      `ArrowRight`.
+- [x] 10.0e Skipped: a reset on an already-empty draft still writes a backup
+      and offers an `Undo` that restores an identical draft. Harmless, and the
+      alternative is a second emptiness rule to keep in sync with
+      `confirmsReset`.
+
 ## 10. Gates
 
 - [ ] 10.1 `bun test` green; `tsc --noEmit` clean; `biome check` clean.

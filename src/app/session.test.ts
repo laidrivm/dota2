@@ -6,6 +6,7 @@ import {
 	BACKUP_KEY,
 	clearBackup,
 	closesEditor,
+	closesUndoWindow,
 	confirmsReset,
 	endsUndoWindow,
 	type HotkeyContext,
@@ -250,7 +251,7 @@ describe("hotkey context", () => {
 	);
 
 	test.each(["r", "d", "1", "2", "3", "4", "5", "c", "m", "o", "s", "f"])(
-		"%s does nothing on the board — proposal 2c owns those keys",
+		"%s changes no session field on the board — it opens the picker instead",
 		(key) => {
 			expect(press(key, {}, "board")).toBeNull();
 		},
@@ -740,6 +741,42 @@ describe("the undo backup", () => {
 			expect(endsUndoWindow(action)).toBe(ends);
 		},
 	);
+
+	// The window closes on a hero entered, not on a key pressed: the reducer
+	// hands back the session it was given whenever it refuses.
+	test.each([
+		[
+			"a ban at the limit",
+			{ ...EMPTY_SESSION(), bans: [1, 2, 3] },
+			{ kind: "banAdd", hero: 9 } satisfies Action,
+			3,
+		],
+		[
+			"a pick of a hero already banned",
+			{ ...EMPTY_SESSION(), bans: [9] },
+			{ kind: "teamSet", role: 1, hero: 9 } satisfies Action,
+			NO_LIMIT,
+		],
+		[
+			"a sixth enemy pick",
+			{ ...EMPTY_SESSION(), enemyPicks: [1, 2, 3, 4, 5] },
+			{ kind: "enemyAdd", hero: 9 } satisfies Action,
+			NO_LIMIT,
+		],
+	])("%s leaves the undo window open", (_label, session, action, limit) => {
+		const after = applyAction(session, action, limit);
+
+		expect(after).toBe(session);
+		expect(closesUndoWindow(session, after, action)).toBe(false);
+	});
+
+	test("an accepted ban closes the window", () => {
+		const session = EMPTY_SESSION();
+		const action: Action = { kind: "banAdd", hero: 9 };
+		const after = applyAction(session, action, NO_LIMIT);
+
+		expect(closesUndoWindow(session, after, action)).toBe(true);
+	});
 });
 
 describe("the reducer contract", () => {

@@ -190,9 +190,12 @@ const positionOf = (target: PickTarget): string =>
 function focusAfterPick(target: PickTarget): void {
 	const position = positionOf(target);
 	setTimeout(() => {
+		// The last removal control of the position is the entry just added — the
+		// first would hand a keyboard user the ✕ of somebody else's hero.
+		const removals = document.querySelectorAll(`[data-remove="${position}"]`);
 		const next =
 			document.querySelector(`[data-pick="${position}"]:not(:disabled)`) ??
-			document.querySelector(`[data-remove="${position}"]`);
+			removals[removals.length - 1];
 		if (next instanceof HTMLElement) next.focus();
 	}, 0);
 }

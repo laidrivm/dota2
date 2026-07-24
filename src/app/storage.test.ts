@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, test } from "bun:test";
-import { read, write } from "./storage.ts";
+import { read, remove, write } from "./storage.ts";
 
 /** Bun has no localStorage, so every test installs the one it needs. */
 function install(fake: Partial<Storage> | undefined) {
@@ -12,6 +12,9 @@ function memoryStorage(): Partial<Storage> {
 		getItem: (k) => map.get(k) ?? null,
 		setItem: (k, v) => {
 			map.set(k, v);
+		},
+		removeItem: (k) => {
+			map.delete(k);
 		},
 	};
 }
@@ -50,9 +53,28 @@ describe("storage wrapper", () => {
 		expect(() => write("draft.session", "x")).not.toThrow();
 	});
 
+	test("removes a value", () => {
+		install(memoryStorage());
+		write("draft.backup", '{"v":1}');
+		remove("draft.backup");
+		expect(read("draft.backup")).toBeNull();
+	});
+
+	test("removeItem throwing is swallowed", () => {
+		install({
+			getItem: () => null,
+			setItem: () => {},
+			removeItem: () => {
+				throw new DOMException("access denied", "SecurityError");
+			},
+		});
+		expect(() => remove("draft.backup")).not.toThrow();
+	});
+
 	test("a missing localStorage degrades instead of throwing", () => {
 		install(undefined);
 		expect(read("draft.session")).toBeNull();
 		expect(() => write("draft.session", "x")).not.toThrow();
+		expect(() => remove("draft.session")).not.toThrow();
 	});
 });

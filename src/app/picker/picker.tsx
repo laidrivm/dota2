@@ -110,7 +110,9 @@ export function Picker({
 			return;
 		}
 
-		if (event.key.length === 1) {
+		// Space is a character everywhere except on a button, where it is how the
+		// button is pressed — typing it here would swallow the tile's activation.
+		if (event.key.length === 1 && event.key !== " ") {
 			// The keystroke that moved focus here cannot land in the field by
 			// itself, so it is carried over by hand.
 			setQuery((current) => current + event.key);
