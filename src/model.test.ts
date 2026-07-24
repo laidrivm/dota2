@@ -257,20 +257,27 @@ describe("insufficient-data hero (§7.5)", () => {
 		expect(p["1"]).toBeGreaterThan(p["4"]);
 	});
 
-	test("a sufficient hero with an insufficient position is dropped from that role", () => {
-		// Spectre is a top-5 role-1 candidate; flag its pos-1 as insufficient and
-		// it must leave the role-1 block (share → 0), independent of hero.sufficient.
-		const s = session({ myRole: 1, side: "radiant" });
-		const inRole1 = (b: SnapshotBundle) =>
-			def(
-				computeModel(b, s).suggestions.find((x) => x.role === 1),
-			).entries.some((e) => e.hero === H.spectre);
-		expect(inRole1(bundle)).toBe(true);
+	// Spectre is a top-5 role-1 candidate, which is what makes it the hero
+	// worth flagging: its pos-1 share going to 0 must take it out of the block,
+	// independent of `hero.sufficient`.
+	const spectreInRole1 = (b: SnapshotBundle) =>
+		def(
+			computeModel(b, session({ myRole: 1, side: "radiant" })).suggestions.find(
+				(x) => x.role === 1,
+			),
+		).entries.some((e) => e.hero === H.spectre);
 
+	test("a hero with a sufficient position is a candidate for that role", () => {
+		expect(spectreInRole1(bundle)).toBe(true);
+	});
+
+	test("a sufficient hero with an insufficient position is dropped from that role", () => {
 		const patched = structuredClone(bundle);
-		const spectre = def(patched.heroes.find((h) => h.id === H.spectre));
-		def(spectre.positions["1"]).sufficient = false;
-		expect(inRole1(patched)).toBe(false);
+		def(
+			def(patched.heroes.find((h) => h.id === H.spectre)).positions["1"],
+		).sufficient = false;
+
+		expect(spectreInRole1(patched)).toBe(false);
 	});
 });
 
@@ -289,15 +296,21 @@ describe("win estimate (§4)", () => {
 			enemyPicks: [H.lifestealer, H.zeus, H.axe, H.clockwerk, H.oracle],
 		});
 
-	test("only present at a full 5v5 draft", () => {
+	test("present at a full 5v5 draft", () => {
 		expect(computeModel(bundle, full("radiant")).winEstimate).not.toBeNull();
-		// 5 team + 4 enemy
+	});
+
+	test("absent with five of mine and four of theirs", () => {
 		const almost = full("radiant");
 		almost.enemyPicks = almost.enemyPicks.slice(0, 4);
+
 		expect(computeModel(bundle, almost).winEstimate).toBeNull();
-		// 4 team + 5 enemy
+	});
+
+	test("absent with four of mine and five of theirs", () => {
 		const fourTeam = full("radiant");
 		fourTeam.teamPicks = { ...fourTeam.teamPicks, "5": null };
+
 		expect(computeModel(bundle, fourTeam).winEstimate).toBeNull();
 	});
 
