@@ -172,8 +172,12 @@ protocol:
 
 ### Rules
 
+- Gate a side effect on the reducer's result, not on the action that asked
+  for it.
 - A default action bound to a key applies to the first *enabled* candidate,
   never the first rendered one.
+- Restore focus after an action that unmounts the active element in a
+  macrotask (`setTimeout(…, 0)`), not `requestAnimationFrame`.
 - Read state a document-level listener depends on through a ref, never by
   re-subscribing the listener when that state changes.
 - A guard against malformed input must cover the whole value, not a prefix —

@@ -15,7 +15,7 @@ import type {
 	WinEstimate,
 } from "../../types.ts";
 import { ROLES } from "../../types.ts";
-import { type Action, isUsed } from "../session.ts";
+import type { Action, PickTarget, Position } from "../session.ts";
 import { ROLE_UI, SIDE_LABEL } from "../session-controls.tsx";
 import {
 	formatAdvantage,
@@ -28,62 +28,39 @@ import {
 import { HeroTile } from "./hero-tile.tsx";
 
 type Apply = (action: Action) => void;
+type OpenPicker = (target: PickTarget) => void;
 
 /**
- * What every pick-entry control offers: the heroes not already banned or
- * picked, by name. The picker of proposal 2c filters this same list.
- */
-export function availableHeroes(
-	bundle: SnapshotBundle,
-	session: Session,
-): HeroEntry[] {
-	return bundle.heroes
-		.filter((hero) => !isUsed(session, hero.id))
-		.sort((a, b) => a.name.localeCompare(b.name, "en"));
-}
-
-/**
- * The stand-in for the hero picker of proposal 2c: a native select, so the
- * board can be used and tested before the overlay exists. 2c deletes this and
- * points the same actions at the overlay.
+ * The one way a hero enters the draft: a button that opens the picker for this
+ * position. `position` is what the focus redirect after a pick looks for.
  */
 function PickEntry({
 	label,
 	placeholder,
-	heroes,
-	onPick,
+	position,
+	onOpen,
 	disabled,
 	title,
 }: {
 	label: string;
 	placeholder: string;
-	heroes: HeroEntry[];
-	onPick: (hero: HeroId) => void;
+	position: Position;
+	onOpen: () => void;
 	disabled?: boolean;
 	title?: string;
 }) {
 	return (
-		<label class="pick-entry">
-			<span class="visually-hidden">{label}</span>
-			<select
-				disabled={disabled}
-				title={title}
-				onChange={(event) => {
-					const chosen = event.currentTarget.value;
-					// The select is a trigger, not a value: it always shows its
-					// placeholder again so the same hero can be chosen for another slot.
-					event.currentTarget.value = "";
-					if (chosen !== "") onPick(Number(chosen));
-				}}
-			>
-				<option value="">{placeholder}</option>
-				{heroes.map((hero) => (
-					<option key={hero.id} value={hero.id}>
-						{hero.name}
-					</option>
-				))}
-			</select>
-		</label>
+		<button
+			type="button"
+			class="pick-entry"
+			data-pick={position}
+			aria-label={label}
+			disabled={disabled}
+			title={title}
+			onClick={onOpen}
+		>
+			{placeholder}
+		</button>
 	);
 }
 
@@ -94,15 +71,18 @@ function PickEntry({
  */
 function RemoveButton({
 	label,
+	position,
 	onClick,
 }: {
 	label: string;
+	position: Position;
 	onClick: () => void;
 }) {
 	return (
 		<button
 			type="button"
 			class="remove"
+			data-remove={position}
 			aria-label={label}
 			onClick={(event) => {
 				const row = event.currentTarget.closest(".slot, .ban");
@@ -113,9 +93,9 @@ function RemoveButton({
 				// runs before the commit, and never at all in a hidden tab.
 				setTimeout(() => {
 					const next =
-						(row?.isConnected ? row.querySelector("select") : null) ??
-						region?.querySelector("select");
-					next?.focus();
+						(row?.isConnected ? row.querySelector(".pick-entry") : null) ??
+						region?.querySelector(".pick-entry");
+					if (next instanceof HTMLElement) next.focus();
 				}, 0);
 			}}
 		>
@@ -123,6 +103,11 @@ function RemoveButton({
 		</button>
 	);
 }
+
+/** A hero the loaded snapshot no longer carries (screens-spec §6.4): the entry
+ * stays put, says so, and waits to be replaced. */
+const RepickBadge = ({ hero }: { hero: HeroEntry | undefined }) =>
+	hero === undefined ? <span class="repick-badge">re-pick</span> : null;
 
 const ThinBadge = ({ hero }: { hero: HeroEntry | undefined }) =>
 	hero?.sufficient === false ? (
@@ -132,15 +117,15 @@ const ThinBadge = ({ hero }: { hero: HeroEntry | undefined }) =>
 function BansRow({
 	session,
 	byId,
-	available,
 	banLimit,
 	apply,
+	onPick,
 }: {
 	session: Session;
 	byId: Map<HeroId, HeroEntry>;
-	available: HeroEntry[];
 	banLimit: number;
 	apply: Apply;
+	onPick: OpenPicker;
 }) {
 	const atLimit = session.bans.length >= banLimit;
 
@@ -157,24 +142,32 @@ function BansRow({
 								size="lg"
 								label={hero?.name ?? "Unknown hero"}
 							/>
+							<RepickBadge hero={hero} />
 							<RemoveButton
 								label={`Remove ban ${hero?.name ?? "unknown hero"}`}
+								position="ban"
 								onClick={() => apply({ kind: "banRemove", index })}
 							/>
 						</div>
 					);
 				})}
 				<PickEntry
-					label="Add ban"
+					// A disabled control's `title` is not announced, so the reason
+					// rides along in the name a screen reader does read.
+					label={
+						atLimit
+							? `Add ban — limit reached, ${banLimit} for this snapshot`
+							: "Add ban"
+					}
 					placeholder="+ Add ban"
-					heroes={available}
+					position="ban"
 					disabled={atLimit}
 					title={
 						atLimit
 							? `Ban limit reached — ${banLimit} for this snapshot`
 							: undefined
 					}
-					onPick={(hero) => apply({ kind: "banAdd", hero })}
+					onOpen={() => onPick({ kind: "ban" })}
 				/>
 			</div>
 		</section>
@@ -184,13 +177,13 @@ function BansRow({
 function TeamPanel({
 	session,
 	byId,
-	available,
 	apply,
+	onPick,
 }: {
 	session: Session;
 	byId: Map<HeroId, HeroEntry>;
-	available: HeroEntry[];
 	apply: Apply;
+	onPick: OpenPicker;
 }) {
 	const side = session.side as Side;
 
@@ -215,22 +208,22 @@ function TeamPanel({
 								<PickEntry
 									label={`Pick for ${ROLE_UI[role].label}`}
 									placeholder="+ pick"
-									heroes={available}
-									onPick={(picked) =>
-										apply({ kind: "teamSet", role, hero: picked })
-									}
+									position={`team-${role}`}
+									onOpen={() => onPick({ kind: "team", role })}
 								/>
 							) : (
 								<>
 									<HeroTile hero={hero} size="md" />
 									<span class="hero-name">{hero?.name ?? ""}</span>
 									<ThinBadge hero={hero} />
+									<RepickBadge hero={hero} />
 								</>
 							)}
 						</div>
 						{id !== null && (
 							<RemoveButton
 								label={`Remove ${hero?.name ?? "unknown hero"} from ${ROLE_UI[role].label}`}
+								position={`team-${role}`}
 								onClick={() => apply({ kind: "teamClear", role })}
 							/>
 						)}
@@ -245,14 +238,14 @@ function EnemyPanel({
 	session,
 	model,
 	byId,
-	available,
 	apply,
+	onPick,
 }: {
 	session: Session;
 	model: ModelOutput;
 	byId: Map<HeroId, HeroEntry>;
-	available: HeroEntry[];
 	apply: Apply;
+	onPick: OpenPicker;
 }) {
 	const side: Side = session.side === "radiant" ? "dire" : "radiant";
 	const roles = new Map(
@@ -280,10 +273,12 @@ function EnemyPanel({
 								<span class="enemy-roles">
 									{probs === undefined ? "" : topRoles(probs)}
 								</span>
+								<RepickBadge hero={hero} />
 							</div>
 						</div>
 						<RemoveButton
 							label={`Remove enemy pick ${hero?.name ?? "unknown hero"}`}
+							position="enemy"
 							onClick={() => apply({ kind: "enemyRemove", index })}
 						/>
 					</div>
@@ -295,8 +290,8 @@ function EnemyPanel({
 						<PickEntry
 							label="Enemy pick"
 							placeholder="+ pick"
-							heroes={available}
-							onPick={(hero) => apply({ kind: "enemyAdd", hero })}
+							position="enemy"
+							onOpen={() => onPick({ kind: "enemy" })}
 						/>
 					</div>
 				</div>
@@ -389,15 +384,16 @@ export function Board({
 	model,
 	banLimit,
 	apply,
+	onPick,
 }: {
 	bundle: SnapshotBundle;
 	session: Session;
 	model: ModelOutput;
 	banLimit: number;
 	apply: Apply;
+	onPick: OpenPicker;
 }) {
 	const byId = new Map(bundle.heroes.map((hero) => [hero.id, hero]));
-	const available = availableHeroes(bundle, session);
 
 	// My team reads left on Radiant and right on Dire, as the game client puts it.
 	const teams = `teams${session.side === "dire" ? " teams-mirrored" : ""}`;
@@ -407,23 +403,23 @@ export function Board({
 			<BansRow
 				session={session}
 				byId={byId}
-				available={available}
 				banLimit={banLimit}
 				apply={apply}
+				onPick={onPick}
 			/>
 			<div class={teams}>
 				<TeamPanel
 					session={session}
 					byId={byId}
-					available={available}
 					apply={apply}
+					onPick={onPick}
 				/>
 				<EnemyPanel
 					session={session}
 					model={model}
 					byId={byId}
-					available={available}
 					apply={apply}
+					onPick={onPick}
 				/>
 			</div>
 			{model.winEstimate !== null ? (

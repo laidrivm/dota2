@@ -273,9 +273,8 @@
 	white-space: nowrap;
 }
 
-/* The picker of proposal 2c replaces every one of these. */
-.pick-entry select {
-	appearance: none;
+/* Every empty position carries one of these, and each opens the picker. */
+.pick-entry {
 	padding: var(--sp-2) var(--sp-4);
 	border: 1px dashed var(--border-3);
 	border-radius: var(--r-control);
@@ -285,12 +284,12 @@
 	font-size: var(--fs-control);
 }
 
-.pick-entry select:hover:not(:disabled) {
+.pick-entry:hover:not(:disabled) {
 	border-color: var(--border-hover);
 	color: var(--text-2);
 }
 
-.pick-entry select:disabled {
+.pick-entry:disabled {
 	color: var(--text-6);
 	border-color: var(--border-2);
 }
@@ -625,6 +624,216 @@
 	color: var(--tile-ink-light);
 }
 
+/* re-pick marker: the hero left the snapshot (screens-spec §6.4) */
+
+.repick-badge {
+	padding: 2px var(--sp-2);
+	border: 1px solid var(--accent-border);
+	border-radius: var(--r-kbd);
+	background: var(--accent-banner-bg);
+	color: var(--accent);
+	font-family: var(--font-mono);
+	font-size: var(--fs-kbd);
+}
+
+/* picker and dialogs */
+
+dialog {
+	border: 1px solid var(--border-2);
+	border-radius: var(--r-panel);
+	background: var(--bg-1);
+	color: var(--text-1);
+	box-shadow: var(--shadow-modal);
+}
+
+dialog::backdrop {
+	background: var(--backdrop);
+}
+
+.picker {
+	width: min(640px, 100% - var(--sp-8));
+	padding: 0;
+	overflow: hidden;
+}
+
+.picker-head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: var(--sp-5) var(--sp-6) var(--sp-4);
+}
+
+.picker-title {
+	font-size: var(--fs-body);
+	font-weight: 600;
+}
+
+.picker-close {
+	width: var(--tile-sm);
+	height: var(--tile-sm);
+	border: 1px solid var(--border-3);
+	border-radius: var(--r-tile-sm);
+	background: transparent;
+	color: var(--text-4);
+	font-size: var(--fs-meta);
+}
+
+.picker-search {
+	display: block;
+	padding: 0 var(--sp-6) var(--sp-4);
+}
+
+.picker-search input {
+	width: 100%;
+	padding: var(--sp-3) var(--sp-4);
+	border: 1px solid var(--border-3);
+	border-radius: var(--r-control);
+	background: var(--bg-0);
+	color: var(--text-1);
+	font-family: var(--font-ui);
+	font-size: var(--fs-body);
+}
+
+.picker-empty {
+	padding: 0 var(--sp-6) var(--sp-5);
+	color: var(--text-4);
+	font-size: var(--fs-control);
+}
+
+.picker-grid {
+	display: grid;
+	grid-template-columns: repeat(8, 1fr);
+	gap: var(--sp-3) var(--sp-2);
+	max-height: 50vh;
+	padding: var(--sp-1) var(--sp-6) var(--sp-5);
+	overflow-y: auto;
+}
+
+.picker-tile {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 5px;
+	padding: var(--sp-2) 2px;
+	border: 0;
+	border-radius: var(--r-tile);
+	background: transparent;
+	color: var(--text-4);
+	font-family: var(--font-ui);
+	font-size: var(--fs-kbd);
+	text-align: center;
+}
+
+.picker-first {
+	background: var(--bg-3);
+}
+
+.picker-first .tile {
+	box-shadow:
+		var(--tile-inset),
+		0 0 0 2px var(--accent);
+}
+
+.picker-tile[aria-disabled="true"] {
+	cursor: not-allowed;
+}
+
+/* The design fades the whole cell; fading the words with it would leave the
+   one thing a taken tile has to say — where the hero already sits — below any
+   readable contrast. Only the artwork dims. */
+.picker-tile[aria-disabled="true"] .tile {
+	opacity: 0.35;
+}
+
+.picker-tile[aria-disabled="true"] .picker-name {
+	color: var(--text-5);
+}
+
+.picker-used {
+	color: var(--accent);
+}
+
+.picker-hints {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--sp-5);
+	padding: var(--sp-3) var(--sp-6);
+	border-top: 1px solid var(--border-0);
+	color: var(--text-5);
+	font-family: var(--font-mono);
+	font-size: var(--fs-kbd);
+}
+
+.confirm {
+	width: min(320px, 100% - var(--sp-8));
+	padding: var(--sp-7);
+}
+
+.confirm h2 {
+	margin-bottom: var(--sp-2);
+	font-size: var(--fs-body);
+	font-weight: 600;
+}
+
+.confirm p {
+	margin-bottom: var(--sp-6);
+	color: var(--text-4);
+	font-size: var(--fs-meta);
+}
+
+.confirm-actions {
+	display: flex;
+	gap: var(--sp-3);
+	justify-content: flex-end;
+}
+
+.confirm-actions button {
+	padding: var(--sp-2) var(--sp-5);
+	border: 1px solid var(--border-3);
+	border-radius: var(--r-control);
+	background: var(--bg-2);
+	color: var(--text-2);
+	font-family: var(--font-ui);
+	font-size: var(--fs-control);
+	font-weight: 600;
+}
+
+/* The design tints this button with its own colour rather than a new one, so
+   the tint is mixed from the token instead of restating the palette here. */
+.confirm-actions .danger {
+	border-color: color-mix(in srgb, var(--dire) 45%, transparent);
+	background: color-mix(in srgb, var(--dire) 8%, transparent);
+	color: var(--dire);
+}
+
+/* undo toast — the transient half of the undo window (screens-spec §4) */
+
+.toast {
+	position: fixed;
+	bottom: var(--sp-7);
+	left: 50%;
+	transform: translateX(-50%);
+	display: flex;
+	align-items: center;
+	gap: var(--sp-4);
+	padding: var(--sp-4) var(--sp-5);
+	border: 1px solid var(--border-3);
+	border-radius: var(--r-tile);
+	background: var(--bg-3);
+	color: var(--text-2);
+	font-size: var(--fs-control);
+	box-shadow: var(--shadow-toast);
+}
+
+.link-button {
+	border: 0;
+	background: none;
+	color: var(--accent);
+	font-family: var(--font-ui);
+	font-size: var(--fs-control);
+	font-weight: 600;
+}
+
 /* One column: the board has to fit a phone held beside the game (US-25). */
 
 @media (max-width: 720px) {
@@ -696,5 +905,35 @@
 		border-color: var(--border-3);
 		color: var(--text-4);
 		font-size: var(--fs-kbd);
+	}
+
+	/* Full-screen picker: the search field has to be reachable with a thumb
+	   and the grid still has to show whole rows (screens-spec §3). */
+	.picker {
+		display: flex;
+		flex-direction: column;
+		width: 100%;
+		max-width: none;
+		height: 100%;
+		max-height: none;
+		margin: 0;
+		border: 0;
+		border-radius: 0;
+	}
+
+	/* The grid is the only part that may shrink, so the hint bar stays on
+	   screen and the heroes scroll inside instead of being clipped away. */
+	.picker-grid {
+		grid-template-columns: repeat(4, 1fr);
+		min-height: 0;
+		max-height: none;
+	}
+
+	.picker-hints {
+		margin-top: auto;
+	}
+
+	.picker-hints {
+		gap: var(--sp-4);
 	}
 }
