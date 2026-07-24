@@ -194,8 +194,9 @@ font, at one of three sizes: 40px in the bans row, 34px in a team slot, 26px
 on a suggestion chip. Its background SHALL be the `--hero-<short>` token, or
 `--hero-fallback` when the palette has no entry for that hero. Its ink SHALL
 be `--tile-ink-light` when the background's relative luminance is below 0.22
-and `--tile-ink-dark` otherwise. Every tile SHALL carry an accessible name
-naming its hero.
+and `--tile-ink-dark` otherwise. Every tile SHALL either carry an accessible
+name naming its hero, or be hidden from assistive technology when the row it
+sits in already names that hero.
 
 #### Scenario: Abbreviation
 

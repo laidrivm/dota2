@@ -145,11 +145,17 @@ this, typing `3` on a finished board would silently move the user's role.
 - **The `<select>` is throwaway code in a shipped state** → it is deleted by
   the next proposal in this sequence, and it is the only entry path that
   exists in between; the alternative ships a board with dead controls.
-- **The ink threshold is a tuned constant** → its value is justified against
-  the whole shipped palette by a unit test that recomputes every
-  `--hero-*` token from `tokens/colors.css` and asserts the ink it selects
-  clears a contrast floor, so a palette addition that needs the other ink
-  fails the suite instead of shipping unreadable text.
+- **The ink threshold is a tuned constant** → it is the design's own
+  judgement, reproduced. A contrast floor cannot police it: with two fixed
+  inks the worst case is fixed at the threshold itself (≈3.5:1), so any such
+  test passes by construction and guards nothing. What the suite does guard is
+  the input — every `--hero-*` and `--tile-ink-*` token in
+  `tokens/colors.css` must parse to a luminance, so a malformed or renamed
+  entry fails the suite instead of silently lettering a tile in the wrong ink.
+  The palette maxes out at 3.76:1 for its darkest mid-tones whichever ink is
+  chosen; moving the threshold to the contrast-optimal 0.192 would buy 0.22
+  of ratio and diverge from the design on five more heroes, so it was not
+  taken.
 - **`getComputedStyle` runs on the render path** → once per hero per snapshot
   behind a `Map`; if a profile ever objects, the map is built eagerly when the
   snapshot resolves.

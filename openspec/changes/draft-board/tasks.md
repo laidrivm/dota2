@@ -46,31 +46,33 @@ Playwright target.
 
 ## 3. Formatters and hero tile
 
-- [ ] 3.1 Tests for `heroAbbr`: `Zeus` → `ZEUS`; `Keeper of the Light` →
+- [x] 3.1 Tests for `heroAbbr`: `Zeus` → `ZEUS`; `Keeper of the Light` →
       `KEEP`; `Anti-Mage` → `ANTI` (non-letters stripped before truncating);
       `Io` → `IO` with no padding. (Req: draft-board — Hero tile /
       Abbreviation)
-- [ ] 3.2 Tests for `tileInk`: `#4a3d85` (luminance 0.065) → light ink;
+- [x] 3.2 Tests for `tileInk`: `#4a3d85` (luminance 0.065) → light ink;
       `#dce8f2` (0.793) → dark ink; a colour at exactly 0.22 → dark ink.
       (Req: draft-board — Hero tile / Ink follows the background)
-- [ ] 3.3 Test: every `--hero-*` token parsed out of
-      `src/app/styles/tokens/colors.css` gets an ink from `tileInk` that
-      clears the contrast floor — the guard that a palette addition needing
-      the other ink fails the suite. (Req: draft-board — Hero tile)
-- [ ] 3.4 Tests for score and estimate formatting: `+2.1%` for 2.14; `-0.4%`
+- [x] 3.3 Test: every `--hero-*` and `--tile-ink-*` token in
+      `src/app/styles/tokens/colors.css` parses to a luminance, and
+      `--hero-fallback` is present — a malformed or renamed entry fails the
+      suite instead of lettering a tile in the wrong ink. (A contrast floor
+      was the original plan and guards nothing here — see design.md.) (Req:
+      draft-board — Hero tile)
+- [x] 3.4 Tests for score and estimate formatting: `+2.1%` for 2.14; `-0.4%`
       for -0.44; `+0.0%` for 0 with the muted class, not the positive one;
       `formatAdvantage(-3.24)` → `-3.2 pp`; `formatWinProbability(0.585)` →
       `~59% win`. (Reqs: draft-board — Suggestion blocks / Score sign is
       visible; Result block)
-- [ ] 3.5 Tests for `topRoles`: `{1: .62, 2: .31, …}` → `p1 62% · p2 31%`; a
+- [x] 3.5 Tests for `topRoles`: `{1: .62, 2: .31, …}` → `p1 62% · p2 31%`; a
       second term rounding to `0%` is dropped; ties break by ascending role.
       (Req: draft-board — Enemy slots with inferred roles, first two
       scenarios)
-- [ ] 3.6 Test: `formatPhase` maps `p1`/`p2`/`last` to `1st`/`2nd`/`last`.
+- [x] 3.6 Test: `formatPhase` maps `p1`/`p2`/`last` to `1st`/`2nd`/`last`.
       (Req: draft-board — Suggestion blocks)
-- [ ] 3.7 Implement the formatters and `tileInk`/`relativeLuminance` as pure
+- [x] 3.7 Implement the formatters and `tileInk`/`relativeLuminance` as pure
       functions in `src/app/board/`. (Reqs: as 3.1–3.6)
-- [ ] 3.8 Implement the hero tile component: three sizes, abbreviation,
+- [x] 3.8 Implement the hero tile component: three sizes, abbreviation,
       `--hero-<short>` background resolved through `getComputedStyle` and
       memoized by slug, `--hero-fallback` when the token is absent, ink from
       3.7, accessible name naming the hero. (Req: draft-board — Hero tile, all
