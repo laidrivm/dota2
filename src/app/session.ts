@@ -8,6 +8,7 @@
 import { useEffect, useState } from "preact/hooks";
 import {
 	EMPTY_SESSION,
+	type HeroId,
 	ROLES,
 	type Role,
 	type Session,
@@ -17,9 +18,20 @@ import { read, write } from "./storage.ts";
 
 export const SESSION_KEY = "draft.session";
 
-export type Hotkey =
+/** Every way the draft can change. The picker in proposal 2c dispatches
+ * these same actions, so it adds a trigger and not a second write path. */
+export type Action =
 	| { kind: "side"; side: Side }
-	| { kind: "role"; role: Role };
+	| { kind: "role"; role: Role }
+	| { kind: "banAdd"; hero: HeroId }
+	| { kind: "banRemove"; index: number }
+	| { kind: "teamSet"; role: Role; hero: HeroId }
+	| { kind: "teamClear"; role: Role }
+	| { kind: "enemyAdd"; hero: HeroId }
+	| { kind: "enemyRemove"; index: number };
+
+/** The two actions a keystroke can produce. */
+export type Hotkey = Extract<Action, { kind: "side" | "role" }>;
 
 /** Just the parts of a keystroke the hotkey layer reads, so it is testable
  * without a DOM. */
@@ -57,10 +69,70 @@ export function hotkeyFor(event: Keystroke): Hotkey | null {
 	return null;
 }
 
-export function applyHotkey(session: Session, hotkey: Hotkey): Session {
-	return hotkey.kind === "side"
-		? { ...session, side: hotkey.side }
-		: { ...session, myRole: hotkey.role };
+/** A hero is on the board once — as a ban, on my team, or on theirs. */
+export function isUsed(session: Session, hero: HeroId): boolean {
+	return (
+		session.bans.includes(hero) ||
+		session.enemyPicks.includes(hero) ||
+		ROLES.some((role) => session.teamPicks[`${role}`] === hero)
+	);
+}
+
+const MAX_ENEMY_PICKS = 5;
+
+const removeAt = <T>(list: T[], index: number): T[] =>
+	index < 0 || index >= list.length ? list : list.filter((_, i) => i !== index);
+
+/**
+ * The single write path for the draft. Every refusal returns the session
+ * unchanged rather than throwing: the UI disables what cannot be done, and a
+ * race against that is not worth an error path.
+ *
+ * `banLimit` is `snapshot.heroes.length - 10` (US-7) — the caller holds the
+ * snapshot, this function does not.
+ */
+export function applyAction(
+	session: Session,
+	action: Action,
+	banLimit: number,
+): Session {
+	switch (action.kind) {
+		case "side":
+			return { ...session, side: action.side };
+		case "role":
+			return { ...session, myRole: action.role };
+		case "banAdd":
+			return session.bans.length >= banLimit || isUsed(session, action.hero)
+				? session
+				: { ...session, bans: [...session.bans, action.hero] };
+		case "banRemove":
+			return { ...session, bans: removeAt(session.bans, action.index) };
+		case "teamSet":
+			return isUsed(session, action.hero)
+				? session
+				: {
+						...session,
+						teamPicks: {
+							...session.teamPicks,
+							[`${action.role}`]: action.hero,
+						},
+					};
+		case "teamClear":
+			return {
+				...session,
+				teamPicks: { ...session.teamPicks, [`${action.role}`]: null },
+			};
+		case "enemyAdd":
+			return session.enemyPicks.length >= MAX_ENEMY_PICKS ||
+				isUsed(session, action.hero)
+				? session
+				: { ...session, enemyPicks: [...session.enemyPicks, action.hero] };
+		case "enemyRemove":
+			return {
+				...session,
+				enemyPicks: removeAt(session.enemyPicks, action.index),
+			};
+	}
 }
 
 /**
@@ -96,13 +168,13 @@ export function persist(session: Session): void {
 	write(SESSION_KEY, JSON.stringify(session));
 }
 
-export function useSession() {
+export function useSession(banLimit: number) {
 	const [session, setSession] = useState(restore);
 
 	/** Every change is written through, so a reload loses nothing. */
-	const apply = (hotkey: Hotkey) =>
+	const apply = (action: Action) =>
 		setSession((previous) => {
-			const next = applyHotkey(previous, hotkey);
+			const next = applyAction(previous, action, banLimit);
 			persist(next);
 			return next;
 		});

@@ -9,7 +9,13 @@ export function App() {
 	const [snapshot, setSnapshot] = useState<SnapshotBundle | null | "pending">(
 		"pending",
 	);
-	const { session, apply } = useSession();
+	// No snapshot, no board, so no ban is possible — the limit is US-7's
+	// "hero count minus the ten that get picked".
+	const banLimit =
+		snapshot === "pending" || snapshot === null
+			? 0
+			: snapshot.heroes.length - 10;
+	const { session, apply } = useSession(banLimit);
 
 	// One automatic fetch per page; anything further is the user's retry.
 	useEffect(() => {
