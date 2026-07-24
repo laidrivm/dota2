@@ -72,9 +72,9 @@ completes, name the next step and the exact command.
   list of what exists now vs. before, highlighting the additions. The user
   reviews the system first, the code second.
 
-- When all Stage 3 gates pass: push the branch and offer to open a draft
-  PR (`gh pr create --draft`) with the description per Git & PRs. Wait for
-  the user's go-ahead before opening it.
+- When all Stage 3 gates pass: push the branch and offer to open the PR
+  (`gh pr create`, ready for review — see Git & PRs) with the description per
+  Git & PRs. Wait for the user's go-ahead before opening it.
 
 ## Stage 4 — Archive
 
