@@ -48,11 +48,13 @@ below.
         team and enemy slots, suggestion blocks, the result block, the
         collapsed header + editor, the 390px one-column layout, and the first
         `computeModel` call. 244 tests. Corrections mid-apply — see decisions.
-  - [ ] **2c `hero-picker`** ← next step is Stage 1 (`/opsx:propose`). Deletes
-        the temporary `<select>` and points `applyAction` at the overlay.
-        Picker overlay (search/aliases/grid/keyboard),
-        board hotkeys + context routing, New/reset dialog, undo toast,
-        screens-spec §6 edge cases.
+  - [ ] **2c `hero-picker`** — Stage 1 done on `feat/hero-picker`:
+        `openspec/changes/hero-picker/` holds proposal, design, tasks and the
+        three spec deltas (`hero-picker` new; `draft-board` and `draft-session`
+        modified). Next step is Stage 2 (`/opsx:apply`). Deletes the temporary
+        `<select>` and points `applyAction` at the overlay. Picker overlay
+        (search/aliases/grid/keyboard), board hotkeys + context routing,
+        New/reset dialog, undo toast, screens-spec §6.4.
 - [ ] **Task 4** — Playwright smoke (precondition: a UI exists); its first
       scenarios are the tasks marked **(e2e)** in `ui-foundation/tasks.md`
 - [ ] **Task 7** — Docker + VPS deploy (open decisions: registry
@@ -133,6 +135,10 @@ below.
   document listener reads that context through a ref and is installed once:
   re-subscribing per context change dropped the first keystroke after the
   editor opened, because effects flush a frame later than the click.
+- 2c: both overlays are native `<dialog>` + `showModal()` (platform focus trap,
+  inert background, Esc); reset keeps side and role and clears only the draft,
+  as the design's own dialog copy promises; undo is one level, stored under
+  `draft.backup`, dropped by the first draft action after a reset.
 - 2b corrections found during apply: the planned contrast-floor test for the
   tile ink guards nothing (with two fixed inks the worst case is pinned at
   the threshold), so the suite guards the palette tokens parsing instead; and
