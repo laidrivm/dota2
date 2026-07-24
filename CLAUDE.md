@@ -190,8 +190,8 @@ protocol:
 
 ### Rules
 
-- A verification claim names the environment it actually ran in — viewport,
-  browser, data — not the one it was aimed at.
+- Name the environment a verification claim ran in — viewport, browser,
+  data — not the one it targeted.
 - Before inlining a single-caller helper, grep for the logic it duplicates
   elsewhere.
 - Gate a side effect on the reducer's result, not on the action that asked
