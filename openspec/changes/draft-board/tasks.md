@@ -8,38 +8,38 @@ Playwright target.
 
 ## 1. Design tokens
 
-- [ ] 1.1 Add `--tile-ink-dark: #1b1d12`, `--tile-ink-light: #f4f3fb`, and
+- [x] 1.1 Add `--tile-ink-dark: #1b1d12`, `--tile-ink-light: #f4f3fb`, and
       `--hero-fallback: #3a4250` to `src/app/styles/tokens/colors.css`. (Req:
       draft-board — Hero tile; app-shell — Style values come from design
       tokens)
-- [ ] 1.2 Push the same three lines to the design project's
+- [x] 1.2 Push the same three lines to the design project's
       `tokens/colors.css` so `src/app/styles/` stays a verbatim copy. (Req:
       draft-board — Hero tile)
 
 ## 2. Session reducer
 
-- [ ] 2.1 Tests for bans: `banAdd` appends last; `banRemove` at index 1 of
+- [x] 2.1 Tests for bans: `banAdd` appends last; `banRemove` at index 1 of
       three preserves the order of the other two; removing from an empty
       `bans` changes nothing; `banAdd` is refused at exactly
       `heroes.length - 10` and accepted one below. (Req: draft-session — Ban
       list, all three scenarios)
-- [ ] 2.2 Tests for team picks: `teamSet` on role 2 leaves the other four
+- [x] 2.2 Tests for team picks: `teamSet` on role 2 leaves the other four
       `null`; `teamSet` on an occupied role replaces rather than appends;
       `teamClear` on role 4 leaves the other four unchanged; `teamClear` on an
       already-empty role changes nothing. (Req: draft-session — Team picks,
       both scenarios)
-- [ ] 2.3 Tests for enemy picks: `enemyAdd` appends; `enemyRemove` at index 0
+- [x] 2.3 Tests for enemy picks: `enemyAdd` appends; `enemyRemove` at index 0
       of three preserves the relative order of the rest; a sixth `enemyAdd` is
       refused. (Req: draft-session — Enemy picks, all three scenarios)
-- [ ] 2.4 Tests for single occupancy: a hero in `teamPicks` cannot be banned;
+- [x] 2.4 Tests for single occupancy: a hero in `teamPicks` cannot be banned;
       a hero in `bans` cannot be set as a team pick; a hero in `enemyPicks`
       cannot be added twice. (Req: draft-session — A hero occupies at most one
       position)
-- [ ] 2.5 Tests for the reducer contract: `applyAction` does not mutate its
+- [x] 2.5 Tests for the reducer contract: `applyAction` does not mutate its
       argument; eight actions in sequence all survive to `localStorage` with
       no field dropped. (Reqs: draft-session — Team picks; Session persists
       across reloads)
-- [ ] 2.6 Fold `applyHotkey` into `applyAction(session, action)` over the
+- [x] 2.6 Fold `applyHotkey` into `applyAction(session, action)` over the
       eight-variant union and keep `useSession`'s single write-through
       `persist`. (Reqs: draft-session — Ban list; Team picks; Enemy picks; A
       hero occupies at most one position)
