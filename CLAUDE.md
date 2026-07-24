@@ -110,9 +110,10 @@ Before every PR that changes code — a feature, a bugfix, a chore alike, and
 whether or not it goes through the OpenSpec stages of
 [docs/feature-workflow.md](docs/feature-workflow.md): `/zombies` → fix what
 it finds → `/warm` (only when a manifest changed) → `/ponytail-review` →
-`/triage` last, over the final diff, then `/coderabbit` once the PR has
-comments. A branch of documentation, rules or config runs `/triage` and
-`/coderabbit` alone, plus a grep for every site restating what it changes.
+`/triage` last, over the final diff. A branch of documentation, rules or
+config runs `/triage` alone, plus a grep for every site restating what it
+changes. Once the PR is open and the bot has commented, `/coderabbit` closes
+the loop on either.
 
 ## Feature workflow (spec-driven, OpenSpec)
 
