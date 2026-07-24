@@ -45,7 +45,9 @@ export function HeroTile({
 
 	return (
 		<span
-			class={`tile tile-${size} tile-ink-${short === undefined ? "light" : inkFor(short)}`}
+			// "fallback" resolves `--hero-fallback`, so the unknown-hero tile takes
+			// its lettering from the same rule every other tile does.
+			class={`tile tile-${size} tile-ink-${inkFor(short ?? "fallback")}`}
 			style={{
 				background:
 					short === undefined

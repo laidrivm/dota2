@@ -36,7 +36,7 @@ exists to show — and is the second of the three sequenced Phase 2 proposals.
 - Add a temporary native `<select>` of heroes as the pick-entry control on
   empty slots and the bans row, so the board is usable and testable before the
   picker exists. Proposal 2c deletes it and points the same
-  `applyDraftAction` seam at the picker overlay.
+  `applyAction` seam at the picker overlay.
 
 ## Capabilities
 
