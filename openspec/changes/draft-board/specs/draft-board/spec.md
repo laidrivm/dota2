@@ -275,3 +275,11 @@ its row has focus within it, not only on pointer hover.
 
 - **WHEN** the removal control of a filled slot receives focus
 - **THEN** it SHALL be visible and SHALL show a focus indicator
+
+#### Scenario: Focus survives the removal
+
+- **WHEN** a removal control is activated and unmounts with the entry it
+  removed
+- **THEN** focus SHALL move to the pick-entry control that replaces it —
+  the same slot's where the slot survives, the region's first otherwise —
+  and SHALL NOT fall back to the document body

@@ -7,6 +7,7 @@ import {
 	type HotkeyContext,
 	hotkeyContext,
 	hotkeyFor,
+	ownsKeystroke,
 	persist,
 	restore,
 	SESSION_KEY,
@@ -237,6 +238,32 @@ describe("hotkey context", () => {
 
 	test("a modified Esc belongs to the browser", () => {
 		expect(closesEditor(keystroke("Escape", { metaKey: true }))).toBe(false);
+	});
+
+	test.each([
+		["a select, which types ahead on the same letters", { tagName: "SELECT" }],
+		["a text field", { tagName: "INPUT", type: "text" }],
+		["the picker's search field of 2c", { tagName: "INPUT", type: "search" }],
+		["a textarea", { tagName: "TEXTAREA" }],
+		["a contenteditable region", { tagName: "DIV", isContentEditable: true }],
+	])("%s owns its keystrokes", (_label, target) => {
+		expect(ownsKeystroke(target)).toBe(true);
+	});
+
+	test.each([
+		["nothing focused", null],
+		[
+			"the side and role chips, which are what the hotkeys drive",
+			{
+				tagName: "INPUT",
+				type: "radio",
+			},
+		],
+		["a checkbox", { tagName: "INPUT", type: "checkbox" }],
+		["a button", { tagName: "BUTTON" }],
+		["the body", { tagName: "BODY" }],
+	])("%s does not", (_label, target) => {
+		expect(ownsKeystroke(target)).toBe(false);
 	});
 });
 

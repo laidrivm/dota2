@@ -42,8 +42,8 @@ below.
         specs at `openspec/specs/{app-shell,snapshot-delivery,draft-session}`).
         Shipped `index.html`, `server.ts`, `static-routes.ts`, `src/app/**`,
         133 tests. Two design decisions reversed mid-apply — see decisions.
-  - [ ] **2b `draft-board`** ← applied on `feat/draft-board`: 49/51 tasks,
-        only the `/triage` suggestion and this entry left. 234 tests.
+  - [ ] **2b `draft-board`** — applied, 51/51 tasks, 234 tests; draft PR #13
+        open. Stays unchecked until it merges and is archived, as 2a did.
         Shipped the bans row, team and enemy slots, suggestion blocks, the
         result block, the collapsed header + editor, the 390px one-column
         layout, and the first `computeModel` call. Two corrections mid-apply —

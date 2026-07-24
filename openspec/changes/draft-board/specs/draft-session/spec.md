@@ -45,9 +45,8 @@ unchanged.
 
 ### Requirement: Enemy picks
 
-The user SHALL be able to append a hero to `session.enemyPicks`, replace the
-entry at a given position, and remove any entry. `enemyPicks` SHALL never
-exceed five entries.
+The user SHALL be able to append a hero to `session.enemyPicks` and to remove
+any entry. `enemyPicks` SHALL never exceed five entries.
 
 #### Scenario: Append
 

@@ -90,6 +90,11 @@ function PickEntry({
 	);
 }
 
+/**
+ * Removal unmounts the button that did it, which would drop focus onto the
+ * body. Focus goes to the control that took its place instead: the slot's own
+ * pick-entry where the row survives, the region's first one where it does not.
+ */
 function RemoveButton({
 	label,
 	onClick,
@@ -98,7 +103,25 @@ function RemoveButton({
 	onClick: () => void;
 }) {
 	return (
-		<button type="button" class="remove" aria-label={label} onClick={onClick}>
+		<button
+			type="button"
+			class="remove"
+			aria-label={label}
+			onClick={(event) => {
+				const row = event.currentTarget.closest(".slot, .ban");
+				const region = event.currentTarget.closest(".panel, .bans");
+				onClick();
+				// After Preact commits: it renders on a microtask, so a macrotask is
+				// the first point the replacement control exists. `rAF` is not — it
+				// runs before the commit, and never at all in a hidden tab.
+				setTimeout(() => {
+					const next =
+						(row?.isConnected ? row.querySelector("select") : null) ??
+						region?.querySelector("select");
+					next?.focus();
+				}, 0);
+			}}
+		>
 			✕
 		</button>
 	);

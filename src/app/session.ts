@@ -76,6 +76,26 @@ export function hotkeyContext(
 const unmodified = (event: Keystroke) =>
 	!(event.ctrlKey || event.metaKey || event.altKey);
 
+/**
+ * A focused control that reads characters itself owns the keystroke — a
+ * `<select>` types ahead, and the picker's search field in 2c will too.
+ * Radios and checkboxes are excluded: the side and role chips are radios, and
+ * they are the very controls these hotkeys exist to drive.
+ */
+export function ownsKeystroke(
+	target: {
+		tagName?: string;
+		type?: string;
+		isContentEditable?: boolean;
+	} | null,
+): boolean {
+	if (target === null) return false;
+	if (target.isContentEditable === true) return true;
+	if (target.tagName === "SELECT" || target.tagName === "TEXTAREA") return true;
+	const type = target.type?.toLowerCase();
+	return target.tagName === "INPUT" && type !== "radio" && type !== "checkbox";
+}
+
 /** `Esc` leaves the header editor; 2c gives it the picker and the dialog. */
 export const closesEditor = (event: Keystroke): boolean =>
 	event.key === "Escape" && unmodified(event);
@@ -218,6 +238,7 @@ export function useSession(banLimit: number, editorOpen: boolean) {
 	// `apply` through the ref above.
 	useEffect(() => {
 		const onKeyDown = (event: KeyboardEvent) => {
+			if (ownsKeystroke(event.target as HTMLElement | null)) return;
 			const hotkey = hotkeyFor(event, latest.current.context);
 			if (hotkey) latest.current.apply(hotkey);
 		};

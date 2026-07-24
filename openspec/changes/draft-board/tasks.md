@@ -185,6 +185,10 @@ Playwright target.
 - [x] 7.10 Verify the `insufficient data` badge appears on a team slot holding
       a hero with `sufficient: false`. **(e2e)** (Req: draft-board — My-team
       slots / Thin statistics are flagged)
+- [x] 7.11 Verify a removal moves focus to the replacing pick-entry control in
+      all three regions rather than dropping it on the body. **(e2e)** (Req:
+      draft-board — Removal controls are reachable / Focus survives the
+      removal)
 
 ## 8. Gates
 

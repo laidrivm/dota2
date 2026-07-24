@@ -177,7 +177,8 @@ controls, now also rendered inside the header editor), `header.tsx` (collapsed
 side · role display, `edit` toggle, `New`), and `app.tsx` (board composition).
 A stored `v: 1` session from `ui-foundation` restores unchanged — the fields
 this change starts writing are the ones `EMPTY_SESSION()` already has.
-Rollback is reverting those four files and deleting `src/app/board/`.
+Rollback is reverting those four files plus the two stylesheets
+(`styles/app.css`, `styles/tokens/colors.css`) and deleting `src/app/board/`.
 
 ## Open Questions
 
