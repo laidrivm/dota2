@@ -85,6 +85,10 @@
 }
 
 .brand {
+	/* An h1 for the accessibility tree, sized by its context like every other
+	   line in the bar — the design gives the product name no extra weight. */
+	margin: 0;
+	font-size: inherit;
 	font-weight: 600;
 	color: var(--text-2);
 }

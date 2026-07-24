@@ -64,10 +64,12 @@ here. Task 4's precondition — a UI to smoke-test — is now met.
 
 ## Impact
 
-- Dependencies: `@playwright/test` 1.62.0 (microsoft/playwright, first
+- Dependencies: `@playwright/test` 1.61.1 (microsoft/playwright, first
   published 2020-09-24, 48.0M weekly downloads) and `@axe-core/playwright`
   4.12.1 (dequelabs/axe-core-npm, 2021-06-02, 6.8M weekly) — both pass the
   registry check; `/warm` runs on the manifest change before the PR.
+  1.62.0 is the published latest, but `bunfig.toml`'s three-day
+  `minimumReleaseAge` held it back — the gate doing its job, not a pin.
 - New files: `playwright.config.ts`, `e2e/smoke.spec.ts`,
   `.github/workflows/{e2e,test}.yml`.
 - Changed files: `package.json` (two devDependencies, `test:coverage`),

@@ -28,13 +28,41 @@ One fact lives in exactly one file; everything else links to it.
   serves a working app. `server.ts` is the other way to run in production —
   it bundles from source instead of serving `dist/`, so the two are
   alternatives, not a pipeline.
-- `bun test` — the whole suite. It shells out to `bun run build` once, so a
-  broken copy step or a bundler upgrade that starts inlining the fonts fails
-  here rather than in the browser.
+- `bun test` — the whole unit suite. It shells out to `bun run build` once, so
+  a broken copy step or a bundler upgrade that starts inlining the fonts fails
+  here rather than in the browser. `e2e/` is excluded (`pathIgnorePatterns` in
+  `bunfig.toml`) — those specs belong to Playwright's runner.
+- `bun run test:coverage` — the same suite with Bun's built-in coverage
+  reporter. The number is visibility, not a gate: no threshold is configured
+  and none should be added without a decision made against real numbers.
 
 The snapshot is `src/fixtures/snapshot.json` until the Phase 3 pipeline
 exists; the client only ever knows the URL `/snapshot.json`
 (`src/app/snapshot.ts`).
+
+## E2E smoke suite
+
+`bunx playwright test` — chromium only. The runner starts `bun run dev`
+itself and, outside CI, reuses an instance already listening on port 3000.
+`--repeat-each=3` is the flake gate a change has to clear before CI sees it.
+
+One spec, `e2e/smoke.spec.ts`, covering the paths `bun test` cannot reach
+without a DOM:
+
+- Setup completed by keyboard alone — named radio groups, arrow keys within
+  a group, a focus ring that only `:focus-visible` draws.
+- Both choices collapse Setup into the board, and a reload restores them.
+- The `R`/`D` and `1`–`5` document hotkeys with nothing focused.
+- A cold-cache snapshot failure, and retry recovering without a navigation.
+- An axe scan on every state above, asserting zero violations. A rule is
+  never excluded without a user decision recorded at the exclusion site.
+
+New e2e tests arrive one way: a `/zombies` finding marked `(e2e candidate)`.
+The backlog is the **(e2e)** bullets in the archived `draft-board` and
+`hero-picker` task lists; the second spec file is where fixtures earn their
+existence, which is why this one has none.
+
+e2e never runs in a git hook — it is `e2e.yml` on pull requests, nothing else.
 
 ## Tooling
 

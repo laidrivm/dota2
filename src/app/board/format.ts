@@ -38,12 +38,13 @@ export function relativeLuminance(color: string): number | null {
 export type Ink = "dark" | "light";
 
 /**
- * Where the tile switches from light lettering to dark. Tuned against the
- * whole shipped palette: it reproduces the design's own per-hero choice for
- * 50 of its 51 heroes (see design.md for the one divergence), so the palette
- * never has to be restated in TypeScript.
+ * Where the tile switches from light lettering to dark: the luminance at
+ * which black and white contrast equally, so whichever side a hero colour
+ * falls on gets the ink that reads better on it. With the pure inks the
+ * tokens now carry, every colour in the shipped palette clears WCAG AA —
+ * the worst is 4.64:1. The palette is never restated in TypeScript.
  */
-export const INK_THRESHOLD = 0.22;
+export const INK_THRESHOLD = 0.18;
 
 export const inkFor = (luminance: number): Ink =>
 	luminance >= INK_THRESHOLD ? "dark" : "light";
