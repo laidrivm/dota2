@@ -32,7 +32,7 @@ One fact lives in exactly one file; everything else links to it.
   broken copy step or a bundler upgrade that starts inlining the fonts fails
   here rather than in the browser.
 
-The snapshot is `src/fixtures/snapshot.json` until the Phase 4 pipeline
+The snapshot is `src/fixtures/snapshot.json` until the Phase 3 pipeline
 exists; the client only ever knows the URL `/snapshot.json`
 (`src/app/snapshot.ts`).
 

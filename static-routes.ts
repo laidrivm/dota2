@@ -32,7 +32,7 @@ export function staticRoutes(): Record<string, Response> {
 		});
 	}
 
-	// Until Phase 4 publishes a real bundle, the fixture is the snapshot. It is
+	// Until Phase 3 publishes a real bundle, the fixture is the snapshot. It is
 	// revalidated rather than cached, because the pipeline will republish this
 	// same URL.
 	routes["/snapshot.json"] = new Response(Bun.file(snapshotFile), {

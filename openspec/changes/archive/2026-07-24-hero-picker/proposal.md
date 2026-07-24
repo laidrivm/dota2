@@ -56,7 +56,7 @@ undo. It is the last of the three sequenced Phase 2 proposals.
 ## Non-goals
 
 - **No hero icons**: the grid uses the same coloured initial tiles the board
-  already renders. Real portraits are a snapshot-pipeline concern (Phase 4).
+  already renders. Real portraits are a snapshot-pipeline concern (Phase 3).
 - **No fuzzy or typo-tolerant search** — prefix matching over names and
   aliases only, as specified. No scoring, no ranking beyond alphabetical.
 - **No multi-level undo, no redo**: one backup, replaced by each reset

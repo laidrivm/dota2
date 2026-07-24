@@ -2,7 +2,7 @@
  * Where the snapshot bundle comes from.
  *
  * The bundle is fetched over HTTP rather than imported as a module, so the
- * pipeline (Phase 4) can take over the producer by changing nothing but the
+ * pipeline (Phase 3) can take over the producer by changing nothing but the
  * URL below. The last good response is cached, because a draft assistant
  * that dies with the network is useless in the two minutes it exists for.
  */
@@ -11,7 +11,7 @@ import type { SnapshotBundle } from "../types.ts";
 import { read, write } from "./storage.ts";
 
 /**
- * The one line Phase 4 changes. Until the pipeline exists, `server.ts`
+ * The one line Phase 3 changes. Until the pipeline exists, `server.ts`
  * serves the fixture here and the build copies it into `dist/`; the client
  * only ever sees a URL. Deliberately not a bundler asset import: a hashed
  * filename would mean a rebuild to publish a new snapshot, which is the

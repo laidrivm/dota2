@@ -42,7 +42,7 @@ tested module. It is the first piece of product code in the repo.
 - No UI, no rendering, no localStorage/session persistence — those are
   Phase 2. This module is a pure function of its two inputs.
 - No STRATZ/pipeline work: the snapshot bundle is consumed as given; how
-  it is built is Phase 4.
+  it is built is Phase 3.
 - No weight/β calibration — v1 uses the fixed constants in `MODEL_CONSTANTS`
   (calibration is v2, US-37/US-38).
 - No caching or incrementality — full synchronous recompute per call, as

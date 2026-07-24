@@ -35,7 +35,7 @@ already-fixed `SnapshotBundle` type.
   cannot cover.
 - Design tokens imported verbatim, so a design change is a re-copy and not a
   re-interpretation.
-- Snapshot obtained through a URL boundary that Phase 4 can take over
+- Snapshot obtained through a URL boundary that Phase 3 can take over
   untouched, with a last-good cache so the tool survives a dead network.
 - Session state that round-trips a reload exactly, and survives a corrupt or
   unavailable `localStorage`.
@@ -81,9 +81,9 @@ rejected — it erases the network boundary, inlines ~50 KB into the bundle,
 and makes the offline and error requirements untestable. Bun's file loader
 (`with { type: "file" }`) was tried and rejected too: it emits a
 content-hashed filename, so publishing a new snapshot would mean rebuilding
-the client, which is the opposite of what the Phase 4 pipeline needs — and
+the client, which is the opposite of what the Phase 3 pipeline needs — and
 the dev server does not serve the emitted asset at all. A plain constant is
-also the smaller change for Phase 4: one string, no cast, no bundler.
+also the smaller change for Phase 3: one string, no cast, no bundler.
 
 **Last-good cache in `localStorage`, not a service worker.** One key holds
 the last successfully fetched bundle. A service worker is the "correct"

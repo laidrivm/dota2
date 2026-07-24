@@ -12,7 +12,7 @@ snapshot metadata the header shows.
 
 The client SHALL obtain its `SnapshotBundle` by fetching one stable URL. It
 SHALL NOT import the bundle as a module, so that replacing the producer
-(Phase 4) changes nothing on the client but that URL.
+(Phase 3) changes nothing on the client but that URL.
 
 #### Scenario: Startup fetch
 
