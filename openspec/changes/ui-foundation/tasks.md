@@ -1,9 +1,12 @@
 # UI foundation — tasks
 
 Test tasks are derived from the proposal-stage `/zombies` run and are written
-before the module they cover (docs/testing.md — TDD for edge cases). Bullets
-marked **(e2e)** are not written here: they are the enumerated target for
-Task 4's Playwright smoke suite.
+before the module they cover (docs/testing.md — TDD for edge cases).
+
+Bullets marked **(e2e)** — 1.5, 6.4, 6.5, 6.6 — are *specified* here and were
+verified by hand against a running app during apply, which is why they are
+ticked. Their automated form is Task 4's Playwright smoke suite; this file is
+the enumerated target that task works from.
 
 ## 1. Toolchain and entry point
 
@@ -11,15 +14,15 @@ Task 4's Playwright smoke suite.
       run `/warm` on the manifest change before anything else lands. (Req:
       app-shell — Single screen, state derived from data)
 - [x] 1.2 Add `index.html` at the repo root plus `src/app/main.tsx` mounting
-      a Preact root; `bun ./index.html` serves it. (Req: app-shell — Single
-      screen, state derived from data / No navigation surface)
+      a Preact root, served by `server.ts` (`bun run dev`). (Req: app-shell —
+      Single screen, state derived from data / No navigation surface)
 - [x] 1.3 Set `tsconfig.json` `"jsx": "react-jsx"`, `"jsxImportSource":
       "preact"`, and add `DOM` + `DOM.Iterable` to `lib`; `tsc --noEmit`
       stays clean. (Req: app-shell — Single screen)
-- [x] 1.4 Add `dev` (`bun ./index.html`) and `build` (`bun build
-      ./index.html --outdir=dist --minify`) scripts; add `dist/` to
-      `.gitignore` before the first build runs. (Req: app-shell — Static
-      production build)
+- [x] 1.4 Add `dev` (`bun --hot server.ts`) and `build` (`bun build
+      ./index.html --outdir=dist --minify`, plus the font and snapshot copy
+      steps) scripts; add `dist/` to `.gitignore` before the first build
+      runs. (Req: app-shell — Static production build)
 - [x] 1.5 Verify `dist/` served by a plain static file server loads and
       reaches Setup with no other process running. **(e2e)** (Req:
       app-shell — Static production build / Build output is self-contained)

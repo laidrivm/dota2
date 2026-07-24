@@ -58,9 +58,10 @@ pixel is drawn: where the snapshot comes from, and where the session lives.
 - **No hero picker, no board hotkeys, no New/undo** — the third proposal.
 - **No `computeModel` call yet**: nothing can be picked, so there is nothing
   to compute. The model module is untouched.
-- **No pipeline, no server**: the snapshot is a static file served by the
-  bundler's dev server or the production static host. Phase 4 owns the
-  producer; Task 7 owns the host.
+- **No pipeline**: the snapshot is the in-repo fixture, served at a fixed
+  URL by `server.ts` (which also serves the font files, because Bun's
+  bundler cannot — see design.md) and copied into `dist/` by the build.
+  Phase 4 owns the producer; Task 7 owns the host.
 - **No e2e tests**: the Playwright smoke suite is Task 4, unblocked by this
   change but not part of it.
 - **No mobile board layout** beyond what the setup strip needs — the mobile
