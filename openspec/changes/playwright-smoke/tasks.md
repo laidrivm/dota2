@@ -138,9 +138,9 @@ All of §3 lives in `e2e/smoke.spec.ts`.
       findings marked `(e2e candidate)`. (AC: README documents the suite
       and the routing)
 - [x] 7.7 `bun run lint`, `bun run typecheck`, `bun test` all green.
-- [ ] 7.8 Pre-PR sequence over the final diff: `/zombies` (diff mode) →
+- [x] 7.8 Pre-PR sequence over the final diff: `/zombies` (diff mode) →
       `/warm` (a manifest changed) → `/ponytail-review` → `/triage`, each
       report shown and acted on.
-- [ ] 7.9 `PLAN.md` updated: Task 4 marked done, the deferred
+- [x] 7.9 `PLAN.md` updated: Task 4 marked done, the deferred
       `ui-foundation` 1.5 bullet and the 2b/2c `(e2e)` backlog recorded as
       decisions.

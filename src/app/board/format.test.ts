@@ -60,8 +60,12 @@ describe("tile ink", () => {
 });
 
 describe("the shipped palette", () => {
+	/** Comments legitimately mention token names and ratios; rules may not, so
+	 *  they are stripped before anything below matches against the file. */
 	const read = () =>
-		Bun.file(new URL("../styles/tokens/colors.css", import.meta.url)).text();
+		Bun.file(new URL("../styles/tokens/colors.css", import.meta.url))
+			.text()
+			.then((css) => css.replace(/\/\*[\s\S]*?\*\//g, ""));
 
 	/**
 	 * The tile reads these tokens at runtime, so a malformed or renamed entry

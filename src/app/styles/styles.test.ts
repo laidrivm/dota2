@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+import { relativeLuminance } from "../board/format.ts";
 
 /** Every stylesheet the app ships, path relative to this directory. */
 const cssFiles = [...new Bun.Glob("**/*.css").scanSync(import.meta.dir)].sort();
@@ -34,6 +35,41 @@ describe("style values come from design tokens", () => {
 		expect(css).not.toMatch(/#[0-9a-f]{3,8}\b/i);
 		expect(css).not.toMatch(/\brgba?\(/i);
 	});
+});
+
+describe("text tokens clear WCAG AA on the surfaces they land on", () => {
+	/**
+	 * The e2e axe scan is the real check, but it costs a browser. This is the
+	 * same floor in 100 ms, so a token pushed back from the design project
+	 * fails at `bun test` rather than in CI's browser job.
+	 *
+	 * `--text-6` is excluded on purpose: it renders `·` separators, disabled
+	 * pick-entry labels, and the result arrow — punctuation and disabled
+	 * controls, both of which WCAG 1.4.3 exempts.
+	 */
+	const surfaces = ["bg-0", "bg-1", "bg-2"];
+	const inks = ["text-1", "text-2", "text-3", "text-4", "text-5"];
+
+	const luminanceOf = async (token: string) => {
+		const css = await read("tokens/colors.css");
+		const value = css.match(new RegExp(`--${token}:\\s*([^;]+);`))?.[1] ?? "";
+		const luminance = relativeLuminance(value);
+		if (luminance === null) throw new Error(`--${token} is not a colour`);
+		return luminance;
+	};
+
+	test.each(inks.flatMap((ink) => surfaces.map((bg) => [ink, bg])))(
+		"%s on %s reaches 4.5:1",
+		async (ink, bg) => {
+			const [a, b] = await Promise.all([
+				luminanceOf(ink as string),
+				luminanceOf(bg as string),
+			]);
+			expect(
+				(Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05),
+			).toBeGreaterThanOrEqual(4.5);
+		},
+	);
 });
 
 describe("no third-party runtime requests", () => {
