@@ -65,7 +65,7 @@ local reviewer doubles the noise instead of cutting it.
       `docs/review-toolkit.md`, `CLAUDE.md`, `docs/feature-workflow.md`,
       `docs/testing.md`, `PLAN.md`, `README.md` — and reconcile them (rule in
       `CLAUDE.md`)
-- [ ] 4.2 Confirm `.coderabbit.yaml` still names `**/CLAUDE.md` under
+- [x] 4.2 Confirm `.coderabbit.yaml` still names `**/CLAUDE.md` under
       `knowledge_base.code_guidelines.filePatterns` — the whole
       justification-feedback route depends on it (*A justification survives
       only when it is a convention*)
