@@ -48,7 +48,7 @@ it is verified as step 1.1 instead of by a test.
 
 ## 4. Review gates
 
-- [ ] 4.1 `/triage` over the final diff, per the `CLAUDE.md` rule that a
+- [x] 4.1 `/triage` over the final diff, per the `CLAUDE.md` rule that a
       branch of documentation, rules or config runs `/triage` alone plus the
       grep in 3.1 — `/zombies` diff mode, `/warm` and `/ponytail-review` do
       not apply to a YAML-only change
