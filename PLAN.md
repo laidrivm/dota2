@@ -75,15 +75,17 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
       archive / fixture / woff2, `tools` off for biome + yamllint +
       actionlint, `learnings.scope: "local"`, each with its reason beside
       the key. `filePatterns` left as `docs/*.md` with a comment saying why.
-- [ ] **2. `vendored-skill-permissions`** — proposed (stage 1 complete,
-      `openspec/changes/vendored-skill-permissions`, validates). Reconciles a
-      vendored skill's frontmatter with this project's policy on two fields:
-      `allowed-tools` (deny `npx`/`npm`/`pnpm`/`yarn` in the tracked
-      `.claude/settings.json`) and `disable-model-invocation` (restore the
-      flag on `coderabbit`, trim the clauses it makes redundant). Two of the
-      three skills-repo fixes it reports are applied — the flag and the
-      README; the re-vendoring procedure step is still outstanding. Next:
-      branch `fix/vendored-skill-permissions`, `/clear`, `/opsx:apply`.
+- [ ] **2. `vendored-skill-permissions`** — applied on
+      `fix/vendored-skill-permissions`, awaiting the gates and the PR.
+      `permissions.deny` for `npx`/`npm`/`pnpm`/`yarn` in the tracked
+      `.claude/settings.json`, `ask` reduced to bun's two install commands,
+      pinned by `agent-permissions.test.ts` (7 tests, red on all four deny
+      entries before the policy was written). All three skills-repo fixes are
+      now confirmed there — the flag, the README's invocable list, and its
+      base-branch sentence; the re-vendoring procedure step is drafted here
+      for the user to apply. Two rules added to `CLAUDE.md`, three clauses
+      trimmed in `docs/review-toolkit.md`. Outstanding: task 3.1, which needs
+      a Claude Code restart the agent cannot perform.
 - [ ] **3. `coderabbit-local-gate`** — proposed (stage 1 complete,
       `openspec/changes/coderabbit-local-gate`, validates). Adds
       `/coderabbit-local` to the pre-PR gate after `/triage`, three passes
@@ -119,7 +121,19 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
   here and applied there. The `playwright-cli` skill is not forked: its binary
   is already installed through bun (`~/.bun/bin/playwright-cli`), so its whole
   body runs unchanged, and `npx playwright test` in its two reference files
-  substitutes with `bunx playwright test`.
+  substitutes with `bunx playwright test`. Apply verified all three deny
+  scenarios live in Claude Code 2.1.220 on macOS 25.2.0, interactive mode:
+  `npx` blocked in a plain command, blocked inside `bun run build && npx
+  some-tool`, and `npm view preact version` blocked despite
+  `.claude/settings.local.json` line 47 allowing `Bash(npm view *)` among its
+  119 allow entries. The skill-grant scenario was run with `/playwright-cli`
+  actually invoked, so its `Bash(npx:*)` grant was live and still lost to
+  deny, while `playwright-cli --version` returned `0.1.17`. The rules took
+  effect without a restart. `CLAUDE.md`'s existing `bunx`/`npx` rule is left
+  alone: its subject is a package that has not passed the dependency check,
+  and deny blocks a command without verifying anything, so it is not a
+  restatement of the new boundary. The "Rules" list now stands at 19, one
+  short of its own ~20 maintenance trigger.
 - `readme-drift`: the "private" claim is deleted, not corrected to "public" —
   the fact belongs to another repository and can change with nothing changing
   here, so the root-cause fix is to stop stating it and link instead. The

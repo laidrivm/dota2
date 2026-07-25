@@ -15,19 +15,19 @@ The report alone is never the deliverable.
 
 - `/zombies [feature]` — test ideas via the ZOMBIES heuristic. With args:
   works from a feature description (pre-code). Without args: diff mode,
-  cross-referenced against existing tests. Invoke it yourself.
-- `/warm [base]` — WARM check of dependencies the branch pulls in. Invoke it
-  yourself after any dependency manifest change; the change is not done until
-  its dependencies are vetted.
+  cross-referenced against existing tests.
+- `/warm [base]` — WARM check of dependencies the branch pulls in. The change
+  is not done until its dependencies are vetted.
 - `/ponytail-review` — over-engineering pass over the diff. Invoke it
   yourself and apply the cuts that survive.
 - `/triage [base]` — risk-ordered map of the branch diff. Invoke it yourself.
   It returns no findings by design, so acting on it means reading the files it
   ranks High and Medium, reporting the defects they hold, and grepping every
   decision or value the diff changes for the sites that restate it.
-- `/coderabbit [pr]` — chews the bot's PR comments. **The user invokes this
-  one**, never you: the bot's review arrives on its own schedule, and waiting
-  for it burns a session doing nothing. Once a PR is open, say so and stop —
+- `/coderabbit [pr]` — chews the bot's PR comments. Its
+  `disable-model-invocation` flag reserves it for the user, because the bot's
+  review arrives on its own schedule and waiting for it burns a session doing
+  nothing. Once a PR is open, say so and stop —
   do not poll the checks, do not sleep on a timer, do not re-run `gh` to see
   whether the bot has posted. It drops Trivial and Minor with a reason and
   holds Major and above for the user's approval before applying anything.

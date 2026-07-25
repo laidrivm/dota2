@@ -39,17 +39,17 @@ Requirement names are those in `specs/agent-permissions/spec.md`.
 - [ ] 3.1 Restart Claude Code and confirm no startup warning about a
       permission rule in `.claude/settings.json` (a malformed rule is reported
       only at startup, and `bun test` cannot see it)
-- [ ] 3.2 Invoke `/playwright-cli`, attempt `npx playwright --version`, and
+- [x] 3.2 Invoke `/playwright-cli`, attempt `npx playwright --version`, and
       record that it is blocked while the skill's `playwright-cli` grant still
       works (*Deny overrides grants from any other source* → "A vendored skill
       pre-approves a denied command")
-- [ ] 3.3 In the same session attempt `bun run build && npx some-tool` and
+- [x] 3.3 In the same session attempt `bun run build && npx some-tool` and
       record that it is blocked (*Foreign package managers are denied* →
       "Denied manager hidden in a compound command")
-- [ ] 3.4 Attempt `npm view preact`, which `.claude/settings.local.json` still
+- [x] 3.4 Attempt `npm view preact`, which `.claude/settings.local.json` still
       allows, and record that it is blocked (*Deny overrides grants from any
       other source* → "A stale local allow entry names a denied command")
-- [ ] 3.5 Name the environment each of 3.1–3.4 ran in — Claude Code version,
+- [x] 3.5 Name the environment each of 3.1–3.4 ran in — Claude Code version,
       permission mode — per the rule in `CLAUDE.md`
 
 ## 4. Confirm the skills-repo fixes (user applies them there)
@@ -57,13 +57,13 @@ Requirement names are those in `specs/agent-permissions/spec.md`.
 Two of the three were applied while this change was being proposed; 4.3 is
 still outstanding. Never edit the skills repo from this project.
 
-- [ ] 4.1 Confirm `grep -c '^disable-model-invocation:'
+- [x] 4.1 Confirm `grep -c '^disable-model-invocation:'
       .claude/skills/coderabbit/SKILL.md` returns 1 (*Who may invoke a skill
       is enforced, not narrated* → "A skill reserved for the user")
-- [ ] 4.2 Confirm the skills `README.md` no longer lists `coderabbit` among
+- [x] 4.2 Confirm the skills `README.md` no longer lists `coderabbit` among
       the agent-invocable skills, and that its base-branch sentence matches
       what the skills do
-- [ ] 4.3 Draft the missing re-vendoring procedure step for the "Skill
+- [x] 4.3 Draft the missing re-vendoring procedure step for the "Skill
       provenance" section — reconcile a skill's `allowed-tools` **and**
       `disable-model-invocation` against the consuming project's policy,
       since the lock's `computedHash` detects an edited skill but not a
@@ -72,29 +72,29 @@ still outstanding. Never edit the skills repo from this project.
 
 ## 5. Reconcile this repo's rules
 
-- [ ] 5.1 Add one rule to the `CLAUDE.md` "Rules" list: a vendored skill's
+- [x] 5.1 Add one rule to the `CLAUDE.md` "Rules" list: a vendored skill's
       `allowed-tools` and `disable-model-invocation` are reconciled with this
       project's policy before the skill is used
-- [ ] 5.2 Add one rule to the `CLAUDE.md` "Rules" list giving the bun
+- [x] 5.2 Add one rule to the `CLAUDE.md` "Rules" list giving the bun
       substitutions for the `playwright-cli` skill's denied paths —
       `bunx playwright test` for `npx playwright test`, `bun add -g
       @playwright/cli` for `npm install -g` — so the skill's dead-end
       recovery has a documented way out
-- [ ] 5.3 Drop the "Invoke it yourself" clauses on `/zombies` and `/warm` in
+- [x] 5.3 Drop the "Invoke it yourself" clauses on `/zombies` and `/warm` in
       `docs/review-toolkit.md` (*Who may invoke a skill is enforced, not
       narrated* → "A skill the agent is meant to run itself"); leave the
       `/triage` and `/ponytail-review` clauses alone (→ "A clause that adds
       information")
-- [ ] 5.4 Only after `grep -c disable-model-invocation
+- [x] 5.4 Only after `grep -c disable-model-invocation
       .claude/skills/coderabbit/SKILL.md` returns 1, reduce the `/coderabbit`
       bullet to its rationale, dropping "**The user invokes this one**, never
       you" (*Who may invoke a skill is enforced, not narrated* → "A skill
       reserved for the user"). If the flag is not yet there, leave the
       sentence and say so — it is the only brake until then
-- [ ] 5.5 Grep every site restating the permission or invocation policy —
+- [x] 5.5 Grep every site restating the permission or invocation policy —
       `CLAUDE.md`, `docs/`, `README.md`, `PLAN.md` — and reconcile them (rule
       in `CLAUDE.md`)
-- [ ] 5.6 Update `PLAN.md`: queue entry, status, and the decisions this change
+- [x] 5.6 Update `PLAN.md`: queue entry, status, and the decisions this change
       settles
 
 ## 6. Review gates
