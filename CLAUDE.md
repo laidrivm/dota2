@@ -113,7 +113,8 @@ The report alone is never the deliverable.
   yourself and apply the cuts that survive.
 - `/triage [base]` — risk-ordered map of the branch diff. Invoke it yourself.
   It returns no findings by design, so acting on it means reading the files it
-  ranks High and Medium and reporting the defects they hold.
+  ranks High and Medium, reporting the defects they hold, and grepping every
+  decision or value the diff changes for the sites that restate it.
 - `/coderabbit [pr]` — chews the bot's PR comments. **The user invokes this
   one**, never you: the bot's review arrives on its own schedule, and waiting
   for it burns a session doing nothing. Once a PR is open, say so and stop —
@@ -237,5 +238,5 @@ protocol:
   ignore comment or config override unless the user approves the suppression.
 - Open every markdown file with a level-1 heading — OpenSpec's `design.md`
   and delta-spec templates start at `##`, so the title is yours to add.
-
-<!-- newest first; added via the loop above -->
+- Assert the match before a scripted string replacement — a silent no-op
+  reads as a successful edit.
