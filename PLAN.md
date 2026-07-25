@@ -56,9 +56,10 @@ below.
         the `modal` context, `usedAs`, the `re-pick` marker, and three overlay
         tokens pushed to the design project. 319 tests; every **(e2e)** bullet
         walked by hand in Chrome. Corrections mid-apply — see decisions.
-- [x] **Task 4** — Playwright smoke. OpenSpec change `playwright-smoke`
-      (capability `smoke-suite`). Shipped `playwright.config.ts`,
-      `e2e/smoke.spec.ts` (3 tests, chromium, axe on every state),
+- [x] **Task 4** — Playwright smoke. Merged (PR #19) and archived
+      (`openspec/changes/archive/2026-07-25-playwright-smoke`; capability spec
+      at `openspec/specs/smoke-suite/`). Shipped `playwright.config.ts`,
+      `e2e/smoke.spec.ts` (3 tests, Chromium, axe on every state),
       `.github/workflows/{e2e,test}.yml` and `test:coverage`. Automates
       `ui-foundation` **(e2e)** 6.4, 6.5, 6.6; three a11y defects fixed —
       see decisions. 339 unit tests.
