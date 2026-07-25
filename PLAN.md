@@ -65,7 +65,7 @@ below.
       see decisions. 339 unit tests.
 Apply order for the four proposed changes is fixed: `coderabbit-config` first
 (no preconditions, no shared files), then `vendored-skill-permissions`, then
-`coderabbit-local-gate`, then `skills-readme-drift`. The last three all edit
+`coderabbit-local-gate`, then `readme-drift`. The last three all edit
 `CLAUDE.md`, and each writes next to what the previous one changed.
 
 - [ ] **1. `coderabbit-config`** — proposed (stage 1 complete,
@@ -80,9 +80,10 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
       vendored skill's frontmatter with this project's policy on two fields:
       `allowed-tools` (deny `npx`/`npm`/`pnpm`/`yarn` in the tracked
       `.claude/settings.json`) and `disable-model-invocation` (restore the
-      flag on `coderabbit`, trim the clauses it makes redundant). The three
-      skills-repo fixes it reports are already applied. Next: branch
-      `fix/vendored-skill-permissions`, `/clear`, `/opsx:apply`.
+      flag on `coderabbit`, trim the clauses it makes redundant). Two of the
+      three skills-repo fixes it reports are applied — the flag and the
+      README; the re-vendoring procedure step is still outstanding. Next:
+      branch `fix/vendored-skill-permissions`, `/clear`, `/opsx:apply`.
 - [ ] **3. `coderabbit-local-gate`** — proposed (stage 1 complete,
       `openspec/changes/coderabbit-local-gate`, validates). Adds
       `/coderabbit-local` to the pre-PR gate after `/triage`, three passes
