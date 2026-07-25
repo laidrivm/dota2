@@ -14,36 +14,31 @@ const denied = ["npx", "npm", "pnpm", "yarn"];
 const deny: string[] = settings.permissions?.deny ?? [];
 const ask: string[] = settings.permissions?.ask ?? [];
 
-describe("foreign package managers are denied", () => {
-	for (const cmd of denied) {
-		test(`${cmd} has a deny entry`, () => {
-			expect(deny).toContain(`Bash(${cmd} *)`);
-		});
+test("every foreign package manager is denied", () => {
+	expect(deny).toEqual(denied.map((cmd) => `Bash(${cmd} *)`));
+});
+
+test("deny entries keep their word boundary", () => {
+	// The trailing-space form is the only one that holds: `Bash(npm*)` would
+	// also block `npmlog`, and `Bash(command:npm *)` is ignored by Claude
+	// Code, which warns about it at startup — a boundary that only looks
+	// like one. Both fail this pattern, as does `Bash(npm:*)`.
+	for (const entry of deny) {
+		expect(entry).toMatch(/^Bash\([a-z-]+ \*\)$/);
 	}
 });
 
-describe("deny entries keep their word boundary", () => {
-	// `Bash(npm*)` would also block `npmlog`; `Bash(command:npm *)` is ignored
-	// by Claude Code, which warns about it at startup — a boundary that only
-	// looks like one.
-	test("every entry uses the trailing-space wildcard form", () => {
-		for (const entry of deny) {
-			expect(entry).toMatch(/^Bash\([a-z-]+ \*\)$/);
-		}
+describe("only bun's install commands prompt", () => {
+	test("both commands that mutate the manifest are listed", () => {
+		expect(ask).toEqual(["Bash(bun add *)", "Bash(bun install *)"]);
 	});
 
-	test("no entry uses the ignored field form", () => {
-		for (const entry of deny) {
-			expect(entry).not.toContain("command:");
+	test("no ask entry names a denied manager", () => {
+		// Deny is evaluated before ask, so such an entry can never be reached.
+		for (const entry of ask) {
+			for (const cmd of denied) {
+				expect(entry).not.toMatch(new RegExp(`\\b${cmd}\\b`));
+			}
 		}
 	});
-});
-
-test("no ask entry names a denied manager", () => {
-	// Deny is evaluated before ask, so such an entry can never be reached.
-	for (const entry of ask) {
-		for (const cmd of denied) {
-			expect(entry).not.toMatch(new RegExp(`\\b${cmd}\\b`));
-		}
-	}
 });
