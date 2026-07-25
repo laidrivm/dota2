@@ -52,23 +52,23 @@ Requirement names are those in `specs/agent-permissions/spec.md`.
 - [ ] 3.5 Name the environment each of 3.1–3.4 ran in — Claude Code version,
       permission mode — per the rule in `CLAUDE.md`
 
-## 4. Report the skills-repo fixes (user applies them there)
+## 4. Confirm the skills-repo fixes (user applies them there)
 
-- [ ] 4.1 Draft the re-vendoring procedure step — reconcile a skill's
-      `allowed-tools` **and** `disable-model-invocation` against the consuming
-      project's policy — and report the wording here
-- [ ] 4.2 Report the `coderabbit/SKILL.md` fix: restore
-      `disable-model-invocation: true`, reverting that part of `0df4241`
-      (*Who may invoke a skill is enforced, not narrated* → "A skill reserved
-      for the user")
-- [ ] 4.3 Report the `README.md` line 23 rewrite, both halves: eight skills
-      lack the flag, not two (add `feature-generator`, `playwright-cli`,
-      `preflight`, `spec-generator`, `warm`, `zombies`), and the base-branch
-      sentence covers three conventions — `origin/HEAD` with a `main`
-      fallback (triage, warm, zombies), hardcoded `main` (first-five,
-      review-order), and no argument at all (preflight)
-- [ ] 4.4 Stop here and let the user apply 4.1–4.3 in the skills repo — never
-      edit it from this project
+Two of the three were applied while this change was being proposed; 4.3 is
+still outstanding. Never edit the skills repo from this project.
+
+- [ ] 4.1 Confirm `grep -c '^disable-model-invocation:'
+      .claude/skills/coderabbit/SKILL.md` returns 1 (*Who may invoke a skill
+      is enforced, not narrated* → "A skill reserved for the user")
+- [ ] 4.2 Confirm the skills `README.md` no longer lists `coderabbit` among
+      the agent-invocable skills, and that its base-branch sentence matches
+      what the skills do
+- [ ] 4.3 Draft the missing re-vendoring procedure step for the "Skill
+      provenance" section — reconcile a skill's `allowed-tools` **and**
+      `disable-model-invocation` against the consuming project's policy,
+      since the lock's `computedHash` detects an edited skill but not a
+      skill whose unedited frontmatter contradicts the project — and report
+      the wording here for the user to apply
 
 ## 5. Reconcile this repo's rules
 
