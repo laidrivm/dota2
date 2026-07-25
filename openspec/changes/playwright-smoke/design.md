@@ -64,16 +64,15 @@ It belongs with Task 7, which introduces the container that actually serves
 and the test is nearly free. Recorded here so the bullet is not silently
 lost.
 
-### Try the runner under bun; fall back to node, do not patch
+### The runner runs under Bun, and no Node toolchain is introduced
 
-`bunx playwright test` first. Playwright's runner officially targets Node
-(`engines: node >=20`), so if it misbehaves — worker spawn, module
-resolution, reporter output — the fallback is `setup-node` in CI and `npx`
-locally, with bun kept for everything else. Working around runner internals
-is not an option: a patched runner is worse than a second toolchain.
-**Resolved: bun wins.** `bunx playwright test` runs the suite, spawns its
-workers, starts the `webServer` and reports normally; no node toolchain is
-introduced anywhere.
+`bunx playwright test` runs the suite: it spawns its workers, starts the
+`webServer` and reports normally. Playwright's runner officially targets Node
+(`engines: node >=20`), so `setup-node` in CI with `npx` locally was the
+standing fallback had worker spawn, module resolution or reporter output
+misbehaved. It did not, so the project stays on one toolchain. Patching
+runner internals was never an option either way — a patched runner is worse
+than a second toolchain.
 
 `e2e/*.spec.ts` does match bun's own test glob, though, so `bunfig.toml`
 gains `[test] pathIgnorePatterns = ["e2e/**"]` — set there rather than on a
@@ -170,8 +169,8 @@ unmounts the error state along with its button.
   this change; the scan is not weakened. If one is a genuine axe false
   positive, it becomes a user decision with a comment, not a silent
   exclusion.
-- **The Playwright runner misbehaves under bun** → node fallback above, with
-  bun kept for install, build and unit tests.
+- **The Playwright runner misbehaves under Bun** → did not happen; the Node
+  fallback above stayed unused, and Bun runs install, build and both suites.
 - **`reuseExistingServer` locally can run the suite against a stale dev
   server** → accepted for local speed; CI always starts its own instance
   (`!process.env.CI`).
@@ -186,5 +185,4 @@ unmounts the error state along with its button.
 
 ## Open Questions
 
-- None blocking. Whether the runner stays on Bun is answered during apply,
-  by running it.
+- None.
