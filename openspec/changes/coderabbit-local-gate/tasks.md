@@ -2,8 +2,8 @@
 
 Requirement names are those in `specs/local-review-loop/spec.md`.
 
-Sequenced after `vendored-skill-permissions`: both edit the Review toolkit
-section of `CLAUDE.md`, and that change also trims the `/coderabbit` bullet
+Sequenced after `vendored-skill-permissions`: both edit
+`docs/review-toolkit.md`, and that change also trims the `/coderabbit` bullet
 this one writes next to.
 
 `/zombies` at propose returned no test ideas — the change is rules only.
@@ -37,18 +37,18 @@ local reviewer doubles the noise instead of cutting it.
 - [ ] 2.4 If neither 2.1 nor 2.2 could run, stop and report — do not write the
       rule (→ "The question is unanswered")
 
-## 3. Write the gate into CLAUDE.md
+## 3. Write the gate into docs/review-toolkit.md
 
-- [ ] 3.1 Add a `/coderabbit-local [base]` bullet to the Review toolkit list,
-      stating that the agent invokes it and that Major and above are applied
-      without asking (*Major and above are fixed without asking*)
+- [ ] 3.1 Add a `/coderabbit-local [base]` bullet to the skills list, stating
+      that the agent invokes it and that Major and above are applied without
+      asking (*Major and above are fixed without asking*)
 - [ ] 3.2 In the same bullet, state the loop: at most three reviews with
       fixes between them, stopping early when a review returns nothing above
       Minor; report and stop if Major or above survives the third
       (*The loop terminates*)
 - [ ] 3.3 State that Minor findings are collected across passes and reported
       once at the end (*Minor findings are reported once, at the end*)
-- [ ] 3.4 Move the gate paragraph's ending from `/triage` to
+- [ ] 3.4 Move the pre-PR sequence's ending from `/triage` to
       `/coderabbit-local`, and give a documentation, rules or config branch a
       single pass (*The gate runs after triage and before the push* → "A
       documentation branch")
@@ -61,10 +61,10 @@ local reviewer doubles the noise instead of cutting it.
 
 ## 4. Reconcile the repo
 
-- [ ] 4.1 Grep every site restating the pre-PR sequence — `CLAUDE.md`,
-      `docs/feature-workflow.md`, `docs/testing.md`, `PLAN.md`, `README.md` —
-      and reconcile them (rule in `CLAUDE.md`); `docs/feature-workflow.md`
-      Stage 3 states the sequence in full and will contradict this otherwise
+- [ ] 4.1 Grep every site restating the pre-PR sequence —
+      `docs/review-toolkit.md`, `CLAUDE.md`, `docs/feature-workflow.md`,
+      `docs/testing.md`, `PLAN.md`, `README.md` — and reconcile them (rule in
+      `CLAUDE.md`)
 - [ ] 4.2 Confirm `.coderabbit.yaml` still names `**/CLAUDE.md` under
       `knowledge_base.code_guidelines.filePatterns` — the whole
       justification-feedback route depends on it (*A justification survives

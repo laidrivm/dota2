@@ -81,7 +81,7 @@ still outstanding. Never edit the skills repo from this project.
       @playwright/cli` for `npm install -g` — so the skill's dead-end
       recovery has a documented way out
 - [ ] 5.3 Drop the "Invoke it yourself" clauses on `/zombies` and `/warm` in
-      the Review toolkit section (*Who may invoke a skill is enforced, not
+      `docs/review-toolkit.md` (*Who may invoke a skill is enforced, not
       narrated* → "A skill the agent is meant to run itself"); leave the
       `/triage` and `/ponytail-review` clauses alone (→ "A clause that adds
       information")

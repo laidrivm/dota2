@@ -54,16 +54,8 @@ completes, name the next step and the exact command.
 
 ## Stage 3 — Review
 
-- Run the pre-PR sequence in the order the Review toolkit sets out, showing
-  each report and acting on it in the same turn: `/zombies` with **no
-  arguments** — diff mode reads the real code and existing tests, cross-checks
-  the implementation against the proposal-stage edge-case list, and catches
-  the edges only implementation decisions create → fix → `/warm`, whenever a
-  dependency manifest changed, having walked the ponytail ladder before ever
-  reaching for a dependency → `/ponytail-review` → `/triage` last, so it maps
-  the diff the reviewer will actually see. Your sequence ends there.
-  `/coderabbit` closes that loop the same way, but the **user** invokes it —
-  never wait on the bot, and never poll the PR's checks.
+- Run the pre-PR sequence the Review toolkit sets out, in its order, showing
+  each report and acting on it in the same turn.
 - Every new or `[partial]` finding from that run becomes a test before
   archive — or an explicit user decision to skip it. Deferred items from
   the proposal-stage list are settled here too. Scaffolding tests from the
