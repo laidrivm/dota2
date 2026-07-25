@@ -63,6 +63,40 @@ below.
       `.github/workflows/{e2e,test}.yml` and `test:coverage`. Automates
       `ui-foundation` **(e2e)** 6.4, 6.5, 6.6; three a11y defects fixed —
       see decisions. 339 unit tests.
+Apply order for the four proposed changes is fixed: `coderabbit-config` first
+(no preconditions, no shared files), then `vendored-skill-permissions`, then
+`coderabbit-local-gate`, then `skills-readme-drift`. The last three all edit
+`CLAUDE.md`, and each writes next to what the previous one changed.
+
+- [ ] **1. `coderabbit-config`** — proposed (stage 1 complete,
+      `openspec/changes/coderabbit-config`, validates). Four settings in
+      `.coderabbit.yaml`: `docstrings.mode: "off"`, `path_filters` for the
+      archive / fixture / woff2, `tools` off for biome + yamllint +
+      actionlint, `learnings.scope: "local"`. Independent — touches no file
+      the others touch. Next: branch `chore/coderabbit-config`, `/clear`,
+      `/opsx:apply`.
+- [ ] **2. `vendored-skill-permissions`** — proposed (stage 1 complete,
+      `openspec/changes/vendored-skill-permissions`, validates). Reconciles a
+      vendored skill's frontmatter with this project's policy on two fields:
+      `allowed-tools` (deny `npx`/`npm`/`pnpm`/`yarn` in the tracked
+      `.claude/settings.json`) and `disable-model-invocation` (restore the
+      flag on `coderabbit`, trim the clauses it makes redundant). The three
+      skills-repo fixes it reports are already applied. Next: branch
+      `fix/vendored-skill-permissions`, `/clear`, `/opsx:apply`.
+- [ ] **3. `coderabbit-local-gate`** — proposed (stage 1 complete,
+      `openspec/changes/coderabbit-local-gate`, validates). Adds
+      `/coderabbit-local` to the pre-PR gate after `/triage`, three passes
+      max. After №2 — same `CLAUDE.md` section, and №2 trims the
+      `/coderabbit` bullet this one writes beside. `cr` is installed inside
+      apply (task group 1). Next: branch `chore/coderabbit-local-gate`,
+      `/clear`, `/opsx:apply`.
+- [ ] **4. `readme-drift`** — proposed (stage 1 complete,
+      `openspec/changes/readme-drift`, validates). `README.md` calls the
+      skills repo private; it is public. Drops the claim rather than
+      correcting it, adds the `link.sh` instructions a clone needs, adds
+      `.claude/settings.json` and `.coderabbit.yaml` to the ownership map,
+      and pins the map's paths with a test. Next: branch `fix/readme-drift`,
+      `/clear`, `/opsx:apply`.
 - [ ] **Task 7** — Docker + VPS deploy (open decisions: registry
       GHCR/Docker Hub, same VPS or a new one)
 - [ ] **Phase 3** — OpenSpec: STRATZ → Postgres → snapshot bundle pipeline
@@ -70,6 +104,78 @@ below.
 - [ ] **Task 5** — error tracking (precondition: product is deployed)
 
 ## Accepted decisions
+
+- `vendored-skill-permissions`: the enforcement is a `permissions.deny` list,
+  not a `PreToolUse` hook — deny is evaluated before ask and allow, matches
+  each subcommand of a compound command independently, and merges across
+  settings scopes, so it overrides both a skill's `allowed-tools` grant and
+  the untracked `.claude/settings.local.json`. A test scanning skill grants
+  was designed and then cut: `playwright-cli` grants `npx`/`npm` and cannot be
+  edited from this project, so the test is red on arrival, and its inverse
+  ("a grant is fine when deny covers it") is a tautology. The residual risk —
+  a skill granting something forbidden that the deny list does not name — is
+  closed by a step in the shared skills repo's re-vendoring procedure, drafted
+  here and applied there. The `playwright-cli` skill is not forked: its binary
+  is already installed through bun (`~/.bun/bin/playwright-cli`), so its whole
+  body runs unchanged, and `npx playwright test` in its two reference files
+  substitutes with `bunx playwright test`.
+- `readme-drift`: the "private" claim is deleted, not corrected to "public" —
+  the fact belongs to another repository and can change with nothing changing
+  here, so the root-cause fix is to stop stating it and link instead. The
+  existing grep rule in `CLAUDE.md` is left alone: it fires on a local change
+  and nothing local changed, and widening it to "re-verify external facts"
+  would make it uncheckable. Only the map's paths get a test — a README is
+  prose about intent, and no check decides whether a sentence is still true.
+  The test must consult `git check-ignore`, because `.claude/skills/` is in
+  the map and gitignored, so an existence check would pass here and fail in a
+  clone.
+- `coderabbit-local-gate`: CodeRabbit learnings are unreachable from the CLI
+  (every documented path needs a PR comment or the web dashboard), so the
+  substitute is the route already wired — `.coderabbit.yaml` points
+  `knowledge_base.code_guidelines.filePatterns` at `**/CLAUDE.md`, so a
+  justification written as a rule is read back by the next review. **Whether
+  `cr` reads that config unprompted is unverified**: the CLI reference does
+  not say so and lists `-c, --config <files...>` whose own example is
+  `coderabbit.yaml`, which is hard to explain if it were already read.
+  Settled inside apply with `cr review --show-prompts`, before any rule is
+  written; if the config is not read, the gate prescribes
+  `--config .coderabbit.yaml CLAUDE.md` instead. Mirroring `.gitignore` into
+  the config is not needed either way — `--include-untracked` is defined as
+  tracked changes plus *non-ignored* files. Only a settled convention becomes
+  a rule; a
+  bot's taste objections would blow through the rule quality bar and the ~20
+  rule maintenance trigger. Major and above are auto-applied, deliberately
+  overriding the skill's "No fixes before approval" — the branch is unpushed,
+  so being wrong costs a `git checkout`. `/coderabbit` stays the user's
+  because its cost is the wait for the PR bot, which a synchronous CLI review
+  does not have.
+- `coderabbit-config`: `docstrings.mode: "off"`, not a lower `threshold` — a
+  permanently amber check devalues the checks beside it, and this project has
+  no docstring rule for one to enforce. `path_filters` excludes
+  `openspec/changes/archive/**`, the generated fixture and woff2 binaries, but
+  never `openspec/**` wholesale: the schema says those patterns also drive the
+  bot's git sparse-checkout, so excluding the specs would stop it reading
+  them, and this repo opens proposal PRs separately from implementation PRs —
+  the exclusion would leave every proposal PR unreviewed. `dist/**` is not
+  filtered because it is gitignored, so the rule would be a no-op. Three of
+  the 57 tool integrations go off — biome, yamllint, actionlint — each because
+  `lint.yml` or the pre-commit hook already runs it; markdownlint and the
+  secret scanners stay on. `code_guidelines.filePatterns` stays `docs/*.md`:
+  `filePatterns` has no negation syntax, and `docs/` is flat by the growth
+  protocol, so the flat pattern already excludes the `docs/context/`
+  save-points that `CLAUDE.md` says are never loaded automatically —
+  `docs/**/*.md` would pull them in with no way to exclude them.
+- `vendored-skill-permissions`, invocation half: `CLAUDE.md` wins over the
+  skills repo's `0df4241` — `disable-model-invocation: true` returns to
+  `coderabbit`, because the reason it was reserved for the user still holds
+  (the bot's review arrives on its own schedule; an agent that waits burns a
+  session). Only the `/zombies` and `/warm` clauses in the Review toolkit are
+  redundant with their skills' `description`; `/triage` differs in trigger and
+  position, `/ponytail-review` ships in the ponytail plugin and its
+  description inverts the instruction, so both clauses stay. The skills repo's
+  `README.md` line 23 is wrong on both halves — eight skills lack the flag,
+  not two, and three different base-branch conventions hide behind "defaulting
+  to `main`".
 
 - Task 4 deferred `ui-foundation` **(e2e)** 1.5 (`dist/` under a plain static
   server) to Task 7: `build.test.ts` already asserts what `dist/` carries, and
