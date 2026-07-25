@@ -209,6 +209,10 @@ protocol:
 
 - Name the environment a verification claim ran in — viewport, browser,
   data — not the one it targeted.
+- Verify an external contract against its machine-readable artefact —
+  schema, reference page, `--help` — never against a prose summary of it.
+- Verify every external recommendation before implementing it; report which
+  parts failed verification and what replaces them.
 - Before inlining a single-caller helper, grep for the logic it duplicates
   elsewhere.
 - Gate a side effect on the reducer's result, not on the action that asked
@@ -221,8 +225,8 @@ protocol:
   re-subscribing the listener when that state changes.
 - A guard against malformed input must cover the whole value, not a prefix —
   anchor both ends or parse it.
-- Before calling a tracked file a duplicate, check whether its twin is
-  tracked — a gitignored copy does not ship with the repo.
+- Confirm a path is tracked before a check or a claim depends on it — a
+  gitignored file is present for the author and absent in a clone.
 - When a rule or a recorded decision changes, grep every site that restates
   it — rules list, docs, OpenSpec artifacts, README — before calling the
   change done.
