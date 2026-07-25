@@ -15,7 +15,7 @@ review pass rather than the full loop.
 
 #### Scenario: The CLI is unavailable
 
-- **WHEN** `cr doctor` exits non-zero, or `cr` is not on PATH
+- **WHEN** `coderabbit doctor` exits non-zero, or `coderabbit` is not on PATH
 - **THEN** the agent reports which check failed and what fixes it
 - **AND** pushes without the gate rather than blocking the branch
 
@@ -83,21 +83,22 @@ rather than start a fourth pass.
 ### Requirement: The local reviewer is aligned with the PR bot
 
 Before the gate is written into `CLAUDE.md`, it SHALL be established whether
-`cr` reads the repository's `.coderabbit.yaml` unprompted. Where it does not,
+`coderabbit` reads the repository's `.coderabbit.yaml` unprompted. Where it
+does not,
 the prescribed invocation MUST pass the config explicitly with
 `--config .coderabbit.yaml CLAUDE.md`, so the local review applies the same
 `path_instructions` and `code_guidelines` as the PR bot.
 
 #### Scenario: The saved prompts carry this repo's instructions
 
-- **WHEN** `cr review --show-prompts` is run after one local review
+- **WHEN** `coderabbit review --show-prompts` is run after one local review
 - **AND** the output contains the `path_instructions` from `.coderabbit.yaml`
-- **THEN** the gate prescribes a plain `cr review`
+- **THEN** the gate prescribes a plain `coderabbit review`
 
 #### Scenario: The saved prompts do not carry them
 
 - **WHEN** that output shows none of this repo's configured instructions
-- **THEN** the gate prescribes `cr review --config .coderabbit.yaml CLAUDE.md`
+- **THEN** the gate prescribes `coderabbit review --config .coderabbit.yaml CLAUDE.md`
 
 #### Scenario: The question is unanswered
 
