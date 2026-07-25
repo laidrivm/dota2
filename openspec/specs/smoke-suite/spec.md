@@ -1,7 +1,14 @@
-# smoke-suite — delta
+# smoke-suite Specification
 
-## ADDED Requirements
+## Purpose
 
+The browser-level verification layer: what it must prove about the running
+app, the conditions it runs under — a real instance, parallel workers, no
+retries — and the accessibility floor it enforces on every page state it
+reaches. It exists so that agentic changes cannot silently break the paths a
+user actually walks, which `bun test` cannot reach without a DOM.
+
+## Requirements
 ### Requirement: The suite runs against a real running app
 
 The smoke suite SHALL exercise the application through a browser against an
@@ -72,8 +79,8 @@ reloading the page restores both choices.
 #### Scenario: A reload restores the choices
 
 - **WHEN** the page is reloaded after both choices are made
-- **THEN** the board SHALL be rendered directly, without the Setup block
-  appearing, and the header SHALL still name the same side and role
+- **THEN** the board SHALL be rendered, the Setup controls SHALL be absent,
+  and the header SHALL still name the same side and role
 
 ### Requirement: A cold-cache snapshot failure is recoverable in place
 
