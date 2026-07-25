@@ -36,7 +36,7 @@ Requirement names are those in `specs/agent-permissions/spec.md`.
 
 ## 3. Verify the boundary holds in a live session
 
-- [ ] 3.1 Restart Claude Code and confirm no startup warning about a
+- [x] 3.1 Restart Claude Code and confirm no startup warning about a
       permission rule in `.claude/settings.json` (a malformed rule is reported
       only at startup, and `bun test` cannot see it)
 - [x] 3.2 Invoke `/playwright-cli`, attempt `npx playwright --version`, and
@@ -104,5 +104,5 @@ still outstanding. Never edit the skills repo from this project.
 - [x] 6.2 `/ponytail-review`, applying the cuts that survive
 - [x] 6.3 `/triage` last, over the final diff; read every file it ranks High or
       Medium and report the defects they hold
-- [ ] 6.4 Open the PR from `fix/vendored-skill-permissions` — `/warm` is
+- [x] 6.4 Open the PR from `fix/vendored-skill-permissions` — `/warm` is
       skipped, no dependency manifest changes
