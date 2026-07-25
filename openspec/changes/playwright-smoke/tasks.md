@@ -17,8 +17,8 @@ automate are listed in §6 with their reason.
       the registry check is already done (see proposal Impact), `/warm`
       runs over the manifest change in §7. (AC: exact devDependencies)
 - [x] 1.3 Install the browser: `bunx playwright install chromium`, and
-      confirm `bunx playwright --version` answers under bun. If the runner
-      misbehaves, take the node fallback from design.md and record which
+      confirm `bunx playwright --version` answers under Bun. If the runner
+      misbehaves, take the Node fallback from design.md and record which
       won as a decision — do not patch runner internals.
 
 ## 2. Runner configuration

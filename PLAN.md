@@ -147,10 +147,11 @@ below.
 - Unsorted product specs live in `spec-inbox/`, gitignored except its
   README — the public repo carries the pointer, never the content.
 - Hero tiles take their background from the `--hero-<short>` token and derive
-  their ink from that colour's relative luminance (threshold 0.22), so the
-  palette is never restated in TypeScript. CSS `contrast-color()` was rejected
-  — it flips the palette's mid-tone blues to black. The derived ink differs
-  from the mock on exactly one hero (Wraith King), in favour of contrast.
+  their ink from that colour's relative luminance (threshold 0.18 since Task
+  4; 0.22 as first shipped), so the palette is never restated in TypeScript.
+  CSS `contrast-color()` was rejected — it flips the palette's mid-tone blues
+  to black. The derived ink differs from the mock on exactly one hero (Wraith
+  King), in favour of contrast.
   `tokens/colors.css` gains `--tile-ink-dark`, `--tile-ink-light`, and
   `--hero-fallback`, pushed back to the design project to keep the copy
   verbatim.
@@ -182,8 +183,10 @@ below.
   design.md — the state that decision priced in turned out to be the `first`
   match the grid already computes.
 - 2b corrections found during apply: the planned contrast-floor test for the
-  tile ink guards nothing (with two fixed inks the worst case is pinned at
-  the threshold), so the suite guards the palette tokens parsing instead; and
+  tile ink guards nothing (with the softened ink pair the worst case is pinned
+  at the threshold), so the suite guards the palette tokens parsing instead —
+  superseded in Task 4, where pure inks gave the floor room to guard something
+  and the test was written; and
   a tile carries an accessible name only where its row does not already name
   the hero, so a screen reader hears it once.
 
