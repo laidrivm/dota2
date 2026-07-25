@@ -79,8 +79,8 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
       `fix/vendored-skill-permissions`, awaiting the gates and the PR.
       `permissions.deny` for `npx`/`npm`/`pnpm`/`yarn` in the tracked
       `.claude/settings.json`, `ask` reduced to bun's two install commands,
-      pinned by `agent-permissions.test.ts` (7 tests, red on all four deny
-      entries before the policy was written). All three skills-repo fixes are
+      pinned by `agent-permissions.test.ts` (4 tests; the deny-list assertion
+      was red before the policy was written). All three skills-repo fixes are
       now confirmed there — the flag, the README's invocable list, and its
       base-branch sentence; the re-vendoring procedure step is drafted here
       for the user to apply. Two rules added to `CLAUDE.md`, three clauses
