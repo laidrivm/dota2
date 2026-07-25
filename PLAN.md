@@ -193,5 +193,5 @@ below.
   → `/ponytail-review` → `/triage`, in that order and all self-run; act on
   every finding, report what is skipped and why (CLAUDE.md — Review toolkit).
 - `/zombies` also at propose, from the feature description.
-- `/coderabbit` once the PR has the bot's comments.
+- `/coderabbit` is the user's to invoke, whenever they choose.
 - Commit per completed task-list item without being asked
