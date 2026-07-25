@@ -211,3 +211,8 @@ protocol:
   and delta-spec templates start at `##`, so the title is yours to add.
 - Assert the match before a scripted string replacement — a silent no-op
   reads as a successful edit.
+- Reconcile a vendored skill's `allowed-tools` and `disable-model-invocation`
+  against this project's policy before the skill is used.
+- Substitute `bunx playwright test` for `npx playwright test` and
+  `bun add -g @playwright/cli` for `npm install -g @playwright/cli` — the
+  `playwright-cli` skill's own npx/npm paths are denied here.
