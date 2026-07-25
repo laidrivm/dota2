@@ -86,7 +86,9 @@ below.
   hero tile lettering missed AA on 13 of 52 colours, so the inks became pure
   `#000`/`#fff` and `INK_THRESHOLD` moved 0.22 → 0.18 — the luminance where
   the two contrast equally, worst case now 4.64:1. All three values are
-  design-owned and go back to the design project.
+  design-owned and were pushed back to `tokens/colors.css` in the design
+  project, with the contrast rationale as comments beside them. Its two
+  guideline pages still hardcode the old inks — see the next bullet.
 - That threshold move revives the tile contrast-floor test recorded below as
   deliberately dropped: pinned at the old threshold it guarded nothing, and it
   guards the whole palette now. `--text-5` gained the same guard in
@@ -190,6 +192,15 @@ below.
   and the test was written; and
   a tile carries an accessible name only where its row does not already name
   the hero, so a screen reader hears it once.
+
+- Open against the design project: `guidelines/colors-hero-palette.html`
+  (52 swatches) and `guidelines/component-hero-tile.html` (5) hardcode
+  `#1b1d12`/`#f4f3fb` inline rather than referencing `--tile-ink-*`, so they
+  show the superseded inks. Eight of them also show the wrong ink now, having
+  been authored at threshold 0.22: batrider, clockwerk, magnus, mars, slark,
+  spectre, storm-spirit, treant-protector all move light → dark. The fix is
+  to reference the tokens instead of the hexes; the shortened swatch labels
+  are hand-authored, so the pages cannot simply be regenerated.
 
 ## Gates (reminder)
 
