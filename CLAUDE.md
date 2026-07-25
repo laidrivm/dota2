@@ -81,6 +81,17 @@ Response contract rules for every endpoint — see
   proposal, decisions taken, anything the reviewer must check by hand.
   Never write a walkthrough, a file-by-file summary, or a restatement of
   the acceptance criteria — CodeRabbit generates those on every run.
+- Check a branch's PR state before adding commits — a squash merge strands
+  anything pushed after it.
+- Never post to a PR, issue, or any external service on the user's behalf —
+  report the reply here and let them send it.
+- Never re-run a check to confirm what a completed command already proved —
+  a push that succeeded means its pre-push hook passed.
+- Never wait on a result someone else produces — CI, a review bot, a queue:
+  report where it will appear and end the turn.
+- This repo is public: before anything is staged or committed, check the
+  diff for secrets, tokens, capability URLs, internal identifiers, and
+  machine-local files — flag anything questionable instead of committing it.
 
 ## Review toolkit
 
@@ -214,26 +225,15 @@ protocol:
 - When a rule or a recorded decision changes, grep every site that restates
   it — rules list, docs, OpenSpec artifacts, README — before calling the
   change done.
-- Check a branch's PR state before adding commits — a squash merge strands
-  anything pushed after it.
-- Never post to a PR, issue, or any external service on the user's behalf —
-  report the reply here and let them send it.
-- Never re-run a check to confirm what a completed command already proved —
-  a push that succeeded means its pre-push hook passed.
 - Before the first dependency install or tool run in a repo, verify
   `.gitignore` covers its outputs (`node_modules/`, build dirs, local
   settings).
-- This repo is public: before anything is staged or committed, check the
-  diff for secrets, tokens, capability URLs, internal identifiers, and
-  machine-local files — flag anything questionable instead of committing it.
 - All repo artifacts — docs, plans, specs, code comments, commit messages —
   are written in English by default.
 - Maintain `PLAN.md`: read it at session start; update its queue, statuses
   and decisions in the same turn a task or stage completes.
 - Fix code a linter or type-checker flags; never suppress a finding with an
   ignore comment or config override unless the user approves the suppression.
-- Never wait on a result someone else produces — CI, a review bot, a queue:
-  report where it will appear and end the turn.
 - Open every markdown file with a level-1 heading — OpenSpec's `design.md`
   and delta-spec templates start at `##`, so the title is yours to add.
 
