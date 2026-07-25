@@ -2,13 +2,13 @@
 
 ## Why
 
-The pre-PR sequence ends at `/triage`, and `CLAUDE.md` says so explicitly:
-"Your sequence ends there — the PR link is the deliverable." CodeRabbit's
-findings therefore arrive only after the PR is open, on the bot's own
-schedule, which is also why `/coderabbit` is reserved for the user — waiting
-on it burns a session. The consequence is that every defect the bot would
-catch lands as review churn on an open PR instead of being fixed before the
-branch is pushed.
+The pre-PR sequence ends at `/triage`, and `docs/review-toolkit.md` says so
+explicitly: "Your sequence ends there — the PR link is the deliverable."
+CodeRabbit's findings therefore arrive only after the PR is open, on the bot's
+own schedule, which is also why `/coderabbit` is reserved for the user —
+waiting on it burns a session. The consequence is that every defect the bot
+would catch lands as review churn on an open PR instead of being fixed before
+the branch is pushed.
 
 The `coderabbit-local` skill removes the reason for that split: `cr review`
 runs the same review against the working branch synchronously, with no PR and
@@ -34,7 +34,7 @@ change establishes — see design.
   CLAUDE.md`. An unaligned local reviewer would raise what the PR bot
   suppresses and miss what it enforces, doubling the noise this change exists
   to cut.
-- Extend the pre-PR gate in `CLAUDE.md`: after `/triage`, run
+- Extend the pre-PR sequence in `docs/review-toolkit.md`: after `/triage`, run
   `/coderabbit-local` against the branch, then push. The sequence's stated
   end moves from `/triage` to the local review.
 - Define the loop: at most three reviews with fixes between them, stopping
@@ -88,8 +88,8 @@ None.
 
 ## Impact
 
-- `CLAUDE.md` — the Review toolkit section gains `/coderabbit-local`, and the
-  gate paragraph's ending changes.
-- Sequenced after `vendored-skill-permissions`, which edits the same section.
+- `docs/review-toolkit.md` — gains `/coderabbit-local`, and the pre-PR
+  sequence's ending changes.
+- Sequenced after `vendored-skill-permissions`, which edits the same file.
 - No code, no dependency, no CI workflow.
 - Wall-clock cost per PR: up to three reviews of several minutes each.

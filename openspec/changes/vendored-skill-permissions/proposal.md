@@ -43,10 +43,10 @@ two clauses are dead weight.
 - Add a rule to the `CLAUDE.md` "Rules" list requiring a vendored skill's
   `allowed-tools` and `disable-model-invocation` to be reconciled with this
   project's policy before the skill is used.
-- Trim the `CLAUDE.md` Review toolkit section: drop the "Invoke it yourself"
-  clauses on `/zombies` and `/warm`, which their skill descriptions already
-  carry, and reduce the `/coderabbit` prohibition to its rationale once the
-  flag enforces it. The `/triage` and `/ponytail-review` clauses stay — see
+- Trim `docs/review-toolkit.md`: drop the "Invoke it yourself" clauses on
+  `/zombies` and `/warm`, which their skill descriptions already carry, and
+  reduce the `/coderabbit` prohibition to its rationale once the flag
+  enforces it. The `/triage` and `/ponytail-review` clauses stay — see
   design.
 - Report — do not apply — three fixes for the shared skills repo: restore
   `disable-model-invocation: true` on `coderabbit`, correct both halves of
@@ -86,8 +86,8 @@ None. No product capability changes behaviour.
 
 - `.claude/settings.json` — the only file whose behaviour changes; tracked, so
   the policy travels with a clone.
-- `CLAUDE.md` — one rule added to the "Rules" list; three clauses trimmed from
-  the Review toolkit section.
+- `CLAUDE.md` — one rule added to the "Rules" list.
+- `docs/review-toolkit.md` — three clauses trimmed.
 - `.claude/skills/playwright-cli/` — unchanged, but its `npx`/`npm` grant
   becomes inert in this repo.
 - No production code, no dependency, no CI change.
