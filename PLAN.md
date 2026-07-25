@@ -68,13 +68,13 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
 `coderabbit-local-gate`, then `readme-drift`. The last three all edit
 `CLAUDE.md`, and each writes next to what the previous one changed.
 
-- [x] **1. `coderabbit-config`** — applied on `chore/coderabbit-config`.
-      Four settings in `.coderabbit.yaml`: `docstrings.mode: "off"`,
-      `path_filters` for the archive / fixture / woff2, `tools` off for
-      biome + yamllint + actionlint, `learnings.scope: "local"`, each with
-      its reason beside the key. `filePatterns` left as `docs/*.md` with a
-      comment saying why. Awaiting PR and merge; the effect is observable
-      only in the bot's own review on that PR.
+- [x] **1. `coderabbit-config`** — merged (PR #24) and archived
+      (`openspec/changes/archive/2026-07-25-coderabbit-config`; capability
+      spec at `openspec/specs/review-bot-config/`). Four settings in
+      `.coderabbit.yaml`: `docstrings.mode: "off"`, `path_filters` for the
+      archive / fixture / woff2, `tools` off for biome + yamllint +
+      actionlint, `learnings.scope: "local"`, each with its reason beside
+      the key. `filePatterns` left as `docs/*.md` with a comment saying why.
 - [ ] **2. `vendored-skill-permissions`** — proposed (stage 1 complete,
       `openspec/changes/vendored-skill-permissions`, validates). Reconciles a
       vendored skill's frontmatter with this project's policy on two fields:
