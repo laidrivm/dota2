@@ -81,8 +81,8 @@ Response contract rules for every endpoint — see
   proposal, decisions taken, anything the reviewer must check by hand.
   Never write a walkthrough, a file-by-file summary, or a restatement of
   the acceptance criteria — CodeRabbit generates those on every run.
-- Check a branch's PR state before adding commits — a squash merge strands
-  anything pushed after it.
+- Re-check a pushed branch's PR state before every commit to it — a merged
+  PR strands anything added afterwards, whichever merge style closed it.
 - Never post to a PR, issue, or any external service on the user's behalf —
   report the reply here and let them send it.
 - Never re-run a check to confirm what a completed command already proved —
