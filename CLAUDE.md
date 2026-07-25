@@ -103,9 +103,12 @@ The report alone is never the deliverable.
 - `/triage [base]` — risk-ordered map of the branch diff. Invoke it yourself.
   It returns no findings by design, so acting on it means reading the files it
   ranks High and Medium and reporting the defects they hold.
-- `/coderabbit [pr]` — chews the bot's PR comments. Invoke it yourself once a
-  PR has them; it drops Trivial and Minor with a reason and holds Major and
-  above for the user's approval before applying anything.
+- `/coderabbit [pr]` — chews the bot's PR comments. **The user invokes this
+  one**, never you: the bot's review arrives on its own schedule, and waiting
+  for it burns a session doing nothing. Once a PR is open, say so and stop —
+  do not poll the checks, do not sleep on a timer, do not re-run `gh` to see
+  whether the bot has posted. It drops Trivial and Minor with a reason and
+  holds Major and above for the user's approval before applying anything.
 
 Before every PR that changes code — a feature, a bugfix, a chore alike, and
 whether or not it goes through the OpenSpec stages of
@@ -113,8 +116,8 @@ whether or not it goes through the OpenSpec stages of
 it finds → `/warm` (only when a manifest changed) → `/ponytail-review` →
 `/triage` last, over the final diff. A branch of documentation, rules or
 config runs `/triage` alone, plus a grep for every site restating what it
-changes. Once the PR is open and the bot has commented, `/coderabbit` closes
-the loop on either.
+changes. Your sequence ends there — the PR link is the deliverable.
+`/coderabbit` closes the loop on either, whenever the user chooses to run it.
 
 ## Feature workflow (spec-driven, OpenSpec)
 
@@ -229,5 +232,7 @@ protocol:
   and decisions in the same turn a task or stage completes.
 - Fix code a linter or type-checker flags; never suppress a finding with an
   ignore comment or config override unless the user approves the suppression.
+- Never wait on a result someone else produces — CI, a review bot, a queue:
+  report where it will appear and end the turn.
 
 <!-- newest first; added via the loop above -->
