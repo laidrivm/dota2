@@ -99,9 +99,9 @@ still outstanding. Never edit the skills repo from this project.
 
 ## 6. Review gates
 
-- [ ] 6.1 `/zombies` with no arguments over the final diff, then fix what it
+- [x] 6.1 `/zombies` with no arguments over the final diff, then fix what it
       finds
-- [ ] 6.2 `/ponytail-review`, applying the cuts that survive
+- [x] 6.2 `/ponytail-review`, applying the cuts that survive
 - [ ] 6.3 `/triage` last, over the final diff; read every file it ranks High or
       Medium and report the defects they hold
 - [ ] 6.4 Open the PR from `fix/vendored-skill-permissions` — `/warm` is
