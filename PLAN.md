@@ -129,7 +129,14 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
   119 allow entries. The skill-grant scenario was run with `/playwright-cli`
   actually invoked, so its `Bash(npx:*)` grant was live and still lost to
   deny, while `playwright-cli --version` returned `0.1.17`. The rules took
-  effect without a restart. `CLAUDE.md`'s existing `bunx`/`npx` rule is left
+  effect without a restart. The precedence the whole design rests on is
+  confirmed against `code.claude.com/docs/en/permissions`: "Rules are
+  evaluated in order: deny, then ask, then allow", and an `ask` rule prompts
+  even when a more specific `allow` matches — so the untracked local
+  settings can neither re-open a denied command nor silence a prompt.
+  Whether an `ask` rule fired is not observable from inside a session: an
+  approved prompt and an unprompted call look identical to the agent.
+  `CLAUDE.md`'s existing `bunx`/`npx` rule is left
   alone: its subject is a package that has not passed the dependency check,
   and deny blocks a command without verifying anything, so it is not a
   restatement of the new boundary. The "Rules" list now stands at 19, one
