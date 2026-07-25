@@ -2,18 +2,19 @@
 
 ## Context
 
-`coderabbit-local` is vendored from the shared skills repo. It grants
-`Bash(cr doctor:*)` and `Bash(cr review:*)` and carries no
-`disable-model-invocation`, so the agent may invoke it — which is what this
-change relies on. Its `allowed-tools` names no package manager, so it already
-satisfies the reconciliation rule `vendored-skill-permissions` introduces.
+`coderabbit-local` is owned, not vendored — the shared repo's
+`skills-lock.json` lists only `playwright-cli` — so it is fixed there by fix
+& capture rather than re-vendored. It grants `Bash(coderabbit doctor:*)` and
+`Bash(coderabbit review:*)` and carries no `disable-model-invocation`, so the
+agent may invoke it, which is what this change relies on. Its `allowed-tools`
+names no package manager, so it already satisfies the reconciliation rule
+`vendored-skill-permissions` introduces.
 
-The skill's own procedure is: `cr doctor`, then `cr review --base <base>
---plain`, then sort findings on the `🔵 Trivial < 🟡 Minor < 🟠 Major <
-🔴 Critical` ladder, then show a plan and wait. It ends with "**No fixes
-before approval.** Steps 1–3 change nothing on disk."
-
-`cr` is not installed on this machine.
+The skill's own procedure is: `coderabbit doctor`, then `coderabbit review
+--base <base> --agent --config .coderabbit.yaml CLAUDE.md`, then sort findings
+on the `🔵 Trivial < 🟡 Minor < 🟠 Major < 🔴 Critical` ladder, then show a
+plan and wait. It ends with "**No fixes before approval.** Steps 1–3 change
+nothing on disk."
 
 ## Goals / Non-Goals
 
@@ -26,7 +27,7 @@ before approval.** Steps 1–3 change nothing on disk."
 
 **Non-Goals:**
 
-- Learnings, installing `cr`, CI or hook integration, editing the skill —
+- Learnings, installing `coderabbit`, CI or hook integration, editing the skill —
   see the proposal.
 
 ## Decisions
@@ -34,7 +35,7 @@ before approval.** Steps 1–3 change nothing on disk."
 **The agent invokes `/coderabbit-local`; `/coderabbit` stays the user's.**
 These look contradictory and are not. `CLAUDE.md` reserves `/coderabbit`
 because the bot's PR review "arrives on its own schedule, and waiting for it
-burns a session doing nothing" — the cost is the wait, not the review. `cr
+burns a session doing nothing" — the cost is the wait, not the review. `coderabbit
 review` returns in the same turn, so the rationale does not carry over. Both
 sentences are kept, next to each other, with the distinction stated, because
 the pair otherwise reads as an inconsistency someone will later "fix".
@@ -87,7 +88,7 @@ the PR bot: it would raise what the PR bot suppresses and miss what the PR bot
 enforces, doubling the noise instead of removing it — the opposite of this
 change's purpose. So this is a precondition, not a footnote.
 
-It is cheap to settle: `cr review --show-prompts` prints the saved prompts
+It is cheap to settle: `coderabbit review --show-prompts` prints the saved prompts
 from the most recent local review without running a new one, so one review
 followed by that flag shows whether the `path_instructions` and the
 `code_guidelines` pointer reached the model. That check runs before any rule
@@ -98,6 +99,32 @@ proposing before the check.** If the config is read, nothing more is needed.
 If it is not, `--config .coderabbit.yaml CLAUDE.md` is added to the invocation
 the rule prescribes, and the same alignment is bought explicitly. What must
 not happen is writing the rule without knowing which of the two it is.
+
+**Settled: the config is not read.** One review on `coderabbit` 0.7.0,
+followed by `coderabbit review --show-prompts`, replayed three saved prompts
+carrying none of this repo's `path_instructions` — no `api-design`, no
+`locator priority`, no `waitForTimeout`, no accessible-name clause, no
+full-commit-SHA clause. The one `CLAUDE.md` string in the output sits inside a
+finding's own prose, not in an instruction. Corroborated by the reviewed-file
+list, which included five `openspec/changes/archive/**` paths that
+`.coderabbit.yaml` excludes through `path_filters`. So the gate prescribes
+`--config .coderabbit.yaml CLAUDE.md`, and `--agent` beside it because the CLI
+itself recommends that under Claude. That the explicit form *does* load them
+is verified where it matters — task 5.2 runs the gate over this branch.
+
+**The CLI is `coderabbit`, and there is no `cr`.** The brew cask installs one
+binary, `coderabbit`; `cr` is not on PATH, contrary to what the vendor's own
+`code-review` skill claims. Its `-t all` / `-t committed` flags do not exist
+either and are silently swallowed rather than rejected, so a scoped-looking
+invocation reviews everything. Both were reasons to keep `coderabbit-local`
+rather than adopt the vendor skill.
+
+**Reviews are rate-limited and then billed.** The plan carries a quota — two
+runs hit it during this apply, 48 and 32 minutes from reset — after which
+reviews cost $0.25 per file. A three-pass loop over a 12-file branch is $9 of
+add-on at worst, a cost the proposal accounted for only in wall-clock minutes.
+Whether the loop stays at three passes or drops to one-by-default is the
+user's call, recorded in Open Questions.
 
 **Gitignored paths need no mirroring into the config.** The CLI reference
 defines `--include-untracked` as "Tracked changes plus **non-ignored** files
@@ -116,9 +143,9 @@ a prose diff is a poor trade against several minutes each.
   available if a branch is large and the user asks. If the cost proves worse
   than the churn it prevents, the cap drops to one pass; that is a one-line
   change to the rule.
-- **`cr` is not installed and needs authentication** → the gate is inert
-  until the user runs `brew install coderabbit` and `cr auth login`. The
-  skill's own step 1 is `cr doctor`, which exits non-zero and names the
+- **`coderabbit` is not installed and needs authentication** → the gate is inert
+  until the user runs `brew install coderabbit` and `coderabbit auth login`. The
+  skill's own step 1 is `coderabbit doctor`, which exits non-zero and names the
   failing check, so the failure mode is a clear message rather than a
   confusing review. Until then the agent reports the gate as unavailable and
   pushes without it rather than blocking the branch.
@@ -134,8 +161,12 @@ a prose diff is a poor trade against several minutes each.
 
 ## Open Questions
 
-- **Does `cr` read `.coderabbit.yaml` from the repository without being told
-  to?** Settled by the `--show-prompts` check in the task list, before any
-  rule is written. The answer decides only whether the prescribed invocation
-  carries `--config .coderabbit.yaml CLAUDE.md`; it does not decide whether
-  the gate exists.
+- ~~**Does `coderabbit` read `.coderabbit.yaml` from the repository without
+  being told to?**~~ Settled during apply: it does not. See Decisions.
+- **How many passes does the loop get?** The proposal specifies at most three.
+  Apply found that reviews are quota-limited and then billed per file, which
+  the proposal costed only in minutes. One pass by default — a second only
+  when the first returned Major or above and fixes followed — buys most of the
+  value at a third of the cost, but three passes catch a fix that introduces
+  its own defect. The user decides; task group 3 cannot be written until they
+  do, because the pass count is what requirement *The loop terminates* states.

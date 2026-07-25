@@ -10,11 +10,11 @@ this one writes next to.
 
 ## 1. Preconditions the user owns
 
-- [ ] 1.1 Ask the user to run `brew install coderabbit` — never the published
+- [x] 1.1 Ask the user to run `brew install coderabbit` — never the published
       `curl … | sh` installer, and never install it on their behalf
-- [ ] 1.2 Ask the user to run `cr auth login`, which is interactive (suggest
+- [x] 1.2 Ask the user to run `coderabbit auth login`, which is interactive (suggest
       the `!` prefix so its output lands in the session)
-- [ ] 1.3 Run `cr doctor` and confirm it exits zero before writing any rule
+- [x] 1.3 Run `coderabbit doctor` and confirm it exits zero before writing any rule
       that depends on it (*The gate runs after triage and before the push* →
       "The CLI is unavailable")
 
@@ -23,16 +23,16 @@ this one writes next to.
 Nothing in group 3 may be written until this group is done — an unaligned
 local reviewer doubles the noise instead of cutting it.
 
-- [ ] 2.1 Run one `cr review --base main --plain` on a branch that touches a
+- [x] 2.1 Run one `coderabbit review --base main` on a branch that touches a
       path covered by a `path_instructions` block (`**/*.{ts,tsx}` is the
       broadest)
-- [ ] 2.2 Run `cr review --show-prompts` and read whether the saved prompts
+- [x] 2.2 Run `coderabbit review --show-prompts` and read whether the saved prompts
       carry this repo's `path_instructions` and the `code_guidelines` pointer
       at `**/CLAUDE.md` (*The local reviewer is aligned with the PR bot* →
       "The saved prompts carry this repo's instructions")
-- [ ] 2.3 Record the answer in this change's design as settled, and pick the
-      invocation the gate prescribes: plain `cr review` if the config is read,
-      `cr review --config .coderabbit.yaml CLAUDE.md` if it is not (→ "The
+- [x] 2.3 Record the answer in this change's design as settled, and pick the
+      invocation the gate prescribes: plain `coderabbit review` if the config is read,
+      `coderabbit review --config .coderabbit.yaml CLAUDE.md` if it is not (→ "The
       saved prompts do not carry them")
 - [ ] 2.4 If neither 2.1 nor 2.2 could run, stop and report — do not write the
       rule (→ "The question is unanswered")

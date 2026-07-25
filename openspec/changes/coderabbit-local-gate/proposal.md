@@ -10,7 +10,7 @@ waiting on it burns a session. The consequence is that every defect the bot
 would catch lands as review churn on an open PR instead of being fixed before
 the branch is pushed.
 
-The `coderabbit-local` skill removes the reason for that split: `cr review`
+The `coderabbit-local` skill removes the reason for that split: `coderabbit review`
 runs the same review against the working branch synchronously, with no PR and
 no waiting. Nothing in the rationale for deferring `/coderabbit` applies to a
 review that returns in the same turn.
@@ -27,8 +27,8 @@ change establishes — see design.
 
 ## What Changes
 
-- Establish, before any rule is written, whether `cr` reads the repository's
-  `.coderabbit.yaml` — via `cr review --show-prompts`, which prints the saved
+- Establish, before any rule is written, whether `coderabbit` reads the repository's
+  `.coderabbit.yaml` — via `coderabbit review --show-prompts`, which prints the saved
   prompts of the most recent local review without running a new one. If it
   does not, the prescribed invocation carries `--config .coderabbit.yaml
   CLAUDE.md`. An unaligned local reviewer would raise what the PR bot
@@ -72,15 +72,15 @@ None.
   `approval_delay`. The `code_guidelines` route above is the substitute.
 - **Replacing `/coderabbit`.** The PR-comment skill still closes the loop
   after a PR is open, and stays the user's to invoke.
-- **Installing `cr`.** It is not on this machine's PATH. `brew install
+- **Installing `coderabbit`.** It is not on this machine's PATH. `brew install
   coderabbit` is the supported route; the published `curl … | sh` installer
-  is forbidden by `CLAUDE.md`. Installing it and running `cr auth login` are
+  is forbidden by `CLAUDE.md`. Installing it and running `coderabbit auth login` are
   the user's, not the agent's.
 - **Mirroring `.gitignore` into `path_filters` for the local run.** The CLI
   reference defines `--include-untracked` as tracked changes plus
   **non-ignored** files, so an ignored path is already out of scope under the
   widest scope flag.
-- **Running `cr` in CI or in a git hook.** Each review takes minutes and
+- **Running `coderabbit` in CI or in a git hook.** Each review takes minutes and
   needs authenticated network access; the pre-push hook stays
   `typecheck && bun test`.
 - **Editing the `coderabbit-local` skill.** It lives in the shared skills
