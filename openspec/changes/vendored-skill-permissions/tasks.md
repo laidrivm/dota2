@@ -4,35 +4,35 @@ Requirement names are those in `specs/agent-permissions/spec.md`.
 
 ## 1. Pin the policy in a test (tests first)
 
-- [ ] 1.1 Add `agent-permissions.test.ts` at the repo root, reading the tracked
+- [x] 1.1 Add `agent-permissions.test.ts` at the repo root, reading the tracked
       `.claude/settings.json` — never `.claude/settings.local.json`
       (*The permission policy is pinned by a test* → "The settings file stops
       parsing", "A deny entry is removed")
-- [ ] 1.2 Assert `permissions.deny` carries an entry for each of `npx`, `npm`,
+- [x] 1.2 Assert `permissions.deny` carries an entry for each of `npx`, `npm`,
       `pnpm`, `yarn` (*Foreign package managers are denied* → "Denied manager
       in a plain command"; *pinned by a test* → "A deny entry is removed")
-- [ ] 1.3 Assert every deny entry uses the trailing-space wildcard form
+- [x] 1.3 Assert every deny entry uses the trailing-space wildcard form
       `Bash(<cmd> *)` and none uses `Bash(command:…)` (*Foreign package
       managers are denied* → "A command that merely starts with a denied
       name"; *pinned by a test* → "A deny entry loses its word boundary",
       "A deny entry uses the ignored field form")
-- [ ] 1.4 Assert no `permissions.ask` entry names a denied manager (*Only
+- [x] 1.4 Assert no `permissions.ask` entry names a denied manager (*Only
       bun's install commands prompt* → "Settings carry no unreachable ask
       rule"; *pinned by a test* → "An unreachable ask entry is reintroduced")
-- [ ] 1.5 Run `bun test` and watch 1.2–1.4 fail against the current
+- [x] 1.5 Run `bun test` and watch 1.2–1.4 fail against the current
       `.claude/settings.json` — a test that never failed guards nothing
 
 ## 2. Write the policy
 
-- [ ] 2.1 Add `permissions.deny` to `.claude/settings.json` with
+- [x] 2.1 Add `permissions.deny` to `.claude/settings.json` with
       `Bash(npx *)`, `Bash(npm *)`, `Bash(pnpm *)`, `Bash(yarn *)`
       (*Foreign package managers are denied*; *Deny overrides grants from any
       other source*)
-- [ ] 2.2 Reduce `permissions.ask` to `Bash(bun add *)` and
+- [x] 2.2 Reduce `permissions.ask` to `Bash(bun add *)` and
       `Bash(bun install *)`, dropping the npm/pnpm/yarn entries deny now makes
       unreachable (*Only bun's install commands prompt* → "Adding a
       dependency")
-- [ ] 2.3 Run `bun test` — 1.2–1.4 now pass
+- [x] 2.3 Run `bun test` — 1.2–1.4 now pass
 
 ## 3. Verify the boundary holds in a live session
 
