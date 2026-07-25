@@ -8,7 +8,7 @@ it is verified as step 1.1 instead of by a test.
 
 ## 1. Verify every key path before writing it
 
-- [ ] 1.1 Fetch
+- [x] 1.1 Fetch
       `https://storage.googleapis.com/coderabbit_public_assets/schema.v2.json`
       and confirm each of `reviews.pre_merge_checks.docstrings.mode`,
       `reviews.path_filters`, `reviews.tools.{biome,yamllint,actionlint}
@@ -18,32 +18,32 @@ it is verified as step 1.1 instead of by a test.
 
 ## 2. Write the config
 
-- [ ] 2.1 Add `reviews.pre_merge_checks.docstrings.mode: "off"` with no
+- [x] 2.1 Add `reviews.pre_merge_checks.docstrings.mode: "off"` with no
       `threshold` (*Docstring coverage does not apply here* → "The check is
       off, not loosened")
-- [ ] 2.2 Add `reviews.path_filters` with `!openspec/changes/archive/**`,
+- [x] 2.2 Add `reviews.path_filters` with `!openspec/changes/archive/**`,
       `!src/fixtures/snapshot.json` and `!**/*.woff2` — and nothing broader
       (*Generated and settled paths are out of review scope*)
-- [ ] 2.3 Add `reviews.tools` disabling `biome`, `yamllint` and `actionlint`
+- [x] 2.3 Add `reviews.tools` disabling `biome`, `yamllint` and `actionlint`
       only (*The bot does not re-run this repo's own linters*)
-- [ ] 2.4 Add `knowledge_base.learnings.scope: "local"` (*Learnings are
+- [x] 2.4 Add `knowledge_base.learnings.scope: "local"` (*Learnings are
       scoped by decision, not by visibility*)
-- [ ] 2.5 Leave `knowledge_base.code_guidelines.filePatterns` as it is, and
+- [x] 2.5 Leave `knowledge_base.code_guidelines.filePatterns` as it is, and
       add a comment saying why `docs/**/*.md` is not used (*Coding guidelines
       cover the indexed docs only*)
-- [ ] 2.6 Write the reason beside each switch: no docstring rule exists and a
+- [x] 2.6 Write the reason beside each switch: no docstring rule exists and a
       permanently amber check devalues its neighbours; each disabled tool
       names the gate that already runs it (*A disabled check carries its
       reason in the config*)
-- [ ] 2.7 Run `bun run lint:yaml` — it parses every `**/*.{yml,yaml}`
+- [x] 2.7 Run `bun run lint:yaml` — it parses every `**/*.{yml,yaml}`
       including dotfiles, so it covers this file
 
 ## 3. Reconcile the repo
 
-- [ ] 3.1 Grep every site restating the review-bot configuration —
+- [x] 3.1 Grep every site restating the review-bot configuration —
       `CLAUDE.md`, `docs/`, `README.md`, `PLAN.md` — and reconcile them (rule
       in `CLAUDE.md`)
-- [ ] 3.2 Update `PLAN.md`: queue entry, status, and the decisions this change
+- [x] 3.2 Update `PLAN.md`: queue entry, status, and the decisions this change
       settles
 
 ## 4. Review gates
