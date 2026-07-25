@@ -92,11 +92,11 @@ doing nothing — so the flag is the right place to enforce it, and prose is the
 wrong one. This is the same argument as the deny rule: a claim the harness
 enforces beats a claim only the model reads.
 
-**Three of the five "who invokes" clauses in the Review toolkit stay.** Only
-`/zombies` and `/warm` duplicate their skills' own `description` fields, which
-already say "proactively after implementing a feature" and "proactively after
-you add or upgrade a dependency yourself". The other three carry information
-no description does:
+**Three of the five "who invokes" clauses in `docs/review-toolkit.md` stay.**
+Only `/zombies` and `/warm` duplicate their skills' own `description` fields,
+which already say "proactively after implementing a feature" and "proactively
+after you add or upgrade a dependency yourself". The other three carry
+information no description does:
 
 - `/triage` — its description triggers on "a branch or PR that touches more
   than a couple of files"; `CLAUDE.md` requires it before *every* PR, last in
