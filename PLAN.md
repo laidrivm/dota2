@@ -75,17 +75,17 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
       archive / fixture / woff2, `tools` off for biome + yamllint +
       actionlint, `learnings.scope: "local"`, each with its reason beside
       the key. `filePatterns` left as `docs/*.md` with a comment saying why.
-- [ ] **2. `vendored-skill-permissions`** — applied on
-      `fix/vendored-skill-permissions`, awaiting the gates and the PR.
+- [x] **2. `vendored-skill-permissions`** — merged (PR #26) and archived
+      (`openspec/changes/archive/2026-07-26-vendored-skill-permissions`;
+      capability spec at `openspec/specs/agent-permissions/`).
       `permissions.deny` for `npx`/`npm`/`pnpm`/`yarn` in the tracked
       `.claude/settings.json`, `ask` reduced to bun's two install commands,
       pinned by `agent-permissions.test.ts` (4 tests; the deny-list assertion
       was red before the policy was written). All three skills-repo fixes are
-      now confirmed there — the flag, the README's invocable list, and its
-      base-branch sentence; the re-vendoring procedure step is drafted here
-      for the user to apply. Two rules added to `CLAUDE.md`, three clauses
-      trimmed in `docs/review-toolkit.md`. Outstanding: task 3.1, which needs
-      a Claude Code restart the agent cannot perform.
+      confirmed there — the flag, the README's invocable list, and its
+      base-branch sentence; the re-vendoring procedure step is drafted for
+      the user to apply. Two rules added to `CLAUDE.md`, three clauses
+      trimmed in `docs/review-toolkit.md`.
 - [ ] **3. `coderabbit-local-gate`** — proposed (stage 1 complete,
       `openspec/changes/coderabbit-local-gate`, validates). Adds
       `/coderabbit-local` to the pre-PR gate after `/triage`, three passes
@@ -136,6 +136,8 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
   settings can neither re-open a denied command nor silence a prompt.
   Whether an `ask` rule fired is not observable from inside a session: an
   approved prompt and an unprompted call look identical to the agent.
+  Task 3.1 — no startup warning about a malformed rule — is the user's
+  observation on their own restart, not the agent's.
   `CLAUDE.md`'s existing `bunx`/`npx` rule is left
   alone: its subject is a package that has not passed the dependency check,
   and deny blocks a command without verifying anything, so it is not a
