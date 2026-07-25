@@ -52,6 +52,6 @@ it is verified as step 1.1 instead of by a test.
       branch of documentation, rules or config runs `/triage` alone plus the
       grep in 3.1 — `/zombies` diff mode, `/warm` and `/ponytail-review` do
       not apply to a YAML-only change
-- [ ] 4.2 Open the PR from `chore/coderabbit-config` and say in the handover
+- [x] 4.2 Open the PR from `chore/coderabbit-config` and say in the handover
       that the effect is observable only in the bot's own review on that PR —
       do not poll for it (rule in `CLAUDE.md`)
