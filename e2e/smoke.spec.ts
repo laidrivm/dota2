@@ -20,6 +20,7 @@ test("a keyboard alone reaches the board, and a reload keeps it", async ({
 
 	const side = page.getByRole("group", { name: "Side" });
 	await expect(side).toBeVisible();
+	await expect(page.getByRole("group", { name: "Role" })).toBeVisible();
 
 	expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
 

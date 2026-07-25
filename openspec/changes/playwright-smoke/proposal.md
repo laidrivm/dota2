@@ -44,7 +44,7 @@ here. Task 4's precondition — a UI to smoke-test — is now met.
 
 ## Non-goals
 
-- **No second browser**: chromium only. Firefox and WebKit are a later
+- **No second browser**: Chromium only. Firefox and WebKit are a later
   decision with a cost, not a default.
 - **No test infrastructure beyond the one spec**: no page objects, no
   fixtures file, no helpers, no global setup. They earn their existence

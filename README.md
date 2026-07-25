@@ -42,8 +42,10 @@ exists; the client only ever knows the URL `/snapshot.json`
 
 ## E2E smoke suite
 
-`bunx playwright test` — chromium only. The runner starts `bun run dev`
-itself and, outside CI, reuses an instance already listening on port 3000.
+`bunx playwright test` — Chromium only. The runner starts `bun run dev`
+itself and, outside CI, reuses an instance already listening on the dev
+server's port (`BUN_PORT`/`PORT`, else 3000 — the same precedence `Bun.serve`
+uses, so both sides agree).
 `--repeat-each=3` is the flake gate a change has to clear before CI sees it.
 
 One spec, `e2e/smoke.spec.ts`, covering the paths `bun test` cannot reach
