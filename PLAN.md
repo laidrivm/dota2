@@ -68,13 +68,13 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
 `coderabbit-local-gate`, then `readme-drift`. The last three all edit
 `CLAUDE.md`, and each writes next to what the previous one changed.
 
-- [ ] **1. `coderabbit-config`** — proposed (stage 1 complete,
-      `openspec/changes/coderabbit-config`, validates). Four settings in
-      `.coderabbit.yaml`: `docstrings.mode: "off"`, `path_filters` for the
-      archive / fixture / woff2, `tools` off for biome + yamllint +
-      actionlint, `learnings.scope: "local"`. Independent — touches no file
-      the others touch. Next: branch `chore/coderabbit-config`, `/clear`,
-      `/opsx:apply`.
+- [x] **1. `coderabbit-config`** — applied on `chore/coderabbit-config`.
+      Four settings in `.coderabbit.yaml`: `docstrings.mode: "off"`,
+      `path_filters` for the archive / fixture / woff2, `tools` off for
+      biome + yamllint + actionlint, `learnings.scope: "local"`, each with
+      its reason beside the key. `filePatterns` left as `docs/*.md` with a
+      comment saying why. Awaiting PR and merge; the effect is observable
+      only in the bot's own review on that PR.
 - [ ] **2. `vendored-skill-permissions`** — proposed (stage 1 complete,
       `openspec/changes/vendored-skill-permissions`, validates). Reconciles a
       vendored skill's frontmatter with this project's policy on two fields:
@@ -165,7 +165,16 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
   `filePatterns` has no negation syntax, and `docs/` is flat by the growth
   protocol, so the flat pattern already excludes the `docs/context/`
   save-points that `CLAUDE.md` says are never loaded automatically —
-  `docs/**/*.md` would pull them in with no way to exclude them.
+  `docs/**/*.md` would pull them in with no way to exclude them. Apply
+  settled the two things propose left open: every key path was checked
+  against `schema.v2.json` and exists with the value given (`docstrings.mode`
+  enum `off`/`warning`/`error`, `learnings.scope` enum `local`/`global`/`auto`
+  whose `auto` the schema itself defines as resolving by repository
+  visibility, `path_filters` a string array whose description confirms the
+  sparse-checkout behaviour, and `enabled` on each of the three tools); and
+  the 3.1 grep found no other site restating this configuration —
+  `tasks/task-8.md` and the `path_instructions` citations concern
+  `filePatterns`, which this change deliberately does not touch.
 - `vendored-skill-permissions`, invocation half: `CLAUDE.md` wins over the
   skills repo's `0df4241` — `disable-model-invocation: true` returns to
   `coderabbit`, because the reason it was reserved for the user still holds
