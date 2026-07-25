@@ -1,3 +1,5 @@
+# Playwright smoke layer — design
+
 ## Context
 
 `bun test` covers pure modules only — the project decided against a DOM test

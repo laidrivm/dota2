@@ -234,5 +234,7 @@ protocol:
   ignore comment or config override unless the user approves the suppression.
 - Never wait on a result someone else produces — CI, a review bot, a queue:
   report where it will appear and end the turn.
+- Open every markdown file with a level-1 heading — OpenSpec's `design.md`
+  and delta-spec templates start at `##`, so the title is yours to add.
 
 <!-- newest first; added via the loop above -->
