@@ -5,9 +5,12 @@ import { defineConfig, devices } from "@playwright/test";
  * is the only thing that serves `/snapshot.json`, and the build output's
  * contents are already asserted by `build.test.ts`.
  *
- * `Bun.serve` with no explicit port listens on 3000.
+ * The port follows `Bun.serve`'s own precedence rather than hard-coding 3000:
+ * `webServer` inherits this environment, so a developer with `PORT` set gets
+ * the suite and the server on the same port instead of probing a stranger.
  */
-const baseURL = "http://localhost:3000";
+const port = process.env.BUN_PORT ?? process.env.PORT ?? "3000";
+const baseURL = `http://localhost:${port}`;
 
 export default defineConfig({
 	testDir: "e2e",

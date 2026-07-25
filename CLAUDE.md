@@ -229,7 +229,8 @@ protocol:
   `.gitignore` covers its outputs (`node_modules/`, build dirs, local
   settings).
 - All repo artifacts — docs, plans, specs, code comments, commit messages —
-  are written in English by default.
+  are written in British English by default (`behaviour`, `afterwards`);
+  identifiers and third-party API names keep whatever spelling they ship with.
 - Maintain `PLAN.md`: read it at session start; update its queue, statuses
   and decisions in the same turn a task or stage completes.
 - Fix code a linter or type-checker flags; never suppress a finding with an

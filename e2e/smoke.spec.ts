@@ -132,4 +132,8 @@ test("a cold-cache snapshot failure recovers through retry", async ({
 			() => (window as Window & { e2eWitness?: number }).e2eWitness,
 		),
 	).toBe(1);
+
+	// Setup reached this way is a state the suite reached, so it is scanned —
+	// the requirement is every reached state, not every distinct state type.
+	expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
 });

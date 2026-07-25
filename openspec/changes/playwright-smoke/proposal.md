@@ -78,4 +78,4 @@ here. Task 4's precondition — a UI to smoke-test — is now met.
 - No application source changes — unless an axe scan finds a violation in
   the shipped UI, in which case the app is fixed rather than the rule
   excluded.
-- CI cost: one more job per PR, plus a chromium download in it.
+- CI cost: one more job per PR, plus a Chromium download in it.

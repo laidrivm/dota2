@@ -186,5 +186,5 @@ unmounts the error state along with its button.
 
 ## Open Questions
 
-- None blocking. Whether the runner stays on bun is answered during apply,
+- None blocking. Whether the runner stays on Bun is answered during apply,
   by running it.
