@@ -56,8 +56,12 @@ below.
         the `modal` context, `usedAs`, the `re-pick` marker, and three overlay
         tokens pushed to the design project. 319 tests; every **(e2e)** bullet
         walked by hand in Chrome. Corrections mid-apply — see decisions.
-- [ ] **Task 4** — Playwright smoke (precondition: a UI exists); its first
-      scenarios are the tasks marked **(e2e)** in `ui-foundation/tasks.md`
+- [x] **Task 4** — Playwright smoke. OpenSpec change `playwright-smoke`
+      (capability `smoke-suite`). Shipped `playwright.config.ts`,
+      `e2e/smoke.spec.ts` (3 tests, chromium, axe on every state),
+      `.github/workflows/{e2e,test}.yml` and `test:coverage`. Automates
+      `ui-foundation` **(e2e)** 6.4, 6.5, 6.6; three a11y defects fixed —
+      see decisions. 339 unit tests.
 - [ ] **Task 7** — Docker + VPS deploy (open decisions: registry
       GHCR/Docker Hub, same VPS or a new one)
 - [ ] **Phase 3** — OpenSpec: STRATZ → Postgres → snapshot bundle pipeline
@@ -65,6 +69,28 @@ below.
 - [ ] **Task 5** — error tracking (precondition: product is deployed)
 
 ## Accepted decisions
+
+- Task 4 deferred `ui-foundation` **(e2e)** 1.5 (`dist/` under a plain static
+  server) to Task 7: `build.test.ts` already asserts what `dist/` carries, and
+  the residual "it boots in a browser" costs a second `webServer` plus a build
+  per e2e run — nearly free once Task 7 introduces the container that serves
+  `dist/`. The ~25 **(e2e)** bullets from `draft-board` and `hero-picker` are
+  the e2e backlog; the second spec file is where fixtures earn their keep.
+- Playwright's runner works under bun — no node toolchain. `e2e/*.spec.ts`
+  matches bun's own test glob, so `bunfig.toml` carries
+  `[test] pathIgnorePatterns = ["e2e/**"]`.
+- The first axe scans failed on three real defects, all fixed in the app: the
+  page had no `<h1>` (the product name is one now, and the snapshot error
+  state carries its own); `--text-5` read 3.10:1 and became `#7e8897`; and
+  hero tile lettering missed AA on 13 of 52 colours, so the inks became pure
+  `#000`/`#fff` and `INK_THRESHOLD` moved 0.22 → 0.18 — the luminance where
+  the two contrast equally, worst case now 4.64:1. All three values are
+  design-owned and go back to the design project.
+- That threshold move revives the tile contrast-floor test recorded below as
+  deliberately dropped: pinned at the old threshold it guarded nothing, and it
+  guards the whole palette now. `--text-5` gained the same guard in
+  `styles.test.ts`; `--text-6` is exempt on purpose (separators, disabled
+  controls, the result arrow — all exempt under WCAG 1.4.3).
 
 - UI stack: **Preact** (first runtime dependency, WARM in phase 2).
 - Deploy: **Docker on a VPS**.

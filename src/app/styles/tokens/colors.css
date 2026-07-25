@@ -16,6 +16,10 @@
 	--text-3: #9aa4b2; /* secondary: role labels */
 	--text-4: #8a93a3; /* controls at rest, kbd */
 	--text-5: #7e8897; /* section labels, meta — 4.5:1 on every surface */
+	/* Below AA on every surface, and deliberately so: it only ever renders
+	   `·` separators, disabled pick-entry labels and the result arrow —
+	   punctuation and disabled controls, which WCAG 1.4.3 exempts. Any new
+	   use on real text has to pick a lighter token. */
 	--text-6: #4d5665; /* separators, faintest */
 	/* accent — "my pick" emphasis (gold) */
 	--accent: #e8b656;

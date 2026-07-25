@@ -109,8 +109,9 @@ test("a cold-cache snapshot failure recovers through retry", async ({
 
 	// The message has to be *inside* the live region — a region that announces
 	// nothing is the failure this asserts against.
-	const announcement = page.getByRole("status");
-	await expect(announcement).toContainText("No snapshot could be loaded");
+	await expect(page.getByRole("status")).toContainText(
+		"No snapshot could be loaded",
+	);
 	const retry = page.getByRole("button", { name: "Retry" });
 	await expect(retry).toBeVisible();
 
