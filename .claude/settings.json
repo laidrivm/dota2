@@ -1,13 +1,6 @@
 {
 	"permissions": {
-		"ask": [
-			"Bash(npm install:*)",
-			"Bash(npm i:*)",
-			"Bash(pnpm add:*)",
-			"Bash(pnpm install:*)",
-			"Bash(yarn add:*)",
-			"Bash(bun add:*)",
-			"Bash(bun install:*)"
-		]
+		"deny": ["Bash(npx *)", "Bash(npm *)", "Bash(pnpm *)", "Bash(yarn *)"],
+		"ask": ["Bash(bun add *)", "Bash(bun install *)"]
 	}
 }
