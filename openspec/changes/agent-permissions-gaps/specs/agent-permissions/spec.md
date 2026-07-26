@@ -21,6 +21,20 @@ command — save `bun pm pkg get`, which the single `bun pm pkg` entry prompts f
 by design. Claude Code matches a permission pattern against the literal command
 string, so an alias is a separate entry and not a variant of one.
 
+Unlike `deny`, an `ask` entry does not override a grant from another source: a
+broader `allow` pattern in `.claude/settings.local.json` or a user-level
+settings file suppresses the prompt. This repository cannot test that, because
+the local file is gitignored, so the requirement holds only where no broader
+grant exists.
+
+#### Scenario: A broader local allow entry suppresses the prompt
+
+- **WHEN** `.claude/settings.local.json` carries `Bash(bun *)` under
+  `permissions.allow`
+- **AND** the agent attempts `bun add preact`
+- **THEN** Claude Code does not prompt, and no test in this repository detects
+  it
+
 #### Scenario: Adding a dependency
 
 - **WHEN** the agent attempts `bun add preact`

@@ -79,6 +79,27 @@ above all, because surfacing its output is how the user reaches that decision.
 The cost is that `Bash(bun pm pkg *)` also prompts on `bun pm pkg get`, taken
 over three narrower entries.
 
+**The gate is inert on the authoring machine, and the spec now says so.**
+Asked to demonstrate the prompt, neither `bun pm pkg get` nor `bun update
+--help` prompted. Nor did `bun install --help`, whose `ask` entry has been in
+the tracked settings since PR #26 and was therefore loaded at session start —
+which rules out a stale in-session copy of the file. The cause is
+`.claude/settings.local.json`, which carries `Bash(bun *)` under
+`permissions.allow`: a broader grant suppresses `ask`, so none of the 14 entries
+prompt there. `deny` behaves the opposite way and is unaffected.
+
+Nothing in this repository can catch that — the local file is gitignored, the
+case the tracked-path rule in `CLAUDE.md` names. So it is written into the
+requirement as a stated limit rather than left as a surprise, and the prompt
+scenarios read as conditional on no broader grant existing.
+
+The two blanket entries were then removed from the local file, and the prompt
+still did not appear: a session holds the permission set it loaded at startup,
+so an edit to either settings file takes effect only in the next session. That
+is why the widened `ask` list is verified here by the test reading the tracked
+file, and the prompt itself is left for the user to confirm after a restart —
+claiming it from this session would be claiming what was not observed.
+
 **The requirement is renamed because removal is no longer an install.** *Only
 bun's install commands prompt* stops describing a policy that prompts for
 `bun remove`. The rename is a delta `RENAMED` entry so the archive applies it
