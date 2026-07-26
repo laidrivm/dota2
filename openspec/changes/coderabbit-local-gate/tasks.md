@@ -34,34 +34,34 @@ local reviewer doubles the noise instead of cutting it.
       invocation the gate prescribes: plain `coderabbit review` if the config is read,
       `coderabbit review --config .coderabbit.yaml CLAUDE.md` if it is not (→ "The
       saved prompts do not carry them")
-- [ ] 2.4 If neither 2.1 nor 2.2 could run, stop and report — do not write the
+- [x] 2.4 (not triggered — both ran) If neither 2.1 nor 2.2 could run, stop and report — do not write the
       rule (→ "The question is unanswered")
 
 ## 3. Write the gate into docs/review-toolkit.md
 
-- [ ] 3.1 Add a `/coderabbit-local [base]` bullet to the skills list, stating
+- [x] 3.1 Add a `/coderabbit-local [base]` bullet to the skills list, stating
       that the agent invokes it and that Major and above are applied without
       asking (*Major and above are fixed without asking*)
-- [ ] 3.2 In the same bullet, state the loop: at most three reviews with
+- [x] 3.2 In the same bullet, state the loop: at most three reviews with
       fixes between them, stopping early when a review returns nothing above
       Minor; report and stop if Major or above survives the third
       (*The loop terminates*)
-- [ ] 3.3 State that Minor findings are collected across passes and reported
+- [x] 3.3 State that Minor findings are collected across passes and reported
       once at the end (*Minor findings are reported once, at the end*)
-- [ ] 3.4 Move the pre-PR sequence's ending from `/triage` to
+- [x] 3.4 Move the pre-PR sequence's ending from `/triage` to
       `/coderabbit-local`, and give a documentation, rules or config branch a
       single pass (*The gate runs after triage and before the push* → "A
       documentation branch")
-- [ ] 3.5 Next to the `/coderabbit` bullet, state why that one stays the
+- [x] 3.5 Next to the `/coderabbit` bullet, state why that one stays the
       user's and this one does not — the PR bot's wait, absent from a
       synchronous CLI review — so the pair does not read as a contradiction
-- [ ] 3.6 Extend the fix & capture routing with the skipped-Minor case: a
+- [x] 3.6 Extend the fix & capture routing with the skipped-Minor case: a
       settled convention becomes a rule, a one-off does not (*A justification
       survives only when it is a convention*)
 
 ## 4. Reconcile the repo
 
-- [ ] 4.1 Grep every site restating the pre-PR sequence —
+- [x] 4.1 Grep every site restating the pre-PR sequence —
       `docs/review-toolkit.md`, `CLAUDE.md`, `docs/feature-workflow.md`,
       `docs/testing.md`, `PLAN.md`, `README.md` — and reconcile them (rule in
       `CLAUDE.md`)
@@ -69,7 +69,7 @@ local reviewer doubles the noise instead of cutting it.
       `knowledge_base.code_guidelines.filePatterns` — the whole
       justification-feedback route depends on it (*A justification survives
       only when it is a convention*)
-- [ ] 4.3 Update `PLAN.md`: queue entry, status, and the decisions this
+- [x] 4.3 Update `PLAN.md`: queue entry, status, and the decisions this
       change settles
 
 ## 5. Review gates
