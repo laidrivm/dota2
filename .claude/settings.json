@@ -9,7 +9,12 @@
 			"Bash(bun remove *)",
 			"Bash(bun rm *)",
 			"Bash(bun r *)",
-			"Bash(bun uninstall *)"
+			"Bash(bun uninstall *)",
+			"Bash(bun update *)",
+			"Bash(bun patch *)",
+			"Bash(bun pm pkg *)",
+			"Bash(bun pm version *)",
+			"Bash(bun pm trust *)"
 		]
 	}
 }

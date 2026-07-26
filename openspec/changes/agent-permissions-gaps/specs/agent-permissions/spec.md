@@ -10,11 +10,15 @@
 ### Requirement: Every manifest-mutating invocation prompts
 
 `permissions.ask` in `.claude/settings.json` SHALL cover every invocation form
-that writes `package.json` — the commands `bun add`, `bun install` and
-`bun remove`, together with each alias `bun` documents for them — and no entry
-naming a denied package manager, because an `ask` rule for a denied command can
-never be reached. Claude Code matches a permission pattern against the literal
-command string, so an alias is a separate entry and not a variant of one.
+that changes the project's dependency record — `package.json` or the lockfile.
+That is bun's install family, `bun add`, `bun install` and `bun remove`, with
+each alias `bun` documents for them; `bun update` and `bun patch`; and the
+`bun pm` subcommands that edit `package.json` directly — `pkg`, `version` and
+`trust`. It SHALL carry no entry naming a denied package manager, because an
+`ask` rule for a denied command can never be reached, and no entry broad enough
+to capture a read-only command. Claude Code matches a permission pattern against
+the literal command string, so an alias is a separate entry and not a variant
+of one.
 
 #### Scenario: Adding a dependency
 
@@ -32,6 +36,25 @@ command string, so an alias is a separate entry and not a variant of one.
 - **WHEN** the agent attempts `bun remove preact`
 - **THEN** Claude Code prompts, because removal writes `package.json` and the
   lockfile
+
+#### Scenario: A subcommand that edits the manifest directly
+
+- **WHEN** the agent attempts `bun pm pkg set sideEffects=false`,
+  `bun pm version patch`, `bun update --latest` or `bun patch --commit`
+- **THEN** Claude Code prompts, because each rewrites `package.json` without
+  going through the install family
+
+#### Scenario: trustedDependencies is never granted silently
+
+- **WHEN** the agent attempts `bun pm trust some-package`
+- **THEN** Claude Code prompts, because `CLAUDE.md` reserves that decision for
+  the user
+
+#### Scenario: A read-only sibling is not captured
+
+- **WHEN** the agent attempts `bun pm untrusted` or `bun pm why preact`
+- **THEN** Claude Code does not prompt, because surfacing that output is how
+  the user reaches the `trustedDependencies` decision
 
 #### Scenario: Settings carry no unreachable ask rule
 
@@ -109,8 +132,8 @@ on a skill's frontmatter would pass for the author and fail in a clone.
 
 #### Scenario: A listed form stops being a manifest write
 
-- **WHEN** an `ask` entry names a form that `bun <form> --help` no longer
-  reports as `add`, `install` or `remove`
+- **WHEN** a top-level `ask` entry names a form that `bun <form> --help` no
+  longer reports as one of the manifest-writing commands
 - **THEN** `bun test` fails, so the list is checked against the installed
   binary in both directions rather than against a literal alone
 

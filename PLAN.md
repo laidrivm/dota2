@@ -118,7 +118,12 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
       of the CodeRabbit local-review setup; do it before `readme-drift`.
       Apply verified each new assertion red before green, by breaking the
       policy three ways; the alias probe on bun 1.3.14 confirmed eight forms
-      and that `bun un` is not a command. Idea 5 from `/zombies` — that an
+      and that `bun un` is not a command. The gate then found the surface
+      reaches past the install family — `bun pm pkg set` and `bun pm version`
+      rewrite `package.json` unprompted, and `bun pm trust` grants
+      `trustedDependencies`, which `CLAUDE.md` forbids the agent to do alone —
+      so `ask` is 13 entries, and the read-only `bun pm` siblings stay ungated
+      on purpose. Idea 5 from `/zombies` — that an
       unparseable settings file fails the run — is left untested: the
       module-level `await Bun.file(…).json()` makes it hold by construction,
       and a fixture would test the fixture.

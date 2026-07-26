@@ -36,10 +36,12 @@ writing `package.json` without a prompt is not a documentation problem.
 **Every alias gets its own entry, because a pattern cannot cover them.** Claude
 Code matches a permission rule against the literal command string, which is
 already how this spec reasons about `deny` — the trailing-space wildcard
-scenario turns on `npmlog` not matching `Bash(npm *)`. So `Bash(bun add *)`
-does not reach `bun a preact`, and the list is eight entries for three
-commands: `bun add`, `bun a`, `bun install`, `bun i`, `bun remove`, `bun rm`,
-`bun r`, `bun uninstall`.
+scenario turns on `npmlog` not matching `Bash(npm *)`. `Bash(bun add *)`
+does not reach `bun a preact`, so the install family alone is eight entries
+for three commands: `bun add`, `bun a`, `bun install`, `bun i`, `bun remove`,
+`bun rm`, `bun r`, `bun uninstall`. Five more cover the commands outside that
+family: `bun update`, `bun patch`, `bun pm pkg`, `bun pm version`,
+`bun pm trust`.
 
 **The alias list comes from `bun`'s own `--help`, not from memory.** `bun
 remove --help` prints `Alias: bun r`; `bun add --help` prints `Alias: bun a`;
@@ -53,9 +55,24 @@ probe rather than trusting this paragraph.
 
 **The requirement is stated as a surface, not a count.** "Exactly the two bun
 commands" was falsified by an alias; "the four" would be falsified by the next
-one. The requirement now names the three commands plus "each alias `bun`
-documents for them", so a new alias makes the settings incomplete — a test
-failure — without making the spec wrong.
+one, and "the eight" was — see below. The requirement now describes what
+changes the dependency record and enumerates beneath it, so a newly discovered
+form makes the settings incomplete — a test failure — without making the spec
+wrong.
+
+**The surface is wider than the install family, found by the gate reviewing its
+own branch.** CodeRabbit's local review objected that `bun install` writes the
+lockfile rather than `package.json`, and that the real manifest writers were
+missing. Probed against bun 1.3.14 in a scratch project: `bun pm pkg set
+sideEffects=false` and `bun pm version patch` both rewrote `package.json` with
+no prompt, `bun update --latest` and `bun patch --commit` both exist, and `bun
+pm trust` is documented as adding to `trustedDependencies` — the one thing
+`CLAUDE.md` forbids the agent to do unilaterally, unenforced until now. So five
+flat entries join the list; none of these commands has an alias. Left ungated
+deliberately: the read-only `bun pm` siblings, `bun pm untrusted` above all,
+because surfacing its output is how the user reaches that decision. The cost is
+that `Bash(bun pm pkg *)` also prompts on `bun pm pkg get`, taken over three
+narrower entries.
 
 **The requirement is renamed because removal is no longer an install.** *Only
 bun's install commands prompt* stops describing a policy that prompts for
@@ -79,15 +96,17 @@ absent from it is visibly not denied.
 
 ## Risks / Trade-offs
 
-- **Six new approval prompts** → all of them on commands that write
-  `package.json`, which is the boundary the policy exists to hold. If the
-  short aliases prove never to be used, dropping them is a two-line edit and a
-  test update.
-- **The alias list can go stale on a `bun` upgrade** → the requirement is
-  written as a surface, so a new alias shows up as an incomplete settings file
-  rather than a spec that lies. Nothing detects it automatically; the probe is
-  an apply-stage task, not a CI job.
-- **An exact-equality assertion on eight strings is brittle to reordering** →
+- **Eleven new approval prompts** → all of them on commands that write
+  `package.json` or the lockfile, which is the boundary the policy exists to
+  hold. `Bash(bun pm pkg *)` also prompts on the read-only `bun pm pkg get`;
+  accepted rather than split into three precise entries. If the short aliases
+  prove never to be used, dropping them is a two-line edit and a test update.
+- **The alias list can go stale on a `bun` upgrade** → the test probes the
+  installed binary in both directions, so a renamed alias and a dropped form
+  each fail `bun test` on the next run. What it cannot see is a *new* alias for
+  a command that already has one, since `--help` prints only one `Alias:` line
+  per command.
+- **An exact-equality assertion on 13 strings is brittle to reordering** →
   intended: the test pins the policy, and a reviewer reading a diff of that
   array is the point.
 - **`bun r` is surprising** → `bun run` is the far more common `bun r*`
@@ -98,4 +117,5 @@ absent from it is visibly not denied.
 ## Open Questions
 
 None. The fork over whether to widen the policy or narrow the sentence was
-settled by the user at propose time.
+settled by the user at propose time, and put again — same answer — when the
+local review found the surface reached beyond the install family.
