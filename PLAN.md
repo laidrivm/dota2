@@ -97,7 +97,11 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
       CLAUDE.md --agent` — and that the review quota is shared between the
       web app and the CLI, so a local run can be blocked by browser reviews.
 - [ ] **3a. `agent-permissions-gaps`** — applied on
-      `fix/agent-permissions-gaps`, awaiting the gates and the PR. CodeRabbit's three
+      `fix/agent-permissions-gaps`, gates passed, PR #30 open. The one item left
+      is confirming in a fresh session that `bun add` now prompts — this
+      session holds the permission set it loaded at startup, so neither the
+      widened `ask` list nor the local-allow removal is in force in it.
+      CodeRabbit's three
       Major findings against the already-merged
       `openspec/specs/agent-permissions/spec.md`. In order of
       weight: `bun remove`/`bun rm` also mutate `package.json` but are absent
@@ -216,9 +220,10 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
   bot's taste objections would blow through the rule quality bar and the ~20
   rule maintenance trigger. Major and above are auto-applied, deliberately
   overriding the skill's "No fixes before approval" — the branch is unpushed,
-  so being wrong costs a `git checkout`. `/coderabbit` stays the user's
-  because its cost is the wait for the PR bot, which a synchronous CLI review
-  does not have.
+  so being wrong costs a `git checkout`. `/coderabbit` stays the user's *to
+  invoke*, because its cost is the wait for the PR bot, which a synchronous CLI
+  review does not have; its findings are then disposed of on the same terms,
+  Major and above without asking, since invoking it is the approval.
 - `coderabbit-config`: `docstrings.mode: "off"`, not a lower `threshold` — a
   permanently amber check devalues the checks beside it, and this project has
   no docstring rule for one to enforce. `path_filters` excludes
