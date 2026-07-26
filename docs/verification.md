@@ -18,5 +18,7 @@ What counts as evidence for a claim, and what a claim may rest on.
 - Never infer a permission outcome from a command that succeeded — an
   approved prompt and an unprompted call are indistinguishable from inside
   the session.
+- Verify a settings change only in a session started after it — a session
+  holds the permission set it loaded at startup.
 - Record the cause a measurement establishes, not the one it merely permits —
   name the alternatives ruled out.
