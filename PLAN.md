@@ -95,19 +95,27 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
       unprompted — so the gate prescribes `--config .coderabbit.yaml
       CLAUDE.md --agent` — and that the review quota is shared between the
       web app and the CLI, so a local run can be blocked by browser reviews.
-- [ ] **3a. CodeRabbit's three Major findings on `agent-permissions`** — the
-      first local review raised them against `openspec/specs/agent-permissions/
-      spec.md`, already merged, so they need their own change. In order of
+- [ ] **3a. `agent-permissions-gaps`** — proposed (stage 1 complete,
+      `openspec/changes/agent-permissions-gaps`, validates). CodeRabbit's three
+      Major findings against the already-merged
+      `openspec/specs/agent-permissions/spec.md`. In order of
       weight: `bun remove`/`bun rm` also mutate `package.json` but are absent
       from `permissions.ask`, while the spec calls its two entries "the two
       bun commands that mutate the dependency manifest" — the wording is
-      false either way, so either the policy or the sentence gives. Second,
+      false either way, so either the policy or the sentence gives. The policy
+      gives: propose settled that the mutating surface is three commands in
+      eight forms (`bun a`, `bun i`, `bun r`, `bun rm`, `bun uninstall` beside
+      the long forms), so `bun a preact` and `bun i` reach a manifest write
+      today without prompting — a live hole the finding did not name. Second,
       requirement *The permission policy is pinned by a test* promises to
       guard "the policy above" but its scenarios cover only
       `.claude/settings.json`, so dropping `disable-model-invocation` passes
       silently. Third, *Foreign package managers are denied* says "every
-      package manager other than `bun`" while enumerating four. Last item of
-      the CodeRabbit local-review setup; do it before `readme-drift`.
+      package manager other than `bun`" while enumerating four. Both narrow
+      rather than grow: skill frontmatter cannot be pinned by a test here,
+      because `.claude/skills/*` are symlinks to untracked content. Last item
+      of the CodeRabbit local-review setup; do it before `readme-drift`.
+      Next: branch `fix/agent-permissions-gaps`, `/clear`, `/opsx:apply`.
 - [ ] **4. `readme-drift`** — proposed (stage 1 complete,
       `openspec/changes/readme-drift`, validates). `README.md` calls the
       skills repo private; it is public. Drops the claim rather than
