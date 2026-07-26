@@ -221,3 +221,8 @@ protocol:
 - Substitute `bunx playwright test` for `npx playwright test` and
   `bun add -g @playwright/cli` for `npm install -g @playwright/cli` — the
   `playwright-cli` skill's own npx/npm paths are denied here.
+- Never infer a permission outcome from a command that succeeded — an
+  approved prompt and an unprompted call are indistinguishable from inside
+  the session.
+- Record the cause a measurement establishes, not the one it merely permits —
+  name the alternatives ruled out.
