@@ -92,8 +92,8 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
       max, Major and above applied without asking. Apply settled that the CLI
       is `coderabbit` (no `cr`), that it does not read `.coderabbit.yaml`
       unprompted — so the gate prescribes `--config .coderabbit.yaml
-      CLAUDE.md --agent` — and that reviews are quota-limited with no
-      usage-based relief on a trial.
+      CLAUDE.md --agent` — and that the review quota is shared between the
+      web app and the CLI, so a local run can be blocked by browser reviews.
 - [ ] **3a. CodeRabbit's three Major findings on `agent-permissions`** — the
       first local review raised them against `openspec/specs/agent-permissions/
       spec.md`, already merged, so they need their own change. In order of
