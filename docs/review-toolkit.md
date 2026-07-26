@@ -32,7 +32,9 @@ The report alone is never the deliverable.
   early the moment a review returns nothing above 🟡 Minor, and if Major or
   above survives the third, report it and stop rather than starting a fourth.
   Collect Minor findings across all passes and report them once at the end,
-  each fixed or skipped with its reason.
+  each fixed or skipped with its reason. The CLI does not read
+  `.coderabbit.yaml` on its own, so the skill passes it explicitly — a local
+  review that skips that is a differently aligned reviewer, not a cheaper one.
 - `/coderabbit [pr]` — chews the bot's PR comments. Its
   `disable-model-invocation` flag reserves it for the user, because the bot's
   review arrives on its own schedule and waiting for it burns a session doing
