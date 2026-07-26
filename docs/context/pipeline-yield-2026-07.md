@@ -27,3 +27,7 @@
 - coderabbit-local: PASS — 3 passes, 11 findings, 9 applied, 2 rejected; pass 3 returned nothing. The loop paid for itself twice: pass 1 found the manifest-writing surface reaches past the install family (`bun pm pkg set`, `bun pm version`, `bun pm trust`), pass 2 found `bun patch-commit`, which `Bash(bun patch *)` misses on the hyphen
 - coderabbit (PR #30): PASS — 2 findings, 2 dispositioned (1 Major: this file's name broke the dated-context convention and my append had eaten a blank line; 1 Minor: a stale PR-wait state)
 - Not run: warm (no manifest change)
+
+## 2026-07-27 — chore/archive-agent-permissions-gaps
+
+- Not run: all of them — archive-only branch (spec sync + `git mv` + PLAN.md). The review runs from this session are logged under the two branch headings above, on the branches they ran against.
