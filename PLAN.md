@@ -96,12 +96,11 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
       unprompted — so the gate prescribes `--config .coderabbit.yaml
       CLAUDE.md --agent` — and that the review quota is shared between the
       web app and the CLI, so a local run can be blocked by browser reviews.
-- [ ] **3a. `agent-permissions-gaps`** — applied on
-      `fix/agent-permissions-gaps`, gates passed, PR #30 open. The one item left
-      is confirming in a fresh session that `bun add` now prompts — this
-      session holds the permission set it loaded at startup, so neither the
-      widened `ask` list nor the local-allow removal is in force in it.
-      CodeRabbit's three
+- [x] **3a. `agent-permissions-gaps`** — merged (PR #30) and archived
+      (`openspec/changes/archive/2026-07-27-agent-permissions-gaps`; capability
+      spec at `openspec/specs/agent-permissions/`). One verification is
+      outstanding and cannot be done from the authoring session — see the
+      checklist below. CodeRabbit's three
       Major findings against the already-merged
       `openspec/specs/agent-permissions/spec.md`. In order of
       weight: `bun remove`/`bun rm` also mutate `package.json` but are absent
@@ -140,6 +139,14 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
       `.claude/settings.json` and `.coderabbit.yaml` to the ownership map,
       and pins the map's paths with a test. Next: branch `fix/readme-drift`,
       `/clear`, `/opsx:apply`.
+- [ ] **3a-check. Confirm the widened permission gate actually prompts** — in
+      a session started after PR #30, have the agent attempt `bun update
+      --help`. A session holds the permission set it loaded at startup, so
+      every attempt from the authoring session passed silently and the prompt
+      was never observed. If it still does not prompt, the 14 `ask` entries are
+      decorative and 3a needs reopening; check `.claude/settings.local.json`
+      first for a grant broader than the entry, which is what suppressed it
+      before.
 - [ ] **Task 7** — Docker + VPS deploy (open decisions: registry
       GHCR/Docker Hub, same VPS or a new one)
 - [ ] **Phase 3** — OpenSpec: STRATZ → Postgres → snapshot bundle pipeline
