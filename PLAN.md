@@ -139,14 +139,13 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
       `.claude/settings.json` and `.coderabbit.yaml` to the ownership map,
       and pins the map's paths with a test. Next: branch `fix/readme-drift`,
       `/clear`, `/opsx:apply`.
-- [ ] **3a-check. Confirm the widened permission gate actually prompts** — in
-      a session started after PR #30, have the agent attempt `bun update
-      --help`. A session holds the permission set it loaded at startup, so
-      every attempt from the authoring session passed silently and the prompt
-      was never observed. If it still does not prompt, the 14 `ask` entries are
-      decorative and 3a needs reopening; check `.claude/settings.local.json`
-      first for a grant broader than the entry, which is what suppressed it
-      before.
+- [x] **3a-check. Confirm the widened permission gate actually prompts** —
+      done. In a session started after PR #30 the agent ran `bun update
+      --help` and the user was prompted for permission, so the 14 `ask`
+      entries are live, not decorative. A session holds the permission set it
+      loaded at startup, which is why every attempt from the authoring session
+      passed silently. Confirming it takes the user: an approved prompt and an
+      unprompted call are indistinguishable from inside the session.
 - [ ] **Task 7** — Docker + VPS deploy (open decisions: registry
       GHCR/Docker Hub, same VPS or a new one)
 - [ ] **Phase 3** — OpenSpec: STRATZ → Postgres → snapshot bundle pipeline
