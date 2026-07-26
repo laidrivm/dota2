@@ -126,7 +126,7 @@ capture it exactly like a bug, so future runs don't repeat the old style:
    - If it's about how reviews should be run → say the fix belongs in the
      corresponding skill in the shared skills repo, and propose the exact
      wording (do not edit the skill from this project).
-   - If it's a Minor a local review raised and you skipped → it becomes a
+   - If it's a Minor that a local review raised and you skipped → it becomes a
      rule only when the reason is a settled project convention the bot
      cannot know; a one-off keeps its reason in the report and becomes no
      rule. A rule here is read back by the next review, since

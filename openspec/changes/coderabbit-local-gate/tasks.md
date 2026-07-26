@@ -32,7 +32,7 @@ local reviewer doubles the noise instead of cutting it.
       "The saved prompts carry this repo's instructions")
 - [x] 2.3 Record the answer in this change's design as settled, and pick the
       invocation the gate prescribes: plain `coderabbit review` if the config is read,
-      `coderabbit review --config .coderabbit.yaml CLAUDE.md` if it is not (→ "The
+      `coderabbit review --agent --config .coderabbit.yaml CLAUDE.md` if it is not (→ "The
       saved prompts do not carry them")
 - [x] 2.4 (not triggered — both ran) If neither 2.1 nor 2.2 could run, stop and report — do not write the
       rule (→ "The question is unanswered")
@@ -76,7 +76,7 @@ local reviewer doubles the noise instead of cutting it.
 
 - [x] 5.1 `/triage` over the final diff, per the `CLAUDE.md` rule that a
       branch of rules runs `/triage` alone plus the grep in 4.1
-- [ ] 5.2 Run `/coderabbit-local` once over this branch, with the invocation
+- [x] 5.2 Run `/coderabbit-local` once over this branch, with the invocation
       settled in 2.3 — the change that introduces the gate is the first to go
       through it; skip with a note if groups 1 and 2 could not be done
 - [ ] 5.3 Open the PR from `chore/coderabbit-local-gate`
