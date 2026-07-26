@@ -81,3 +81,22 @@ Test ideas from `/zombies` at propose; numbers are that report's.
 - [ ] 6.4 `/coderabbit-local` — a settings-and-test branch, so the full loop
       rather than the single documentation pass
 - [ ] 6.5 Open the PR from `fix/agent-permissions-gaps`
+
+## 7. Widen to the rest of the manifest-writing surface
+
+Raised by 6.4's first pass; the user chose to widen here rather than defer.
+
+- [x] 7.1 Probe which commands outside the install family rewrite
+      `package.json` — `bun pm pkg set`, `bun pm version`, `bun update
+      --latest`, `bun patch --commit`, `bun pm trust` (*Every manifest-mutating
+      invocation prompts*)
+- [x] 7.2 Add the five entries to `permissions.ask`, choosing
+      `Bash(bun pm pkg *)` over three narrower entries and accepting the prompt
+      on the read-only `bun pm pkg get` (→ "A subcommand that edits the
+      manifest directly", "trustedDependencies is never granted silently")
+- [x] 7.3 Widen the test's shape regex for the two-word `bun pm` forms, and
+      confirm no entry captures `bun pm untrusted` — the read `CLAUDE.md`
+      relies on (→ "A read-only sibling is not captured")
+- [x] 7.4 Restate the requirement as the dependency record rather than
+      `package.json` alone, since `bun install` writes the lockfile
+- [x] 7.5 Reconcile the counts in proposal, design and `PLAN.md`

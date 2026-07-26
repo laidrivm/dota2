@@ -45,6 +45,11 @@ describe("every manifest-mutating invocation prompts", () => {
 			"Bash(bun rm *)",
 			"Bash(bun r *)",
 			"Bash(bun uninstall *)",
+			"Bash(bun update *)",
+			"Bash(bun patch *)",
+			"Bash(bun pm pkg *)",
+			"Bash(bun pm version *)",
+			"Bash(bun pm trust *)",
 		]);
 	});
 
@@ -59,31 +64,45 @@ describe("every manifest-mutating invocation prompts", () => {
 		}
 	});
 
-	test("every listed form still resolves to a manifest write", () => {
+	test("every top-level form still resolves to a manifest write", () => {
 		// The reverse direction: `bun rm`, `bun r` and `bun uninstall` appear
 		// in no `Alias:` line, so this is what catches a release dropping one
 		// and leaving behind an entry the spec claims is part of the surface.
+		// `bun pm …` forms are nested subcommands rather than aliases, so
+		// `--help` resolves them to `bun pm` and the list above pins them.
 		for (const entry of ask) {
-			const form = entry.match(/^Bash\(bun ([a-z]+) \*\)$/)?.[1] ?? "";
-			expect(bunHelp(form)).toMatch(/^Usage: bun (add|install|remove) /m);
+			const form = entry.match(/^Bash\(bun ([a-z]+) \*\)$/)?.[1];
+			if (!form) continue;
+			expect(bunHelp(form)).toMatch(
+				/^Usage: bun (add|install|remove|update|patch) /m,
+			);
 		}
 	});
 
 	test("ask entries keep their word boundary", () => {
 		// `Bash(bun a*)` without the space would also cover `bun add`, so the
-		// entry for the alias would silently stand in for the long form.
+		// entry for the alias would silently stand in for the long form. The
+		// optional second word is `bun pm pkg` and its siblings.
 		for (const entry of ask) {
-			expect(entry).toMatch(/^Bash\(bun [a-z]+ \*\)$/);
+			expect(entry).toMatch(/^Bash\(bun [a-z]+( [a-z]+)? \*\)$/);
 		}
 	});
 
 	test("no ask entry captures a command that writes nothing", () => {
-		// Each short form sits one character from a command that mutates no
-		// manifest: `bun i` from `bun init`, `bun a` from `bun audit`, `bun r`
-		// from `bun run`.
+		// Each form sits one word from a command that mutates no manifest:
+		// `bun i` from `bun init`, `bun a` from `bun audit`, `bun r` from
+		// `bun run`, `bun pm trust` from `bun pm untrusted` — which CLAUDE.md
+		// requires staying ungated, since surfacing its output is how the user
+		// gets to decide about `trustedDependencies`.
 		for (const entry of ask) {
 			const command = entry.match(/^Bash\((.+) \*\)$/)?.[1];
-			for (const invocation of ["bun run build", "bun init", "bun audit"]) {
+			for (const invocation of [
+				"bun run build",
+				"bun init",
+				"bun audit",
+				"bun pm untrusted",
+				"bun pm why preact",
+			]) {
 				expect(invocation.startsWith(`${command} `)).toBe(false);
 			}
 		}
