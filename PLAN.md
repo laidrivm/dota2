@@ -79,8 +79,9 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
       (`openspec/changes/archive/2026-07-26-vendored-skill-permissions`;
       capability spec at `openspec/specs/agent-permissions/`).
       `permissions.deny` for `npx`/`npm`/`pnpm`/`yarn` in the tracked
-      `.claude/settings.json`, `ask` reduced to bun's two install commands,
-      pinned by `agent-permissions.test.ts` (4 tests; the deny-list assertion
+      `.claude/settings.json`, `ask` reduced to bun's two install commands
+      (widened to all eight manifest-mutating forms by 3a), pinned by
+      `agent-permissions.test.ts` (4 tests; the deny-list assertion
       was red before the policy was written). All three skills-repo fixes are
       confirmed there — the flag, the README's invocable list, and its
       base-branch sentence; the re-vendoring procedure step is drafted for
@@ -95,8 +96,8 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
       unprompted — so the gate prescribes `--config .coderabbit.yaml
       CLAUDE.md --agent` — and that the review quota is shared between the
       web app and the CLI, so a local run can be blocked by browser reviews.
-- [ ] **3a. `agent-permissions-gaps`** — proposed (stage 1 complete,
-      `openspec/changes/agent-permissions-gaps`, validates). CodeRabbit's three
+- [ ] **3a. `agent-permissions-gaps`** — applied on
+      `fix/agent-permissions-gaps`, awaiting the gates and the PR. CodeRabbit's three
       Major findings against the already-merged
       `openspec/specs/agent-permissions/spec.md`. In order of
       weight: `bun remove`/`bun rm` also mutate `package.json` but are absent
@@ -115,7 +116,12 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
       rather than grow: skill frontmatter cannot be pinned by a test here,
       because `.claude/skills/*` are symlinks to untracked content. Last item
       of the CodeRabbit local-review setup; do it before `readme-drift`.
-      Next: branch `fix/agent-permissions-gaps`, `/clear`, `/opsx:apply`.
+      Apply verified each new assertion red before green, by breaking the
+      policy three ways; the alias probe on bun 1.3.14 confirmed eight forms
+      and that `bun un` is not a command. Idea 5 from `/zombies` — that an
+      unparseable settings file fails the run — is left untested: the
+      module-level `await Bun.file(…).json()` makes it hold by construction,
+      and a fixture would test the fixture.
 - [ ] **4. `readme-drift`** — proposed (stage 1 complete,
       `openspec/changes/readme-drift`, validates). `README.md` calls the
       skills repo private; it is public. Drops the claim rather than

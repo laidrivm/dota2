@@ -28,9 +28,50 @@ test("deny entries keep their word boundary", () => {
 	}
 });
 
-describe("only bun's install commands prompt", () => {
-	test("both commands that mutate the manifest are listed", () => {
-		expect(ask).toEqual(["Bash(bun add *)", "Bash(bun install *)"]);
+describe("every manifest-mutating invocation prompts", () => {
+	test("every form that writes package.json is listed", () => {
+		expect(ask).toEqual([
+			"Bash(bun add *)",
+			"Bash(bun a *)",
+			"Bash(bun install *)",
+			"Bash(bun i *)",
+			"Bash(bun remove *)",
+			"Bash(bun rm *)",
+			"Bash(bun r *)",
+			"Bash(bun uninstall *)",
+		]);
+	});
+
+	test("the alias bun documents for each command is gated too", () => {
+		// Read from the binary, so an upgrade that renames an alias fails here
+		// rather than silently leaving a manifest write ungated. Only the one
+		// alias per command that `--help` prints is discoverable this way —
+		// `bun rm` and `bun uninstall` appear in no `Alias:` line and are
+		// pinned by the list above.
+		for (const command of ["add", "install", "remove"]) {
+			const help = Bun.spawnSync(["bun", command, "--help"]);
+			const printed = help.stdout.toString() + help.stderr.toString();
+			const alias = printed.match(/^Alias: bun (\S+)$/m)?.[1];
+			expect(alias).toBeTruthy();
+			expect(ask).toContain(`Bash(bun ${alias} *)`);
+		}
+	});
+
+	test("ask entries keep their word boundary", () => {
+		// `Bash(bun a*)` without the space would also cover `bun add`, so the
+		// entry for the alias would silently stand in for the long form.
+		for (const entry of ask) {
+			expect(entry).toMatch(/^Bash\(bun [a-z]+ \*\)$/);
+		}
+	});
+
+	test("no ask entry captures `bun run`", () => {
+		// `bun r` is `bun remove`'s alias, and `bun run` is the command a
+		// prompt must never be attributed to.
+		for (const entry of ask) {
+			const command = entry.match(/^Bash\((.+) \*\)$/)?.[1];
+			expect("bun run build".startsWith(`${command} `)).toBe(false);
+		}
 	});
 
 	test("no ask entry names a denied manager", () => {

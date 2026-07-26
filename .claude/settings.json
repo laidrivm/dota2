@@ -1,6 +1,15 @@
 {
 	"permissions": {
 		"deny": ["Bash(npx *)", "Bash(npm *)", "Bash(pnpm *)", "Bash(yarn *)"],
-		"ask": ["Bash(bun add *)", "Bash(bun install *)"]
+		"ask": [
+			"Bash(bun add *)",
+			"Bash(bun a *)",
+			"Bash(bun install *)",
+			"Bash(bun i *)",
+			"Bash(bun remove *)",
+			"Bash(bun rm *)",
+			"Bash(bun r *)",
+			"Bash(bun uninstall *)"
+		]
 	}
 }
