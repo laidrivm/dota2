@@ -171,13 +171,15 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
   (every documented path needs a PR comment or the web dashboard), so the
   substitute is the route already wired — `.coderabbit.yaml` points
   `knowledge_base.code_guidelines.filePatterns` at `**/CLAUDE.md`, so a
-  justification written as a rule is read back by the next review. **Whether
-  `cr` reads that config unprompted is unverified**: the CLI reference does
-  not say so and lists `-c, --config <files...>` whose own example is
-  `coderabbit.yaml`, which is hard to explain if it were already read.
-  Settled inside apply with `cr review --show-prompts`, before any rule is
-  written; if the config is not read, the gate prescribes
-  `--config .coderabbit.yaml CLAUDE.md` instead. Mirroring `.gitignore` into
+  justification written as a rule is read back by the next review. **The CLI
+  does not read that config unprompted** — settled inside apply, before any
+  rule was written: `coderabbit review --show-prompts` replayed three saved
+  prompts carrying none of this repo's `path_instructions`, and the reviewed
+  file list held five `openspec/changes/archive/**` paths that `path_filters`
+  excludes. So the gate prescribes `--config .coderabbit.yaml CLAUDE.md`
+  beside `--agent`, and `docs/review-toolkit.md` states why the flag is not
+  optional, since the command itself lives in the skill's own repository.
+  Mirroring `.gitignore` into
   the config is not needed either way — `--include-untracked` is defined as
   tracked changes plus *non-ignored* files. Only a settled convention becomes
   a rule; a

@@ -74,7 +74,7 @@ local reviewer doubles the noise instead of cutting it.
 
 ## 5. Review gates
 
-- [ ] 5.1 `/triage` over the final diff, per the `CLAUDE.md` rule that a
+- [x] 5.1 `/triage` over the final diff, per the `CLAUDE.md` rule that a
       branch of rules runs `/triage` alone plus the grep in 4.1
 - [ ] 5.2 Run `/coderabbit-local` once over this branch, with the invocation
       settled in 2.3 — the change that introduces the gate is the first to go
