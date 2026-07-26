@@ -80,7 +80,7 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
       capability spec at `openspec/specs/agent-permissions/`).
       `permissions.deny` for `npx`/`npm`/`pnpm`/`yarn` in the tracked
       `.claude/settings.json`, `ask` reduced to bun's two install commands
-      (widened to all eight manifest-mutating forms by 3a), pinned by
+      (widened to all 14 manifest-writing forms by 3a), pinned by
       `agent-permissions.test.ts` (4 tests; the deny-list assertion
       was red before the policy was written). All three skills-repo fixes are
       confirmed there — the flag, the README's invocable list, and its
@@ -122,8 +122,10 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
       reaches past the install family — `bun pm pkg set` and `bun pm version`
       rewrite `package.json` unprompted, and `bun pm trust` grants
       `trustedDependencies`, which `CLAUDE.md` forbids the agent to do alone —
-      so `ask` is 13 entries, and the read-only `bun pm` siblings stay ungated
-      on purpose. Idea 5 from `/zombies` — that an
+      so `ask` is 14 entries — `bun patch-commit` too, which `Bash(bun patch
+      *)` misses on the hyphen — and the read-only `bun pm` siblings stay
+      ungated, except `bun pm pkg get`, prompted as the cost of one entry
+      over three. Idea 5 from `/zombies` — that an
       unparseable settings file fails the run — is left untested: the
       module-level `await Bun.file(…).json()` makes it hold by construction,
       and a fixture would test the fixture.
