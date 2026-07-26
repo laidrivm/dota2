@@ -42,8 +42,12 @@ The report alone is never the deliverable.
   have, and that is the whole difference between this bullet and the one above
   it. Once a PR is open, say so and stop —
   do not poll the checks, do not sleep on a timer, do not re-run `gh` to see
-  whether the bot has posted. It drops Trivial and Minor with a reason and
-  holds Major and above for the user's approval before applying anything.
+  whether the bot has posted. Once the user does invoke it, dispose of the
+  findings on the same terms as `/coderabbit-local`: Major and above applied
+  without asking, Minor read and then fixed or skipped with its reason,
+  overriding the skill's "No fixes before approval". Invoking it is the
+  approval — the user is present by definition, and a wrong fix on an open PR
+  costs one more commit on a branch already under review.
 
 ## The pre-PR sequence
 

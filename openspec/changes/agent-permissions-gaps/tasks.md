@@ -81,7 +81,7 @@ Test ideas from `/zombies` at propose; numbers are that report's.
 - [x] 6.3 `/triage` over the final diff
 - [x] 6.4 `/coderabbit-local` — a settings-and-test branch, so the full loop
       rather than the single documentation pass
-- [ ] 6.5 Open the PR from `fix/agent-permissions-gaps`
+- [x] 6.5 Open the PR from `fix/agent-permissions-gaps`
 - [ ] 6.6 Confirm in a fresh session that `bun add preact` now prompts — this
       session holds the permission set it loaded at startup, so neither the
       widened `ask` list nor the local-allow removal is in force here
