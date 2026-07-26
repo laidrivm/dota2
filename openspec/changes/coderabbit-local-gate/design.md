@@ -119,12 +119,16 @@ either and are silently swallowed rather than rejected, so a scoped-looking
 invocation reviews everything. Both were reasons to keep `coderabbit-local`
 rather than adopt the vendor skill.
 
-**Reviews are rate-limited and then billed.** The plan carries a quota — two
-runs hit it during this apply, 48 and 32 minutes from reset — after which
-reviews cost $0.25 per file. A three-pass loop over a 12-file branch is $9 of
-add-on at worst, a cost the proposal accounted for only in wall-clock minutes.
-Whether the loop stays at three passes or drops to one-by-default is the
-user's call, recorded in Open Questions.
+**Reviews are rate-limited, and a trial cannot lift the limit.** Three runs
+hit the quota during this apply — 48, 32 and 24 minutes from reset. Past the
+quota, reviews are billed at $0.25 per file, but only for a paid account:
+`coderabbit auth status` reports `Plan: Pro+` on a trial while the review
+service answers `"isProUser": false`, so enabling usage-based reviews changes
+nothing until the trial converts. The gate is therefore written to its
+intended shape and runs at whatever cadence the quota allows; a pass that
+cannot run is reported as blocked, not silently skipped. A three-pass loop
+over a 12-file branch would be $9 of add-on on a paid plan — a cost the
+proposal accounted for only in wall-clock minutes.
 
 **Gitignored paths need no mirroring into the config.** The CLI reference
 defines `--include-untracked` as "Tracked changes plus **non-ignored** files
@@ -163,10 +167,8 @@ a prose diff is a poor trade against several minutes each.
 
 - ~~**Does `coderabbit` read `.coderabbit.yaml` from the repository without
   being told to?**~~ Settled during apply: it does not. See Decisions.
-- **How many passes does the loop get?** The proposal specifies at most three.
-  Apply found that reviews are quota-limited and then billed per file, which
-  the proposal costed only in minutes. One pass by default — a second only
-  when the first returned Major or above and fixes followed — buys most of the
-  value at a third of the cost, but three passes catch a fix that introduces
-  its own defect. The user decides; task group 3 cannot be written until they
-  do, because the pass count is what requirement *The loop terminates* states.
+- ~~**How many passes does the loop get?**~~ Settled during apply: three, as
+  the proposal specifies. Apply found reviews are quota-limited and then
+  billed per file, and the cheaper one-pass-by-default shape was weighed
+  against it; three stays, because a fix applied between passes can introduce
+  its own defect and only a re-review catches that.

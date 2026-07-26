@@ -24,10 +24,21 @@ The report alone is never the deliverable.
   It returns no findings by design, so acting on it means reading the files it
   ranks High and Medium, reporting the defects they hold, and grepping every
   decision or value the diff changes for the sites that restate it.
+- `/coderabbit-local [base]` — the same review against the working branch,
+  before there is a PR. Invoke it yourself. 🟠 Major and 🔴 Critical findings
+  that survive verification are applied without asking, overriding the skill's
+  own "No fixes before approval" — the branch is unpushed, so being wrong
+  costs a `git checkout`. At most three reviews with fixes between them; stop
+  early the moment a review returns nothing above 🟡 Minor, and if Major or
+  above survives the third, report it and stop rather than starting a fourth.
+  Collect Minor findings across all passes and report them once at the end,
+  each fixed or skipped with its reason.
 - `/coderabbit [pr]` — chews the bot's PR comments. Its
   `disable-model-invocation` flag reserves it for the user, because the bot's
   review arrives on its own schedule and waiting for it burns a session doing
-  nothing. Once a PR is open, say so and stop —
+  nothing — the cost is the wait, which a synchronous CLI review does not
+  have, and that is the whole difference between this bullet and the one above
+  it. Once a PR is open, say so and stop —
   do not poll the checks, do not sleep on a timer, do not re-run `gh` to see
   whether the bot has posted. It drops Trivial and Minor with a reason and
   holds Major and above for the user's approval before applying anything.
@@ -44,11 +55,13 @@ whether or not it goes through the OpenSpec stages:
 2. `/warm`, only when a dependency manifest changed, having walked the
    ponytail ladder before ever reaching for a dependency.
 3. `/ponytail-review`, applying the cuts that survive.
-4. `/triage` last, over the final diff, so it maps the diff the reviewer
+4. `/triage`, over the final diff, so it maps the diff the reviewer
    will actually see.
+5. `/coderabbit-local` last, then push.
 
 A branch of documentation, rules or config runs `/triage` alone, plus a grep
-for every site restating what it changes.
+for every site restating what it changes, then one pass of
+`/coderabbit-local` — one, not three.
 
 Your sequence ends there — the PR link is the deliverable. `/coderabbit`
 closes the loop on either, whenever the user chooses to run it.

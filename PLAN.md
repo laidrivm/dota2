@@ -86,13 +86,27 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
       base-branch sentence; the re-vendoring procedure step is drafted for
       the user to apply. Two rules added to `CLAUDE.md`, three clauses
       trimmed in `docs/review-toolkit.md`.
-- [ ] **3. `coderabbit-local-gate`** — proposed (stage 1 complete,
-      `openspec/changes/coderabbit-local-gate`, validates). Adds
-      `/coderabbit-local` to the pre-PR gate after `/triage`, three passes
-      max. After №2 — same `CLAUDE.md` section, and №2 trims the
-      `/coderabbit` bullet this one writes beside. `cr` is installed inside
-      apply (task group 1). Next: branch `chore/coderabbit-local-gate`,
-      `/clear`, `/opsx:apply`.
+- [ ] **3. `coderabbit-local-gate`** — applied on
+      `chore/coderabbit-local-gate`, awaiting the gates and the PR. Adds
+      `/coderabbit-local` to the pre-PR sequence after `/triage`, three passes
+      max, Major and above applied without asking. Apply settled that the CLI
+      is `coderabbit` (no `cr`), that it does not read `.coderabbit.yaml`
+      unprompted — so the gate prescribes `--config .coderabbit.yaml
+      CLAUDE.md --agent` — and that reviews are quota-limited with no
+      usage-based relief on a trial.
+- [ ] **3a. CodeRabbit's three Major findings on `agent-permissions`** — the
+      first local review raised them against `openspec/specs/agent-permissions/
+      spec.md`, already merged, so they need their own change. In order of
+      weight: `bun remove`/`bun rm` also mutate `package.json` but are absent
+      from `permissions.ask`, while the spec calls its two entries "the two
+      bun commands that mutate the dependency manifest" — the wording is
+      false either way, so either the policy or the sentence gives. Second,
+      requirement *The permission policy is pinned by a test* promises to
+      guard "the policy above" but its scenarios cover only
+      `.claude/settings.json`, so dropping `disable-model-invocation` passes
+      silently. Third, *Foreign package managers are denied* says "every
+      package manager other than `bun`" while enumerating four. Last item of
+      the CodeRabbit local-review setup; do it before `readme-drift`.
 - [ ] **4. `readme-drift`** — proposed (stage 1 complete,
       `openspec/changes/readme-drift`, validates). `README.md` calls the
       skills repo private; it is public. Drops the claim rather than
@@ -344,8 +358,9 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
 ## Gates (reminder)
 
 - Before every PR: `/zombies` → fix → `/warm` (only when a manifest changed)
-  → `/ponytail-review` → `/triage`, in that order and all self-run; act on
-  every finding, report what is skipped and why (docs/review-toolkit.md).
+  → `/ponytail-review` → `/triage` → `/coderabbit-local` → push, in that
+  order and all self-run; act on every finding, report what is skipped and
+  why (docs/review-toolkit.md).
 - `/zombies` also at propose, from the feature description.
 - `/coderabbit` is the user's to invoke, whenever they choose.
 - Commit per completed task-list item without being asked
