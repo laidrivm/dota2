@@ -87,7 +87,7 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
       the user to apply. Two rules added to `CLAUDE.md`, three clauses
       trimmed in `docs/review-toolkit.md`.
 - [ ] **3. `coderabbit-local-gate`** — applied on
-      `chore/coderabbit-local-gate`, awaiting the gates and the PR. Adds
+      `chore/coderabbit-local-gate`, gates passed, awaiting the PR. Adds
       `/coderabbit-local` to the pre-PR sequence after `/triage`, three passes
       max, Major and above applied without asking. Apply settled that the CLI
       is `coderabbit` (no `cr`), that it does not read `.coderabbit.yaml`
@@ -185,7 +185,9 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
   excludes. So the gate prescribes `--config .coderabbit.yaml CLAUDE.md`
   beside `--agent`, and `docs/review-toolkit.md` states why the flag is not
   optional, since the command itself lives in the skill's own repository.
-  Mirroring `.gitignore` into
+  The explicit form is confirmed to work: the gate's own run over this branch
+  reviewed no `openspec/changes/archive/**` path, where the unprompted run
+  reviewed five. Mirroring `.gitignore` into
   the config is not needed either way — `--include-untracked` is defined as
   tracked changes plus *non-ignored* files. Only a settled convention becomes
   a rule; a

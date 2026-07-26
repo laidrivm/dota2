@@ -15,5 +15,5 @@
 ## 2026-07-26 — chore/coderabbit-local-gate
 
 - triage: PASS — 3 groups, 1 medium-risk read, 1 finding, 1 acted on (the config requirement had no anchor in this repo)
-- coderabbit-local: BLOCKED — review refused: rate limit, quota shared with the web app; 0 findings, run never produced any
+- coderabbit-local: PASS — 3 findings, 3 dispositioned (1 Major applied, 1 Minor applied, 1 Minor skipped as a one-off); an earlier attempt was refused on the rate limit, whose quota is shared with the web app
 - Not run: zombies (no test ideas at propose — rules only), warm (no manifest change), ponytail-review (prose only)
