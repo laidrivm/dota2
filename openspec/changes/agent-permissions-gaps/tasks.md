@@ -74,10 +74,10 @@ Test ideas from `/zombies` at propose; numbers are that report's.
 
 ## 6. Review gates
 
-- [ ] 6.1 `/zombies` with no arguments over the final diff — this branch
+- [x] 6.1 `/zombies` with no arguments over the final diff — this branch
       changes a test, so diff mode reads the real assertions
-- [ ] 6.2 `/ponytail-review`, applying the cuts that survive
-- [ ] 6.3 `/triage` over the final diff
+- [x] 6.2 `/ponytail-review`, applying the cuts that survive
+- [x] 6.3 `/triage` over the final diff
 - [ ] 6.4 `/coderabbit-local` — a settings-and-test branch, so the full loop
       rather than the single documentation pass
 - [ ] 6.5 Open the PR from `fix/agent-permissions-gaps`

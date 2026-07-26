@@ -107,6 +107,13 @@ on a skill's frontmatter would pass for the author and fail in a clone.
 - **THEN** `bun test` fails, because an uncovered alias reaches a manifest
   write without prompting
 
+#### Scenario: A listed form stops being a manifest write
+
+- **WHEN** an `ask` entry names a form that `bun <form> --help` no longer
+  reports as `add`, `install` or `remove`
+- **THEN** `bun test` fails, so the list is checked against the installed
+  binary in both directions rather than against a literal alone
+
 #### Scenario: The settings file stops parsing
 
 - **WHEN** `.claude/settings.json` contains a trailing comma

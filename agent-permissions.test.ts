@@ -14,6 +14,12 @@ const denied = ["npx", "npm", "pnpm", "yarn"];
 const deny: string[] = settings.permissions?.deny ?? [];
 const ask: string[] = settings.permissions?.ask ?? [];
 
+/** `bun <command> --help`, which prints across both streams. */
+function bunHelp(command: string): string {
+	const help = Bun.spawnSync(["bun", command, "--help"]);
+	return help.stdout.toString() + help.stderr.toString();
+}
+
 test("every foreign package manager is denied", () => {
 	expect(deny).toEqual(denied.map((cmd) => `Bash(${cmd} *)`));
 });
@@ -45,15 +51,21 @@ describe("every manifest-mutating invocation prompts", () => {
 	test("the alias bun documents for each command is gated too", () => {
 		// Read from the binary, so an upgrade that renames an alias fails here
 		// rather than silently leaving a manifest write ungated. Only the one
-		// alias per command that `--help` prints is discoverable this way —
-		// `bun rm` and `bun uninstall` appear in no `Alias:` line and are
-		// pinned by the list above.
+		// alias per command that `--help` prints is discoverable this way.
 		for (const command of ["add", "install", "remove"]) {
-			const help = Bun.spawnSync(["bun", command, "--help"]);
-			const printed = help.stdout.toString() + help.stderr.toString();
-			const alias = printed.match(/^Alias: bun (\S+)$/m)?.[1];
+			const alias = bunHelp(command).match(/^Alias: bun (\S+)$/m)?.[1];
 			expect(alias).toBeTruthy();
 			expect(ask).toContain(`Bash(bun ${alias} *)`);
+		}
+	});
+
+	test("every listed form still resolves to a manifest write", () => {
+		// The reverse direction: `bun rm`, `bun r` and `bun uninstall` appear
+		// in no `Alias:` line, so this is what catches a release dropping one
+		// and leaving behind an entry the spec claims is part of the surface.
+		for (const entry of ask) {
+			const form = entry.match(/^Bash\(bun ([a-z]+) \*\)$/)?.[1] ?? "";
+			expect(bunHelp(form)).toMatch(/^Usage: bun (add|install|remove) /m);
 		}
 	});
 
@@ -65,12 +77,15 @@ describe("every manifest-mutating invocation prompts", () => {
 		}
 	});
 
-	test("no ask entry captures `bun run`", () => {
-		// `bun r` is `bun remove`'s alias, and `bun run` is the command a
-		// prompt must never be attributed to.
+	test("no ask entry captures a command that writes nothing", () => {
+		// Each short form sits one character from a command that mutates no
+		// manifest: `bun i` from `bun init`, `bun a` from `bun audit`, `bun r`
+		// from `bun run`.
 		for (const entry of ask) {
 			const command = entry.match(/^Bash\((.+) \*\)$/)?.[1];
-			expect("bun run build".startsWith(`${command} `)).toBe(false);
+			for (const invocation of ["bun run build", "bun init", "bun audit"]) {
+				expect(invocation.startsWith(`${command} `)).toBe(false);
+			}
 		}
 	});
 
