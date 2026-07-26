@@ -211,8 +211,9 @@ observability, causal claims — see [docs/verification.md](docs/verification.md
   ignore comment or config override unless the user approves the suppression.
 - Open every markdown file with a level-1 heading — OpenSpec's `design.md`
   and delta-spec templates start at `##`, so the title is yours to add.
-- Assert the match before a scripted string replacement — a silent no-op
-  reads as a successful edit.
+- Assert the match before a scripted string replacement and read the
+  resulting diff — a silent no-op and a malformed result both read as a
+  successful edit.
 - Reconcile a vendored skill's `allowed-tools` and `disable-model-invocation`
   against this project's policy before the skill is used.
 - Substitute `bunx playwright test` for `npx playwright test` and
