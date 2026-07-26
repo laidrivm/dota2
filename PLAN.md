@@ -87,7 +87,7 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
       the user to apply. Two rules added to `CLAUDE.md`, three clauses
       trimmed in `docs/review-toolkit.md`.
 - [ ] **3. `coderabbit-local-gate`** — applied on
-      `chore/coderabbit-local-gate`, gates passed, awaiting the PR. Adds
+      `chore/coderabbit-local-gate`, gates passed, PR #28 open. Adds
       `/coderabbit-local` to the pre-PR sequence after `/triage`, three passes
       max, Major and above applied without asking. Apply settled that the CLI
       is `coderabbit` (no `cr`), that it does not read `.coderabbit.yaml`

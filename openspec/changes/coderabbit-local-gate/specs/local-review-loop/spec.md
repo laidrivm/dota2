@@ -93,12 +93,13 @@ the prescribed invocation MUST pass the config explicitly with
 
 - **WHEN** `coderabbit review --show-prompts` is run after one local review
 - **AND** the output contains the `path_instructions` from `.coderabbit.yaml`
+- **AND** it names `**/CLAUDE.md` under `code_guidelines`
 - **THEN** the gate prescribes a plain `coderabbit review`
 
 #### Scenario: The saved prompts do not carry them
 
-- **WHEN** that output shows none of this repo's configured instructions
-- **THEN** the gate prescribes `coderabbit review --config .coderabbit.yaml CLAUDE.md`
+- **WHEN** that output is missing either source
+- **THEN** the gate prescribes `coderabbit review --agent --config .coderabbit.yaml CLAUDE.md`
 
 #### Scenario: The question is unanswered
 
