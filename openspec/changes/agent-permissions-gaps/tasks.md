@@ -69,8 +69,9 @@ Test ideas from `/zombies` at propose; numbers are that report's.
       historical checklist and may be left with a note (rule in `CLAUDE.md`)
 - [x] 5.2 Confirm `.claude/settings.json` is tracked, so the widened policy
       reaches a clone (rule in `CLAUDE.md`)
-- [x] 5.3 Update `PLAN.md`: tick item 3a, record the settled alias surface and
-      the decision not to pin skill frontmatter
+- [x] 5.3 Update `PLAN.md`: record the settled alias surface and the decision
+      not to pin skill frontmatter. Item 3a stays unticked until the PR merges
+      and the change is archived, as entries 1 to 3 did
 
 ## 6. Review gates
 
@@ -90,7 +91,7 @@ Raised by 6.4's first pass; the user chose to widen here rather than defer.
       `package.json` — `bun pm pkg set`, `bun pm version`, `bun update
       --latest`, `bun patch --commit`, `bun pm trust` (*Every manifest-mutating
       invocation prompts*)
-- [x] 7.2 Add the five entries to `permissions.ask`, choosing
+- [x] 7.2 Add the six entries to `permissions.ask`, choosing
       `Bash(bun pm pkg *)` over three narrower entries and accepting the prompt
       on the read-only `bun pm pkg get` (→ "A subcommand that edits the
       manifest directly", "trustedDependencies is never granted silently")
@@ -100,3 +101,6 @@ Raised by 6.4's first pass; the user chose to widen here rather than defer.
 - [x] 7.4 Restate the requirement as the dependency record rather than
       `package.json` alone, since `bun install` writes the lockfile
 - [x] 7.5 Reconcile the counts in proposal, design and `PLAN.md`
+- [x] 7.6 Gate `bun patch-commit`, which `Bash(bun patch *)` misses on the
+      hyphen, and allow the hyphen in both shape checks; probe `bun link` and
+      `bun unlink` and leave them out — neither writes `package.json`

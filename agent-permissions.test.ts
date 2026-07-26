@@ -47,6 +47,7 @@ describe("every manifest-mutating invocation prompts", () => {
 			"Bash(bun uninstall *)",
 			"Bash(bun update *)",
 			"Bash(bun patch *)",
+			"Bash(bun patch-commit *)",
 			"Bash(bun pm pkg *)",
 			"Bash(bun pm version *)",
 			"Bash(bun pm trust *)",
@@ -71,10 +72,10 @@ describe("every manifest-mutating invocation prompts", () => {
 		// `bun pm …` forms are nested subcommands rather than aliases, so
 		// `--help` resolves them to `bun pm` and the list above pins them.
 		for (const entry of ask) {
-			const form = entry.match(/^Bash\(bun ([a-z]+) \*\)$/)?.[1];
+			const form = entry.match(/^Bash\(bun ([a-z-]+) \*\)$/)?.[1];
 			if (!form) continue;
 			expect(bunHelp(form)).toMatch(
-				/^Usage: bun (add|install|remove|update|patch) /m,
+				/^Usage: bun (add|install|remove|update|patch|patch-commit) /m,
 			);
 		}
 	});
@@ -84,7 +85,7 @@ describe("every manifest-mutating invocation prompts", () => {
 		// entry for the alias would silently stand in for the long form. The
 		// optional second word is `bun pm pkg` and its siblings.
 		for (const entry of ask) {
-			expect(entry).toMatch(/^Bash\(bun [a-z]+( [a-z]+)? \*\)$/);
+			expect(entry).toMatch(/^Bash\(bun [a-z-]+( [a-z-]+)? \*\)$/);
 		}
 	});
 

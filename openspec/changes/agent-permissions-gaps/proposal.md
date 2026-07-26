@@ -29,11 +29,13 @@ enumeration.
 - Extend `permissions.ask` to every invocation form that changes the
   dependency record: `bun add`, `bun a`, `bun install`, `bun i`, `bun remove`,
   `bun rm`, `bun r`, `bun uninstall`, `bun update`, `bun patch`,
-  `bun pm pkg`, `bun pm version`, `bun pm trust`. Claude Code matches
+  `bun patch-commit`, `bun pm pkg`, `bun pm version`, `bun pm trust`. Claude Code matches
   permission patterns literally, so each alias needs its own entry — there is
   no pattern that covers a command's aliases.
 - Keep the read-only `bun pm` siblings ungated — `bun pm untrusted` above all,
-  since `CLAUDE.md` requires surfacing its output for the user to act on.
+  since `CLAUDE.md` requires surfacing its output for the user to act on. The
+  one exception is `bun pm pkg get`, which the single `bun pm pkg` entry
+  prompts for.
 - Rename the requirement *Only bun's install commands prompt*. Removal is now
   in scope, so "install commands" no longer describes it.
 - Restate that requirement in terms of the manifest-mutating **surface**
@@ -65,13 +67,14 @@ None.
 
 ## Impact
 
-- `.claude/settings.json` — `permissions.ask` grows from two entries to 13.
+- `.claude/settings.json` — `permissions.ask` grows from two entries to 14.
 - `agent-permissions.test.ts` — the `ask` assertion and two names.
 - `openspec/specs/agent-permissions/spec.md` — three requirements, one renamed.
 - `PLAN.md:82` restates the old policy as "`ask` reduced to bun's two install
   commands" and changes with it.
-- Eleven new approval prompts in day-to-day work, all on commands that write
-  `package.json` or the lockfile.
+- Twelve new approval prompts in day-to-day work. All but one are commands
+  that write `package.json` or the lockfile; `bun pm pkg get` reads it and
+  prompts anyway, because one `bun pm pkg` entry is taken over three.
 
 ## Non-goals
 

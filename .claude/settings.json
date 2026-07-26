@@ -12,6 +12,7 @@
 			"Bash(bun uninstall *)",
 			"Bash(bun update *)",
 			"Bash(bun patch *)",
+			"Bash(bun patch-commit *)",
 			"Bash(bun pm pkg *)",
 			"Bash(bun pm version *)",
 			"Bash(bun pm trust *)"

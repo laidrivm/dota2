@@ -12,13 +12,14 @@
 `permissions.ask` in `.claude/settings.json` SHALL cover every invocation form
 that changes the project's dependency record — `package.json` or the lockfile.
 That is bun's install family, `bun add`, `bun install` and `bun remove`, with
-each alias `bun` documents for them; `bun update` and `bun patch`; and the
-`bun pm` subcommands that edit `package.json` directly — `pkg`, `version` and
-`trust`. It SHALL carry no entry naming a denied package manager, because an
-`ask` rule for a denied command can never be reached, and no entry broad enough
-to capture a read-only command. Claude Code matches a permission pattern against
-the literal command string, so an alias is a separate entry and not a variant
-of one.
+each alias `bun` documents for them; `bun update`, `bun patch` and its
+undocumented equivalent `bun patch-commit`; and the `bun pm` subcommands that
+edit `package.json` directly — `pkg`, `version` and `trust`. It SHALL carry no
+entry naming a denied package manager, because an `ask` rule for a denied
+command can never be reached, and no entry broad enough to capture a read-only
+command — save `bun pm pkg get`, which the single `bun pm pkg` entry prompts for
+by design. Claude Code matches a permission pattern against the literal command
+string, so an alias is a separate entry and not a variant of one.
 
 #### Scenario: Adding a dependency
 
