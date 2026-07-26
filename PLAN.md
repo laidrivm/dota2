@@ -167,6 +167,12 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
   The test must consult `git check-ignore`, because `.claude/skills/` is in
   the map and gitignored, so an existence check would pass here and fail in a
   clone.
+- The `CLAUDE.md` "Rules" list crossed its own ~20 maintenance trigger at 21,
+  so the verification cluster — environments, external contracts,
+  observability, causal claims — moved to `docs/verification.md` under the
+  growth protocol, leaving one index line and 16 rules. The cluster was the
+  largest and the most stable; the remaining rules share no second theme big
+  enough to promote, so the next overflow needs a different cut.
 - `coderabbit-local-gate`: CodeRabbit learnings are unreachable from the CLI
   (every documented path needs a PR comment or the web dashboard), so the
   substitute is the route already wired — `.coderabbit.yaml` points

@@ -179,12 +179,9 @@ protocol:
 
 ### Rules
 
-- Name the environment a verification claim ran in — viewport, browser,
-  data — not the one it targeted.
-- Verify an external contract against its machine-readable artefact —
-  schema, reference page, `--help` — never against a prose summary of it.
-- Verify every external recommendation before implementing it; report which
-  parts failed verification and what replaces them.
+What counts as evidence for a claim — environments, external contracts,
+observability, causal claims — see [docs/verification.md](docs/verification.md).
+
 - Before inlining a single-caller helper, grep for the logic it duplicates
   elsewhere.
 - Gate a side effect on the reducer's result, not on the action that asked
@@ -221,8 +218,3 @@ protocol:
 - Substitute `bunx playwright test` for `npx playwright test` and
   `bun add -g @playwright/cli` for `npm install -g @playwright/cli` — the
   `playwright-cli` skill's own npx/npm paths are denied here.
-- Never infer a permission outcome from a command that succeeded — an
-  approved prompt and an unprompted call are indistinguishable from inside
-  the session.
-- Record the cause a measurement establishes, not the one it merely permits —
-  name the alternatives ruled out.
