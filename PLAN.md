@@ -86,8 +86,9 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
       base-branch sentence; the re-vendoring procedure step is drafted for
       the user to apply. Two rules added to `CLAUDE.md`, three clauses
       trimmed in `docs/review-toolkit.md`.
-- [ ] **3. `coderabbit-local-gate`** — applied on
-      `chore/coderabbit-local-gate`, gates passed, PR #28 open. Adds
+- [x] **3. `coderabbit-local-gate`** — merged (PR #28) and archived
+      (`openspec/changes/archive/2026-07-26-coderabbit-local-gate`; capability
+      spec at `openspec/specs/local-review-loop/`). Adds
       `/coderabbit-local` to the pre-PR sequence after `/triage`, three passes
       max, Major and above applied without asking. Apply settled that the CLI
       is `coderabbit` (no `cr`), that it does not read `.coderabbit.yaml`

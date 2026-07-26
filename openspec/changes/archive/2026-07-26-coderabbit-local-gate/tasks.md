@@ -79,4 +79,4 @@ local reviewer doubles the noise instead of cutting it.
 - [x] 5.2 Run `/coderabbit-local` once over this branch, with the invocation
       settled in 2.3 — the change that introduces the gate is the first to go
       through it; skip with a note if groups 1 and 2 could not be done
-- [ ] 5.3 Open the PR from `chore/coderabbit-local-gate`
+- [x] 5.3 Open the PR from `chore/coderabbit-local-gate`
