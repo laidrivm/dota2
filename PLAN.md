@@ -132,19 +132,19 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
       unparseable settings file fails the run — is left untested: the
       module-level `await Bun.file(…).json()` makes it hold by construction,
       and a fixture would test the fixture.
-- [ ] **4. `readme-drift`** — proposed (stage 1 complete,
-      `openspec/changes/readme-drift`, validates). `README.md` calls the
+- [x] **4. `readme-drift`** — merged (PR #33) and archived
+      (`openspec/changes/archive/2026-07-27-readme-drift`; capability spec at
+      `openspec/specs/repo-onboarding/`). `README.md` calls the
       skills repo private; it is public. Drops the claim rather than
       correcting it, adds the `link.sh` instructions a clone needs, adds
       `.claude/settings.json` and `.coderabbit.yaml` to the ownership map,
-      and pins the map's paths with a test. Applied on `fix/readme-drift`
-      (commit `e330c50`): sections 1–4 done, `readme-map.test.ts` guards 14
+      and pins the map's paths with a test. `readme-map.test.ts` guards 14
       rows and skips the gitignored one. All four section 5 gates closed —
       `/zombies` found one gap (an untracked-but-present path must not
       satisfy a row) and it is now a test, `/ponytail-review` collapsed the
       three-branch resolver into one glob, `/coderabbit-local` returned four
-      findings, all applied. 364 unit tests. PR #33 is open; CodeRabbit's one
-      Major there caught the length assertion those four findings left behind
+      findings, all applied. 364 unit tests. On the PR, CodeRabbit's one
+      Major caught the length assertion those four findings left behind
       — `toHaveLength(rows.length)` passes on `0 === 0`, so an emptied map
       generated no cases at all. The probe that had proved the old assertion
       red was not re-run after the rewrite, which is now a rule in
