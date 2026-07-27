@@ -39,6 +39,7 @@ const resolves = (path: string) => {
 test("every row of the map yields a path", () => {
 	// A reshaped table yields fewer paths than rows — or none at all, which
 	// would make every assertion below pass by vacuity.
+	expect(rows.length).toBeGreaterThan(0);
 	expect(paths).toHaveLength(rows.length);
 });
 
