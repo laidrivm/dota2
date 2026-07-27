@@ -39,6 +39,18 @@ test("the map still parses as a table", () => {
 	expect(paths.length).toBeGreaterThan(10);
 });
 
+test("a path present but untracked does not satisfy a row", async () => {
+	// Guards the choice of `git ls-files` over the filesystem: a check that
+	// asked whether the file exists would pass here and fail in a clone.
+	const probe = `${import.meta.dir}/untracked-probe.md`;
+	await Bun.write(probe, "");
+	try {
+		expect(resolves("untracked-probe.md")).toBe(false);
+	} finally {
+		await Bun.file(probe).delete();
+	}
+});
+
 test.each(paths)("the map's `%s` is real and shipped", (path) => {
 	// A gitignored row is absent from a clone by design, so asserting it
 	// would pass here and fail there.
