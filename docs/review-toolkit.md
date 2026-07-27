@@ -9,7 +9,9 @@ plugin.
 
 Show a review skill's report, then act on it in the same turn: apply the
 findings that hold against the current code, and say which you skip and why.
-The report alone is never the deliverable.
+The report alone is never the deliverable — a turn ending on a gate line that
+reads `OPEN` is a turn abandoned halfway. Close it, or write `BLOCKED` and
+name what only the user can settle.
 
 ## The skills
 
