@@ -15,8 +15,13 @@ const map =
  * second one (`openspec/config.yaml` → `context:`) naming a key inside it.
  * The header and separator rows carry none and drop out here.
  */
-const paths = [...map.matchAll(/^\|([^|]*)\|/gm)]
-	.map((row) => row[1]?.match(/`([^`]+)`/)?.[1])
+const rows = map
+	.split("\n")
+	.filter((line) => line.startsWith("|"))
+	.slice(2); // the header and the `|---|` separator
+
+const paths = rows
+	.map((row) => row.split("|")[1]?.match(/`([^`]+)`/)?.[1])
 	.filter((path) => path !== undefined);
 
 const git = (...args: string[]) =>
@@ -31,21 +36,23 @@ const resolves = (path: string) => {
 	return tracked.some((file) => glob.match(file));
 };
 
-test("the map still parses as a table", () => {
-	// Without this, a reshaped table yields an empty set and every assertion
-	// below passes by vacuity.
-	expect(paths.length).toBeGreaterThan(10);
+test("every row of the map yields a path", () => {
+	// A reshaped table yields fewer paths than rows — or none at all, which
+	// would make every assertion below pass by vacuity.
+	expect(paths).toHaveLength(rows.length);
 });
 
 test("a path present but untracked does not satisfy a row", async () => {
 	// Guards the choice of `git ls-files` over the filesystem: a check that
 	// asked whether the file exists would pass here and fail in a clone.
-	const probe = `${import.meta.dir}/untracked-probe.md`;
-	await Bun.write(probe, "");
+	// The name is unique so a run can never delete a file someone else left
+	// at the repo root.
+	const probe = `untracked-probe-${crypto.randomUUID()}.md`;
+	await Bun.write(`${import.meta.dir}/${probe}`, "");
 	try {
-		expect(resolves("untracked-probe.md")).toBe(false);
+		expect(resolves(probe)).toBe(false);
 	} finally {
-		await Bun.file(probe).delete();
+		await Bun.file(`${import.meta.dir}/${probe}`).delete();
 	}
 });
 
