@@ -22,3 +22,4 @@ What counts as evidence for a claim, and what a claim may rest on.
   holds the permission set it loaded at startup.
 - Record the cause a measurement establishes, not the one it merely permits —
   name the alternatives ruled out.
+- Re-run the failure probe that justified an assertion after rewriting it.

@@ -143,7 +143,12 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
       `/zombies` found one gap (an untracked-but-present path must not
       satisfy a row) and it is now a test, `/ponytail-review` collapsed the
       three-branch resolver into one glob, `/coderabbit-local` returned four
-      findings, all applied. 364 unit tests. Remaining: the PR.
+      findings, all applied. 364 unit tests. PR #33 is open; CodeRabbit's one
+      Major there caught the length assertion those four findings left behind
+      — `toHaveLength(rows.length)` passes on `0 === 0`, so an emptied map
+      generated no cases at all. The probe that had proved the old assertion
+      red was not re-run after the rewrite, which is now a rule in
+      `docs/verification.md`.
 - [x] **3a-check. Confirm the widened permission gate actually prompts** —
       done. In a session started after PR #30 the agent ran `bun update
       --help` and the user was prompted for permission, so the 14 `ask`
