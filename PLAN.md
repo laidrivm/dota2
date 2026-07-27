@@ -137,8 +137,10 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
       skills repo private; it is public. Drops the claim rather than
       correcting it, adds the `link.sh` instructions a clone needs, adds
       `.claude/settings.json` and `.coderabbit.yaml` to the ownership map,
-      and pins the map's paths with a test. Next: branch `fix/readme-drift`,
-      `/clear`, `/opsx:apply`.
+      and pins the map's paths with a test. Applied on `fix/readme-drift`
+      (commit `e330c50`): sections 1–4 done, `readme-map.test.ts` guards 14
+      rows and skips the gitignored one, 363 unit tests. Remaining: the
+      section 5 review gates and the PR.
 - [x] **3a-check. Confirm the widened permission gate actually prompts** —
       done. In a session started after PR #30 the agent ran `bun update
       --help` and the user was prompted for permission, so the 14 `ask`
@@ -198,7 +200,15 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
   prose about intent, and no check decides whether a sentence is still true.
   The test must consult `git check-ignore`, because `.claude/skills/` is in
   the map and gitignored, so an existence check would pass here and fail in a
-  clone.
+  clone. Apply settled that resolution reads `git ls-files` rather than the
+  filesystem — one list covers the literal, directory-prefix and glob forms,
+  and an untracked file cannot satisfy a row, which is the same guarantee
+  from the other side. The rewritten skills row leads with the backticked
+  `.claude/skills/` and carries the repository as a markdown link, so the
+  parser still finds a path in it and the check-ignore skip is the branch
+  that fires — a row with only a link would have been silently unparsed.
+  Both guards were watched red first: a renamed row, and a renamed heading
+  emptying the set. The "Rules" list stands at 18.
 - The `CLAUDE.md` "Rules" list crossed its own ~20 maintenance trigger at 21,
   so the verification cluster — environments, external contracts,
   observability, causal claims — moved to `docs/verification.md` under the

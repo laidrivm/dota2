@@ -50,10 +50,10 @@ Last of the four proposed changes: all of them write to the `CLAUDE.md`
 
 ## 4. Reconcile the repo
 
-- [ ] 4.1 Check the map's own claim — one fact, one file — still holds for
+- [x] 4.1 Check the map's own claim — one fact, one file — still holds for
       the two rows added in 2.2, and that neither restates what
       `.coderabbit.yaml` or `.claude/settings.json` already says
-- [ ] 4.2 Update `PLAN.md`: queue entry, status, and the decisions this
+- [x] 4.2 Update `PLAN.md`: queue entry, status, and the decisions this
       change settles
 
 ## 5. Review gates
