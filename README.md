@@ -16,7 +16,9 @@
 | `openspec/specs/*/spec.md` | what each shipped capability must do (EARS) | when changing behaviour it covers |
 | `openspec/config.yaml` → `context:` | architecture choices (SSE, BFF, cache, N+1) | on artifact generation |
 | `openspec/config.yaml` → `rules:` | artifact shape requirements (referencing CLAUDE.md) | on artifact generation |
-| skills repo (private, symlinked into `.claude/skills/`) | how reviews are run (triage/zombies/warm) | on skill invocation |
+| `.claude/settings.json` | the agent's permission policy — what is denied, what prompts | before granting a tool call |
+| `.coderabbit.yaml` | how CodeRabbit reviews this repo | when the bot reviews the wrong things |
+| `.claude/skills/` — symlinks into the [skills repo](https://github.com/laidrivm/skills) | how reviews are run (triage/zombies/warm) | on skill invocation |
 
 One fact lives in exactly one file; everything else links to it.
 
@@ -91,6 +93,21 @@ Installed automatically by `bun install` (the `prepare` script runs
 - `--no-verify` bypasses a hook — an emergency exit, not a workflow. CI
   (`lint.yml`) re-runs the whole-repo checks when a PR is opened or updated,
   so a bypassed hook only delays the failure until then.
+
+## Getting the review skills
+
+`CLAUDE.md` requires a review pass before every PR, and the skills that run
+it do not ship here: `.claude/skills/` is gitignored and holds symlinks into
+[laidrivm/skills](https://github.com/laidrivm/skills), so a clone has
+neither. Clone that repo and run, from its root:
+
+```sh
+./link.sh all <path-to-d2ass>
+```
+
+That supplies four of the five commands — `/zombies`, `/warm`, `/triage`,
+`/coderabbit`. The fifth, `/ponytail-review`, comes from the ponytail plugin
+instead.
 
 ## Dependency hygiene
 

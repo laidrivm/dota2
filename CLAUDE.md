@@ -219,3 +219,5 @@ observability, causal claims — see [docs/verification.md](docs/verification.md
 - Substitute `bunx playwright test` for `npx playwright test` and
   `bun add -g @playwright/cli` for `npm install -g @playwright/cli` — the
   `playwright-cli` skill's own npx/npm paths are denied here.
+- Never state another repository's mutable properties — visibility, default
+  branch, owner — anywhere in this repo; link to it instead.
