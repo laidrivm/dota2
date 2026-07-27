@@ -31,3 +31,17 @@
 ## 2026-07-27 — chore/archive-agent-permissions-gaps
 
 - Not run: all of them — archive-only branch (spec sync + `git mv` + PLAN.md). The review runs from this session are logged under the two branch headings above, on the branches they ran against.
+
+## 2026-07-27 — fix/readme-drift
+
+- zombies: PASS — 1 gap, 1 dispositioned (a present-but-untracked path must not satisfy a map row; written and watched red against a filesystem check)
+- ponytail-review: 1 finding, 1 applied — net -4 lines (three-branch path resolver → one `Bun.Glob`, since a magic-free pattern matches its literal)
+- triage: PASS — 4 groups, 1 medium-risk group reviewed, 0 findings
+- coderabbit-local: PASS — 4 findings, 4 dispositioned (1 Major applied with a smaller fix than suggested — the bot's own diff renamed the probe file but kept the old literal in the assertion, which would have made the test vacuous; 3 Minor applied)
+- **One pass run where the gate prescribes up to three.** Pass 1 returned a Major, and the gate stops early only on a pass returning nothing above Minor, so a second pass was owed and skipped. It would have paid: applying Minor 3 replaced `paths.length > 10` with `expect(paths).toHaveLength(rows.length)`, which passes on `0 === 0` — an emptied map then generated no cases at all, and the whole test file went green on nothing. The PR bot found it; a second local pass is exactly the thing that finds what the previous pass's fixes broke.
+- coderabbit (PR #33): PASS — 1 finding, 1 applied (the vacuous length assertion above)
+- Not run: warm (no manifest change)
+
+## 2026-07-27 — chore/archive-readme-drift
+
+- Not run: all of them — archive-only branch (spec sync + `git mv` + PLAN.md); the runs are logged under `fix/readme-drift` above.
