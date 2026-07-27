@@ -25,11 +25,9 @@ const git = (...args: string[]) =>
 /** Tracked, not merely present — a clone has only what git carries. */
 const tracked = git("ls-files").stdout.toString().split("\n").filter(Boolean);
 
+/** A pattern without magic characters matches only its literal path. */
 const resolves = (path: string) => {
-	if (tracked.includes(path)) return true;
-	const dir = path.endsWith("/") ? path : `${path}/`;
-	if (tracked.some((file) => file.startsWith(dir))) return true;
-	const glob = new Bun.Glob(path);
+	const glob = new Bun.Glob(path.endsWith("/") ? `${path}**` : path);
 	return tracked.some((file) => glob.match(file));
 };
 
