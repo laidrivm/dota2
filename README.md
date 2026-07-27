@@ -18,7 +18,7 @@
 | `openspec/config.yaml` → `rules:` | artifact shape requirements (referencing CLAUDE.md) | on artifact generation |
 | `.claude/settings.json` | the agent's permission policy — what is denied, what prompts | before granting a tool call |
 | `.coderabbit.yaml` | how CodeRabbit reviews this repo | when the bot reviews the wrong things |
-| `.claude/skills/` — symlinks into the [skills repo](https://github.com/laidrivm/skills) | how reviews are run (triage/zombies/warm) | on skill invocation |
+| `.claude/skills/` — symlinks into the [skills repo](https://github.com/laidrivm/skills) | how reviews are run (triage/zombies/warm/coderabbit) | on skill invocation |
 
 One fact lives in exactly one file; everything else links to it.
 

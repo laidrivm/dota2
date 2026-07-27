@@ -61,6 +61,6 @@ Last of the four proposed changes: all of them write to the `CLAUDE.md`
 - [x] 5.1 `/zombies` with no arguments over the final diff, then fix what it
       finds — this change ships a test, so the diff-mode pass applies
 - [x] 5.2 `/ponytail-review`, applying the cuts that survive
-- [x] 5.3 `/triage` last, over the final diff
-- [ ] 5.4 `/coderabbit-local` if `coderabbit-local-gate` has landed by then
+- [x] 5.3 `/triage` over the final diff, last of the local passes
+- [x] 5.4 `/coderabbit-local` if `coderabbit-local-gate` has landed by then
 - [ ] 5.5 Open the PR from `fix/readme-drift`
