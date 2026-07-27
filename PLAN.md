@@ -139,8 +139,11 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
       `.claude/settings.json` and `.coderabbit.yaml` to the ownership map,
       and pins the map's paths with a test. Applied on `fix/readme-drift`
       (commit `e330c50`): sections 1–4 done, `readme-map.test.ts` guards 14
-      rows and skips the gitignored one, 363 unit tests. Remaining: the
-      section 5 review gates and the PR.
+      rows and skips the gitignored one. All four section 5 gates closed —
+      `/zombies` found one gap (an untracked-but-present path must not
+      satisfy a row) and it is now a test, `/ponytail-review` collapsed the
+      three-branch resolver into one glob, `/coderabbit-local` returned four
+      findings, all applied. 364 unit tests. Remaining: the PR.
 - [x] **3a-check. Confirm the widened permission gate actually prompts** —
       done. In a session started after PR #30 the agent ran `bun update
       --help` and the user was prompted for permission, so the 14 `ask`
