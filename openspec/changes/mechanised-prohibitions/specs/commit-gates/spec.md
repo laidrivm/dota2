@@ -1,0 +1,76 @@
+# commit-gates delta specification
+
+## ADDED Requirements
+
+### Requirement: A secret scan runs in CI and, when available, before a commit
+
+CI SHALL run `gitleaks` over the branch on every pull request, from a
+container image pinned by digest, matching how `actionlint` is already
+pinned. The pre-commit hook SHALL run the locally installed `gitleaks` when
+one is on `PATH` and SHALL skip silently when none is, so a fresh clone works
+without installing it. A finding in CI SHALL fail the check.
+
+#### Scenario: A token reaches a pull request
+
+- **WHEN** a branch carries a file containing a recognisable API token
+- **THEN** the CI check fails and names the file and line
+
+#### Scenario: A developer without the binary
+
+- **WHEN** `gitleaks` is not on `PATH` and a commit is made
+- **THEN** the pre-commit hook completes without error and without scanning
+
+#### Scenario: The image is not pinned
+
+- **WHEN** the workflow references the image by tag alone
+- **THEN** the change is rejected at review — a tag is mutable, and this
+  repository pins container actions by digest
+
+### Requirement: Linter and type-checker suppressions fail CI
+
+CI SHALL fail when a tracked **source** file contains `biome-ignore`,
+`@ts-expect-error` or `@ts-ignore`. The scanned set SHALL be the file
+extensions a linter or type-checker acts on — `.ts`, `.tsx`, `.json` — and
+never prose: documentation and OpenSpec artefacts discuss suppressions by
+name, this specification among them, and a check that fails on its own
+proposal is a check nobody keeps. An approved suppression SHALL be admitted
+only by naming its exact path, and how many occurrences are approved there, in
+the check's own allowlist — so the approval arrives as a reviewable line in
+the diff rather than as a silent comment in a source file, and a second
+suppression cannot ride in on the first one's approval. The check SHALL read tracked files only, so an ignored or
+untracked file cannot fail a clone that does not have it.
+
+#### Scenario: A suppression is added
+
+- **WHEN** a commit adds `// biome-ignore lint/suspicious/noExplicitAny: …`
+  to `src/model.ts`
+- **THEN** the CI check fails and names the file and line
+
+#### Scenario: An approved suppression
+
+- **WHEN** the same commit also adds `src/model.ts` with a count of one to the
+  check's allowlist
+- **THEN** the CI check passes, and the approval is visible in the diff
+
+#### Scenario: The repository as it stands
+
+- **WHEN** the check runs over the current tree
+- **THEN** it passes with an empty allowlist, because no tracked source
+  carries a suppression today
+
+#### Scenario: A document that discusses suppressions
+
+- **WHEN** a markdown file names `biome-ignore` while explaining this rule
+- **THEN** the check passes, because prose is outside the scanned extensions
+
+#### Scenario: An allowlisted file gains a second suppression
+
+- **WHEN** a file already on the allowlist gains an unrelated second
+  suppression
+- **THEN** the check fails — the allowlist admits the approved occurrence, and
+  the count is part of what it pins
+
+#### Scenario: A suppression inside a dependency
+
+- **WHEN** `node_modules` or `dist` contains a suppression
+- **THEN** the check passes, because it reads tracked files only
