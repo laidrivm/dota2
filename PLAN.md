@@ -177,6 +177,12 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
       PRs: plan and trigger → the rule and the bot instruction. Runs after both
       5 and 6 — 5 measures every later change, and 6 deletes the Gates section
       and splits the rules list this one writes into.
+- [ ] **`review-approval-direction`** — proposed
+      (`openspec/changes/review-approval-direction`), not yet applied. Moves
+      the review-run approval from the fix to the dismissal: any severity is
+      fixed without asking, a Major or Critical dismissal is the user's. One
+      task group, one PR. Unnumbered and unsequenced on purpose — it shares no
+      file with the numbered queue and can land at any point in it.
 - [ ] **Task 7** — Docker + VPS deploy (open decisions: registry
       GHCR/Docker Hub, same VPS or a new one)
 - [ ] **Phase 3** — OpenSpec: STRATZ → Postgres → snapshot bundle pipeline
@@ -208,6 +214,21 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
   failure is cleared by moving text to somewhere uncounted. No third file
   either — the archive is the outlet, and archived changes are never edited to
   receive an evicted entry.
+
+- `review-approval-direction`: the override of the skills' "No fixes before
+  approval" loses its severity scope rather than gaining a second rule beside
+  it — the reason the override exists is that the branch is unpushed and a
+  wrong fix costs a `git checkout`, and that reason never consults the severity
+  label. The approval moves to the dismissal, where the asymmetry is real: a
+  wrongly applied fix is reverted in one command, a wrongly dismissed Major
+  merges. Minor and Trivial keep self-service skipping, because a gate on every
+  dismissed Trivial trains everyone to approve without reading — the failure
+  `coderabbit-config` already named for a permanently amber check. The gate
+  line is where this is observable: `OPEN` now means a dismissal awaits the
+  user, never a fix, so a run that fixes everything closes at `PASS` whatever
+  the severities were. The skills are not edited from here; the wording is
+  drafted for the user to apply in their own repository, and the project's spec
+  already outranks them either way.
 
 - `mechanised-prohibitions`: the split between `deny` and a hook follows what
   each can express, not taste. `deny` matches a command prefix, which fits
