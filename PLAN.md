@@ -185,6 +185,13 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
       but **not** unsequenced: it corrects wording in `PLAN.md` that 7 then
       collapses, so it applies before 7. Both now sit on one branch, so that
       ordering is task order inside one apply rather than PR order.
+- [ ] **8. `skill-provenance`** — proposed
+      (`openspec/changes/skill-provenance`), not yet applied. Records which
+      shared skills the gates depend on and the commit each was verified
+      against, marks the five nobody depends on archived, pins the table with a
+      test, and hands the `skills-lock.json` patch to the user. One task group,
+      one PR. No ordering constraint — it touches `docs/review-toolkit.md` and
+      a new test file, which nothing else in the queue edits.
 - [ ] **Task 7** — Docker + VPS deploy (open decisions: registry
       GHCR/Docker Hub, same VPS or a new one)
 - [ ] **Phase 3** — OpenSpec: STRATZ → Postgres → snapshot bundle pipeline
@@ -192,6 +199,33 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
 - [ ] **Task 5** — error tracking (precondition: product is deployed)
 
 ## Accepted decisions
+
+- `skill-provenance`: three premises of the source analysis did not survive
+  checking, and the survivors reshaped the change. `skills-lock.json` lives in
+  the shared repository and carries **one** entry, `playwright-cli` — the only
+  skill vendored from outside; the other thirteen are authored there and have
+  no upstream to fall behind, so `ref`/`vendoredAt` is a one-row hand-off, not
+  a fleet problem. The skills' README and the base-branch conventions were
+  already fixed upstream: all seven diff skills now use `git rev-parse
+  --abbrev-ref origin/HEAD` with a `main` fallback, where the analysis found
+  three conventions. That staleness is the argument for the change rather than
+  against it — nothing here recorded which upstream state the observation was
+  made against. What remains, and belongs to this repository, is the symlink:
+  `.claude/skills/<name>` points at a working tree, so the gate is whatever is
+  checked out, invisibly to any diff here. The recorded value is therefore
+  **verified against**, not vendored at — `computedHash` already answers "was
+  my copy edited?", and "when did I copy it?" is undefined for thirteen of the
+  fourteen, while "does the contract in `docs/review-toolkit.md` still describe
+  what will run?" is defined for all of them. The table lives in
+  `docs/review-toolkit.md` beside the contracts it dates, in the shape
+  `readme-map.test.ts` already parses, rather than in a new root manifest that
+  would be a second place naming the same skills. Archived entries carry no
+  commit on purpose: a verified-at on something nothing depends on claims a
+  check whose absence would never be noticed. Of fourteen skills, six are
+  referenced anywhere in tracked files, five more are symlinked and named
+  nowhere, and three are not symlinked at all. The test never resolves the
+  symlinks — they point outside the repository and are absent from a clone,
+  the same reason `agent-permissions` gives for not pinning skill frontmatter.
 
 - `always-on-context-budget`: the premise that the standing constraints need
   moving into the code is false, and checking the tree is what showed it —
