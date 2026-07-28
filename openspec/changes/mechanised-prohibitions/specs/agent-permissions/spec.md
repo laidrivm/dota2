@@ -7,8 +7,12 @@
 `permissions.deny` in `.claude/settings.json` SHALL carry entries for the
 GitHub CLI commands that publish text on the user's behalf: `gh pr comment`,
 `gh issue comment` and `gh pr review`, each with a trailing-space wildcard.
-`gh pr create` SHALL NOT be denied, because opening the pull request is the
-last step of the feature workflow and is taken after the user says go.
+`gh pr create` SHALL NOT be denied: opening the pull request is the last step
+of the feature workflow, offered by the agent and taken only after the user
+says go. The prose rule *Never post to a PR, issue, or any external service on
+the user's behalf* SHALL be narrowed to name what it forbids — replying,
+commenting and reviewing — so that it no longer reads as covering the PR the
+user asked for.
 
 #### Scenario: The agent tries to reply to a review
 
@@ -41,8 +45,14 @@ SHALL be enforced by a single `PreToolUse` hook registered in the tracked
 it does not run on every Bash call. The hook SHALL read the invoked command
 from the event JSON on stdin rather than pattern-matching the raw payload, so
 a `--force` appearing in a command's description cannot trigger it. It SHALL
-block by exiting non-zero with the reason on stderr, and SHALL depend on
-nothing beyond git and bun, both of which the repository already requires.
+block by exiting **2** with the reason on stderr — the only code Claude Code
+treats as blocking — and SHALL reserve a different non-zero code for the cases
+it cannot decide, which are non-blocking. It SHALL depend on nothing beyond git
+and bun, both of which the repository already requires.
+
+The `if` field matches each subcommand of a compound command independently, so
+one entry covers a git command in any position, including one reached through
+`&&` after a non-git command.
 
 The hook SHALL block a commit while `HEAD` is on `main`, and SHALL block any
 force-push, whether written as `--force`, `--force-with-lease` or `-f`, and
@@ -65,6 +75,13 @@ agent loses force-push entirely, and the user keeps it.
 - **WHEN** `HEAD` is on `main` and the agent attempts `git add -A && git
   commit -m "fix"`
 - **THEN** the hook blocks the call
+
+#### Scenario: A commit reached through a command that does not start with git
+
+- **WHEN** `HEAD` is on `main` and the agent attempts `bun test && git commit
+  -m "fix"`
+- **THEN** the hook blocks the call, because the `if` field matches each
+  subcommand and not the command string's prefix
 
 #### Scenario: A force-push with the flag last
 
@@ -154,4 +171,5 @@ repository would change its verdict with the branch.
 
 - **WHEN** the script is run against a fabricated repository whose `HEAD` is
   on `main`, with a commit command on stdin
-- **THEN** it exits non-zero, and `bun test` fails if it does not
+- **THEN** it exits `2`, and `bun test` fails on any other code — including the
+  non-blocking one it uses for an undecidable event

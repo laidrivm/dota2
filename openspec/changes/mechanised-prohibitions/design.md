@@ -15,7 +15,16 @@ Verified while drafting this design:
   and each command may carry an `if` field in permission-rule syntax that
   filters on tool name *and* arguments — `"Bash(git *)"`. The command receives
   the event JSON on stdin with `tool_input.command`, and **exit 2 blocks the
-  call, feeding stderr back to the agent as the reason**.
+  call, feeding stderr back to the agent as the reason**. Any other non-zero
+  code is a non-blocking error: the tool proceeds and the transcript shows the
+  first line of stderr, so "could not determine" must not reuse the blocking
+  code.
+- The `if` field uses permission-rule syntax and **matches each subcommand of a
+  compound command independently**, not the command string's prefix. The docs'
+  own table gives `Bash(git *)` against `npm test && git push` as a match,
+  strips leading `VAR=value` assignments before matching, and checks commands
+  inside `$()` and backticks. So one entry covers a git command in any
+  position.
 - `zricethezav/gitleaks:v8.30.1` resolves to
   `sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f`.
   The digest is re-fetched at apply rather than trusted from here.
@@ -121,11 +130,14 @@ configurations would not.
 
 ### Three sublists, and where the boundary falls
 
-Of the seventeen rules today, six describe this application's code — the
-reducer, the key handler, the focus restore, the document listener, the input
-guard, the single-caller helper — and are the evictable set. One is fully
-mechanised by this change and leaves. The remaining ten are process and
-safety, and none of them age.
+Seventeen rules stand in the list today. Six describe this application's code —
+the reducer, the key handler, the focus restore, the document listener, the
+input guard, the single-caller helper — and are the evictable set. The other
+eleven are process and safety, and none of them age. Exactly one of those
+eleven is fully mechanised here — *Fix code a linter or type-checker flags;
+never suppress a finding …*, which the suppression check takes over — so the
+split leaves **six code rules and ten process/safety rules**, sixteen in all,
+and no code rule is evicted by this change.
 
 The split is worth its own diff because it changes what the maintenance
 trigger means: at seventeen the list is near its threshold, and every
@@ -145,10 +157,10 @@ The rule keeps its subject and loses its enumeration of sites.
   process per git call → the script does no I/O beyond one `git symbolic-ref`
   and exits; if it ever shows up, the `if` narrows to `git commit*` and
   `git push*` as two entries.
-- **`if` may not match subcommands the way `deny` does.** The permission
-  matcher splits compound commands; whether the hook's `if` field does the
-  same is documented only by analogy → apply proves it with `git add -A &&
-  git commit` on `main` before the prose is deleted.
+- **The `if` field's matching is documented, not observed here.** It splits
+  compound commands by the docs' own table → apply confirms it live with
+  `bun test && git commit` on `main`, since a wrong reading would leave the
+  hook unregistered for exactly the compound form the prose forbids.
 - **A blocked force-push during a rebase workflow.** The agent cannot finish a
   rebase it starts → it does not start one; branch rewrites become the user's,
   which is what the original rule already implied.
@@ -180,6 +192,4 @@ for each is a revert.
 
 ## Open questions
 
-None blocking. Whether the hook's `if` field splits compound commands is
-settled inside apply, and the answer only changes how many hook entries there
-are.
+None.

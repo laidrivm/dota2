@@ -190,7 +190,12 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
   a command's *description* cannot block a push. The hook contract was checked
   against `code.claude.com/docs/en/hooks`: exit 2 blocks and stderr becomes
   the reason; any other non-zero is non-blocking, so "could not determine"
-  must not reuse it. The result is stricter than the prose it replaces —
+  must not reuse it — the spec says exit 2 outright, since "non-zero" there
+  would have permitted the one code that lets the commit through. The same
+  page settles what the design had left open: `if` uses permission-rule
+  syntax and matches each subcommand independently, stripping leading
+  `VAR=value` and looking inside `$()`, so one entry covers `bun test && git
+  commit` and there is no second entry to add. The result is stricter than the prose it replaces —
   force-push was forbidden only after a PR opened, and the agent now loses it
   entirely, because encoding "after a PR is open" means a `gh` call on every
   push. `gitleaks` comes from a digest-pinned image in CI, the way
