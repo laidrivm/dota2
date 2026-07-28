@@ -45,17 +45,21 @@ that copy removes one way for the two to diverge.
   `actionlint` already is, and in the pre-commit hook when the binary is
   present locally.
 - A CI check greps tracked sources for `biome-ignore`, `@ts-expect-error` and
-  `@ts-ignore`. The repository has none today, so the check is green on
-  arrival; an approved suppression is admitted by naming it in the check's own
-  allowlist, which is then visible in the diff.
+  `@ts-ignore`, skipping its own script and test, which must spell the markers
+  out. The repository has none today, so the check is green on arrival; an
+  approved suppression is admitted by naming its path, its marker and its count
+  in the check's own allowlist, which is then visible in the diff.
 
 **The rulebook**
 
 - The `CLAUDE.md` rules list splits into **code**, **process** and **safety**,
   so the ~20-rule trigger applies per sublist and the code sublist is the one
   that gets evicted as the code changes.
-- Every prohibition this change mechanises is deleted from its prose home —
-  in the Git & PRs section, not only from the rules list.
+- Every prohibition this change mechanises leaves its prose home, wherever it
+  lives — the commit-on-main and force-push sentences go from Git & PRs, the
+  suppression rule goes from the rules list, and the two the mechanisms cover
+  only in part (posting on the user's behalf, secrets) are cut back to the
+  remainder rather than deleted.
 - `PLAN.md`'s "Gates (reminder)" section is deleted; `docs/review-toolkit.md`
   keeps sole ownership of the pre-PR sequence. The grep rule is narrowed
   rather than dropped, because `openspec/specs/**` and the README ownership

@@ -16,9 +16,11 @@ Verified while drafting this design:
   filters on tool name *and* arguments — `"Bash(git *)"`. The command receives
   the event JSON on stdin with `tool_input.command`, and **exit 2 blocks the
   call, feeding stderr back to the agent as the reason**. Any other non-zero
-  code is a non-blocking error: the tool proceeds and the transcript shows the
-  first line of stderr, so "could not determine" must not reuse the blocking
-  code.
+  code is a *non-blocking* error: the tool runs anyway and the transcript shows
+  the first line of stderr. So the script has exactly two exits — 0 to allow,
+  2 for everything else, including an event it cannot read. A separate
+  "could not determine" code was drafted and dropped: it lets the commit
+  through with a notice, which is the failure mode the hook exists to remove.
 - The `if` field uses permission-rule syntax and **matches each subcommand of a
   compound command independently**, not the command string's prefix. The docs'
   own table gives `Bash(git *)` against `npm test && git push` as a match,
@@ -117,7 +119,17 @@ stops a second suppression riding in on the first one's approval.
 The scanned set is `.ts`, `.tsx` and `.json` rather than every tracked file.
 Prose discusses suppressions by name — this change's own three artefacts
 contain `biome-ignore` between them — and a check that fails on the proposal
-introducing it is a check that gets disabled in its first week.
+introducing it is a check that gets disabled in its first week. The check's own
+script and test are excluded for the same reason: both are `.ts` files that
+must carry the three markers literally, so the check would fail on itself the
+moment it existed. Excluding them by path rather than by allowlist entry keeps
+the counts off the test, which would otherwise have to be re-approved every
+time a case is added.
+
+The allowlist keys on path **and marker**, not path alone. With the path alone,
+replacing an approved `@ts-ignore` with a `biome-ignore` at that path passes on
+the earlier approval, which is the same hole as a second suppression riding in
+on the first — one entry, one marker, one count.
 
 Rejected: an in-comment marker such as `biome-ignore … approved-by:`. It keeps
 the approval next to the code but makes the check parse comment text, and it

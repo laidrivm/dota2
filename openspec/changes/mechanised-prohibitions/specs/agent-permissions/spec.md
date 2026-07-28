@@ -46,13 +46,19 @@ it does not run on every Bash call. The hook SHALL read the invoked command
 from the event JSON on stdin rather than pattern-matching the raw payload, so
 a `--force` appearing in a command's description cannot trigger it. It SHALL
 block by exiting **2** with the reason on stderr — the only code Claude Code
-treats as blocking — and SHALL reserve a different non-zero code for the cases
-it cannot decide, which are non-blocking. It SHALL depend on nothing beyond git
-and bun, both of which the repository already requires.
+treats as blocking — and SHALL exit 2 for an event it cannot decide as well: a
+malformed payload, an absent command field or a git call that fails. Every
+other non-zero code lets the command run, so the undecidable case fails closed
+or it does not fail at all. It SHALL depend on nothing beyond git and bun, both
+of which the repository already requires.
 
 The `if` field matches each subcommand of a compound command independently, so
 one entry covers a git command in any position, including one reached through
-`&&` after a non-git command.
+`&&` after a non-git command. It matches the command word literally, so
+`/usr/bin/git commit` and `command git commit` do not reach the hook at all.
+That ceiling is accepted rather than closed: the hook guards an agent that
+writes `git` because that is what the documentation and this repository's own
+prose say, not an adversary looking for a spelling the matcher misses.
 
 The hook SHALL block a commit while `HEAD` is on `main`, and SHALL block any
 force-push, whether written as `--force`, `--force-with-lease` or `-f`, and
@@ -171,5 +177,18 @@ repository would change its verdict with the branch.
 
 - **WHEN** the script is run against a fabricated repository whose `HEAD` is
   on `main`, with a commit command on stdin
-- **THEN** it exits `2`, and `bun test` fails on any other code — including the
-  non-blocking one it uses for an undecidable event
+- **THEN** it exits `2`, and `bun test` fails on any other code
+
+#### Scenario: An event the hook cannot read
+
+- **WHEN** the script is given a payload with no `tool_input.command`
+- **THEN** it exits `2` — a non-blocking code here would let an unread git
+  command run, which is the case the hook is for
+
+#### Scenario: The hook stops catching a force-push
+
+- **WHEN** the script is run on a feature branch with `git push origin feat/x
+  --force` on stdin
+- **THEN** it exits `2`, and `bun test` fails if it does not — the flag scan is
+  a separate path from the branch check and the reordered flag is the form no
+  permission entry could have caught

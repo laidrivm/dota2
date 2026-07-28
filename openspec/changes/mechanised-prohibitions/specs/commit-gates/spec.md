@@ -33,12 +33,17 @@ CI SHALL fail when a tracked **source** file contains `biome-ignore`,
 extensions a linter or type-checker acts on — `.ts`, `.tsx`, `.json` — and
 never prose: documentation and OpenSpec artefacts discuss suppressions by
 name, this specification among them, and a check that fails on its own
-proposal is a check nobody keeps. An approved suppression SHALL be admitted
-only by naming its exact path, and how many occurrences are approved there, in
-the check's own allowlist — so the approval arrives as a reviewable line in
-the diff rather than as a silent comment in a source file, and a second
-suppression cannot ride in on the first one's approval. The check SHALL read tracked files only, so an ignored or
-untracked file cannot fail a clone that does not have it.
+proposal is a check nobody keeps. The check's own script and test SHALL be
+outside the scanned set too, for the same reason and no other: they must carry
+the three markers literally to do their job. An approved suppression SHALL be
+admitted only by naming its exact path, **which marker**, and how many
+occurrences of it are approved there, in the check's own allowlist — so the
+approval arrives as a reviewable line in the diff rather than as a silent
+comment in a source file, a second suppression cannot ride in on the first
+one's approval, and swapping an approved `@ts-ignore` for a `biome-ignore` at
+the same path is a new approval rather than a free one. The check SHALL read
+tracked files only, so an ignored or untracked file cannot fail a clone that
+does not have it.
 
 #### Scenario: A suppression is added
 
@@ -48,9 +53,16 @@ untracked file cannot fail a clone that does not have it.
 
 #### Scenario: An approved suppression
 
-- **WHEN** the same commit also adds `src/model.ts` with a count of one to the
-  check's allowlist
+- **WHEN** the same commit also adds `src/model.ts`, `biome-ignore`, count one
+  to the check's allowlist
 - **THEN** the CI check passes, and the approval is visible in the diff
+
+#### Scenario: An approved suppression swapped for another kind
+
+- **WHEN** that `biome-ignore` is later replaced by an `@ts-ignore` at the same
+  path, leaving the allowlist untouched
+- **THEN** the CI check fails, because the entry approves one marker and not
+  the line it sits on
 
 #### Scenario: The repository as it stands
 
