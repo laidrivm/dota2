@@ -24,8 +24,10 @@ Bracketed numbers cite the `/zombies` ideas raised at propose.
       depend on, rather than from a second hand-kept list (7), and never
       resolving `.claude/skills/` (11) — *The table is pinned by a test, within
       what a clone can see*
-- [ ] 1.5 Cover in that test: an emptied or renamed table yields no rows and
-      fails rather than passing on zero cases (1, 2); one row parses to a name
+- [ ] 1.5 Cover in that test: an emptied or renamed table, and a renamed
+      source heading that empties the active set, both fail on the empty set
+      itself rather than passing every per-skill assertion vacuously (1, 2);
+      one row parses to a name
       and a commit (3); 7- and 40-character object names are accepted (4, 5)
       and a 6-character cell is not (6); a sequenced skill with no row fails
       (8); an archived row carrying a commit fails (9); a prose cell such as
