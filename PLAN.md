@@ -193,6 +193,28 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
       one PR. Unnumbered like `review-approval-direction`, and genuinely
       unsequenced this time — it touches `docs/review-toolkit.md` and a new
       test file, which nothing else in the queue edits.
+- [ ] **`review-bot-instructions`** — proposed
+      (`openspec/changes/review-bot-instructions`), not yet applied. Points the
+      bot at the two reviews no local skill performs — the delta spec, and the
+      diff against its own proposal — wires it into the ponytail ladder and the
+      fix-and-capture loop, and enables MCP so the API-existence rule becomes
+      checkable. One task group, one PR. Applies after
+      `always-on-context-budget`, which creates the test and the
+      `**/*.{ts,tsx}` clause this one extends.
+- [ ] **`spec-test-traceability`** — not yet proposed. Extends
+      `openspec/config.yaml`'s "every criterion is cited by a task" one step:
+      cited by a **test**, via a criterion identifier in the test name and a
+      script that greps both sides. Second of the three the source analysis's
+      items 25–31 decompose into.
+- [ ] **`mutation-floor`** — not yet proposed. Mutation testing over
+      `src/model.ts` and `src/types.ts` only, its own CI job, floor set from
+      the first measurement and forbidden to fall. Tool through `/warm` first;
+      a hand-rolled AST mutator is the fallback. Third of the three, last
+      because it is the heaviest.
+- [ ] **`reviewable-diff-gates` — reverse two non-goals** (item 29). The
+      file-size cap (~300 `.ts`, ~200 `.css`) and the rule of two are recorded
+      there as deliberate non-goals; the import arrow is already in its scope.
+      An `/opsx:update` on that change, not a new proposal.
 - [ ] **Task 7** — Docker + VPS deploy (open decisions: registry
       GHCR/Docker Hub, same VPS or a new one)
 - [ ] **Phase 3** — OpenSpec: STRATZ → Postgres → snapshot bundle pipeline
@@ -200,6 +222,41 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
 - [ ] **Task 5** — error tracking (precondition: product is deployed)
 
 ## Accepted decisions
+
+- `review-bot-instructions`: most of the source analysis's item 27 was already
+  shipped by `coderabbit-config` on 2026-07-25 — `path_filters`, the three
+  disabled linters and `learnings.scope: "local"` are in the file with their
+  reasons, `!dist/**` was rejected there as a no-op over a gitignored
+  directory, and `docs/**/*.md` because `filePatterns` has no negation syntax
+  and would pull in `docs/context/`. So the claim that the bot duplicates Biome
+  had been false for four days. What was live: the two reviews no local skill
+  performs. The division is structural rather than a matter of skill — every
+  local skill takes a diff and only a diff, while reviewing a delta spec means
+  reading a document against `openspec/config.yaml`, and catching scope creep
+  means reading the diff against a proposal it never mentions. Both are reviews
+  of a diff *against something else*, which is the shape a PR bot has.
+  Teaching `/triage` to do it was rejected: it returns no findings by design,
+  so it has nowhere to put one. On MCP, the schema settles two things —
+  `knowledge_base.mcp.usage` defaults to `auto`, which **disables** MCP for a
+  public repository, so an instruction depending on version-accurate docs would
+  have shipped against a dead source; and the config can only *deny* servers
+  (`disabled_servers`), never allow them, so "only Context7 is connected" is
+  dashboard state and the user's, not this file's. Context7 covers all three
+  libraries — `/oven-sh/bun` 12932 snippets, `/microsoft/playwright` 6863,
+  `/preactjs/preact` 107 plus 813 on its docs site — and Preact's thinness is
+  accepted, because where the index says nothing the rule falls back to the
+  prose it is today, which is a floor and not a regression. The library
+  documentation is community-contributed with no accuracy or safety warranty,
+  which makes it in principle an injection surface into the reviewer's context;
+  taken anyway because the alternative is not safety but the status quo, where
+  the same claim comes from training data with no source at all, and because
+  the bot comments rather than commits. Checkpoint: after three or four PRs,
+  ask whether any finding of the API class appeared and set `usage` back to
+  `"disabled"` if none did. Items 25–31 split into three sequenced proposals —
+  this one, `spec-test-traceability`, `mutation-floor` — plus item 29, which is
+  an update to `reviewable-diff-gates` rather than new work, since that change
+  already carries the import arrow and records the cap and the rule of two as
+  non-goals.
 
 - `skill-provenance`: three premises of the source analysis did not survive
   checking, and the survivors reshaped the change. `skills-lock.json` lives in
