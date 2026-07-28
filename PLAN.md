@@ -156,6 +156,11 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
       loaded at startup, which is why every attempt from the authoring session
       passed silently. Confirming it takes the user: an approved prompt and an
       unprompted call are indistinguishable from inside the session.
+- [ ] **5. `reviewable-diff-gates`** — proposed (`openspec/changes/
+      reviewable-diff-gates`), not yet applied. Makes the splitting rule
+      measurable and enforces one import arrow. Four task groups, four PRs in
+      order: slicing rules → the budget script → wiring it → the Biome arrow.
+      Runs before Task 7, since every later change is measured by it.
 - [ ] **Task 7** — Docker + VPS deploy (open decisions: registry
       GHCR/Docker Hub, same VPS or a new one)
 - [ ] **Phase 3** — OpenSpec: STRATZ → Postgres → snapshot bundle pipeline
@@ -163,6 +168,30 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
 - [ ] **Task 5** — error tracking (precondition: product is deployed)
 
 ## Accepted decisions
+
+- `reviewable-diff-gates`: the cap counts tests too. Exempting them was
+  considered and rejected — that heuristic belongs where a human writes tests
+  reluctantly, whereas here they are agent-written, nearly free, and the place
+  slop hides, so exempting them would remove attention from the part that
+  needs it most. `openspec/**` is not excluded either, although it dominates
+  most diffs: a 1688-line proposal PR is exactly what the gate should catch,
+  and sequenced proposals are the remedy `config.yaml` already prescribes.
+  Only `bun.lock`, `*.woff2`, `src/fixtures/snapshot.json` and the net-zero
+  half of a checkbox flip come off. Thresholds 500/800 were checked against
+  the 26 merged PRs (median 194, eight over 500, seven over 800), so they bite
+  the top third. The cap is a sensor, not the mechanism — a tight cap on a
+  horizontal task yields four unreviewable stumps, so the causal rule is at
+  propose: a step closes one to three acceptance criteria and leaves the app
+  working, with a temporary stub at the seam (2b's native `<select>`, promoted
+  from a one-off decision to a rule). One `oversize:` marker, not a second
+  `mechanical:` one — mechanical is a reason, and naming the reason is already
+  the requirement. Enforcement of the import boundary is Biome, verified on
+  2.5.4 before the design was written: `suspicious.noImportCycles` reports a
+  two-file cycle, and a `style.noRestrictedImports` override on `src/model.ts`
+  and `src/types.ts` with `patterns[].group` catches both value and type-only
+  imports from `./app/**`. One arrow, not a layer lattice — the current graph
+  is clean by accident, and a lattice would have to permit
+  `picker.tsx → board/hero-tile.tsx` by name.
 
 - `vendored-skill-permissions`: the enforcement is a `permissions.deny` list,
   not a `PreToolUse` hook — deny is evaluated before ask and allow, matches
