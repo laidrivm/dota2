@@ -169,6 +169,13 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
       replaced. Four task groups, four PRs: permissions → secrets →
       suppressions → rulebook, the last one last because it removes the prose
       the first three take over.
+- [ ] **7. `always-on-context-budget`** — proposed
+      (`openspec/changes/always-on-context-budget`), not yet applied. Measures
+      the budget that exists — `CLAUDE.md` plus this file, 738 lines — evicts
+      this file's decisions section by a three-way test, gives it a growth
+      protocol, and states the fence practice as a rule. Two task groups, two
+      PRs: plan and trigger → the rule and the bot instruction. Runs after 6,
+      which deletes the Gates section and splits the rules list.
 - [ ] **Task 7** — Docker + VPS deploy (open decisions: registry
       GHCR/Docker Hub, same VPS or a new one)
 - [ ] **Phase 3** — OpenSpec: STRATZ → Postgres → snapshot bundle pipeline
@@ -176,6 +183,30 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
 - [ ] **Task 5** — error tracking (precondition: product is deployed)
 
 ## Accepted decisions
+
+- `always-on-context-budget`: the premise that the standing constraints need
+  moving into the code is false, and checking the tree is what showed it —
+  `computeModel` (`src/model.ts:152`), the 1 dp antisymmetry assertion
+  (`src/model.test.ts:344`), the inline `@import` (`index.html:7`) and the
+  snapshot URL (`src/app/snapshot.ts:1`) all already carry their comment, so
+  those four entries are deletions from this file rather than moves into the
+  code. The direction of the duplication was the opposite of the one assumed.
+  What survives of that idea is the rule, which the four existing comments
+  justify: the practice exists here and nothing says to keep it, while
+  `/ponytail-review` runs over every diff looking for constructions that look
+  gratuitous. The eviction is per entry and not per section, because a
+  five-item sample of the archive suggested it held everything and the sixth,
+  `aria-disabled` on taken tiles, is in no archived change — a wholesale
+  deletion would have lost it. The three dispositions are ordered rather than
+  parallel, settled by `/zombies` at propose: an entry can be both a fence and
+  archived, and deleting it on the archive's strength leaves the governed line
+  unmarked, since nobody reads the archive before editing a line. `docs/**` is
+  excluded from the budget because that exclusion is the growth protocol's
+  lever — a budget counting `docs/` would price extraction at zero. No CI check
+  on the line counts: the trigger asks what belongs in the file, and a build
+  failure is cleared by moving text to somewhere uncounted. No third file
+  either — the archive is the outlet, and archived changes are never edited to
+  receive an evicted entry.
 
 - `mechanised-prohibitions`: the split between `deny` and a hook follows what
   each can express, not taste. `deny` matches a command prefix, which fits
