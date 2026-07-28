@@ -1,8 +1,13 @@
 # local-review-loop delta specification
 
+## RENAMED Requirements
+
+- FROM: `### Requirement: Major and above are fixed without asking`
+- TO: `### Requirement: A verified finding is fixed without asking`
+
 ## MODIFIED Requirements
 
-### Requirement: Major and above are fixed without asking
+### Requirement: A verified finding is fixed without asking
 
 A finding that survives verification against the current code SHALL be applied
 without pausing for approval, **whatever its severity**, overriding the skills'
@@ -62,6 +67,13 @@ its own reasoning, and the report carries the reason.
 - **WHEN** a 🟡 Minor is skipped because it is taste, or a settled convention
   the bot does not know
 - **THEN** the reason goes in the report and the user is not asked
+
+#### Scenario: The user accepts a dismissal
+
+- **WHEN** the user agrees with the agent's reasoning on a proposed dismissal
+  and no other finding is pending
+- **THEN** the dismissal is recorded as settled with its reason, and the gate
+  line moves from `OPEN` to `PASS`
 
 #### Scenario: The user disagrees with a dismissal
 

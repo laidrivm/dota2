@@ -57,9 +57,10 @@ None.
 
 ### Modified Capabilities
 
-- `local-review-loop`: the auto-apply requirement loses its severity scope, and
-  the capability gains the constraint the old wording left open — that a Major
-  dismissal is the user's call.
+- `local-review-loop`: the auto-apply requirement loses its severity scope and
+  is renamed accordingly, and the capability gains the constraint the old
+  wording left open — that dismissing a 🟠 Major **or** 🔴 Critical is the
+  user's call.
 
 ## Impact
 

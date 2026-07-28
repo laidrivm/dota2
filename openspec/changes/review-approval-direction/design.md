@@ -47,9 +47,10 @@ severity scope goes, and one sentence covers the ladder.
 
 `PASS` and `OPEN` already exist in both skills. What changes is what puts a run
 in `OPEN`: today it is fixes awaiting approval, and after this it is dismissals
-awaiting approval. A run that fixes everything it found now closes at `PASS`
-even when the fixes were Minor, and a run that dismisses one Major stays `OPEN`
-even when it fixed everything else.
+of a 🟠 Major or 🔴 Critical awaiting approval. A run that fixes everything it
+found now closes at `PASS` even when the fixes were Minor, and a run that
+dismisses one finding at either of those two severities stays `OPEN` even when
+it fixed everything else.
 
 This is deliberately the part a hook or a PR template can read. The reason the
 gate line exists is that the report alone is never the deliverable, and the
@@ -66,8 +67,9 @@ top two rungs are where a dismissal is worth a pause.
 
 `CLAUDE.md` routes a fix about how reviews run to the shared skills repository,
 with the wording drafted here rather than applied there. The drafted change is
-one line in each skill's severity section — that a Major dismissal is proposed
-rather than decided, and that the gate stays `OPEN` on it. The project's own
+one line in each skill's severity section — that a dismissal at 🟠 Major or
+🔴 Critical is proposed rather than decided, and that the gate stays `OPEN` on
+it. The project's own
 override already outranks the skills' default, so this change is complete
 without it; the skills-repo edit removes the contradiction rather than
 enabling the behaviour.
