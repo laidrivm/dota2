@@ -6,9 +6,13 @@ group 2 writes. Requirement citations are the `### Requirement:` headings in
 `specs/context-budget/spec.md` and `specs/review-bot-config/spec.md`.
 
 Applied after `reviewable-diff-gates` and `mechanised-prohibitions` are
-merged. Before starting, confirm the two things this change takes as done:
-`PLAN.md` has no "Gates (reminder)" section, and the `CLAUDE.md` rules list is
-split into code / process / safety sublists.
+merged, and after `review-approval-direction`, which shares two of this
+change's `PLAN.md` sites — the completed queue entry at `:94` and the decision
+at `:355` — and corrects their wording before group 1 collapses and evicts
+them. Before starting, confirm the three things this change takes as done:
+`PLAN.md` has no "Gates (reminder)" section, the `CLAUDE.md` rules list is
+split into code / process / safety sublists, and the review-approval wording
+is already corrected.
 
 ## 1. PLAN.md and the trigger
 

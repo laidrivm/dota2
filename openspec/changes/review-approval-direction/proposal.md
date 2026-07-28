@@ -70,6 +70,6 @@ None.
   and stops on a Major it wants to reject rather than closing it alone. Runs
   get shorter at the bottom of the ladder and longer at the top, which is the
   trade being bought.
-- **Outstanding**: the two Major dismissals already made on
-  `mechanised-prohibitions` are put to the user, since the change they belong
-  to is not yet applied.
+- **Settled before apply**: the two Major dismissals already made on
+  `mechanised-prohibitions` under the old reading were put to the user and
+  upheld, so that change needs no revision on their account.
