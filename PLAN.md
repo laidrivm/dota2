@@ -176,9 +176,14 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
   needs it most. `openspec/**` is not excluded either, although it dominates
   most diffs: a 1688-line proposal PR is exactly what the gate should catch,
   and sequenced proposals are the remedy `config.yaml` already prescribes.
-  Only `bun.lock`, `*.woff2`, `src/fixtures/snapshot.json` and the two paired
-  lines of a checkbox flip come off — paired by content, not by netting the
-  counts, so a rewritten task line still counts. Thresholds 500/800 were checked against
+  Only `bun.lock`, `*.woff2`, `src/fixtures/snapshot.json` and the two lines
+  of a checkbox flip come off, where a flip is a removal and an addition in
+  the **same file**, with identical text once the box is normalised and with
+  **opposite** boxes. Netting the counts was tried and dropped: it cancelled a
+  rewritten task line against an unrelated tick. The path and the
+  opposite-state condition close the other two ways an exclusion can fire
+  wrongly — an identically worded task moving between files, and a verbatim
+  move with the box unchanged. Thresholds 500/800 were checked against
   the 26 merged PRs (median 194, eight over 500, seven over 800), so they bite
   the top third. The cap is a sensor, not the mechanism — a tight cap on a
   horizontal task yields four unreviewable stumps, so the causal rule is at

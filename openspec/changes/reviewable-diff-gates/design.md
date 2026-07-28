@@ -112,11 +112,23 @@ patch() {
 
 Counting is then: every line that is not a task-list checkbox, plus every
 checkbox line that finds no partner on the other side of the diff. Two
-checkbox lines pair when they are identical once `[ ]` and `[x]` are
-normalised to one token — which is a tick and nothing else. Sixty newly
-authored task lines pair with nothing and count sixty; a task whose text was
-rewritten pairs with nothing either, and counts. Pairing is a `comm` between
-two sorted, normalised streams.
+checkbox lines pair only when all three conditions hold — they come from the
+same file, their text is identical once the box is normalised to one token,
+and their boxes are opposite. That is a tick, or its reverse, and nothing
+else.
+
+Each condition earns its place. The path belongs in the pairing key, or a
+ticked task in one file cancels an identically worded task deleted from
+another. The boxes must differ, or an identical task line moved between two
+files cancels itself although neither half changed state. And the text must
+match after normalisation, or the earlier netting bug returns.
+
+So: sixty newly authored task lines pair with nothing and count sixty; a task
+whose text was rewritten pairs with nothing either, and counts; a task line
+moved verbatim counts on both sides. Pairing is two `comm` passes over sorted
+streams keyed by `path + normalised text` — removed `[ ]` against added `[x]`,
+then removed `[x]` against added `[ ]` — with the path taken from the
+enclosing `+++` header.
 
 Rejected: netting the counts, `|added − removed|`. It is shorter, but it
 cancels a rewritten task line against an unrelated tick, which is precisely
