@@ -32,9 +32,11 @@ citations are the `### Requirement:` headings in
 
 - [ ] 2.1 Write `scripts/diff-budget.sh`: resolve the base, read the patch
       with the three pathspec exclusions, count non-checkbox lines plus every
-      checkbox line that does not pair with one on the other side once the
-      box is normalised, split source against test by pathspec — *The diff
-      budget is measured over a defined set of lines*
+      checkbox line that does not pair with one on the other side, where a
+      pair requires the same file, identical text once the box is normalised,
+      and opposite boxes — the path comes from the enclosing `+++` header, so
+      the pairing key is per-file — split source against test by pathspec —
+      *The diff budget is measured over a defined set of lines*
 - [ ] 2.2 Emit the single gate line `DIFF gate: <VERDICT> — <N> lines (<S>
       source / <T> test)`, PASS below 500, WARN from 500, FAIL from 800, exit
       non-zero only on FAIL — *The budget warns at 500 lines and fails at 800*
@@ -50,7 +52,10 @@ citations are the `### Requirement:` headings in
       task lines counted (10); a binary marker contributing zero (11); the
       gate line's exact shape (12); exit codes (13); the split summing to the
       total (14); an unreachable base exiting non-zero (15); a task line whose
-      text was rewritten counted, not cancelled against an unrelated tick
+      text was rewritten counted, not cancelled against an unrelated tick; an
+      identical task line deleted from one file and added ticked to another
+      counted on both sides; a task line moved with its box unchanged counted
+      on both sides
 - [ ] 2.5 Watch each threshold assertion fail before it passes, by moving the
       thresholds rather than by editing the assertion
 - [ ] 2.6 Add `"diff-budget": "bash scripts/diff-budget.sh"` to

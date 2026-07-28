@@ -72,9 +72,12 @@ delete it. Merging code that no step exercises is prohibited.
 
 The project SHALL provide a script that counts changed lines in
 `<base>...HEAD` and excludes only artefacts no reviewer reads: `bun.lock`,
-`*.woff2`, `src/fixtures/snapshot.json`, and the paired removal and addition
-of one task-list line that differ solely in the checkbox state. Newly authored
-task lines SHALL be counted. Tests SHALL be counted in the total.
+`*.woff2`, `src/fixtures/snapshot.json`, and a removal and addition of one
+task-list line **in the same file** whose text is identical once the checkbox
+is normalised and whose checkboxes are opposite. A pair drawn from two
+different files, or carrying the same checkbox state, SHALL NOT be excluded.
+Newly authored task lines SHALL be counted. Tests SHALL be counted in the
+total.
 
 #### Scenario: A lockfile-heavy branch
 
@@ -85,6 +88,20 @@ task lines SHALL be counted. Tests SHALL be counted in the total.
 
 - **WHEN** a branch's only diff is `- [ ]` lines becoming `- [x]`
 - **THEN** the script reports 0 changed lines
+
+#### Scenario: An identical task line in two files
+
+- **WHEN** `- [ ] Write the parser` is deleted from one `tasks.md` and
+  `- [x] Write the parser` is added to another
+- **THEN** the script reports 2 changed lines — the pair spans two files, so
+  neither half is excluded
+
+#### Scenario: A task line moved verbatim
+
+- **WHEN** `- [x] Write the parser` moves from one place to another with its
+  checkbox unchanged
+- **THEN** the script reports 2 changed lines — the two boxes are not
+  opposite, so nothing cancels
 
 #### Scenario: A proposal that authors new task lines
 
