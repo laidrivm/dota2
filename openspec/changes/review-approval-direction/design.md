@@ -90,9 +90,16 @@ enabling the behaviour.
 
 ## Migration plan
 
-One step, one PR on `fix/review-approval-direction`: the delta spec, the two
-`docs/review-toolkit.md` entries, and the two `PLAN.md` sites. There is no
-sequencing problem — nothing else in the queue touches these lines.
+One step: the delta spec, the two `docs/review-toolkit.md` entries, and the two
+`PLAN.md` sites.
+
+It applies **before** `always-on-context-budget`, which shares two of those
+sites: its task 1.5 collapses the completed queue entry at `PLAN.md:94` and its
+eviction walks the decision at `:355`. Correcting the wording first means the
+collapse carries corrected text; the other order corrects a line that is about
+to be rewritten. Both changes were merged onto one branch at the user's
+request, so this is the order of two task groups in one apply run, not of two
+pull requests.
 
 Rollback is a revert; the previous policy is a strictly narrower override.
 

@@ -181,8 +181,10 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
       (`openspec/changes/review-approval-direction`), not yet applied. Moves
       the review-run approval from the fix to the dismissal: any severity is
       fixed without asking, a Major or Critical dismissal is the user's. One
-      task group, one PR. Unnumbered and unsequenced on purpose — it shares no
-      file with the numbered queue and can land at any point in it.
+      task group. Unnumbered because it is not part of the numbered sequence,
+      but **not** unsequenced: it corrects wording in `PLAN.md` that 7 then
+      collapses, so it applies before 7. Both now sit on one branch, so that
+      ordering is task order inside one apply rather than PR order.
 - [ ] **Task 7** — Docker + VPS deploy (open decisions: registry
       GHCR/Docker Hub, same VPS or a new one)
 - [ ] **Phase 3** — OpenSpec: STRATZ → Postgres → snapshot bundle pipeline

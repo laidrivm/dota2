@@ -97,7 +97,9 @@ behind it.
   `.coderabbit.yaml` (one `path_instructions` entry).
 - **Code**: comments only, and only where a `PLAN.md` decision names a
   constraint that no comment currently carries.
-- **Preconditions**: applied after `reviewable-diff-gates` and
-  `mechanised-prohibitions`. The latter deletes `PLAN.md`'s "Gates (reminder)"
-  section and splits the `CLAUDE.md` rules list into three sublists, so the
-  rule added here goes into a sublist that exists by then.
+- **Preconditions**: applied after `reviewable-diff-gates`,
+  `mechanised-prohibitions` and `review-approval-direction`. The second deletes
+  `PLAN.md`'s "Gates (reminder)" section and splits the `CLAUDE.md` rules list
+  into three sublists, so the rule added here goes into a sublist that exists
+  by then. The third corrects two `PLAN.md` sites this change then collapses
+  and evicts, so correcting first keeps the collapse from carrying stale text.
