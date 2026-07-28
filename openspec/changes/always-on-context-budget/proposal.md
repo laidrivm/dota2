@@ -27,22 +27,26 @@ behind it.
 **`PLAN.md` — evict, then bound**
 
 - Every entry under "Accepted decisions" is dispositioned by where its fact has
-  to be legible: already in the archive → deleted; a fence a reader would
-  otherwise remove → a comment at that line, if one is not already there;
-  a standing constraint that no single site owns (Preact, camelCase in JSON,
-  Docker on a VPS, Dependabot over Renovate, Bun's bundler without Vite) →
-  kept.
-- The completed queue collapses to one line naming the archive; "Requirement
-  sources" collapses to the entries whose work is still open.
+  to be legible, tested in this order: a fence a reader would otherwise remove
+  → a comment at that line, if one is not already there; then, a fact the
+  archive already records → deleted; then, a standing constraint that no single
+  site owns (Preact, camelCase in JSON, Docker on a VPS, Dependabot over
+  Renovate, Bun's bundler without Vite) → kept. Fence first, because an entry
+  can be both.
+- Each completed queue entry collapses to its name, its outcome and its archive
+  path; "Requirement sources" collapses to the entries whose work is still
+  open.
 - `PLAN.md` gains its own growth protocol, stating what lives there, what
   evicts it, and where the evicted thing goes — the archive, a code comment, or
-  nothing.
+  nothing. A kept constraint that is later overtaken is deleted on the terms
+  `CLAUDE.md` already applies to a stale rule, so "kept" is not permanent.
 
 **The trigger becomes aggregate**
 
 - The `CLAUDE.md` growth trigger is restated over the always-on set rather than
-  over one file: the budget is the sum of the files read every session, and the
-  remedy remains extraction, which works because `docs/**` is read on demand.
+  over one file: the budget is ~500 lines across the files read every session,
+  and the remedy remains extraction, which works because `docs/**` is read on
+  demand.
 
 **Fences get a rule**
 

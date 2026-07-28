@@ -48,7 +48,12 @@ and reopening docstring coverage.
 
 ### The trigger counts the set, not the file
 
-The budget is `CLAUDE.md` + `PLAN.md`. `docs/**` is excluded not as a
+The budget is `CLAUDE.md` + `PLAN.md`, and the figure is ~500 lines. It is
+chosen so the trigger is firing today at 738 and clear after the eviction: the
+decisions section is 329 lines and most of it goes, which lands the pair near
+400. A number above today's total would announce a rule and enforce nothing;
+one at the post-eviction figure would fire on the next paragraph anyone writes.
+`docs/**` is excluded not as a
 concession but because it is the mechanism: the growth protocol's remedy is to
 move a section to `docs/<topic>.md` and leave a link, and that remedy only pays
 if the extracted file is read when its topic comes up and not before. A budget

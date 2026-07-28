@@ -33,12 +33,14 @@ split into code / process / safety sublists.
       Collapsing removes the numbering collision that made `7.` sit beside
       `Task 7`: what survives is one queue with one scheme
 - [ ] 1.6 Add `PLAN.md`'s growth protocol: what lives there, what evicts an
-      entry, where the evicted thing goes, and that an archived change is never
-      edited to receive one — *An entry leaves PLAN.md by one of three routes*
+      entry, where the evicted thing goes, that a kept constraint overtaken
+      later is deleted rather than left standing, and that an archived change is
+      never edited to receive an entry — *An entry leaves PLAN.md by one of
+      three routes*
 - [ ] 1.7 Restate the `CLAUDE.md` trigger in *Structure & growth of this file*
-      over the always-on set rather than over that file alone, naming the two
-      files and saying why `docs/**` does not count — *The always-on set is
-      named and measured as one budget*
+      over the always-on set rather than over that file alone: ~500 lines
+      across the two files, naming both and saying why `docs/**` does not
+      count — *The always-on set is named and measured as one budget*
 - [ ] 1.8 Reconcile every site restating what this step changes: `README.md`'s
       ownership row for `PLAN.md`, which describes it as carrying accepted
       decisions; `spec-inbox/README.md`, which points at `PLAN.md` →
