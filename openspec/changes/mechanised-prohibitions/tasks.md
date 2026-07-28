@@ -30,8 +30,9 @@ Requirement citations are the `### Requirement:` headings in
       event JSON against fabricated repositories: missing command (1); a
       non-git command (2); a commit on `main` (3); a compound `git add -A &&
       git commit` on `main` (4); `git log --grep="git commit"` on `main` (5);
-      detached `HEAD` (9); `--force-with-lease` (10); the clean feature-branch
-      cases (14)
+      detached `HEAD` (9); `--force-with-lease` (10); a compound whose first
+      command is not git, `bun test && git commit` on `main`; the clean
+      feature-branch cases (14)
 - [ ] 1.7 Extend `agent-permissions.test.ts`: the three `gh` deny entries
       present (17), the hook registered and pointing at the tracked script
       (18), `gh pr create` and `gh pr view` matching no deny entry (15, 16) —
@@ -41,9 +42,9 @@ Requirement citations are the `### Requirement:` headings in
 - [ ] 1.9 Confirm in a fresh session that the hook actually fires — a session
       loads its settings at startup, so the authoring session cannot observe
       it. Record the result the way `3a-check` did in `PLAN.md`
-- [ ] 1.10 Settle whether the hook's `if` field splits compound commands the
-      way permission rules do; if it does not, narrow to two entries and note
-      it in the design
+- [ ] 1.10 Confirm live that the `if` field splits compound commands as the
+      docs' table says, with `bun test && git commit` on `main` — the
+      registration is wrong for exactly that form if it does not
 
 ## 2. The secret scan
 
@@ -85,9 +86,12 @@ Requirement citations are the `### Requirement:` headings in
       sublists, and restate the ~20 trigger as per-sublist — *The rules list
       is partitioned into three sublists*
 - [ ] 4.2 Delete the prose each mechanism now enforces: the commit-on-main and
-      force-push sentence and the "never post to a PR" sentence in Git & PRs,
-      and the suppression rule in the rules list — *A mechanised prohibition
-      leaves its prose home*
+      force-push sentence in Git & PRs, and the suppression rule in the rules
+      list. The "never post to a PR" sentence is narrowed instead of deleted —
+      the deny entries reach `gh` only, so it keeps the external services they
+      cannot, and names replying, commenting and reviewing, which stops it
+      reading as a ban on `gh pr create` — *A mechanised prohibition leaves its
+      prose home*
 - [ ] 4.3 Shorten the secrets sentence to what `gitleaks` cannot see —
       capability URLs, internal identifiers, machine-local files — rather than
       deleting it — *A mechanised prohibition leaves its prose home*

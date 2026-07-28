@@ -30,8 +30,11 @@ that copy removes one way for the two to diverge.
 - `.claude/settings.json` gains `permissions.deny` entries for the GitHub
   write commands the agent must never issue on the user's behalf:
   `gh pr comment`, `gh issue comment`, `gh pr review`. `gh pr create` is
-  deliberately not denied — Stage 3 of the feature workflow ends by opening
-  the PR once the user says go.
+  deliberately not denied — Stage 3 of the feature workflow ends by offering to
+  open the PR, and it is opened once the user says go. The prose rule is
+  narrowed in the same breath to name replying, commenting and reviewing, so
+  that "post on the user's behalf" stops reading as a ban on the PR the user
+  asked for.
 - A `PreToolUse` hook guards the two git prohibitions that a prefix-matched
   `deny` entry cannot express: committing while `HEAD` is on `main`, and any
   force-push, whatever argument position the flag arrives in.
