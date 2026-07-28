@@ -17,9 +17,9 @@ changes, while process and safety rules never age. Mixed together, the trigger
 finds nothing safe to evict. Splitting the list is what makes eviction
 possible, and it also sorts out which rules are hook candidates.
 
-A third, smaller thing follows. The list carries *When a rule or a recorded
-decision changes, grep every site that restates it* — a rule that exists
-because duplication was already created, treating the symptom. `PLAN.md`
+A third, smaller thing follows. The list carries *When a statement changes …
+grep every site that restates it* — a rule that exists because duplication was
+already created, treating the symptom. `PLAN.md`
 restates the pre-PR gate sequence that `docs/review-toolkit.md` owns. Deleting
 that copy removes one way for the two to diverge.
 
