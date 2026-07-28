@@ -25,9 +25,10 @@ split into code / process / safety sublists.
       those four entries are deletions, not moves. List the ones that do not
       for group 2 — *A fence stands where it is stepped on*
 - [ ] 1.4 Leave the standing constraints — Preact, camelCase in every JSON
-      payload, the snapshot URL, Bun's bundler without Vite, Dependabot over
-      Renovate, Docker on a VPS — and nothing else — *PLAN.md holds the open
-      queue and the standing constraints*
+      payload, Bun's bundler without Vite, Dependabot over Renovate, Docker on
+      a VPS — and nothing else. The snapshot URL is not among them: 1.3 finds
+      its fence already standing in `src/app/snapshot.ts`, which makes it a
+      deletion — *PLAN.md holds the open queue and the standing constraints*
 - [ ] 1.5 Collapse the completed queue entries to one line naming the archive,
       and drop from "Requirement sources" every source whose work is closed.
       Collapsing removes the numbering collision that made `7.` sit beside
@@ -56,9 +57,11 @@ split into code / process / safety sublists.
 
 - [ ] 2.1 Write `coderabbit-config.test.ts` asserting the `path_instructions`
       entry for `**/*.{ts,tsx}` exists and names an unchecked precondition (1),
-      and that `docstrings.mode` is still `"off"` with no `threshold` beside it
-      (2) — watch both fail before the config is edited — *The bot judges what
-      a comment protects, not whether one exists*
+      that its text carries the exemption for self-evident functions — the
+      clause whose loss turns the entry back into docstring coverage — and that
+      `docstrings.mode` is still `"off"` with no `threshold` beside it (2) —
+      watch each fail before the config is edited — *The bot judges what a
+      comment protects, not whether one exists*
 - [ ] 2.2 Add the `path_instructions` entry to `.coderabbit.yaml`, worded so it
       cannot be satisfied by prose over every function, with its reason beside
       it as the other entries carry theirs
