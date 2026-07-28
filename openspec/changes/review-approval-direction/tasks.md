@@ -6,10 +6,11 @@ citations are the `### Requirement:` headings in
 
 ## 1. The policy and its four sites
 
-- [ ] 1.1 Modify *Major and above are fixed without asking* in
-      `openspec/specs/local-review-loop/spec.md` so the override covers every
-      severity, and add the Minor scenario beside the Major one — *Major and
-      above are fixed without asking*
+- [ ] 1.1 Rename *Major and above are fixed without asking* to *A verified
+      finding is fixed without asking* in
+      `openspec/specs/local-review-loop/spec.md`, widen the override to every
+      severity, and add the Minor scenario beside the Major one — *A verified
+      finding is fixed without asking*
 - [ ] 1.2 Add *Dismissing a Major or above is the user's call*, with the gate
       line reading `OPEN` on a pending dismissal and never on a pending fix —
       *Dismissing a Major or above is the user's call*
@@ -20,13 +21,18 @@ citations are the `### Requirement:` headings in
       decision. The historical statement of what `coderabbit-local-gate`
       settled stays accurate; what changes is the policy it points at, so
       correct the forward-looking sentence and leave the record of the decision
-- [ ] 1.5 Grep for any further site restating either half before calling this
-      done — the four above are what a grep for "without asking" and "No fixes
-      before approval" returned
-- [ ] 1.6 Draft the matching wording for `coderabbit` and `coderabbit-local` in
+- [ ] 1.5 Update the capability's Purpose paragraph
+      (`openspec/specs/local-review-loop/spec.md:6`), which describes the loop
+      as "what it fixes without asking" — the same one-sided framing, in the
+      sentence that introduces the whole capability
+- [ ] 1.6 Grep for any further site restating either half before calling this
+      done — the five above are what a grep for "without asking" and "No fixes
+      before approval" returned across `docs/`, `PLAN.md`, `CLAUDE.md` and
+      `openspec/`
+- [ ] 1.7 Draft the matching wording for `coderabbit` and `coderabbit-local` in
       the skills repository and hand it to the user; do not edit the skills
       from this project
-- [ ] 1.7 Put the two Major dismissals already made on
+- [ ] 1.8 Put the two Major dismissals already made on
       `mechanised-prohibitions` to the user — the `gh` deny scenarios and the
       suppression scan's extension set — since that change is proposed and not
       yet applied, and both were closed under the old reading
