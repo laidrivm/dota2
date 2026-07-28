@@ -110,12 +110,17 @@ patch() {
 }
 ```
 
-Counting is then: lines that are not task-list checkboxes, plus the *net*
-checkbox lines — `|added − removed|`. A tick flips one line from `- [ ]` to
-`- [x]`, which is one addition against one removal and nets zero; sixty newly
-authored task lines net sixty. The under-count this leaves is a task whose
-text was rewritten while another was added, which is noise at this
-granularity.
+Counting is then: every line that is not a task-list checkbox, plus every
+checkbox line that finds no partner on the other side of the diff. Two
+checkbox lines pair when they are identical once `[ ]` and `[x]` are
+normalised to one token — which is a tick and nothing else. Sixty newly
+authored task lines pair with nothing and count sixty; a task whose text was
+rewritten pairs with nothing either, and counts. Pairing is a `comm` between
+two sorted, normalised streams.
+
+Rejected: netting the counts, `|added − removed|`. It is shorter, but it
+cancels a rewritten task line against an unrelated tick, which is precisely
+the "differ solely in the checkbox state" the requirement excludes.
 
 Rejected: dropping every checkbox line unconditionally. It is one `grep -v`
 shorter and wrong in the direction that matters — a proposal PR authoring
@@ -176,23 +181,31 @@ catches the wrong-way import the arrow does not cover.
   ignored.
 - **CI needs the full history.** `actions/checkout` defaults to a shallow
   clone, so `<base>...HEAD` fails without `fetch-depth: 0` → the workflow sets
-  it, and the script exits 0 with a stated reason when the base is unreachable
-  rather than failing opaquely.
+  it, and the script exits non-zero with a stated reason when it cannot
+  measure, so an unresolvable base fails the check instead of silently
+  retiring the gate. Softness lives at the call site: the pre-push hook
+  absorbs any non-zero exit, which is the same mechanism that already keeps a
+  FAIL from blocking a push.
 - **`/triage` may lose its purpose.** If PRs settle near 500 lines, a diff can
   be read whole → not removed here; re-check after a month of measurements.
 
-## Migration plan — three sequenced steps
+## Migration plan — four sequenced steps
 
-Applied as three PRs, one per task group, which is the default this change
+Applied as four PRs, one per task group, which is the default this change
 introduces:
 
 1. `feat/reviewable-diff-gates-slicing` — the rules only: `CLAUDE.md`,
    `openspec/config.yaml`, `docs/feature-workflow.md`,
    `docs/review-toolkit.md`. Independently applyable; changes no code.
-2. `feat/reviewable-diff-gates-budget` — `scripts/diff-budget.sh`, its test,
-   the pre-push hook, the CI job.
-3. `feat/reviewable-diff-gates-arrow` — `biome.json` and the one rule line in
+2. `feat/reviewable-diff-gates-budget` — `scripts/diff-budget.sh`, its test
+   and the `package.json` entry. Runnable by hand; wired to nothing yet.
+3. `feat/reviewable-diff-gates-wiring` — the `oversize:` override, the CI job
+   and the pre-push call, plus the gate's line in `docs/review-toolkit.md`.
+4. `feat/reviewable-diff-gates-arrow` — `biome.json` and the one rule line in
    `CLAUDE.md`.
+
+Steps 2 and 3 are separate because bundling them would have closed four
+acceptance criteria in one PR, which is the limit this change introduces.
 
 Rollback for each is a revert; nothing carries state.
 
