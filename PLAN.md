@@ -174,8 +174,9 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
       the budget that exists — `CLAUDE.md` plus this file, 738 lines — evicts
       this file's decisions section by a three-way test, gives it a growth
       protocol, and states the fence practice as a rule. Two task groups, two
-      PRs: plan and trigger → the rule and the bot instruction. Runs after 6,
-      which deletes the Gates section and splits the rules list.
+      PRs: plan and trigger → the rule and the bot instruction. Runs after both
+      5 and 6 — 5 measures every later change, and 6 deletes the Gates section
+      and splits the rules list this one writes into.
 - [ ] **Task 7** — Docker + VPS deploy (open decisions: registry
       GHCR/Docker Hub, same VPS or a new one)
 - [ ] **Phase 3** — OpenSpec: STRATZ → Postgres → snapshot bundle pipeline

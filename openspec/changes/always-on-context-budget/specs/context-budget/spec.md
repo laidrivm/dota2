@@ -6,14 +6,14 @@
 
 The repository SHALL name, in `CLAUDE.md`, the files read at the start of every
 session — `CLAUDE.md` itself and `PLAN.md` — and SHALL state the maintenance
-trigger over their **combined** line count rather than over any single file.
-A file indexed from `CLAUDE.md` under `docs/` is read on demand and SHALL NOT
-count against the budget, which is what makes extraction a real remedy rather
-than a move of the same cost to another name.
+trigger over their **combined** line count: the trigger fires when the two
+together exceed **~500 lines**. A file indexed from `CLAUDE.md` under `docs/`
+is read on demand and SHALL NOT count against the budget, which is what makes
+extraction a real remedy rather than a move of the same cost to another name.
 
 #### Scenario: The trigger is read against the sum
 
-- **WHEN** the always-on files together exceed the stated line budget
+- **WHEN** `CLAUDE.md` and `PLAN.md` together exceed ~500 lines
 - **THEN** the trigger has fired, whichever of them grew
 
 #### Scenario: One file alone stays under the old figure
@@ -55,6 +55,14 @@ current state only* applies to `PLAN.md` as it does to every other artefact.
 
 - **WHEN** every task drawn from a listed requirement source is done
 - **THEN** the source leaves the list
+
+#### Scenario: A standing constraint that stops applying
+
+- **WHEN** a kept constraint is overtaken — the dependency is dropped, the
+  approach is replaced
+- **THEN** it is deleted from `PLAN.md` rather than left standing, on the same
+  terms as a stale rule in `CLAUDE.md`: a constraint nobody honours costs trust
+  in the ones beside it
 
 ### Requirement: An entry leaves PLAN.md by one of three routes
 
