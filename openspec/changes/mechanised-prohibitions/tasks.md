@@ -101,9 +101,11 @@ Requirement citations are the `### Requirement:` headings in
       deleting it — *A mechanised prohibition leaves its prose home*
 - [ ] 4.4 Delete the "Gates (reminder)" section from `PLAN.md` — *The pre-PR
       sequence has one home*
-- [ ] 4.5 Narrow the grep rule to the sites that still restate things, and
-      confirm `docs/feature-workflow.md` references the sequence rather than
-      repeating it — *The pre-PR sequence has one home*
+- [ ] 4.5 Narrow the grep rule to the sites that still restate things, keeping
+      the widened subject it carries by then — a change's own sibling artefacts
+      as well as the rulebook — and confirm `docs/feature-workflow.md`
+      references the sequence rather than repeating it — *The pre-PR sequence
+      has one home*
 - [ ] 4.6 Write `rulebook.test.ts`: the three headings exist and every rule
       bullet sits under one of them (25); a bullet outside them fails (26)
 - [ ] 4.7 Add rows to the README ownership map for anything this change adds

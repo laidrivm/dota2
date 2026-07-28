@@ -161,7 +161,10 @@ Removing `PLAN.md`'s copy of the gate sequence removes the duplication that
 motivated the rule, but not every duplication: `openspec/specs/**` restates
 decisions by design, and `README.md`'s ownership map restates paths — pinned
 by `readme-map.test.ts`, which is itself the reason the map can be trusted.
-The rule keeps its subject and loses its enumeration of sites.
+The rule loses its enumeration of sites and keeps its subject, which by then
+covers a change's own sibling artefacts as well as the rulebook — widened
+after three review passes in a row found a delta spec corrected while its
+proposal still said the old thing.
 
 ## Risks / Trade-offs
 

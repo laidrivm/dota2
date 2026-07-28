@@ -196,9 +196,9 @@ observability, causal claims — see [docs/verification.md](docs/verification.md
   anchor both ends or parse it.
 - Confirm a path is tracked before a check or a claim depends on it — a
   gitignored file is present for the author and absent in a clone.
-- When a rule or a recorded decision changes, grep every site that restates
-  it — rules list, docs, OpenSpec artifacts, README — before calling the
-  change done.
+- When a statement changes — a rule, a recorded decision, or one artefact of
+  a change under review — grep every site that restates it, the change's own
+  sibling artefacts included, before calling the change done.
 - Before the first dependency install or tool run in a repo, verify
   `.gitignore` covers its outputs (`node_modules/`, build dirs, local
   settings).
