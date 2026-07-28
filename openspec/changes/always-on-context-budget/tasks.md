@@ -39,9 +39,15 @@ split into code / process / safety sublists.
       over the always-on set rather than over that file alone, naming the two
       files and saying why `docs/**` does not count — *The always-on set is
       named and measured as one budget*
-- [ ] 1.8 Record the before and after line counts of both files in the PR body,
+- [ ] 1.8 Reconcile every site restating what this step changes: `README.md`'s
+      ownership row for `PLAN.md`, which describes it as carrying accepted
+      decisions; `spec-inbox/README.md`, which points at `PLAN.md` →
+      Requirement sources; and `tasks/task-8.md`, whose acceptance criteria
+      state the per-file 250-line figure. `readme-map.test.ts` pins the map's
+      paths and not its descriptions, so the first drifts silently
+- [ ] 1.9 Record the before and after line counts of both files in the PR body,
       so the next maintenance run has a figure to compare against
-- [ ] 1.9 Do not add a CI check on the line counts — the trigger is a
+- [ ] 1.10 Do not add a CI check on the line counts — the trigger is a
       maintenance prompt, and a gate would be cleared by moving text
 
 ## 2. The fence rule and the bot instruction
