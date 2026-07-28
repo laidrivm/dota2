@@ -161,6 +161,14 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
       measurable and enforces one import arrow. Four task groups, four PRs in
       order: slicing rules → the budget script → wiring it → the Biome arrow.
       Runs before Task 7, since every later change is measured by it.
+- [ ] **6. `mechanised-prohibitions`** — proposed
+      (`openspec/changes/mechanised-prohibitions`), not yet applied. Converts
+      the prohibitions that carry no judgement into `deny` entries, a
+      `PreToolUse` hook, `gitleaks` and a suppression check, then splits the
+      rules list into code / process / safety and deletes what the mechanisms
+      replaced. Four task groups, four PRs: permissions → secrets →
+      suppressions → rulebook, the last one last because it removes the prose
+      the first three take over.
 - [ ] **Task 7** — Docker + VPS deploy (open decisions: registry
       GHCR/Docker Hub, same VPS or a new one)
 - [ ] **Phase 3** — OpenSpec: STRATZ → Postgres → snapshot bundle pipeline
@@ -168,6 +176,38 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
 - [ ] **Task 5** — error tracking (precondition: product is deployed)
 
 ## Accepted decisions
+
+- `mechanised-prohibitions`: the split between `deny` and a hook follows what
+  each can express, not taste. `deny` matches a command prefix, which fits
+  `gh pr comment` and does not fit either git rule — `git push origin feat/x
+  --force` puts the flag last, and `git commit` is forbidden only when `HEAD`
+  is on `main`, which no pattern can see. So `Bash(git push --force*)` was
+  sketched and dropped: a boundary that holds only for the well-behaved caller
+  is what this change exists to stop relying on. One `scripts/git-guard.ts`
+  under a single `PreToolUse` entry with `if: "Bash(git *)"`, in bun rather
+  than the documented `jq` (not a dependency here, not shipped by macOS), and
+  reading `tool_input.command` rather than the raw payload, so a `--force` in
+  a command's *description* cannot block a push. The hook contract was checked
+  against `code.claude.com/docs/en/hooks`: exit 2 blocks and stderr becomes
+  the reason; any other non-zero is non-blocking, so "could not determine"
+  must not reuse it. The result is stricter than the prose it replaces —
+  force-push was forbidden only after a PR opened, and the agent now loses it
+  entirely, because encoding "after a PR is open" means a `gh` call on every
+  push. `gitleaks` comes from a digest-pinned image in CI, the way
+  `actionlint` already does, and from an optional local binary in pre-commit:
+  a hard prerequisite would break the first commit of a fresh clone on a Go
+  binary this repository cannot install for you, and CI-only would catch a
+  secret that is already pushed. The suppression allowlist keys on path **and
+  count**, so a second suppression cannot ride in on the first one's approval,
+  and the scanned set is `.ts`/`.tsx`/`.json` — prose names those tokens while
+  discussing them, this proposal three times over, and a check that fails on
+  its own proposal gets disabled in its first week. Departure from the source
+  analysis: the pre-PR sequence stays in `docs/review-toolkit.md`, which
+  already owns it, rather than moving to `docs/feature-workflow.md` — the only
+  genuine duplicate is `PLAN.md`'s "Gates (reminder)" section, and
+  `feature-workflow.md` references the sequence without repeating it. The grep
+  rule is narrowed rather than dropped, because `openspec/specs/**` and the
+  README ownership map still restate things this change does not touch.
 
 - `reviewable-diff-gates`: the cap counts tests too. Exempting them was
   considered and rejected — that heuristic belongs where a human writes tests
