@@ -185,13 +185,14 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
       but **not** unsequenced: it corrects wording in `PLAN.md` that 7 then
       collapses, so it applies before 7. Both now sit on one branch, so that
       ordering is task order inside one apply rather than PR order.
-- [ ] **8. `skill-provenance`** — proposed
+- [ ] **`skill-provenance`** — proposed
       (`openspec/changes/skill-provenance`), not yet applied. Records which
       shared skills the gates depend on and the commit each was verified
       against, marks the five nobody depends on archived, pins the table with a
       test, and hands the `skills-lock.json` patch to the user. One task group,
-      one PR. No ordering constraint — it touches `docs/review-toolkit.md` and
-      a new test file, which nothing else in the queue edits.
+      one PR. Unnumbered like `review-approval-direction`, and genuinely
+      unsequenced this time — it touches `docs/review-toolkit.md` and a new
+      test file, which nothing else in the queue edits.
 - [ ] **Task 7** — Docker + VPS deploy (open decisions: registry
       GHCR/Docker Hub, same VPS or a new one)
 - [ ] **Phase 3** — OpenSpec: STRATZ → Postgres → snapshot bundle pipeline

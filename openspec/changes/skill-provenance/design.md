@@ -82,12 +82,14 @@ change exists to remove.
 
 ### The test does not read the skills
 
-`.claude/skills/*` point outside the repository; after `git clone` they resolve
-to nothing. `agent-permissions` already records this as the reason skill
-frontmatter cannot be pinned here, and the same reasoning applies with more
-force to content. So the test asserts the table against this file's own gate
-sequence — a closed loop inside the repository — and asserts the shape of each
-cell. What it cannot assert, the specification says out loud rather than
+The eleven symlinked entries in `.claude/skills/` point outside the repository
+and resolve to nothing after `git clone`; the six `openspec-*` entries beside
+them are real directories and are not what this change is about.
+`agent-permissions` already records the symlink as the reason skill frontmatter
+cannot be pinned here, and the same reasoning applies with more force to
+content. So the test asserts the table against tracked files — this file's own
+gate sequence and `CLAUDE.md`'s rules, a closed loop inside the repository —
+and asserts the shape of each cell. What it cannot assert, the specification says out loud rather than
 implying.
 
 ### The lock change is a hand-off
