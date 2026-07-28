@@ -24,14 +24,20 @@ single `feat/<slug>` pull request.
 ### Requirement: A step closes one to three acceptance criteria
 
 A step SHALL close between one and three acceptance criteria and SHALL leave
-the application working when merged. The pull request body SHALL name the
-criteria the step closes.
+the application working when merged. A step that carries only infrastructure
+MAY close none, and SHALL say so in its body. The pull request body SHALL name
+the criteria the step closes, by identifier alone — an identifier is not the
+restatement of an acceptance criterion that the PR description rule forbids,
+and that rule SHALL be amended to say so rather than left to be read against
+this one.
 
 #### Scenario: A step names what it closes
 
 - **WHEN** a step's pull request is opened
 - **THEN** its body names the acceptance criteria the step closes, by their
   identifiers in the change's spec
+- **AND** it does not reproduce their text, which the review bot generates on
+  every run
 
 #### Scenario: A step closing more than three criteria
 
@@ -125,8 +131,8 @@ body carrying `oversize:` with no text after it SHALL NOT clear the failure.
 
 #### Scenario: A mechanical rename
 
-- **WHEN** a 1200-line pull request's body contains `oversize: mechanical
-  rename of `computeModel` across 14 files`
+- **WHEN** a 1200-line pull request's body contains
+  `oversize: mechanical rename of computeModel across 14 files`
 - **THEN** CI reports the override, names the reason in the gate line, and
   passes
 
@@ -138,8 +144,10 @@ body carrying `oversize:` with no text after it SHALL NOT clear the failure.
 ### Requirement: The gate is hard in CI and soft before the push
 
 CI SHALL run the budget against the pull request's base branch and fail the
-check when the budget is exceeded without an override. The pre-push hook SHALL
-run the same script and SHALL NOT block the push.
+check when the budget is exceeded without an override. The script SHALL exit
+non-zero whenever it cannot measure, so a check never passes unmeasured. The
+pre-push hook SHALL run the same script and SHALL absorb every non-zero exit,
+so it never blocks the push.
 
 #### Scenario: An over-budget push
 
@@ -150,4 +158,11 @@ run the same script and SHALL NOT block the push.
 #### Scenario: A branch with no upstream base
 
 - **IF** the base branch is unavailable locally
-- **THEN** the pre-push hook reports that it could not measure and exits 0
+- **THEN** the script reports that it could not measure and exits non-zero
+- **AND** the pre-push hook absorbs it, so the push still completes
+
+#### Scenario: CI cannot resolve the base
+
+- **IF** the base ref cannot be resolved in CI, because the clone is shallow
+  or the ref is missing
+- **THEN** the check fails, rather than passing on an unmeasured diff
