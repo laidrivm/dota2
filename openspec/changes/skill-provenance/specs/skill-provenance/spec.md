@@ -57,10 +57,18 @@ which are indistinguishable while both are merely present.
 ### Requirement: The table is pinned by a test, within what a clone can see
 
 The repository's test run SHALL fail when the table stops covering the gates,
-so the pin cannot rot into decoration. The check MUST work from a clone, which
-means it MUST NOT read through `.claude/skills/`: those symlinks point outside
-the repository and resolve to nothing after `git clone`. It therefore asserts
-the table's internal consistency against this file's own gate sequence, and
+so the pin cannot rot into decoration. The **active set** is defined as the
+skills named in this file's pre-PR sequence together with any skill a tracked
+rule in `CLAUDE.md` depends on — `playwright-cli` is a gate by such a rule and
+not by the sequence. The test SHALL require exactly one active row per member
+of that set, SHALL reject a duplicate row and an active row for a skill in
+neither source, and SHALL require the archived list to be disjoint from the
+active one.
+
+The check MUST work from a clone, which means it MUST NOT read through
+`.claude/skills/`: the entries this change is about are symlinks pointing
+outside the repository, and they resolve to nothing after `git clone`. It
+therefore asserts the table's internal consistency against tracked files, and
 never the content of a skill.
 
 #### Scenario: A gate loses its row
@@ -73,6 +81,24 @@ never the content of a skill.
 - **WHEN** an archived row is given a verified-at commit
 - **THEN** `bun test` fails, because the commit asserts a check nothing
   depends on
+
+#### Scenario: One gate, two rows
+
+- **WHEN** a skill appears twice in the active table, with two commits
+- **THEN** `bun test` fails, because the pin would then name two states for
+  one contract
+
+#### Scenario: An active row for a skill nothing names
+
+- **WHEN** an active row names a skill absent from both the pre-PR sequence and
+  `CLAUDE.md`'s rules
+- **THEN** `bun test` fails — a commit recorded for a skill nothing depends on
+  is the archived case wearing the active shape
+
+#### Scenario: A skill in both lists
+
+- **WHEN** a skill appears as active and as archived
+- **THEN** `bun test` fails
 
 #### Scenario: A row's commit is not an object name
 
