@@ -228,7 +228,9 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
   user, never a fix, so a run that fixes everything closes at `PASS` whatever
   the severities were. The skills are not edited from here; the wording is
   drafted for the user to apply in their own repository, and the project's spec
-  already outranks them either way.
+  already outranks them either way. The two Major dismissals made on
+  `mechanised-prohibitions` under the old reading were put to the user
+  retroactively and upheld, so that change needs no revision on their account.
 
 - `mechanised-prohibitions`: the split between `deny` and a hook follows what
   each can express, not taste. `deny` matches a command prefix, which fits

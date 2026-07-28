@@ -32,7 +32,8 @@ citations are the `### Requirement:` headings in
 - [ ] 1.7 Draft the matching wording for `coderabbit` and `coderabbit-local` in
       the skills repository and hand it to the user; do not edit the skills
       from this project
-- [ ] 1.8 Put the two Major dismissals already made on
+- [x] 1.8 Put the two Major dismissals already made on
       `mechanised-prohibitions` to the user — the `gh` deny scenarios and the
-      suppression scan's extension set — since that change is proposed and not
-      yet applied, and both were closed under the old reading
+      suppression scan's extension set, both closed under the old reading. Done
+      before apply: the user upheld both, so `mechanised-prohibitions` needs no
+      revision on their account
