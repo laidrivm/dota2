@@ -19,10 +19,11 @@ Requirement citations are the `### Requirement:` headings in
 - [ ] 1.3 Match the force flags as whole arguments, not substrings, so
       `--follow-tags` and `--fixup` do not trigger them (7, 8), and compare the
       branch for equality so `mainline` does not match `main` (6)
-- [ ] 1.4 Block with exit code 2 and the reason on stderr; use a different
-      non-zero code for "could not determine" so a malformed event or a
-      missing work tree does not silently let a commit through as a
-      non-blocking error (11, 12, 13)
+- [ ] 1.4 Exit 0 to allow and 2 for everything else — a blocked command and an
+      event the script cannot read alike, with the reason on stderr. Any other
+      non-zero code is non-blocking, so a malformed event or a missing work
+      tree would let the commit through with only a transcript notice
+      (11, 12, 13)
 - [ ] 1.5 Register the hook in `.claude/settings.json` under
       `hooks.PreToolUse`, `matcher: "Bash"`, with `if: "Bash(git *)"` — *The
       git prohibitions are enforced by a hook*
@@ -65,20 +66,23 @@ Requirement citations are the `### Requirement:` headings in
 ## 3. The suppression check
 
 - [ ] 3.1 Write `scripts/no-suppressions.ts`: read `git ls-files`, keep
-      `.ts`, `.tsx` and `.json`, report every occurrence of `biome-ignore`,
-      `@ts-expect-error` and `@ts-ignore` with its file and line, and subtract
-      the approved count for each allowlisted path — *Linter and type-checker
-      suppressions fail CI*
-- [ ] 3.2 Keep the allowlist inside the script, empty on arrival, with the
-      approval reason as a comment beside each entry
+      `.ts`, `.tsx` and `.json`, drop its own two paths — they carry the
+      markers literally and would fail the check on arrival — report every
+      occurrence of `biome-ignore`, `@ts-expect-error` and `@ts-ignore` with
+      its file and line, and subtract the approved count for the matching
+      path *and marker* — *Linter and type-checker suppressions fail CI*
+- [ ] 3.2 Keep the allowlist inside the script, empty on arrival, keyed by path
+      and marker, with the approval reason as a comment beside each entry
 - [ ] 3.3 Add the check to `lint.yml` and to `package.json` scripts
 - [ ] 3.4 Write `scripts/no-suppressions.test.ts`: the clean tree passes with
       an empty allowlist (19); one suppression fails naming file and line
       (20); two files both reported (21); a markdown file naming
       `biome-ignore` passes (22); an allowlisted path with a second occurrence
-      still fails (23); an untracked file passes (24)
-- [ ] 3.5 Confirm the check passes over the tree as it stands and that the
-      three artefacts of this change do not trip it
+      still fails (23); an allowlisted path whose marker was swapped for
+      another kind fails; an untracked file passes (24)
+- [ ] 3.5 Confirm the check passes over the tree as it stands, that the three
+      artefacts of this change do not trip it, and that it does not trip on its
+      own script and test
 
 ## 4. The rulebook
 

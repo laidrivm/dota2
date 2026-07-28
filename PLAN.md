@@ -189,24 +189,32 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
   reading `tool_input.command` rather than the raw payload, so a `--force` in
   a command's *description* cannot block a push. The hook contract was checked
   against `code.claude.com/docs/en/hooks`: exit 2 blocks and stderr becomes
-  the reason; any other non-zero is non-blocking, so "could not determine"
-  must not reuse it — the spec says exit 2 outright, since "non-zero" there
-  would have permitted the one code that lets the commit through. The same
+  the reason; any other non-zero is non-blocking. The script therefore has two
+  exits, 0 and 2, and an event it cannot read takes the blocking one: a
+  separate "could not determine" code was drafted and dropped once it was clear
+  that it lets the commit run with a transcript notice, which is the failure
+  the hook exists to remove. The spec says exit 2 outright, since "non-zero"
+  there would have permitted the one code that lets the commit through. The same
   page settles what the design had left open: `if` uses permission-rule
   syntax and matches each subcommand independently, stripping leading
   `VAR=value` and looking inside `$()`, so one entry covers `bun test && git
-  commit` and there is no second entry to add. The result is stricter than the prose it replaces —
+  commit` and there is no second entry to add. It matches the command word
+  literally, so `/usr/bin/git commit` never reaches the hook — an accepted
+  ceiling, since the guard is against a probabilistic agent and not against
+  someone hunting a spelling the matcher misses. The result is stricter than the prose it replaces —
   force-push was forbidden only after a PR opened, and the agent now loses it
   entirely, because encoding "after a PR is open" means a `gh` call on every
   push. `gitleaks` comes from a digest-pinned image in CI, the way
   `actionlint` already does, and from an optional local binary in pre-commit:
   a hard prerequisite would break the first commit of a fresh clone on a Go
   binary this repository cannot install for you, and CI-only would catch a
-  secret that is already pushed. The suppression allowlist keys on path **and
-  count**, so a second suppression cannot ride in on the first one's approval,
-  and the scanned set is `.ts`/`.tsx`/`.json` — prose names those tokens while
-  discussing them, this proposal three times over, and a check that fails on
-  its own proposal gets disabled in its first week. Departure from the source
+  secret that is already pushed. The suppression allowlist keys on path,
+  **marker and count**, so neither a second suppression nor one swapped for
+  another kind rides in on the first one's approval, and the scanned set is
+  `.ts`/`.tsx`/`.json` less the check's own script and test — prose names those
+  tokens while discussing them, this proposal three times over, the check
+  cannot match a marker without spelling it out, and a check that fails on its
+  own proposal or on itself gets disabled in its first week. Departure from the source
   analysis: the pre-PR sequence stays in `docs/review-toolkit.md`, which
   already owns it, rather than moving to `docs/feature-workflow.md` — the only
   genuine duplicate is `PLAN.md`'s "Gates (reminder)" section, and
