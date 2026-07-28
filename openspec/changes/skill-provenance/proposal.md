@@ -34,8 +34,12 @@ behind am I?*.
   archived in the same place: available to invoke, depended on by nothing, and
   carrying no verified-at commit, because nothing here would notice if they
   changed.
-- A test pins the table's internal consistency: every skill named in the
-  pre-PR sequence appears with a commit, and no archived entry carries one. It
+- A test pins the table's internal consistency: every skill the gates depend
+  on appears exactly once with a commit, and no archived entry carries one. The
+  active set is the pre-PR sequence **plus** the skills a tracked `CLAUDE.md`
+  rule depends on — `playwright-cli` is a gate that way and not through the
+  sequence, so a test reading the sequence alone would leave it unpinned. The
+  test fails rather than passes when either source yields nothing, and it
   deliberately does not read through the symlinks, which resolve to nothing in
   a clone.
 - The one change the shared repository needs — `ref` and `vendoredAt` beside

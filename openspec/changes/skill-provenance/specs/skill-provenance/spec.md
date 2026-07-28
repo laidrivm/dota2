@@ -65,6 +65,13 @@ of that set, SHALL reject a duplicate row and an active row for a skill in
 neither source, and SHALL require the archived list to be disjoint from the
 active one.
 
+Every one of those assertions is over a set, so the test SHALL first require
+its inputs to be non-empty: the pre-PR sequence and the `CLAUDE.md` rules MUST
+both be found, the active set MUST hold at least one skill, and the table MUST
+yield at least one row. Without that, a renamed heading empties a source and
+every exactness check passes on nothing — the failure a length assertion in
+`readme-map.test.ts` already shipped once.
+
 The check MUST work from a clone, which means it MUST NOT read through
 `.claude/skills/`: the entries this change is about are symlinks pointing
 outside the repository, and they resolve to nothing after `git clone`. It
@@ -74,6 +81,18 @@ never the content of a skill.
 #### Scenario: A gate loses its row
 
 - **WHEN** a skill named in the pre-PR sequence has no row in the table
+- **THEN** `bun test` fails
+
+#### Scenario: A source section is renamed away
+
+- **WHEN** the pre-PR sequence heading changes and the parse yields an empty
+  active set
+- **THEN** `bun test` fails on the empty set itself, rather than passing every
+  per-skill assertion vacuously
+
+#### Scenario: The table is emptied
+
+- **WHEN** the table keeps its heading but holds no rows
 - **THEN** `bun test` fails
 
 #### Scenario: An archived entry gains a commit
