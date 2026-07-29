@@ -46,11 +46,13 @@ explicit user decision*. Both keys are prose boundaries today.
   where it is reviewable and reaches a clone.
 - Everything machine-local, one-off, or naming a path outside the repository
   is dropped rather than moved.
-- `agent-permissions.test.ts` gains a check that every tracked allow entry
-  resolves inside the repository — after expanding `~` and the environment and
-  collapsing `..`, not by blacklisting two spellings — so the same
-  accumulation cannot happen again inside the tracked file. Whether an entry
-  is a one-off stays a review criterion, answered in the PR body.
+- `agent-permissions.test.ts` gains a hygiene check in two rules, because the
+  entries are not uniformly paths — 145 of the 170 are `Bash(...)` command
+  strings and 6 are `Read(...)` specifiers. No entry may carry an absolute
+  path token, which is lexical and needs no shell parsing; and a path
+  specifier must additionally resolve inside the repository, which is what
+  catches a `../../` traversal. Whether an entry is a one-off stays a review
+  criterion, answered in the PR body.
 
 ## Non-goals
 
