@@ -7,25 +7,25 @@ citations are the `### Requirement:` headings in
 
 ## 1. Slicing rules
 
-- [ ] 1.1 Flip the reviewable unit in `CLAUDE.md` Git & PRs: the step is the
+- [x] 1.1 Flip the reviewable unit in `CLAUDE.md` Git & PRs: the step is the
       default, the whole proposal is the exception for a single-group
       `tasks.md` — *The reviewable unit is the step, not the proposal*
-- [ ] 1.2 Replace "Scope a proposal to one reviewable cycle" in
+- [x] 1.2 Replace "Scope a proposal to one reviewable cycle" in
       `openspec/config.yaml` `rules.proposal` with the one-to-three-criteria
       slice, and add to `rules.tasks` that each task group is a shippable step
       — *A step closes one to three acceptance criteria*
-- [ ] 1.3 Amend the PR-description rule in `CLAUDE.md` Git & PRs — the one
+- [x] 1.3 Amend the PR-description rule in `CLAUDE.md` Git & PRs — the one
       forbidding "a restatement of the acceptance criteria" — so it requires
       the closed criteria by identifier and forbids only their text. Placing a
       new sentence beside the prohibition would leave the two reading as a
       contradiction — *A step closes one to three acceptance criteria*
-- [ ] 1.4 Add the stub-at-the-seam rule to `docs/feature-workflow.md` Stage 1,
+- [x] 1.4 Add the stub-at-the-seam rule to `docs/feature-workflow.md` Stage 1,
       citing 2b's native `<select>` as the worked example — *A seam between
       steps carries a working stub*
-- [ ] 1.5 Grep every site restating the old "unit is the proposal" default —
+- [x] 1.5 Grep every site restating the old "unit is the proposal" default —
       `CLAUDE.md`, `docs/feature-workflow.md`, `docs/review-toolkit.md`,
       `PLAN.md`, `README.md`, `openspec/config.yaml` — and reconcile each
-- [ ] 1.6 Record the accepted decisions in `PLAN.md` and queue the remaining
+- [x] 1.6 Record the accepted decisions in `PLAN.md` and queue the remaining
       three steps
 
 ## 2. The budget script

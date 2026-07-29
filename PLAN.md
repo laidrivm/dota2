@@ -156,11 +156,21 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
       loaded at startup, which is why every attempt from the authoring session
       passed silently. Confirming it takes the user: an approved prompt and an
       unprompted call are indistinguishable from inside the session.
-- [ ] **5. `reviewable-diff-gates`** — proposed (`openspec/changes/
-      reviewable-diff-gates`), not yet applied. Makes the splitting rule
+- [ ] **5. `reviewable-diff-gates`** — applying
+      (`openspec/changes/reviewable-diff-gates`). Makes the splitting rule
       measurable and enforces one import arrow. Four task groups, four PRs in
-      order: slicing rules → the budget script → wiring it → the Biome arrow.
-      Runs before Task 7, since every later change is measured by it.
+      order. Runs before Task 7, since every later change is measured by it.
+  - [ ] **5.1 slicing rules** — `feat/reviewable-diff-gates-slicing`. Rules
+        and docs only, no code: `CLAUDE.md`, `openspec/config.yaml`,
+        `docs/feature-workflow.md`. Closes *The reviewable unit is the step*,
+        *A step closes one to three acceptance criteria*, *A seam between
+        steps carries a working stub*.
+  - [ ] **5.2 the budget script** — `scripts/diff-budget.sh`, its test and the
+        `package.json` entry. Runnable by hand, wired to nothing.
+  - [ ] **5.3 wiring the budget** — the `oversize:` override, the CI job, the
+        pre-push call, the gate's line in `docs/review-toolkit.md`.
+  - [ ] **5.4 the import arrow** — `biome.json` (`noImportCycles` plus the
+        `noRestrictedImports` override on the model) and one rule line.
 - [ ] **6. `mechanised-prohibitions`** — proposed
       (`openspec/changes/mechanised-prohibitions`), not yet applied. Converts
       the prohibitions that carry no judgement into `deny` entries, a
@@ -229,6 +239,16 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
 - [ ] **Task 5** — error tracking (precondition: product is deployed)
 
 ## Accepted decisions
+
+- `reviewable-diff-gates` step 1: the PR-description rule was amended in
+  place rather than joined by a sentence about naming criteria — the two
+  read as a contradiction otherwise, since an identifier *is* a reference to
+  an acceptance criterion. What the identifier prohibition now forbids is the
+  criterion's text, which is the part CodeRabbit regenerates. The
+  reconciliation grep found the default restated nowhere else by name, but
+  twice by cadence: `docs/feature-workflow.md` spoke of "the branch" for a
+  whole change and of archiving once "the change is merged", both of which
+  are per-step now.
 
 - Cross-artefact staleness is not held by prose, demonstrated on three pull
   requests in a row. The rule *When a statement changes … grep every site that
