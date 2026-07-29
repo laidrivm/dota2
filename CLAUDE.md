@@ -86,6 +86,8 @@ Response contract rules for every endpoint — see
   those on every run.
 - Re-check a pushed branch's PR state before every commit to it — a merged
   PR strands anything added afterwards, whichever merge style closed it.
+- Commit a session's wrap-up artefacts — the pipeline-yield ledger, a save
+  point — to the branch in hand, never a branch of their own.
 - Never post to a PR, issue, or any external service on the user's behalf —
   report the reply here and let them send it.
 - Never re-run a check to confirm what a completed command already proved —
