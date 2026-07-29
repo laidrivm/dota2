@@ -160,7 +160,7 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
       (`openspec/changes/reviewable-diff-gates`). Makes the splitting rule
       measurable and enforces one import arrow. Four task groups, four PRs in
       order. Runs before Task 7, since every later change is measured by it.
-  - [ ] **5.1 slicing rules** — `feat/reviewable-diff-gates-slicing`. Rules
+  - [x] **5.1 slicing rules** — `feat/reviewable-diff-gates-slicing`. Rules
         and docs only, no code: `CLAUDE.md`, `openspec/config.yaml`,
         `docs/feature-workflow.md`. Closes *The reviewable unit is the step*,
         *A step closes one to three acceptance criteria*, *A seam between
