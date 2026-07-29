@@ -81,6 +81,13 @@ count() {
 
 test_lines=$(count "${TESTS[@]}")
 source_lines=$(count . "${TESTS[@]/#/:(exclude)}")
+
+# A half that failed mid-pipeline comes back empty, and empty reads as 0 in
+# arithmetic — the one way left for an unmeasured diff to report a pass.
+if ! [[ "$test_lines$source_lines" =~ ^[0-9]+$ ]]; then
+	echo "DIFF gate: ERROR — could not count the diff against '${base}'" >&2
+	exit 2
+fi
 total=$((source_lines + test_lines))
 
 if [ "$total" -ge "$FAIL_AT" ]; then
