@@ -17,8 +17,8 @@ Two gaps are unclaimed by any local skill, by design:
   diff, `/zombies` finds test gaps, `/ponytail-review` hunts over-engineering.
   None of them opens the change the diff is supposed to implement.
 
-Separately, three rules in this repository — *never call an unfamiliar
-framework/library API from memory* in `CLAUDE.md`, the Playwright-documentation
+Separately, three rules in this repository — *never state a framework, library
+or tool's behaviour from memory* in `CLAUDE.md`, the Playwright-documentation
 rule in `docs/testing.md`, and the grep-the-receiving-class step the
 `first-five` skill prescribes — are all executed by one side, the agent, on its
 word. The grep confirms a method is absent from *this* codebase; it says

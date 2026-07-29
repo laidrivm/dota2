@@ -230,6 +230,19 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
 
 ## Accepted decisions
 
+- Cross-artefact staleness is not held by prose, demonstrated on three pull
+  requests in a row. The rule *When a statement changes … grep every site that
+  restates it* was widened on 2026-07-29 to name a change's own sibling
+  artefacts, precisely because a delta spec kept being corrected by a review
+  finding while its proposal still said the old thing. It was then violated
+  twice more in the same session — PR #40 raised two findings of exactly that
+  class, PR #41 one. The trigger fires at the wrong moment: the correction
+  happens mid-review, where the rule reads as an end-of-change checklist. So
+  the mechanism is what closes it, not a tighter sentence —
+  `review-bot-instructions`' `openspec/changes/**` instruction has the bot
+  compare a change's artefacts against each other, and that is the argument for
+  its position in the queue.
+
 - `tracked-permission-policy`: the registry rule is expressible as a
   permission entry, unlike the two git prohibitions `mechanised-prohibitions`
   gave a hook, so it gets two lines and no script. What settles the shape is

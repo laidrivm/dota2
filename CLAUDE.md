@@ -42,8 +42,9 @@
 - Automated installs — CI jobs, hooks, scripts — use `bun install
   --frozen-lockfile`; plain `bun install` is only a developer resolving
   versions locally on purpose (it is also what installs the git hooks).
-- Never call an unfamiliar framework/library API from memory — check the
-  docs; models invent methods.
+- Never state a framework, library or tool's behaviour from memory — a
+  method, a default, a file it reads — check the docs or ask the tool
+  itself; models invent all three.
 
 ### Accessibility
 
@@ -199,6 +200,8 @@ observability, causal claims — see [docs/verification.md](docs/verification.md
 - When a statement changes — a rule, a recorded decision, or one artefact of
   a change under review — grep every site that restates it, the change's own
   sibling artefacts included, before calling the change done.
+- A rules or docs edit that no artefact of the change under way asks for goes
+  in its own commit.
 - Before the first dependency install or tool run in a repo, verify
   `.gitignore` covers its outputs (`node_modules/`, build dirs, local
   settings).

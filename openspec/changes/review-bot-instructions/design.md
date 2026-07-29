@@ -28,8 +28,8 @@ Verified against `schema.v2.json` and the tree before this design was written:
 
 - Point the bot at the two reviews no local skill performs.
 - Give it a way to feed the fix-and-capture loop rather than only the report.
-- Turn one prose rule — *never call an unfamiliar API from memory* — into
-  something the reviewer can check.
+- Turn one prose rule — *never state a framework, library or tool's behaviour
+  from memory* — into something the reviewer can check.
 
 **Non-Goals:** as listed in the proposal — redoing `coderabbit-config`,
 connecting Context7 itself, replacing `bun info`, the item-29 cluster, and the
