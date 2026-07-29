@@ -28,10 +28,9 @@ rules:
       measurable values, not adjectives
     - Scope each step to one to three acceptance criteria, leaving the
       application working when it merges. A step carrying only
-      infrastructure may close none and says so. If the feature needs more
-      steps than one proposal can hold, split it into sequenced proposals,
-      each independently applyable and testable — state the sequence in the
-      first proposal's design
+      infrastructure may close none and says so. A proposal holds as many
+      steps as it needs — they ship one pull request at a time, so the
+      count of them is not what makes a change reviewable
   design:
     - For every endpoint, fix the exact response shape per
       /docs/api-design.md
