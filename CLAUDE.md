@@ -67,11 +67,11 @@ Response contract rules for every endpoint — see
 
 ## Git & PRs
 
-- One reviewable unit = one branch = one PR. The unit is the proposal, unless
-  it decomposes into stages or steps tracked in `PLAN.md` — then each of those
-  gets its own branch and PR. Branch name: `feat/<proposal-slug>` for the
-  whole thing, `feat/<proposal-slug>-<step>` for one step (`fix/`, `chore/`
-  for non-feature work).
+- One reviewable unit = one branch = one PR. The unit is the **step**: a
+  change whose `tasks.md` holds more than one task group ships as one PR per
+  group, in the order the groups appear, on `feat/<proposal-slug>-<step>`. A
+  change whose `tasks.md` holds exactly one group is the exception and ships
+  whole on `feat/<proposal-slug>` (`fix/`, `chore/` for non-feature work).
 - Commits: imperative subject ≤ 72 chars, body only when the diff doesn't
   explain itself. Commit per completed task-list item, not per file.
 - Never commit directly to main; never force-push a branch after its PR
@@ -79,9 +79,11 @@ Response contract rules for every endpoint — see
 - Open PRs ready for review, not as drafts — CodeRabbit's auto-review skips
   drafts, so a draft is a PR nobody reviews.
 - Keep the PR description to what the diff can't say: a link to the
-  proposal, decisions taken, anything the reviewer must check by hand.
-  Never write a walkthrough, a file-by-file summary, or a restatement of
-  the acceptance criteria — CodeRabbit generates those on every run.
+  proposal, the acceptance criteria the step closes named by identifier —
+  or a line saying it closes none — decisions taken, anything the reviewer
+  must check by hand. Never write a walkthrough, a file-by-file summary, or
+  the text of an acceptance criterion — CodeRabbit generates those on every
+  run.
 - Re-check a pushed branch's PR state before every commit to it — a merged
   PR strands anything added afterwards, whichever merge style closed it.
 - Never post to a PR, issue, or any external service on the user's behalf —
