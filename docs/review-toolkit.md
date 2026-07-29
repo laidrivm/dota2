@@ -70,7 +70,7 @@ whether or not it goes through the OpenSpec stages:
 `bun run diff-budget` is not in that list and is not a review skill: it is a
 measurement, run by the pre-push hook on every push and by CI on every pull
 request. It reports how many lines the reviewer must read and names its own
-thresholds in the gate line, so they live in the script and nowhere else. A
+thresholds in the gate line, so a reader never looks them up here. A
 failure says the step was cut too wide, not that the code is wrong: cut the
 step, or put `oversize: <reason>` in the pull request body — a marker with
 nothing after it clears nothing.

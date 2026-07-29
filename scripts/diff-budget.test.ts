@@ -60,7 +60,9 @@ const repo = (base: Tree, head: Tree) => {
 const gate = (dir: string, base = "main", body?: string) => {
 	const p = Bun.spawnSync(["bash", script, base], {
 		cwd: dir,
-		env: body === undefined ? process.env : { ...process.env, PR_BODY: body },
+		// Always set, so a `PR_BODY` exported in the developer's own shell
+		// cannot turn a case that expects FAIL into an OVERRIDE.
+		env: { ...process.env, PR_BODY: body ?? "" },
 	});
 	return {
 		line: p.stdout.toString().trim(),
