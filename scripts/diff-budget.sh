@@ -92,6 +92,19 @@ total=$((source_lines + test_lines))
 if [ "$total" -ge "$FAIL_AT" ]; then
 	verdict="FAIL"
 	tail=" — over ${FAIL_AT}"
+	# The override lives in the pull request body, which the caller passes in
+	# `PR_BODY`; a marker with nothing after it names no reason and clears
+	# nothing. GitHub bodies arrive with CRLF line endings.
+	marker=$(printf '%s\n' "${PR_BODY:-}" | tr -d '\r' | grep -Em1 '^[[:space:]]*oversize:' || true)
+	if [ -n "$marker" ]; then
+		reason=$(printf '%s' "$marker" | sed -E 's/^[[:space:]]*oversize:[[:space:]]*//; s/[[:space:]]+$//')
+		if [ -n "$reason" ]; then
+			verdict="OVERRIDE"
+			tail=" — over ${FAIL_AT}, oversize: ${reason}"
+		else
+			tail=" — over ${FAIL_AT}, oversize: marker carries no reason"
+		fi
+	fi
 elif [ "$total" -ge "$WARN_AT" ]; then
 	verdict="WARN"
 	tail=" — over ${WARN_AT}, fails at ${FAIL_AT}"
