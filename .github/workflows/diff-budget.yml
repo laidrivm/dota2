@@ -21,9 +21,12 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
-      # Both values reach the script through the environment, never through
-      # the command line — a pull request body is attacker-controlled text.
+      # The base is passed as a commit, not as `origin/<ref>`: the checked-out
+      # merge commit has the base as an ancestor, so the SHA resolves without
+      # depending on which remote-tracking refs the checkout happened to fetch.
+      # Both values reach the script through the environment, never through the
+      # command line — a pull request body is attacker-controlled text.
       - env:
-          BASE_REF: ${{ github.event.pull_request.base.ref }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
           PR_BODY: ${{ github.event.pull_request.body }}
-        run: bash scripts/diff-budget.sh "origin/${BASE_REF}"
+        run: bash scripts/diff-budget.sh "$BASE_SHA"
