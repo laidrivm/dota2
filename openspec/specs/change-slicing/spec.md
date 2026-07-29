@@ -150,9 +150,17 @@ NOT affect the verdict.
 
 ### Requirement: An over-budget pull request is admitted only with a named reason
 
-WHEN a pull request exceeds 800 counted lines, CI SHALL fail unless the pull
-request body contains a line beginning `oversize:` followed by a reason. A
-body carrying `oversize:` with no text after it SHALL NOT clear the failure.
+WHEN a pull request reaches 800 counted lines or more, CI SHALL fail unless
+the pull request body contains a line beginning `oversize:` followed by a
+reason. A body carrying `oversize:` with no text after it SHALL NOT clear the
+failure.
+
+#### Scenario: A pull request at exactly the threshold
+
+- **WHEN** the count is exactly 800 and the body carries no `oversize:` line
+- **THEN** CI fails
+- **AND** the same 800 lines pass once the body names a reason — the override
+  covers every count the budget fails, not only those past it
 
 #### Scenario: A mechanical rename
 

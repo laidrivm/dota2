@@ -264,6 +264,14 @@ test("an oversize marker with a reason clears the failure", () => {
 	expect(g.code).toBe(0);
 });
 
+test("the override covers a count of exactly 800, not only counts past it", () => {
+	const dir = repo({ "a.ts": "one\n" }, { "b.ts": lines(800) });
+	expect(gate(dir, "main").code).toBe(1);
+	const g = gate(dir, "main", "oversize: at the threshold, not past it\n");
+	expect(g.line).toContain("OVERRIDE — 800 lines");
+	expect(g.code).toBe(0);
+});
+
 test("an oversize marker with no reason does not clear the failure", () => {
 	const dir = repo({ "a.ts": "one\n" }, { "b.ts": lines(900) });
 	const g = gate(dir, "main", "oversize:   \r\n");

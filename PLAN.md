@@ -163,6 +163,12 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
       splitting rule measurable and enforces one import arrow. The first change
       to ship one PR per task group, which is the default it introduces.
       Every change after this one is measured by `bun run diff-budget`.
+      The main spec differs from the archived delta in one requirement:
+      *An over-budget pull request is admitted only with a named reason* said
+      "exceeds 800" while the budget fails at 800 *or above*, so a count of
+      exactly 800 fell outside the override's own trigger although the script
+      applied it there. The living spec is corrected and carries the boundary
+      scenario; the archive keeps what shipped, because it is a snapshot.
   - [x] **5.1 slicing rules** — `feat/reviewable-diff-gates-slicing`. Rules
         and docs only, no code: `CLAUDE.md`, `openspec/config.yaml`,
         `docs/feature-workflow.md`. Closes *The reviewable unit is the step*,
