@@ -165,8 +165,11 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
         `docs/feature-workflow.md`. Closes *The reviewable unit is the step*,
         *A step closes one to three acceptance criteria*, *A seam between
         steps carries a working stub*.
-  - [ ] **5.2 the budget script** — `scripts/diff-budget.sh`, its test and the
-        `package.json` entry. Runnable by hand, wired to nothing.
+  - [x] **5.2 the budget script** — `scripts/diff-budget.sh`, its test and the
+        `package.json` entry. Runnable by hand, wired to nothing. Pairing is
+        one awk pass over per-file keys, not the design's two `comm` passes:
+        same three conditions, no sorted streams. 22 tests; all four
+        threshold assertions watched red under a moved threshold.
   - [ ] **5.3 wiring the budget** — the `oversize:` override, the CI job, the
         pre-push call, the gate's line in `docs/review-toolkit.md`.
   - [ ] **5.4 the import arrow** — `biome.json` (`noImportCycles` plus the

@@ -30,20 +30,20 @@ citations are the `### Requirement:` headings in
 
 ## 2. The budget script
 
-- [ ] 2.1 Write `scripts/diff-budget.sh`: resolve the base, read the patch
+- [x] 2.1 Write `scripts/diff-budget.sh`: resolve the base, read the patch
       with the three pathspec exclusions, count non-checkbox lines plus every
       checkbox line that does not pair with one on the other side, where a
       pair requires the same file, identical text once the box is normalised,
       and opposite boxes — the path comes from the enclosing `+++` header, so
       the pairing key is per-file — split source against test by pathspec —
       *The diff budget is measured over a defined set of lines*
-- [ ] 2.2 Emit the single gate line `DIFF gate: <VERDICT> — <N> lines (<S>
+- [x] 2.2 Emit the single gate line `DIFF gate: <VERDICT> — <N> lines (<S>
       source / <T> test)`, PASS below 500, WARN from 500, FAIL from 800, exit
       non-zero only on FAIL — *The budget warns at 500 lines and fails at 800*
-- [ ] 2.3 Exit non-zero with a stated reason when the base ref cannot be
+- [x] 2.3 Exit non-zero with a stated reason when the base ref cannot be
       resolved, so no caller can pass on an unmeasured diff — *The gate is
       hard in CI and soft before the push*
-- [ ] 2.4 Write `scripts/diff-budget.test.ts` driving the script against
+- [x] 2.4 Write `scripts/diff-budget.test.ts` driving the script against
       fabricated repositories, never the live branch. Cover the `/zombies`
       ideas: empty diff (1); only excluded artefacts (2); only checkbox flips
       (3); `src/app/latest.ts` counted as source (4); `e2e/*.spec.ts` counted
@@ -56,9 +56,9 @@ citations are the `### Requirement:` headings in
       identical task line deleted from one file and added ticked to another
       counted on both sides; a task line moved with its box unchanged counted
       on both sides
-- [ ] 2.5 Watch each threshold assertion fail before it passes, by moving the
+- [x] 2.5 Watch each threshold assertion fail before it passes, by moving the
       thresholds rather than by editing the assertion
-- [ ] 2.6 Add `"diff-budget": "bash scripts/diff-budget.sh"` to
+- [x] 2.6 Add `"diff-budget": "bash scripts/diff-budget.sh"` to
       `package.json` scripts so the gate is runnable by hand
 
 ## 3. Wiring the budget
