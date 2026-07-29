@@ -45,3 +45,54 @@
 ## 2026-07-27 — chore/archive-readme-drift
 
 - Not run: all of them — archive-only branch (spec sync + `git mv` + PLAN.md); the runs are logged under `fix/readme-drift` above.
+
+## 2026-07-29 — feat/mechanised-prohibitions
+
+- coderabbit (PR #38): PASS — 5 findings, 5 dispositioned (4 applied, 1 skipped: a queue-numbering collision the numbered proposal sequence already carries)
+- coderabbit-local: PASS — 9 findings, 9 dispositioned (7 applied, 2 rejected: scenario enumeration is not a spec convention here; `.md` in the suppression scan contradicts a recorded decision)
+- coderabbit (PR #38, second run): PASS — 6 findings, 6 dispositioned (1 applied, 4 already fixed, 1 skipped)
+- Not run: triage, zombies (branch restored mid-flight, proposal already written), warm (no manifest change), ponytail-review (documentation branch — the short sequence excludes it)
+
+## 2026-07-29 — feat/always-on-context-budget
+
+- zombies (propose): OPEN — 2 gaps, 2 folded into tasks
+- triage: OPEN — 4 groups, 0 high-risk
+- grep (documentation-branch gate): 3 sites found and turned into a task — `README.md`'s ownership row, `spec-inbox/README.md`, `tasks/task-8.md`
+- coderabbit-local: PASS — 7 findings, 7 dispositioned (6 applied, 1 rejected: an in-repo dismissal ledger is a declared non-goal)
+- coderabbit (PR #39): PASS — 2 findings, 2 applied
+- coderabbit (PR #39, after merge of a second change into the branch): PASS — 4 findings, 4 dispositioned (2 applied, 2 already fixed)
+- Not run: warm, ponytail-review
+
+## 2026-07-29 — fix/review-approval-direction
+
+- zombies (propose): PASS — 0 gaps; the deliverable is prose policy, nothing machine-readable to pin
+- triage: OPEN — 3 groups, 0 high-risk
+- grep: 1 site found beyond the four the change already named — the capability's own Purpose paragraph
+- coderabbit-local: PASS — 4 findings, 4 applied (one required `RENAMED` + `MODIFIED`; the validator's error message settled the contract)
+- Not run: warm, ponytail-review
+
+## 2026-07-29 — feat/skill-provenance
+
+- zombies (propose): OPEN — 11 gaps, 11 folded into tasks
+- triage: OPEN — 3 groups, 0 high-risk
+- grep: 1 live drift found — `README.md:21` names four gate skills where six are gates
+- coderabbit-local: PASS — 3 findings, 3 applied
+- coderabbit (PR #40): PASS — 2 findings, 2 applied (both cross-artefact: a spec corrected by an earlier finding while its proposal still said the old thing)
+- Not run: warm, ponytail-review
+
+## 2026-07-29 — feat/review-bot-instructions
+
+- zombies (propose): OPEN — 7 gaps, 7 folded into tasks
+- grep: 1 consequence found the proposal had not named — `local-review-loop` requires the local CLI to pass the same `path_instructions`, so both new reviews reach `/coderabbit-local` too
+- coderabbit-local: PASS — 8 findings, 8 dispositioned (6 applied, 2 rejected: "applyable" is this project's own term in `openspec/config.yaml`; the bot's date arithmetic ran a day behind)
+- coderabbit (PR #41): PASS — 8 findings, 8 dispositioned (6 applied, 2 rejected)
+- **triage announced and then not run.** The sequence was stated in the turn and only the grep and the CodeRabbit pass followed it.
+- Not run: warm, ponytail-review, triage (see above)
+
+## 2026-07-29 — feat/tracked-permission-policy
+
+- zombies (propose): OPEN — 8 ideas, 7 worth writing, all folded into tasks
+- coderabbit-local: PASS — 10 findings, 10 applied (one corrected a factual premise: bun reads `.npmrc`, per `bun install --help` on 1.3.14)
+- coderabbit (PR #42): PASS — 2 findings, 2 applied (the hygiene criterion was undefined for the 145 `Bash(...)` entries of 170)
+- **triage and the grep gate both skipped.** Neither ran; the grep is deferred to apply as task 2.6, which is not the same thing as running it over this diff.
+- Not run: warm, ponytail-review, triage, grep (see above)
