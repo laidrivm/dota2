@@ -156,10 +156,13 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
       loaded at startup, which is why every attempt from the authoring session
       passed silently. Confirming it takes the user: an approved prompt and an
       unprompted call are indistinguishable from inside the session.
-- [ ] **5. `reviewable-diff-gates`** — applying
-      (`openspec/changes/reviewable-diff-gates`). Makes the splitting rule
-      measurable and enforces one import arrow. Four task groups, four PRs in
-      order. Runs before Task 7, since every later change is measured by it.
+- [x] **5. `reviewable-diff-gates`** — merged as four pull requests (#44, #45,
+      #46 and the arrow step) and archived
+      (`openspec/changes/archive/2026-07-30-reviewable-diff-gates`; capability
+      specs at `openspec/specs/{change-slicing,module-boundaries}`). Makes the
+      splitting rule measurable and enforces one import arrow. The first change
+      to ship one PR per task group, which is the default it introduces.
+      Every change after this one is measured by `bun run diff-budget`.
   - [x] **5.1 slicing rules** — `feat/reviewable-diff-gates-slicing`. Rules
         and docs only, no code: `CLAUDE.md`, `openspec/config.yaml`,
         `docs/feature-workflow.md`. Closes *The reviewable unit is the step*,
