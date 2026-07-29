@@ -25,3 +25,5 @@ What counts as evidence for a claim, and what a claim may rest on.
 - Re-run the failure probe that justified an assertion after rewriting it.
 - Verify a generated file against the file on disk, not its source of truth —
   a git hook is what `.git/hooks/` holds, not what `package.json` declares.
+- Read a command's exit status from the command, not from a pipeline or a
+  loop that continued past its failure.
