@@ -196,8 +196,12 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
         `git commit` itself rejected with exit 1. Two more probes fixed the
         override's blast radius: a sibling `src/app/` file is untouched by it,
         and `noDoubleEquals` still fires inside `src/model.ts`, so the override
-        merges with the recommended preset rather than replacing it. The rules
-        list
+        merges with the recommended preset rather than replacing it. Every
+        probe was run twice: first under Biome 2.5.4, which was what
+        `node_modules` held, and again under the 2.5.5 that `bun.lock` pins and
+        CI installs — the local tree had fallen behind the lockfile, so the
+        first round verified a version CI never runs. Same result on both. The
+        rules list
         in `CLAUDE.md` now stands at 20, its maintenance trigger — the split is
         already queue item 7 (`always-on-context-budget`), so no separate
         proposal.
