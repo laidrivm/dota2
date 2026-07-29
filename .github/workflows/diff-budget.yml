@@ -24,8 +24,10 @@ jobs:
       # The base is passed as a commit, not as `origin/<ref>`: the checked-out
       # merge commit has the base as an ancestor, so the SHA resolves without
       # depending on which remote-tracking refs the checkout happened to fetch.
-      # Both values reach the script through the environment, never through the
-      # command line — a pull request body is attacker-controlled text.
+      # Neither value is interpolated into the script text: the body is read
+      # from the environment, and the SHA is expanded by the shell from an
+      # environment variable into an argument — a pull request body is
+      # attacker-controlled text.
       - env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
           PR_BODY: ${{ github.event.pull_request.body }}
