@@ -39,5 +39,5 @@ rules:
     - Include a test task derived from /zombies output
     - Each task cites the requirement(s) or acceptance criteria it fulfils;
       every criterion is cited by at least one task
-    - Each task group is one shippable step — it ships as its own pull
-      request and leaves the application working
+    - Group the tasks into steps, one `## <n>. <group>` heading per step —
+      the unit the proposal rule above scopes and /CLAUDE.md branches on
