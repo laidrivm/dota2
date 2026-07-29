@@ -10,6 +10,13 @@ this project's own authoring rules in `openspec/config.yaml`: acceptance
 criteria in EARS form, measurable values rather than adjectives, a Non-goals
 section present, and every criterion cited by at least one task.
 
+The same entry SHALL tell the bot to check the change's artefacts **against
+each other** — a statement in `proposal.md`, `design.md`, `tasks.md` and the
+delta specs that contradicts its siblings is a finding. This is the half no
+rule holds: a delta spec corrected by a review finding while its proposal still
+states the old thing produced findings on three consecutive pull requests, and
+widening the prose rule that forbids it did not stop the fourth.
+
 No local skill reads a delta spec, and a proposal opens as its own pull request
 here, so this is the one review that happens where `docs/feature-workflow.md`
 says a fix is still cheap.
@@ -27,6 +34,18 @@ says a fix is still cheap.
 #### Scenario: A proposal without Non-goals
 
 - **WHEN** `proposal.md` carries no Non-goals section
+- **THEN** the bot flags it
+
+#### Scenario: A spec corrected without its proposal
+
+- **WHEN** a delta spec is changed and `proposal.md` still describes the
+  previous behaviour
+- **THEN** the bot flags the contradiction and names both sites
+
+#### Scenario: A count that disagrees between artefacts
+
+- **WHEN** `proposal.md` says a change adds four entries and `tasks.md` adds
+  three
 - **THEN** the bot flags it
 
 #### Scenario: An archived change

@@ -55,8 +55,8 @@
 
 ## 2026-07-29 — feat/always-on-context-budget
 
-- zombies (propose): OPEN — 2 gaps, 2 folded into tasks
-- triage: OPEN — 4 groups, 0 high-risk
+- zombies (propose): PASS — 2 gaps, 2 dispositioned (both folded into tasks 2.1)
+- triage: **left OPEN** — 4 groups, 0 high-risk, 1 Medium never read. The gate was never closed and no `BLOCKED` was written; recorded as it ended.
 - grep (documentation-branch gate): 3 sites found and turned into a task — `README.md`'s ownership row, `spec-inbox/README.md`, `tasks/task-8.md`
 - coderabbit-local: PASS — 7 findings, 7 dispositioned (6 applied, 1 rejected: an in-repo dismissal ledger is a declared non-goal)
 - coderabbit (PR #39): PASS — 2 findings, 2 applied
@@ -66,15 +66,15 @@
 ## 2026-07-29 — fix/review-approval-direction
 
 - zombies (propose): PASS — 0 gaps; the deliverable is prose policy, nothing machine-readable to pin
-- triage: OPEN — 3 groups, 0 high-risk
+- triage: **left OPEN** — 3 groups, 0 high-risk, 1 Medium never read. Same as above.
 - grep: 1 site found beyond the four the change already named — the capability's own Purpose paragraph
 - coderabbit-local: PASS — 4 findings, 4 applied (one required `RENAMED` + `MODIFIED`; the validator's error message settled the contract)
 - Not run: warm, ponytail-review
 
 ## 2026-07-29 — feat/skill-provenance
 
-- zombies (propose): OPEN — 11 gaps, 11 folded into tasks
-- triage: OPEN — 3 groups, 0 high-risk
+- zombies (propose): PASS — 11 gaps, 11 dispositioned (all folded into tasks 1.4-1.5)
+- triage: **left OPEN** — 3 groups, 0 high-risk, 1 Medium never read. Same as above.
 - grep: 1 live drift found — `README.md:21` names four gate skills where six are gates
 - coderabbit-local: PASS — 3 findings, 3 applied
 - coderabbit (PR #40): PASS — 2 findings, 2 applied (both cross-artefact: a spec corrected by an earlier finding while its proposal still said the old thing)
@@ -82,7 +82,7 @@
 
 ## 2026-07-29 — feat/review-bot-instructions
 
-- zombies (propose): OPEN — 7 gaps, 7 folded into tasks
+- zombies (propose): PASS — 7 gaps, 7 dispositioned (all folded into task 1.9)
 - grep: 1 consequence found the proposal had not named — `local-review-loop` requires the local CLI to pass the same `path_instructions`, so both new reviews reach `/coderabbit-local` too
 - coderabbit-local: PASS — 8 findings, 8 dispositioned (6 applied, 2 rejected: "applyable" is this project's own term in `openspec/config.yaml`; the bot's date arithmetic ran a day behind)
 - coderabbit (PR #41): PASS — 8 findings, 8 dispositioned (6 applied, 2 rejected)
@@ -91,7 +91,7 @@
 
 ## 2026-07-29 — feat/tracked-permission-policy
 
-- zombies (propose): OPEN — 8 ideas, 7 worth writing, all folded into tasks
+- zombies (propose): PASS — 8 ideas, 8 dispositioned (7 folded into tasks 2.4-2.5, 1 skipped: holds by construction)
 - coderabbit-local: PASS — 10 findings, 10 applied (one corrected a factual premise: bun reads `.npmrc`, per `bun install --help` on 1.3.14)
 - coderabbit (PR #42): PASS — 2 findings, 2 applied (the hygiene criterion was undefined for the 145 `Bash(...)` entries of 170)
 - **triage and the grep gate both skipped.** Neither ran; the grep is deferred to apply as task 2.6, which is not the same thing as running it over this diff.

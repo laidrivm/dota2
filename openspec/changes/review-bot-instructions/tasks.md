@@ -19,7 +19,9 @@ assertions; this change extends both, never rewrites them.
       trusted from `design.md` (2)
 - [ ] 1.2 Add the `openspec/changes/**` entry: EARS form, measurable values
       rather than adjectives, Non-goals present, every criterion cited by a
-      task — *The specification itself is reviewed*
+      task, **and the change's artefacts checked against each other** — a
+      statement in one that contradicts its siblings is a finding — *The
+      specification itself is reviewed*
 - [ ] 1.3 Add the `src/**` entry: select the change by branch name, exact match
       on the name after the branch prefix first and only then stripping a
       trailing `-<step>`, since slugs contain hyphens; compare in both
