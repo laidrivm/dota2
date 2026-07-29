@@ -180,6 +180,10 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
         exactly as recorded. The four most recent merged PRs measure 472, 76,
         112 and 485 — the last two of those sit just under the warning line,
         so the first reading of the threshold is that it is set about right.
+        The hook needed `bunx simple-git-hooks` to reach `.git/hooks/pre-push`:
+        editing `package.json` changed the declaration and nothing on disk, so
+        the first push after the edit ran the old hook. Now a rule in
+        `docs/verification.md`.
   - [ ] **5.4 the import arrow** — `biome.json` (`noImportCycles` plus the
         `noRestrictedImports` override on the model) and one rule line.
 - [ ] **6. `mechanised-prohibitions`** — proposed
