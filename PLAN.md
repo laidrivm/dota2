@@ -184,13 +184,20 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
         editing `package.json` changed the declaration and nothing on disk, so
         the first push after the edit ran the old hook. Now a rule in
         `docs/verification.md`.
-  - [x] **5.4 the import arrow** — `biome.json` (`noImportCycles` plus the
-        `noRestrictedImports` override on the model) and one rule line. The
-        option shape came from Biome's own `configuration_schema.json` in
-        `node_modules`, not from the design's recollection of it. Four probes,
-        all red on both files and green after revert: a value import, a
-        type-only import, a `storage.ts` ↔ `session.ts` cycle, and a staged
-        violation that `git commit` itself rejected with exit 1. The rules list
+  - [x] **5.4 the import arrow** — `biome.json`: `noImportCycles` repository
+        wide, plus a `noRestrictedImports` override scoped to `src/model.ts`
+        and `src/types.ts`, and one rule line. The option shape came from
+        Biome's own `configuration_schema.json` in `node_modules`, not from the
+        design's recollection of it. Four probes, each red where it was planted
+        and green after revert: a value import in `src/model.ts`, a type-only
+        import in `src/types.ts` — so the boundary covers types without extra
+        configuration — a `src/app/storage.ts` ↔ `src/app/session.ts` cycle,
+        reported on both files, and a staged violation in `src/types.ts` that
+        `git commit` itself rejected with exit 1. Two more probes fixed the
+        override's blast radius: a sibling `src/app/` file is untouched by it,
+        and `noDoubleEquals` still fires inside `src/model.ts`, so the override
+        merges with the recommended preset rather than replacing it. The rules
+        list
         in `CLAUDE.md` now stands at 20, its maintenance trigger — the split is
         already queue item 7 (`always-on-context-budget`), so no separate
         proposal.
