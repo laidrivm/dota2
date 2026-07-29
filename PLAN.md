@@ -256,10 +256,14 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
   a shell redirection, a permission mode such as `acceptEdits`, and a
   subprocess each pass it. On the allow list, the test pins the criterion and
   not the entries: pinning fifteen conveniences by name would make every added
-  convenience a test edit. The criterion is containment after normalisation —
-  expand `~` and the environment, collapse `..`, require the result under the
-  repository root — because a blacklist of `//Users/` and `/tmp` passes
-  `../../secrets/**`. Whether an entry is a one-off stays a review criterion,
+  convenience a test edit. The criterion is two rules over two forms, because
+  the entries are not uniformly paths: 145 of the 170 are `Bash(...)` command
+  strings and 6 are `Read(...)` specifiers. No entry may carry an absolute path
+  token — lexical, no shell parsing, catches both `Read(//Users/…)` and
+  `Bash(cp … /tmp/c.bak)`; and a path specifier additionally resolves against
+  the repository root, which is what catches `Edit(../../secrets/**)`. Parsing
+  paths out of a `Bash` command was rejected: quoting, globs, redirections and
+  expansions, to gate a file a human reads on review. Whether an entry is a one-off stays a review criterion,
   answered in the PR body: repo-relative, it is indistinguishable from policy
   by path alone.
 

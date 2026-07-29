@@ -62,11 +62,30 @@ documented workflow needs. An entry whose path leaves the repository SHALL NOT
 appear in it: such an entry is a fact about one machine, and the tracked file
 is read by every clone.
 
-**Leaving the repository is decided by normalising, not by matching a shape.**
-The check resolves each path in an entry — expanding `~` and any environment
-reference, then collapsing `.` and `..` — and requires the result to stay under
-the repository root. A blacklist of `//Users/` and `/tmp` would pass
-`Edit(../../secrets/**)`, which escapes by a different spelling.
+**The entries are not uniformly paths, so the check is two rules over two
+forms.** Of the 170 entries as they stand, 145 are `Bash(...)` — a command
+string — and 6 are `Read(...)`, a path specifier.
+
+1. **Every entry, whatever its tool**: no absolute path token — nothing
+   beginning `/`, `//` or `~/`. A command this project's workflow runs needs
+   none: `bun test`, `gh pr view *`, `bunx openspec validate *` are all
+   relative or pathless. This is lexical, so it needs no shell parsing, and it
+   catches `Bash(cp … /tmp/c.bak)` and `Read(//Users/…/skills/**)` by the same
+   sentence.
+2. **Path-specifier rules only** — `Read(...)` and `Edit(...)`, whose
+   specifier is a path by definition: resolve it against the repository root,
+   collapsing `.` and `..`, and require the result to stay inside. This is what
+   catches `Edit(../../secrets/**)`, which carries no absolute token.
+
+A `Bash` entry is deliberately **not** parsed for paths inside its command.
+Extracting them means handling quoting, globs, redirections and expansions —
+a shell parser, to gate a file that a human reads on review. Rule 1 is what
+covers that class, and it covers it by forbidding the shape rather than by
+understanding the command.
+
+Unset environment references and symlinks are out of scope for both rules: the
+check reads a settings file, it does not touch the filesystem, so it never
+resolves a symlink and never expands a variable whose value it cannot know.
 
 Two kinds of unwanted entry are separated by what a test can see. The path
 criterion above is **pinned by a test**. Whether an entry is a one-off — a
@@ -90,12 +109,24 @@ name a machine-local or `/tmp` path and 8 a one-off `sed`, `cp` or `mv`.
 - **WHEN** an allow entry names a path under `/tmp`
 - **THEN** `bun test` fails
 
-#### Scenario: An entry that escapes by traversal
+#### Scenario: An absolute path inside a command
 
-- **WHEN** an allow entry names `../../something` or a `~`-rooted path that
-  normalises outside the repository
-- **THEN** `bun test` fails, because containment is decided after
-  normalisation and not by the spelling
+- **WHEN** an allow entry is `Bash(cp src/x.css /tmp/x.bak)`
+- **THEN** `bun test` fails on the absolute token, without the command being
+  parsed
+
+#### Scenario: A path specifier that escapes by traversal
+
+- **WHEN** an allow entry is `Edit(../../secrets/**)`, which carries no
+  absolute token
+- **THEN** `bun test` fails, because a path specifier is also resolved against
+  the repository root
+
+#### Scenario: A pathless workflow command
+
+- **WHEN** an allow entry is `Bash(bun test)` or `Bash(gh pr view *)`
+- **THEN** neither rule fires: there is no absolute token and no path
+  specifier to resolve
 
 #### Scenario: A one-off command with a repo-relative path
 
