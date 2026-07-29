@@ -266,18 +266,21 @@ test("the default base is resolved when no argument is given", () => {
 	expect(p.exitCode).toBe(0);
 });
 
-test("the origin/ prefix is stripped from the resolved default", () => {
+test("the default comes from origin/HEAD, not from a local branch", () => {
 	const dir = repo({ "a.ts": "one\n" }, { "b.ts": lines(10) });
-	// A bare repository standing in for the remote, so `origin/HEAD` resolves
-	// and the script has a prefix to strip.
 	const remote = mkdtempSync(join(tmpdir(), "diff-budget-remote-"));
 	made.push(remote);
 	git(remote, "init", "-q", "--bare", "-b", "main");
 	git(dir, "remote", "add", "origin", remote);
 	git(dir, "push", "-q", "origin", "main", "feature");
 	git(dir, "remote", "set-head", "origin", "main");
+	// Deleting the local branch is what makes this case discriminating: with
+	// `main` still present, a script that resolved nothing at all would fall
+	// back to it and count the same 10 lines.
+	git(dir, "branch", "-qD", "main");
 	const p = Bun.spawnSync(["bash", script], { cwd: dir });
 	expect(p.stdout.toString()).toContain("PASS — 10 lines");
+	expect(p.exitCode).toBe(0);
 });
 
 test("the same task text ticked in two files pairs within each", () => {
