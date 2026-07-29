@@ -57,8 +57,11 @@ const repo = (base: Tree, head: Tree) => {
 	return dir;
 };
 
-const gate = (dir: string, base = "main") => {
-	const p = Bun.spawnSync(["bash", script, base], { cwd: dir });
+const gate = (dir: string, base = "main", body?: string) => {
+	const p = Bun.spawnSync(["bash", script, base], {
+		cwd: dir,
+		env: body === undefined ? process.env : { ...process.env, PR_BODY: body },
+	});
 	return {
 		line: p.stdout.toString().trim(),
 		stderr: p.stderr.toString().trim(),
@@ -243,6 +246,43 @@ test("a test-heavy branch fails on the total, tests included", () => {
 	// 340 added + 1 removed original line, so the verdict is the total's.
 	expect(g.line).toContain("FAIL");
 	expect(g.code).not.toBe(0);
+});
+
+test("an oversize marker with a reason clears the failure", () => {
+	const dir = repo({ "a.ts": "one\n" }, { "b.ts": lines(900) });
+	const g = gate(
+		dir,
+		"main",
+		"Some prose.\r\noversize: mechanical rename of computeModel across 14 files\r\nMore prose.\r\n",
+	);
+	expect(g.line).toBe(
+		"DIFF gate: OVERRIDE — 900 lines (900 source / 0 test) — over 800, " +
+			"oversize: mechanical rename of computeModel across 14 files",
+	);
+	expect(g.code).toBe(0);
+});
+
+test("an oversize marker with no reason does not clear the failure", () => {
+	const dir = repo({ "a.ts": "one\n" }, { "b.ts": lines(900) });
+	const g = gate(dir, "main", "oversize:   \r\n");
+	expect(g.line).toContain("FAIL");
+	expect(g.line).toContain("oversize: marker carries no reason");
+	expect(g.code).toBe(1);
+});
+
+test("an oversize marker does not rescue a branch that only warns", () => {
+	const dir = repo({ "a.ts": "one\n" }, { "b.ts": lines(600) });
+	const g = gate(dir, "main", "oversize: not needed here\n");
+	expect(g.line).toContain("WARN — 600 lines");
+	expect(g.line).not.toContain("oversize");
+});
+
+test("a body mentioning oversize mid-line is not a marker", () => {
+	const dir = repo({ "a.ts": "one\n" }, { "b.ts": lines(900) });
+	const g = gate(dir, "main", "I considered whether oversize: applies here.\n");
+	expect(g.line).toContain("FAIL");
+	expect(g.line).not.toContain("oversize:");
+	expect(g.code).toBe(1);
 });
 
 test("an unresolvable base exits non-zero rather than reporting a pass", () => {
