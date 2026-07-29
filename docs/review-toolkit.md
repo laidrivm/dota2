@@ -68,12 +68,14 @@ whether or not it goes through the OpenSpec stages:
 5. `/coderabbit-local` last, then push.
 
 `bun run diff-budget` is not in that list and is not a review skill: it is a
-measurement, run by the pre-push hook on every push and by CI on every pull
-request. It reports how many lines the reviewer must read and names its own
-thresholds in the gate line, so a reader never looks them up here. A
-failure says the step was cut too wide, not that the code is wrong: cut the
-step, or put `oversize: <reason>` in the pull request body — a marker with
-nothing after it clears nothing.
+measurement, run by CI on every pull request and by the pre-push hook once
+typecheck and the tests have passed. It reports how many lines the reviewer
+must read and names its own thresholds in the gate line, so a reader never
+looks them up here. Over budget says the step was cut too wide, not that the
+code is wrong: cut the step, or put `oversize: <reason>` in the pull request
+body — a marker with nothing after it clears nothing. A gate that reports it
+could not measure is neither: it means the base is unresolvable, and in CI it
+fails the check rather than passing unmeasured.
 
 A branch of documentation, rules or config runs `/triage` alone, plus a grep
 for every site restating what it changes, then one pass of
