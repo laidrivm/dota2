@@ -248,7 +248,10 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
   reconciliation grep found the default restated nowhere else by name, but
   twice by cadence: `docs/feature-workflow.md` spoke of "the branch" for a
   whole change and of archiving once "the change is merged", both of which
-  are per-step now.
+  are per-step now. The instruction to split a feature into sequenced
+  proposals is deleted rather than given a number: its trigger was an
+  adjective in the same rule block that forbids adjectives, and with the step
+  as the reviewable unit a proposal's step count no longer bounds anything.
 
 - Cross-artefact staleness is not held by prose, demonstrated on three pull
   requests in a row. The rule *When a statement changes … grep every site that
