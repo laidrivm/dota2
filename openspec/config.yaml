@@ -26,9 +26,12 @@ rules:
     - Write acceptance criteria in EARS form (WHEN <trigger> / IF <unwanted
       condition> THEN / WHILE <state> — the system SHALL <behaviour>), with
       measurable values, not adjectives
-    - Scope a proposal to one reviewable cycle. If the feature needs more,
-      split it into sequenced proposals, each independently applyable and
-      testable — state the sequence in the first proposal's design
+    - Scope each step to one to three acceptance criteria, leaving the
+      application working when it merges. A step carrying only
+      infrastructure may close none and says so. If the feature needs more
+      steps than one proposal can hold, split it into sequenced proposals,
+      each independently applyable and testable — state the sequence in the
+      first proposal's design
   design:
     - For every endpoint, fix the exact response shape per
       /docs/api-design.md
@@ -36,3 +39,5 @@ rules:
     - Include a test task derived from /zombies output
     - Each task cites the requirement(s) or acceptance criteria it fulfils;
       every criterion is cited by at least one task
+    - Each task group is one shippable step — it ships as its own pull
+      request and leaves the application working
