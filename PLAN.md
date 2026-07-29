@@ -215,6 +215,13 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
       file-size cap (~300 `.ts`, ~200 `.css`) and the rule of two are recorded
       there as deliberate non-goals; the import arrow is already in its scope.
       An `/opsx:update` on that change, not a new proposal.
+- [ ] **`tracked-permission-policy`** — proposed
+      (`openspec/changes/tracked-permission-policy`), not yet applied. Gates
+      `bunfig.toml` and `.npmrc` with `Edit` rules, and curates the 170
+      auto-accepted allow entries out of the untracked settings file into the
+      tracked one. Two task groups, two PRs. Applies after
+      `mechanised-prohibitions`, which rewrites `deny` and adds `hooks` in the
+      same file.
 - [ ] **Task 7** — Docker + VPS deploy (open decisions: registry
       GHCR/Docker Hub, same VPS or a new one)
 - [ ] **Phase 3** — OpenSpec: STRATZ → Postgres → snapshot bundle pipeline
@@ -222,6 +229,29 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
 - [ ] **Task 5** — error tracking (precondition: product is deployed)
 
 ## Accepted decisions
+
+- `tracked-permission-policy`: the registry rule is expressible as a
+  permission entry, unlike the two git prohibitions `mechanised-prohibitions`
+  gave a hook, so it gets two lines and no script. What settles the shape is
+  the docs: file permission checks match `Edit(path)` only — a `Write(path)`
+  rule is accepted, never matched, and warns at startup — and `Bash(command:…)`
+  and its `file_path` equivalent are ignored outright, so no permission rule
+  can see a *key*, only a file. The two files then fall on opposite sides:
+  `.npmrc` has no legitimate content here at all, so its existence is the
+  event and `deny` is exactly as coarse as the prose; `bunfig.toml` carries
+  `[test] pathIgnorePatterns` and the release-age gate, so `ask` is the
+  strongest rule that does not break a legitimate edit. A `PreToolUse` hook
+  reading `tool_input.new_string` was rejected — more precise, and a second
+  script to keep true, to save a prompt on a file edited twice since it was
+  created. The prose rule stays in `CLAUDE.md`, unlike the ones that change
+  deletes, because a shell redirection writes either file without an `Edit`
+  call and the mechanism is therefore partial. `bunfig.toml`'s
+  `minimumReleaseAgeExcludes` is covered by the same rule, being in the same
+  file — its own comment already said "add entries only with an explicit user
+  decision". On the allow list, the test pins the criterion and not the
+  entries: pinning fifteen conveniences by name would make every added
+  convenience a test edit, while "no path outside the repository, nothing under
+  `/tmp`" catches what produced an 11 KB untracked file of 170 entries.
 
 - `review-bot-instructions`: most of the source analysis's item 27 was already
   shipped by `coderabbit-config` on 2026-07-25 — `path_filters`, the three
