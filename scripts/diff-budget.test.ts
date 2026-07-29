@@ -285,6 +285,39 @@ test("a body mentioning oversize mid-line is not a marker", () => {
 	expect(g.code).toBe(1);
 });
 
+test("the first oversize marker in a body wins", () => {
+	const dir = repo({ "a.ts": "one\n" }, { "b.ts": lines(900) });
+	const g = gate(
+		dir,
+		"main",
+		"oversize: the real reason\noversize: a stale one\n",
+	);
+	expect(g.line).toContain("oversize: the real reason");
+	expect(g.line).not.toContain("stale");
+});
+
+test("an indented marker still clears the failure", () => {
+	const dir = repo({ "a.ts": "one\n" }, { "b.ts": lines(900) });
+	const g = gate(dir, "main", "  oversize: indented but on its own line\n");
+	expect(g.line).toContain("OVERRIDE");
+});
+
+test("a marker written as a markdown bullet is not a marker", () => {
+	const dir = repo({ "a.ts": "one\n" }, { "b.ts": lines(900) });
+	// The spec names a line *beginning* `oversize:`. A bullet begins with the
+	// dash, so it does not clear — the marker is a field, not prose.
+	const g = gate(dir, "main", "- oversize: mechanical rename\n");
+	expect(g.line).toContain("FAIL");
+	expect(g.code).toBe(1);
+});
+
+test("a capitalised marker is not a marker", () => {
+	const dir = repo({ "a.ts": "one\n" }, { "b.ts": lines(900) });
+	const g = gate(dir, "main", "Oversize: mechanical rename\n");
+	expect(g.line).toContain("FAIL");
+	expect(g.code).toBe(1);
+});
+
 test("an unresolvable base exits non-zero rather than reporting a pass", () => {
 	const g = gate(
 		repo({ "a.ts": "one\n" }, { "b.ts": lines(10) }),
