@@ -1,0 +1,29 @@
+name: Diff budget
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  budget:
+    runs-on: ubuntu-latest
+    steps:
+      # `<base>...HEAD` needs the merge base, which a shallow clone does not
+      # carry. The script exits non-zero when it cannot measure, so a missing
+      # history fails this check rather than quietly retiring it.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      # Both values reach the script through the environment, never through
+      # the command line — a pull request body is attacker-controlled text.
+      - env:
+          BASE_REF: ${{ github.event.pull_request.base.ref }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: bash scripts/diff-budget.sh "origin/${BASE_REF}"
