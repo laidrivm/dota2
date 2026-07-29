@@ -7,26 +7,28 @@ set -uo pipefail
 WARN_AT=500
 FAIL_AT=800
 
+# An unmeasured diff must never read as a passing one, so every way of
+# failing to measure leaves through here.
+die() {
+	echo "DIFF gate: ERROR — $1" >&2
+	exit 2
+}
+
 base="${1:-}"
 if [ -z "$base" ]; then
-	# Not `rev-parse --abbrev-ref origin/HEAD`: with no origin/HEAD it echoes
-	# the argument back, which strips to the literal `HEAD` — and `HEAD...HEAD`
-	# is an empty diff, so every branch would read PASS at 0 lines.
+	# The remote-tracking ref is kept whole: `origin/main` resolves wherever
+	# `main` does and also where the local branch was never checked out.
+	# Not `rev-parse --abbrev-ref origin/HEAD` — with no origin/HEAD it echoes
+	# the argument back, and `HEAD...HEAD` is an empty diff, so every branch
+	# would read PASS at 0 lines.
 	base=$(git symbolic-ref --quiet --short refs/remotes/origin/HEAD 2>/dev/null || true)
-	base="${base#origin/}"
 	base="${base:-main}"
 fi
 
-# An unmeasured diff must never read as a passing one, so every way of
-# failing to measure exits non-zero with the reason.
-if ! git rev-parse --verify --quiet "${base}^{commit}" >/dev/null; then
-	echo "DIFF gate: ERROR — cannot resolve base ref '${base}'" >&2
-	exit 2
-fi
-if ! git merge-base "$base" HEAD >/dev/null 2>&1; then
-	echo "DIFF gate: ERROR — no merge base between '${base}' and HEAD" >&2
-	exit 2
-fi
+git rev-parse --verify --quiet "${base}^{commit}" >/dev/null ||
+	die "cannot resolve base ref '${base}'"
+git merge-base "$base" HEAD >/dev/null 2>&1 ||
+	die "no merge base between '${base}' and HEAD"
 
 # Artefacts nobody reads line by line. Everything else counts, `openspec/**`
 # included — a proposal too large to read is the case this gate exists for.
@@ -79,15 +81,12 @@ count() {
 	'
 }
 
-test_lines=$(count "${TESTS[@]}")
-source_lines=$(count . "${TESTS[@]/#/:(exclude)}")
-
-# A half that failed mid-pipeline comes back empty, and empty reads as 0 in
-# arithmetic — the one way left for an unmeasured diff to report a pass.
-if ! [[ "$test_lines$source_lines" =~ ^[0-9]+$ ]]; then
-	echo "DIFF gate: ERROR — could not count the diff against '${base}'" >&2
-	exit 2
-fi
+# A pipeline that died partway still prints a number, so the exit status is
+# what says the count is whole; the numeric test catches an empty half, which
+# arithmetic would otherwise read as a zero.
+test_lines=$(count "${TESTS[@]}") || die "could not count the tests"
+source_lines=$(count . "${TESTS[@]/#/:(exclude)}") || die "could not count the source"
+[[ "$test_lines$source_lines" =~ ^[0-9]+$ ]] || die "counted no lines at all"
 total=$((source_lines + test_lines))
 
 if [ "$total" -ge "$FAIL_AT" ]; then
