@@ -79,11 +79,11 @@ Response contract rules for every endpoint — see
 - Open PRs ready for review, not as drafts — CodeRabbit's auto-review skips
   drafts, so a draft is a PR nobody reviews.
 - Keep the PR description to what the diff can't say: a link to the
-  proposal, the acceptance criteria the step closes named by identifier —
-  or a line saying it closes none — decisions taken, anything the reviewer
-  must check by hand. Never write a walkthrough, a file-by-file summary, or
-  the text of an acceptance criterion — CodeRabbit generates those on every
-  run.
+  proposal, the criteria the step closes named by their `### Requirement:`
+  headings — or a line saying it closes none — decisions taken, anything the
+  reviewer must check by hand. Never write a walkthrough, a file-by-file
+  summary, or the text of an acceptance criterion — CodeRabbit generates
+  those on every run.
 - Re-check a pushed branch's PR state before every commit to it — a merged
   PR strands anything added afterwards, whichever merge style closed it.
 - Never post to a PR, issue, or any external service on the user's behalf —
