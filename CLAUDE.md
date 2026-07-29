@@ -187,6 +187,8 @@ observability, causal claims — see [docs/verification.md](docs/verification.md
 
 - Before inlining a single-caller helper, grep for the logic it duplicates
   elsewhere.
+- `src/model.ts` and `src/types.ts` never import from `src/app/**`, type-only
+  imports included.
 - Gate a side effect on the reducer's result, not on the action that asked
   for it.
 - A default action bound to a key applies to the first *enabled* candidate,
