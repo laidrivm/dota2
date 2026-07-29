@@ -83,19 +83,19 @@ citations are the `### Requirement:` headings in
 
 ## 4. The import arrow
 
-- [ ] 4.1 Enable `suspicious.noImportCycles` in `biome.json` — *No module
+- [x] 4.1 Enable `suspicious.noImportCycles` in `biome.json` — *No module
       import cycles*
-- [ ] 4.2 Add the `overrides` entry for `src/model.ts` and `src/types.ts`
+- [x] 4.2 Add the `overrides` entry for `src/model.ts` and `src/types.ts`
       enabling `style.noRestrictedImports` against `./app/**` with a message
       naming the boundary — *The prediction model never imports from the
       application layer*
-- [ ] 4.3 Prove both rules red by hand before relying on them: a value import
+- [x] 4.3 Prove both rules red by hand before relying on them: a value import
       from the app layer in `src/model.ts` (19), a type-only import (20), and
       a two-file cycle inside `src/app/` — then revert the probes
-- [ ] 4.4 Confirm `src/app/app.tsx` importing `../model.ts` stays green (21)
+- [x] 4.4 Confirm `src/app/app.tsx` importing `../model.ts` stays green (21)
       and that `bun run lint` is clean over the untouched tree
-- [ ] 4.5 Confirm the pre-commit hook rejects a staged violation, not only CI
+- [x] 4.5 Confirm the pre-commit hook rejects a staged violation, not only CI
       (22)
-- [ ] 4.6 Add the one-line arrow rule to the `CLAUDE.md` rules list so
+- [x] 4.6 Add the one-line arrow rule to the `CLAUDE.md` rules list so
       CodeRabbit reads it through `code_guidelines`, and check the list
       against its own ~20-rule maintenance trigger

@@ -184,8 +184,16 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
         editing `package.json` changed the declaration and nothing on disk, so
         the first push after the edit ran the old hook. Now a rule in
         `docs/verification.md`.
-  - [ ] **5.4 the import arrow** — `biome.json` (`noImportCycles` plus the
-        `noRestrictedImports` override on the model) and one rule line.
+  - [x] **5.4 the import arrow** — `biome.json` (`noImportCycles` plus the
+        `noRestrictedImports` override on the model) and one rule line. The
+        option shape came from Biome's own `configuration_schema.json` in
+        `node_modules`, not from the design's recollection of it. Four probes,
+        all red on both files and green after revert: a value import, a
+        type-only import, a `storage.ts` ↔ `session.ts` cycle, and a staged
+        violation that `git commit` itself rejected with exit 1. The rules list
+        in `CLAUDE.md` now stands at 20, its maintenance trigger — the split is
+        already queue item 7 (`always-on-context-budget`), so no separate
+        proposal.
 - [ ] **6. `mechanised-prohibitions`** — proposed
       (`openspec/changes/mechanised-prohibitions`), not yet applied. Converts
       the prohibitions that carry no judgement into `deny` entries, a
