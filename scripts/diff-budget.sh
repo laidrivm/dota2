@@ -38,16 +38,12 @@ count() {
 	git diff "${base}...HEAD" -- "$@" "${EXCLUDE[@]}" | awk '
 		/^diff --git / { inhunk = 0; next }
 		/^@@/          { inhunk = 1; next }
-		!inhunk && /^--- / {
-			old = substr($0, 5)
-			sub(/^a\//, "", old)
-			next
-		}
 		!inhunk && /^\+\+\+ / {
+			# A deleted file reads `+++ /dev/null`, which needs no fallback to
+			# the `---` header: it contributes removed lines only, and a pair
+			# needs one of each.
 			path = substr($0, 5)
 			sub(/^b\//, "", path)
-			# A deleted file names itself only in the `---` header.
-			if (path == "/dev/null") path = old
 			next
 		}
 		!inhunk { next }
