@@ -211,7 +211,9 @@ observability, causal claims — see [docs/verification.md](docs/verification.md
   are written in British English by default (`behaviour`, `afterwards`);
   identifiers and third-party API names keep whatever spelling they ship with.
 - Maintain `PLAN.md`: read it at session start; update its queue, statuses
-  and decisions in the same turn a task or stage completes.
+  and decisions in the same turn a task or stage completes. A step's box is
+  ticked in the pull request that implements it, never in a commit after the
+  merge.
 - Fix code a linter or type-checker flags; never suppress a finding with an
   ignore comment or config override unless the user approves the suppression.
 - Open every markdown file with a level-1 heading — OpenSpec's `design.md`
