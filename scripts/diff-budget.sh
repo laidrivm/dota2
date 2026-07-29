@@ -96,9 +96,13 @@ if [ "$total" -ge "$FAIL_AT" ]; then
 	# `PR_BODY`; a marker with nothing after it names no reason and clears
 	# nothing. GitHub bodies arrive with CRLF line endings, and the trailing
 	# `[[:space:]]` strip below takes the carriage return with it.
-	marker=$(printf '%s\n' "${PR_BODY:-}" | grep -Em1 '^[[:space:]]*oversize:' || true)
-	if [ -n "$marker" ]; then
-		reason=$(printf '%s' "$marker" | sed -E 's/^[[:space:]]*oversize:[[:space:]]*//; s/[[:space:]]+$//')
+	markers=$(printf '%s\n' "${PR_BODY:-}" | grep -E '^[[:space:]]*oversize:' || true)
+	if [ -n "$markers" ]; then
+		# The first marker that carries a reason decides, so an empty one
+		# earlier in the body does not shadow a later valid one.
+		reason=$(printf '%s\n' "$markers" |
+			sed -E 's/^[[:space:]]*oversize:[[:space:]]*//; s/[[:space:]]+$//' |
+			grep -m1 -v '^$' || true)
 		if [ -n "$reason" ]; then
 			verdict="OVERRIDE"
 			tail=" — over ${FAIL_AT}, oversize: ${reason}"

@@ -298,6 +298,14 @@ test("the first oversize marker in a body wins", () => {
 	expect(g.line).not.toContain("stale");
 });
 
+test("an empty marker does not shadow a later one that carries a reason", () => {
+	const dir = repo({ "a.ts": "one\n" }, { "b.ts": lines(900) });
+	const g = gate(dir, "main", "oversize:\noversize: mechanical rename\n");
+	expect(g.line).toContain("OVERRIDE");
+	expect(g.line).toContain("oversize: mechanical rename");
+	expect(g.code).toBe(0);
+});
+
 test("an indented marker still clears the failure", () => {
 	const dir = repo({ "a.ts": "one\n" }, { "b.ts": lines(900) });
 	const g = gate(dir, "main", "  oversize: indented but on its own line\n");
