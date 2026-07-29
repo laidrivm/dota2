@@ -26,6 +26,13 @@ completes, name the next step and the exact command.
   against the proposal text. Fold the resulting edge cases into the tasks
   checklist as tests-first items. A proposal without its edge cases listed
   is not ready to apply.
+- A seam between steps carries a working stub: when a step depends on a
+  capability a later step delivers, the earlier one ships a temporary
+  substitute that works and the later one deletes it in the pull request
+  that replaces it. Proposal 2b shipped a native `<select>` so the board
+  could pick heroes before the picker existed, and 2c deleted it. A module
+  no shipped code path calls is a horizontal slice, not a seam — cut the
+  step differently instead of merging dead code.
 - If a vendored best-practices skill (listed in the skills repo's
   `skills-lock.json`) covers the feature's domain, run the draft design
   through it before finalising and fold in what applies. If none covers
@@ -46,9 +53,11 @@ completes, name the next step and the exact command.
 
 ## Stage 2 — Apply
 
-- Before `/opsx:apply`: create the branch per Git & PRs (never apply on
-  main), then remind the user to `/clear` — implementation should start
-  from a clean context, reading only the spec artifacts.
+- Before `/opsx:apply`: create the branch for the task group being applied,
+  per Git & PRs (never apply on main), then remind the user to `/clear` —
+  implementation should start from a clean context, reading only the spec
+  artifacts. Stages 2 and 3 repeat per group, in order, until the last one
+  merges.
 - Never edit spec files by hand and don't rewrite the proposal mid-build.
   Small course corrections go into the rules in `CLAUDE.md` (fix &
   capture); structural changes wait for the build to finish and become a
@@ -77,7 +86,7 @@ completes, name the next step and the exact command.
 
 ## Stage 4 — Archive
 
-- After the change is merged and verified, prompt the user to run
+- After the change's last step is merged and verified, prompt the user to run
   `/opsx:archive` so the change lands in the project history. Work is not
   finished until it's archived.
 - Single-source rule: agent rules and contract rules live in `CLAUDE.md`
