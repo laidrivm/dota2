@@ -15,7 +15,7 @@
 	},
 	"simple-git-hooks": {
 		"pre-commit": "bunx biome check --staged --no-errors-on-unmatched",
-		"pre-push": "bun run typecheck && bun test --pass-with-no-tests"
+		"pre-push": "bun run typecheck && bun test --pass-with-no-tests && { bash scripts/diff-budget.sh || true; }"
 	},
 	"devDependencies": {
 		"@axe-core/playwright": "4.12.1",
