@@ -15,9 +15,34 @@
 	"linter": {
 		"enabled": true,
 		"rules": {
-			"preset": "recommended"
+			"preset": "recommended",
+			"suspicious": {
+				"noImportCycles": "error"
+			}
 		}
 	},
+	"overrides": [
+		{
+			"includes": ["src/model.ts", "src/types.ts"],
+			"linter": {
+				"rules": {
+					"style": {
+						"noRestrictedImports": {
+							"level": "error",
+							"options": {
+								"patterns": [
+									{
+										"group": ["./app/**", "**/app/**"],
+										"message": "The prediction model owns no application state: src/model.ts and src/types.ts never import from src/app/**, so the model stays testable on its own."
+									}
+								]
+							}
+						}
+					}
+				}
+			}
+		}
+	],
 	"javascript": {
 		"formatter": {
 			"quoteStyle": "double"
