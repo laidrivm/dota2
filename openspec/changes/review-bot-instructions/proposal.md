@@ -18,7 +18,8 @@ Two gaps are unclaimed by any local skill, by design:
   None of them opens the change the diff is supposed to implement.
 
 Separately, three rules in this repository — *never state a framework, library
-or tool's behaviour from memory* in `CLAUDE.md`, the Playwright-documentation
+or tool's behaviour from memory* in `CLAUDE.md`, of which this change
+mechanises **only the API-existence half**, the Playwright-documentation
 rule in `docs/testing.md`, and the grep-the-receiving-class step the
 `first-five` skill prescribes — are all executed by one side, the agent, on its
 word. The grep confirms a method is absent from *this* codebase; it says
@@ -32,7 +33,11 @@ installed. The reviewer currently cannot check any of it.
 - `path_instructions` for `openspec/changes/**`: check EARS form, measurable
   values rather than adjectives, the presence of Non-goals, and that every
   acceptance criterion is cited by at least one task — this project's own rules
-  from `openspec/config.yaml`, applied by a second reader.
+  from `openspec/config.yaml`, applied by a second reader. The same entry
+  checks the change's artefacts against **each other**, which is the half no
+  rule holds: a delta spec corrected mid-review while its proposal still says
+  the old thing produced findings on three consecutive pull requests, and
+  widening the rule that forbids it did not stop the fourth.
 - `path_instructions` for `src/**`: check the diff against the active change's
   `proposal.md`, `design.md`, `tasks.md` and delta specs — whether every
   criterion it claims is actually met, and whether anything appears that the

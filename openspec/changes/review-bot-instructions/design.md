@@ -28,8 +28,11 @@ Verified against `schema.v2.json` and the tree before this design was written:
 
 - Point the bot at the two reviews no local skill performs.
 - Give it a way to feed the fix-and-capture loop rather than only the report.
-- Turn one prose rule — *never state a framework, library or tool's behaviour
-  from memory* — into something the reviewer can check.
+- Turn the checkable half of one prose rule — *never state a framework,
+  library or tool's behaviour from memory* — into something the reviewer can
+  check. Only "does this API exist at this version" is mechanised; a claim
+  about a default or about which file a tool reads stays prose, so the rule
+  keeps its subject and is not deleted.
 
 **Non-Goals:** as listed in the proposal — redoing `coderabbit-config`,
 connecting Context7 itself, replacing `bun info`, the item-29 cluster, and the
