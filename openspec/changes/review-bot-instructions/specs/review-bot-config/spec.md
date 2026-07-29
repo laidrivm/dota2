@@ -38,9 +38,16 @@ says a fix is still cheap.
 ### Requirement: An implementation is reviewed against its proposal
 
 `.coderabbit.yaml` SHALL carry a `path_instructions` entry for `src/**`
-telling the bot to read the active change under `openspec/changes/` and compare
-the diff with it in both directions: every acceptance criterion the branch
-claims is met, and nothing present that the change never asked for.
+telling the bot to compare the diff with the active change in both directions:
+every acceptance criterion the branch claims is met, and nothing present that
+the change never asked for.
+
+The active change SHALL be selected by branch name, not guessed: `CLAUDE.md`
+fixes the branch as `feat/<proposal-slug>` or `feat/<proposal-slug>-<step>`, so
+the directory is `openspec/changes/<proposal-slug>/`. Five changes can sit
+there at once, so a rule that says "the active one" without saying how names
+nothing. Where the branch matches no directory, the bot SHALL say the
+comparison could not be made rather than pick a candidate.
 
 The direction that matters is the second. `/triage` maps the diff, `/zombies`
 finds test gaps and `/ponytail-review` hunts over-engineering; none of them
@@ -58,19 +65,38 @@ opens the proposal, so scope creep is currently caught by nobody.
   not satisfy
 - **THEN** the bot flags the gap
 
+#### Scenario: The branch names no change
+
+- **WHEN** the branch is `fix/something` with no directory of that name under
+  `openspec/changes/`
+- **THEN** the bot reports that it could not identify the change, rather than
+  comparing against one of the others
+
 ### Requirement: The bot reports against the rules list
 
 `.coderabbit.yaml` SHALL instruct the bot to quote the rule from `/CLAUDE.md`
-that a defect instances, and to say explicitly when a defect is covered by no
+that a defect violates, and to say explicitly when a defect is covered by no
 rule and could recur. The fix-and-capture loop is fed by the user and the local
 skills today; this makes the bot a third source, and the rule it quotes is one
 `knowledge_base.code_guidelines` already puts in its context.
+
+The instruction SHALL be attached to the path `**`. The schema offers no
+general review-instruction key — `path_instructions` is the only mechanism and
+every entry is path-scoped — so hanging this on `**/*.{ts,tsx}` would exempt
+every rule violation in a config, a workflow or a document from being named.
 
 #### Scenario: A defect an existing rule covers
 
 - **WHEN** a diff gates a side effect on the action rather than on the
   reducer's result
 - **THEN** the bot quotes that rule from `/CLAUDE.md` beside the finding
+
+#### Scenario: A rule violated outside TypeScript
+
+- **WHEN** a workflow file pins an action by tag rather than by commit SHA,
+  which a rule forbids
+- **THEN** the bot quotes that rule, because the instruction is scoped to `**`
+  and not to a language
 
 #### Scenario: A defect no rule covers
 

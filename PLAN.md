@@ -242,8 +242,11 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
   have shipped against a dead source; and the config can only *deny* servers
   (`disabled_servers`), never allow them, so "only Context7 is connected" is
   dashboard state and the user's, not this file's. Context7 covers all three
-  libraries — `/oven-sh/bun` 12932 snippets, `/microsoft/playwright` 6863,
-  `/preactjs/preact` 107 plus 813 on its docs site — and Preact's thinness is
+  libraries — `/oven-sh/bun`, `/microsoft/playwright` and `/preactjs/preact`,
+  the last an order of magnitude thinner than the other two when checked on
+  2026-07-29; the index is theirs and moves, so those figures are dated
+  evidence and not a guarantee this repository can make — and Preact's
+  thinness is
   accepted, because where the index says nothing the rule falls back to the
   prose it is today, which is a floor and not a regression. The library
   documentation is community-contributed with no accuracy or safety warranty,
