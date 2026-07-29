@@ -63,21 +63,21 @@ citations are the `### Requirement:` headings in
 
 ## 3. Wiring the budget
 
-- [ ] 3.1 Read the `oversize:` marker from the pull request body, clear a FAIL
+- [x] 3.1 Read the `oversize:` marker from the pull request body, clear a FAIL
       only when a reason follows it, and name that reason in the gate line —
       *An over-budget pull request is admitted only with a named reason*
-- [ ] 3.2 Extend `scripts/diff-budget.test.ts` with the marker cases: a reason
+- [x] 3.2 Extend `scripts/diff-budget.test.ts` with the marker cases: a reason
       clearing a FAIL (16), an empty marker not clearing it (17)
-- [ ] 3.3 Add the CI job against `github.event.pull_request.base.ref` with
+- [x] 3.3 Add the CI job against `github.event.pull_request.base.ref` with
       `fetch-depth: 0`, pinning the action by SHA per the repo convention, and
       confirm it fails rather than passes when the base cannot be resolved —
       *The gate is hard in CI and soft before the push*
-- [ ] 3.4 Add the script to the `pre-push` hook in a form that absorbs every
+- [x] 3.4 Add the script to the `pre-push` hook in a form that absorbs every
       non-zero exit, and confirm a deliberately over-budget push still
       completes (18) — *The gate is hard in CI and soft before the push*
-- [ ] 3.5 Add the gate to the pre-PR sequence in `docs/review-toolkit.md`,
+- [x] 3.5 Add the gate to the pre-PR sequence in `docs/review-toolkit.md`,
       naming it a measurement rather than a review skill
-- [ ] 3.6 Run the script over the four most recent merged PRs and check the
+- [x] 3.6 Run the script over the four most recent merged PRs and check the
       counts against the table in `design.md`
 
 ## 4. The import arrow

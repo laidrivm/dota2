@@ -170,8 +170,16 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
         one awk pass over per-file keys, not the design's two `comm` passes:
         same three conditions, no sorted streams. 22 tests; all four
         threshold assertions watched red under a moved threshold.
-  - [ ] **5.3 wiring the budget** — the `oversize:` override, the CI job, the
-        pre-push call, the gate's line in `docs/review-toolkit.md`.
+  - [x] **5.3 wiring the budget** — the `oversize:` override, the CI job, the
+        pre-push call, the gate's line in `docs/review-toolkit.md`. The hook
+        chains with `&&`: a `;` would make the absorbed budget the hook's exit
+        status and silently retire the typecheck and test gates. The override
+        reaches the script through `PR_BODY`, set from the event in `env:`,
+        never interpolated into a `run:` line. Verification against
+        `design.md`'s table: #30 measures 678 and #21 measures 1688, both
+        exactly as recorded. The four most recent merged PRs measure 472, 76,
+        112 and 485 — the last two of those sit just under the warning line,
+        so the first reading of the threshold is that it is set about right.
   - [ ] **5.4 the import arrow** — `biome.json` (`noImportCycles` plus the
         `noRestrictedImports` override on the model) and one rule line.
 - [ ] **6. `mechanised-prohibitions`** — proposed
