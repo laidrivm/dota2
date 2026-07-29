@@ -98,10 +98,12 @@ back to prose, which is where it is today. That is a floor, not a regression.
 
 ## Risks / Trade-offs
 
-- **Instruction fatigue.** Six instruction blocks on one config make each one
-  less likely to be honoured → the two new path scopes address files the
-  existing four never match, so no diff receives more instructions than before;
-  only the `**/*.{ts,tsx}` block grows.
+- **Instruction fatigue.** Seven instruction blocks on one config make each one
+  less likely to be honoured → `openspec/changes/**` addresses files the
+  existing four never match, and the `**` block carries one sentence. A file
+  under `src/` does now match two scopes where it matched one, which is the
+  real cost and the reason the `src/**` entry says nothing the `**/*.{ts,tsx}`
+  entry already says.
 - **The spec review turns into a style debate on proposals.** → the instruction
   cites four checkable properties from `openspec/config.yaml` and no taste, and
   a bot objection that blows through the rule quality bar is disposed of by the
@@ -110,10 +112,15 @@ back to prose, which is where it is today. That is a floor, not a regression.
   in this codebase and the setting goes back to `disabled`; `PLAN.md` carries
   the checkpoint so the question gets asked rather than forgotten.
 - **A change's artefacts and its implementation land in different PRs**, so the
-  `src/**` instruction reads a proposal that may itself have moved → the
-  instruction names the active change under `openspec/changes/`, which is the
-  merged state by then, and that is the state the branch is supposed to
-  implement.
+  `src/**` instruction reads a proposal that may itself have moved → by then
+  the proposal is merged, and that merged state is exactly what the branch is
+  supposed to implement.
+- **Five changes sit under `openspec/changes/` at once**, so "the active
+  change" names nothing on its own → the branch name selects it, since
+  `CLAUDE.md` fixes branches as `feat/<proposal-slug>[-<step>]`; where no
+  directory matches, the instruction has the bot say so rather than compare
+  against a neighbour, which is the failure that would produce confident
+  nonsense.
 
 ## Sequencing
 
@@ -121,8 +128,9 @@ This proposal is the first of three that the source analysis's items 25–31
 decompose into, split because they share no file and each is independently
 applyable:
 
-1. **This one** — items 25, 26, the live remainder of 27, and 28. One file,
-   `.coderabbit.yaml`.
+1. **This one** — items 25, 26, the live remainder of 27, and 28.
+   `.coderabbit.yaml` carries the change; `coderabbit-config.test.ts` and
+   `PLAN.md` carry its pin and its record.
 2. **`spec-test-traceability`** — item 30. `openspec/config.yaml` already
    requires every criterion to be cited by a task; extending that to *cited by
    a test* is a criterion identifier in a test name and a script that greps
@@ -147,8 +155,14 @@ being created twice with two different shapes.
 ## Migration plan
 
 One step, one PR: the config edits, the test assertions, and the `PLAN.md`
-record of the Context7 caveats and the checkpoint. Rollback is a revert; every
-key is additive and none changes an existing one.
+record of the Context7 caveats and the checkpoint.
+
+Every key is new to the file, but two of them are behaviour changes rather than
+additions: `related_issues` and `related_prs` both default to `true`, so
+writing `false` turns off sections the walkthrough carries today, and
+`mcp.usage` starts a knowledge source that `auto` had kept off. Rollback is a
+revert, which restores each default by removing the key rather than by writing
+the old value back.
 
 ## Open questions
 

@@ -43,10 +43,10 @@ installed. The reviewer currently cannot check any of it.
 - A ponytail instruction: flag an abstraction with a single caller, a parameter
   or option with no current consumer, and any new dependency. Linters do not
   cover these and the bot finds them well.
-- A fix-and-capture instruction: when a defect instances a rule in
-  `/CLAUDE.md`, quote the rule; when a defect is covered by no rule and could
-  recur, say so. The loop is fed by the user and the local skills today and not
-  by the bot.
+- A fix-and-capture instruction on the path `**`: when a defect violates a rule
+  in `/CLAUDE.md`, quote the rule; when a defect is covered by no rule and
+  could recur, say so. The loop is fed by the user and the local skills today
+  and not by the bot.
 
 **MCP, for the API-existence rule**
 
@@ -92,12 +92,19 @@ installed. The reviewer currently cannot check any of it.
 
 ## Impact
 
-- **Config**: `.coderabbit.yaml` — four `path_instructions` entries added or
-  extended, `knowledge_base.mcp.usage`, `reviews.related_issues` and
-  `reviews.related_prs`.
+- **Config**: `.coderabbit.yaml` — three new `path_instructions` entries
+  (`openspec/changes/**`, `src/**`, and `**` for the fix-and-capture clause,
+  which has nowhere else to go: the schema has no general review-instruction
+  key), the existing `**/*.{ts,tsx}` entry extended twice, plus
+  `knowledge_base.mcp.usage`, `reviews.related_issues` and
+  `reviews.related_prs`. The last two default to `true`, so setting them is a
+  behaviour change and not only an addition.
 - **Tests**: `coderabbit-config.test.ts`, which `always-on-context-budget`
   creates, gains assertions for the keys this change adds.
 - **PLAN.md**: the Context7 caveats and the review checkpoint after three or
   four PRs.
 - **Behaviour**: proposal PRs get a reviewer they did not have; implementation
-  PRs get one that has read the proposal.
+  PRs get one that has read the proposal. `/coderabbit-local` inherits both,
+  since `local-review-loop` requires it to pass `--config .coderabbit.yaml`
+  and so applies the same `path_instructions` — the spec review therefore
+  happens before the proposal PR is opened, not only on it.
