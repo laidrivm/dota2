@@ -94,8 +94,9 @@ if [ "$total" -ge "$FAIL_AT" ]; then
 	tail=" — over ${FAIL_AT}"
 	# The override lives in the pull request body, which the caller passes in
 	# `PR_BODY`; a marker with nothing after it names no reason and clears
-	# nothing. GitHub bodies arrive with CRLF line endings.
-	marker=$(printf '%s\n' "${PR_BODY:-}" | tr -d '\r' | grep -Em1 '^[[:space:]]*oversize:' || true)
+	# nothing. GitHub bodies arrive with CRLF line endings, and the trailing
+	# `[[:space:]]` strip below takes the carriage return with it.
+	marker=$(printf '%s\n' "${PR_BODY:-}" | grep -Em1 '^[[:space:]]*oversize:' || true)
 	if [ -n "$marker" ]; then
 		reason=$(printf '%s' "$marker" | sed -E 's/^[[:space:]]*oversize:[[:space:]]*//; s/[[:space:]]+$//')
 		if [ -n "$reason" ]; then
