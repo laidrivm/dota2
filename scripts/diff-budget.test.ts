@@ -250,9 +250,96 @@ test("an unresolvable base exits non-zero rather than reporting a pass", () => {
 		repo({ "a.ts": "one\n" }, { "b.ts": lines(10) }),
 		"no-such-branch",
 	);
-	expect(g.code).not.toBe(0);
+	// 2, not 1: CI has to tell a diff it could not measure from one that is
+	// merely over budget, and the pre-push hook absorbs both alike.
+	expect(g.code).toBe(2);
 	expect(g.stderr).toContain("cannot resolve base ref 'no-such-branch'");
 	expect(g.line).toBe("");
+});
+
+test("the default base is resolved when no argument is given", () => {
+	const dir = repo({ "a.ts": "one\n" }, { "b.ts": lines(10) });
+	// No remote, so `origin/HEAD` fails and the fallback to `main` is what
+	// answers — the path every other case skips by passing a base.
+	const p = Bun.spawnSync(["bash", script], { cwd: dir });
+	expect(p.stdout.toString()).toContain("PASS — 10 lines");
+	expect(p.exitCode).toBe(0);
+});
+
+test("the origin/ prefix is stripped from the resolved default", () => {
+	const dir = repo({ "a.ts": "one\n" }, { "b.ts": lines(10) });
+	// A bare repository standing in for the remote, so `origin/HEAD` resolves
+	// and the script has a prefix to strip.
+	const remote = mkdtempSync(join(tmpdir(), "diff-budget-remote-"));
+	made.push(remote);
+	git(remote, "init", "-q", "--bare", "-b", "main");
+	git(dir, "remote", "add", "origin", remote);
+	git(dir, "push", "-q", "origin", "main", "feature");
+	git(dir, "remote", "set-head", "origin", "main");
+	const p = Bun.spawnSync(["bash", script], { cwd: dir });
+	expect(p.stdout.toString()).toContain("PASS — 10 lines");
+});
+
+test("the same task text ticked in two files pairs within each", () => {
+	const both = (box: " " | "x") => `- [${box}] write the parser\n`;
+	const g = gate(
+		repo(
+			{ "a/tasks.md": both(" "), "b/tasks.md": both(" ") },
+			{ "a/tasks.md": both("x"), "b/tasks.md": both("x") },
+		),
+	);
+	expect(g.total).toBe(0);
+});
+
+test("an indented task line pairs on a tick", () => {
+	const g = gate(
+		repo(
+			{ "PLAN.md": "  - [ ] **5.1 slicing rules** — rules only\n" },
+			{ "PLAN.md": "  - [x] **5.1 slicing rules** — rules only\n" },
+		),
+	);
+	expect(g.total).toBe(0);
+});
+
+test("re-indenting a task line is a change, not a tick", () => {
+	const g = gate(
+		repo(
+			{ "tasks.md": "- [x] write the parser\n" },
+			{ "tasks.md": "    - [x] write the parser\n" },
+		),
+	);
+	expect(g.total).toBe(2);
+});
+
+test("an uppercase box pairs with a lowercase one", () => {
+	const g = gate(
+		repo(
+			{ "tasks.md": "- [ ] write the parser\n" },
+			{ "tasks.md": "- [X] write the parser\n" },
+		),
+	);
+	expect(g.total).toBe(0);
+});
+
+test("patch headers written as file content are counted, not parsed", () => {
+	// `design.md` in this repo contains a diff snippet. Inside a hunk these
+	// are content: a removed `-- foo` and an added `++ foo` arrive on the
+	// wire as `--- foo` and `+++ foo`.
+	const g = gate(
+		repo(
+			{ "design.md": "intro\n--- a/old.ts\nmiddle\n" },
+			{ "design.md": "intro\n+++ b/new.ts\nmiddle\n" },
+		),
+	);
+	expect(g.total).toBe(2);
+});
+
+test("outside a git repository the script exits non-zero", () => {
+	const dir = mkdtempSync(join(tmpdir(), "diff-budget-bare-"));
+	made.push(dir);
+	const p = Bun.spawnSync(["bash", script, "main"], { cwd: dir });
+	expect(p.exitCode).not.toBe(0);
+	expect(p.stdout.toString()).not.toContain("PASS");
 });
 
 test("an unrelated base exits non-zero — no merge base to measure from", () => {
