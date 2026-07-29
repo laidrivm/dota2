@@ -70,8 +70,8 @@ const gate = (dir: string, base = "main") => {
 };
 
 /** N distinct lines, so no pairing can occur by accident. */
-const lines = (n: number, prefix = "line") =>
-	`${Array.from({ length: n }, (_, i) => `${prefix} ${i}`).join("\n")}\n`;
+const lines = (n: number) =>
+	`${Array.from({ length: n }, (_, i) => `line ${i}`).join("\n")}\n`;
 
 const tasks = (n: number, box: " " | "x") =>
 	`${Array.from({ length: n }, (_, i) => `- [${box}] task ${i}`).join("\n")}\n`;
