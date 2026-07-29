@@ -12,9 +12,12 @@ Verified against `code.claude.com/docs/en/permissions` and the tree:
 - Specifiers use gitignore syntax. A bare filename matches at any depth, so
   `Edit(.npmrc)` and `Edit(**/.npmrc)` are the same rule; `/path` anchors at
   the settings source, which for project settings is the repository root.
-- `Bash(command:…)` and the equivalent parameter form for `file_path` are
-  ignored with a startup warning, because a compound command would bypass
-  them. So there is no way to write a content-matching permission rule.
+- `Tool(param:value)` matches a top-level input parameter on any tool, but the
+  fields a tool already canonicalises are excluded — `command` for Bash,
+  `file_path` for Read, Edit and Write, `path` for Grep and Glob. `Bash(command:
+  rm *)` is called out by name as bypassable by a compound command; the
+  `file_path` forms are excluded because those tools match paths with their own
+  rules. Either way there is no content-matching permission rule to write.
 - `.claude/settings.json` is 456 bytes: 4 deny, 14 ask, no allow.
   `.claude/settings.local.json` is 11 KB with 170 allow entries — 19 naming a
   path outside the repository or under `/tmp`, 8 a one-off `sed`/`cp`/`mv`.
@@ -44,15 +47,18 @@ equivalent are explicitly ignored by Claude Code. So the choice is between a
 file-scoped rule that is coarser than the prose, and a hook that reads
 `tool_input`.
 
-The two files fall on opposite sides. `.npmrc` has no legitimate content here
-at all: bun reads `bunfig.toml`, nothing in this repository references an
-`.npmrc`, so *the file existing* is the thing to prevent and `deny` is exactly
-as coarse as the rule. `bunfig.toml` has legitimate content, so `deny` would
+The two files fall on opposite sides. `.npmrc` is a registry source bun
+honours — `bun install --help` on 1.3.14 lists it beside `bunfig.toml` and the
+environment as what `--registry` overrides — and this repository deliberately
+has none. So it is a live channel that is intentionally unused, *the file
+existing* is the thing to prevent, and `deny` is exactly as coarse as the rule. `bunfig.toml` has legitimate content, so `deny` would
 block the `[test]` key this project already relies on; `ask` costs a prompt on
 a file that has been edited twice since it was created.
 
-Rejected: a `PreToolUse` hook parsing `tool_input.new_string` for `registry:`
-and `minimumReleaseAgeExcludes`. It is more precise and it is a second script,
+Rejected: a `PreToolUse` hook parsing `tool_input.new_string` for the actual
+key syntax — `registry = "…"` under `[install]` in `bunfig.toml`, `registry=…`
+in `.npmrc`, and any entry in `minimumReleaseAgeExcludes`. It is more precise
+and it is a second script,
 a second registration and a second thing to keep true, to save a prompt on a
 file nobody edits. `mechanised-prohibitions` justified its hook by a boundary
 no pattern could express at all — force-push in any argument position, a commit
@@ -63,12 +69,18 @@ form Claude Code never matches.
 
 ### The prompt is a boundary against the agent, not a proof
 
-`echo 'registry = …' >> bunfig.toml` is a Bash call, not an `Edit`, and no
-`Bash(...)` pattern catches a redirection reliably. So the rule stops the path
-the agent actually takes and not every path that exists. That is why the prose
-rule keeps its subject rather than being deleted the way
-`mechanised-prohibitions` deletes what it fully replaces — the mechanism here
-is partial, and its own capability says so.
+Three things pass it. `echo 'registry = …' >> bunfig.toml` is a Bash call, not
+an `Edit`, and no `Bash(...)` pattern catches a redirection reliably. A
+permission mode — `acceptEdits`, `bypassPermissions` — answers the prompt
+without the user ever seeing it, so `ask` gates the normal path and not every
+path. And a subprocess writes outside the tool layer altogether.
+
+So the rule stops what the agent actually does in an ordinary session, which is
+the failure mode this repository has, and it is not a security boundary against
+a determined caller. That is why the prose rule keeps its subject rather than
+being deleted the way `mechanised-prohibitions` deletes what it fully replaces
+— the mechanism here is partial, and both the capability and this design say so
+rather than letting the entry read as a guarantee.
 
 ### Curation drops rather than promotes by default
 
