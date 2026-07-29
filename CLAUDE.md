@@ -221,6 +221,8 @@ observability, causal claims — see [docs/verification.md](docs/verification.md
 - Assert the match before a scripted string replacement and read the
   resulting diff — a silent no-op and a malformed result both read as a
   successful edit.
+- Commit the work before a probe whose undo is `git checkout <path>`,
+  `git reset --hard`, or `git stash drop`.
 - Reconcile a vendored skill's `allowed-tools` and `disable-model-invocation`
   against this project's policy before the skill is used.
 - Substitute `bunx playwright test` for `npx playwright test` and
