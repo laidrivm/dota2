@@ -10,16 +10,22 @@ permission checks match `Edit(path)` rules only, and an `Edit` rule covers
 every file-editing tool, while a `Write(path)` rule is accepted, never matched,
 and warns at startup.
 
-`.npmrc` is denied rather than asked because this repository has none and needs
-none — bun reads `bunfig.toml`, so the file appearing at all is the event.
-`bunfig.toml` is asked rather than denied because it legitimately carries
-`[test] pathIgnorePatterns` and the release-age gate; what must not pass
-unremarked is a registry key or an entry in `minimumReleaseAgeExcludes`, and
-both are reached only through that file.
+`.npmrc` is denied rather than asked because bun reads it — `bun install
+--help` on 1.3.14 lists `.npmrc` beside `bunfig.toml` and the environment as a
+registry source that `--registry` overrides — and this repository deliberately
+has none. It is a live channel with no legitimate content here, so the file
+appearing at all is the event. `bunfig.toml` is asked rather than denied
+because it legitimately carries `[test] pathIgnorePatterns` and the
+release-age gate; what must not pass unremarked is a registry key or an entry
+in `minimumReleaseAgeExcludes`, and both are reached only through that file.
 
-The boundary is a prompt, not a proof: a shell redirection writes either file
-without an `Edit` call, and no permission rule matches that reliably. The
-prose rule keeps its subject for that reason.
+The boundary is a prompt, not a proof, and the capability SHALL say so rather
+than imply otherwise. Three things pass it: a shell redirection writes either
+file without an `Edit` call and no `Bash(...)` pattern matches a redirection
+reliably; a permission mode such as `acceptEdits` or `bypassPermissions`
+answers the prompt without the user; and a subprocess writes outside the tool
+layer entirely. The prose rule in `CLAUDE.md` keeps its subject for that
+reason, where a rule fully replaced by a mechanism is deleted.
 
 #### Scenario: A registry added to bunfig.toml
 
@@ -52,14 +58,26 @@ prose rule keeps its subject for that reason.
 ### Requirement: The tracked allow list holds only what a clone can use
 
 `.claude/settings.json` SHALL carry the allow entries this project's own
-documented workflow needs, and SHALL NOT carry an entry naming an absolute path
-outside the repository or a path under `/tmp`. Such an entry is a fact about
-one machine, and the tracked file is read by every clone.
+documented workflow needs. An entry whose path leaves the repository SHALL NOT
+appear in it: such an entry is a fact about one machine, and the tracked file
+is read by every clone.
 
-Entries accumulated in the untracked `.claude/settings.local.json` by
-approving a prompt are not decisions: at the time of writing it holds 170, of
-which 19 name a machine-local or `/tmp` path and 8 a one-off `sed`, `cp` or
-`mv` against a single named file. Those SHALL be dropped rather than promoted.
+**Leaving the repository is decided by normalising, not by matching a shape.**
+The check resolves each path in an entry — expanding `~` and any environment
+reference, then collapsing `.` and `..` — and requires the result to stay under
+the repository root. A blacklist of `//Users/` and `/tmp` would pass
+`Edit(../../secrets/**)`, which escapes by a different spelling.
+
+Two kinds of unwanted entry are separated by what a test can see. The path
+criterion above is **pinned by a test**. Whether an entry is a one-off — a
+`sed`, `cp` or `mv` against a single named file, repo-relative and so
+indistinguishable by path — is a **review criterion**: the curation names its
+promotions and the largest dropped group in the pull request body, because no
+check can tell a command that is policy from one that was convenient once.
+
+Entries accumulated in the untracked `.claude/settings.local.json` by approving
+a prompt are not decisions: at the time of writing it holds 170, of which 19
+name a machine-local or `/tmp` path and 8 a one-off `sed`, `cp` or `mv`.
 
 #### Scenario: A machine-local entry
 
@@ -71,6 +89,21 @@ which 19 name a machine-local or `/tmp` path and 8 a one-off `sed`, `cp` or
 
 - **WHEN** an allow entry names a path under `/tmp`
 - **THEN** `bun test` fails
+
+#### Scenario: An entry that escapes by traversal
+
+- **WHEN** an allow entry names `../../something` or a `~`-rooted path that
+  normalises outside the repository
+- **THEN** `bun test` fails, because containment is decided after
+  normalisation and not by the spelling
+
+#### Scenario: A one-off command with a repo-relative path
+
+- **WHEN** an allow entry names a `sed -i` against one file inside the
+  repository
+- **THEN** no test fails, and the curation is answerable for it in the pull
+  request body — the criterion is a review one, because the entry is
+  indistinguishable from policy by path alone
 
 #### Scenario: A workflow command
 

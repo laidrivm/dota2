@@ -22,10 +22,13 @@ Applied after `mechanised-prohibitions`, which rewrites `deny` and adds a
       written in the `Write(...)` form Claude Code never matches (3)
 - [ ] 1.4 Watch each assertion fail before it passes, by breaking the policy
       rather than by editing the assertion
-- [ ] 1.5 Confirm the prompt fires in a session started after the change — a
-      session loads its permissions at startup, so the authoring session
-      cannot observe it, and `3a-check` in `PLAN.md` records how this was done
-      before
+- [ ] 1.5 Confirm the behaviour per file in a session started after the
+      change — a session loads its permissions at startup, so the authoring
+      session cannot observe it, and `3a-check` in `PLAN.md` records how this
+      was done before. Three cases: editing `bunfig.toml` prompts; creating
+      `.npmrc` at the repository root is blocked without prompting; creating
+      one in a subdirectory is blocked too, since a bare filename matches at
+      any depth
 - [ ] 1.6 Leave the prose rule in `CLAUDE.md` in place, and say why in the
       capability: a shell redirection writes either file without an `Edit`
       call, so the mechanism is partial where `mechanised-prohibitions`'
@@ -44,14 +47,18 @@ Applied after `mechanised-prohibitions`, which rewrites `deny` and adds a
 - [ ] 2.3 Record the promoted count and the reason for the largest dropped
       group in the PR body, so the curation is reviewable without diffing an
       untracked file the reviewer does not have
-- [ ] 2.4 Extend `agent-permissions.test.ts` with the hygiene check: no
-      tracked allow entry contains an absolute path outside the repository (5)
-      or a `/tmp` path (6). Assert the entry set is non-empty first, so an
-      emptied `allow` fails rather than passing every per-entry check
-      vacuously (1)
-- [ ] 2.5 Watch the hygiene check fail by adding a machine-local entry, then
-      remove it
+- [ ] 2.4 Extend `agent-permissions.test.ts` with the hygiene check: resolve
+      each entry's path — expand `~` and any environment reference, collapse
+      `.` and `..` — and require the result to stay under the repository root,
+      so `//Users/…` (5), `/tmp/…` (6) and `../../…` all fail by one rule
+      rather than by a blacklist of spellings. Assert the entry set is
+      non-empty first, so an emptied `allow` fails rather than passing every
+      per-entry check vacuously (1)
+- [ ] 2.5 Watch the hygiene check fail three ways before it passes — a
+      machine-local entry, a `/tmp` entry, and a `../../` traversal — then
+      remove each
 - [ ] 2.6 Grep for sites restating what these two groups change —
-      `openspec/specs/agent-permissions/spec.md`, `README.md`'s ownership row
-      for `.claude/settings.json`, and `CLAUDE.md`'s dependency-safety rules —
-      and reconcile each
+      `openspec/specs/agent-permissions/spec.md`, `PLAN.md`'s decision for this
+      change and the `3a` entries that describe the current policy,
+      `README.md`'s ownership row for `.claude/settings.json`, and `CLAUDE.md`'s
+      dependency-safety rules — and reconcile each

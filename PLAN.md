@@ -248,10 +248,20 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
   call and the mechanism is therefore partial. `bunfig.toml`'s
   `minimumReleaseAgeExcludes` is covered by the same rule, being in the same
   file — its own comment already said "add entries only with an explicit user
-  decision". On the allow list, the test pins the criterion and not the
-  entries: pinning fifteen conveniences by name would make every added
-  convenience a test edit, while "no path outside the repository, nothing under
-  `/tmp`" catches what produced an 11 KB untracked file of 170 entries.
+  decision". `.npmrc` is denied rather than asked not because bun ignores it
+  but because bun *reads* it — `bun install --help` on 1.3.14 lists it beside
+  `bunfig.toml` as a registry source `--registry` overrides — and this
+  repository deliberately has none, so a live channel is being kept shut. The
+  entry is a prompt and not a proof, which the capability states outright:
+  a shell redirection, a permission mode such as `acceptEdits`, and a
+  subprocess each pass it. On the allow list, the test pins the criterion and
+  not the entries: pinning fifteen conveniences by name would make every added
+  convenience a test edit. The criterion is containment after normalisation —
+  expand `~` and the environment, collapse `..`, require the result under the
+  repository root — because a blacklist of `//Users/` and `/tmp` passes
+  `../../secrets/**`. Whether an entry is a one-off stays a review criterion,
+  answered in the PR body: repo-relative, it is indistinguishable from policy
+  by path alone.
 
 - `review-bot-instructions`: most of the source analysis's item 27 was already
   shipped by `coderabbit-config` on 2026-07-25 — `path_filters`, the three

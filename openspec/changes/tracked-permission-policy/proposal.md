@@ -27,8 +27,9 @@ explicit user decision*. Both keys are prose boundaries today.
 **The supply-chain keys become a prompt**
 
 - `.claude/settings.json` gains `permissions.deny` for `Edit(.npmrc)`: bun
-  reads `bunfig.toml`, this repository has no `.npmrc` and no use for one, so
-  the file appearing at all is the event to stop.
+  reads `.npmrc` as a registry source — its own `--help` says `--registry`
+  overrides `.npmrc`, `bunfig.toml` and the environment — and this repository
+  deliberately has none, so the file appearing at all is the event to stop.
 - It gains `permissions.ask` for `Edit(bunfig.toml)`. The file is edited about
   twice in a repository's life, so the prompt costs nothing, and its two
   supply-chain keys — a registry and `minimumReleaseAgeExcludes` — are both
@@ -45,9 +46,11 @@ explicit user decision*. Both keys are prose boundaries today.
   where it is reviewable and reaches a clone.
 - Everything machine-local, one-off, or naming a path outside the repository
   is dropped rather than moved.
-- `agent-permissions.test.ts` gains a check that no tracked allow entry names
-  an absolute path outside the repository or `/tmp`, so the same accumulation
-  cannot happen again inside the tracked file.
+- `agent-permissions.test.ts` gains a check that every tracked allow entry
+  resolves inside the repository — after expanding `~` and the environment and
+  collapsing `..`, not by blacklisting two spellings — so the same
+  accumulation cannot happen again inside the tracked file. Whether an entry
+  is a one-off stays a review criterion, answered in the PR body.
 
 ## Non-goals
 
@@ -81,4 +84,6 @@ explicit user decision*. Both keys are prose boundaries today.
 - **Preconditions**: applied after `mechanised-prohibitions`, which rewrites
   the same file's `deny` and `hooks` sections.
 - **Behaviour**: an agent editing `bunfig.toml` is prompted; an agent creating
-  `.npmrc` is blocked.
+  `.npmrc` is blocked. Neither is a security boundary — a shell redirection, a
+  permission mode such as `acceptEdits`, and a subprocess each pass it, which
+  is why the prose rule stays.
