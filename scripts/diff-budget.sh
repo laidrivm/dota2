@@ -9,7 +9,10 @@ FAIL_AT=800
 
 base="${1:-}"
 if [ -z "$base" ]; then
-	base=$(git rev-parse --abbrev-ref origin/HEAD 2>/dev/null || true)
+	# Not `rev-parse --abbrev-ref origin/HEAD`: with no origin/HEAD it echoes
+	# the argument back, which strips to the literal `HEAD` — and `HEAD...HEAD`
+	# is an empty diff, so every branch would read PASS at 0 lines.
+	base=$(git symbolic-ref --quiet --short refs/remotes/origin/HEAD 2>/dev/null || true)
 	base="${base#origin/}"
 	base="${base:-main}"
 fi
