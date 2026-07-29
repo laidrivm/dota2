@@ -74,8 +74,12 @@ Response contract rules for every endpoint — see
   whole on `feat/<proposal-slug>` (`fix/`, `chore/` for non-feature work).
 - Commits: imperative subject ≤ 72 chars, body only when the diff doesn't
   explain itself. Commit per completed task-list item, not per file.
-- Never commit directly to main; never force-push a branch after its PR
-  is open (review comments lose their anchors).
+- Never commit or push to main. When HEAD is on main and a change is needed,
+  branch first, commit there, and push that branch — check which branch HEAD
+  is on before the turn's first commit, because the user moves the working
+  tree between turns.
+- Never force-push a branch after its PR is open (review comments lose their
+  anchors).
 - Open PRs ready for review, not as drafts — CodeRabbit's auto-review skips
   drafts, so a draft is a PR nobody reviews.
 - Keep the PR description to what the diff can't say: a link to the
