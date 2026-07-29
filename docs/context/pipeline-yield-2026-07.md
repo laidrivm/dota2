@@ -96,3 +96,25 @@
 - coderabbit (PR #42): PASS — 2 findings, 2 applied (the hygiene criterion was undefined for the 145 `Bash(...)` entries of 170)
 - **triage and the grep gate both skipped.** Neither ran; the grep is deferred to apply as task 2.6, which is not the same thing as running it over this diff.
 - Not run: warm, ponytail-review, triage, grep (see above)
+
+## 2026-07-30 — reviewable-diff-gates (four steps + archive)
+
+- triage: PASS ×5 — 4 findings, 4 acted on (slicing: `rules.tasks` restated the PR rule `CLAUDE.md` owns, and "by identifier" was ambiguous; budget: an empty count read as 0, the last way an unmeasured diff could pass; wiring: the CI job depended on which remote-tracking refs checkout fetched; arrow and archive: 0 findings each)
+- zombies: PASS ×2 — 12 gaps, 12 acted on (budget 8, wiring 4). Idea 1 on the budget branch was not a missing test but a live bug: `git rev-parse --abbrev-ref origin/HEAD` echoes its argument back, so the gate read `PASS — 0 lines` for every branch on a clone without `origin/HEAD`
+- ponytail-review: PASS ×2 — 4 cuts, 4 applied (dead `---` header fallback, an unused test parameter, a redundant `tr -d '\r'`, a threshold duplicated into the toolkit doc)
+- coderabbit-local: PASS ×5 — 13 findings, 13 dispositioned (12 applied, 1 rejected: it read the implementing branch as post-merge and wanted its own task boxes unticked)
+- coderabbit (PR #46): PASS — 3 findings, 3 applied (`grep -m1` let an empty `oversize:` marker shadow a later valid one)
+- Not run: warm (no dependency added or upgraded on any of the five branches), preflight, security-review
+
+Notes for whoever reads this later:
+
+- The archive step earned its review pass. Freezing the delta spec into
+  `openspec/specs/change-slicing/` surfaced a Major the delta had carried
+  through three earlier review passes: the override requirement said
+  "exceeds 800" while the budget fails at 800 *or above*, so the boundary
+  count fell outside its own trigger although the script applied it there.
+  Evidence for queue item 6 (`review-bot-instructions`), which points the bot
+  at delta specs.
+- Two of the four `/triage` findings were defects in artefacts the same
+  session had written minutes earlier. `/triage` returns no findings by
+  design, so these are the reading it hands over, not the skill's own output.
