@@ -53,18 +53,18 @@ Requirement citations are the `### Requirement:` headings in
 
 ## 2. The secret scan
 
-- [ ] 2.1 Add a `gitleaks` job to `.github/workflows/lint.yml` using the
+- [x] 2.1 Add a `gitleaks` job to `.github/workflows/lint.yml` using the
       container image pinned by digest with the version in a trailing comment,
       as `actionlint` is — re-fetch the digest rather than copying the one in
       `design.md` — *A secret scan runs in CI and, when available, before a
       commit*
-- [ ] 2.2 Add `gitleaks` to the `pre-commit` hook in a form that runs only
+- [x] 2.2 Add `gitleaks` to the `pre-commit` hook in a form that runs only
       when `command -v gitleaks` finds a binary and exits 0 otherwise — *A
       secret scan runs in CI and, when available, before a commit*
 - [ ] 2.3 Prove the CI job red by planting a recognisable fake credential on a
       throwaway branch, then remove it — the check must be seen failing before
       it is trusted
-- [ ] 2.4 Confirm the pre-commit path is a no-op on a machine without the
+- [x] 2.4 Confirm the pre-commit path is a no-op on a machine without the
       binary, and does not print a warning on every commit
 
 ## 3. The suppression check
