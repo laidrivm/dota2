@@ -34,6 +34,7 @@ const VALUE_OPTIONS = new Set([
 	"--git-dir",
 	"--work-tree",
 	"--namespace",
+	"--config-env",
 ]);
 
 /**
@@ -76,39 +77,69 @@ function currentBranch(cwd?: string): string {
 }
 
 /** Characters that end one command and start the next, outside quotes. */
-const SEPARATORS = new Set([";", "\n", "|", "&", "(", ")", "`"]);
+const SEPARATORS = new Set([";", "\n", "|", "&", "(", ")"]);
 
 /**
- * Splits on the separators that start a new command, ignoring any inside
- * quotes: `git push origin "a;b" --force` is one command, and
- * `git log --grep="x; git commit"` is not two. A command substitution starts a
- * command even inside double quotes, which is where `echo "$(git commit)"`
- * would otherwise hide one — the shell substitutes there, and so does the
- * hook's own `if` field.
+ * Splits a command line into commands, each a list of words with its quoting
+ * removed. Quote-aware in both directions, and that matters twice over:
+ *
+ * - A separator inside quotes does not start a command, so
+ *   `git push origin "a;b" --force` stays one and `git log --grep="x; git
+ *   commit"` does not become two.
+ * - A space inside quotes does not end a word, so `GIT_AUTHOR_NAME="Jane Doe"
+ *   git commit` still resolves to `git`, and `git -C "some path" commit` still
+ *   finds `commit`. Splitting on whitespace alone lost both.
+ *
+ * Command substitution starts a command even inside double quotes, in both of
+ * the POSIX spellings — `$(…)` and backticks — because the shell substitutes
+ * there and a guard that honoured only one would be walked around with the
+ * other.
  */
-function subcommands(line: string): string[] {
-	const parts: string[] = [];
+function commands(line: string): string[][] {
+	const all: string[][] = [];
+	let words: string[] = [];
+	let word = "";
 	let quote = "";
-	let start = 0;
+
+	const endWord = () => {
+		if (word) words.push(word);
+		word = "";
+	};
+	const endCommand = () => {
+		endWord();
+		if (words.length) all.push(words);
+		words = [];
+	};
+
 	for (let at = 0; at < line.length; at++) {
 		const char = line.charAt(at);
-		if (char === "$" && line[at + 1] === "(" && quote !== "'") {
-			parts.push(line.slice(start, at));
-			quote = "";
+		if (char === "\\" && quote !== "'") {
+			word += line.charAt(++at);
+		} else if (quote === "'") {
+			if (char === "'") quote = "";
+			else word += char;
+		} else if (char === "$" && line[at + 1] === "(") {
+			endCommand();
+			quote = ""; // inside the substitution the enclosing quote is not in force
 			at++;
-			start = at + 1;
-		} else if (quote) {
-			if (char === quote) quote = "";
+		} else if (char === "`") {
+			endCommand();
+			quote = "";
+		} else if (quote === '"') {
+			if (char === '"') quote = "";
+			else word += char;
 		} else if (char === '"' || char === "'") {
 			quote = char;
 		} else if (SEPARATORS.has(char)) {
-			parts.push(line.slice(start, at));
-			while (line[at + 1] === "&" || line[at + 1] === "|") at++;
-			start = at + 1;
+			endCommand();
+		} else if (/\s/.test(char)) {
+			endWord();
+		} else {
+			word += char;
 		}
 	}
-	parts.push(line.slice(start));
-	return parts;
+	endCommand();
+	return all;
 }
 
 /**
@@ -146,20 +177,16 @@ function invocation(words: string[]): [string, string[]] | undefined {
 }
 
 function check(command: string): void {
-	for (const part of subcommands(command)) {
-		const found = invocation(part.trim().split(/\s+/).filter(Boolean));
+	for (const part of commands(command)) {
+		const found = invocation(part);
 		if (!found) continue;
 		const [name, rest] = found;
 
-		if (SHELLS.has(name) && rest[0] === "-c") {
-			// `bash -c "git push --force"` — the quotes survive our splitting,
-			// so strip one layer and look at what is inside.
-			check(
-				rest
-					.slice(1)
-					.join(" ")
-					.replace(/^(["'])(.*)\1$/s, "$2"),
-			);
+		// `bash -c "git push --force"`, and `bash -lc …` too: short flags
+		// bundle, so `-c` neither stands alone nor has to come first.
+		const dashC = rest.findIndex((word) => /^-[a-z]*c[a-z]*$/.test(word));
+		if (SHELLS.has(name) && dashC >= 0) {
+			check(rest.slice(dashC + 1).join(" "));
 			continue;
 		}
 
