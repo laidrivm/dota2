@@ -14,6 +14,14 @@ the user's behalf* SHALL be narrowed to name what it forbids — replying,
 commenting and reviewing — so that it no longer reads as covering the PR the
 user asked for.
 
+A deny entry matches the command word literally, so `/opt/homebrew/bin/gh pr
+comment` reaches none of them. That ceiling is accepted here for the same
+reason the hook accepts it below, and it is not closed by moving the check into
+a hook: a hook's `if` field uses the same permission-rule syntax, confirmed by
+running `/usr/bin/git push --force` against the registered guard and watching it
+pass. Closing it would mean a script on every Bash call resolving every
+executable, which is a different proposal against a different threat model.
+
 #### Scenario: The agent tries to reply to a review
 
 - **WHEN** the agent attempts `gh pr comment 37 --body "fixed"`
@@ -75,7 +83,19 @@ force-push entirely, and the user keeps it.
 The script SHALL find the git command inside a compound one by splitting only
 on separators outside quotes. A split that ignores quoting cuts both ways: it
 severs a force flag from its command, and it turns a quoted `;` inside a
-`--grep` argument into a fragment that reads as a commit.
+`--grep` argument into a fragment that reads as a commit. A command
+substitution SHALL start a command even inside double quotes, where the shell
+substitutes and the `if` field looks, so `echo "$(git commit)"` cannot hide one.
+
+The branch SHALL be read from the repository the commit would land in — the
+`-C` target when the command names one — and not from the guard's own working
+directory, which is a different repository in exactly that case.
+
+The long force flags SHALL be matched by the `--force` prefix rather than by
+their full spellings. Git accepts any unambiguous abbreviation, so `--force-w`
+and `--force-i` reach the force-push path while `--forc` and `--fo` are
+rejected as ambiguous — every spelling git honours therefore begins with
+`--force`.
 
 #### Scenario: A commit attempted on main
 
@@ -116,6 +136,23 @@ severs a force flag from its command, and it turns a quoted `;` inside a
 - **WHEN** the agent attempts `git push origin "a;b" --force`
 - **THEN** the hook blocks the call, because the `;` is inside quotes and does
   not start a second command that the flag would fall outside of
+
+#### Scenario: An abbreviated force flag
+
+- **WHEN** the agent attempts `git push --force-w origin feat/x`
+- **THEN** the hook blocks the call, because git resolves the abbreviation to
+  `--force-with-lease`
+
+#### Scenario: A git command hidden in a command substitution
+
+- **WHEN** the agent attempts `echo "$(git push --force origin feat/x)"`
+- **THEN** the hook blocks the call
+
+#### Scenario: A commit aimed at another repository
+
+- **WHEN** `HEAD` here is on `feat/x` and the agent attempts `git -C ../other
+  commit -m "fix"` where `../other` is on `main`
+- **THEN** the hook blocks the call, because `-C` names where the commit lands
 
 #### Scenario: A lease-guarded force-push
 
