@@ -31,9 +31,12 @@ const VALUE_OPTIONS = new Set([
 /**
  * Whole arguments only: `--follow-tags` and `--fixup` share a prefix with
  * neither, and a `--force` inside a quoted string is not an argument of its
- * own.
+ * own. Short flags bundle — git reads `push -uf` as `-u -f` — so the
+ * single-dash form matches an `f` anywhere in the group, and `-f` is the only
+ * short option of `git push` that carries one.
  */
-const FORCE = /^(-f|--force(-with-lease|-if-includes)?(=.*)?)$/;
+const FORCE =
+	/^(-[a-z0-9]*f[a-z0-9]*|--force(-with-lease|-if-includes)?(=.*)?)$/;
 
 const payload = await Bun.stdin.json().catch(() => null);
 const command = payload?.tool_input?.command;

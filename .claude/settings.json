@@ -34,7 +34,7 @@
 					{
 						"type": "command",
 						"if": "Bash(git *)",
-						"command": "bun \"${CLAUDE_PROJECT_DIR}/scripts/git-guard.ts\""
+						"command": "bun \"${CLAUDE_PROJECT_DIR}/scripts/git-guard.ts\" || exit 2"
 					}
 				]
 			}

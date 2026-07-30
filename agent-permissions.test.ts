@@ -77,6 +77,10 @@ describe("the git guard is registered", () => {
 		// a command that merely names the path — an echo, a stale wrapper —
 		// never runs it.
 		expect(hook?.command).toMatch(/^bun\s/);
+		// A guard that cannot launch — bun absent, the path unresolved — exits
+		// 1, which Claude Code treats as non-blocking and runs the command
+		// anyway. The fallback turns every such failure back into a block.
+		expect(hook?.command).toMatch(/\|\| exit 2$/);
 		const path = hook?.command?.match(/scripts\/[\w-]+\.ts/)?.[0];
 		expect(path).toBe("scripts/git-guard.ts");
 		const tracked = Bun.spawnSync(
