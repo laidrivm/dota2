@@ -24,7 +24,7 @@ Requirement citations are the `### Requirement:` headings in
       non-zero code is non-blocking, so a malformed event or a missing work
       tree would let the commit through with only a transcript notice
       (11, 12, 13)
-- [ ] 1.5 Register the hook in `.claude/settings.json` under
+- [x] 1.5 Register the hook in `.claude/settings.json` under
       `hooks.PreToolUse`, `matcher: "Bash"`, with `if: "Bash(git *)"` — *The
       git prohibitions are enforced by a hook*
 - [x] 1.6 Write `scripts/git-guard.test.ts` driving the script with fabricated
@@ -34,7 +34,7 @@ Requirement citations are the `### Requirement:` headings in
       detached `HEAD` (9); `--force-with-lease` (10); a compound whose first
       command is not git, `bun test && git commit` on `main`; the clean
       feature-branch cases (14)
-- [ ] 1.7 Extend `agent-permissions.test.ts`: the three `gh` deny entries
+- [x] 1.7 Extend `agent-permissions.test.ts`: the three `gh` deny entries
       present (17), the hook registered and pointing at the tracked script
       (18), `gh pr create` and `gh pr view` matching no deny entry (15, 16) —
       *The permission policy is pinned by a test*

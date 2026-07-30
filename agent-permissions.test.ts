@@ -17,6 +17,14 @@ const ghWrites = ["gh pr comment", "gh issue comment", "gh pr review"];
 const deny: string[] = settings.permissions?.deny ?? [];
 const ask: string[] = settings.permissions?.ask ?? [];
 
+/** Whether a command matches a deny entry, by the prefix each one names. */
+function isDenied(command: string): boolean {
+	return deny.some((entry) => {
+		const prefix = entry.match(/^Bash\((.+) \*\)$/)?.[1];
+		return prefix !== undefined && command.startsWith(`${prefix} `);
+	});
+}
+
 /** `bun <command> --help`, which prints across both streams. */
 function bunHelp(command: string): string {
 	const help = Bun.spawnSync(["bun", command, "--help"]);
@@ -38,6 +46,44 @@ test("deny entries keep their word boundary", () => {
 	for (const entry of deny) {
 		expect(entry).toMatch(/^Bash\([a-z-]+( [a-z-]+)* \*\)$/);
 	}
+});
+
+test("only the GitHub write commands are denied", () => {
+	// Opening the pull request is the last step of the feature workflow and is
+	// taken once the user says go, so `gh pr create` must stay reachable; the
+	// read commands were never in scope.
+	expect(isDenied("gh pr comment 37 --body fixed")).toBe(true);
+	expect(isDenied("gh pr review 37 --approve")).toBe(true);
+	expect(isDenied("gh pr create --title x --body y")).toBe(false);
+	expect(isDenied("gh pr view 37 --json state")).toBe(false);
+});
+
+describe("the git guard is registered", () => {
+	const hook = (settings.hooks?.PreToolUse ?? [])
+		.filter((entry: { matcher?: string }) => entry.matcher === "Bash")
+		.flatMap((entry: { hooks?: unknown[] }) => entry.hooks ?? [])
+		.find((each: { if?: string }) => each.if === "Bash(git *)") as
+		| { type?: string; command?: string }
+		| undefined;
+
+	test("a PreToolUse entry narrows to git commands", () => {
+		// Without the `if` field the guard would run a bun process on every
+		// Bash call; without the entry it would never run at all.
+		expect(hook?.type).toBe("command");
+	});
+
+	test("it points at a tracked script", () => {
+		// A path present only for the author is not a boundary in a clone.
+		const path = hook?.command?.match(/scripts\/[\w-]+\.ts/)?.[0];
+		expect(path).toBe("scripts/git-guard.ts");
+		const tracked = Bun.spawnSync(
+			["git", "ls-files", "--error-unmatch", path ?? ""],
+			{
+				cwd: import.meta.dir,
+			},
+		);
+		expect(tracked.exitCode).toBe(0);
+	});
 });
 
 describe("every manifest-mutating invocation prompts", () => {
