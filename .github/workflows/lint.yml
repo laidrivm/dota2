@@ -56,3 +56,21 @@ jobs:
       - uses: docker://rhysd/actionlint:1.7.12@sha256:b1934ee5f1c509618f2508e6eb47ee0d3520686341fec936f3b79331f9315667
         with:
           args: -color
+
+  gitleaks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          # `gitleaks git` reads history through `git log -p`, and the default
+          # shallow clone hides every commit but the last — a secret added and
+          # then deleted on the branch would pass.
+          fetch-depth: 0
+      - uses: docker://zricethezav/gitleaks:v8.30.1@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f
+        with:
+          # `git` rather than `dir`: it reads tracked content only, where `dir`
+          # also walks gitignored files that exist for one author and in no
+          # clone. `-v` names the file and line, and `--redact` keeps the secret
+          # itself out of a build log this public repository shows to anyone.
+          args: git . -v --redact --no-banner

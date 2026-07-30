@@ -14,7 +14,7 @@
 		"prepare": "simple-git-hooks"
 	},
 	"simple-git-hooks": {
-		"pre-commit": "bunx biome check --staged --no-errors-on-unmatched",
+		"pre-commit": "bunx biome check --staged --no-errors-on-unmatched && if command -v gitleaks >/dev/null 2>&1; then gitleaks git --staged -v --redact --no-banner; fi",
 		"pre-push": "bun run typecheck && bun test --pass-with-no-tests && { bash scripts/diff-budget.sh || true; }"
 	},
 	"devDependencies": {
