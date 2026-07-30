@@ -26,13 +26,18 @@ test("every docker:// step in CI names a digest", () => {
 	// zero and the sweep looking healthy.
 	const files = readdirSync(workflows).filter((f) => /\.ya?ml$/.test(f));
 	for (const name of files) {
-		for (const line of readFileSync(join(workflows, name), "utf8").split(
-			"\n",
-		)) {
-			const image = line.match(/uses:\s*(docker:\/\/\S+)/)?.[1];
-			if (!image) continue;
-			found++;
-			expect(`${name}: ${image}`).toMatch(/@sha256:[0-9a-f]{64}$/);
+		// Parsed rather than grepped line by line, so a quoted or folded
+		// scalar is the same `uses` value to this check as a plain one.
+		// `Bun.YAML` is what `scripts/check-yaml.ts` already reads YAML with.
+		const doc = Bun.YAML.parse(readFileSync(join(workflows, name), "utf8")) as {
+			jobs?: Record<string, { steps?: { uses?: string }[] }>;
+		};
+		for (const job of Object.values(doc.jobs ?? {})) {
+			for (const step of job.steps ?? []) {
+				if (!step.uses?.startsWith("docker://")) continue;
+				found++;
+				expect(`${name}: ${step.uses}`).toMatch(/@sha256:[0-9a-f]{64}$/);
+			}
 		}
 	}
 	// Guards the guard: an empty sweep passes every assertion above.
@@ -47,9 +52,9 @@ describe("the pre-commit secret scan", () => {
 	 */
 	function runHook(stubs: Record<string, string>) {
 		const bin = mkdtempSync(join(tmpdir(), "commit-gates-"));
-		// The hook reaches biome through bunx; stubbing it keeps this test on
-		// the gitleaks half rather than on biome's opinion of the tree.
-		for (const [name, body] of Object.entries({ bunx: "exit 0", ...stubs })) {
+		// The hook reaches biome through `bun run`; stubbing it keeps this test
+		// on the gitleaks half rather than on biome's opinion of the tree.
+		for (const [name, body] of Object.entries({ bun: "exit 0", ...stubs })) {
 			const path = join(bin, name);
 			writeFileSync(path, `#!/bin/sh\n${body}\n`);
 			chmodSync(path, 0o755);
