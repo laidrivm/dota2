@@ -224,17 +224,8 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
   - [ ] **6.1 deny entries and the git guard** —
         `feat/mechanised-prohibitions-permissions`. Three `gh` write
         commands denied, `scripts/git-guard.ts` under a `PreToolUse` hook, 24
-        guard tests and 5 settings assertions. Two checks below need a session
-        started after the merge.
-- [ ] **6.1-check. Confirm the git guard fires and splits compound commands** —
-      tasks 1.9 and 1.10, and impossible from the authoring session: a session
-      loads `.claude/settings.json` at startup, so a hook registered mid-session
-      is not live in it, the same reason `3a-check` gives. In a session started
-      after this branch merges, attempt `git push --force-with-lease` on a
-      throwaway branch and `bun test && git commit` while `HEAD` is on `main`.
-      The second one is what 1.10 rests on: if the `if` field matched the
-      command string's prefix rather than each subcommand, the hook would not
-      fire for that form at all.
+        guard tests and 5 settings assertions. Tasks 1.9 and 1.10 confirmed in
+        the authoring session — see decisions.
 - [ ] **7. `always-on-context-budget`** — proposed
       (`openspec/changes/always-on-context-budget`), not yet applied. Measures
       the budget that exists — `CLAUDE.md` plus this file, 738 lines — evicts
@@ -311,6 +302,22 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
   as a commit and blocked a read. `--exec-path` came out of the value-taking
   global options, since bare it prints the path and runs nothing. The delta spec
   and `design.md` carry all four.
+
+- Tasks 1.9 and 1.10 rested on a false premise, and both are done. They say the
+  authoring session cannot observe its own hook because settings load at
+  startup — generalised from `3a-check`, which established that only for the
+  *permission* set. A hook is re-read from `.claude/settings.json` per tool
+  call: the guard registered mid-session blocked a force-push immediately, and
+  stopped blocking the moment `git checkout main` put a settings file without
+  it on disk. So the check cost three commands rather than a session boundary,
+  and `docs/verification.md` now says which half of the claim holds.
+  1.10 is closed by `bun test && git commit` with `HEAD` on `main`: blocked, and
+  `bun test` never ran, so the `if` field matched the git subcommand rather than
+  the command string's prefix. The `|| exit 2` fallback also proved itself
+  unprompted — with the hook registered and `scripts/git-guard.ts` absent from
+  `main`, every git command was blocked until the registration was removed with
+  a non-Bash tool. That is the intended failure direction, and it is worth
+  knowing that a half-applied guard locks git rather than degrading quietly.
 
 - `reviewable-diff-gates` step 1: the PR-description rule was amended in
   place rather than joined by a sentence about naming criteria — the two
