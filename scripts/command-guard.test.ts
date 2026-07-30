@@ -232,8 +232,75 @@ describe("a spelling that walks around a permission pattern", () => {
 		).toBe(2);
 	});
 
+	test("a shell -c bundled with other flags is looked inside", () => {
+		expect(
+			run(event(`bash -lc "git commit -m fix"`), fabricate("main")).code,
+		).toBe(2);
+	});
+
+	test("a shell -c after other flags is looked inside", () => {
+		expect(
+			run(event(`sh -eu -c "git commit -m fix"`), fabricate("main")).code,
+		).toBe(2);
+	});
+
 	test("a command merely ending in git does not block", () => {
 		expect(run(event("mygit commit -m fix"), fabricate("main")).code).toBe(0);
+	});
+});
+
+describe("quoting that hides the command from a naive tokeniser", () => {
+	test("an assignment with a spaced value still resolves to git", () => {
+		// `GIT_AUTHOR_NAME="Jane Doe"` splits into two words on whitespace, and
+		// the second is neither an assignment nor a wrapper, so the invocation
+		// used to resolve to `Doe"` and the commit went unchecked.
+		expect(
+			run(
+				event(`GIT_AUTHOR_NAME="Jane Doe" git commit -m fix`),
+				fabricate("main"),
+			).code,
+		).toBe(2);
+	});
+
+	test("a -C target containing a space is read whole", () => {
+		const dir = mkdtempSync(join(tmpdir(), "command guard spaced "));
+		made.push(dir);
+		git(dir, "init", "-b", "main");
+		expect(
+			run(event(`git -C "${dir}" commit -m fix`), fabricate("feat/x")).code,
+		).toBe(2);
+	});
+
+	test("a backtick substitution inside double quotes blocks", () => {
+		// Backticks expand inside double quotes exactly as `$(…)` does, so a
+		// guard honouring only one spelling is walked around with the other.
+		expect(
+			run(event('echo "`git commit -m fix`"'), fabricate("main")).code,
+		).toBe(2);
+	});
+
+	test("a gh write inside a backtick substitution blocks", () => {
+		expect(
+			run(event('echo "`gh pr comment 37 --body x`"'), fabricate("feat/x"))
+				.code,
+		).toBe(2);
+	});
+
+	test("a global option taking a separate value does not shift the subcommand", () => {
+		expect(
+			run(
+				event("git --config-env user.name=X commit -m fix"),
+				fabricate("main"),
+			).code,
+		).toBe(2);
+	});
+
+	test("a forbidden command as inert text does not block", () => {
+		// The guard reads invocations, not any string that names one; a quoted
+		// argument is data.
+		expect(
+			run(event(`printf 'git push --force'`), fabricate("feat/x")).code,
+		).toBe(0);
 	});
 });
 
