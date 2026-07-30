@@ -72,8 +72,11 @@ describe("the git guard is registered", () => {
 		expect(hook?.type).toBe("command");
 	});
 
-	test("it points at a tracked script", () => {
-		// A path present only for the author is not a boundary in a clone.
+	test("it runs the tracked script under bun", () => {
+		// A path present only for the author is not a boundary in a clone, and
+		// a command that merely names the path — an echo, a stale wrapper —
+		// never runs it.
+		expect(hook?.command).toMatch(/^bun\s/);
 		const path = hook?.command?.match(/scripts\/[\w-]+\.ts/)?.[0];
 		expect(path).toBe("scripts/git-guard.ts");
 		const tracked = Bun.spawnSync(

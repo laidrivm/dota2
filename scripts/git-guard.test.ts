@@ -109,6 +109,18 @@ describe("committing while HEAD is on main", () => {
 		).toBe(2);
 	});
 
+	test("a commit after a semicolon blocks", () => {
+		expect(
+			run(event("git status; git commit -m fix"), fabricate("main")).code,
+		).toBe(2);
+	});
+
+	test("a commit on its own line blocks", () => {
+		expect(
+			run(event("bun test\ngit commit -m fix"), fabricate("main")).code,
+		).toBe(2);
+	});
+
 	test("a commit behind a leading assignment blocks", () => {
 		expect(
 			run(event("GIT_TRACE=1 git commit -m fix"), fabricate("main")).code,
@@ -163,6 +175,10 @@ describe("force-pushing", () => {
 		expect(
 			run(event("git push --force-with-lease=feat/x:abc123"), branch()).code,
 		).toBe(2);
+	});
+
+	test("an includes-guarded force blocks", () => {
+		expect(run(event("git push --force-if-includes"), branch()).code).toBe(2);
 	});
 
 	test("the short flag blocks", () => {
