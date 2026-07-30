@@ -323,6 +323,16 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
   of Bash closed rather than only git, which is the same direction and a wider
   blast radius.
 
+- Step 1 ships over the diff budget with an `oversize:` marker, the first time
+  the override has been used since `reviewable-diff-gates` introduced it. 1048
+  lines against a 800 fail line. What the sensor is reading is not scope creep:
+  the step still closes the three criteria it set out to, and the growth is five
+  review rounds against one security script, each round finding a live bypass
+  and each fix arriving with a test watched red. Slicing it further was weighed
+  and dropped — taking `gh` out into its own step would break *GitHub write
+  commands are denied*, which this step closes, and reordering the tokeniser
+  ahead of an already-open pull request costs more than the marker.
+
 - The guard blocks *invocations*, not text. An earlier note here claimed it
   blocked any Bash command whose text contained a forbidden invocation, on the
   evidence that it had stopped a diagnostic script of mine that passed `git push
