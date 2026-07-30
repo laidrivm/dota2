@@ -227,7 +227,7 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
         guard tests and 5 settings assertions. Tasks 1.9 and 1.10 confirmed in
         the authoring session — see decisions. Merged (PR #50) over the diff
         budget with an `oversize:` marker.
-  - [ ] **6.2 the secret scan** — `feat/mechanised-prohibitions-secrets`.
+  - [x] **6.2 the secret scan** — `feat/mechanised-prohibitions-secrets`.
         `gitleaks` as a digest-pinned CI job and an optional pre-commit binary.
 - [ ] **7. `always-on-context-budget`** — proposed
       (`openspec/changes/always-on-context-budget`), not yet applied. Measures
