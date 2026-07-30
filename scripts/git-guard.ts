@@ -87,5 +87,3 @@ for (const part of command.split(/&&|\|\||[;|\n]/)) {
 		);
 	}
 }
-
-process.exit(0);
