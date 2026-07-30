@@ -21,7 +21,11 @@ test("every docker:// step in CI names a digest", () => {
 	// tomorrow. Until now only a reviewer's eye enforced this.
 	const workflows = `${root}/.github/workflows`;
 	let found = 0;
-	for (const name of readdirSync(workflows).filter((f) => f.endsWith(".yml"))) {
+	// Both extensions: GitHub reads either, and a `.yaml` file skipped here
+	// would carry an unpinned image while the `.yml` files keep the count above
+	// zero and the sweep looking healthy.
+	const files = readdirSync(workflows).filter((f) => /\.ya?ml$/.test(f));
+	for (const name of files) {
 		for (const line of readFileSync(join(workflows, name), "utf8").split(
 			"\n",
 		)) {
