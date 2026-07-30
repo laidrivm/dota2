@@ -185,6 +185,16 @@ describe("force-pushing", () => {
 		expect(run(event("git push -f origin feat/x"), branch()).code).toBe(2);
 	});
 
+	test("the short flag bundled with another blocks", () => {
+		// git reads `-uf` as `-u -f`, so a whole-argument match on `-f` alone
+		// would let the bundled spelling through.
+		expect(run(event("git push -uf origin feat/x"), branch()).code).toBe(2);
+	});
+
+	test("a short flag group without f does not block", () => {
+		expect(run(event("git push -qn origin feat/x"), branch()).code).toBe(0);
+	});
+
 	test("an ordinary push does not block", () => {
 		expect(run(event("git push -u origin feat/x"), branch()).code).toBe(0);
 	});
