@@ -9,7 +9,10 @@ const settings = await Bun.file(
 ).json();
 
 /** Every package manager this project does not use. */
-const denied = ["npx", "npm", "pnpm", "yarn"];
+const managers = ["npx", "npm", "pnpm", "yarn"];
+
+/** The `gh` commands that publish text on the user's behalf. */
+const ghWrites = ["gh pr comment", "gh issue comment", "gh pr review"];
 
 const deny: string[] = settings.permissions?.deny ?? [];
 const ask: string[] = settings.permissions?.ask ?? [];
@@ -20,17 +23,20 @@ function bunHelp(command: string): string {
 	return help.stdout.toString() + help.stderr.toString();
 }
 
-test("every foreign package manager is denied", () => {
-	expect(deny).toEqual(denied.map((cmd) => `Bash(${cmd} *)`));
+test("the deny list is the foreign managers and the GitHub write commands", () => {
+	expect(deny).toEqual(
+		[...managers, ...ghWrites].map((cmd) => `Bash(${cmd} *)`),
+	);
 });
 
 test("deny entries keep their word boundary", () => {
 	// The trailing-space form is the only one that holds: `Bash(npm*)` would
 	// also block `npmlog`, and `Bash(command:npm *)` is ignored by Claude
 	// Code, which warns about it at startup — a boundary that only looks
-	// like one. Both fail this pattern, as does `Bash(npm:*)`.
+	// like one. Both fail this pattern, as does `Bash(npm:*)`. The optional
+	// further words are `gh pr comment` and its siblings.
 	for (const entry of deny) {
-		expect(entry).toMatch(/^Bash\([a-z-]+ \*\)$/);
+		expect(entry).toMatch(/^Bash\([a-z-]+( [a-z-]+)* \*\)$/);
 	}
 });
 
@@ -112,7 +118,7 @@ describe("every manifest-mutating invocation prompts", () => {
 	test("no ask entry names a denied manager", () => {
 		// Deny is evaluated before ask, so such an entry can never be reached.
 		for (const entry of ask) {
-			for (const cmd of denied) {
+			for (const cmd of managers) {
 				expect(entry).not.toMatch(new RegExp(`\\b${cmd}\\b`));
 			}
 		}

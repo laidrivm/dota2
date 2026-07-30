@@ -8,7 +8,7 @@ Requirement citations are the `### Requirement:` headings in
 
 ## 1. Deny entries and the git guard
 
-- [ ] 1.1 Add `Bash(gh pr comment *)`, `Bash(gh issue comment *)` and
+- [x] 1.1 Add `Bash(gh pr comment *)`, `Bash(gh issue comment *)` and
       `Bash(gh pr review *)` to `permissions.deny` in `.claude/settings.json`
       — *GitHub write commands are denied*
 - [ ] 1.2 Write `scripts/git-guard.ts`: read the event JSON from stdin, take

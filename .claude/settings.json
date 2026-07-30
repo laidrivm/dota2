@@ -1,6 +1,14 @@
 {
 	"permissions": {
-		"deny": ["Bash(npx *)", "Bash(npm *)", "Bash(pnpm *)", "Bash(yarn *)"],
+		"deny": [
+			"Bash(npx *)",
+			"Bash(npm *)",
+			"Bash(pnpm *)",
+			"Bash(yarn *)",
+			"Bash(gh pr comment *)",
+			"Bash(gh issue comment *)",
+			"Bash(gh pr review *)"
+		],
 		"ask": [
 			"Bash(bun add *)",
 			"Bash(bun a *)",
