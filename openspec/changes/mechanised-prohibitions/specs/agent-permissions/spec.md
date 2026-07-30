@@ -15,12 +15,11 @@ commenting and reviewing — so that it no longer reads as covering the PR the
 user asked for.
 
 A deny entry matches the command word literally, so `/opt/homebrew/bin/gh pr
-comment` reaches none of them. That ceiling is accepted here for the same
-reason the hook accepts it below, and it is not closed by moving the check into
-a hook: a hook's `if` field uses the same permission-rule syntax, confirmed by
-running `/usr/bin/git push --force` against the registered guard and watching it
-pass. Closing it would mean a script on every Bash call resolving every
-executable, which is a different proposal against a different threat model.
+comment` reaches none of them. The deny entries are therefore the cheap first
+pass and not the boundary: the same three writes SHALL also be blocked by the
+guard below, which resolves the command to its base name and so sees the
+wrapped spellings. The two are not a rule stated twice — the guard is a
+superset, and a deny entry can only ever be redundant, never wrong.
 
 #### Scenario: The agent tries to reply to a review
 
@@ -49,8 +48,7 @@ executable, which is a different proposal against a different threat model.
 Two git prohibitions cannot be expressed as prefix-matched permission entries,
 because their trigger is repository state or an argument in any position. They
 SHALL be enforced by a single `PreToolUse` hook registered in the tracked
-`.claude/settings.json`, narrowed to git commands by the hook's `if` field so
-it does not run on every Bash call. The hook SHALL read the invoked command
+`.claude/settings.json`. The hook SHALL read the invoked command
 from the event JSON on stdin rather than pattern-matching the raw payload, so
 a `--force` appearing in a command's description cannot trigger it. It SHALL
 block by exiting **2** with the reason on stderr — the only code Claude Code
@@ -65,13 +63,21 @@ answer for it: an unresolved path or an absent `bun` exits **1**, which lets the
 command run. The registered command SHALL therefore carry an `|| exit 2`
 fallback, so every failure to launch blocks as well.
 
-The `if` field matches each subcommand of a compound command independently, so
-one entry covers a git command in any position, including one reached through
-`&&` after a non-git command. It matches the command word literally, so
-`/usr/bin/git commit` and `command git commit` do not reach the hook at all.
-That ceiling is accepted rather than closed: the hook guards an agent that
-writes `git` because that is what the documentation and this repository's own
-prose say, not an adversary looking for a spelling the matcher misses.
+The hook SHALL carry no `if` field, and SHALL therefore run on every Bash call.
+The `if` field takes a permission pattern, and a permission pattern matches the
+command word literally: `/usr/bin/git commit` and `command gh pr comment` reach
+no hook narrowed that way, which was demonstrated against the registered guard
+before this requirement was written. Narrowing by `if` would mean the boundary
+is whatever spelling the pattern anticipates. Deciding in the script instead
+costs one bun start per Bash call, measured at 16-22 ms — negligible beside the
+call it precedes — and the script SHALL resolve each command to its base name,
+past a leading assignment, past a wrapper word such as `command`, `builtin`,
+`exec` or `env`, and into a shell's `-c` argument.
+
+The residual ceiling is a command whose text does not contain the guarded name
+at all — `python -c` spawning a subprocess, or anything encoded. That is
+accepted: the guard exists for an agent that writes `git` and `gh` because the
+documentation and this repository's prose do, not for an adversary.
 
 The hook SHALL block a commit while `HEAD` is on `main`, and SHALL block any
 force-push, whether written as `--force`, `--force-with-lease`, `-f` or bundled
@@ -117,8 +123,31 @@ rejected as ambiguous — every spelling git honours therefore begins with
 
 - **WHEN** `HEAD` is on `main` and the agent attempts `bun test && git commit
   -m "fix"`
-- **THEN** the hook blocks the call, because the `if` field matches each
-  subcommand and not the command string's prefix
+- **THEN** the hook blocks the call, because the script scans every subcommand
+  and not the command string's prefix
+
+#### Scenario: A guarded command reached by another spelling
+
+- **WHEN** the agent attempts `/usr/bin/git commit` on `main`, `command gh pr
+  comment 37 --body x`, or `bash -c "git commit"` on `main`
+- **THEN** the hook blocks each one, because the script resolves the command to
+  its base name rather than matching the word as written
+
+#### Scenario: A command that merely ends in a guarded name
+
+- **WHEN** the agent attempts `mygit commit -m "fix"` on `main`
+- **THEN** the hook allows the call — the base name is `mygit`, not `git`
+
+#### Scenario: A gh write reached by an absolute path
+
+- **WHEN** the agent attempts `/opt/homebrew/bin/gh pr comment 37 --body x`
+- **THEN** the hook blocks the call, which is the case the deny entry cannot see
+
+#### Scenario: A gh write behind a global flag
+
+- **WHEN** the agent attempts `gh --repo owner/name pr comment 37 --body x`
+- **THEN** the hook blocks the call, because the pair is matched wherever it
+  sits and not as the first two words
 
 #### Scenario: A force-push with the flag last
 

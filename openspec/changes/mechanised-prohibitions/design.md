@@ -68,10 +68,24 @@ Rejected: adding both, deny for the prefix form and a hook for the rest. Two
 mechanisms for one rule means two places to read and one to forget; the hook
 already covers everything the deny entry would.
 
+**Revised during apply.** CodeRabbit raised, as a Critical, that a deny entry
+matches the command word literally, so `/opt/homebrew/bin/gh pr comment` walks
+past all three entries. It was first rejected here on the grounds that its own
+remedy — a hook — inherits the same ceiling through the `if` field, which was
+demonstrated by running `/usr/bin/git push --force` against the registered guard
+and watching it pass. That demonstration is what showed the real fix: drop the
+`if` field. The hook then runs on every Bash call and the script resolves the
+command to its base name, which no permission pattern of either kind can do.
+The measured cost is 16-22 ms per Bash call, small enough that the reason for
+narrowing evaporates. So `gh` is guarded by the script too, and the deny entries
+stay as a zero-cost first pass rather than as the boundary — which is not the
+"two places to read" this section rejects, because the script is a superset and
+a deny entry can only be redundant, never wrong.
+
 ### One hook script in bun, not a shell one-liner or `jq`
 
-The two git checks live in one `scripts/git-guard.ts`, run by `bun`, mounted
-under a single hook entry with `if: "Bash(git *)"`.
+Every check lives in one `scripts/command-guard.ts`, run by `bun`, mounted
+under a single hook entry with `matcher: "Bash"` and no `if` field.
 
 - **Not `jq`.** The documented example parses stdin with `jq`, which this
   project does not require and macOS does not ship. Bun is already a hard

@@ -3,7 +3,7 @@ import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-const guard = `${import.meta.dir}/git-guard.ts`;
+const guard = `${import.meta.dir}/command-guard.ts`;
 const made: string[] = [];
 
 afterAll(() => {
@@ -17,7 +17,7 @@ function git(cwd: string, ...args: string[]): void {
 
 /** A throwaway directory; `git init` only when a branch is asked for. */
 function fabricate(branch?: string): string {
-	const dir = mkdtempSync(join(tmpdir(), "git-guard-"));
+	const dir = mkdtempSync(join(tmpdir(), "command-guard-"));
 	made.push(dir);
 	if (branch) git(dir, "init", "-b", branch);
 	return dir;
@@ -202,6 +202,87 @@ describe("committing while HEAD is on main", () => {
 
 	test("a non-git command does not block", () => {
 		expect(run(event("bun test"), fabricate("main")).code).toBe(0);
+	});
+});
+
+describe("a spelling that walks around a permission pattern", () => {
+	test("an absolute path is still git", () => {
+		// The reason the hook carries no `if` field: a permission pattern
+		// matches the command word literally, and this one is not `git`.
+		expect(
+			run(event("/usr/bin/git commit -m fix"), fabricate("main")).code,
+		).toBe(2);
+	});
+
+	test("a command builtin in front is stripped", () => {
+		expect(
+			run(event("command git commit -m fix"), fabricate("main")).code,
+		).toBe(2);
+	});
+
+	test("env with an assignment in front is stripped", () => {
+		expect(
+			run(event("env GIT_TRACE=1 git commit -m fix"), fabricate("main")).code,
+		).toBe(2);
+	});
+
+	test("a shell -c argument is looked inside", () => {
+		expect(
+			run(event(`bash -c "git commit -m fix"`), fabricate("main")).code,
+		).toBe(2);
+	});
+
+	test("a command merely ending in git does not block", () => {
+		expect(run(event("mygit commit -m fix"), fabricate("main")).code).toBe(0);
+	});
+});
+
+describe("gh commands that publish on the user's behalf", () => {
+	const anywhere = () => fabricate("feat/x");
+
+	test("a pull request comment blocks", () => {
+		const { code, reason } = run(
+			event('gh pr comment 37 --body "fixed"'),
+			anywhere(),
+		);
+		expect(code).toBe(2);
+		expect(reason).toContain("publishes text");
+	});
+
+	test("an issue comment blocks", () => {
+		expect(run(event("gh issue comment 12 --body x"), anywhere()).code).toBe(2);
+	});
+
+	test("a review blocks", () => {
+		expect(run(event("gh pr review 37 --approve"), anywhere()).code).toBe(2);
+	});
+
+	test("an absolute path to gh blocks", () => {
+		// This is what the deny entry cannot see and the guard can.
+		expect(
+			run(event("/opt/homebrew/bin/gh pr comment 37 --body x"), anywhere())
+				.code,
+		).toBe(2);
+	});
+
+	test("a write behind a global flag blocks", () => {
+		expect(
+			run(event("gh --repo a/b pr comment 37 --body x"), anywhere()).code,
+		).toBe(2);
+	});
+
+	test("opening a pull request does not block", () => {
+		expect(run(event("gh pr create --title x --body y"), anywhere()).code).toBe(
+			0,
+		);
+	});
+
+	test("reading a pull request does not block", () => {
+		expect(run(event("gh pr view 37 --json state"), anywhere()).code).toBe(0);
+	});
+
+	test("listing issues does not block", () => {
+		expect(run(event("gh issue list"), anywhere()).code).toBe(0);
 	});
 });
 

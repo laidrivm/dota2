@@ -11,7 +11,7 @@ Requirement citations are the `### Requirement:` headings in
 - [x] 1.1 Add `Bash(gh pr comment *)`, `Bash(gh issue comment *)` and
       `Bash(gh pr review *)` to `permissions.deny` in `.claude/settings.json`
       — *GitHub write commands are denied*
-- [x] 1.2 Write `scripts/git-guard.ts`: read the event JSON from stdin, take
+- [x] 1.2 Write `scripts/command-guard.ts`: read the event JSON from stdin, take
       `tool_input.command`, split it on `&&`, `||`, `;`, `|` and newlines, and
       for each subcommand decide whether it is a commit while `HEAD` is on
       `main` or a push carrying a force flag — *The git prohibitions are
@@ -25,9 +25,11 @@ Requirement citations are the `### Requirement:` headings in
       tree would let the commit through with only a transcript notice
       (11, 12, 13)
 - [x] 1.5 Register the hook in `.claude/settings.json` under
-      `hooks.PreToolUse`, `matcher: "Bash"`, with `if: "Bash(git *)"` — *The
-      git prohibitions are enforced by a hook*
-- [x] 1.6 Write `scripts/git-guard.test.ts` driving the script with fabricated
+      `hooks.PreToolUse`, `matcher: "Bash"`, with **no** `if` field — that
+      field takes a permission pattern, which matches the command word
+      literally, so a narrowed hook never sees `/usr/bin/git` — *The git
+      prohibitions are enforced by a hook*
+- [x] 1.6 Write `scripts/command-guard.test.ts` driving the script with fabricated
       event JSON against fabricated repositories: missing command (1); a
       non-git command (2); a commit on `main` (3); a compound `git add -A &&
       git commit` on `main` (4); `git log --grep="git commit"` on `main` (5);
@@ -44,9 +46,10 @@ Requirement citations are the `### Requirement:` headings in
       This task assumed a fresh session was needed, because settings load at
       startup; that holds for the permission set and not for a hook, which is
       re-read per tool call — so the authoring session can observe it
-- [x] 1.10 Confirm live that the `if` field splits compound commands as the
-      docs' table says, with `bun test && git commit` on `main` — the
-      registration is wrong for exactly that form if it does not
+- [x] 1.10 Confirm live that a git command is caught wherever it sits in a
+      compound command, with `bun test && git commit` on `main`. Confirmed
+      first through the `if` field, then again after `if` was dropped and the
+      script took over the scan
 
 ## 2. The secret scan
 

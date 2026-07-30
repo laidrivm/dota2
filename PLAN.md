@@ -223,7 +223,7 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
       the first three take over.
   - [ ] **6.1 deny entries and the git guard** —
         `feat/mechanised-prohibitions-permissions`. Three `gh` write
-        commands denied, `scripts/git-guard.ts` under a `PreToolUse` hook, 24
+        commands denied, `scripts/command-guard.ts` under a `PreToolUse` hook, 24
         guard tests and 5 settings assertions. Tasks 1.9 and 1.10 confirmed in
         the authoring session — see decisions.
 - [ ] **7. `always-on-context-budget`** — proposed
@@ -303,6 +303,28 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
   global options, since bare it prints the path and runs nothing. The delta spec
   and `design.md` carry all four.
 
+- The guard lost its `if` field, on the user's push-back against a rejected
+  CodeRabbit Critical. The finding said a `deny` entry matches the command word
+  literally, so `/opt/homebrew/bin/gh pr comment` walks past it — true — and
+  proposed a hook, which was rejected because a hook's `if` field inherits the
+  same ceiling, demonstrated by `/usr/bin/git push --force` passing the
+  registered guard. The rejection was right about the bot's remedy and wrong to
+  stop there: dropping `if` altogether closes it, because the script then sees
+  every Bash call and resolves the command to its base name, past a leading
+  assignment, a wrapper word (`command`, `builtin`, `exec`, `env`) and into a
+  shell's `-c`. The only argument for narrowing was cost, and it was never
+  measured; it is 16-22 ms per Bash call. `gh` moved into the guard for the same
+  reason, so `scripts/git-guard.ts` is `scripts/command-guard.ts` now. Both
+  bypasses were confirmed closed live, against the same two commands that had
+  passed. The residual ceiling is a command whose text never contains the
+  guarded name — `python -c` spawning a subprocess — which is outside the
+  agent-not-adversary model this guard is for. The deny entries stay as a
+  zero-cost first pass. Two side effects worth knowing: the guard now blocks any
+  Bash command whose *text* contains a forbidden invocation, which caught a
+  diagnostic script of mine that merely passed `git push --force` as a string;
+  and `|| exit 2` now fails all of Bash closed rather than only git, which is
+  the same direction and a wider blast radius.
+
 - Tasks 1.9 and 1.10 rested on a false premise, and both are done. They say the
   authoring session cannot observe its own hook because settings load at
   startup — generalised from `3a-check`, which established that only for the
@@ -314,7 +336,7 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
   1.10 is closed by `bun test && git commit` with `HEAD` on `main`: blocked, and
   `bun test` never ran, so the `if` field matched the git subcommand rather than
   the command string's prefix. The `|| exit 2` fallback also proved itself
-  unprompted — with the hook registered and `scripts/git-guard.ts` absent from
+  unprompted — with the hook registered and the guard script absent from
   `main`, every git command was blocked until the registration was removed with
   a non-Bash tool. That is the intended failure direction, and it is worth
   knowing that a half-applied guard locks git rather than degrading quietly.
@@ -494,7 +516,7 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
   --force` puts the flag last, and `git commit` is forbidden only when `HEAD`
   is on `main`, which no pattern can see. So `Bash(git push --force*)` was
   sketched and dropped: a boundary that holds only for the well-behaved caller
-  is what this change exists to stop relying on. One `scripts/git-guard.ts`
+  is what this change exists to stop relying on. One `scripts/command-guard.ts`
   under a single `PreToolUse` entry with `if: "Bash(git *)"`, in bun rather
   than the documented `jq` (not a dependency here, not shipped by macOS), and
   reading `tool_input.command` rather than the raw payload, so a `--force` in
