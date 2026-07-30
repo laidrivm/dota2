@@ -52,6 +52,11 @@ other non-zero code lets the command run, so the undecidable case fails closed
 or it does not fail at all. It SHALL depend on nothing beyond git and bun, both
 of which the repository already requires.
 
+A guard that never starts is the undecidable case too, and the script cannot
+answer for it: an unresolved path or an absent `bun` exits **1**, which lets the
+command run. The registered command SHALL therefore carry an `|| exit 2`
+fallback, so every failure to launch blocks as well.
+
 The `if` field matches each subcommand of a compound command independently, so
 one entry covers a git command in any position, including one reached through
 `&&` after a non-git command. It matches the command word literally, so
@@ -61,10 +66,16 @@ writes `git` because that is what the documentation and this repository's own
 prose say, not an adversary looking for a spelling the matcher misses.
 
 The hook SHALL block a commit while `HEAD` is on `main`, and SHALL block any
-force-push, whether written as `--force`, `--force-with-lease` or `-f`, and
-wherever the flag sits in the command. This is stricter than the prose it
-replaces, which forbade force-pushing only after a pull request was open: the
-agent loses force-push entirely, and the user keeps it.
+force-push, whether written as `--force`, `--force-with-lease`, `-f` or bundled
+into a short-flag group such as `-uf`, which git reads as `-u -f`, and wherever
+the flag sits in the command. This is stricter than the prose it replaces, which
+forbade force-pushing only after a pull request was open: the agent loses
+force-push entirely, and the user keeps it.
+
+The script SHALL find the git command inside a compound one by splitting only
+on separators outside quotes. A split that ignores quoting cuts both ways: it
+severs a force flag from its command, and it turns a quoted `;` inside a
+`--grep` argument into a fragment that reads as a commit.
 
 #### Scenario: A commit attempted on main
 
@@ -94,6 +105,17 @@ agent loses force-push entirely, and the user keeps it.
 - **WHEN** the agent attempts `git push origin feat/x --force`
 - **THEN** the hook blocks the call, although no command-prefix pattern would
   have matched it
+
+#### Scenario: A force flag bundled with another short flag
+
+- **WHEN** the agent attempts `git push -uf origin feat/x`
+- **THEN** the hook blocks the call, because git reads the group as `-u -f`
+
+#### Scenario: A separator inside a quoted argument
+
+- **WHEN** the agent attempts `git push origin "a;b" --force`
+- **THEN** the hook blocks the call, because the `;` is inside quotes and does
+  not start a second command that the flag would fall outside of
 
 #### Scenario: A lease-guarded force-push
 
@@ -170,7 +192,8 @@ repository would change its verdict with the branch.
 #### Scenario: The hook loses its registration
 
 - **WHEN** the `PreToolUse` entry is removed from `.claude/settings.json`, or
-  its command no longer points at the tracked script
+  its command no longer runs the tracked script, or it loses its `|| exit 2`
+  fallback
 - **THEN** `bun test` fails
 
 #### Scenario: The hook stops blocking
