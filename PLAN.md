@@ -319,11 +319,25 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
   passed. The residual ceiling is a command whose text never contains the
   guarded name — `python -c` spawning a subprocess — which is outside the
   agent-not-adversary model this guard is for. The deny entries stay as a
-  zero-cost first pass. Two side effects worth knowing: the guard now blocks any
-  Bash command whose *text* contains a forbidden invocation, which caught a
-  diagnostic script of mine that merely passed `git push --force` as a string;
-  and `|| exit 2` now fails all of Bash closed rather than only git, which is
-  the same direction and a wider blast radius.
+  zero-cost first pass. One side effect worth knowing: `|| exit 2` now fails all
+  of Bash closed rather than only git, which is the same direction and a wider
+  blast radius.
+
+- The guard blocks *invocations*, not text. An earlier note here claimed it
+  blocked any Bash command whose text contained a forbidden invocation, on the
+  evidence that it had stopped a diagnostic script of mine that passed `git push
+  --force` as a quoted argument. The claim was false and the evidence was a
+  different defect: the tokeniser was not quote-aware, so an unbalanced quote
+  earlier in that script desynchronised the scan and a later fragment began
+  mid-string with an unquoted `git push --force`. `printf 'git push --force'` is
+  allowed now and has a test saying so. The same naivety was three findings on
+  the pull request, all confirmed as live bypasses before the fix:
+  `GIT_AUTHOR_NAME="Jane Doe" git commit` resolved the invocation to `Doe"` and
+  skipped the branch check, `git -C "some path" commit` lost the subcommand, and
+  a backtick substitution inside double quotes was never split out at all —
+  backticks expand there exactly as `$(…)` does, and only `$(` had been
+  special-cased. Tokenising once with quote state, emitting words with quoting
+  removed, closes all three and deletes the separate string-splitting step.
 
 - Tasks 1.9 and 1.10 rested on a false premise, and both are done. They say the
   authoring session cannot observe its own hook because settings load at

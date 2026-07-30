@@ -89,9 +89,13 @@ force-push entirely, and the user keeps it.
 The script SHALL find the git command inside a compound one by splitting only
 on separators outside quotes. A split that ignores quoting cuts both ways: it
 severs a force flag from its command, and it turns a quoted `;` inside a
-`--grep` argument into a fragment that reads as a commit. A command
-substitution SHALL start a command even inside double quotes, where the shell
-substitutes and the `if` field looks, so `echo "$(git commit)"` cannot hide one.
+`--grep` argument into a fragment that reads as a commit. Quoting SHALL be
+removed from the words it yields as well, so a value containing a space —
+`GIT_AUTHOR_NAME="Jane Doe" git commit`, `git -C "some path" commit` — does not
+break the command's resolution. A command substitution SHALL start a command
+even inside double quotes, in **both** POSIX spellings, `$(…)` and backticks:
+the shell expands them there alike, so honouring one and not the other leaves
+the guard walked around by the other.
 
 The branch SHALL be read from the repository the commit would land in — the
 `-C` target when the command names one — and not from the guard's own working
@@ -132,6 +136,25 @@ rejected as ambiguous — every spelling git honours therefore begins with
   comment 37 --body x`, or `bash -c "git commit"` on `main`
 - **THEN** the hook blocks each one, because the script resolves the command to
   its base name rather than matching the word as written
+
+#### Scenario: A guarded command behind a quoted value containing a space
+
+- **WHEN** `HEAD` is on `main` and the agent attempts
+  `GIT_AUTHOR_NAME="Jane Doe" git commit -m "fix"`
+- **THEN** the hook blocks the call — splitting on whitespace alone would
+  resolve the invocation to the tail of the quoted value instead of to `git`
+
+#### Scenario: A guarded command inside a backtick substitution
+
+- **WHEN** `HEAD` is on `main` and the agent attempts
+  ``echo "`git commit -m fix`"``
+- **THEN** the hook blocks the call, as it does for the `$(…)` spelling
+
+#### Scenario: A forbidden command appearing only as text
+
+- **WHEN** the agent attempts `printf 'git push --force'`
+- **THEN** the hook allows the call — the guard reads invocations, and a quoted
+  argument is data
 
 #### Scenario: A command that merely ends in a guarded name
 
