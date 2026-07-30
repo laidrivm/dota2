@@ -11,15 +11,15 @@ Requirement citations are the `### Requirement:` headings in
 - [x] 1.1 Add `Bash(gh pr comment *)`, `Bash(gh issue comment *)` and
       `Bash(gh pr review *)` to `permissions.deny` in `.claude/settings.json`
       — *GitHub write commands are denied*
-- [ ] 1.2 Write `scripts/git-guard.ts`: read the event JSON from stdin, take
+- [x] 1.2 Write `scripts/git-guard.ts`: read the event JSON from stdin, take
       `tool_input.command`, split it on `&&`, `||`, `;`, `|` and newlines, and
       for each subcommand decide whether it is a commit while `HEAD` is on
       `main` or a push carrying a force flag — *The git prohibitions are
       enforced by a hook*
-- [ ] 1.3 Match the force flags as whole arguments, not substrings, so
+- [x] 1.3 Match the force flags as whole arguments, not substrings, so
       `--follow-tags` and `--fixup` do not trigger them (7, 8), and compare the
       branch for equality so `mainline` does not match `main` (6)
-- [ ] 1.4 Exit 0 to allow and 2 for everything else — a blocked command and an
+- [x] 1.4 Exit 0 to allow and 2 for everything else — a blocked command and an
       event the script cannot read alike, with the reason on stderr. Any other
       non-zero code is non-blocking, so a malformed event or a missing work
       tree would let the commit through with only a transcript notice
@@ -27,7 +27,7 @@ Requirement citations are the `### Requirement:` headings in
 - [ ] 1.5 Register the hook in `.claude/settings.json` under
       `hooks.PreToolUse`, `matcher: "Bash"`, with `if: "Bash(git *)"` — *The
       git prohibitions are enforced by a hook*
-- [ ] 1.6 Write `scripts/git-guard.test.ts` driving the script with fabricated
+- [x] 1.6 Write `scripts/git-guard.test.ts` driving the script with fabricated
       event JSON against fabricated repositories: missing command (1); a
       non-git command (2); a commit on `main` (3); a compound `git add -A &&
       git commit` on `main` (4); `git log --grep="git commit"` on `main` (5);
