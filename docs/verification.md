@@ -18,8 +18,9 @@ What counts as evidence for a claim, and what a claim may rest on.
 - Never infer a permission outcome from a command that succeeded — an
   approved prompt and an unprompted call are indistinguishable from inside
   the session.
-- Verify a settings change only in a session started after it — a session
-  holds the permission set it loaded at startup.
+- Verify a permissions change only in a session started after it — a session
+  holds the permission set it loaded at startup, while a hook is re-read from
+  the settings file per tool call and is observable at once.
 - Record the cause a measurement establishes, not the one it merely permits —
   name the alternatives ruled out.
 - Re-run the failure probe that justified an assertion after rewriting it.
