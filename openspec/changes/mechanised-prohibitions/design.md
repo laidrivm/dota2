@@ -86,6 +86,11 @@ under a single hook entry with `if: "Bash(git *)"`.
   command's `description` too, so grepping the whole payload for `--force`
   would block a push whose description merely says "force". The script reads
   `tool_input.command`.
+- **With an `|| exit 2` fallback on the registration.** The script's two exits
+  cover events it receives; they cannot cover never running. An unresolved
+  `${CLAUDE_PROJECT_DIR}` or an absent `bun` exits 1, which is non-blocking, so
+  the guard would disappear silently. The fallback is the only place that case
+  can be caught.
 
 The hook is stricter than the prose it replaces: the old rule forbade
 force-pushing *after a PR is open*, and the hook forbids it always. Encoding

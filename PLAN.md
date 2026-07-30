@@ -214,14 +214,27 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
         in `CLAUDE.md` now stands at 20, its maintenance trigger — the split is
         already queue item 7 (`always-on-context-budget`), so no separate
         proposal.
-- [ ] **6. `mechanised-prohibitions`** — proposed
-      (`openspec/changes/mechanised-prohibitions`), not yet applied. Converts
+- [ ] **6. `mechanised-prohibitions`** — applying. Converts
       the prohibitions that carry no judgement into `deny` entries, a
       `PreToolUse` hook, `gitleaks` and a suppression check, then splits the
       rules list into code / process / safety and deletes what the mechanisms
       replaced. Four task groups, four PRs: permissions → secrets →
       suppressions → rulebook, the last one last because it removes the prose
       the first three take over.
+  - [ ] **6.1 deny entries and the git guard** —
+        `feat/mechanised-prohibitions-permissions`. Three `gh` write
+        commands denied, `scripts/git-guard.ts` under a `PreToolUse` hook, 24
+        guard tests and 5 settings assertions. Two checks below need a session
+        started after the merge.
+- [ ] **6.1-check. Confirm the git guard fires and splits compound commands** —
+      tasks 1.9 and 1.10, and impossible from the authoring session: a session
+      loads `.claude/settings.json` at startup, so a hook registered mid-session
+      is not live in it, the same reason `3a-check` gives. In a session started
+      after this branch merges, attempt `git push --force-with-lease` on a
+      throwaway branch and `bun test && git commit` while `HEAD` is on `main`.
+      The second one is what 1.10 rests on: if the `if` field matched the
+      command string's prefix rather than each subcommand, the hook would not
+      fire for that form at all.
 - [ ] **7. `always-on-context-budget`** — proposed
       (`openspec/changes/always-on-context-budget`), not yet applied. Measures
       the budget that exists — `CLAUDE.md` plus this file, 738 lines — evicts
@@ -282,6 +295,22 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
 - [ ] **Task 5** — error tracking (precondition: product is deployed)
 
 ## Accepted decisions
+
+- `mechanised-prohibitions` step 1: three things the design did not foresee, all
+  found by the gates rather than by writing the code. The guard fails closed on
+  an event it cannot read, but a guard that never *starts* — an unresolved
+  `${CLAUDE_PROJECT_DIR}`, an absent `bun` — exits 1, which Claude Code treats
+  as non-blocking, so the whole boundary would vanish silently; the registration
+  carries `|| exit 2` and the three outcomes were run through `sh` to confirm
+  0/2/2. Git bundles short flags, reading `push -uf` as `-u -f`, so a
+  whole-argument match on `-f` alone missed a spelling git itself accepts —
+  confirmed against the binary, which parses `-uf` past option handling while
+  rejecting an unknown flag outright. And the compound-command split had to
+  become quote-aware, which cuts both ways: it severed a force flag from its
+  command, and it turned a quoted `;` inside `--grep` into a fragment that read
+  as a commit and blocked a read. `--exec-path` came out of the value-taking
+  global options, since bare it prints the path and runs nothing. The delta spec
+  and `design.md` carry all four.
 
 - `reviewable-diff-gates` step 1: the PR-description rule was amended in
   place rather than joined by a sentence about naming criteria — the two

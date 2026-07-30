@@ -38,7 +38,7 @@ Requirement citations are the `### Requirement:` headings in
       present (17), the hook registered and pointing at the tracked script
       (18), `gh pr create` and `gh pr view` matching no deny entry (15, 16) —
       *The permission policy is pinned by a test*
-- [ ] 1.8 Watch each new assertion fail before it passes, by breaking the
+- [x] 1.8 Watch each new assertion fail before it passes, by breaking the
       policy rather than by editing the assertion
 - [ ] 1.9 Confirm in a fresh session that the hook actually fires — a session
       loads its settings at startup, so the authoring session cannot observe
