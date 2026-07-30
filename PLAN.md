@@ -287,7 +287,7 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
 
 ## Accepted decisions
 
-- `mechanised-prohibitions` step 1: three things the design did not foresee, all
+- `mechanised-prohibitions` step 1: four things the design did not foresee, all
   found by the gates rather than by writing the code. The guard fails closed on
   an event it cannot read, but a guard that never *starts* — an unresolved
   `${CLAUDE_PROJECT_DIR}`, an absent `bun` — exits 1, which Claude Code treats

@@ -150,6 +150,48 @@ describe("committing while HEAD is on main", () => {
 		).toBe(0);
 	});
 
+	test("a commit inside a command substitution blocks", () => {
+		expect(
+			run(event("echo $(git commit -m fix)"), fabricate("main")).code,
+		).toBe(2);
+	});
+
+	test("a commit inside backticks blocks", () => {
+		expect(run(event("echo `git commit -m fix`"), fabricate("main")).code).toBe(
+			2,
+		);
+	});
+
+	test("a commit inside a substitution within double quotes blocks", () => {
+		// The shell substitutes inside double quotes, so quote tracking alone
+		// would hide this one.
+		expect(
+			run(event('echo "$(git commit -m fix)"'), fabricate("main")).code,
+		).toBe(2);
+	});
+
+	test("a commit aimed at another repository reads that repository", () => {
+		// `-C` names where the commit lands; the guard's own cwd is irrelevant.
+		const elsewhere = fabricate("main");
+		expect(
+			run(event(`git -C ${elsewhere} commit -m fix`), fabricate("feat/x")).code,
+		).toBe(2);
+	});
+
+	test("a commit aimed at a feature branch elsewhere does not block", () => {
+		const elsewhere = fabricate("feat/x");
+		expect(
+			run(event(`git -C ${elsewhere} commit -m fix`), fabricate("main")).code,
+		).toBe(0);
+	});
+
+	test("a commit aimed at an unreadable target blocks", () => {
+		expect(
+			run(event("git -C /nonexistent/xyz commit -m fix"), fabricate("feat/x"))
+				.code,
+		).toBe(2);
+	});
+
 	test("a branch merely starting with main does not block", () => {
 		expect(run(event("git commit -m fix"), fabricate("mainline")).code).toBe(0);
 	});
@@ -207,6 +249,26 @@ describe("force-pushing", () => {
 		// A naive split would leave `git push origin "a` — no force flag in
 		// it — and let the rewrite through.
 		expect(run(event('git push origin "a;b" --force'), branch()).code).toBe(2);
+	});
+
+	test("an abbreviated lease flag blocks", () => {
+		// git takes any unambiguous abbreviation, so `--force-w` reaches the
+		// same code path as the full spelling.
+		expect(run(event("git push --force-w origin feat/x"), branch()).code).toBe(
+			2,
+		);
+	});
+
+	test("an abbreviated includes flag blocks", () => {
+		expect(run(event("git push --force-i origin feat/x"), branch()).code).toBe(
+			2,
+		);
+	});
+
+	test("a force-push inside a command substitution blocks", () => {
+		expect(
+			run(event('echo "$(git push --force origin feat/x)"'), branch()).code,
+		).toBe(2);
 	});
 
 	test("an ordinary push does not block", () => {
