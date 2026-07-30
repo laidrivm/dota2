@@ -73,16 +73,15 @@ describe("the git guard is registered", () => {
 	});
 
 	test("it runs the tracked script under bun", () => {
-		// A path present only for the author is not a boundary in a clone, and
-		// a command that merely names the path — an echo, a stale wrapper —
-		// never runs it.
-		expect(hook?.command).toMatch(/^bun\s/);
-		// A guard that cannot launch — bun absent, the path unresolved — exits
-		// 1, which Claude Code treats as non-blocking and runs the command
-		// anyway. The fallback turns every such failure back into a block.
-		expect(hook?.command).toMatch(/\|\| exit 2$/);
-		const path = hook?.command?.match(/scripts\/[\w-]+\.ts/)?.[0];
-		expect(path).toBe("scripts/git-guard.ts");
+		// Pinned whole rather than by three loose matches, which
+		// `bun "…/git-guard.ts"; true || exit 2` would satisfy while never
+		// blocking anything. The `|| exit 2` matters because a guard that
+		// cannot launch — bun absent, the path unresolved — exits 1, which
+		// Claude Code treats as non-blocking and runs the command anyway.
+		const path = "scripts/git-guard.ts";
+		expect(hook?.command).toBe(
+			`bun "\${CLAUDE_PROJECT_DIR}/${path}" || exit 2`,
+		);
 		const tracked = Bun.spawnSync(
 			["git", "ls-files", "--error-unmatch", path ?? ""],
 			{

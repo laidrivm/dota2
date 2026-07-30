@@ -142,6 +142,14 @@ describe("committing while HEAD is on main", () => {
 		).toBe(0);
 	});
 
+	test("a separator inside quotes does not start a new command", () => {
+		// Splitting here would leave the fragment `git commit -m x"`, and a
+		// read command would be blocked as a commit.
+		expect(
+			run(event('git log --grep="x; git commit -m x"'), fabricate("main")).code,
+		).toBe(0);
+	});
+
 	test("a branch merely starting with main does not block", () => {
 		expect(run(event("git commit -m fix"), fabricate("mainline")).code).toBe(0);
 	});
@@ -193,6 +201,12 @@ describe("force-pushing", () => {
 
 	test("a short flag group without f does not block", () => {
 		expect(run(event("git push -qn origin feat/x"), branch()).code).toBe(0);
+	});
+
+	test("a quoted separator does not split the flag away", () => {
+		// A naive split would leave `git push origin "a` — no force flag in
+		// it — and let the rewrite through.
+		expect(run(event('git push origin "a;b" --force'), branch()).code).toBe(2);
 	});
 
 	test("an ordinary push does not block", () => {
