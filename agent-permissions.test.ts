@@ -58,32 +58,38 @@ test("only the GitHub write commands are denied", () => {
 	expect(isDenied("gh pr view 37 --json state")).toBe(false);
 });
 
-describe("the git guard is registered", () => {
-	const hook = (settings.hooks?.PreToolUse ?? [])
+describe("the command guard is registered", () => {
+	const hooks = (settings.hooks?.PreToolUse ?? [])
 		.filter((entry: { matcher?: string }) => entry.matcher === "Bash")
-		.flatMap((entry: { hooks?: unknown[] }) => entry.hooks ?? [])
-		.find((each: { if?: string }) => each.if === "Bash(git *)") as
-		| { type?: string; command?: string }
-		| undefined;
+		.flatMap((entry: { hooks?: unknown[] }) => entry.hooks ?? []) as {
+		type?: string;
+		if?: string;
+		command?: string;
+	}[];
+	const hook = hooks[0];
 
-	test("a PreToolUse entry narrows to git commands", () => {
-		// Without the `if` field the guard would run a bun process on every
-		// Bash call; without the entry it would never run at all.
+	test("one entry covers every Bash call", () => {
+		// No `if` field, deliberately: it takes a permission pattern, which
+		// matches the command word literally, so `/usr/bin/git` and
+		// `command gh` would walk around a hook narrowed that way. The script
+		// decides instead, and it must therefore see everything.
+		expect(hooks).toHaveLength(1);
 		expect(hook?.type).toBe("command");
+		expect(hook?.if).toBeUndefined();
 	});
 
 	test("it runs the tracked script under bun", () => {
-		// Pinned whole rather than by three loose matches, which
-		// `bun "…/git-guard.ts"; true || exit 2` would satisfy while never
+		// Pinned whole rather than by loose matches, which
+		// `bun "…/command-guard.ts"; true || exit 2` would satisfy while never
 		// blocking anything. The `|| exit 2` matters because a guard that
 		// cannot launch — bun absent, the path unresolved — exits 1, which
 		// Claude Code treats as non-blocking and runs the command anyway.
-		const path = "scripts/git-guard.ts";
+		const path = "scripts/command-guard.ts";
 		expect(hook?.command).toBe(
 			`bun "\${CLAUDE_PROJECT_DIR}/${path}" || exit 2`,
 		);
 		const tracked = Bun.spawnSync(
-			["git", "ls-files", "--error-unmatch", path ?? ""],
+			["git", "ls-files", "--error-unmatch", path],
 			{
 				cwd: import.meta.dir,
 			},

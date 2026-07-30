@@ -33,8 +33,7 @@
 				"hooks": [
 					{
 						"type": "command",
-						"if": "Bash(git *)",
-						"command": "bun \"${CLAUDE_PROJECT_DIR}/scripts/git-guard.ts\" || exit 2"
+						"command": "bun \"${CLAUDE_PROJECT_DIR}/scripts/command-guard.ts\" || exit 2"
 					}
 				]
 			}
