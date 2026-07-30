@@ -18,6 +18,8 @@ function block(reason: string): never {
 /**
  * Global options that swallow the token after them, so the subcommand of
  * `git -C some/dir commit` resolves to `commit` and not to the path.
+ * `--exec-path` is absent on purpose: bare, it prints the path and runs
+ * nothing, so treating the next token as its value would be wrong.
  */
 const VALUE_OPTIONS = new Set([
 	"-C",
@@ -25,7 +27,6 @@ const VALUE_OPTIONS = new Set([
 	"--git-dir",
 	"--work-tree",
 	"--namespace",
-	"--exec-path",
 ]);
 
 /**
@@ -63,11 +64,36 @@ function currentBranch(): string {
 	return head.stdout.toString().trim();
 }
 
+/**
+ * Splits on the separators that start a new command, ignoring any inside
+ * quotes: `git push origin "a;b" --force` is one command, and
+ * `git log --grep="x; git commit"` is not two.
+ */
+function subcommands(line: string): string[] {
+	const parts: string[] = [];
+	let quote = "";
+	let start = 0;
+	for (let at = 0; at < line.length; at++) {
+		const char = line[at];
+		if (quote) {
+			if (char === quote) quote = "";
+		} else if (char === '"' || char === "'") {
+			quote = char;
+		} else if (char === ";" || char === "\n" || char === "|" || char === "&") {
+			parts.push(line.slice(start, at));
+			while (line[at + 1] === "&" || line[at + 1] === "|") at++;
+			start = at + 1;
+		}
+	}
+	parts.push(line.slice(start));
+	return parts;
+}
+
 // The `if` field already matched each subcommand of a compound command
 // independently; this split finds the git one again inside the whole string.
-for (const part of command.split(/&&|\|\||[;|\n]/)) {
+for (const part of subcommands(command)) {
 	const words = part.trim().split(/\s+/).filter(Boolean);
-	while (words[0] && !words[0].startsWith("-") && words[0].includes("=")) {
+	while (words[0] && /^[A-Za-z_][A-Za-z0-9_]*=/.test(words[0])) {
 		words.shift(); // a leading VAR=value assignment
 	}
 	if (words.shift() !== "git") continue;
