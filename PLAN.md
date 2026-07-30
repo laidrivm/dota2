@@ -225,7 +225,10 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
         `feat/mechanised-prohibitions-permissions`. Three `gh` write
         commands denied, `scripts/command-guard.ts` under a `PreToolUse` hook, 24
         guard tests and 5 settings assertions. Tasks 1.9 and 1.10 confirmed in
-        the authoring session — see decisions.
+        the authoring session — see decisions. Merged (PR #50) over the diff
+        budget with an `oversize:` marker.
+  - [ ] **6.2 the secret scan** — `feat/mechanised-prohibitions-secrets`.
+        `gitleaks` as a digest-pinned CI job and an optional pre-commit binary.
 - [ ] **7. `always-on-context-budget`** — proposed
       (`openspec/changes/always-on-context-budget`), not yet applied. Measures
       the budget that exists — `CLAUDE.md` plus this file, 738 lines — evicts
@@ -322,6 +325,31 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
   zero-cost first pass. One side effect worth knowing: `|| exit 2` now fails all
   of Bash closed rather than only git, which is the same direction and a wider
   blast radius.
+
+- `mechanised-prohibitions` step 2: `gitleaks git`, not `gitleaks dir`, settled
+  by running both against a fixture. `dir` reported a gitignored file, which
+  exists for one author and in no clone, so it would fail a check nobody else
+  can reproduce; `git` reads tracked content only. `-v --redact` together,
+  because `--redact` alone prints "leaks found: 1" and nothing else, while the
+  criterion asks for the file and the line — with `-v` it names both and shows
+  `REDACTED` in place of the secret, which matters in a public repository's
+  build log. `fetch-depth: 0` on the checkout, since `gitleaks git` reads
+  history through `git log -p` and the default shallow clone would let a secret
+  added and then deleted on the branch pass. The digest was re-fetched from the
+  registry rather than copied from `design.md`; it matched. The pre-commit half
+  is an `if command -v` guard rather than `&& … || true`, which would have
+  swallowed a real finding. Both halves were exercised: the commit that carries
+  a fake credential is refused, and on this machine — which has no `gitleaks`
+  binary — the hook prints nothing and exits 0.
+
+- The guard's `-C` handling costs something real, met twice while doing step 2.
+  It blocks `git -C "$SOME_VAR" commit` outright, because a static text check
+  cannot expand a variable and an unreadable target fails closed; and it blocks
+  a commit in an unrelated repository that happens to be on `main`, because it
+  reads a branch and not which repository it belongs to. Both are the specified
+  behaviour and both fail safe. The workaround is a literal path and a separate
+  command, which is what the fixture work here used. Worth revisiting only if it
+  costs more than it saves.
 
 - Step 1 ships over the diff budget with an `oversize:` marker, the first time
   the override has been used since `reviewable-diff-gates` introduced it. 1048
