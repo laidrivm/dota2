@@ -40,10 +40,11 @@ Requirement citations are the `### Requirement:` headings in
       *The permission policy is pinned by a test*
 - [x] 1.8 Watch each new assertion fail before it passes, by breaking the
       policy rather than by editing the assertion
-- [ ] 1.9 Confirm in a fresh session that the hook actually fires — a session
-      loads its settings at startup, so the authoring session cannot observe
-      it. Record the result the way `3a-check` did in `PLAN.md`
-- [ ] 1.10 Confirm live that the `if` field splits compound commands as the
+- [x] 1.9 Confirm the hook actually fires, and record the result in `PLAN.md`.
+      This task assumed a fresh session was needed, because settings load at
+      startup; that holds for the permission set and not for a hook, which is
+      re-read per tool call — so the authoring session can observe it
+- [x] 1.10 Confirm live that the `if` field splits compound commands as the
       docs' table says, with `bun test && git commit` on `main` — the
       registration is wrong for exactly that form if it does not
 
