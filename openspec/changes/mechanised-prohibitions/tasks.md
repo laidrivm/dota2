@@ -61,9 +61,14 @@ Requirement citations are the `### Requirement:` headings in
 - [x] 2.2 Add `gitleaks` to the `pre-commit` hook in a form that runs only
       when `command -v gitleaks` finds a binary and exits 0 otherwise — *A
       secret scan runs in CI and, when available, before a commit*
-- [ ] 2.3 Prove the CI job red by planting a recognisable fake credential on a
-      throwaway branch, then remove it — the check must be seen failing before
-      it is trusted
+- [x] 2.3 Prove the scan red by planting a recognisable fake credential, then
+      remove it — the check must be seen failing before it is trusted. Done
+      against a local clone rather than a pushed branch, so no fake credential
+      enters this public repository's history: the exact CI arguments, over the
+      same `/github/workspace` mount, exit 1 naming the file and line and exit 0
+      once the commit is gone. What that leaves unproven is the runner wiring —
+      the digest pull, `fetch-depth: 0`, the job itself — which the first pull
+      request run shows
 - [x] 2.4 Confirm the pre-commit path is a no-op on a machine without the
       binary, and does not print a warning on every commit
 
