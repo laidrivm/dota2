@@ -54,7 +54,9 @@ completes, name the next step and the exact command.
 ## Stage 2 — Apply
 
 - Before `/opsx:apply`: create the branch for the task group being applied,
-  per Git & PRs (never apply on main), then remind the user to `/clear` —
+  per Git & PRs — the commit guard refuses a commit while `HEAD` is on `main`,
+  so an apply that skipped this stalls at its first commit. Then remind the
+  user to `/clear` —
   implementation should start from a clean context, reading only the spec
   artifacts. Stages 2 and 3 repeat per group, in order, until the last one
   merges.
