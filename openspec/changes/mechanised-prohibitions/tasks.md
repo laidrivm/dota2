@@ -108,7 +108,11 @@ Requirement citations are the `### Requirement:` headings in
       the deny entries reach `gh` only, so it keeps the external services they
       cannot, and names replying, commenting and reviewing, which stops it
       reading as a ban on `gh pr create` — *A mechanised prohibition leaves its
-      prose home*
+      prose home*. Two of the three deletions turned out to be partial and were
+      shortened instead: the guard reads the branch a commit lands on and not
+      the refspec a push carries, so `git push origin HEAD:main` walks past it;
+      and the suppression check sees comment markers, not a rule switched off
+      in `biome.json`
 - [x] 4.3 Shorten the secrets sentence to what `gitleaks` cannot see —
       capability URLs, internal identifiers, machine-local files — rather than
       deleting it — *A mechanised prohibition leaves its prose home*
