@@ -71,5 +71,10 @@ test("the section stops at the next heading of its level", () => {
 });
 
 test("the maintenance trigger counts a sublist, not the list", () => {
-	expect(slice("Maintenance")).toContain("When one sublist exceeds ~20 rules");
+	const maintenance = slice("Maintenance");
+	expect(maintenance).toContain("When one sublist exceeds ~20 rules");
+	// The opening phrase alone passes on a rule that goes on to count them all.
+	expect(maintenance).toContain(
+		"the other two sublists are not counted against it",
+	);
 });
