@@ -8,6 +8,7 @@
 		"lint": "biome ci .",
 		"lint:fix": "biome check --write .",
 		"lint:yaml": "bun scripts/check-yaml.ts",
+		"lint:suppressions": "bun scripts/no-suppressions.ts",
 		"typecheck": "tsc --noEmit",
 		"diff-budget": "bash scripts/diff-budget.sh",
 		"test:coverage": "bun test --coverage",
