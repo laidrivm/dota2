@@ -58,12 +58,17 @@ export function scan(cwd?: string, approved = APPROVED): Finding[] {
 			.split("\n")
 			.forEach((text, at) => {
 				for (const marker of MARKERS) {
-					if (!text.includes(marker)) continue;
+					// Occurrences, not lines: two block comments fit on one line,
+					// and counting the line once would let an approval of one
+					// admit both.
+					const times = text.split(marker).length - 1;
 					const key = `${path} ${marker}`;
-					found.set(key, [
-						...(found.get(key) ?? []),
-						{ path, line: at + 1, marker },
-					]);
+					for (let n = 0; n < times; n++) {
+						found.set(key, [
+							...(found.get(key) ?? []),
+							{ path, line: at + 1, marker },
+						]);
+					}
 				}
 			});
 	}
