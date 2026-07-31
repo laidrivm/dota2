@@ -231,8 +231,13 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
         `gitleaks` as a digest-pinned CI job and an optional pre-commit binary.
   - [x] **6.3 the suppression check** —
         `feat/mechanised-prohibitions-suppressions`. `scripts/no-suppressions.ts`
-        with an empty allowlist, its own CI job and `lint:suppressions`. 12
-        tests; five probes watched red — see decisions.
+        with an empty allowlist, its own CI job and `lint:suppressions`. 20
+        tests; every assertion watched red — see decisions.
+  - [x] **6.4 the rulebook** — `feat/mechanised-prohibitions-rulebook`. The
+        rules list split into Code (8), Process (10) and Safety (3), the
+        trigger restated per sublist, `PLAN.md`'s Gates section deleted, and
+        `rulebook.test.ts`. Two prohibitions the design called fully mechanised
+        are not — see decisions.
 - [ ] **7. `always-on-context-budget`** — proposed
       (`openspec/changes/always-on-context-budget`), not yet applied. Measures
       the budget that exists — `CLAUDE.md` plus this file, 738 lines — evicts
@@ -345,6 +350,24 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
   swallowed a real finding. Both halves were exercised: the commit that carries
   a fake credential is refused, and on this machine — which has no `gitleaks`
   binary — the hook prints nothing and exits 0.
+
+- `mechanised-prohibitions` step 4: two of the three prohibitions the design
+  called fully mechanised are not, and both are shortened rather than deleted,
+  under the change's own *A rule only partly covered* scenario. The guard reads
+  the branch a commit would land on; it never reads a push's refspec, so
+  `git push origin HEAD:main` is untouched by it — the prose keeps the push half
+  and loses the commit half. The suppression check sees comment markers in
+  tracked files; a Biome rule switched off in `biome.json` carries no marker, so
+  the rule keeps the configuration half. Both were found by asking what the
+  mechanism actually reads rather than what the prohibition says, which is the
+  test the *leaves its prose home* requirement needs and does not state. The
+  eight tasks ship as one commit rather than eight: the split, the deletions the
+  split makes coherent, and the test that pins them are one edit to one section,
+  and a commit that deleted a rule before the sublist existed to hold it would
+  not have passed its own gate. The three sublists come out 8 / 10 / 3 against
+  the design's predicted 6 / 10 — four rules were added after the design was
+  written, and the import arrow and the scan-scope rule read as Code although
+  neither ages with the code, which is the boundary's soft edge.
 
 - The suppression allowlist is keyed by path and marker, holds the approved
   occurrence count as its value, and deliberately names no line — CodeRabbit's
