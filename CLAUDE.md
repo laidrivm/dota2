@@ -74,8 +74,7 @@ Response contract rules for every endpoint — see
   whole on `feat/<proposal-slug>` (`fix/`, `chore/` for non-feature work).
 - Commits: imperative subject ≤ 72 chars, body only when the diff doesn't
   explain itself. Commit per completed task-list item, not per file.
-- Never push to main, whatever the branch in hand — `git push origin
-  HEAD:main` is the spelling the commit guard does not see.
+- Never push to `main`, whatever the branch in hand and whatever the refspec.
 - Open PRs ready for review, not as drafts — CodeRabbit's auto-review skips
   drafts, so a draft is a PR nobody reviews.
 - Keep the PR description to what the diff can't say: a link to the
@@ -96,10 +95,11 @@ Response contract rules for every endpoint — see
   a push that succeeded means its pre-push hook passed.
 - Never wait on a result someone else produces — CI, a review bot, a queue:
   report where it will appear and end the turn.
-- This repo is public: before anything is staged or committed, check the diff
-  for capability URLs, internal identifiers and machine-local files — what the
-  secret scan cannot recognise. Flag anything questionable instead of
-  committing it.
+- This repo is public: before anything is staged or committed, read every new
+  file whole and the staged diff for the rest, looking for capability URLs,
+  internal identifiers and machine-local files — what the secret scan cannot
+  recognise. A diff shows nothing of an untracked file. Flag anything
+  questionable instead of committing it.
 
 ## Review toolkit
 
@@ -156,8 +156,9 @@ Rule quality bar — a rule must be:
 - When one sublist exceeds ~20 rules, propose merging or promoting stable
   clusters out of **that** sublist into the "Code style" section above or the
   docs indexed there — the other two sublists are not counted against it. A
-  Code rule can also leave by being deleted once the code it describes is
-  rewritten; a Process or Safety rule leaves only by promotion.
+  Code rule also leaves by being deleted once the code it describes is
+  rewritten; a Process or Safety rule leaves by promotion, or by the bullet
+  below when it stops applying at all.
 - If a rule stops applying (dependency removed, approach changed), propose
   deleting it — a stale rule costs trust in the whole list.
 
