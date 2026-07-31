@@ -229,6 +229,10 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
         budget with an `oversize:` marker.
   - [x] **6.2 the secret scan** — `feat/mechanised-prohibitions-secrets`.
         `gitleaks` as a digest-pinned CI job and an optional pre-commit binary.
+  - [x] **6.3 the suppression check** —
+        `feat/mechanised-prohibitions-suppressions`. `scripts/no-suppressions.ts`
+        with an empty allowlist, its own CI job and `lint:suppressions`. 12
+        tests; five probes watched red — see decisions.
 - [ ] **7. `always-on-context-budget`** — proposed
       (`openspec/changes/always-on-context-budget`), not yet applied. Measures
       the budget that exists — `CLAUDE.md` plus this file, 738 lines — evicts
@@ -341,6 +345,24 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
   swallowed a real finding. Both halves were exercised: the commit that carries
   a fake credential is refused, and on this machine — which has no `gitleaks`
   binary — the hook prints nothing and exits 0.
+
+- `mechanised-prohibitions` step 3: the check's own script cannot name the
+  markers in prose, only in string literals. Biome's `suspicious/noTsIgnore`
+  reads a comment as a directive wherever it sits, including a doc comment
+  explaining the allowlist — `biome check --write` silently rewrote that
+  sentence, swapping one marker for another and inverting what it said. The
+  design foresaw that the script must spell the markers out and excluded it
+  from its own scan for that reason; what it did not foresee is that a second
+  linter polices the same tokens on a rule the repository cannot suppress
+  without the suppression it exists to forbid. The exclusion by path holds
+  either way, since the test's markers sit inside template literals, which
+  Biome does not read as comments. Five probes, each red where it was planted:
+  the self-exclusion removed, the allowlist keyed on path alone, the count
+  ignored, `.md` added to the scanned extensions, and `--others` added to `git
+  ls-files`. The last two also turn the two repository-level assertions red,
+  which is what shows they are live sensors rather than tautologies — the
+  change's own four artefacts carry the markers in prose, `tasks.md` included,
+  where the task expected three.
 
 - The guard's `-C` handling costs something real, met twice while doing step 2.
   It blocks `git -C "$SOME_VAR" commit` outright, because a static text check
