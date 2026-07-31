@@ -74,16 +74,16 @@ Requirement citations are the `### Requirement:` headings in
 
 ## 3. The suppression check
 
-- [ ] 3.1 Write `scripts/no-suppressions.ts`: read `git ls-files`, keep
+- [x] 3.1 Write `scripts/no-suppressions.ts`: read `git ls-files`, keep
       `.ts`, `.tsx` and `.json`, drop its own two paths — they carry the
       markers literally and would fail the check on arrival — report every
       occurrence of `biome-ignore`, `@ts-expect-error` and `@ts-ignore` with
       its file and line, and subtract the approved count for the matching
       path *and marker* — *Linter and type-checker suppressions fail CI*
-- [ ] 3.2 Keep the allowlist inside the script, empty on arrival, keyed by path
+- [x] 3.2 Keep the allowlist inside the script, empty on arrival, keyed by path
       and marker, with the approval reason as a comment beside each entry
 - [ ] 3.3 Add the check to `lint.yml` and to `package.json` scripts
-- [ ] 3.4 Write `scripts/no-suppressions.test.ts`: the clean tree passes with
+- [x] 3.4 Write `scripts/no-suppressions.test.ts`: the clean tree passes with
       an empty allowlist (19); one suppression fails naming file and line
       (20); two files both reported (21); a markdown file naming
       `biome-ignore` passes (22); an allowlisted path with a second occurrence
