@@ -154,9 +154,10 @@ Rule quality bar — a rule must be:
 ### Maintenance
 
 - When one sublist exceeds ~20 rules, propose merging or promoting stable
-  clusters out of **that** sublist into "Code style" here or the docs indexed
-  above — the other two are not counted against it. Code is the sublist where
-  eviction is possible; Process and Safety grow only by promotion.
+  clusters out of **that** sublist into the "Code style" section above or the
+  docs indexed there — the other two sublists are not counted against it. A
+  Code rule can also leave by being deleted once the code it describes is
+  rewritten; a Process or Safety rule leaves only by promotion.
 - If a rule stops applying (dependency removed, approach changed), propose
   deleting it — a stale rule costs trust in the whole list.
 
