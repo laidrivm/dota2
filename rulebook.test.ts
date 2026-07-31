@@ -49,6 +49,23 @@ test("every rule sits under one of them", () => {
 	).toEqual([]);
 });
 
+test("a rule under a fourth heading fails", () => {
+	const fourth = `${section}\n#### Tooling\n\n- A rule filed nowhere the trigger counts.\n`;
+	expect(
+		bullets(fourth).filter(({ heading }) => !SUBLISTS.includes(heading ?? "")),
+	).not.toEqual([]);
+});
+
+test("the section stops at the next heading of its level", () => {
+	// `### Rules` is the last section today, so nothing else exercises the
+	// terminator: a section appended after it must not be read as rules.
+	const appended = claude.replace(
+		/$/,
+		"\n### Afterword\n\n- Not a rule at all.\n",
+	);
+	expect(bullets(rules(appended))).toEqual(bullets(section));
+});
+
 test("a rule outside the three headings fails", () => {
 	const stray = section.replace("#### Code\n", "");
 	expect(
