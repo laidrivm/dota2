@@ -367,7 +367,16 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
   not have passed its own gate. The three sublists come out 8 / 10 / 3 against
   the design's predicted 6 / 10 — four rules were added after the design was
   written, and the import arrow and the scan-scope rule read as Code although
-  neither ages with the code, which is the boundary's soft edge.
+  neither ages with the code, which is the boundary's soft edge. The trigger
+  stays per sublist against a CodeRabbit Major asking for it to count Code
+  alone, put to the user and dismissed: eviction is not its only remedy, and
+  promotion is the one with a precedent here — the verification cluster left a
+  21-rule flat list for `docs/verification.md`, and every rule in it was
+  process. A list of twenty-five is unreadable whether or not its rules age.
+  What the finding was right about is that the per-sublist count will rarely
+  fire first: `CLAUDE.md` stands at 261 lines against its own ~250-line growth
+  trigger, already over, while the fullest sublist is at ten of twenty. The
+  line trigger is `always-on-context-budget`'s to act on.
 
 - The suppression allowlist is keyed by path and marker, holds the approved
   occurrence count as its value, and deliberately names no line — CodeRabbit's
