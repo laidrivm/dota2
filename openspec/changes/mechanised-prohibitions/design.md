@@ -135,10 +135,14 @@ path and a count in the check's own allowlist turns it into a line of the
 diff, which is where an approval should be visible anyway. The count is what
 stops a second suppression riding in on the first one's approval.
 
-The scanned set is `.ts`, `.tsx` and `.json` rather than every tracked file.
-Prose discusses suppressions by name — this change's own three artefacts
-contain `biome-ignore` between them — and a check that fails on the proposal
-introducing it is a check that gets disabled in its first week. The check's own
+The scanned set is every tracked file but prose. Prose discusses suppressions
+by name — this change's own four artefacts contain `biome-ignore` between them —
+and a check that fails on the proposal introducing it is a check that gets
+disabled in its first week. Naming the source extensions instead was the first
+shape, `.ts`, `.tsx` and `.json`, and it was inverted during apply: a linter
+acts on more extensions than that list remembered — Biome's own `.js`, `.jsx`,
+`.mjs` and `.cjs` were all exempt — and the exemption a check gets wrong
+silently is worse than the one it states. The check's own
 script and test are excluded for the same reason: both are `.ts` files that
 must carry the three markers literally, so the check would fail on itself the
 moment it existed. Excluding them by path rather than by allowlist entry keeps
