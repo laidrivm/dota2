@@ -60,6 +60,21 @@ describe("a suppression is added", () => {
 		]);
 	});
 
+	test("a .json file is read too", () => {
+		const dir = fabricate({ "tsconfig.json": `{}\n// biome-ignore x\n` });
+		expect(at(scan(dir))).toEqual(["tsconfig.json:2: biome-ignore"]);
+	});
+
+	test("two on one line are two occurrences", () => {
+		const dir = fabricate({
+			"src/model.ts": "/* biome-ignore a */ /* biome-ignore b */\n",
+		});
+		expect(at(scan(dir, { "src/model.ts biome-ignore": 1 }))).toEqual([
+			"src/model.ts:1: biome-ignore",
+			"src/model.ts:1: biome-ignore",
+		]);
+	});
+
 	test("the command exits 1 and names the file and line", () => {
 		const dir = fabricate({ "src/model.ts": `// @ts-ignore why\n` });
 		const run = Bun.spawnSync(["bun", script], { cwd: dir, stderr: "pipe" });
@@ -123,6 +138,24 @@ describe("the allowlist", () => {
 			"src/types.ts": `// biome-ignore lint/style/x: y\n`,
 		});
 		expect(at(scan(dir, approved))).toEqual(["src/types.ts:1: biome-ignore"]);
+	});
+});
+
+describe("a tree the check cannot read straight through", () => {
+	test("nothing is tracked", () => {
+		expect(scan(fabricate({}))).toEqual([]);
+	});
+
+	test("a tracked file deleted from the work tree is skipped", () => {
+		const dir = fabricate({ "src/model.ts": "// @ts-ignore\n" });
+		rmSync(join(dir, "src/model.ts"));
+		expect(scan(dir)).toEqual([]);
+	});
+
+	test("outside a repository the check throws rather than passing", () => {
+		const dir = mkdtempSync(join(tmpdir(), "no-suppressions-bare-"));
+		made.push(dir);
+		expect(() => scan(dir)).toThrow();
 	});
 });
 
