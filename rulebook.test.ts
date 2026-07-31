@@ -42,7 +42,9 @@ const unfiled = (section: string) =>
 const rules = slice("Rules");
 
 test("the three sublists exist", () => {
-	for (const name of SUBLISTS) expect(rules).toContain(`#### ${name}`);
+	// Anchored: a heading, not the words in a sentence about one.
+	for (const name of SUBLISTS)
+		expect(rules).toMatch(new RegExp(`^#### ${name}$`, "m"));
 });
 
 test("every rule sits under one of them", () => {
