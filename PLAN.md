@@ -364,7 +364,9 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
   eight tasks ship as one commit rather than eight: the split, the deletions the
   split makes coherent, and the test that pins them are one edit to one section,
   and a commit that deleted a rule before the sublist existed to hold it would
-  not have passed its own gate. The three sublists come out 8 / 10 / 3 against
+  not have passed its own gate. The branch's other commits are not task items —
+  they are the gates acting on what the first one shipped, and one of them
+  corrects a rule outside this change, which is why it stands alone. The three sublists come out 8 / 10 / 3 against
   the design's predicted 6 / 10 — four rules were added after the design was
   written, and the import arrow and the scan-scope rule read as Code although
   neither ages with the code, which is the boundary's soft edge. The trigger
