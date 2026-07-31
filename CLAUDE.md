@@ -205,6 +205,7 @@ observability, causal claims — see [docs/verification.md](docs/verification.md
   re-subscribing the listener when that state changes.
 - A guard against malformed input must cover the whole value, not a prefix —
   anchor both ends or parse it.
+- Scope a scan by what it exempts, never by an enumeration of what it covers.
 - Confirm a path is tracked before a check or a claim depends on it — a
   gitignored file is present for the author and absent in a clone.
 - When a statement changes — a rule, a recorded decision, or one artefact of
