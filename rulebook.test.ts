@@ -10,15 +10,16 @@ const claude = await Bun.file(`${import.meta.dir}/CLAUDE.md`).text();
 const SUBLISTS = ["Code", "Process", "Safety"];
 
 /**
- * The `### Rules` section, up to the next heading of its level or above — or
- * to the end of the file, which is where it sits today.
+ * A `### ` section, up to the next heading of its level or above — or to the
+ * end of the file, which is where `Rules` sits today.
  */
-function rules(text: string): string {
-	return (text.split(/^### Rules$/m)[1] ?? "").split(/^#{1,3} /m)[0] ?? "";
-}
+const slice = (name: string, text = claude) =>
+	(text.split(new RegExp(`^### ${name}$`, "m"))[1] ?? "").split(
+		/^#{1,3} /m,
+	)[0] ?? "";
 
 /**
- * Every top-level bullet of the section, paired with the `####` heading above
+ * Every top-level bullet of a section, paired with the `####` heading above
  * it — `undefined` for one that precedes all three. Continuation lines are
  * indented and belong to the bullet before them.
  */
@@ -34,48 +35,39 @@ function bullets(section: string): { heading?: string; text: string }[] {
 	return found;
 }
 
-const section = rules(claude);
-const listed = bullets(section);
+/** The rules a per-sublist maintenance trigger would never count. */
+const unfiled = (section: string) =>
+	bullets(section).filter(({ heading }) => !SUBLISTS.includes(heading ?? ""));
+
+const rules = slice("Rules");
 
 test("the three sublists exist", () => {
-	for (const name of SUBLISTS) expect(section).toContain(`#### ${name}`);
+	for (const name of SUBLISTS) expect(rules).toContain(`#### ${name}`);
 });
 
 test("every rule sits under one of them", () => {
 	// Without this the assertion below could pass on an empty section.
-	expect(listed.length).toBeGreaterThan(0);
-	expect(
-		listed.filter(({ heading }) => !SUBLISTS.includes(heading ?? "")),
-	).toEqual([]);
+	expect(bullets(rules).length).toBeGreaterThan(0);
+	expect(unfiled(rules)).toEqual([]);
+});
+
+test("a rule above the first heading fails", () => {
+	expect(unfiled(rules.replace("#### Code\n", ""))).not.toEqual([]);
 });
 
 test("a rule under a fourth heading fails", () => {
-	const fourth = `${section}\n#### Tooling\n\n- A rule filed nowhere the trigger counts.\n`;
-	expect(
-		bullets(fourth).filter(({ heading }) => !SUBLISTS.includes(heading ?? "")),
-	).not.toEqual([]);
+	expect(unfiled(`${rules}\n#### Tooling\n\n- Filed nowhere.\n`)).not.toEqual(
+		[],
+	);
 });
 
 test("the section stops at the next heading of its level", () => {
 	// `### Rules` is the last section today, so nothing else exercises the
 	// terminator: a section appended after it must not be read as rules.
-	const appended = claude.replace(
-		/$/,
-		"\n### Afterword\n\n- Not a rule at all.\n",
-	);
-	expect(bullets(rules(appended))).toEqual(bullets(section));
-});
-
-test("a rule outside the three headings fails", () => {
-	const stray = section.replace("#### Code\n", "");
-	expect(
-		bullets(stray).filter(({ heading }) => !SUBLISTS.includes(heading ?? "")),
-	).not.toEqual([]);
+	const appended = `${claude}\n### Afterword\n\n- Not a rule at all.\n`;
+	expect(bullets(slice("Rules", appended))).toEqual(bullets(rules));
 });
 
 test("the maintenance trigger counts a sublist, not the list", () => {
-	const maintenance = (claude.split(/^### Maintenance$/m)[1] ?? "").split(
-		/^#{1,3} /m,
-	)[0];
-	expect(maintenance).toContain("When one sublist exceeds ~20 rules");
+	expect(slice("Maintenance")).toContain("When one sublist exceeds ~20 rules");
 });
