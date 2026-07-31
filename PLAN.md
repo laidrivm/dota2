@@ -346,8 +346,9 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
   a fake credential is refused, and on this machine — which has no `gitleaks`
   binary — the hook prints nothing and exits 0.
 
-- The suppression allowlist keys on path, marker and count, and deliberately not
-  on the line — CodeRabbit's Major asking for the line was put to the user and
+- The suppression allowlist is keyed by path and marker, holds the approved
+  occurrence count as its value, and deliberately names no line — CodeRabbit's
+  Major asking for the line was put to the user and
   dismissed. What it names is real: an approval follows the count rather than
   the occurrence, so deleting an approved suppression and adding another of the
   same marker in the same file passes on the first one's approval. The line
@@ -372,13 +373,16 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
   linter polices the same tokens on a rule the repository cannot suppress
   without the suppression it exists to forbid. The exclusion by path holds
   either way, since the test's markers sit inside template literals, which
-  Biome does not read as comments. Five probes, each red where it was planted:
-  the self-exclusion removed, the allowlist keyed on path alone, the count
-  ignored, `.md` added to the scanned extensions, and `--others` added to `git
-  ls-files`. The last two also turn the two repository-level assertions red,
-  which is what shows they are live sensors rather than tautologies — the
-  change's own four artefacts carry the markers in prose, `tasks.md` included,
-  where the task expected three.
+  Biome does not read as comments. Every assertion was watched red under a
+  broken script before it was trusted — the self-exclusion removed, the
+  allowlist keyed on path alone, its count ignored, prose no longer exempt,
+  untracked files read, occurrences counted as lines, the listing taken at
+  `cwd` rather than at the repository root, and `lstatSync` traded back for
+  `existsSync`. Dropping the prose exemption and reading untracked files each
+  turn the two repository-level assertions red too, which is what shows they
+  are live sensors rather than tautologies — the change's own four artefacts
+  carry the markers in prose, `tasks.md` included, where the task expected
+  three.
 
 - The guard's `-C` handling costs something real, met twice while doing step 2.
   It blocks `git -C "$SOME_VAR" commit` outright, because a static text check

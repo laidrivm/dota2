@@ -1,5 +1,11 @@
 import { afterAll, describe, expect, test } from "bun:test";
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import {
+	mkdirSync,
+	mkdtempSync,
+	rmSync,
+	symlinkSync,
+	writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { type Finding, scan } from "./no-suppressions.ts";
@@ -149,6 +155,23 @@ describe("the allowlist", () => {
 describe("a tree the check cannot read straight through", () => {
 	test("nothing is tracked", () => {
 		expect(scan(fabricate({}))).toEqual([]);
+	});
+
+	test("run from a subdirectory it still reads the whole repository", () => {
+		const dir = fabricate({
+			"src/model.ts": "// @ts-ignore\n",
+			"scripts/no-suppressions.ts": "// biome-ignore x\n",
+		});
+		expect(at(scan(join(dir, "scripts")))).toEqual([
+			"src/model.ts:1: @ts-ignore",
+		]);
+	});
+
+	test("a tracked symlink is skipped rather than followed", () => {
+		const dir = fabricate({ "src/model.ts": "const a = 1;\n" });
+		symlinkSync("src", join(dir, "link"));
+		Bun.spawnSync(["git", "add", "-A"], { cwd: dir });
+		expect(scan(dir)).toEqual([]);
 	});
 
 	test("a tracked file deleted from the work tree is skipped", () => {
