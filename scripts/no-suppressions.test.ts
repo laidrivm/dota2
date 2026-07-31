@@ -65,6 +65,11 @@ describe("a suppression is added", () => {
 		expect(at(scan(dir))).toEqual(["tsconfig.json:2: biome-ignore"]);
 	});
 
+	test("a source type nobody listed is read too", () => {
+		const dir = fabricate({ "eslint.config.mjs": "// biome-ignore x\n" });
+		expect(at(scan(dir))).toEqual(["eslint.config.mjs:1: biome-ignore"]);
+	});
+
 	test("two on one line are two occurrences", () => {
 		const dir = fabricate({
 			"src/model.ts": "/* biome-ignore a */ /* biome-ignore b */\n",

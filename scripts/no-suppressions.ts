@@ -5,17 +5,23 @@
  * allowed once the user approves it — and a grep cannot see approval, so the
  * approval is a line of this file's allowlist and therefore a line of the diff.
  *
- * Only the extensions a linter or a type-checker acts on are read. Prose names
- * these markers while explaining the rule — all four artefacts of the change
- * introducing this check do — and a check that fails on its own proposal is a
- * check nobody keeps.
+ * Every tracked file is read but prose. Prose names these markers while
+ * explaining the rule — all four artefacts of the change introducing this check
+ * do — and a check that fails on its own proposal is a check nobody keeps.
  */
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
 const MARKERS = ["biome-ignore", "@ts-expect-error", "@ts-ignore"];
 
-const EXTENSIONS = [".ts", ".tsx", ".json"];
+/**
+ * Exempt because it is prose, and prose is the only thing here that discusses a
+ * suppression without carrying one. Naming the source extensions instead was
+ * tried and is a list that grows silently: `.ts`, `.tsx` and `.json` left
+ * Biome's own `.js`, `.jsx`, `.mjs` and `.cjs` unscanned, so the first such
+ * file to arrive would have been exempt with nobody deciding that.
+ */
+const PROSE = [".md"];
 
 /**
  * This script and its test, excluded by path rather than by allowlist entry:
@@ -49,8 +55,10 @@ export function scan(cwd?: string, approved = APPROVED): Finding[] {
 	if (ls.exitCode !== 0) throw new Error(ls.stderr.toString());
 
 	const found: Finding[] = [];
-	for (const path of ls.stdout.toString().split("\0")) {
-		if (!EXTENSIONS.some((ext) => path.endsWith(ext))) continue;
+	// `-z` terminates rather than separates, so the last field is empty and
+	// would otherwise resolve to `cwd` itself and be read as a directory.
+	for (const path of ls.stdout.toString().split("\0").filter(Boolean)) {
+		if (PROSE.some((ext) => path.endsWith(ext))) continue;
 		if (SELF.includes(path)) continue;
 		const full = join(cwd ?? ".", path);
 		if (!existsSync(full)) continue; // tracked, deleted in the work tree

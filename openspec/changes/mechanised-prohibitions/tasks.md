@@ -74,9 +74,9 @@ Requirement citations are the `### Requirement:` headings in
 
 ## 3. The suppression check
 
-- [x] 3.1 Write `scripts/no-suppressions.ts`: read `git ls-files`, keep
-      `.ts`, `.tsx` and `.json`, drop its own two paths — they carry the
-      markers literally and would fail the check on arrival — report every
+- [x] 3.1 Write `scripts/no-suppressions.ts`: read `git ls-files`, drop prose
+      and its own two paths — they carry the markers literally and would fail
+      the check on arrival — report every
       occurrence of `biome-ignore`, `@ts-expect-error` and `@ts-ignore` with
       its file and line, and subtract the approved count for the matching
       path *and marker* — *Linter and type-checker suppressions fail CI*
@@ -86,7 +86,8 @@ Requirement citations are the `### Requirement:` headings in
 - [x] 3.4 Write `scripts/no-suppressions.test.ts`: the clean tree passes with
       an empty allowlist (19); one suppression fails naming file and line
       (20); two files both reported (21); a markdown file naming
-      `biome-ignore` passes (22); an allowlisted path with a second occurrence
+      `biome-ignore` passes (22); a source type nobody enumerated is scanned;
+      an allowlisted path with a second occurrence
       still fails (23); an allowlisted path whose marker was swapped for
       another kind fails; an untracked file passes (24)
 - [x] 3.5 Confirm the check passes over the tree as it stands, that the three

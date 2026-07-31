@@ -29,11 +29,13 @@ without installing it. A finding in CI SHALL fail the check.
 ### Requirement: Linter and type-checker suppressions fail CI
 
 CI SHALL fail when a tracked **source** file contains `biome-ignore`,
-`@ts-expect-error` or `@ts-ignore`. The scanned set SHALL be the file
-extensions a linter or type-checker acts on — `.ts`, `.tsx`, `.json` — and
-never prose: documentation and OpenSpec artefacts discuss suppressions by
-name, this specification among them, and a check that fails on its own
-proposal is a check nobody keeps. The check's own script and test SHALL be
+`@ts-expect-error` or `@ts-ignore`. The scanned set SHALL be every tracked
+file that is not prose, rather than an enumeration of source extensions: a
+linter acts on more of them than one list remembers, and a source type left off
+such a list is exempt with nobody deciding it. Prose is exempt because
+documentation and OpenSpec artefacts discuss suppressions by name, this
+specification among them, and a check that fails on its own proposal is a check
+nobody keeps. The check's own script and test SHALL be
 outside the scanned set too, for the same reason and no other: they must carry
 the three markers literally to do their job. An approved suppression SHALL be
 admitted only by naming its exact path, **which marker**, and how many
@@ -73,7 +75,13 @@ does not have it.
 #### Scenario: A document that discusses suppressions
 
 - **WHEN** a markdown file names `biome-ignore` while explaining this rule
-- **THEN** the check passes, because prose is outside the scanned extensions
+- **THEN** the check passes, because prose is the one thing exempt
+
+#### Scenario: A source type the specification never enumerated
+
+- **WHEN** a tracked `.mjs` file carries a suppression
+- **THEN** the check fails, because the exemption is prose and not a list of
+  the source extensions somebody thought of
 
 #### Scenario: An allowlisted file gains a second suppression
 
