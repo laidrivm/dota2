@@ -6,8 +6,8 @@
  * approval is a line of this file's allowlist and therefore a line of the diff.
  *
  * Only the extensions a linter or a type-checker acts on are read. Prose names
- * these markers while explaining the rule — this change's own artefacts do,
- * three times over — and a check that fails on the proposal introducing it is a
+ * these markers while explaining the rule — all four artefacts of the change
+ * introducing this check do — and a check that fails on its own proposal is a
  * check nobody keeps.
  */
 import { existsSync, readFileSync } from "node:fs";
@@ -48,7 +48,7 @@ export function scan(cwd?: string, approved = APPROVED): Finding[] {
 	const ls = Bun.spawnSync(["git", "ls-files", "-z"], { cwd });
 	if (ls.exitCode !== 0) throw new Error(ls.stderr.toString());
 
-	const found = new Map<string, Finding[]>();
+	const found: Finding[] = [];
 	for (const path of ls.stdout.toString().split("\0")) {
 		if (!EXTENSIONS.some((ext) => path.endsWith(ext))) continue;
 		if (SELF.includes(path)) continue;
@@ -62,22 +62,16 @@ export function scan(cwd?: string, approved = APPROVED): Finding[] {
 					// and counting the line once would let an approval of one
 					// admit both.
 					const times = text.split(marker).length - 1;
-					const key = `${path} ${marker}`;
 					for (let n = 0; n < times; n++) {
-						found.set(key, [
-							...(found.get(key) ?? []),
-							{ path, line: at + 1, marker },
-						]);
+						found.push({ path, line: at + 1, marker });
 					}
 				}
 			});
 	}
 
-	const unapproved: Finding[] = [];
-	for (const [key, list] of found) {
-		if (list.length > (approved[key] ?? 0)) unapproved.push(...list);
-	}
-	return unapproved;
+	return [...Map.groupBy(found, ({ path, marker }) => `${path} ${marker}`)]
+		.filter(([key, list]) => list.length > (approved[key] ?? 0))
+		.flatMap(([, list]) => list);
 }
 
 if (import.meta.main) {
