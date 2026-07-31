@@ -90,11 +90,12 @@ Requirement citations are the `### Requirement:` headings in
       an allowlisted path with a second occurrence
       still fails (23); an allowlisted path whose marker was swapped for
       another kind fails; an untracked file passes (24)
-- [x] 3.5 Confirm the check passes over the tree as it stands, that the three
+- [x] 3.5 Confirm the check passes over the tree as it stands, that the
       artefacts of this change do not trip it, and that it does not trip on its
-      own script and test. Four artefacts carry the markers, not three —
-      `tasks.md` too — and all are `.md`, so the extension list is what covers
-      them: scanning `.md` as a probe turns the tree red
+      own script and test. Four of them carry the markers, not the three this
+      task assumed — `tasks.md` too — and all four are `.md`, so the prose
+      exemption is what covers them: scanning `.md` as a probe turns the tree
+      red
 
 ## 4. The rulebook
 

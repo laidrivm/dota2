@@ -9,7 +9,7 @@
  * explaining the rule — all four artefacts of the change introducing this check
  * do — and a check that fails on its own proposal is a check nobody keeps.
  */
-import { existsSync, readFileSync } from "node:fs";
+import { lstatSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
 const MARKERS = ["biome-ignore", "@ts-expect-error", "@ts-ignore"];
@@ -46,22 +46,34 @@ const APPROVED: Record<string, number> = {};
 export type Finding = { path: string; line: number; marker: string };
 
 /**
- * Every suppression in the work tree at `cwd` that `approved` does not admit.
- * Tracked files only, so an ignored or untracked file cannot fail a clone that
- * does not have it.
+ * Every suppression in the repository containing `cwd` that `approved` does not
+ * admit. Tracked files only, so an ignored or untracked file cannot fail a
+ * clone that does not have it.
+ *
+ * The listing is taken at the repository root, never at `cwd`: `git ls-files`
+ * run in a subdirectory reports only what is under it and names it relative to
+ * it, so from `scripts/` the check's own two paths stop matching `SELF` and it
+ * fails on itself.
  */
 export function scan(cwd?: string, approved = APPROVED): Finding[] {
-	const ls = Bun.spawnSync(["git", "ls-files", "-z"], { cwd });
+	const top = Bun.spawnSync(["git", "rev-parse", "--show-toplevel"], { cwd });
+	if (top.exitCode !== 0) throw new Error(top.stderr.toString());
+	const root = top.stdout.toString().trim();
+
+	const ls = Bun.spawnSync(["git", "ls-files", "-z"], { cwd: root });
 	if (ls.exitCode !== 0) throw new Error(ls.stderr.toString());
 
 	const found: Finding[] = [];
 	// `-z` terminates rather than separates, so the last field is empty and
-	// would otherwise resolve to `cwd` itself and be read as a directory.
+	// would otherwise resolve to the root itself and be read as a directory.
 	for (const path of ls.stdout.toString().split("\0").filter(Boolean)) {
 		if (PROSE.some((ext) => path.endsWith(ext))) continue;
 		if (SELF.includes(path)) continue;
-		const full = join(cwd ?? ".", path);
-		if (!existsSync(full)) continue; // tracked, deleted in the work tree
+		const full = join(root, path);
+		// Regular files only: the entry may be tracked but deleted from the work
+		// tree, a symlink whose target is nobody's business here, or a
+		// submodule's gitlink, which reads as a directory.
+		if (!lstatSync(full, { throwIfNoEntry: false })?.isFile()) continue;
 		readFileSync(full, "utf8")
 			.split("\n")
 			.forEach((text, at) => {
