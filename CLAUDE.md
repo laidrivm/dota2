@@ -91,15 +91,16 @@ Response contract rules for every endpoint — see
   entries do not reach — a tracker, a forum, any external service: report what
   you would have written and let them send it. Opening the pull request they
   asked for is not that.
-- Never re-run a check whose own output already proved it passed — a later
-  command's success is not that proof.
+- Never re-run a check whose own output already proved it passed and whose
+  inputs have not changed since — a later command's success is not that proof.
 - Never wait on a result someone else produces — CI, a review bot, a queue:
   report where it will appear and end the turn.
 - This repo is public: before anything is staged or committed, read every new
-  file whole and the staged diff for the rest, looking for capability URLs,
+  file whole and `git diff HEAD` for the rest, looking for capability URLs,
   internal identifiers and machine-local files — what the secret scan cannot
-  recognise. A diff shows nothing of an untracked file. Flag anything
-  questionable instead of committing it.
+  recognise. A diff against the index shows nothing of an untracked file and
+  nothing of an unstaged edit. Flag anything questionable instead of
+  committing it.
 
 ## Review toolkit
 
