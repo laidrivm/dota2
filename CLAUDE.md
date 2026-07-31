@@ -74,12 +74,8 @@ Response contract rules for every endpoint — see
   whole on `feat/<proposal-slug>` (`fix/`, `chore/` for non-feature work).
 - Commits: imperative subject ≤ 72 chars, body only when the diff doesn't
   explain itself. Commit per completed task-list item, not per file.
-- Never commit or push to main. When HEAD is on main and a change is needed,
-  branch first, commit there, and push that branch — check which branch HEAD
-  is on before the turn's first commit, because the user moves the working
-  tree between turns.
-- Never force-push a branch after its PR is open (review comments lose their
-  anchors).
+- Never push to main, whatever the branch in hand — `git push origin
+  HEAD:main` is the spelling the commit guard does not see.
 - Open PRs ready for review, not as drafts — CodeRabbit's auto-review skips
   drafts, so a draft is a PR nobody reviews.
 - Keep the PR description to what the diff can't say: a link to the
@@ -92,15 +88,18 @@ Response contract rules for every endpoint — see
   PR strands anything added afterwards, whichever merge style closed it.
 - Commit a session's wrap-up artefacts — the pipeline-yield ledger, a save
   point — to the branch in hand, never a branch of their own.
-- Never post to a PR, issue, or any external service on the user's behalf —
-  report the reply here and let them send it.
+- Never reply, comment or review under the user's name anywhere the `gh` deny
+  entries do not reach — a tracker, a forum, any external service: report what
+  you would have written and let them send it. Opening the pull request they
+  asked for is not that.
 - Never re-run a check to confirm what a completed command already proved —
   a push that succeeded means its pre-push hook passed.
 - Never wait on a result someone else produces — CI, a review bot, a queue:
   report where it will appear and end the turn.
-- This repo is public: before anything is staged or committed, check the
-  diff for secrets, tokens, capability URLs, internal identifiers, and
-  machine-local files — flag anything questionable instead of committing it.
+- This repo is public: before anything is staged or committed, check the diff
+  for capability URLs, internal identifiers and machine-local files — what the
+  secret scan cannot recognise. Flag anything questionable instead of
+  committing it.
 
 ## Review toolkit
 
@@ -131,7 +130,8 @@ capture it exactly like a bug, so future runs don't repeat the old style:
 1. Fix the code.
 2. Capture the lesson, in the same turn, before treating the task as done:
    - If it's about how code should be written here → propose a one-line rule
-     for the "Rules" list below and add it after the user confirms.
+     for the matching sublist of "Rules" below — Code, Process or Safety —
+     and add it after the user confirms.
    - If it's about how reviews should be run → say the fix belongs in the
      corresponding skill in the shared skills repo, and propose the exact
      wording (do not edit the skill from this project).
@@ -153,8 +153,10 @@ Rule quality bar — a rule must be:
 
 ### Maintenance
 
-- When this list exceeds ~20 rules, propose merging or promoting stable
-  clusters into "Code style" here or the docs indexed above.
+- When one sublist exceeds ~20 rules, propose merging or promoting stable
+  clusters out of **that** sublist into "Code style" here or the docs indexed
+  above — the other two are not counted against it. Code is the sublist where
+  eviction is possible; Process and Safety grow only by promotion.
 - If a rule stops applying (dependency removed, approach changed), propose
   deleting it — a stale rule costs trust in the whole list.
 
@@ -191,6 +193,11 @@ protocol:
 What counts as evidence for a claim — environments, external contracts,
 observability, causal claims — see [docs/verification.md](docs/verification.md).
 
+#### Code
+
+Rules about this application's code. They age with it: when the code a rule
+describes is rewritten, the rule is a candidate for deletion.
+
 - Before inlining a single-caller helper, grep for the logic it duplicates
   elsewhere.
 - `src/model.ts` and `src/types.ts` never import from `src/app/**`, type-only
@@ -206,16 +213,21 @@ observability, causal claims — see [docs/verification.md](docs/verification.md
 - A guard against malformed input must cover the whole value, not a prefix —
   anchor both ends or parse it.
 - Scope a scan by what it exempts, never by an enumeration of what it covers.
+
+#### Process
+
+Rules about how work is carried out here. They do not age with the code.
+
 - Confirm a path is tracked before a check or a claim depends on it — a
   gitignored file is present for the author and absent in a clone.
 - When a statement changes — a rule, a recorded decision, or one artefact of
-  a change under review — grep every site that restates it, the change's own
-  sibling artefacts included, before calling the change done.
+  a change under review — grep the three places that restate one before
+  calling the change done: the change's own sibling artefacts,
+  `openspec/specs/**`, and the README ownership map.
 - A rules or docs edit that no artefact of the change under way asks for goes
   in its own commit.
-- Before the first dependency install or tool run in a repo, verify
-  `.gitignore` covers its outputs (`node_modules/`, build dirs, local
-  settings).
+- Never silence a linter or type-checker finding by disabling its rule in
+  configuration; fix the code or ask the user to approve a suppression.
 - All repo artifacts — docs, plans, specs, code comments, commit messages —
   are written in British English by default (`behaviour`, `afterwards`);
   identifiers and third-party API names keep whatever spelling they ship with.
@@ -223,8 +235,6 @@ observability, causal claims — see [docs/verification.md](docs/verification.md
   and decisions in the same turn a task or stage completes. A step's box is
   ticked in the pull request that implements it, never in a commit after the
   merge.
-- Fix code a linter or type-checker flags; never suppress a finding with an
-  ignore comment or config override unless the user approves the suppression.
 - Open every markdown file with a level-1 heading — OpenSpec's `design.md`
   and delta-spec templates start at `##`, so the title is yours to add.
 - Assert the match before a scripted string replacement and read the
@@ -232,10 +242,19 @@ observability, causal claims — see [docs/verification.md](docs/verification.md
   successful edit.
 - Commit the work before a probe whose undo is `git checkout <path>`,
   `git reset --hard`, or `git stash drop`.
+- Never state another repository's mutable properties — visibility, default
+  branch, owner — anywhere in this repo; link to it instead.
+
+#### Safety
+
+Rules that keep something out of the repository or off the machine. They do
+not age with the code.
+
+- Before the first dependency install or tool run in a repo, verify
+  `.gitignore` covers its outputs (`node_modules/`, build dirs, local
+  settings).
 - Reconcile a vendored skill's `allowed-tools` and `disable-model-invocation`
   against this project's policy before the skill is used.
 - Substitute `bunx playwright test` for `npx playwright test` and
   `bun add -g @playwright/cli` for `npm install -g @playwright/cli` — the
   `playwright-cli` skill's own npx/npm paths are denied here.
-- Never state another repository's mutable properties — visibility, default
-  branch, owner — anywhere in this repo; link to it instead.

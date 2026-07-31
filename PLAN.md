@@ -931,12 +931,3 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
   to reference the tokens instead of the hexes; the shortened swatch labels
   are hand-authored, so the pages cannot simply be regenerated.
 
-## Gates (reminder)
-
-- Before every PR: `/zombies` → fix → `/warm` (only when a manifest changed)
-  → `/ponytail-review` → `/triage` → `/coderabbit-local` → push, in that
-  order and all self-run; act on every finding, report what is skipped and
-  why (docs/review-toolkit.md).
-- `/zombies` also at propose, from the feature description.
-- `/coderabbit` is the user's to invoke, whenever they choose.
-- Commit per completed task-list item without being asked

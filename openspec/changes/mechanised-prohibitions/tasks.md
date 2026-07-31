@@ -99,29 +99,29 @@ Requirement citations are the `### Requirement:` headings in
 
 ## 4. The rulebook
 
-- [ ] 4.1 Split the `CLAUDE.md` rules list into Code, Process and Safety
+- [x] 4.1 Split the `CLAUDE.md` rules list into Code, Process and Safety
       sublists, and restate the ~20 trigger as per-sublist — *The rules list
       is partitioned into three sublists*
-- [ ] 4.2 Delete the prose each mechanism now enforces: the commit-on-main and
+- [x] 4.2 Delete the prose each mechanism now enforces: the commit-on-main and
       force-push sentence in Git & PRs, and the suppression rule in the rules
       list. The "never post to a PR" sentence is narrowed instead of deleted —
       the deny entries reach `gh` only, so it keeps the external services they
       cannot, and names replying, commenting and reviewing, which stops it
       reading as a ban on `gh pr create` — *A mechanised prohibition leaves its
       prose home*
-- [ ] 4.3 Shorten the secrets sentence to what `gitleaks` cannot see —
+- [x] 4.3 Shorten the secrets sentence to what `gitleaks` cannot see —
       capability URLs, internal identifiers, machine-local files — rather than
       deleting it — *A mechanised prohibition leaves its prose home*
-- [ ] 4.4 Delete the "Gates (reminder)" section from `PLAN.md` — *The pre-PR
+- [x] 4.4 Delete the "Gates (reminder)" section from `PLAN.md` — *The pre-PR
       sequence has one home*
-- [ ] 4.5 Narrow the grep rule to the sites that still restate things, keeping
+- [x] 4.5 Narrow the grep rule to the sites that still restate things, keeping
       the widened subject it carries by then — a change's own sibling artefacts
       as well as the rulebook — and confirm `docs/feature-workflow.md`
       references the sequence rather than repeating it — *The pre-PR sequence
       has one home*
-- [ ] 4.6 Write `rulebook.test.ts`: the three headings exist and every rule
+- [x] 4.6 Write `rulebook.test.ts`: the three headings exist and every rule
       bullet sits under one of them (25); a bullet outside them fails (26)
-- [ ] 4.7 Add rows to the README ownership map for anything this change adds
+- [x] 4.7 Add rows to the README ownership map for anything this change adds
       that owns a rule, and re-run `readme-map.test.ts`
-- [ ] 4.8 Grep for every site restating a deleted rule — `docs/`,
+- [x] 4.8 Grep for every site restating a deleted rule — `docs/`,
       `openspec/specs/**`, `README.md`, `PLAN.md` — and reconcile each
