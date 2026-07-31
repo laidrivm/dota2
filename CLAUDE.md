@@ -91,8 +91,8 @@ Response contract rules for every endpoint — see
   entries do not reach — a tracker, a forum, any external service: report what
   you would have written and let them send it. Opening the pull request they
   asked for is not that.
-- Never re-run a check to confirm what a completed command already proved —
-  a push that succeeded means its pre-push hook passed.
+- Never re-run a check whose own output already proved it passed — a later
+  command's success is not that proof.
 - Never wait on a result someone else produces — CI, a review bot, a queue:
   report where it will appear and end the turn.
 - This repo is public: before anything is staged or committed, read every new
