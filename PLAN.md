@@ -346,6 +346,22 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
   a fake credential is refused, and on this machine — which has no `gitleaks`
   binary — the hook prints nothing and exits 0.
 
+- The suppression allowlist keys on path, marker and count, and deliberately not
+  on the line — CodeRabbit's Major asking for the line was put to the user and
+  dismissed. What it names is real: an approval follows the count rather than
+  the occurrence, so deleting an approved suppression and adding another of the
+  same marker in the same file passes on the first one's approval. The line
+  closes it and costs more than it buys, because a line number is a property of
+  everything above the directive: an import added to the head of the file moves
+  it, the check fails on a diff that never touched it, and the entry gets its
+  number bumped by someone who knows they changed nothing — which is the
+  ritual-approval failure `coderabbit-config` and `review-approval-direction`
+  both already refused elsewhere. The substitution it misses is two lines of a
+  diff a reviewer reads. A third shape, keying on the Biome rule name, was
+  offered and declined: the rule is a property of the suppression rather than of
+  the file, but `@ts-ignore` and `@ts-expect-error` carry no rule name, so the
+  allowlist would have two key forms.
+
 - `mechanised-prohibitions` step 3: the check's own script cannot name the
   markers in prose, only in string literals. Biome's `suspicious/noTsIgnore`
   reads a comment as a directive wherever it sits, including a doc comment

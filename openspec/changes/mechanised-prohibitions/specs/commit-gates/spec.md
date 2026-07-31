@@ -43,9 +43,14 @@ occurrences of it are approved there, in the check's own allowlist — so the
 approval arrives as a reviewable line in the diff rather than as a silent
 comment in a source file, a second suppression cannot ride in on the first
 one's approval, and swapping an approved `@ts-ignore` for a `biome-ignore` at
-the same path is a new approval rather than a free one. The check SHALL read
-tracked files only, so an ignored or untracked file cannot fail a clone that
-does not have it.
+the same path is a new approval rather than a free one. An entry SHALL NOT name
+the line the suppression sits on: an approval follows the count and not the
+occurrence, so deleting an approved suppression and adding another of the same
+marker at the same path passes — an accepted ceiling, because the substitution
+is two lines of the diff a reviewer reads, while a line number moves with every
+unrelated edit above it and would have the allowlist re-approved by someone who
+never re-read the reason. The check SHALL read tracked files only, so an
+ignored or untracked file cannot fail a clone that does not have it.
 
 #### Scenario: A suppression is added
 
