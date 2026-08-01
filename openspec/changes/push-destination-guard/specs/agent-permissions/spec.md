@@ -79,8 +79,11 @@ A leading `+` on a refspec SHALL be blocked as a force-push wherever it
 appears, whatever its destination: it forces the update exactly as `--force`
 does, and the flag pattern does not see it because it is not a flag.
 
-`--all`, its alias `--branches`, and `--mirror` SHALL be blocked outright: they
-name no ref and push every ref under `refs/heads/`, `main` among them.
+`--all`, its alias `--branches`, `--mirror` and `--prune` SHALL be blocked
+outright: each acts on refs the command does not name. The first three push
+every ref under `refs/heads/` or `refs/`, `main` among them; `--prune` removes
+a remote branch that has no local counterpart, so it deletes `main` from the
+remote in any tree that does not carry it locally.
 
 The destination SHALL be read from the command's own words. A destination that
 comes from configuration is outside the guard — `remote.<name>.push`,
@@ -272,6 +275,12 @@ rejected as ambiguous — every spelling git honours therefore begins with
 - **WHEN** the agent attempts `git push origin feat/x main`
 - **THEN** the hook blocks the call, because every refspec is read and not
   only the first
+
+#### Scenario: A push that prunes
+
+- **WHEN** the agent attempts `git push --prune origin`
+- **THEN** the hook blocks the call, because `--prune` removes a remote branch
+  whose local counterpart is gone and names none of them
 
 #### Scenario: A push of every branch with no branch to read
 

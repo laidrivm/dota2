@@ -88,15 +88,19 @@ a push that would have been allowed. The value words of `-o`, `--push-option`,
 `-o main` would otherwise refuse a legitimate push, and a false positive that
 common is a guard people work around.
 
-### `--all`, `--branches` and `--mirror` block outright
+### The flags that act on refs they do not name block outright
 
 `--all` is documented as "Push all branches (i.e. refs under `refs/heads/`)",
 `--branches` is its alias, and `--mirror` covers "all refs under `refs/`". Each
-pushes `main` without naming it. Three strings in a set, and the check on them
-SHALL come before anything reads a branch, so `--all` with a detached `HEAD`
-blocks on the flag rather than on an unreadable head.
+pushes `main` without naming it. `--prune` belongs with them from the other
+direction: it removes "remote branches that don't have a local counterpart", so
+in a tree with no local `main` it deletes the remote one, and the destination
+scan sees nothing because there is nothing written down to see.
 
-`--tags` is not among them: it pushes `refs/tags/`, which contains no branch.
+`--tags` and `--follow-tags` stay out: they act on `refs/tags/`, which holds no
+branch. Four strings in a set, and the check on them
+comes before anything reads a branch, so `--all` with a detached `HEAD`
+blocks on the flag rather than on an unreadable head.
 
 ### A `+` refspec prefix is a force-push
 
