@@ -12,10 +12,13 @@ const toolkit = await Bun.file(
 ).text();
 const claudeMd = await Bun.file(`${import.meta.dir}/CLAUDE.md`).text();
 
-/** Up to the next `## ` heading, or the end of the file for the last section. */
-const section = (markdown: string, heading: string) =>
+/** Up to the next heading of the same level, or the end of the file. */
+const section = (markdown: string, heading: string, level = "##") =>
 	markdown.match(
-		new RegExp(`^## ${heading}$([\\s\\S]*?)(?=\\n## |$(?![\\s\\S]))`, "m"),
+		new RegExp(
+			`^${level} ${heading}$([\\s\\S]*?)(?=\\n${level} |$(?![\\s\\S]))`,
+			"m",
+		),
 	)?.[1] ?? "";
 
 /** Every skill invoked as a slash command inside the pre-PR sequence. */
@@ -31,8 +34,13 @@ const sequenced = [...sequence.matchAll(/`\/([a-z][a-z0-9-]*)`/g)].map(
  */
 const fromPlugin = ["ponytail-review"];
 
-/** A skill a `CLAUDE.md` rule names is a gate too, without being sequenced. */
-const ruled = [...claudeMd.matchAll(/`([a-z][a-z0-9-]*)` skill/g)].map(
+/**
+ * A skill a `CLAUDE.md` rule names is a gate too, without being sequenced.
+ * Only the rules count — prose elsewhere in that file names skills without
+ * depending on them.
+ */
+const rules = section(claudeMd, "Rules", "###");
+const ruled = [...rules.matchAll(/`([a-z][a-z0-9-]*)` skill/g)].map(
 	(match) => match[1] as string,
 );
 
@@ -78,6 +86,7 @@ test("both sources of the active set yield skills", () => {
 	// exactness check below would then pass on nothing.
 	expect(sequence.length).toBeGreaterThan(0);
 	expect(sequenced.length).toBeGreaterThan(0);
+	expect(rules.length).toBeGreaterThan(0);
 	expect(ruled.length).toBeGreaterThan(0);
 	expect(active.size).toBeGreaterThan(0);
 });
