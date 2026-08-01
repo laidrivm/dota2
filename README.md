@@ -8,7 +8,7 @@
 | `docs/api-design.md` | endpoint response contract | when an endpoint changes |
 | `docs/testing.md` | what tests assert, e2e rules | when tests change |
 | `docs/feature-workflow.md` | the four OpenSpec stages and their gates | on any feature, new tooling, or gate change |
-| `docs/review-toolkit.md` | which review skill to run, the pre-PR sequence, and the commit each gate was verified against | before every PR |
+| `docs/review-toolkit.md` | which review skill to run, the pre-PR sequence, and the commit each shared-repo gate was verified against | before every PR |
 | `docs/verification.md` | what counts as evidence for a claim | before a claim or a decision rests on one |
 | `PLAN.md` | the open queue, its sources, and the standing constraints | every session |
 | `tasks/*.md` | infra task specs — scope, steps, acceptance criteria | when a task starts |
