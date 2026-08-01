@@ -74,7 +74,10 @@ Response contract rules for every endpoint — see
   whole on `feat/<proposal-slug>` (`fix/`, `chore/` for non-feature work).
 - Commits: imperative subject ≤ 72 chars, body only when the diff doesn't
   explain itself. Commit per completed task-list item, not per file.
-- Never push to `main`, whatever the branch in hand and whatever the refspec.
+- Never configure a push to `main` — `remote.<name>.push`, `push.default` set
+  to `matching`, `upstream` or `tracking`, `remote.<name>.mirror` — the guard
+  reads the command's own words and cannot see a destination that comes from
+  configuration.
 - Open PRs ready for review, not as drafts — CodeRabbit's auto-review skips
   drafts, so a draft is a PR nobody reviews.
 - Keep the PR description to what the diff can't say: a link to the
