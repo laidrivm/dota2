@@ -71,14 +71,12 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
 - **`push-destination-guard`** — `archive/2026-08-01-push-destination-guard`.
   The guard reads every operand as a refspec; a destination that comes from git
   configuration is what it cannot see, and that residue is the `CLAUDE.md` rule.
+- **`skill-provenance`** — PR #63, `archive/2026-08-01-skill-provenance`;
+  capability spec at `openspec/specs/skill-provenance/`. The
+  `skills-lock.json` patch it drafted is the user's to apply in the skills
+  repo, and its `ref` needs the upstream commit in `microsoft/playwright-cli`.
 
 ### Open
-- [ ] **`skill-provenance`** — proposed (`openspec/changes/skill-provenance`).
-      Records which shared skills the gates depend on and the commit each was
-      verified against, marks the five nobody depends on archived, pins the
-      table with a test, and hands the `skills-lock.json` patch to the user. One
-      task group, one PR. Unsequenced: it touches `docs/review-toolkit.md` and a
-      new test file, which nothing else in the queue edits.
 - [ ] **`review-bot-instructions`** — proposed
       (`openspec/changes/review-bot-instructions`). Points the bot at the two
       reviews no local skill performs — the delta spec, and the diff against its
