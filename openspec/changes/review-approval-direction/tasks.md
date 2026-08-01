@@ -25,7 +25,7 @@ citations are the `### Requirement:` headings in
       (`openspec/specs/local-review-loop/spec.md:6`), which describes the loop
       as "what it fixes without asking" — the same one-sided framing, in the
       sentence that introduces the whole capability
-- [ ] 1.6 Grep for any further site restating either half before calling this
+- [x] 1.6 Grep for any further site restating either half before calling this
       done — the five above are what a grep for "without asking" and "No fixes
       before approval" returned across `docs/`, `PLAN.md`, `CLAUDE.md` and
       `openspec/`
