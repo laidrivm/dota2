@@ -71,10 +71,10 @@ assertions; this change extends both, never rewrites them.
       config can only deny servers and never allow them, and the checkpoint:
       after three or four PRs, ask whether any finding of the API class
       appeared, and set `usage` back to `"disabled"` if none did
-- [ ] 1.12 Tell the user what only they can do: connect Context7 in the
+- [x] 1.12 Tell the user what only they can do: connect Context7 in the
       CodeRabbit dashboard, since the schema exposes no way to do it from the
       repository
-- [ ] 1.13 Grep for sites restating what this change adds —
+- [x] 1.13 Grep for sites restating what this change adds —
       `openspec/specs/review-bot-config/spec.md`, `docs/review-toolkit.md`
       where the bot's disposition terms live, and `README.md`'s ownership row
       for `.coderabbit.yaml` — and reconcile each
