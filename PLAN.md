@@ -396,6 +396,13 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
   destination can only refuse a push that was allowed. `--prune` joins `--all`,
   `--branches` and `--mirror` in the blocked set from the other direction: it
   deletes a remote branch whose local counterpart is gone, naming none of them.
+  Those four are matched by prefix, because git resolves an unambiguous
+  abbreviation — `--mir`, `--pru`, `--al` and `--bra` were each run against git
+  and reached the option they abbreviate, where `--a` is rejected as ambiguous —
+  while the option-value list is matched exactly, since a prefix there could
+  swallow the word after it and hide an operand. Every uncertainty in the parse
+  resolves towards blocking, which is the shape the whole change converged on
+  after three review rounds each found a form the previous enumeration missed.
 
 - `mechanised-prohibitions` step 4: two of the three prohibitions the design
   called fully mechanised are not, and both are shortened rather than deleted,
