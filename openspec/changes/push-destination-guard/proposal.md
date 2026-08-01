@@ -12,6 +12,13 @@ publishes its own bypass is worse than one that does not. Removing the example
 left the rule true and the hole open. Closing the hole is what makes the
 sentence unnecessary.
 
+The spelling is not exotic, and nobody has to think of it. A branch created
+from `origin/main` takes it as its upstream, and the first `git push` on such a
+branch fails with git's own suggestion: "To push to the upstream branch on the
+remote, use `git push origin HEAD:main`". That happened on this change's own
+branch while this proposal was being written. The one form the guard misses is
+the one the tool recommends.
+
 ## What Changes
 
 - `scripts/command-guard.ts` decides a push by its destination as well as its
