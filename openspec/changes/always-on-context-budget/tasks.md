@@ -59,20 +59,20 @@ is already corrected.
 
 ## 2. The fence rule and the bot instruction
 
-- [ ] 2.1 Write `coderabbit-config.test.ts` asserting the `path_instructions`
+- [x] 2.1 Write `coderabbit-config.test.ts` asserting the `path_instructions`
       entry for `**/*.{ts,tsx}` exists and names an unchecked precondition (1),
       that its text carries the exemption for self-evident functions — the
       clause whose loss turns the entry back into docstring coverage — and that
       `docstrings.mode` is still `"off"` with no `threshold` beside it (2) —
       watch each fail before the config is edited — *The bot judges what a
       comment protects, not whether one exists*
-- [ ] 2.2 Add the `path_instructions` entry to `.coderabbit.yaml`, worded so it
+- [x] 2.2 Add the `path_instructions` entry to `.coderabbit.yaml`, worded so it
       cannot be satisfied by prose over every function, with its reason beside
       it as the other entries carry theirs
-- [ ] 2.3 Add one line to the `CLAUDE.md` rules list, in the code sublist:
+- [x] 2.3 Add one line to the `CLAUDE.md` rules list, in the code sublist:
       comment what a reader would otherwise "fix" — a deliberate departure from
       the obvious implementation, or a precondition the code does not check —
       *A fence stands where it is stepped on*
-- [ ] 2.4 Write the comments for the fences group 1 listed as having none
-- [ ] 2.5 Confirm the rules list is still within its own ~20 trigger after the
+- [x] 2.4 Write the comments for the fences group 1 listed as having none
+- [x] 2.5 Confirm the rules list is still within its own ~20 trigger after the
       addition, and note the count in the PR body
