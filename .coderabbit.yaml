@@ -131,31 +131,14 @@ reviews:
         both sites. This is the half no rule holds: a delta spec corrected
         mid-review while its proposal still says the old thing has produced
         findings on consecutive pull requests.
-    # Says nothing the **/*.{ts,tsx} entry says: this one never reads the
-    # code as code, only against the change it is supposed to implement.
-    - path: "src/**"
-      instructions: |
-        Compare the diff with the active change under /openspec/changes/ in
-        both directions: every acceptance criterion the branch claims to
-        meet, and anything present that the change never asked for. Report
-        the second as "scope not proposed" — /triage, /zombies and
-        /ponytail-review all read the diff without the proposal, so that
-        direction is checked by nobody else.
-
-        Select the change by branch name, never by guessing which is
-        active: several sit under /openspec/changes/ at once. Take the
-        branch's name after its feat/, fix/ or chore/ prefix and look for a
-        directory of exactly that name; only if none exists, strip a
-        trailing -<step> and look again. Slugs contain hyphens, so the
-        exact match must be tried first. If neither lookup finds a
-        directory, say the comparison could not be made rather than
-        comparing against a neighbour.
-    # Scoped to ** because neither clause is about a language. A rule can be
-    # violated in a workflow or a document, and a dependency arrives in
-    # package.json or a Dockerfile and never in a TypeScript file — so a
-    # TypeScript scope would name cases it can never see. path_instructions
-    # is the only mechanism the schema offers; there is no general
-    # review-instruction key to hang these on instead.
+    # Scoped to ** because none of these three clauses is about a language.
+    # A rule can be violated in a workflow or a document; a dependency
+    # arrives in package.json or a Dockerfile and never in a TypeScript
+    # file; and a change here is as often implemented in a config file or a
+    # root-level test as under src/ — 11 of this repo's TypeScript files sit
+    # at the root. A narrower scope would name cases it cannot see.
+    # path_instructions is the only mechanism the schema offers; there is no
+    # general review-instruction key to hang these on instead.
     - path: "**"
       instructions: |
         When a defect violates a rule in /CLAUDE.md, quote that rule beside
@@ -166,6 +149,26 @@ reviews:
         Flag an abstraction with a single caller, a parameter or option
         with no current consumer, and any new dependency. No linter checks
         these, and /ponytail-review sees only the diffs it is run over.
+
+        Compare the diff with the active change under /openspec/changes/ in
+        both directions: every acceptance criterion the branch claims to
+        meet, and anything present that the change never asked for. Report
+        the second as "scope not proposed" — /triage, /zombies and
+        /ponytail-review all read the diff without the proposal, so that
+        direction is checked by nobody else. Exempt the change's own
+        artefacts under /openspec/changes/: the entry above reviews those,
+        and a proposal is not evidence against itself.
+
+        Select the change by branch name, never by guessing which is
+        active: several sit under /openspec/changes/ at once. Take the
+        branch's name after its feat/, fix/ or chore/ prefix and look for a
+        directory of exactly that name; only if none exists, strip a
+        trailing -<step> and look again. Slugs contain hyphens, so the
+        exact match must be tried first. Never take "archive" as a
+        candidate, whichever lookup reaches it — it is settled history, and
+        a chore/archive-<name> branch strips to it. If neither lookup finds
+        a directory, say the comparison could not be made rather than
+        comparing against a neighbour.
 
 chat:
   auto_reply: true
