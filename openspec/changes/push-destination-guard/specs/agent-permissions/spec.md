@@ -53,16 +53,25 @@ that already exists on the remote, a wildcard refspec pushes whatever it
 matches, and `git push origin HEAD` names its destination only through the
 current branch.
 
-The first non-option argument SHALL be read as the repository operand and the
-rest as refspecs, which is git's own order. A push naming no refspec SHALL be
-blocked while `HEAD` is on `main`, because git then pushes the current branch
-to the upstream branch of the same name.
+While `HEAD` is on `main`, the hook SHALL block every push, whatever the
+command names. A push with no refspec sends the current branch to its upstream
+of the same name, and telling that case apart from a push that names a refspec
+means deciding which operand is the repository — which a value-taking option
+such as `-o <string>` moves by one word. Refusing every push from `main`
+removes that decision instead of parsing around it, and costs an agent nothing:
+it cannot commit there, so it has nothing of its own to push from there.
+
+From any other branch, every operand SHALL be read as a refspec, including the
+repository operand, which is one word that cannot be told from a refspec
+without the same decision above — and a remote whose name is `main` blocks a
+push that would have been allowed, which is the safe direction. The words that
+are values of `-o` and `--push-option`, and of `--receive-pack`, `--exec` and
+`--repo` in their separate-word form, SHALL be skipped, so a push option whose
+value reads like a branch name does not refuse the push carrying it.
 
 Each refspec SHALL be read as `[+]<src>:<dst>`, where a refspec without
 `:<dst>` updates the ref its `<src>` names. The hook SHALL block when the
-destination equals `main` or `refs/heads/main`; when the destination is `HEAD`
-or `@` and `HEAD` is on `main`, since those resolve through the current branch;
-and when the destination is not a single concrete ref at all — the bare `:` and
+destination equals `main` or `refs/heads/main`; and when the destination is not a single concrete ref at all — the bare `:` and
 `+:` matching form, a destination containing `*`, and an empty destination —
 because an unbounded destination cannot be shown not to include `main`.
 
@@ -297,11 +306,12 @@ rejected as ambiguous — every spelling git honours therefore begins with
 - **THEN** the hook blocks the call, because the destination is not a single
   concrete ref
 
-#### Scenario: A push naming HEAD as its refspec
+#### Scenario: A push carrying a push option
 
-- **WHEN** the agent attempts `git push origin HEAD` with `HEAD` on `main`
-- **THEN** the hook blocks the call, because a refspec without `:<dst>` updates
-  the ref its `<src>` names
+- **WHEN** the agent attempts `git push -o ci.skip origin` with `HEAD` on
+  `main`
+- **THEN** the hook blocks the call, because every push from `main` is blocked
+  and no operand has to be identified
 
 #### Scenario: A push naming HEAD from a feature branch
 
@@ -314,8 +324,16 @@ rejected as ambiguous — every spelling git honours therefore begins with
 - **THEN** the hook blocks the call, because `+` forces the update exactly as
   `--force` does
 
-#### Scenario: A push naming a remote and nothing else
+#### Scenario: A push of another branch from main
 
-- **WHEN** the agent attempts `git push origin` with `HEAD` on `main`
-- **THEN** the hook blocks the call, because the only argument is the
-  repository operand and the push therefore names no refspec
+- **WHEN** the agent attempts `git push origin feat/x` with `HEAD` on `main`
+- **THEN** the hook blocks the call — every push from `main` is refused,
+  because which operand is the repository is not decidable cheaply enough to
+  rest a boundary on
+
+#### Scenario: A push option whose value reads like a branch
+
+- **WHEN** the agent attempts `git push -o main origin feat/x` with `HEAD` on
+  `feat/x`
+- **THEN** the hook allows the call, because the word after `-o` is that
+  option's value and not an operand

@@ -259,9 +259,9 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
       guard reads a push's flags and never its destination, so every spelling of
       a push to `main` passes it. The hook comes to allow a push only when
       every destination it names is a concrete ref other than `main` — which
-      also refuses a destination it cannot bound, catches a `+` refspec prefix
-      the force check never saw, and decides a push naming no refspec by the
-      current branch — and the prose rule narrows to what configuration alone
+      also refuses a destination it cannot bound and catches a `+` refspec
+      prefix the force check never saw — while every push from `main` is
+      refused outright, and the prose rule narrows to what configuration alone
       can do. One task group, one PR. Applies after
       `mechanised-prohibitions` is archived, which is what puts the requirement
       it modifies in `openspec/specs/agent-permissions/`.
@@ -385,7 +385,14 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
   step 1; the parse this change adds closes it in one condition. And the live
   confirmation step said to attempt `git push origin HEAD:main`, which pushes
   to `main` in precisely the case the probe exists to detect — it now carries
-  `--dry-run`.
+  `--dry-run`. A second round found the operand split itself unsafe: `git push`
+  takes one option whose value is a separate word, `-o <string>`, so
+  `git push -o ci.skip origin` on `main` reads `ci.skip` as the repository and
+  `origin` as the only refspec, and passes. The remedy is not a longer list of
+  value-taking options but not needing the answer — every push from `main` is
+  refused, which is the only case the split was serving, and from any other
+  branch every operand is read as a refspec because misreading a remote as a
+  destination can only refuse a push that was allowed.
 
 - `mechanised-prohibitions` step 4: two of the three prohibitions the design
   called fully mechanised are not, and both are shortened rather than deleted,
