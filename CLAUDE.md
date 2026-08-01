@@ -72,6 +72,8 @@ Response contract rules for every endpoint — see
   group, in the order the groups appear, on `feat/<proposal-slug>-<step>`. A
   change whose `tasks.md` holds exactly one group is the exception and ships
   whole on `feat/<proposal-slug>` (`fix/`, `chore/` for non-feature work).
+- A proposal ships on `spec/<proposal-slug>`; `feat/<proposal-slug>` is the
+  implementation's, and a squash-merged branch is never freed.
 - Commits: imperative subject ≤ 72 chars, body only when the diff doesn't
   explain itself. Commit per completed task-list item, not per file.
 - Never configure a push to `main` — `remote.<name>.push`, `push.default` set
