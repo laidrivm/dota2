@@ -49,7 +49,7 @@ assertions; this change extends both, never rewrites them.
 - [x] 1.6 Set `knowledge_base.mcp.usage: "enabled"` with the reason beside it,
       as every other pinned key in this file carries one: `auto` disables MCP
       for a public repository — *MCP is enabled by decision, not by default*
-- [ ] 1.7 Set `reviews.related_issues` and `reviews.related_prs` to `false`
+- [x] 1.7 Set `reviews.related_issues` and `reviews.related_prs` to `false`
       with their reason — *The walkthrough drops what a solo repository cannot
       relate*
 - [x] 1.8 Before touching the test, confirm `coderabbit-config.test.ts` is
