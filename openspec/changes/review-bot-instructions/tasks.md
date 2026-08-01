@@ -64,7 +64,7 @@ assertions; this change extends both, never rewrites them.
       single-caller, unused-option and new-dependency clauses, so removing one
       is caught; the `**/*.{ts,tsx}` block still carries the fence clause
       **and** now the API clause (6); `docstrings.mode` is still `"off"` (7)
-- [ ] 1.10 Watch each new assertion fail before it passes, by breaking the
+- [x] 1.10 Watch each new assertion fail before it passes, by breaking the
       config rather than by editing the assertion
 - [ ] 1.11 Record in `PLAN.md` that Context7's library documentation is
       community-contributed with no accuracy or safety warranty, that the
