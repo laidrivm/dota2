@@ -61,27 +61,32 @@ one and the whole argument when there is not — the **last** colon, because
 Comparison is on the whole token, which is what keeps `HEAD:mainline` allowed —
 the same equality the commit path already uses for the branch name.
 
-`HEAD` and `@` as a destination resolve through the current branch, so they
-take the same decision a push with no refspec takes.
+`HEAD` and `@` as a destination resolve through the current branch, which is
+never `main` wherever this scan runs, so they need no case of their own.
 
-### The first non-option argument is the repository
+### Every push from `main` is blocked, so no operand has to be identified
 
-Git's synopsis is `git push [<repository> [<refspec>...]]`, so the first
-non-option argument is the remote and only the rest are refspecs. The first
-shape of this design treated it as a refspec too, on the grounds that a remote
-named `main` does not exist here — which was true and beside the point:
-`git push origin` names no refspec at all, and reading `origin` as one would
-have made it a concrete destination that is not `main`, so the current-branch
-rule would never have run.
+The first shape of this decision read git's grammar literally: the first
+non-option argument is the repository, the rest are refspecs. Review found what
+that rests on. `git push --help` gives push one option whose value is a
+separate word — `-o <string>`, with `--receive-pack`, `--exec` and `--repo`
+accepting the space form as well — so `git push -o ci.skip origin` with `HEAD`
+on `main` reads `ci.skip` as the repository and `origin` as the only refspec.
+`origin` is not `main`, and the push goes to `main` anyway.
 
-### A push with no refspec is decided by the current branch
+The fix is not a longer list of value-taking options: it is not needing the
+answer. While `HEAD` is on `main`, every push is blocked, whatever the command
+names. The case the operand split existed to serve — a push with no refspec,
+which git sends to the upstream branch of the same name — is exactly the case
+where `HEAD` is on `main`, and the agent has nothing else to push from there
+because it cannot commit there.
 
-`git push --help`: with no refspec and none of `--all`, `--mirror`, `--tags`,
-git "honors `push.default` configuration", whose default value `simple` pushes
-"the current branch … to the corresponding upstream branch". The guard already
-knows the current branch — `currentBranch()` exists for the commit path — so
-this case costs no new machinery, and the `git symbolic-ref` it spends is spent
-only when a push carries no refspec.
+From any other branch the operands are scanned as refspecs without deciding
+which is the repository, since reading a remote as a destination can only block
+a push that would have been allowed. The value words of `-o`, `--push-option`,
+`--receive-pack`, `--exec` and `--repo` are skipped for the opposite reason:
+`-o main` would otherwise refuse a legitimate push, and a false positive that
+common is a guard people work around.
 
 ### `--all`, `--branches` and `--mirror` block outright
 
@@ -139,6 +144,10 @@ so they are two messages and not four.
 - **`push.default` changed to `matching`.** A push with no refspec from a
   feature branch would then also update `main` → outside the guard by the
   decision above; the prose keeps it.
+- **A value-taking option nobody listed.** A future git option whose value is a
+  separate word could read as an operand and refuse a legitimate push → a false
+  positive, and the branch-wide refusal is what keeps it from ever being a
+  false negative.
 
 ## Migration plan
 

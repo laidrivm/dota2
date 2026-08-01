@@ -10,35 +10,37 @@ the `### Requirement:` headings in `specs/agent-permissions/spec.md`.
 - [ ] 1.1 Archive `mechanised-prohibitions` before starting, so this change's
       delta applies to `openspec/specs/agent-permissions/spec.md` rather than
       to an unarchived delta of it
-- [ ] 1.2 In `scripts/command-guard.ts`, read a `push`'s first non-option
-      argument as the repository operand and the rest as refspecs, so
-      `git push origin` is recognised as naming no refspec at all — *The git
+- [ ] 1.2 In `scripts/command-guard.ts`, block every `push` while
+      `currentBranch()` is `main`, so no operand has to be identified as the
+      repository — `-o <string>` takes a separate word and moves that operand
+      by one — *The git prohibitions are enforced by a hook*
+- [ ] 1.3 From any other branch, read every operand as a refspec — skipping
+      the value words of `-o`, `--push-option`, `--receive-pack`, `--exec` and
+      `--repo` — and allow the push only when each destination is a concrete
+      ref other than `main`: strip a leading `+`, take the text after the last
+      `:` when there is one and the whole word when there is not, and block on
+      `main`, on `refs/heads/main`, and on a destination the guard cannot
+      bound — the bare `:` and `+:`, a `*`, an empty destination — *The git
       prohibitions are enforced by a hook*
-- [ ] 1.3 Allow a push only when every destination it names is a concrete ref
-      other than `main`: strip a leading `+`, take the text after the last `:`
-      when there is one and the whole word when there is not, and block on
-      `main`, on `refs/heads/main`, on a destination the guard cannot bound —
-      the bare `:` and `+:`, a `*`, an empty destination — and on `HEAD` or `@`
-      while `HEAD` is on `main` — *The git prohibitions are enforced by a hook*
-- [ ] 1.4 Block a `push` carrying no refspec while `currentBranch()` is `main`,
-      reusing the call the commit path already makes; block `--all`,
-      `--branches` and `--mirror` before anything reads a branch, so a detached
-      `HEAD` does not decide them; and block a leading `+` on any refspec as a
-      force-push — *The git prohibitions are enforced by a hook*
+- [ ] 1.4 Block `--all`, `--branches` and `--mirror` before anything reads a
+      branch, so a detached `HEAD` does not decide them, and block a leading
+      `+` on any refspec as a force-push — *The git prohibitions are enforced
+      by a hook*
 - [ ] 1.5 Write two block reasons: one naming the refused destination, one for
       a command that names none — `--all`, `--mirror`, the matching refspec —
       which must not claim a destination it cannot name. Assert each
 - [ ] 1.6 Extend `scripts/command-guard.test.ts` with the blocked forms: a
       refspec destination, a bare `main`, `+HEAD:refs/heads/main`, `:main`,
       a second refspec aimed at `main` in `git push origin feat/x main`, the
-      matching `:` and `+:`, a wildcard refspec, `git push origin HEAD` on
-      `main`, `git push origin` alone on `main`, no refspec on `main`,
-      `+feat/x:feat/x` as a force, and each of `--all`, `--branches` and
-      `--mirror`
+      matching `:` and `+:`, a wildcard refspec, `+feat/x:feat/x` as a force,
+      each of `--all`, `--branches` and `--mirror`, and — from `main` — a bare
+      `git push`, `git push origin feat/x`, and `git push -o ci.skip origin`,
+      which is the form an operand split misreads
 - [ ] 1.6a Extend it with the allowed forms, which are what keep the check from
       blocking ordinary work: `HEAD:mainline`, `main:feat/x`,
       `git push origin HEAD` on a feature branch, no refspec on a feature
-      branch, and the existing `git push -u origin feat/x`
+      branch, `git push -o main origin feat/x`, whose `main` is an option's
+      value and not an operand, and the existing `git push -u origin feat/x`
 - [ ] 1.6b Cover the two cases the destination check shares with the paths
       around it: `--all` with a detached `HEAD` blocks on the flag without
       reaching `currentBranch()`, which blocks for its own reason on an
