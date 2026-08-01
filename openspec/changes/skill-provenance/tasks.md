@@ -7,25 +7,25 @@ Bracketed numbers cite the `/zombies` ideas raised at propose.
 
 ## 1. The table, its pin, and the hand-off
 
-- [ ] 1.1 Verify each gate skill's contract as `docs/review-toolkit.md`
+- [x] 1.1 Verify each gate skill's contract as `docs/review-toolkit.md`
       describes it against its `SKILL.md` in the shared repository — `/zombies`,
       `/warm`, `/triage`, `/coderabbit-local`, `/coderabbit`, plus
       `playwright-cli`, which `CLAUDE.md` names in a rule rather than in the
       sequence. Correct this file wherever the two disagree, in this same
       change — *Every gate skill records the commit it was verified against*
-- [ ] 1.2 Add the provenance table to `docs/review-toolkit.md` with the commit
+- [x] 1.2 Add the provenance table to `docs/review-toolkit.md` with the commit
       the verification in 1.1 was made at, re-read from the shared repository
       rather than copied from `design.md` — *Every gate skill records the
       commit it was verified against*
-- [ ] 1.3 List `checklist`, `first-five`, `preflight`, `review-order` and
+- [x] 1.3 List `checklist`, `first-five`, `preflight`, `review-order` and
       `session-wrapup` as archived, with no commit and one line saying what
       archived means here — *Skills no gate depends on are marked archived*
-- [ ] 1.4 Write `skill-provenance.test.ts`, deriving the active set from the
+- [x] 1.4 Write `skill-provenance.test.ts`, deriving the active set from the
       pre-PR sequence in the same file plus the skills `CLAUDE.md`'s rules
       depend on, rather than from a second hand-kept list (7), and never
       resolving `.claude/skills/` (11) — *The table is pinned by a test, within
       what a clone can see*
-- [ ] 1.5 Cover in that test: an emptied or renamed table, and a renamed
+- [x] 1.5 Cover in that test: an emptied or renamed table, and a renamed
       source heading that empties the active set, both fail on the empty set
       itself rather than passing every per-skill assertion vacuously (1, 2);
       one row parses to a name
@@ -35,13 +35,13 @@ Bracketed numbers cite the `/zombies` ideas raised at propose.
       `latest` or a bare date fails (10); one skill in two active rows fails;
       an active row for a skill neither source names fails; a skill listed as
       both active and archived fails
-- [ ] 1.6 Watch each assertion fail before it passes, by breaking the table
+- [x] 1.6 Watch each assertion fail before it passes, by breaking the table
       rather than by editing the assertion — the length-assertion lesson in
       `docs/verification.md` applies to the zero-row case in particular
-- [ ] 1.7 Draft the `skills-lock.json` patch for the shared repository — `ref`
+- [x] 1.7 Draft the `skills-lock.json` patch for the shared repository — `ref`
       and `vendoredAt` beside `computedHash` on the single `playwright-cli`
       entry — and hand it to the user; do not edit that repository from here
-- [ ] 1.8 Reconcile the sites restating what this change adds. `README.md:21`
+- [x] 1.8 Reconcile the sites restating what this change adds. `README.md:21`
       is already wrong: its ownership row calls the directory
       "triage/zombies/warm/coderabbit" where six skills are gates, missing
       `coderabbit-local` and `playwright-cli` — `readme-map.test.ts` pins the
@@ -50,3 +50,28 @@ Bracketed numbers cite the `/zombies` ideas raised at propose.
       `openspec/specs/agent-permissions/spec.md:43` and `:166`, which carry the
       untracked-symlink reasoning this change leans on, and
       `docs/feature-workflow.md:30`, which cites `skills-lock.json` by name
+
+## The `skills-lock.json` hand-off (1.7)
+
+For the shared repository, applied there by the user — never from here. `ref`
+is the upstream commit in `microsoft/playwright-cli` the file was taken from,
+which only whoever vendored it can supply; `vendoredAt` is the date the
+vendoring landed in the skills repo, `822e8ef`.
+
+```json
+    "playwright-cli": {
+      "source": "microsoft/playwright-cli",
+      "sourceType": "github",
+      "skillPath": "skills/playwright-cli/SKILL.md",
+      "ref": "<upstream commit sha>",
+      "vendoredAt": "2026-07-19",
+      "computedHash": "f602822b51bcb6d033749c60731b8f1e80f308222fcb2e4af551905a817c6e08"
+    }
+```
+
+## What 1.1 found
+
+`CLAUDE.md`'s Safety rule substituted `bunx playwright test` for `npx
+playwright test`, a command the skill has never carried — its npx path is `npx
+playwright cli` and its npm path pins `@latest`. Corrected in this change. The
+other five contracts matched their `SKILL.md` at `759f15e`.
