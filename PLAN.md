@@ -254,6 +254,14 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
       but **not** unsequenced: it corrects wording in `PLAN.md` that 7 then
       collapses, so it applies before 7. Both now sit on one branch, so that
       ordering is task order inside one apply rather than PR order.
+- [ ] **`push-destination-guard`** — proposed
+      (`openspec/changes/push-destination-guard`), not yet applied. The command
+      guard reads a push's flags and never its destination, so every spelling of
+      a push to `main` passes it; this extends the hook to the three forms git
+      documents for naming a destination and narrows the prose rule to what
+      configuration alone can do. One task group, one PR. Applies after
+      `mechanised-prohibitions` is archived, which is what puts the requirement
+      it modifies in `openspec/specs/agent-permissions/`.
 - [ ] **`skill-provenance`** — proposed
       (`openspec/changes/skill-provenance`), not yet applied. Records which
       shared skills the gates depend on and the commit each was verified
@@ -350,6 +358,19 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
   swallowed a real finding. Both halves were exercised: the commit that carries
   a fake credential is refused, and on this machine — which has no `gitleaks`
   binary — the hook prints nothing and exits 0.
+
+- `push-destination-guard`: the delta is a `MODIFIED` copy of a 183-line
+  requirement to change one word in it, which is what the tooling asks for —
+  a partial `MODIFIED` loses the rest at archive time. It is also why the
+  proposal measures 505 lines and trips the budget's warning line: the copy is
+  mechanical and the change itself is one parse. Splitting the requirement so a
+  later change can modify a smaller piece was weighed and dropped — the three
+  prohibitions share every sentence about exit codes, tokenising and the `if`
+  field, and a split would restate them or leave them owned by one of the three
+  arbitrarily. Three of the seven `/zombies` ideas became scenarios rather than
+  only tasks, because each names a behaviour the requirement did not otherwise
+  state: a `:main` deletion, a second refspec, and `--all` with a detached
+  `HEAD`, which must block on the flag before anything reads a branch.
 
 - `mechanised-prohibitions` step 4: two of the three prohibitions the design
   called fully mechanised are not, and both are shortened rather than deleted,
