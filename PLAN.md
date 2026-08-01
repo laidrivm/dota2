@@ -124,8 +124,9 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       four pull requests under `knowledge_base.mcp.usage: "enabled"`, ask
       whether any finding of the API-existence class actually appeared. Silence
       answers that question only if the source was working and had something to
-      read: confirm Context7 is connected in the dashboard and that those PRs
-      actually called into Preact, Bun or Playwright. Without both, the result
+      read: Context7 was connected in the dashboard on 2026-08-01, so the count
+      starts at the pull request that ships this entry, but still confirm those
+      PRs actually called into Preact, Bun or Playwright. Without both, the result
       is unverified and the setting stays — flipping it on silence alone would
       make an unretrieved source and an absent defect class the same evidence,
       which is the confusion `.coderabbit.yaml` tells the bot not to make. With
