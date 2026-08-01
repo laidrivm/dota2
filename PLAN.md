@@ -120,14 +120,14 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       hand-authored, so the pages cannot simply be regenerated.
 - [ ] **The e2e backlog** — the ~25 **(e2e)** bullets in `draft-board`'s and
       `hero-picker`'s archived task lists.
-- [ ] **Decide whether MCP earns its place in the review.** After three or
-      four pull requests under `knowledge_base.mcp.usage: "enabled"`, ask
-      whether any finding of the API-existence class actually appeared. Silence
-      answers that question only if the source was working and had something to
-      read: Context7 was connected in the dashboard on 2026-08-01, so the count
+- [ ] **Decide whether MCP earns its place in the review.** After four pull
+      requests under `knowledge_base.mcp.usage: "enabled"`, ask whether any
+      finding of the API-existence class actually appeared. Silence answers
+      that question only if the source was working and had something to read:
+      Context7 was connected in the dashboard on 2026-08-01, so the count
       starts at the pull request that ships this entry, but still confirm those
-      PRs actually called into Preact, Bun or Playwright. Without both, the result
-      is unverified and the setting stays — flipping it on silence alone would
+      PRs actually called into Preact, Bun or Playwright. Without both, the
+      result is unverified and the setting stays — flipping it on silence would
       make an unretrieved source and an absent defect class the same evidence,
       which is the confusion `.coderabbit.yaml` tells the bot not to make. With
       both, set `usage` back to `"disabled"`: a knowledge source that finds

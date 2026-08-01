@@ -121,10 +121,13 @@ opens the proposal, so scope creep is currently caught by nobody.
 
 #### Scenario: A branch that files settled history
 
-- **WHEN** the branch is `chore/archive-hero-picker`, so stripping its
-  trailing segment reaches `archive`
+- **WHEN** the branch is `chore/archive-preflight`, no
+  `openspec/changes/archive-preflight/` exists, and stripping its one trailing
+  segment therefore reaches `archive`
 - **THEN** no comparison is made, because `openspec/changes/archive/` is
   settled history and not a change
+- **AND** a branch of three segments such as `chore/archive-hero-picker`
+  never reaches it at all, one strip leaving `archive-hero`
 
 #### Scenario: The branch names no change
 
