@@ -256,8 +256,8 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
       fixed without asking, a Major or Critical dismissal is the user's. One
       task group. Unnumbered because it is not part of the numbered sequence,
       but **not** unsequenced: it corrects wording in `PLAN.md` that 7 then
-      collapses, so it applies before 7. Both now sit on one branch, so that
-      ordering is task order inside one apply rather than PR order.
+      collapses, so it applies before 7 — as its own branch and pull request,
+      merged before 7's group 1 starts.
 - [ ] **`push-destination-guard`** — proposed
       (`openspec/changes/push-destination-guard`), not yet applied. The command
       guard reads a push's flags and never its destination, so every spelling of

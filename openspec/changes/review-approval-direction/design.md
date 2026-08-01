@@ -97,9 +97,9 @@ It applies **before** `always-on-context-budget`, which shares two of those
 sites: its task 1.5 collapses the completed queue entry at `PLAN.md:94` and its
 eviction walks the decision at `:355`. Correcting the wording first means the
 collapse carries corrected text; the other order corrects a line that is about
-to be rewritten. Both changes were merged onto one branch at the user's
-request, so this is the order of two task groups in one apply run, not of two
-pull requests.
+to be rewritten. The two ship as separate pull requests, so the ordering is a
+merge order: this one lands first, and `always-on-context-budget` group 1
+starts from a `main` that already carries the corrected wording.
 
 Rollback is a revert; the previous policy is a strictly narrower override.
 
