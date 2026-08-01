@@ -3,8 +3,9 @@
 ## Purpose
 
 How the agent runs CodeRabbit's local CLI over a branch before pushing — how
-many passes it gets, what it fixes without asking, when it stops, and where a
-skipped finding's justification goes. It exists because the bot's PR review
+many passes it gets, what it fixes without asking, what it may not dismiss
+without asking, when it stops, and where a skipped finding's justification
+goes. It exists because the bot's PR review
 arrives after the branch is shared, so every defect it would catch lands as
 review churn on an open PR instead of being fixed while the branch is still
 local and free to be wrong.
