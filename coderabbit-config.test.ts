@@ -33,6 +33,14 @@ const tsEntry = config.reviews.path_instructions.find(
 	(e) => e.path === "**/*.{ts,tsx}",
 );
 
+test("no two entries claim the same path", () => {
+	// `entry` reads the first match, so a second block on a path the bot also
+	// honours would be invisible to every assertion below it.
+	const paths = config.reviews.path_instructions.map((e) => e.path);
+	expect(paths.length).toBeGreaterThan(0);
+	expect([...new Set(paths)]).toHaveLength(paths.length);
+});
+
 test("the TypeScript instruction asks for the fence, not for coverage", () => {
 	expect(tsEntry).toBeDefined();
 	const text = tsEntry?.instructions ?? "";
