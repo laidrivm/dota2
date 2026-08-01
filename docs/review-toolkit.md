@@ -27,10 +27,13 @@ name what only the user can settle.
   ranks High and Medium, reporting the defects they hold, and grepping every
   decision or value the diff changes for the sites that restate it.
 - `/coderabbit-local [base]` — the same review against the working branch,
-  before there is a PR. Invoke it yourself. 🟠 Major and 🔴 Critical findings
-  that survive verification are applied without asking, overriding the skill's
-  own "No fixes before approval" — the branch is unpushed, so being wrong
-  costs a `git checkout`. At most three reviews with fixes between them; stop
+  before there is a PR. Invoke it yourself. A finding that survives
+  verification is applied without asking, whatever its severity, overriding the
+  skill's own "No fixes before approval" — the branch is unpushed, so being
+  wrong costs a `git checkout`. Dismissing a 🟠 Major or 🔴 Critical goes the
+  other way: it is put to the user with what the bot missed, and the gate line
+  reads `OPEN` until they settle it, because a wrong dismissal reaches the
+  merge where a wrong fix does not. At most three reviews with fixes between them; stop
   early the moment a review returns nothing above 🟡 Minor, and if Major or
   above survives the third, report it and stop rather than starting a fourth.
   Collect Minor findings across all passes and report them once at the end,
@@ -45,11 +48,12 @@ name what only the user can settle.
   it. Once a PR is open, say so and stop —
   do not poll the checks, do not sleep on a timer, do not re-run `gh` to see
   whether the bot has posted. Once the user does invoke it, dispose of the
-  findings on the same terms as `/coderabbit-local`: Major and above applied
-  without asking, Minor read and then fixed or skipped with its reason,
-  overriding the skill's "No fixes before approval". Invoking it is the
-  approval — the user is present by definition, and a wrong fix on an open PR
-  costs one more commit on a branch already under review.
+  findings on the same terms as `/coderabbit-local`: any verified finding
+  applied without asking, a Major or Critical dismissal put to the user,
+  Minor read and then fixed or skipped with its reason, overriding the skill's
+  "No fixes before approval". Invoking it is the approval for the fixes — the
+  user is present by definition, and a wrong fix on an open PR costs one more
+  commit on a branch already under review.
 
 ## The pre-PR sequence
 
