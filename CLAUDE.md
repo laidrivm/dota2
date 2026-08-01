@@ -169,8 +169,13 @@ This file must stay readable in one sitting. Keep it small; do not add to
 it beyond the fix & capture loop. When it outgrows itself, split by this
 protocol:
 
-- **Trigger**: the file exceeds ~250 lines, or rules from its middle are
-  observably being ignored.
+- **Trigger**: the always-on set — this file plus `PLAN.md`, the two read at
+  the start of every session — exceeds ~500 lines together, or rules from this
+  file's middle are observably being ignored. The budget is the sum because
+  the cost is what a session must read before it starts, and neither file pays
+  it alone. A file indexed below under `docs/` is read when its topic comes up
+  and does not count: that exclusion is what makes extraction a real remedy
+  rather than the same lines under another name.
 - **Move whole sections only** (e.g. "API design", "E2E") to
   `docs/<topic>.md`, leaving one line here: the section's scope + the
   link. Never split one topic across two homes.
