@@ -47,6 +47,43 @@ const VALUE_OPTIONS = new Set([
  */
 const FORCE = /^(-[a-z0-9]*f[a-z0-9]*$|--force)/;
 
+/**
+ * Options of `git push` that act on refs the command never names, so no
+ * destination check can clear them: the first three push every ref under
+ * `refs/heads/` or `refs/`, `main` among them, and `--prune` deletes a remote
+ * branch that has no local counterpart — `main` itself in any tree that does
+ * not carry it.
+ */
+const REF_WIDE = ["--all", "--branches", "--mirror", "--prune"];
+
+/**
+ * Options whose value is the next word. Matched by their exact spelling, unlike
+ * `REF_WIDE`: a prefix here could swallow the word after it and hide an
+ * operand, while an abbreviation left unskipped is read as an operand and can
+ * only refuse a push. Both lists resolve their uncertainty towards blocking.
+ * The `=` forms need no entry — they are one word, and start with `-`.
+ */
+const PUSH_VALUE_OPTIONS = new Set([
+	"-o",
+	"--push-option",
+	"--receive-pack",
+	"--exec",
+	"--repo",
+]);
+
+/**
+ * Blocks a push whose destination cannot be shown to exclude `main`. Two
+ * reasons, because a command that names no destination must not be refused
+ * with one it never carried.
+ */
+function blockDestination(destination?: string): never {
+	block(
+		destination
+			? `command-guard: this push names \`${destination}\` as a destination. Pushing to main is the user's — ask them to run it.`
+			: "command-guard: this push names no bounded destination, so it cannot be shown not to reach main. Name the branch you mean.",
+	);
+}
+
 const payload = await Bun.stdin.json().catch(() => null);
 const command = payload?.tool_input?.command;
 if (typeof command !== "string") {
@@ -221,11 +258,75 @@ function check(command: string): void {
 				"command-guard: HEAD is on main and this project never commits there. Branch first, then commit on the branch.",
 			);
 		}
-		if (subcommand === "push" && args.some((arg) => FORCE.test(arg))) {
+		if (subcommand === "push") checkPush(args, target);
+	}
+}
+
+function checkPush(args: string[], target?: string): void {
+	if (args.some((arg) => FORCE.test(arg))) {
+		block(
+			"command-guard: force-pushing is the user's, not the agent's — the boundary is the rewrite, not how carefully it is leased. Ask the user to run it.",
+		);
+	}
+
+	// Before the branch is read, so `--all` with a detached HEAD blocks on the
+	// flag rather than on the unreadable head — the flag decides it either way,
+	// and the reason should say which.
+	//
+	// Prefix, not equality: git resolves any unambiguous abbreviation, so
+	// `--mir` and `--pru` reach the option they shorten. A form git would itself
+	// reject as ambiguous blocks too; over-refusing a command git does not
+	// accept costs nothing. The length guard keeps bare `--`, which ends the
+	// options and names nothing, from matching all four.
+	if (
+		args.some(
+			(arg) => arg.length > 2 && REF_WIDE.some((opt) => opt.startsWith(arg)),
+		)
+	) {
+		blockDestination();
+	}
+
+	// Every push from main, whatever it names. Telling a bare `git push` from
+	// one carrying a refspec means deciding which operand is the repository, and
+	// a value-taking option such as `-o <string>` moves that operand by one
+	// word. Refusing the branch outright removes the decision instead of parsing
+	// around it, and costs nothing: the agent cannot commit on main, so it has
+	// nothing of its own to push from there.
+	if (currentBranch(target) === "main") {
+		block(
+			"command-guard: HEAD is on main and this project never pushes from there. Branch first, then push the branch.",
+		);
+	}
+
+	for (let at = 0; at < args.length; at++) {
+		const arg = args[at] ?? "";
+		if (arg.startsWith("-")) {
+			if (PUSH_VALUE_OPTIONS.has(arg)) at++;
+			continue;
+		}
+
+		// Every operand, the repository among them: one word cannot be told from
+		// a refspec without the decision refused above, and a remote called
+		// `main` refuses a push that would have been allowed — the safe way to
+		// be wrong.
+		if (arg.startsWith("+")) {
 			block(
-				"command-guard: force-pushing is the user's, not the agent's — the boundary is the rewrite, not how carefully it is leased. Ask the user to run it.",
+				"command-guard: a leading `+` on a refspec forces the update exactly as --force does. Force-pushing is the user's, not the agent's.",
 			);
 		}
+		const colon = arg.lastIndexOf(":");
+		// `[+]<src>:<dst>`, and a refspec without `:<dst>` updates the ref its
+		// `<src>` names — so a bare word is its own destination. The split is on
+		// the last colon per the spec; no ref name git accepts carries one, so
+		// no input tells that apart from a split on the first.
+		const destination = colon === -1 ? arg : arg.slice(colon + 1);
+		if (destination === "main" || destination === "refs/heads/main") {
+			blockDestination(destination);
+		}
+		// Unbounded rather than aimed at main: the matching `:` form pushes every
+		// branch that already exists on the remote, and a wildcard pushes
+		// whatever it matches. Neither can be shown to exclude main.
+		if (destination === "" || destination.includes("*")) blockDestination();
 	}
 }
 

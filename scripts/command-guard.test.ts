@@ -441,3 +441,145 @@ describe("force-pushing", () => {
 		).toBe(0);
 	});
 });
+
+describe("a push whose destination is main", () => {
+	const branch = () => fabricate("feat/x");
+
+	test("named by refspec", () => {
+		const { code, reason } = run(event("git push origin HEAD:main"), branch());
+		expect(code).toBe(2);
+		expect(reason).toContain("main");
+	});
+
+	test("named bare, as the only operand", () => {
+		expect(run(event("git push origin main"), branch()).code).toBe(2);
+	});
+
+	test("named by its full ref", () => {
+		// Carries a `+` too, so it blocks as a force before the destination is
+		// read — both paths refuse it, which is why the form is worth pinning.
+		expect(
+			run(event("git push origin +HEAD:refs/heads/main"), branch()).code,
+		).toBe(2);
+	});
+
+	test("named as a deletion", () => {
+		expect(run(event("git push origin :main"), branch()).code).toBe(2);
+	});
+
+	test("named by the second of two refspecs", () => {
+		// The first operand is allowed; a scan stopping at the first acceptable
+		// destination would let this through.
+		expect(run(event("git push origin feat/x main"), branch()).code).toBe(2);
+	});
+});
+
+describe("a push whose destination cannot be bounded", () => {
+	const branch = () => fabricate("feat/x");
+
+	test("the matching refspec", () => {
+		const { code, reason } = run(event("git push origin :"), branch());
+		expect(code).toBe(2);
+		// It names no destination, so the reason must not invent one.
+		expect(reason).toContain("no bounded destination");
+	});
+
+	test("the forcing matching refspec", () => {
+		expect(run(event("git push origin +:"), branch()).code).toBe(2);
+	});
+
+	test("a wildcard refspec", () => {
+		expect(
+			run(event("git push origin 'refs/heads/*:refs/heads/*'"), branch()).code,
+		).toBe(2);
+	});
+
+	test("a leading + on an ordinary refspec is a force", () => {
+		const { code, reason } = run(
+			event("git push origin +feat/x:feat/x"),
+			branch(),
+		);
+		expect(code).toBe(2);
+		expect(reason).toContain("force");
+	});
+
+	for (const flag of ["--all", "--branches", "--mirror", "--prune"]) {
+		test(`${flag} acts on refs it never names`, () => {
+			const { code, reason } = run(event(`git push ${flag} origin`), branch());
+			expect(code).toBe(2);
+			expect(reason).toContain("no bounded destination");
+		});
+	}
+
+	test("an abbreviation git would resolve", () => {
+		expect(run(event("git push --mir origin"), branch()).code).toBe(2);
+	});
+});
+
+describe("a push while HEAD is on main", () => {
+	const branch = () => fabricate("main");
+
+	test("with no refspec at all", () => {
+		const { code, reason } = run(event("git push"), branch());
+		expect(code).toBe(2);
+		expect(reason).toContain("never pushes from there");
+	});
+
+	test("aimed at a feature branch", () => {
+		expect(run(event("git push origin feat/x"), branch()).code).toBe(2);
+	});
+
+	test("behind an option whose value is a separate word", () => {
+		// The form an operand split misreads: `ci.skip` is read as the
+		// repository and `origin` as the only refspec, and the push passes.
+		expect(run(event("git push -o ci.skip origin"), branch()).code).toBe(2);
+	});
+});
+
+describe("pushes the destination check must not block", () => {
+	const branch = () => fabricate("feat/x");
+
+	test("a branch whose name merely starts with main", () => {
+		expect(run(event("git push origin HEAD:mainline"), branch()).code).toBe(0);
+	});
+
+	test("main as the source, not the destination", () => {
+		expect(run(event("git push origin main:feat/x"), branch()).code).toBe(0);
+	});
+
+	test("HEAD with no destination", () => {
+		expect(run(event("git push origin HEAD"), branch()).code).toBe(0);
+	});
+
+	test("no refspec on a feature branch", () => {
+		expect(run(event("git push"), branch()).code).toBe(0);
+	});
+
+	test("main as an option's value", () => {
+		// Skipped as `-o`'s value; read as an operand it would refuse the push.
+		expect(run(event("git push -o main origin feat/x"), branch()).code).toBe(0);
+	});
+});
+
+describe("the destination check and the paths around it", () => {
+	test("--all blocks on the flag before the branch is read", () => {
+		// A detached HEAD blocks for its own reason; this must not be that one.
+		const { code, reason } = run(event("git push --all origin"), detached());
+		expect(code).toBe(2);
+		expect(reason).toContain("no bounded destination");
+		expect(reason).not.toContain("could not read the current branch");
+	});
+
+	test("a detached HEAD still blocks a push that names a branch", () => {
+		const { code, reason } = run(event("git push origin feat/x"), detached());
+		expect(code).toBe(2);
+		expect(reason).toContain("could not read the current branch");
+	});
+
+	test("inside a command substitution", () => {
+		expect(
+			run(event('echo "$(git push origin HEAD:main)"'), fabricate("feat/x"))
+				.code,
+		).toBe(2);
+	});
+});
