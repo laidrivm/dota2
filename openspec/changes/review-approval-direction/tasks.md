@@ -29,7 +29,7 @@ citations are the `### Requirement:` headings in
       done — the five above are what a grep for "without asking" and "No fixes
       before approval" returned across `docs/`, `PLAN.md`, `CLAUDE.md` and
       `openspec/`
-- [ ] 1.7 Draft the matching wording for `coderabbit` and `coderabbit-local` in
+- [x] 1.7 Draft the matching wording for `coderabbit` and `coderabbit-local` in
       the skills repository and hand it to the user; do not edit the skills
       from this project
 - [x] 1.8 Put the two Major dismissals already made on
