@@ -91,6 +91,12 @@ reach the option they abbreviate. Any argument that is a prefix of one of the
 four SHALL block, including one git would itself reject as ambiguous — over-
 refusing a command git does not accept costs nothing.
 
+Bare `--` SHALL be exempt from that prefix match, being a prefix of all four
+and none of them: it ends option parsing, and git accepts it. It is the one
+argument the justification above does not reach, since refusing it would refuse
+a valid push. The operands after it are read as refspecs like any other, so
+`git push -- origin main` still blocks on its destination.
+
 The words skipped as option values SHALL be the exact spellings instead — `-o`,
 `--push-option`, `--receive-pack`, `--exec` and `--repo`, and the `=` forms.
 Prefix-matching there would let a short abbreviation swallow the word after it,
@@ -294,6 +300,12 @@ rejected as ambiguous — every spelling git honours therefore begins with
 - **WHEN** the agent attempts `git push --mir origin`
 - **THEN** the hook blocks the call, because git resolves the abbreviation and
   the guard matches the four by prefix
+
+#### Scenario: The end-of-options marker
+
+- **WHEN** the agent attempts `git push -- origin feat/x` from a feature branch
+- **THEN** the hook allows the call — `--` is a prefix of all four blocked
+  options and none of them, and refusing it would refuse a valid push
 
 #### Scenario: A push that prunes
 

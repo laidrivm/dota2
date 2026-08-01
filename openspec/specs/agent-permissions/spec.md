@@ -103,7 +103,7 @@ superset, and a deny entry can only ever be redundant, never wrong.
 
 ### Requirement: The git prohibitions are enforced by a hook
 
-Two git prohibitions cannot be expressed as prefix-matched permission entries,
+Three git prohibitions cannot be expressed as prefix-matched permission entries,
 because their trigger is repository state or an argument in any position. They
 SHALL be enforced by a single `PreToolUse` hook registered in the tracked
 `.claude/settings.json`. The hook SHALL read the invoked command
@@ -138,11 +138,78 @@ accepted: the guard exists for an agent that writes `git` and `gh` because the
 documentation and this repository's prose do, not for an adversary.
 
 The hook SHALL block a commit while `HEAD` is on `main`, and SHALL block any
-force-push, whether written as `--force`, `--force-with-lease`, `-f` or bundled
-into a short-flag group such as `-uf`, which git reads as `-u -f`, and wherever
-the flag sits in the command. This is stricter than the prose it replaces, which
+force-push, whether written as `--force`, `--force-with-lease`, `-f`, bundled
+into a short-flag group such as `-uf`, which git reads as `-u -f`, or as the
+`+` prefix of a refspec, and wherever it sits in the command. This is stricter than the prose it replaces, which
 forbade force-pushing only after a pull request was open: the agent loses
 force-push entirely, and the user keeps it.
+
+The hook SHALL also block a push unless every destination the command names is
+a concrete ref other than `main`. The rule is stated as what it exempts rather
+than as a list of the spellings that mean `main`, because git's grammar has
+more of those than a list remembers: `git push origin :` pushes every branch
+that already exists on the remote, a wildcard refspec pushes whatever it
+matches, and `git push origin HEAD` names its destination only through the
+current branch.
+
+While `HEAD` is on `main`, the hook SHALL block every push, whatever the
+command names. A push with no refspec sends the current branch to its upstream
+of the same name, and telling that case apart from a push that names a refspec
+means deciding which operand is the repository — which a value-taking option
+such as `-o <string>` moves by one word. Refusing every push from `main`
+removes that decision instead of parsing around it, and costs an agent nothing:
+it cannot commit there, so it has nothing of its own to push from there.
+
+From any other branch, every operand SHALL be read as a refspec, including the
+repository operand, which is one word that cannot be told from a refspec
+without the same decision above — and a remote whose name is `main` blocks a
+push that would have been allowed, which is the safe direction. The words that
+are values of `-o` and `--push-option`, and of `--receive-pack`, `--exec` and
+`--repo` in their separate-word form, SHALL be skipped, so a push option whose
+value reads like a branch name does not refuse the push carrying it.
+
+Each refspec SHALL be read as `[+]<src>:<dst>`, where a refspec without
+`:<dst>` updates the ref its `<src>` names. The hook SHALL block when the
+destination equals `main` or `refs/heads/main`; and when the destination is not a single concrete ref at all — the bare `:` and
+`+:` matching form, a destination containing `*`, and an empty destination —
+because an unbounded destination cannot be shown not to include `main`.
+
+A leading `+` on a refspec SHALL be blocked as a force-push wherever it
+appears, whatever its destination: it forces the update exactly as `--force`
+does, and the flag pattern does not see it because it is not a flag.
+
+`--all`, its alias `--branches`, `--mirror` and `--prune` SHALL be blocked
+outright: each acts on refs the command does not name. The first three push
+every ref under `refs/heads/` or `refs/`, `main` among them; `--prune` removes
+a remote branch that has no local counterpart, so it deletes `main` from the
+remote in any tree that does not carry it locally.
+
+Those four SHALL be matched by prefix and not by exact spelling: git accepts
+any unambiguous abbreviation, and `--mir`, `--pru`, `--al` and `--bra` all
+reach the option they abbreviate. Any argument that is a prefix of one of the
+four SHALL block, including one git would itself reject as ambiguous — over-
+refusing a command git does not accept costs nothing.
+
+Bare `--` SHALL be exempt from that prefix match, being a prefix of all four
+and none of them: it ends option parsing, and git accepts it. It is the one
+argument the justification above does not reach, since refusing it would refuse
+a valid push. The operands after it are read as refspecs like any other, so
+`git push -- origin main` still blocks on its destination.
+
+The words skipped as option values SHALL be the exact spellings instead — `-o`,
+`--push-option`, `--receive-pack`, `--exec` and `--repo`, and the `=` forms.
+Prefix-matching there would let a short abbreviation swallow the word after it,
+hiding an operand; leaving an abbreviated form unskipped reads that value as an
+operand and can only refuse a push. Both lists therefore resolve their
+uncertainty towards blocking.
+
+The destination SHALL be read from the command's own words. A destination that
+comes from configuration is outside the guard — `remote.<name>.push`,
+`push.default` set to `matching`, `upstream` or `tracking`, and
+`remote.<name>.mirror` set to true, which makes `--mirror` the default. Reading
+them would make the hook decide on repository state the command does not carry,
+and the fallback that fails closed on an unreadable state would then block
+every push made where that configuration cannot be read. That half stays prose.
 
 The script SHALL find the git command inside a compound one by splitting only
 on separators outside quotes. A split that ignores quoting cuts both ways: it
@@ -155,9 +222,14 @@ even inside double quotes, in **both** POSIX spellings, `$(…)` and backticks:
 the shell expands them there alike, so honouring one and not the other leaves
 the guard walked around by the other.
 
-The branch SHALL be read from the repository the commit would land in — the
-`-C` target when the command names one — and not from the guard's own working
-directory, which is a different repository in exactly that case.
+The branch SHALL be read from the repository the command names with `-C`, and
+not from the guard's own working directory, which is a different repository in
+exactly that case. `-C` is the only selector honoured: `--git-dir`,
+`--work-tree` and the `GIT_DIR` and `GIT_WORK_TREE` environment assignments are
+a declared limitation rather than coverage, so a command using one of them is
+decided against the guard's own working tree — which can refuse a commit or a
+push that would have landed elsewhere, and can miss one that lands on `main` in
+another repository.
 
 The long force flags SHALL be matched by the `--force` prefix rather than by
 their full spellings. Git accepts any unambiguous abbreviation, so `--force-w`
@@ -282,6 +354,128 @@ rejected as ambiguous — every spelling git honours therefore begins with
 - **THEN** the hook allows the call, because it reads the command field and
   not the whole payload
 
+#### Scenario: A push aimed at main by refspec
+
+- **WHEN** the agent attempts `git push origin HEAD:main` from a feature branch
+- **THEN** the hook blocks the call
+
+#### Scenario: A push naming main as its only refspec
+
+- **WHEN** the agent attempts `git push origin main` from a feature branch
+- **THEN** the hook blocks the call, because a refspec without `:<dst>` updates
+  the ref its `<src>` names
+
+#### Scenario: A push aimed at main by its full ref name
+
+- **WHEN** the agent attempts `git push origin +HEAD:refs/heads/main`
+- **THEN** the hook blocks the call
+
+#### Scenario: A push with no refspec while HEAD is on main
+
+- **WHEN** the agent attempts `git push` with `HEAD` on `main`
+- **THEN** the hook blocks the call, because git pushes the current branch to
+  the upstream branch of the same name
+
+#### Scenario: A push of every branch
+
+- **WHEN** the agent attempts `git push --all origin`
+- **THEN** the hook blocks the call, because `--all` pushes every ref under
+  `refs/heads/`, `main` among them
+
+#### Scenario: A push that deletes main
+
+- **WHEN** the agent attempts `git push origin :main`
+- **THEN** the hook blocks the call — the refspec has no `<src>`, and `<dst>`
+  is what the check reads
+
+#### Scenario: A second refspec aimed at main
+
+- **WHEN** the agent attempts `git push origin feat/x main`
+- **THEN** the hook blocks the call, because every refspec is read and not
+  only the first
+
+#### Scenario: A blocked flag written as an abbreviation
+
+- **WHEN** the agent attempts `git push --mir origin`
+- **THEN** the hook blocks the call, because git resolves the abbreviation and
+  the guard matches the four by prefix
+
+#### Scenario: The end-of-options marker
+
+- **WHEN** the agent attempts `git push -- origin feat/x` from a feature branch
+- **THEN** the hook allows the call — `--` is a prefix of all four blocked
+  options and none of them, and refusing it would refuse a valid push
+
+#### Scenario: A push that prunes
+
+- **WHEN** the agent attempts `git push --prune origin`
+- **THEN** the hook blocks the call, because `--prune` removes a remote branch
+  whose local counterpart is gone and names none of them
+
+#### Scenario: A push of every branch with no branch to read
+
+- **WHEN** the agent attempts `git push --all origin` with a detached `HEAD`
+- **THEN** the hook blocks the call on the flag alone, without reading a
+  branch it cannot read
+
+#### Scenario: A push to a branch whose name contains main
+
+- **WHEN** the agent attempts `git push origin HEAD:mainline`
+- **THEN** the hook allows the call — the destination is compared whole
+
+#### Scenario: A push whose source is main but whose destination is not
+
+- **WHEN** the agent attempts `git push origin main:feat/x`
+- **THEN** the hook allows the call, because `<dst>` is what the push updates
+
+#### Scenario: A push with no refspec from a feature branch
+
+- **WHEN** the agent attempts `git push` with `HEAD` on `feat/x`
+- **THEN** the hook allows the call
+
+#### Scenario: A push of matching branches
+
+- **WHEN** the agent attempts `git push origin :`
+- **THEN** the hook blocks the call — the refspec names every branch already on
+  the remote, which cannot be shown to exclude `main`
+
+#### Scenario: A push through a wildcard refspec
+
+- **WHEN** the agent attempts `git push origin 'refs/heads/*:refs/heads/*'`
+- **THEN** the hook blocks the call, because the destination is not a single
+  concrete ref
+
+#### Scenario: A push carrying a push option
+
+- **WHEN** the agent attempts `git push -o ci.skip origin` with `HEAD` on
+  `main`
+- **THEN** the hook blocks the call, because every push from `main` is blocked
+  and no operand has to be identified
+
+#### Scenario: A push naming HEAD from a feature branch
+
+- **WHEN** the agent attempts `git push origin HEAD` with `HEAD` on `feat/x`
+- **THEN** the hook allows the call
+
+#### Scenario: A force-push written as a refspec prefix
+
+- **WHEN** the agent attempts `git push origin +feat/x:feat/x`
+- **THEN** the hook blocks the call, because `+` forces the update exactly as
+  `--force` does
+
+#### Scenario: A push of another branch from main
+
+- **WHEN** the agent attempts `git push origin feat/x` with `HEAD` on `main`
+- **THEN** the hook blocks the call — every push from `main` is refused,
+  because which operand is the repository is not decidable cheaply enough to
+  rest a boundary on
+
+#### Scenario: A push option whose value reads like a branch
+
+- **WHEN** the agent attempts `git push -o main origin feat/x` with `HEAD` on
+  `feat/x`
+- **THEN** the hook allows the call, because the word after `-o` is that
+  option's value and not an operand
 ### Requirement: Every manifest-mutating invocation prompts
 
 `permissions.ask` in `.claude/settings.json` SHALL cover every invocation form
