@@ -10,7 +10,7 @@
 | `docs/feature-workflow.md` | the four OpenSpec stages and their gates | on any feature, new tooling, or gate change |
 | `docs/review-toolkit.md` | which review skill to run, and the pre-PR sequence | before every PR |
 | `docs/verification.md` | what counts as evidence for a claim | before a claim or a decision rests on one |
-| `PLAN.md` | implementation queue, statuses, accepted decisions | every session |
+| `PLAN.md` | the open queue, its sources, and the standing constraints | every session |
 | `tasks/*.md` | infra task specs — scope, steps, acceptance criteria | when a task starts |
 | `spec-inbox/` | raw product specs not yet in the repo — contents gitignored, its README tracked | when a task cites one |
 | `openspec/specs/*/spec.md` | what each shipped capability must do (EARS) | when changing behaviour it covers |
