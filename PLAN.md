@@ -91,7 +91,8 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
       (`openspec/changes/archive/2026-07-26-coderabbit-local-gate`; capability
       spec at `openspec/specs/local-review-loop/`). Adds
       `/coderabbit-local` to the pre-PR sequence after `/triage`, three passes
-      max, Major and above applied without asking. Apply settled that the CLI
+      max, any verified finding applied without asking and a Major or Critical
+      dismissal put to the user. Apply settled that the CLI
       is `coderabbit` (no `cr`), that it does not read `.coderabbit.yaml`
       unprompted — so the gate prescribes `--config .coderabbit.yaml
       CLAUDE.md --agent` — and that the review quota is shared between the
@@ -858,12 +859,13 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
   tracked changes plus *non-ignored* files. Only a settled convention becomes
   a rule; a
   bot's taste objections would blow through the rule quality bar and the ~20
-  rule maintenance trigger. Major and above are auto-applied, deliberately
+  rule maintenance trigger. Any verified finding is auto-applied, deliberately
   overriding the skill's "No fixes before approval" — the branch is unpushed,
-  so being wrong costs a `git checkout`. `/coderabbit` stays the user's *to
-  invoke*, because its cost is the wait for the PR bot, which a synchronous CLI
-  review does not have; its findings are then disposed of on the same terms,
-  Major and above without asking, since invoking it is the approval.
+  so being wrong costs a `git checkout` — while dismissing a Major or Critical
+  is the user's, since a wrong dismissal reaches the merge. `/coderabbit` stays
+  the user's *to invoke*, because its cost is the wait for the PR bot, which a
+  synchronous CLI review does not have; its findings are then disposed of on
+  the same terms, the fixes without asking, since invoking it is the approval.
 - `coderabbit-config`: `docstrings.mode: "off"`, not a lower `threshold` — a
   permanently amber check devalues the checks beside it, and this project has
   no docstring rule for one to enforce. `path_filters` excludes
