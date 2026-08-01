@@ -89,15 +89,7 @@ test("the specification gets a reviewer, naming this project's own rules", () =>
 	expect(text).toMatch(/contradicts a sibling/i);
 });
 
-test("the implementation is compared with the change its branch names", () => {
-	const text = entry("src/**");
-	expect(text).toMatch(/scope not proposed/i);
-	// Exact match before stripping a step suffix: slugs contain hyphens.
-	expect(text).toMatch(/exactly that name/i);
-	expect(text).toMatch(/could not be made/i);
-});
-
-test("the unscoped entry carries both clauses no language scope could hold", () => {
+test("the unscoped entry carries every clause no language scope could hold", () => {
 	const text = entry("**");
 	// Fix-and-capture: quote the rule, and say when no rule covers it.
 	expect(text).toMatch(/quote that rule/i);
@@ -106,4 +98,17 @@ test("the unscoped entry carries both clauses no language scope could hold", () 
 	expect(text).toMatch(/single caller/i);
 	expect(text).toMatch(/no current consumer/i);
 	expect(text).toMatch(/new dependency/i);
+	// The proposal comparison, which lived on src/** until three of the five
+	// most recent changes turned out to touch no file under it.
+	expect(text).toMatch(/scope not proposed/i);
+	expect(text).toMatch(/exactly that name/i);
+	expect(text).toMatch(/never take "archive" as a candidate/i);
+	expect(text).toMatch(/could not be made/i);
+});
+
+test("no entry is scoped to src/, which does not hold this repo's code", () => {
+	// 21 TypeScript files sit under src/, 11 at the root and 6 in scripts/;
+	// a src/ scope silently exempts the rest.
+	const paths = config.reviews.path_instructions.map((e) => e.path);
+	expect(paths).not.toContain("src/**");
 });
