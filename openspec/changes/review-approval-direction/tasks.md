@@ -14,7 +14,7 @@ citations are the `### Requirement:` headings in
 - [x] 1.2 Add *Dismissing a Major or above is the user's call*, with the gate
       line reading `OPEN` on a pending dismissal and never on a pending fix —
       *Dismissing a Major or above is the user's call*
-- [ ] 1.3 Reconcile `docs/review-toolkit.md:30-32` and `:48-50`: both entries
+- [x] 1.3 Reconcile `docs/review-toolkit.md:30-32` and `:48-50`: both entries
       say Major and above are applied without asking, and both become the fix
       side plus the dismissal side
 - [ ] 1.4 Reconcile `PLAN.md:94` and `:365-370`, which record the original
