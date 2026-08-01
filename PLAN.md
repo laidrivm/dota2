@@ -92,8 +92,8 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
       spec at `openspec/specs/local-review-loop/`). Adds
       `/coderabbit-local` to the pre-PR sequence after `/triage`, three passes
       max, any verified finding applied without asking and a Major or Critical
-      dismissal put to the user. Apply settled that the CLI
-      is `coderabbit` (no `cr`), that it does not read `.coderabbit.yaml`
+      dismissal put to the user. Apply settled that the CLI is `coderabbit`
+      (no `cr`), that it does not read `.coderabbit.yaml`
       unprompted — so the gate prescribes `--config .coderabbit.yaml
       CLAUDE.md --agent` — and that the review quota is shared between the
       web app and the CLI, so a local run can be blocked by browser reviews.
