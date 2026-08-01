@@ -108,6 +108,25 @@ reviews:
         both sites. This is the half no rule holds: a delta spec corrected
         mid-review while its proposal still says the old thing has produced
         findings on consecutive pull requests.
+    # Says nothing the **/*.{ts,tsx} entry says: this one never reads the
+    # code as code, only against the change it is supposed to implement.
+    - path: "src/**"
+      instructions: |
+        Compare the diff with the active change under /openspec/changes/ in
+        both directions: every acceptance criterion the branch claims to
+        meet, and anything present that the change never asked for. Report
+        the second as "scope not proposed" — /triage, /zombies and
+        /ponytail-review all read the diff without the proposal, so that
+        direction is checked by nobody else.
+
+        Select the change by branch name, never by guessing which is
+        active: several sit under /openspec/changes/ at once. Take the
+        branch's name after its feat/, fix/ or chore/ prefix and look for a
+        directory of exactly that name; only if none exists, strip a
+        trailing -<step> and look again. Slugs contain hyphens, so the
+        exact match must be tried first. If neither lookup finds a
+        directory, say the comparison could not be made rather than
+        comparing against a neighbour.
 
 chat:
   auto_reply: true
