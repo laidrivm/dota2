@@ -98,9 +98,17 @@ in a tree with no local `main` it deletes the remote one, and the destination
 scan sees nothing because there is nothing written down to see.
 
 `--tags` and `--follow-tags` stay out: they act on `refs/tags/`, which holds no
-branch. Four strings in a set, and the check on them
-comes before anything reads a branch, so `--all` with a detached `HEAD`
+branch. Four names in a set, matched by prefix rather than
+exactly — `--mir`, `--pru`, `--al` and `--bra` were each run against git and
+reach the option they abbreviate, where `--a` is rejected as ambiguous. The
+check comes before anything reads a branch, so `--all` with a detached `HEAD`
 blocks on the flag rather than on an unreadable head.
+
+The option-value list is matched exactly for the opposite reason: a prefix
+there could swallow the word after an abbreviated option and hide an operand,
+where leaving an abbreviation unskipped reads its value as an operand and at
+worst refuses a push. Every uncertainty in this parse resolves towards
+blocking.
 
 ### A `+` refspec prefix is a force-push
 

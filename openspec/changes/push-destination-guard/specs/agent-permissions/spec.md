@@ -85,6 +85,19 @@ every ref under `refs/heads/` or `refs/`, `main` among them; `--prune` removes
 a remote branch that has no local counterpart, so it deletes `main` from the
 remote in any tree that does not carry it locally.
 
+Those four SHALL be matched by prefix and not by exact spelling: git accepts
+any unambiguous abbreviation, and `--mir`, `--pru`, `--al` and `--bra` all
+reach the option they abbreviate. Any argument that is a prefix of one of the
+four SHALL block, including one git would itself reject as ambiguous — over-
+refusing a command git does not accept costs nothing.
+
+The words skipped as option values SHALL be the exact spellings instead — `-o`,
+`--push-option`, `--receive-pack`, `--exec` and `--repo`, and the `=` forms.
+Prefix-matching there would let a short abbreviation swallow the word after it,
+hiding an operand; leaving an abbreviated form unskipped reads that value as an
+operand and can only refuse a push. Both lists therefore resolve their
+uncertainty towards blocking.
+
 The destination SHALL be read from the command's own words. A destination that
 comes from configuration is outside the guard — `remote.<name>.push`,
 `push.default` set to `matching`, `upstream` or `tracking`, and
@@ -275,6 +288,12 @@ rejected as ambiguous — every spelling git honours therefore begins with
 - **WHEN** the agent attempts `git push origin feat/x main`
 - **THEN** the hook blocks the call, because every refspec is read and not
   only the first
+
+#### Scenario: A blocked flag written as an abbreviation
+
+- **WHEN** the agent attempts `git push --mir origin`
+- **THEN** the hook blocks the call, because git resolves the abbreviation and
+  the guard matches the four by prefix
 
 #### Scenario: A push that prunes
 

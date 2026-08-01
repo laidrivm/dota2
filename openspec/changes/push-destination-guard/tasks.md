@@ -22,9 +22,10 @@ the `### Requirement:` headings in `specs/agent-permissions/spec.md`.
       `main`, on `refs/heads/main`, and on a destination the guard cannot
       bound — the bare `:` and `+:`, a `*`, an empty destination — *The git
       prohibitions are enforced by a hook*
-- [ ] 1.4 Block `--all`, `--branches`, `--mirror` and `--prune` before anything
-      reads a branch, so a detached `HEAD` does not decide them, and block a
-      leading `+` on any refspec as a force-push — *The git prohibitions are enforced
+- [ ] 1.4 Block `--all`, `--branches`, `--mirror` and `--prune` — by prefix,
+      since git resolves `--mir` and `--pru` — before anything reads a branch,
+      so a detached `HEAD` does not decide them, and block a leading `+` on any
+      refspec as a force-push — *The git prohibitions are enforced
       by a hook*
 - [ ] 1.5 Write two block reasons: one naming the refused destination, one for
       a command that names none — `--all`, `--branches`, `--mirror`, `--prune`,
@@ -34,8 +35,8 @@ the `### Requirement:` headings in `specs/agent-permissions/spec.md`.
       refspec destination, a bare `main`, `+HEAD:refs/heads/main`, `:main`,
       a second refspec aimed at `main` in `git push origin feat/x main`, the
       matching `:` and `+:`, a wildcard refspec, `+feat/x:feat/x` as a force,
-      each of `--all`, `--branches`, `--mirror` and `--prune`, and — from
-      `main` — a bare
+      each of `--all`, `--branches`, `--mirror` and `--prune`, `--mir` as an
+      abbreviation of one of them, and — from `main` — a bare
       `git push`, `git push origin feat/x`, and `git push -o ci.skip origin`,
       which is the form an operand split misreads
 - [ ] 1.6a Extend it with the allowed forms, which are what keep the check from
