@@ -30,7 +30,7 @@ assertions; this change extends both, never rewrites them.
       and say the comparison could not be made rather than guess when neither
       lookup finds a directory — *An implementation is reviewed against its
       proposal*
-- [ ] 1.4 Add the `**` entry carrying both clauses that must not be scoped to a
+- [x] 1.4 Add the `**` entry carrying both clauses that must not be scoped to a
       language: fix-and-capture — quote the `/CLAUDE.md` rule a defect
       violates, and say so when a defect is covered by no rule and could recur;
       and ponytail — a single-caller abstraction, a parameter with no consumer,

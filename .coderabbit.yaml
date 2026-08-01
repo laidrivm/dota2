@@ -127,6 +127,22 @@ reviews:
         exact match must be tried first. If neither lookup finds a
         directory, say the comparison could not be made rather than
         comparing against a neighbour.
+    # Scoped to ** because neither clause is about a language. A rule can be
+    # violated in a workflow or a document, and a dependency arrives in
+    # package.json or a Dockerfile and never in a TypeScript file — so a
+    # TypeScript scope would name cases it can never see. path_instructions
+    # is the only mechanism the schema offers; there is no general
+    # review-instruction key to hang these on instead.
+    - path: "**"
+      instructions: |
+        When a defect violates a rule in /CLAUDE.md, quote that rule beside
+        the finding. When a defect is covered by no rule and its shape
+        could recur, say so — the fix-and-capture loop decides whether it
+        becomes one, and it is fed by the user and the local skills today.
+
+        Flag an abstraction with a single caller, a parameter or option
+        with no current consumer, and any new dependency. No linter checks
+        these, and /ponytail-review sees only the diffs it is run over.
 
 chat:
   auto_reply: true
