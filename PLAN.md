@@ -391,8 +391,11 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
   `origin` as the only refspec, and passes. The remedy is not a longer list of
   value-taking options but not needing the answer — every push from `main` is
   refused, which is the only case the split was serving, and from any other
-  branch every operand is read as a refspec because misreading a remote as a
-  destination can only refuse a push that was allowed.
+  branch every operand — every non-option word that is not another option's
+  separate-word value — is read as a refspec, because misreading a remote as a
+  destination can only refuse a push that was allowed. `--prune` joins `--all`,
+  `--branches` and `--mirror` in the blocked set from the other direction: it
+  deletes a remote branch whose local counterpart is gone, naming none of them.
 
 - `mechanised-prohibitions` step 4: two of the three prohibitions the design
   called fully mechanised are not, and both are shortened rather than deleted,
