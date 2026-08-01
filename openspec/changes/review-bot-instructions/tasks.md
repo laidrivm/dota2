@@ -39,7 +39,7 @@ assertions; this change extends both, never rewrites them.
       the schema has no general review-instruction key to hang either on —
       *The bot reports against the rules list*, *The bot flags what the linters
       cannot*
-- [ ] 1.5 Extend the `**/*.{ts,tsx}` entry with the API clause: check Preact,
+- [x] 1.5 Extend the `**/*.{ts,tsx}` entry with the API clause: check Preact,
       Bun and Playwright calls against the installed version's documentation;
       treat a non-existent or changed API as Major, but an unverifiable one as
       unverified — say the check could not be made rather than fall back to
