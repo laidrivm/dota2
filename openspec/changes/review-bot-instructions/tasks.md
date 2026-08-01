@@ -57,7 +57,7 @@ assertions; this change extends both, never rewrites them.
       If it is absent, stop and settle the dependency — writing it fresh here
       produces a second file of a different shape, which is the collision this
       ordering exists to prevent
-- [ ] 1.9 Extend `coderabbit-config.test.ts`: `mcp.usage` is exactly
+- [x] 1.9 Extend `coderabbit-config.test.ts`: `mcp.usage` is exactly
       `"enabled"` (1); the three new path entries exist, naming EARS, the
       branch-derived change directory, and the rules list (3, 4); both
       `related_*` keys are `false` (5); the `**` block carries the
