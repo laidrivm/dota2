@@ -121,9 +121,14 @@ back to prose, which is where it is today. That is a floor, not a regression.
   cites four checkable properties from `openspec/config.yaml` and no taste, and
   a bot objection that blows through the rule quality bar is disposed of by the
   same severity ladder as any other.
-- **MCP finds nothing in four PRs.** → then the class is not present
-  in this codebase and the setting goes back to `disabled`; `PLAN.md` carries
-  the checkpoint so the question gets asked rather than forgotten.
+- **MCP finds nothing in four PRs.** → then the class is not present in this
+  codebase and the setting goes back to `disabled` — but only once the source
+  is known to have been working and those PRs are known to have called into
+  Preact, Bun or Playwright. Otherwise the silence is unverified and the
+  setting stays: an unretrieved source and an absent defect class must not
+  read as the same evidence, which is what the instruction itself forbids.
+  `PLAN.md` carries the checkpoint, and both conditions with it, so the
+  question gets asked rather than forgotten.
 - **A change's artefacts and its implementation land in different PRs**, so the
   comparison reads a proposal that may itself have moved → by then the proposal
   is merged, and that merged state is exactly what the branch is supposed to
