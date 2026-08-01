@@ -71,7 +71,8 @@ vendoring landed in the skills repo, `822e8ef`.
 
 ## What 1.1 found
 
-`CLAUDE.md`'s Safety rule substituted `bunx playwright test` for `npx
-playwright test`, a command the skill has never carried — its npx path is `npx
-playwright cli` and its npm path pins `@latest`. Corrected in this change. The
-other five contracts matched their `SKILL.md` at `759f15e`.
+`CLAUDE.md`'s Safety rule named `npx playwright test`, a command that appears
+nowhere in the skill and never has, and covered two paths where the skill
+carries three: `npx playwright cli`, `npx --no-install playwright --version`
+and `npm install -g @playwright/cli@latest`. The rule now names a bun form for
+each. The other five contracts matched their `SKILL.md` at `759f15e`.
