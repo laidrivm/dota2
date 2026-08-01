@@ -23,13 +23,14 @@ assertions; this change extends both, never rewrites them.
       task, **and the change's artefacts checked against each other** — a
       statement in one that contradicts its siblings is a finding — *The
       specification itself is reviewed*
-- [x] 1.3 Add the `src/**` entry: select the change by branch name, exact match
-      on the name after the branch prefix first and only then stripping a
-      trailing `-<step>`, since slugs contain hyphens; compare in both
-      directions, name scope not proposed as the direction nobody else checks,
-      and say the comparison could not be made rather than guess when neither
-      lookup finds a directory — *An implementation is reviewed against its
-      proposal*
+- [x] 1.3 Put the proposal comparison in the `**` entry, exempting the
+      change's own artefacts: select the change by branch name, exact match on
+      the name after the branch prefix first and only then stripping a trailing
+      `-<step>`, since slugs contain hyphens; never take `archive` as a
+      candidate; compare in both directions, name scope not proposed as the
+      direction nobody else checks, and say the comparison could not be made
+      rather than guess when neither lookup finds a directory — *An
+      implementation is reviewed against its proposal*
 - [x] 1.4 Add the `**` entry carrying both clauses that must not be scoped to a
       language: fix-and-capture — quote the `/CLAUDE.md` rule a defect
       violates, and say so when a defect is covered by no rule and could recur;
@@ -58,7 +59,7 @@ assertions; this change extends both, never rewrites them.
       produces a second file of a different shape, which is the collision this
       ordering exists to prevent
 - [x] 1.9 Extend `coderabbit-config.test.ts`: `mcp.usage` is exactly
-      `"enabled"` (1); the three new path entries exist, naming EARS, the
+      `"enabled"` (1); the two new path entries exist, naming EARS, the
       branch-derived change directory, and the rules list (3, 4); both
       `related_*` keys are `false` (5); the `**` block carries the
       single-caller, unused-option and new-dependency clauses, so removing one

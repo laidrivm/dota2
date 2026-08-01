@@ -38,10 +38,12 @@ installed. The reviewer currently cannot check any of it.
   rule holds: a delta spec corrected mid-review while its proposal still says
   the old thing produced findings on three consecutive pull requests, and
   widening the rule that forbids it did not stop the fourth.
-- `path_instructions` for `src/**`: check the diff against the active change's
+- The same check on the path `**`: the diff against the active change's
   `proposal.md`, `design.md`, `tasks.md` and delta specs — whether every
   criterion it claims is actually met, and whether anything appears that the
-  proposal never asked for.
+  proposal never asked for. Scoped to everything because a change here lands
+  in a config file or a root-level test as readily as under `src/`; the
+  change's own artefacts are exempted, since the entry above reviews those.
 
 **The bot inside the loops it is outside of**
 
@@ -101,10 +103,10 @@ installed. The reviewer currently cannot check any of it.
 
 ## Impact
 
-- **Config**: `.coderabbit.yaml` — three new `path_instructions` entries
-  (`openspec/changes/**`, `src/**`, and `**` for the fix-and-capture clause,
-  which has nowhere else to go: the schema has no general review-instruction
-  key), the existing `**/*.{ts,tsx}` entry extended twice, plus
+- **Config**: `.coderabbit.yaml` — two new `path_instructions` entries
+  (`openspec/changes/**`, and `**` carrying the three clauses that have
+  nowhere else to go: the schema has no general review-instruction key), the
+  existing `**/*.{ts,tsx}` entry extended twice, plus
   `knowledge_base.mcp.usage`, `reviews.related_issues` and
   `reviews.related_prs`. The last two default to `true`, so setting them is a
   behaviour change and not only an addition.

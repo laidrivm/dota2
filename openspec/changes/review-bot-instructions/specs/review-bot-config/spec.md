@@ -56,10 +56,17 @@ says a fix is still cheap.
 
 ### Requirement: An implementation is reviewed against its proposal
 
-`.coderabbit.yaml` SHALL carry a `path_instructions` entry for `src/**`
-telling the bot to compare the diff with the active change in both directions:
-every acceptance criterion the branch claims is met, and nothing present that
-the change never asked for.
+`.coderabbit.yaml` SHALL tell the bot to compare the diff with the active
+change in both directions: every acceptance criterion the branch claims is
+met, and nothing present that the change never asked for.
+
+The instruction SHALL be attached to the path `**`, not to a directory and not
+to a set of extensions. A change here is as often implemented in a config
+file, a workflow or a root-level test as under `src/` — this change is itself
+one, and eleven of this repository's TypeScript files sit at the root — so any
+scope narrower than everything names cases it cannot see. The instruction
+SHALL exempt the change's own artefacts under `openspec/changes/**`, whose
+review is the requirement above: a proposal is not evidence against itself.
 
 The active change SHALL be selected by branch name, not guessed: `CLAUDE.md`
 fixes the branch as `feat/<proposal-slug>` or `feat/<proposal-slug>-<step>`.
@@ -70,9 +77,11 @@ Slugs contain hyphens, so the mapping SHALL be **exact match first**: take the
 branch's name after its `feat/`, `fix/` or `chore/` prefix and look for a
 directory of exactly that name; only if none exists, strip a trailing
 `-<step>` and look again. Without that order, `feat/review-bot-instructions-2`
-is ambiguous between a slug ending in `-2` and step 2 of another change. Where
-neither lookup finds a directory, the bot SHALL say the comparison could not be
-made rather than pick a candidate.
+is ambiguous between a slug ending in `-2` and step 2 of another change. The
+name `archive` SHALL never be taken as a candidate, whichever lookup reaches
+it: it is the settled-history directory, and a `chore/archive-<name>` branch
+strips to it. Where neither lookup finds a directory, the bot SHALL say the
+comparison could not be made rather than pick a candidate.
 
 The direction that matters is the second. `/triage` maps the diff, `/zombies`
 finds test gaps and `/ponytail-review` hunts over-engineering; none of them
@@ -90,12 +99,32 @@ opens the proposal, so scope creep is currently caught by nobody.
   not satisfy
 - **THEN** the bot flags the gap
 
+#### Scenario: An implementation that is not TypeScript
+
+- **WHEN** a branch implements its change in `.coderabbit.yaml` and a
+  root-level test file, touching nothing under `src/`
+- **THEN** the comparison still runs, because the instruction is scoped to
+  `**`
+
+#### Scenario: The change's own artefacts
+
+- **WHEN** the diff touches `openspec/changes/<name>/proposal.md`
+- **THEN** that file is not compared against the proposal, because it is the
+  proposal — the specification review covers it instead
+
 #### Scenario: A slug that ends in a number
 
 - **WHEN** the branch is `feat/review-bot-instructions-2` and
   `openspec/changes/review-bot-instructions-2/` exists
 - **THEN** that directory is used, because an exact match is tried before a
   step suffix is stripped
+
+#### Scenario: A branch that files settled history
+
+- **WHEN** the branch is `chore/archive-hero-picker`, so stripping its
+  trailing segment reaches `archive`
+- **THEN** no comparison is made, because `openspec/changes/archive/` is
+  settled history and not a change
 
 #### Scenario: The branch names no change
 

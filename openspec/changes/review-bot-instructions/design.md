@@ -19,8 +19,11 @@ Verified against `schema.v2.json` and the tree before this design was written:
   `learnings.scope: "local"`, each with its reason beside the key. The source
   analysis asked for all three; they landed in PR #24 on 2026-07-25.
 - `path_instructions` today has four entries: `**/*.{ts,tsx}`, `e2e/**`,
-  `**/*.{tsx,html,css}` and `.github/workflows/**`. None covers `openspec/` or
-  `src/**` as such.
+  `**/*.{tsx,html,css}` and `.github/workflows/**`. None covers `openspec/`,
+  and none is unscoped.
+- TypeScript is not confined to `src/`: 21 files sit there, 11 at the
+  repository root, 6 under `scripts/` and 1 under `e2e/`. Three of the five
+  most recent changes were implemented without touching `src/` at all.
 
 ## Goals / Non-Goals
 
@@ -107,12 +110,12 @@ back to prose, which is where it is today. That is a floor, not a regression.
 
 ## Risks / Trade-offs
 
-- **Instruction fatigue.** Seven instruction blocks on one config make each one
+- **Instruction fatigue.** Six instruction blocks on one config make each one
   less likely to be honoured → `openspec/changes/**` addresses files the
-  existing four never match, and the `**` block carries one sentence. A file
-  under `src/` does now match two scopes where it matched one, which is the
-  real cost and the reason the `src/**` entry says nothing the `**/*.{ts,tsx}`
-  entry already says.
+  existing four never match, and the three clauses that fit no language scope
+  share one `**` block rather than taking one each. Every file now matches
+  exactly one more scope than before, which is the floor: an unscoped clause
+  cannot cost less than that.
 - **The spec review turns into a style debate on proposals.** → the instruction
   cites four checkable properties from `openspec/config.yaml` and no taste, and
   a bot objection that blows through the rule quality bar is disposed of by the
@@ -121,9 +124,9 @@ back to prose, which is where it is today. That is a floor, not a regression.
   in this codebase and the setting goes back to `disabled`; `PLAN.md` carries
   the checkpoint so the question gets asked rather than forgotten.
 - **A change's artefacts and its implementation land in different PRs**, so the
-  `src/**` instruction reads a proposal that may itself have moved → by then
-  the proposal is merged, and that merged state is exactly what the branch is
-  supposed to implement.
+  comparison reads a proposal that may itself have moved → by then the proposal
+  is merged, and that merged state is exactly what the branch is supposed to
+  implement.
 - **Five changes sit under `openspec/changes/` at once**, so "the active
   change" names nothing on its own → the branch name selects it, since
   `CLAUDE.md` fixes branches as `feat/<proposal-slug>[-<step>]`; where no
