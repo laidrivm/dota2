@@ -21,7 +21,7 @@ citations are the `### Requirement:` headings in
       decision. The historical statement of what `coderabbit-local-gate`
       settled stays accurate; what changes is the policy it points at, so
       correct the forward-looking sentence and leave the record of the decision
-- [ ] 1.5 Update the capability's Purpose paragraph
+- [x] 1.5 Update the capability's Purpose paragraph
       (`openspec/specs/local-review-loop/spec.md:6`), which describes the loop
       as "what it fixes without asking" — the same one-sided framing, in the
       sentence that introduces the whole capability
