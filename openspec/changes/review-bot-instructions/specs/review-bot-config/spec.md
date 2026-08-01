@@ -69,13 +69,16 @@ SHALL exempt the change's own artefacts under `openspec/changes/**`, whose
 review is the requirement above: a proposal is not evidence against itself.
 
 The active change SHALL be selected by branch name, not guessed: `CLAUDE.md`
-fixes the branch as `feat/<proposal-slug>` or `feat/<proposal-slug>-<step>`.
-Five changes can sit under `openspec/changes/` at once, so a rule that says
-"the active one" without saying how names nothing.
+fixes the branch as `<prefix>/<proposal-slug>` or
+`<prefix>/<proposal-slug>-<step>`. Five changes can sit under
+`openspec/changes/` at once, so a rule that says "the active one" without
+saying how names nothing. The rule SHALL NOT enumerate the prefixes: the set
+grows — `spec/` was added to it while this change was being applied — and an
+enumeration would silently stop matching the branch it was meant to read.
 
-Slugs contain hyphens, so the mapping SHALL be **exact match first**: take the
-branch's name after its `feat/`, `fix/` or `chore/` prefix and look for a
-directory of exactly that name; only if none exists, strip a trailing
+Slugs contain hyphens, so the mapping SHALL be **exact match first**: take
+what follows the branch's first `/` and look for a directory of exactly that
+name; only if none exists, strip a trailing
 `-<step>` and look again. Without that order, `feat/review-bot-instructions-2`
 is ambiguous between a slug ending in `-2` and step 2 of another change. The
 name `archive` SHALL never be taken as a candidate, whichever lookup reaches
@@ -128,6 +131,13 @@ opens the proposal, so scope creep is currently caught by nobody.
   settled history and not a change
 - **AND** a branch of three segments such as `chore/archive-hero-picker`
   never reaches it at all, one strip leaving `archive-hero`
+
+#### Scenario: A prefix the rule was not written against
+
+- **WHEN** the branch carries a prefix introduced after this instruction, such
+  as `spec/review-bot-instructions`
+- **THEN** the lookup still works, because it reads whatever follows the first
+  `/` rather than a list of known prefixes
 
 #### Scenario: The branch names no change
 
