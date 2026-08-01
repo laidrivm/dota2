@@ -5,6 +5,11 @@
 > "Accessibility" stayed in "Code style" — a subsection, not a section.
 > `.coderabbit.yaml` now sets `knowledge_base.code_guidelines.filePatterns`
 > because a custom list replaces the defaults that matched `**/CLAUDE.md`.
+>
+> The ~250-line figure below is what the trigger said when this task ran. It
+> is now ~500 lines across the always-on set — `CLAUDE.md` plus `PLAN.md` —
+> stated in `CLAUDE.md` §*Structure & growth of this file*, which owns it. The
+> criteria below are left as they were met.
 
 ## Context
 

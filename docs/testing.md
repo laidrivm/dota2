@@ -14,6 +14,8 @@ single-source rule this file inherits.
 - Route `/zombies` findings by layer: Zero/One/Many/Boundaries/Interface/
   Exceptions → unit or integration tests; Simple scenarios marked
   `(e2e candidate)` → the Playwright smoke suite.
+- There is no DOM test environment and no `happy-dom` dependency: pure modules
+  get `bun:test`, and anything that needs a document is an e2e test.
 - Scaffolding tests are welcome but mortal: you may write throwaway tests
   to verify your own work during a build (that's how you close your loop),
   but before archive only tests that trace to the `/zombies` list and obey

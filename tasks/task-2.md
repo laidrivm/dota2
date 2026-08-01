@@ -6,7 +6,7 @@
 > keeping a hardening-focused repo free of a third-party GitHub App with
 > write access. Trade-off: no Dependency Dashboard, no lockFileMaintenance
 > (the nightly `bun audit` compensates for the latter). See `PLAN.md`
-> "Accepted decisions". Live config: `.github/dependabot.yml` and
+> "Standing constraints". Live config: `.github/dependabot.yml` and
 > `.github/workflows/audit.yml`.
 
 ## Context
