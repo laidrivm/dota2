@@ -270,6 +270,6 @@ not age with the code.
   settings).
 - Reconcile a vendored skill's `allowed-tools` and `disable-model-invocation`
   against this project's policy before the skill is used.
-- Substitute `bunx playwright test` for `npx playwright test` and
-  `bun add -g @playwright/cli` for `npm install -g @playwright/cli` — the
-  `playwright-cli` skill's own npx/npm paths are denied here.
+- Substitute `bunx playwright cli` for `npx playwright cli` and
+  `bun add -g @playwright/cli` for `npm install -g @playwright/cli@latest` —
+  the `playwright-cli` skill's own npx/npm paths are denied here.
