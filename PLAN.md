@@ -214,14 +214,17 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
         in `CLAUDE.md` now stands at 20, its maintenance trigger — the split is
         already queue item 7 (`always-on-context-budget`), so no separate
         proposal.
-- [ ] **6. `mechanised-prohibitions`** — applying. Converts
+- [x] **6. `mechanised-prohibitions`** — merged and archived
+      (`openspec/changes/archive/2026-08-01-mechanised-prohibitions`; capability
+      specs at `openspec/specs/agent-permissions/`, `openspec/specs/agent-rulebook/`
+      and `openspec/specs/commit-gates/`). Converts
       the prohibitions that carry no judgement into `deny` entries, a
       `PreToolUse` hook, `gitleaks` and a suppression check, then splits the
       rules list into code / process / safety and deletes what the mechanisms
       replaced. Four task groups, four PRs: permissions → secrets →
       suppressions → rulebook, the last one last because it removes the prose
       the first three take over.
-  - [ ] **6.1 deny entries and the git guard** —
+  - [x] **6.1 deny entries and the git guard** —
         `feat/mechanised-prohibitions-permissions`. Three `gh` write
         commands denied, `scripts/command-guard.ts` under a `PreToolUse` hook, 24
         guard tests and 5 settings assertions. Tasks 1.9 and 1.10 confirmed in
@@ -432,6 +435,17 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
   fire first: `CLAUDE.md` stands at 261 lines against its own ~250-line growth
   trigger, already over, while the fullest sublist is at ten of twenty. The
   line trigger is `always-on-context-budget`'s to act on.
+
+- `mechanised-prohibitions` archive: the delta's MODIFIED *The permission policy
+  is pinned by a test* restated the requirement without three scenarios the main
+  spec already carried — the manifest-form cross-check, the unparseable settings
+  file, and the skill frontmatter the test deliberately does not pin. All three
+  are still backed by live assertions in `agent-permissions.test.ts`, so the
+  omission was the delta's and not a decision to drop them. The delta was
+  corrected before the sync rather than the sync merging around it, so the
+  archived artefact reads as what the spec became. A MODIFIED block that restates
+  a requirement in full is a wholesale replacement to any reader who applies it
+  literally, whatever the sync step's merge semantics allow.
 
 - The suppression allowlist is keyed by path and marker, holds the approved
   occurrence count as its value, and deliberately names no line — CodeRabbit's
