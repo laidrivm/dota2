@@ -66,7 +66,7 @@ assertions; this change extends both, never rewrites them.
       **and** now the API clause (6); `docstrings.mode` is still `"off"` (7)
 - [x] 1.10 Watch each new assertion fail before it passes, by breaking the
       config rather than by editing the assertion
-- [ ] 1.11 Record in `PLAN.md` that Context7's library documentation is
+- [x] 1.11 Record in `PLAN.md` that Context7's library documentation is
       community-contributed with no accuracy or safety warranty, that the
       config can only deny servers and never allow them, and the checkpoint:
       after three or four PRs, ask whether any finding of the API class

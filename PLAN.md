@@ -120,6 +120,12 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       hand-authored, so the pages cannot simply be regenerated.
 - [ ] **The e2e backlog** — the ~25 **(e2e)** bullets in `draft-board`'s and
       `hero-picker`'s archived task lists.
+- [ ] **Decide whether MCP earns its place in the review.** After three or
+      four pull requests under `knowledge_base.mcp.usage: "enabled"`, ask
+      whether any finding of the API-existence class actually appeared. If
+      none did, set `usage` back to `"disabled"` — the class is not present in
+      this codebase, and a knowledge source that finds nothing is a widened
+      trust boundary bought for nothing.
 
 ## Standing constraints
 
@@ -136,3 +142,11 @@ Kept because no single file in the tree is where a reader would look for them.
   dependency dashboard and no lockfile maintenance; the nightly `bun audit`
   covers the latter.
 - **Docker on a VPS** — the deployment target.
+- **Context7 is documentation, not a source of truth.** Its library pages are
+  community-contributed and its authors warrant neither accuracy nor safety,
+  so the review instruction treats retrieved text as evidence about whether an
+  API exists and never as instructions. `.coderabbit.yaml` can only deny an
+  MCP server (`knowledge_base.mcp.disabled_servers`), never allow one: which
+  servers are connected is CodeRabbit dashboard state, outside this
+  repository. Release age, downloads and install scripts stay with `/warm` and
+  `bun info` — Context7 says nothing about any of them.
