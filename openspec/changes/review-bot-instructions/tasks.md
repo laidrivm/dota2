@@ -13,12 +13,12 @@ assertions; this change extends both, never rewrites them.
 
 ## 1. Instructions, keys, and their pin
 
-- [ ] 1.1 Check every key path this change adds against
+- [x] 1.1 Check every key path this change adds against
       `https://storage.googleapis.com/coderabbit_public_assets/schema.v2.json`
       before writing it — `knowledge_base.mcp.usage`,
       `reviews.related_issues`, `reviews.related_prs` — re-fetched rather than
       trusted from `design.md` (2)
-- [ ] 1.2 Add the `openspec/changes/**` entry: EARS form, measurable values
+- [x] 1.2 Add the `openspec/changes/**` entry: EARS form, measurable values
       rather than adjectives, Non-goals present, every criterion cited by a
       task, **and the change's artefacts checked against each other** — a
       statement in one that contradicts its siblings is a finding — *The
@@ -52,7 +52,7 @@ assertions; this change extends both, never rewrites them.
 - [ ] 1.7 Set `reviews.related_issues` and `reviews.related_prs` to `false`
       with their reason — *The walkthrough drops what a solo repository cannot
       relate*
-- [ ] 1.8 Before touching the test, confirm `coderabbit-config.test.ts` is
+- [x] 1.8 Before touching the test, confirm `coderabbit-config.test.ts` is
       tracked and carries the fence assertions from `always-on-context-budget`.
       If it is absent, stop and settle the dependency — writing it fresh here
       produces a second file of a different shape, which is the collision this

@@ -90,6 +90,24 @@ reviews:
       instructions: |
         Verify actions are pinned to full commit SHAs and no
         github.event.* value is interpolated into run: blocks.
+    # The one review no local skill performs: /zombies, /triage and
+    # /ponytail-review each take a diff, and a delta spec is not a diff.
+    # Reaches only live changes — path_filters above excludes the archive,
+    # so settled history is not re-reviewed on the PR that files it.
+    - path: "openspec/changes/**"
+      instructions: |
+        Check the change's artefacts against this project's authoring rules
+        in /openspec/config.yaml: acceptance criteria in EARS form,
+        measurable values rather than adjectives, a Non-goals section
+        present, and every acceptance criterion cited by at least one line
+        of tasks.md.
+
+        Check the artefacts against each other as well. proposal.md,
+        design.md, tasks.md and the delta specs describe one change, so a
+        statement in one that contradicts a sibling is a finding — name
+        both sites. This is the half no rule holds: a delta spec corrected
+        mid-review while its proposal still says the old thing has produced
+        findings on consecutive pull requests.
 
 chat:
   auto_reply: true
