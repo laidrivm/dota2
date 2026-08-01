@@ -50,20 +50,20 @@ the `### Requirement:` headings in `specs/agent-permissions/spec.md`.
       unreadable head; and a push to `main` inside a command substitution
       blocks, so the check is confirmed on the recursive path and not only at
       the top level
-- [ ] 1.7 Watch each new assertion fail before it passes, by breaking the parse
+- [x] 1.7 Watch each new assertion fail before it passes, by breaking the parse
       rather than by editing the assertion — at least the whole-token
       comparison and the last-colon split, which are what `mainline` and a
       colon in `<src>` turn on
-- [ ] 1.8 Confirm the guard fires live on `git push origin HEAD:main
+- [x] 1.8 Confirm the guard fires live on `git push origin HEAD:main
       --dry-run`, since a hook is re-read per tool call and the authoring
       session can observe it, and the reason the harness prints is what the
       probe reads — the exit code is not visible from inside the session.
       `--dry-run` is what makes the probe safe: if the guard does not fire, git
       updates nothing, where the same probe without it would push to `main`
       exactly when the guard is broken
-- [ ] 1.9 Narrow the `CLAUDE.md` rule *Never push to `main`* to the residue the
+- [x] 1.9 Narrow the `CLAUDE.md` rule *Never push to `main`* to the residue the
       guard cannot read — a destination that comes from git configuration —
       and record in `PLAN.md` what the guard now covers and what it does not
-- [ ] 1.10 Grep the sites that restate the push prohibition — the change's own
+- [x] 1.10 Grep the sites that restate the push prohibition — the change's own
       artefacts, `openspec/specs/**`, the README ownership map — and reconcile
       each

@@ -70,15 +70,17 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
   against its new ~500 budget.
 
 ### Open
-- [ ] **`push-destination-guard`** — proposed
-      (`openspec/changes/push-destination-guard`). The command guard reads a
-      push's flags and never its destination, so every spelling of a push to
-      `main` passes it. The hook comes to allow a push only when every
-      destination it names is a concrete ref other than `main` — which also
-      refuses a destination it cannot bound and catches a `+` refspec prefix the
-      force check never saw — while every push from `main` is refused outright,
-      and the prose rule narrows to what configuration alone can do. One task
-      group, one PR.
+- [ ] **`push-destination-guard`** — applying
+      (`openspec/changes/push-destination-guard`). The guard now reads every
+      operand as a refspec and allows a push only when each destination is a
+      concrete ref other than `main`; it refuses a destination it cannot bound,
+      a leading `+`, the four options that act on refs the command never names,
+      and every push made from `main`. What it does **not** read is a
+      destination coming from git configuration — `remote.<name>.push`,
+      `push.default`, `remote.<name>.mirror` — because a hook that consulted
+      repository state would have to fail closed on a state it cannot read, and
+      would then block every push made where that configuration is unreadable.
+      That half stays prose in `CLAUDE.md`.
 - [ ] **`skill-provenance`** — proposed (`openspec/changes/skill-provenance`).
       Records which shared skills the gates depend on and the commit each was
       verified against, marks the five nobody depends on archived, pins the
