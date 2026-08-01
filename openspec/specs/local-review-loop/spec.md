@@ -32,12 +32,14 @@ review pass rather than the full loop.
 - **WHEN** the branch changes only documentation, rules or config
 - **THEN** the agent runs one review pass, not three
 
-### Requirement: Major and above are fixed without asking
+### Requirement: A verified finding is fixed without asking
 
-Findings at 🟠 Major or 🔴 Critical that survive verification against the
-current code SHALL be applied without pausing for approval, overriding the
-skill's "No fixes before approval" rule. Every applied fix MUST appear in the
-final report.
+A finding that survives verification against the current code SHALL be applied
+without pausing for approval, **whatever its severity**, overriding the skills'
+"No fixes before approval" rule. The override is not scoped by severity,
+because the cost it prices is the cost of being wrong about a fix, and that
+cost — a `git checkout` on a branch nobody has pulled — does not vary with the
+label on the finding. Every applied fix MUST appear in the final report.
 
 #### Scenario: A verified Major finding
 
@@ -46,11 +48,18 @@ final report.
 - **THEN** the agent applies the smallest correct fix without asking
 - **AND** the fix is listed in the final report
 
+#### Scenario: A correct Minor finding
+
+- **WHEN** a 🟡 Minor finding is read and judged correct, and its fix is small
+  and self-contained
+- **THEN** the agent applies it without asking, exactly as it would a Major
+
 #### Scenario: A Major finding the bot got wrong
 
 - **WHEN** verification shows the finding does not hold against the current
   code
-- **THEN** the agent rejects it and states concretely what the bot missed
+- **THEN** the agent states concretely what the bot missed and puts the
+  dismissal to the user rather than closing it
 
 ### Requirement: Minor findings are reported once, at the end
 

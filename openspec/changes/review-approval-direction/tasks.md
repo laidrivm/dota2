@@ -6,7 +6,7 @@ citations are the `### Requirement:` headings in
 
 ## 1. The policy and its four sites
 
-- [ ] 1.1 Rename *Major and above are fixed without asking* to *A verified
+- [x] 1.1 Rename *Major and above are fixed without asking* to *A verified
       finding is fixed without asking* in
       `openspec/specs/local-review-loop/spec.md`, widen the override to every
       severity, and add the Minor scenario beside the Major one — *A verified
