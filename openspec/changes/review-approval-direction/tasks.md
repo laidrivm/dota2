@@ -17,7 +17,7 @@ citations are the `### Requirement:` headings in
 - [x] 1.3 Reconcile `docs/review-toolkit.md:30-32` and `:48-50`: both entries
       say Major and above are applied without asking, and both become the fix
       side plus the dismissal side
-- [ ] 1.4 Reconcile `PLAN.md:94` and `:365-370`, which record the original
+- [x] 1.4 Reconcile `PLAN.md:94` and `:365-370`, which record the original
       decision. The historical statement of what `coderabbit-local-gate`
       settled stays accurate; what changes is the policy it points at, so
       correct the forward-looking sentence and leave the record of the decision
