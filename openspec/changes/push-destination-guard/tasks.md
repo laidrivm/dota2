@@ -7,14 +7,14 @@ the `### Requirement:` headings in `specs/agent-permissions/spec.md`.
 
 ## 1. The destination check
 
-- [ ] 1.1 Archive `mechanised-prohibitions` before starting, so this change's
+- [x] 1.1 Archive `mechanised-prohibitions` before starting, so this change's
       delta applies to `openspec/specs/agent-permissions/spec.md` rather than
       to an unarchived delta of it
-- [ ] 1.2 In `scripts/command-guard.ts`, block every `push` while
+- [x] 1.2 In `scripts/command-guard.ts`, block every `push` while
       `currentBranch()` is `main`, so no operand has to be identified as the
       repository — `-o <string>` takes a separate word and moves that operand
       by one — *The git prohibitions are enforced by a hook*
-- [ ] 1.3 From any other branch, read every operand as a refspec — skipping
+- [x] 1.3 From any other branch, read every operand as a refspec — skipping
       the value words of `-o`, `--push-option`, `--receive-pack`, `--exec` and
       `--repo` — and allow the push only when each destination is a concrete
       ref other than `main`: strip a leading `+`, take the text after the last
@@ -22,16 +22,16 @@ the `### Requirement:` headings in `specs/agent-permissions/spec.md`.
       `main`, on `refs/heads/main`, and on a destination the guard cannot
       bound — the bare `:` and `+:`, a `*`, an empty destination — *The git
       prohibitions are enforced by a hook*
-- [ ] 1.4 Block `--all`, `--branches`, `--mirror` and `--prune` — by prefix,
+- [x] 1.4 Block `--all`, `--branches`, `--mirror` and `--prune` — by prefix,
       since git resolves `--mir` and `--pru` — before anything reads a branch,
       so a detached `HEAD` does not decide them, and block a leading `+` on any
       refspec as a force-push — *The git prohibitions are enforced
       by a hook*
-- [ ] 1.5 Write two block reasons: one naming the refused destination, one for
+- [x] 1.5 Write two block reasons: one naming the refused destination, one for
       a command that names none — `--all`, `--branches`, `--mirror`, `--prune`,
       the matching refspec — which must not claim a destination it cannot name.
       Assert each
-- [ ] 1.6 Extend `scripts/command-guard.test.ts` with the blocked forms: a
+- [x] 1.6 Extend `scripts/command-guard.test.ts` with the blocked forms: a
       refspec destination, a bare `main`, `+HEAD:refs/heads/main`, `:main`,
       a second refspec aimed at `main` in `git push origin feat/x main`, the
       matching `:` and `+:`, a wildcard refspec, `+feat/x:feat/x` as a force,
@@ -39,12 +39,12 @@ the `### Requirement:` headings in `specs/agent-permissions/spec.md`.
       abbreviation of one of them, and — from `main` — a bare
       `git push`, `git push origin feat/x`, and `git push -o ci.skip origin`,
       which is the form an operand split misreads
-- [ ] 1.6a Extend it with the allowed forms, which are what keep the check from
+- [x] 1.6a Extend it with the allowed forms, which are what keep the check from
       blocking ordinary work: `HEAD:mainline`, `main:feat/x`,
       `git push origin HEAD` on a feature branch, no refspec on a feature
       branch, `git push -o main origin feat/x`, whose `main` is an option's
       value and not an operand, and the existing `git push -u origin feat/x`
-- [ ] 1.6b Cover the two cases the destination check shares with the paths
+- [x] 1.6b Cover the two cases the destination check shares with the paths
       around it: `--all` with a detached `HEAD` blocks on the flag without
       reaching `currentBranch()`, which blocks for its own reason on an
       unreadable head; and a push to `main` inside a command substitution
