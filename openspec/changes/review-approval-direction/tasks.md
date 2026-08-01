@@ -11,7 +11,7 @@ citations are the `### Requirement:` headings in
       `openspec/specs/local-review-loop/spec.md`, widen the override to every
       severity, and add the Minor scenario beside the Major one — *A verified
       finding is fixed without asking*
-- [ ] 1.2 Add *Dismissing a Major or above is the user's call*, with the gate
+- [x] 1.2 Add *Dismissing a Major or above is the user's call*, with the gate
       line reading `OPEN` on a pending dismissal and never on a pending fix —
       *Dismissing a Major or above is the user's call*
 - [ ] 1.3 Reconcile `docs/review-toolkit.md:30-32` and `:48-50`: both entries
