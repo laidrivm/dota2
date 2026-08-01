@@ -22,6 +22,15 @@ knowledge_base:
     filePatterns:
       - "**/CLAUDE.md"
       - "docs/*.md"
+  mcp:
+    # Pinned by decision for the same reason as learnings.scope above, from
+    # the other direction: the "auto" default *disables* MCP for public
+    # repositories, so leaving it unset would ship the API-existence
+    # instruction below with no source to execute it against, and flip it
+    # silently if this repo's visibility changed. Which servers are
+    # connected is dashboard state — the schema exposes usage and
+    # disabled_servers only, so this file can deny a server, never allow one.
+    usage: "enabled"
 
 reviews:
   profile: "assertive"
