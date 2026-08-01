@@ -559,6 +559,16 @@ describe("pushes the destination check must not block", () => {
 		// Skipped as `-o`'s value; read as an operand it would refuse the push.
 		expect(run(event("git push -o main origin feat/x"), branch()).code).toBe(0);
 	});
+
+	test("the end-of-options marker", () => {
+		// `--` is a prefix of all four blocked options and none of them, so the
+		// prefix match has to exempt it or refuse a valid push.
+		expect(run(event("git push -- origin feat/x"), branch()).code).toBe(0);
+	});
+
+	test("but the marker does not smuggle a destination past the check", () => {
+		expect(run(event("git push -- origin main"), branch()).code).toBe(2);
+	});
 });
 
 describe("the destination check and the paths around it", () => {

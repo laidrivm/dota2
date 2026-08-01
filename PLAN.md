@@ -68,19 +68,11 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
   `archive/2026-08-01-always-on-context-budget`; capability spec at
   `openspec/specs/context-budget/`. The always-on set went 1301 lines to 417
   against its new ~500 budget.
+- **`push-destination-guard`** — `archive/2026-08-01-push-destination-guard`.
+  The guard reads every operand as a refspec; a destination that comes from git
+  configuration is what it cannot see, and that residue is the `CLAUDE.md` rule.
 
 ### Open
-- [ ] **`push-destination-guard`** — applying
-      (`openspec/changes/push-destination-guard`). The guard now reads every
-      operand as a refspec and allows a push only when each destination is a
-      concrete ref other than `main`; it refuses a destination it cannot bound,
-      a leading `+`, the four options that act on refs the command never names,
-      and every push made from `main`. What it does **not** read is a
-      destination coming from git configuration — `remote.<name>.push`,
-      `push.default`, `remote.<name>.mirror` — because a hook that consulted
-      repository state would have to fail closed on a state it cannot read, and
-      would then block every push made where that configuration is unreadable.
-      That half stays prose in `CLAUDE.md`.
 - [ ] **`skill-provenance`** — proposed (`openspec/changes/skill-provenance`).
       Records which shared skills the gates depend on and the commit each was
       verified against, marks the five nobody depends on archived, pins the
