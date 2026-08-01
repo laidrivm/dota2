@@ -45,15 +45,14 @@ const rows = section(toolkit, "Provenance")
 	.filter((line) => line.startsWith("|"))
 	.slice(2); // the header and the `|---|` separator
 
-const cells = rows.map((row) =>
-	row
-		.split("|")
-		.slice(1, 3)
-		.map((c) => c.trim()),
+const named = rows.map(
+	(row) =>
+		row
+			.split("|")[1]
+			?.trim()
+			.match(/^`([^`]+)`$/)?.[1],
 );
-
-const named = cells.map(([skill]) => skill?.match(/^`([^`]+)`$/)?.[1]);
-const commits = cells.map(([, verified]) => verified);
+const commits = rows.map((row) => row.split("|")[2]?.trim());
 
 /** A full or abbreviated git object name, and nothing that merely reads like one. */
 const isObjectName = (cell: string | undefined) =>
