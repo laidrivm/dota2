@@ -16,6 +16,13 @@ because the cost it prices is the cost of being wrong about a fix, and that
 cost — a `git checkout` on a branch nobody has pulled — does not vary with the
 label on the finding. Every applied fix MUST appear in the final report.
 
+Surviving verification is what the override is scoped by, and a 🟡 Minor or
+🔵 Trivial the agent reads and judges not worth fixing has not survived it: the
+judgement that a finding is taste, a convention the bot does not know, or
+dearer than the defect is a verification outcome, not an exemption from one.
+Such a finding is skipped with its reason under *Minor findings are reported
+once, at the end*, and that call is the agent's alone.
+
 #### Scenario: A verified Major finding
 
 - **WHEN** a 🟠 Major finding is confirmed by reading the file at the cited
@@ -50,6 +57,12 @@ finding dismissed wrongly reaches the merge.
 🟡 Minor and 🔵 Trivial keep their existing treatment — the agent skips them on
 its own reasoning, and the report carries the reason.
 
+A 🟠 Major or above that no fix resolved and no dismissal was proposed for —
+one surviving the third review under *The loop terminates* — is in neither
+state, because nobody has decided it. The gate line SHALL read `BLOCKED` there,
+naming what remains, and SHALL NOT read `OPEN`: `OPEN` means the user has
+something to settle, and an undecided finding gives them nothing to settle yet.
+
 #### Scenario: A Major the agent believes is wrong
 
 - **WHEN** verification shows a 🟠 Major does not hold, and the agent has a
@@ -79,3 +92,10 @@ its own reasoning, and the report carries the reason.
 
 - **WHEN** the user rejects the agent's reasoning on a proposed dismissal
 - **THEN** the finding is fixed, and the gate closes on the fix
+
+#### Scenario: A Major survives the loop undecided
+
+- **WHEN** a 🟠 Major is still reported after the third review, with no fix
+  applied and no dismissal proposed for it
+- **THEN** the gate line reads `BLOCKED` and names it, and the decision to push
+  is the user's
