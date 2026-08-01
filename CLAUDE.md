@@ -125,8 +125,9 @@ rules — see [docs/testing.md](docs/testing.md).
 ### The loop — agent responsibilities
 
 Whenever a mistake is confirmed — a bug the user reports, a failed test, a
-review finding (human, /triage, /zombies, /warm, or CodeRabbit) the user
-agrees with, or a mistake you catch in your own earlier output — do BOTH.
+review finding (human, /triage, /zombies, /warm, /ponytail-review, or
+CodeRabbit) the user agrees with, or a mistake you catch in your own earlier
+output — do BOTH.
 The same applies to **style preferences**: when the user pauses an apply run
 (or any task) to say "do it this way instead", that correction is a lesson —
 capture it exactly like a bug, so future runs don't repeat the old style:
