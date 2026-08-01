@@ -1,6 +1,7 @@
 # Tasks — skill provenance
 
-One group, one pull request on `feat/skill-provenance`. Requirement citations
+One group, one pull request on `feat/skill-provenance-table` — the unsuffixed
+name belongs to the merged proposal branch. Requirement citations
 are the `### Requirement:` headings in `specs/skill-provenance/spec.md`.
 Bracketed numbers cite the `/zombies` ideas raised at propose.
 
