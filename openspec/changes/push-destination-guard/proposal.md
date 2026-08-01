@@ -15,10 +15,14 @@ sentence unnecessary.
 ## What Changes
 
 - `scripts/command-guard.ts` decides a push by its destination as well as its
-  flags, in the three forms git's own documentation defines: an explicit
-  refspec whose `<dst>` is `main`, a push with no refspec while `HEAD` is on
-  `main`, and `--all` / `--branches` / `--mirror`, which name no ref and push
-  `main` among the rest.
+  flags, and allows one only when every destination it names is a concrete ref
+  other than `main`. Blocked are a refspec resolving to `main`, a push naming
+  no refspec while `HEAD` is on `main`, `--all` / `--branches` / `--mirror`,
+  and any destination the guard cannot bound — the matching refspec `:`, a
+  wildcard, an empty destination.
+- A refspec's leading `+` forces the update exactly as `--force` does, and the
+  flag pattern does not see it because it is not a flag. The parse this change
+  adds closes that with one condition, so it closes it here.
 - The `CLAUDE.md` rule *Never push to `main`* narrows to what the guard cannot
   read — a destination that comes from configuration rather than from the
   command — under `agent-rulebook`'s existing requirement that a mechanised
@@ -37,10 +41,11 @@ sentence unnecessary.
 - **Protecting any name but `main`.** This repository's default branch is
   `main` and the rule names it; a configurable list is one setting nobody
   sets.
-- **Blocking a push that deletes `main`** (`git push origin :main`) as a
-  separate case. Its `<dst>` is `main`, so it falls out of the same check —
-  it is named here only because the refspec has an empty `<src>` and reads
-  like a different form.
+- **Following git's repository selectors past `-C`.** `--git-dir`,
+  `--work-tree`, `GIT_DIR` and `GIT_WORK_TREE` each move the repository a
+  command acts on, and the guard reads none of them; the spec declares that a
+  limitation rather than leaving it implied. It predates this change and is
+  not what this change is for.
 - **Deleting the prose rule.** The guard is one mechanism against one agent's
   commands; a human with a shell is outside it, and so is the configuration
   half above.

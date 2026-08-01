@@ -21,7 +21,8 @@ not from recollection.
 
 **Goals:**
 
-- Block every push to `main` whose destination is written in the command.
+- Allow a push only when every destination it names is a concrete ref other
+  than `main`.
 - Leave every other push untouched, including one whose *source* is `main`.
 - Add no dependency and no second git invocation on the common path.
 
@@ -29,57 +30,83 @@ not from recollection.
 
 - Reading `remote.<name>.push` or `push.default` (see the decision below).
 - A configurable list of protected branch names.
-- Touching the commit or force-push paths, which are correct and covered.
+- Touching the commit path, which is correct and covered.
 
 ## Decisions
 
-### The destination is `<dst>`, and the parse follows git's grammar
+### The check is scoped by what it exempts
 
-`git push --help`: "The format of a `<refspec>` parameter is an optional plus
-`+`, followed by the source object `<src>`, followed by a colon `:`, followed
-by the destination ref `<dst>`", and "missing `:<dst>` means to update the same
-ref as the `<src>`". So for each non-option argument after the remote, strip a
-leading `+`, take the text after the last `:` if there is one and the whole
-argument if there is not, and compare it to `main` and `refs/heads/main`.
+The first shape of this design listed the spellings that mean `main` — a
+refspec whose `<dst>` is `main`, a push with no refspec, `--all`. Review found
+three more inside git's own grammar: `git push origin :` pushes every branch
+that already exists on the remote, a wildcard refspec pushes whatever it
+matches, and `git push origin HEAD` names its destination only through the
+current branch. The list was narrower than the space it claimed to cover, which
+is the failure `CLAUDE.md`'s *Scope a scan by what it exempts* names.
 
-Comparing the whole token is what keeps `HEAD:mainline` allowed, the same
-equality the commit path already uses for the branch name. Taking the text
-after the **last** colon rather than the first matters because `<src>` can be
-any SHA-1 expression and colons appear in some of them.
+So the check allows a push only when every destination it names is a concrete
+ref other than `main`, and blocks everything else — including a destination it
+cannot bound. A form nobody anticipated is refused rather than admitted, and
+the cost of being wrong is a blocked push the user can run.
 
-The first non-option argument is the remote, not a refspec — but treating it as
-a refspec too costs nothing: a remote named `main` is not a thing here, and a
-false positive on one would be a blocked push, which fails safe. Skipping the
-first argument to be precise would mean tracking whether it was given at all.
-Alternative rejected: matching the raw command text against `main`, which
-blocks `git push origin feat/main-menu` and reads a description as a
-destination.
+### The parse follows git's documented grammar
+
+`git push --help`: the format of a refspec is "an optional plus `+`, followed
+by the source object `<src>`, followed by a colon `:`, followed by the
+destination ref `<dst>`", and "missing `:<dst>` means to update the same ref as
+the `<src>`". So the destination is the text after the last colon when there is
+one and the whole argument when there is not — the **last** colon, because
+`<src>` can be any SHA-1 expression and some of those carry one.
+
+Comparison is on the whole token, which is what keeps `HEAD:mainline` allowed —
+the same equality the commit path already uses for the branch name.
+
+`HEAD` and `@` as a destination resolve through the current branch, so they
+take the same decision a push with no refspec takes.
+
+### The first non-option argument is the repository
+
+Git's synopsis is `git push [<repository> [<refspec>...]]`, so the first
+non-option argument is the remote and only the rest are refspecs. The first
+shape of this design treated it as a refspec too, on the grounds that a remote
+named `main` does not exist here — which was true and beside the point:
+`git push origin` names no refspec at all, and reading `origin` as one would
+have made it a concrete destination that is not `main`, so the current-branch
+rule would never have run.
 
 ### A push with no refspec is decided by the current branch
 
 `git push --help`: with no refspec and none of `--all`, `--mirror`, `--tags`,
 git "honors `push.default` configuration", whose default value `simple` pushes
 "the current branch … to the corresponding upstream branch". The guard already
-knows the current branch — `currentBranch()` exists for the commit path — so a
-push with no refspec on `main` blocks with no new machinery.
-
-This is the one case that costs a `git symbolic-ref` on an otherwise clean
-path. It is spent only when a push carries no refspec, which is the shorter
-half of the commands the agent writes.
+knows the current branch — `currentBranch()` exists for the commit path — so
+this case costs no new machinery, and the `git symbolic-ref` it spends is spent
+only when a push carries no refspec.
 
 ### `--all`, `--branches` and `--mirror` block outright
 
 `--all` is documented as "Push all branches (i.e. refs under `refs/heads/`)",
-`--branches` is its alias, and `--mirror` covers "all refs under `refs/`".
-Each pushes `main` without naming it. Three strings in a set.
+`--branches` is its alias, and `--mirror` covers "all refs under `refs/`". Each
+pushes `main` without naming it. Three strings in a set, and the check on them
+SHALL come before anything reads a branch, so `--all` with a detached `HEAD`
+blocks on the flag rather than on an unreadable head.
 
 `--tags` is not among them: it pushes `refs/tags/`, which contains no branch.
 
+### A `+` refspec prefix is a force-push
+
+`git push --help` gives `+` the same meaning as `--force` for the ref it
+prefixes. The existing force check matches flags, and `+feat/x:feat/x` is not a
+flag, so a force-push written that way passes the guard today. The parse this
+change adds is what makes the fix one condition, so it lands here rather than
+becoming a change of its own.
+
 ### Configuration is out of the guard and stays in the prose
 
-A refspec can come from `remote.<name>.push`, and `push.default = matching`
-pushes every same-named branch. The guard could read both with `git config`,
-and does not, for the reason the existing requirement gives for reading the
+A refspec can come from `remote.<name>.push`; `push.default` set to `matching`
+pushes every same-named branch, and set to `upstream` or `tracking` pushes to a
+branch that need not share its name; `remote.<name>.mirror` makes `--mirror`
+the default. The guard could read these with `git config`, and does not, for the reason the existing requirement gives for reading the
 command rather than the payload: the hook decides on what it was handed. Adding
 configuration would also widen the fail-closed fallback — an unreadable config
 would have to block every push, where today an unreadable branch blocks only a
@@ -88,22 +115,23 @@ commit.
 What this leaves is a residue the prose keeps, and the residue is narrower than
 what the prose covers today, which is everything.
 
-### One reason string, three triggers
+### Two reason strings, not one and not four
 
-Blocking messages are what the agent reads and acts on, so the destination
-block says which spelling was refused and what to do instead — push the branch,
-open a pull request — rather than repeating the rule. Three separate messages
-for refspec, no-refspec and `--all` were considered and dropped: the remedy is
-identical in all three.
+Blocking messages are what the agent reads and acts on. A push that names a
+destination is refused with that destination in the message; a push that names
+none — `--all`, `--mirror`, the matching refspec — is refused for pushing every
+branch, because there is no single destination to name and claiming one would
+be false. Both end in the same remedy, push the branch and open a pull request,
+so they are two messages and not four.
 
 ## Risks / Trade-offs
 
 - **A blocked push the user wanted.** The agent cannot push to `main` at all,
   including the legitimate first push of a new repository → that push is the
   user's, exactly as the commit on `main` already is.
-- **The remote-as-refspec shortcut.** A remote literally named `main` would
-  make every push through it block → a false positive that fails safe, and no
-  such remote exists here.
+- **An unbounded destination blocks a legitimate push.** A wildcard refspec
+  that provably avoids `main` is refused with the rest → the agent has no use
+  for one, and the user can run it.
 - **A refspec built by expansion.** `git push origin "$BRANCH:main"` is caught
   because quoting is removed before the words are read, but
   `git push origin "$REF"` is not → the same variable-expansion ceiling the
