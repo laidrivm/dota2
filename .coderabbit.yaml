@@ -58,12 +58,24 @@ reviews:
     actionlint:
       enabled: false # lint.yml, as a SHA-pinned container
   path_instructions:
+    # The fence clause below is the accessibility instruction's division
+    # pointed at comments: a scanner can count comments, only a reader can
+    # say what one protects. It is deliberately not docstring coverage —
+    # docstrings.mode stays "off" above, and an instruction satisfied by
+    # prose over every function would reinstate it by another route.
     - path: "**/*.{ts,tsx}"
       instructions: |
         Apply the rules from /docs/api-design.md, /docs/testing.md, and the
         "Accessibility" section of /CLAUDE.md. Flag violations of those
         rules explicitly, quoting the rule. Do not restate general style
         opinions the linters already cover.
+
+        Flag a function that relies on an unchecked precondition, or a
+        non-obvious approach, when no comment says what it protects — the
+        reader who edits that line next has only the code to go on. Judge
+        what the comment guards, never whether one is present: leave
+        self-evident functions alone, and do not ask for a comment whose
+        content the name and signature already carry.
     - path: "e2e/**"
       instructions: |
         Enforce the "E2E (Playwright)" rules from /docs/testing.md: locator
