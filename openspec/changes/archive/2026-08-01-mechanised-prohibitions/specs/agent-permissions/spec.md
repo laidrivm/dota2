@@ -273,6 +273,24 @@ repository would change its verdict with the branch.
 - **THEN** `bun test` fails, because an uncovered alias reaches a manifest
   write without prompting
 
+#### Scenario: A listed form stops being a manifest write
+
+- **WHEN** a top-level `ask` entry names a form that `bun <form> --help` no
+  longer reports as one of the manifest-writing commands
+- **THEN** `bun test` fails, so the list is checked against the installed
+  binary in both directions rather than against a literal alone
+
+#### Scenario: The settings file stops parsing
+
+- **WHEN** `.claude/settings.json` contains a trailing comma
+- **THEN** `bun test` fails rather than passing on an unread file
+
+#### Scenario: A skill's frontmatter changes
+
+- **WHEN** `disable-model-invocation` is removed from a vendored skill
+- **THEN** no test in this repository fails, and the spec says so rather than
+  promising a check it cannot carry
+
 #### Scenario: A GitHub write entry is dropped
 
 - **WHEN** `Bash(gh pr comment *)` is deleted from `permissions.deny`
