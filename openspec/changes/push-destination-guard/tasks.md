@@ -1,6 +1,7 @@
 # Tasks — push destination guard
 
-One group, one pull request on `feat/push-destination-guard`. The parse and the
+One group, one pull request on `feat/push-destination-guard-parse` — the
+unsuffixed name belongs to the merged proposal branch. The parse and the
 prose narrowing ship together, because a rule deleted before its mechanism
 exists leaves the prohibition unenforced in between. Requirement citations are
 the `### Requirement:` headings in `specs/agent-permissions/spec.md`.
