@@ -8,7 +8,7 @@
 | `docs/api-design.md` | endpoint response contract | when an endpoint changes |
 | `docs/testing.md` | what tests assert, e2e rules | when tests change |
 | `docs/feature-workflow.md` | the four OpenSpec stages and their gates | on any feature, new tooling, or gate change |
-| `docs/review-toolkit.md` | which review skill to run, and the pre-PR sequence | before every PR |
+| `docs/review-toolkit.md` | which review skill to run, the pre-PR sequence, and the commit each gate was verified against | before every PR |
 | `docs/verification.md` | what counts as evidence for a claim | before a claim or a decision rests on one |
 | `PLAN.md` | the open queue, its sources, and the standing constraints | every session |
 | `tasks/*.md` | infra task specs — scope, steps, acceptance criteria | when a task starts |
@@ -20,7 +20,7 @@
 | `scripts/command-guard.ts` | the git and `gh` prohibitions no permission pattern can express | when a git or `gh` call is refused |
 | `scripts/no-suppressions.ts` | which linter and type-checker suppressions are approved, and how many | when a suppression is unavoidable |
 | `.coderabbit.yaml` | how CodeRabbit reviews this repo | when the bot reviews the wrong things |
-| `.claude/skills/` — symlinks into the [skills repo](https://github.com/laidrivm/skills) | how reviews are run (triage/zombies/warm/coderabbit) | on skill invocation |
+| `.claude/skills/` — symlinks into the [skills repo](https://github.com/laidrivm/skills) | the review skills' own text, which is untracked here | on skill invocation |
 
 One fact lives in exactly one file; everything else links to it.
 
@@ -108,8 +108,8 @@ neither. Clone that repo and run, from its root:
 ```
 
 That supplies four of the five commands — `/zombies`, `/warm`, `/triage`,
-`/coderabbit`. The fifth, `/ponytail-review`, comes from the ponytail plugin
-instead.
+`/coderabbit-local`. The fifth, `/ponytail-review`, comes from the ponytail
+plugin instead.
 
 ## Dependency hygiene
 
