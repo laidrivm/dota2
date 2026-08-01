@@ -113,14 +113,15 @@ back to prose, which is where it is today. That is a floor, not a regression.
 - **Instruction fatigue.** Six instruction blocks on one config make each one
   less likely to be honoured → `openspec/changes/**` addresses files the
   existing four never match, and the three clauses that fit no language scope
-  share one `**` block rather than taking one each. Every file now matches
-  exactly one more scope than before, which is the floor: an unscoped clause
-  cannot cost less than that.
+  share one `**` block rather than taking one each. A file outside
+  `openspec/changes/**` matches one more scope than before, which is the floor
+  for an unscoped clause; a file under it matches two more, and those are the
+  files the fewest pull requests touch.
 - **The spec review turns into a style debate on proposals.** → the instruction
   cites four checkable properties from `openspec/config.yaml` and no taste, and
   a bot objection that blows through the rule quality bar is disposed of by the
   same severity ladder as any other.
-- **MCP finds nothing in three or four PRs.** → then the class is not present
+- **MCP finds nothing in four PRs.** → then the class is not present
   in this codebase and the setting goes back to `disabled`; `PLAN.md` carries
   the checkpoint so the question gets asked rather than forgotten.
 - **A change's artefacts and its implementation land in different PRs**, so the

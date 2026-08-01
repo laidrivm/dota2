@@ -70,7 +70,7 @@ assertions; this change extends both, never rewrites them.
 - [x] 1.11 Record in `PLAN.md` that Context7's library documentation is
       community-contributed with no accuracy or safety warranty, that the
       config can only deny servers and never allow them, and the checkpoint:
-      after three or four PRs, ask whether any finding of the API class
+      after four PRs, ask whether any finding of the API class
       appeared, and set `usage` back to `"disabled"` if none did
 - [x] 1.12 Tell the user what only they can do: connect Context7 in the
       CodeRabbit dashboard, since the schema exposes no way to do it from the
