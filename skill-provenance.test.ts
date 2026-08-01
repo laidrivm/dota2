@@ -59,6 +59,21 @@ const commits = cells.map(([, verified]) => verified);
 const isObjectName = (cell: string | undefined) =>
 	/^`[0-9a-f]{7,40}`$/.test(cell ?? "");
 
+test.each([
+	["`759f15e`", true], // the shortest git abbreviates to
+	["`759f15e0047155a5bed2100a7da881c4e0c02e90`", true], // a whole name
+	["`759f15`", false],
+	["`759f15e0047155a5bed2100a7da881c4e0c02e90f`", false],
+	["`759F15E`", false], // git writes object names in lower case
+	["`latest`", false],
+	["2026-08-01", false],
+	["archived", false],
+])("%s is an object name: %p", (cell, expected) => {
+	// The table holds only 7-character names, so neither bound is exercised
+	// by the rows themselves.
+	expect(isObjectName(cell)).toBe(expected);
+});
+
 test("both sources of the active set yield skills", () => {
 	// A renamed heading or a reworded rule empties a source, and every
 	// exactness check below would then pass on nothing.
