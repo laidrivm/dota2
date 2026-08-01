@@ -240,14 +240,11 @@ Rules about how work is carried out here. They do not age with the code.
   merge.
 - Open every markdown file with a level-1 heading — OpenSpec's `design.md`
   and delta-spec templates start at `##`, so the title is yours to add.
-- Assert the match before a scripted string replacement and read the
-  resulting diff — a silent no-op and a malformed result both read as a
-  successful edit.
-- Edit prose with the Edit tool; script a replacement only for a pattern that
-  repeats across files.
-- Create a branch with `git switch -c <name>`, or pass `--no-track`: branching
-  off `origin/main` makes it the upstream and the branch's first push is
-  refused.
+- Script a string replacement only for a pattern repeating across files, assert
+  the match, and read the resulting diff — a silent no-op and a malformed
+  result both read as a successful edit.
+- Create a branch with `git switch -c <name>` or `--no-track`, never tracking
+  `origin/main`.
 - Commit the work before a probe whose undo is `git checkout <path>`,
   `git reset --hard`, or `git stash drop`.
 - Never state another repository's mutable properties — visibility, default
