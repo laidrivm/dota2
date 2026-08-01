@@ -104,6 +104,11 @@ test("the unscoped entry carries every clause no language scope could hold", () 
 	expect(text).toMatch(/exactly that name/i);
 	expect(text).toMatch(/never take "archive" as a candidate/i);
 	expect(text).toMatch(/could not be made/i);
+	// Scoped by shape, not by a list of prefixes: `spec/` joined the set
+	// while this change was being applied, and an enumeration would have
+	// stopped matching the branch it was meant to read.
+	expect(text).toMatch(/follows the branch's first "\/"/i);
+	expect(text).not.toMatch(/feat\/, fix\/ or chore\//);
 });
 
 test("no entry is scoped to src/, which does not hold this repo's code", () => {

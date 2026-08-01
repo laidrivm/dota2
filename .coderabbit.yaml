@@ -160,11 +160,12 @@ reviews:
         and a proposal is not evidence against itself.
 
         Select the change by branch name, never by guessing which is
-        active: several sit under /openspec/changes/ at once. Take the
-        branch's name after its feat/, fix/ or chore/ prefix and look for a
-        directory of exactly that name; only if none exists, strip a
-        trailing -<step> and look again. Slugs contain hyphens, so the
-        exact match must be tried first. Never take "archive" as a
+        active: several sit under /openspec/changes/ at once. Take
+        whatever follows the branch's first "/" — not a list of known
+        prefixes, which goes stale — and look for a directory of exactly
+        that name; only if none exists, strip a trailing -<step> and look
+        again. Slugs contain hyphens, so the exact match must be tried
+        first. Never take "archive" as a
         candidate, whichever lookup reaches it — it is settled history, and
         a chore/archive-<name> branch strips to it. If neither lookup finds
         a directory, say the comparison could not be made rather than
