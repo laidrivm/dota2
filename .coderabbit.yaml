@@ -36,6 +36,10 @@ reviews:
   profile: "assertive"
   high_level_summary: true
   poem: false
+  # Both default to true. A solo repository has no issue tracker in use and
+  # no sibling pull requests to relate, so each is a heading over nothing.
+  related_issues: false
+  related_prs: false
   auto_review:
     enabled: true
     drafts: false # PRs here open ready for review; a draft is deliberate silence
