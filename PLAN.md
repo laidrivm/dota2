@@ -62,16 +62,14 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
   delta stated wrongly, at a count of exactly 800.
 - **`mechanised-prohibitions`** — four PRs ending #50,
   `archive/2026-08-01-mechanised-prohibitions`.
-- **`review-approval-direction`** — PR #57. Merged, not yet archived.
+- **`review-approval-direction`** — PR #57,
+  `archive/2026-08-01-review-approval-direction`.
+- **`always-on-context-budget`** — two PRs,
+  `archive/2026-08-01-always-on-context-budget`; capability spec at
+  `openspec/specs/context-budget/`. The always-on set went 1301 lines to 417
+  against its new ~500 budget.
 
 ### Open
-
-- [ ] **`always-on-context-budget`** — applying
-      (`openspec/changes/always-on-context-budget`). Measures the budget that
-      exists, evicts this file's decisions section by the three-way test above,
-      gives the file its growth protocol, and states the fence practice as a
-      rule. Two task groups, two PRs: plan and trigger → the rule and the bot
-      instruction.
 - [ ] **`push-destination-guard`** — proposed
       (`openspec/changes/push-destination-guard`). The command guard reads a
       push's flags and never its destination, so every spelling of a push to
@@ -92,8 +90,9 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       reviews no local skill performs — the delta spec, and the diff against its
       own proposal — wires it into the ponytail ladder and the fix-and-capture
       loop, and enables MCP so the API-existence rule becomes checkable. One
-      task group, one PR. Applies after `always-on-context-budget`, which
-      creates the test and the `**/*.{ts,tsx}` clause this one extends.
+      task group, one PR. Unblocked: `always-on-context-budget` has shipped the
+      `coderabbit-config.test.ts` and the `**/*.{ts,tsx}` clause this one
+      extends.
 - [ ] **`tracked-permission-policy`** — proposed
       (`openspec/changes/tracked-permission-policy`). Gates `bunfig.toml` and
       `.npmrc` with `Edit` rules, and curates the 170 auto-accepted allow
