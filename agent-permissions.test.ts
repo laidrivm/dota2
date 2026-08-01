@@ -25,10 +25,20 @@ function isDenied(command: string): boolean {
 	});
 }
 
-/** `bun <command> --help`, which prints across both streams. */
+/**
+ * `bun <command> --help`, which prints across both streams. The escapes are
+ * stripped because bun colours this output depending on the environment it is
+ * spawned into, and the assertions below anchor on `Usage:` and `Alias:` at
+ * the start of a line — which a colour code silently moves.
+ */
+// Built from a char code rather than written into a regex literal, where the
+// escape is a literal control character — which Biome forbids, and which this
+// project forbids silencing.
+const ANSI = new RegExp(`${String.fromCharCode(27)}\\[[0-9;]*m`, "g");
+
 function bunHelp(command: string): string {
 	const help = Bun.spawnSync(["bun", command, "--help"]);
-	return help.stdout.toString() + help.stderr.toString();
+	return (help.stdout.toString() + help.stderr.toString()).replace(ANSI, "");
 }
 
 test("the deny list is the foreign managers and the GitHub write commands", () => {
