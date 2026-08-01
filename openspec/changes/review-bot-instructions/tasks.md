@@ -1,6 +1,7 @@
 # Tasks — review bot instructions
 
-One group, one pull request on `feat/review-bot-instructions`. Requirement
+One group, one pull request on `feat/review-bot-instructions-config` — the
+unsuffixed name belongs to the merged proposal branch. Requirement
 citations are the `### Requirement:` headings in
 `specs/review-bot-config/spec.md`. Bracketed numbers cite the `/zombies` ideas
 raised at propose.
