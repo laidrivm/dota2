@@ -257,9 +257,12 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
 - [ ] **`push-destination-guard`** — proposed
       (`openspec/changes/push-destination-guard`), not yet applied. The command
       guard reads a push's flags and never its destination, so every spelling of
-      a push to `main` passes it; this extends the hook to the three forms git
-      documents for naming a destination and narrows the prose rule to what
-      configuration alone can do. One task group, one PR. Applies after
+      a push to `main` passes it. The hook comes to allow a push only when
+      every destination it names is a concrete ref other than `main` — which
+      also refuses a destination it cannot bound, catches a `+` refspec prefix
+      the force check never saw, and decides a push naming no refspec by the
+      current branch — and the prose rule narrows to what configuration alone
+      can do. One task group, one PR. Applies after
       `mechanised-prohibitions` is archived, which is what puts the requirement
       it modifies in `openspec/specs/agent-permissions/`.
 - [ ] **`skill-provenance`** — proposed
@@ -370,7 +373,19 @@ Apply order for the four proposed changes is fixed: `coderabbit-config` first
   arbitrarily. Three of the seven `/zombies` ideas became scenarios rather than
   only tasks, because each names a behaviour the requirement did not otherwise
   state: a `:main` deletion, a second refspec, and `--all` with a detached
-  `HEAD`, which must block on the flag before anything reads a branch.
+  `HEAD`, which must block on the flag before anything reads a branch. The
+  local review then found the enumeration those scenarios sat in was itself too
+  narrow — `git push origin :` pushes every matching branch, a wildcard refspec
+  pushes what it matches, and `git push origin HEAD` names its destination only
+  through the current branch — so the check is scoped by what it exempts
+  instead: a push is allowed only when every destination it names is a concrete
+  ref other than `main`. The same review found two more live holes it did not
+  set out to look for. A `+` prefix on a refspec forces the update exactly as
+  `--force` does and is not a flag, so the force guarantee has been false since
+  step 1; the parse this change adds closes it in one condition. And the live
+  confirmation step said to attempt `git push origin HEAD:main`, which pushes
+  to `main` in precisely the case the probe exists to detect — it now carries
+  `--dry-run`.
 
 - `mechanised-prohibitions` step 4: two of the three prohibitions the design
   called fully mechanised are not, and both are shortened rather than deleted,
