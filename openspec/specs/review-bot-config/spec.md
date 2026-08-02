@@ -31,7 +31,7 @@ mistyped key configures nothing silently.
 
 #### Scenario: The key paths are real
 
-- **WHEN** each key path added by this change is compared against
+- **WHEN** each key path `.coderabbit.yaml` sets is compared against
   `https://storage.googleapis.com/coderabbit_public_assets/schema.v2.json`
 - **THEN** every one exists in the schema with the value it is given
 
@@ -148,9 +148,9 @@ applied to comments instead of accessible names.
 
 #### Scenario: The docstring check stays off
 
-- **WHEN** `.coderabbit.yaml` is read after this change
+- **WHEN** `.coderabbit.yaml` is read alongside the comment instruction above
 - **THEN** `reviews.pre_merge_checks.docstrings.mode` is still `"off"`, and no
-  `threshold` has appeared beside it
+  `threshold` stands beside it
 
 ### Requirement: The specification itself is reviewed
 
