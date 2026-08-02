@@ -75,16 +75,12 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
   capability spec at `openspec/specs/skill-provenance/`. The
   `skills-lock.json` patch it drafted is the user's to apply in the skills
   repo, and its `ref` needs the upstream commit in `microsoft/playwright-cli`.
+- **`review-bot-instructions`** — PR #65,
+  `archive/2026-08-02-review-bot-instructions`. The proposal comparison ended
+  up on `**` rather than `src/**`: three of the five changes before it, itself
+  included, touched no file under `src/`.
 
 ### Open
-- [ ] **`review-bot-instructions`** — proposed
-      (`openspec/changes/review-bot-instructions`). Points the bot at the two
-      reviews no local skill performs — the delta spec, and the diff against its
-      own proposal — wires it into the ponytail ladder and the fix-and-capture
-      loop, and enables MCP so the API-existence rule becomes checkable. One
-      task group, one PR. Unblocked: `always-on-context-budget` has shipped the
-      `coderabbit-config.test.ts` and the `**/*.{ts,tsx}` clause this one
-      extends.
 - [ ] **`tracked-permission-policy`** — proposed
       (`openspec/changes/tracked-permission-policy`). Gates `bunfig.toml` and
       `.npmrc` with `Edit` rules, and curates the 170 auto-accepted allow
