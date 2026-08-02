@@ -77,8 +77,8 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
   repo, and its `ref` needs the upstream commit in `microsoft/playwright-cli`.
 - **`review-bot-instructions`** — PR #65,
   `archive/2026-08-02-review-bot-instructions`. The proposal comparison ended
-  up on `**` rather than `src/**`: three of the five changes before it, itself
-  included, touched no file under `src/`.
+  up on `**` rather than `src/**`: of the five most recent changes at the time,
+  three touched no file under `src/`, this one among them.
 
 ### Open
 - [ ] **`tracked-permission-policy`** — proposed
