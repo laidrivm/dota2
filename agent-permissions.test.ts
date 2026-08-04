@@ -17,9 +17,17 @@ const ghWrites = ["gh pr comment", "gh issue comment", "gh pr review"];
 const deny: string[] = settings.permissions?.deny ?? [];
 const ask: string[] = settings.permissions?.ask ?? [];
 
+/**
+ * The command rules. Both lists also carry file rules, whose specifier is a
+ * path and not a command line, so every assertion that reads an entry word by
+ * word takes this subset rather than the list.
+ */
+const bashDeny = deny.filter((entry) => entry.startsWith("Bash("));
+const bashAsk = ask.filter((entry) => entry.startsWith("Bash("));
+
 /** Whether a command matches a deny entry, by the prefix each one names. */
 function isDenied(command: string): boolean {
-	return deny.some((entry) => {
+	return bashDeny.some((entry) => {
 		const prefix = entry.match(/^Bash\((.+) \*\)$/)?.[1];
 		return prefix !== undefined && command.startsWith(`${prefix} `);
 	});
@@ -42,7 +50,7 @@ function bunHelp(command: string): string {
 }
 
 test("the deny list is the foreign managers and the GitHub write commands", () => {
-	expect(deny).toEqual(
+	expect(bashDeny).toEqual(
 		[...managers, ...ghWrites].map((cmd) => `Bash(${cmd} *)`),
 	);
 });
@@ -53,7 +61,7 @@ test("deny entries keep their word boundary", () => {
 	// Code, which warns about it at startup — a boundary that only looks
 	// like one. Both fail this pattern, as does `Bash(npm:*)`. The optional
 	// further words are `gh pr comment` and its siblings.
-	for (const entry of deny) {
+	for (const entry of bashDeny) {
 		expect(entry).toMatch(/^Bash\([a-z-]+( [a-z-]+)* \*\)$/);
 	}
 });
@@ -110,7 +118,7 @@ describe("the command guard is registered", () => {
 
 describe("every manifest-mutating invocation prompts", () => {
 	test("every form that writes package.json is listed", () => {
-		expect(ask).toEqual([
+		expect(bashAsk).toEqual([
 			"Bash(bun add *)",
 			"Bash(bun a *)",
 			"Bash(bun install *)",
@@ -145,7 +153,7 @@ describe("every manifest-mutating invocation prompts", () => {
 		// and leaving behind an entry the spec claims is part of the surface.
 		// `bun pm …` forms are nested subcommands rather than aliases, so
 		// `--help` resolves them to `bun pm` and the list above pins them.
-		for (const entry of ask) {
+		for (const entry of bashAsk) {
 			const form = entry.match(/^Bash\(bun ([a-z-]+) \*\)$/)?.[1];
 			if (!form) continue;
 			expect(bunHelp(form)).toMatch(
@@ -158,7 +166,7 @@ describe("every manifest-mutating invocation prompts", () => {
 		// `Bash(bun a*)` without the space would also cover `bun add`, so the
 		// entry for the alias would silently stand in for the long form. The
 		// optional second word is `bun pm pkg` and its siblings.
-		for (const entry of ask) {
+		for (const entry of bashAsk) {
 			expect(entry).toMatch(/^Bash\(bun [a-z-]+( [a-z-]+)? \*\)$/);
 		}
 	});
@@ -169,7 +177,7 @@ describe("every manifest-mutating invocation prompts", () => {
 		// `bun run`, `bun pm trust` from `bun pm untrusted` — which CLAUDE.md
 		// requires staying ungated, since surfacing its output is how the user
 		// gets to decide about `trustedDependencies`.
-		for (const entry of ask) {
+		for (const entry of bashAsk) {
 			const command = entry.match(/^Bash\((.+) \*\)$/)?.[1];
 			for (const invocation of [
 				"bun run build",
@@ -189,6 +197,36 @@ describe("every manifest-mutating invocation prompts", () => {
 			for (const cmd of managers) {
 				expect(entry).not.toMatch(new RegExp(`\\b${cmd}\\b`));
 			}
+		}
+	});
+});
+
+describe("the supply-chain configuration files are gated", () => {
+	test(".npmrc is denied outright", () => {
+		// The repository deliberately has none, and bun reads it as a registry
+		// source, so the file existing at all is the event to stop. Written
+		// bare rather than as `/.npmrc`: a bare filename matches at any depth,
+		// and an anchored one would leave a subdirectory copy ungated.
+		expect(deny).toContain("Edit(.npmrc)");
+	});
+
+	test("bunfig.toml is asked and not denied", () => {
+		// Asked, because `[test] pathIgnorePatterns` and the release-age gate
+		// are legitimate content this project already edits; denying the file
+		// would block them. Deny is evaluated first, so an entry there would
+		// make the ask entry unreachable — which is why both halves are
+		// asserted.
+		expect(ask).toContain("Edit(bunfig.toml)");
+		expect(deny).not.toContain("Edit(bunfig.toml)");
+	});
+
+	test("no file rule is written in the form that never matches", () => {
+		// The file permission checks match `Edit(path)` only; a `Write(path)`
+		// rule is accepted, warns at startup, and gates nothing. `Edit` already
+		// covers every file-editing tool, so the natural-reading form is the
+		// wrong one.
+		for (const entry of [...deny, ...ask]) {
+			expect(entry).not.toMatch(/^Write\(/);
 		}
 	});
 });

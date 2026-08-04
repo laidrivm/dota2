@@ -11,13 +11,13 @@ Applied after `mechanised-prohibitions`, which rewrites `deny` and adds a
 
 ## 1. The supply-chain files
 
-- [ ] 1.1 Add `Edit(.npmrc)` to `permissions.deny` — the file has no
+- [x] 1.1 Add `Edit(.npmrc)` to `permissions.deny` — the file has no
       legitimate content here, so its existence is the event — *The
       supply-chain configuration files are gated*
-- [ ] 1.2 Add `Edit(bunfig.toml)` to `permissions.ask`, not to `deny`: the
+- [x] 1.2 Add `Edit(bunfig.toml)` to `permissions.ask`, not to `deny`: the
       file legitimately carries `[test] pathIgnorePatterns` and the
       release-age gate — *The supply-chain configuration files are gated*
-- [ ] 1.3 Extend `agent-permissions.test.ts`: `Edit(.npmrc)` is denied (2),
+- [x] 1.3 Extend `agent-permissions.test.ts`: `Edit(.npmrc)` is denied (2),
       `Edit(bunfig.toml)` is asked and not denied (4, 7), and neither rule is
       written in the `Write(...)` form Claude Code never matches (3)
 - [ ] 1.4 Watch each assertion fail before it passes, by breaking the policy
