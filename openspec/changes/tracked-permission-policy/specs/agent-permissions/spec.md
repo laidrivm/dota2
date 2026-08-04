@@ -34,6 +34,12 @@ which writes outside the tool layer entirely. The prose rule in `CLAUDE.md`
 keeps its subject for that reason, where a rule fully replaced by a mechanism
 is deleted.
 
+The scenarios below describe a tool-layer call under a permission mode that
+honours the configured rules. That is the scope the rules have, not a
+qualification bolted onto them: the paragraph above names what falls outside
+it, and the three content scenarios further down — the ones that fail on a
+settled value rather than on a call — are what cover those routes instead.
+
 #### Scenario: A registry added to bunfig.toml
 
 - **WHEN** the agent edits `bunfig.toml` to add a `registry` key
@@ -55,6 +61,8 @@ is deleted.
 
 - **WHEN** the agent attempts to create `.npmrc` anywhere under the repository
 - **THEN** the call is blocked without prompting
+- **AND** a Bash output redirection to that path is blocked too, which is the
+  one route the deny half covers and the ask half does not
 
 #### Scenario: The rules use the matched specifier
 

@@ -38,6 +38,13 @@ explicit user decision*. Both keys are prose boundaries today.
   checks match `Edit(path)` only, and `Edit` rules cover every file-editing
   tool. A `Write(...)` rule is accepted and never matched, and warns at
   startup.
+- Because a permission rule gates a call and not a value, `bun test` also pins
+  the settled content the two rules stand in front of: `bunfig.toml`'s
+  `[install]` section carries its three keys and no fourth — which is what
+  catches a scoped registry override as well as a plain `registry` — and no
+  `.npmrc` is tracked at any depth. This is the half a rule structurally
+  cannot hold, and it is assertions in an existing test file, not the
+  `PreToolUse` hook the non-goals reject.
 
 **The allow list is curated**
 

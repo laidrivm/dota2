@@ -81,7 +81,8 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
   three touched no file under `src/`, this one among them.
 
 ### Open
-- [ ] **`tracked-permission-policy`** — group 1 implemented, group 2 open
+- [ ] **`tracked-permission-policy`** — group 1 implemented bar its
+      fresh-session check, group 2 open
       (`openspec/changes/tracked-permission-policy`). Gates `bunfig.toml` and
       `.npmrc` with `Edit` rules, and curates the 170 auto-accepted allow
       entries out of the untracked settings file into the tracked one. Two task
