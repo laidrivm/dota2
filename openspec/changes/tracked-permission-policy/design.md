@@ -69,15 +69,25 @@ form Claude Code never matches.
 
 ### The prompt is a boundary against the agent, not a proof
 
-Three things pass it. `echo 'registry = …' >> bunfig.toml` is a Bash call, not
-an `Edit`, and no `Bash(...)` pattern catches a redirection reliably. A
-permission mode — `acceptEdits`, `bypassPermissions` — answers the prompt
-without the user ever seeing it, so `ask` gates the normal path and not every
-path. And a subprocess writes outside the tool layer altogether.
+This was measured during implementation, on Claude Code 2.1.221, and the
+answer is not the one this section first assumed. A Bash output redirection to
+a **denied** path is refused: `printf … > tmpprobe/.npmrc` was blocked, while
+`printf … > tmpprobe/other.txt` beside it went through, and neither
+`settings.local.json`, the user-level settings nor `command-guard.ts` mentions
+`.npmrc` — so the `Edit(.npmrc)` deny rule is what stopped it, at a
+subdirectory depth and in a session that had started before the rule was
+written. An **asked** path leaks: `printf '\n# probe\n' >> bunfig.toml` landed
+with no prompt in that same session.
+
+What passes both halves is a permission mode — `acceptEdits`,
+`bypassPermissions` — which answers the prompt without the user ever seeing it,
+and a subprocess, which writes outside the tool layer altogether.
 
 So the rule stops what the agent actually does in an ordinary session, which is
 the failure mode this repository has, and it is not a security boundary against
-a determined caller. That is why the prose rule keeps its subject rather than
+a determined caller. The gap it leaves is specific — the `ask` half and the
+redirection — which is what task 1.7's content assertions cover. That is why
+the prose rule keeps its subject rather than
 being deleted the way `mechanised-prohibitions` deletes what it fully replaces
 — the mechanism here is partial, and both the capability and this design say so
 rather than letting the entry read as a guarantee.

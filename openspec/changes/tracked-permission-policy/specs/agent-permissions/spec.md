@@ -20,12 +20,19 @@ release-age gate; what must not pass unremarked is a registry key or an entry
 in `minimumReleaseAgeExcludes`, and both are reached only through that file.
 
 The boundary is a prompt, not a proof, and the capability SHALL say so rather
-than imply otherwise. Three things pass it: a shell redirection writes either
-file without an `Edit` call and no `Bash(...)` pattern matches a redirection
-reliably; a permission mode such as `acceptEdits` or `bypassPermissions`
-answers the prompt without the user; and a subprocess writes outside the tool
-layer entirely. The prose rule in `CLAUDE.md` keeps its subject for that
-reason, where a rule fully replaced by a mechanism is deleted.
+than imply otherwise — but the two rules do not leak alike, and the difference
+was measured rather than assumed. On Claude Code 2.1.221, a Bash output
+redirection whose target is a denied path is refused: `printf … >
+tmpprobe/.npmrc` was blocked while `printf … > tmpprobe/other.txt` in the same
+directory went through. The same session's `ask` rule did not gate an append
+redirection to `bunfig.toml`, which landed with no prompt.
+
+So the deny half covers the redirection route and the ask half does not, and
+what still passes both is a permission mode such as `acceptEdits` or
+`bypassPermissions`, which answers a prompt without the user, and a subprocess,
+which writes outside the tool layer entirely. The prose rule in `CLAUDE.md`
+keeps its subject for that reason, where a rule fully replaced by a mechanism
+is deleted.
 
 #### Scenario: A registry added to bunfig.toml
 
