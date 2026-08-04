@@ -237,11 +237,12 @@ describe("the supply-chain configuration files are gated", () => {
 });
 
 describe("the keys the gate is for still hold their reserved value", () => {
-	// The prompt is not a proof: a shell redirection writes either file with
-	// no `Edit` call, a permission mode answers the prompt without the user,
-	// and a subprocess writes outside the tool layer. Each passes the rules
-	// above and none passes these, which read the settled content instead of
-	// the call that produced it.
+	// The prompt is not a proof. A permission mode answers it without the
+	// user, and a subprocess writes outside the tool layer; both pass the
+	// rules above. So does a shell redirection to `bunfig.toml`, measured —
+	// the `ask` half does not gate one, though the `deny` half does refuse a
+	// redirection to `.npmrc`. None of them passes these, which read the
+	// settled content instead of the call that produced it.
 	test("the release-age gate exempts nothing", () => {
 		// `bunfig.toml`'s own comment: keep empty, add entries only with an
 		// explicit user decision.
