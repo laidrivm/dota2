@@ -227,11 +227,13 @@ describe("the supply-chain configuration files are gated", () => {
 		// The file permission checks match `Edit(path)` only; a `Write(path)`
 		// rule is accepted, warns at startup, and gates nothing. `Edit` already
 		// covers every file-editing tool, so the natural-reading form is the
-		// wrong one. All three lists, not just the two that carry a file rule
-		// today: `allow` takes the same specifier and would exempt one.
+		// wrong one. `NotebookEdit` and `Glob` are accepted and unmatched for
+		// the same reason, so all three are named here. All three lists too,
+		// not just the two that carry a file rule today: `allow` takes the
+		// same specifier and would exempt one.
 		const allow: string[] = settings.permissions?.allow ?? [];
 		for (const entry of [...deny, ...ask, ...allow]) {
-			expect(entry).not.toMatch(/^Write\(/);
+			expect(entry).not.toMatch(/^(Write|NotebookEdit|Glob)\(/);
 		}
 	});
 });
@@ -249,10 +251,17 @@ describe("the keys the gate is for still hold their reserved value", () => {
 		expect(bunfig.install.minimumReleaseAgeExcludes).toEqual([]);
 	});
 
-	test("no registry is configured in bunfig.toml", () => {
-		// A registry is a supply-chain root of trust; `CLAUDE.md` reserves
-		// adding one for the user, outside any coding task.
-		expect(bunfig.install.registry).toBeUndefined();
+	test("the install section carries no key but the three it is for", () => {
+		// `CLAUDE.md` reserves a registry *or a scoped registry override* for
+		// the user. Pinning the key set rather than the absence of `registry`
+		// is what makes that hold without this test having to know how bun
+		// spells every route to one: any key arriving here fails, and a human
+		// decides what it was.
+		expect(Object.keys(bunfig.install).sort()).toEqual([
+			"exact",
+			"minimumReleaseAge",
+			"minimumReleaseAgeExcludes",
+		]);
 	});
 
 	test("no .npmrc is tracked at any depth", () => {
@@ -260,12 +269,17 @@ describe("the keys the gate is for still hold their reserved value", () => {
 		// source, so one arriving in a clone is a root of trust nobody chose —
 		// and a bare `Edit(.npmrc)` rule matches at any depth for the same
 		// reason this looks repository-wide.
+		// Both pathspecs: `**/.npmrc` matches at depth and not at the root,
+		// so the bare one is what covers the root — measured, not assumed.
 		const tracked = Bun.spawnSync(
 			["git", "ls-files", "--", "**/.npmrc", ".npmrc"],
 			{
 				cwd: import.meta.dir,
 			},
 		);
+		// Empty stdout means nothing tracked only if git ran. A failed spawn
+		// prints nothing either, and would pass this test on no evidence.
+		expect(tracked.exitCode).toBe(0);
 		expect(tracked.stdout.toString().trim()).toBe("");
 	});
 });
