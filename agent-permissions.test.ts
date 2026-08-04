@@ -1,4 +1,7 @@
 import { describe, expect, test } from "bun:test";
+// Imported rather than pattern-matched: bun parses TOML natively, and a
+// regex over the text would read a commented-out key as a live one.
+import bunfig from "./bunfig.toml";
 
 /**
  * The tracked settings, never `.claude/settings.local.json` — that one is
@@ -224,9 +227,44 @@ describe("the supply-chain configuration files are gated", () => {
 		// The file permission checks match `Edit(path)` only; a `Write(path)`
 		// rule is accepted, warns at startup, and gates nothing. `Edit` already
 		// covers every file-editing tool, so the natural-reading form is the
-		// wrong one.
-		for (const entry of [...deny, ...ask]) {
+		// wrong one. All three lists, not just the two that carry a file rule
+		// today: `allow` takes the same specifier and would exempt one.
+		const allow: string[] = settings.permissions?.allow ?? [];
+		for (const entry of [...deny, ...ask, ...allow]) {
 			expect(entry).not.toMatch(/^Write\(/);
 		}
+	});
+});
+
+describe("the keys the gate is for still hold their reserved value", () => {
+	// The prompt is not a proof: a shell redirection writes either file with
+	// no `Edit` call, a permission mode answers the prompt without the user,
+	// and a subprocess writes outside the tool layer. Each passes the rules
+	// above and none passes these, which read the settled content instead of
+	// the call that produced it.
+	test("the release-age gate exempts nothing", () => {
+		// `bunfig.toml`'s own comment: keep empty, add entries only with an
+		// explicit user decision.
+		expect(bunfig.install.minimumReleaseAgeExcludes).toEqual([]);
+	});
+
+	test("no registry is configured in bunfig.toml", () => {
+		// A registry is a supply-chain root of trust; `CLAUDE.md` reserves
+		// adding one for the user, outside any coding task.
+		expect(bunfig.install.registry).toBeUndefined();
+	});
+
+	test("no .npmrc is tracked at any depth", () => {
+		// The premise the deny rule rests on. bun reads `.npmrc` as a registry
+		// source, so one arriving in a clone is a root of trust nobody chose —
+		// and a bare `Edit(.npmrc)` rule matches at any depth for the same
+		// reason this looks repository-wide.
+		const tracked = Bun.spawnSync(
+			["git", "ls-files", "--", "**/.npmrc", ".npmrc"],
+			{
+				cwd: import.meta.dir,
+			},
+		);
+		expect(tracked.stdout.toString().trim()).toBe("");
 	});
 });
