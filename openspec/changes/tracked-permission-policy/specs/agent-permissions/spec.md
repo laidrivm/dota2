@@ -55,6 +55,30 @@ reason, where a rule fully replaced by a mechanism is deleted.
 - **THEN** both rules are written as `Edit(...)` and neither as `Write(...)`,
   which Claude Code accepts but never matches
 
+Because the prompt is partial, the two keys it stands in front of SHALL also be
+pinned by their settled value. A test that reads the content catches every
+route the rules miss — the redirection, the permission mode and the subprocess
+alike — after the write rather than before it. This is not the rejected hook:
+it parses no edit and registers nothing, it reads two files the repository
+already ships.
+
+#### Scenario: A registry reaches bunfig.toml by a route the prompt misses
+
+- **WHEN** `bunfig.toml` carries a `registry` key under `[install]`
+- **THEN** `bun test` fails, whichever call wrote it
+
+#### Scenario: The release-age gate is given an exemption
+
+- **WHEN** `minimumReleaseAgeExcludes` holds any entry
+- **THEN** `bun test` fails, because the file's own comment reserves that key
+  for an explicit user decision
+
+#### Scenario: An .npmrc reaches a clone
+
+- **WHEN** a file named `.npmrc` is tracked at any depth
+- **THEN** `bun test` fails, because the deny rule's premise is that this
+  repository has none
+
 ### Requirement: The tracked allow list holds only what a clone can use
 
 `.claude/settings.json` SHALL carry the allow entries this project's own

@@ -33,6 +33,13 @@ Applied after `mechanised-prohibitions`, which rewrites `deny` and adds a
       capability: a shell redirection writes either file without an `Edit`
       call, so the mechanism is partial where `mechanised-prohibitions`'
       mechanisms are total
+- [ ] 1.7 Pin the two reserved keys by their settled value — no `registry`
+      under `[install]`, `minimumReleaseAgeExcludes` empty, no tracked
+      `.npmrc` at any depth — reading `bunfig.toml` through bun's own TOML
+      import rather than by pattern. Raised by `/zombies` against 1.3: the
+      three routes 1.6 records as passing the prompt all fail this, which is
+      the half a permission rule structurally cannot hold — *The supply-chain
+      configuration files are gated*
 
 ## 2. The allow list
 
