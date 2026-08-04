@@ -20,7 +20,7 @@ Applied after `mechanised-prohibitions`, which rewrites `deny` and adds a
 - [x] 1.3 Extend `agent-permissions.test.ts`: `Edit(.npmrc)` is denied (2),
       `Edit(bunfig.toml)` is asked and not denied (4, 7), and neither rule is
       written in the `Write(...)` form Claude Code never matches (3)
-- [ ] 1.4 Watch each assertion fail before it passes, by breaking the policy
+- [x] 1.4 Watch each assertion fail before it passes, by breaking the policy
       rather than by editing the assertion
 - [ ] 1.5 Confirm the behaviour per file in a session started after the
       change — a session loads its permissions at startup, so the authoring
@@ -29,7 +29,7 @@ Applied after `mechanised-prohibitions`, which rewrites `deny` and adds a
       `.npmrc` at the repository root is blocked without prompting; creating
       one in a subdirectory is blocked too, since a bare filename matches at
       any depth
-- [ ] 1.6 Leave the prose rule in `CLAUDE.md` in place, and say why in the
+- [x] 1.6 Leave the prose rule in `CLAUDE.md` in place, and say why in the
       capability: a shell redirection writes either file without an `Edit`
       call, so the mechanism is partial where `mechanised-prohibitions`'
       mechanisms are total
