@@ -86,6 +86,7 @@ explicit user decision*. Both keys are prose boundaries today.
 - **Preconditions**: applied after `mechanised-prohibitions`, which rewrites
   the same file's `deny` and `hooks` sections.
 - **Behaviour**: an agent editing `bunfig.toml` is prompted; an agent creating
-  `.npmrc` is blocked. Neither is a security boundary — a shell redirection, a
-  permission mode such as `acceptEdits`, and a subprocess each pass it, which
-  is why the prose rule stays.
+  `.npmrc` is blocked, including by a shell redirection, which the deny half
+  turned out to cover. Neither is a security boundary — a permission mode such
+  as `acceptEdits` and a subprocess each pass both halves, and a redirection
+  still passes the `ask` half, which is why the prose rule stays.
