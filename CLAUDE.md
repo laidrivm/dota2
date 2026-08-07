@@ -236,6 +236,8 @@ Rules about how work is carried out here. They do not age with the code.
 
 - Confirm a path is tracked before a check or a claim depends on it — a
   gitignored file is present for the author and absent in a clone.
+- Probe a gate with an input the session has not already cleared — an approval
+  outlives the mode that granted it.
 - When a statement changes — a rule, a recorded decision, or one artefact of
   a change under review — grep the three places that restate one before
   calling the change done: the change's own sibling artefacts,
