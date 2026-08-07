@@ -82,6 +82,15 @@ already ships.
 - **WHEN** `bunfig.toml` carries a `registry` key under `[install]`
 - **THEN** `bun test` fails, whichever call wrote it
 
+#### Scenario: A route to a registry the check was not written against
+
+- **WHEN** `[install]` carries any key beyond `exact`, `minimumReleaseAge` and
+  `minimumReleaseAgeExcludes` — a scoped override under `[install.scopes]`,
+  say
+- **THEN** `bun test` fails on the key set, because the check pins what the
+  section holds rather than enumerating the routes to a registry, and no
+  enumeration stays complete
+
 #### Scenario: The release-age gate is given an exemption
 
 - **WHEN** `minimumReleaseAgeExcludes` holds any entry
