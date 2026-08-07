@@ -60,7 +60,8 @@ design, because settling it is the user's.
 ## The pre-PR sequence
 
 Before every PR that changes code — a feature, a bugfix, a chore alike, and
-whether or not it goes through the OpenSpec stages:
+whether or not it goes through the OpenSpec stages. Completing a task group
+starts the sequence in the same turn; never ask whether to run it.
 
 1. `/zombies` with **no arguments** — diff mode reads the real code and
    existing tests, cross-checks the implementation against the
