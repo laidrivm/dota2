@@ -22,29 +22,35 @@ Applied after `mechanised-prohibitions`, which rewrites `deny` and adds a
       written in the `Write(...)` form Claude Code never matches (3)
 - [x] 1.4 Watch each assertion fail before it passes, by breaking the policy
       rather than by editing the assertion
-- [ ] 1.5 Confirm the behaviour per file in a session started after the
+- [x] 1.5 Confirm the behaviour per file in a session started after the
       change; `3a-check` in `PLAN.md` records how this was done before. The
       premise that the authoring session cannot observe it turned out to be
       wrong for `deny`: creating `.npmrc` in a subdirectory was blocked in the
       authoring session, so that case is closed and the root case is the same
-      rule at a shallower depth. What a fresh session still owes is the
-      `bunfig.toml` prompt — this session saw it fire for neither the `Edit`
-      tool nor an append redirection, and whether that is the rule loading at
-      startup, the session's permission mode, or something else is unsettled
+      rule at a shallower depth. The `bunfig.toml` prompt is now settled, and
+      settled as absent: four calls matching a loaded `ask` entry ran with no
+      prompt in the `acceptEdits` and the `default` permission mode alike,
+      against targets no earlier approval covered, while `deny` entries of the
+      same shape in the same object were enforced in the same session and
+      `/permissions` listed every `ask` entry as loaded. The tier is
+      registered and not consulted on Claude Code 2.1.221 — a defect upstream,
+      not a rule to respell — and the capability and design record that
 - [x] 1.6 Leave the prose rule in `CLAUDE.md` in place, and say why in the
-      capability: a permission mode answers the prompt without the user and a
-      subprocess writes outside the tool layer, so the mechanism is partial
-      where `mechanised-prohibitions`' mechanisms are total. The redirection
-      route named here at propose time was measured during implementation and
-      splits: the deny half covers it, the ask half does not
+      capability: a subprocess writes outside the tool layer, so the mechanism
+      is partial where `mechanised-prohibitions`' mechanisms are total. The
+      redirection route named here at propose time was measured during
+      implementation and splits: the deny half covers it, the ask half covers
+      nothing. The permission mode named here first was measured too, by 1.5,
+      and is not the reason the ask half leaks — Manual leaks the same way
 - [x] 1.7 Pin `[install]` whole — `exact`, `minimumReleaseAge` and
       `minimumReleaseAgeExcludes` by key *and* value, so a scoped override
       fails on the key set and a wound-down age gate fails on the value — and
       pin that no `.npmrc` is tracked at any depth. Also refuse an `allow`
       entry restating a gated one, since group 2 fills that list — reading `bunfig.toml` through bun's own TOML
       import rather than by pattern. Raised by `/zombies` against 1.3: the
-      three routes 1.6 records as passing the prompt all fail this, which is
-      the half a permission rule structurally cannot hold — *The supply-chain
+      routes 1.6 and 1.5 record as passing the prompt all fail this, which is
+      the half a permission rule cannot hold — structurally for the subprocess,
+      and on this version for every asked call — *The supply-chain
       configuration files are gated*
 
 ## 2. The allow list

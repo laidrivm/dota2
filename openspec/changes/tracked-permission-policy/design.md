@@ -69,28 +69,45 @@ form Claude Code never matches.
 
 ### The prompt is a boundary against the agent, not a proof
 
-This was measured during implementation, on Claude Code 2.1.221, and the
-answer is not the one this section first assumed. A Bash output redirection to
-a **denied** path is refused: `printf … > tmpprobe/.npmrc` was blocked, while
-`printf … > tmpprobe/other.txt` beside it went through, and neither
-`settings.local.json`, the user-level settings nor `command-guard.ts` mentions
-`.npmrc` — so the `Edit(.npmrc)` deny rule is what stopped it, at a
-subdirectory depth and in a session that had started before the rule was
-written. An **asked** path leaks: `printf '\n# probe\n' >> bunfig.toml` landed
-with no prompt in that same session.
+This was measured during implementation, on Claude Code 2.1.221, and neither
+half answered the way this section first assumed.
 
-What passes both halves is a permission mode — `acceptEdits`,
-`bypassPermissions` — which answers the prompt without the user ever seeing it,
-and a subprocess, which writes outside the tool layer altogether.
+The `deny` half holds. A Bash output redirection to a denied path is refused:
+`printf … > tmpprobe/.npmrc` was blocked, while `printf … >
+tmpprobe/other.txt` beside it went through, and neither `settings.local.json`,
+the user-level settings nor `command-guard.ts` mentions `.npmrc` — so the
+`Edit(.npmrc)` deny rule is what stopped it, at a subdirectory depth and in a
+session that had started before the rule was written. A `Write` of `.npmrc` at
+the repository root is refused the same way, which is the `Edit` specifier
+covering every file-editing tool.
 
-So the rule stops what the agent actually does in an ordinary session, which is
-the failure mode this repository has, and it is not a security boundary against
-a determined caller. The gap it leaves is specific — the `ask` half and the
-redirection — which is what task 1.7's content assertions cover. That is why
-the prose rule keeps its subject rather than
-being deleted the way `mechanised-prohibitions` deletes what it fully replaces
-— the mechanism here is partial, and both the capability and this design say so
-rather than letting the entry read as a guarantee.
+The `ask` half does not hold at all. Four calls matching a loaded `ask` entry —
+an `Edit` of `bunfig.toml`, a `Write` of `scripts/bunfig.toml`, `bun update
+--help`, and `bun pm pkg get name` — ran with no prompt, across the
+`acceptEdits` and the `default` permission mode and against targets no earlier
+approval in the session covered. `/permissions` lists all fifteen `ask` entries
+as loaded from this file, while `deny` entries in the same object are enforced
+in the same session. So the tier is registered and not consulted, and the cause
+sits in Claude Code rather than in how the rule is written: the shapes match
+the documented gitignore syntax, `Bash(npm *)` under `deny` and `Bash(bun
+update *)` under `ask` are the same shape, and only the first one fires.
+
+An earlier reading blamed a permission mode — `acceptEdits` answering the
+prompt before the user sees it. Manual mode refutes it: the same calls pass
+there too. What still passes both halves is a subprocess, which writes outside
+the tool layer altogether.
+
+So on this version the `deny` half stops what the agent actually does in an
+ordinary session, which is the failure mode this repository has, and the `ask`
+half stops nothing. What holds the asked file is task 1.7's content
+assertions, which read `bunfig.toml` through bun's own TOML import and fail on
+a wound-down age gate or an added registry key whichever route wrote it. The
+rules stay because they are correctly written and cost nothing until the defect
+is fixed, but the capability records the measurement rather than the intent.
+That is also why the prose rule keeps its subject rather than being deleted the
+way `mechanised-prohibitions` deletes what it fully replaces — the mechanism
+here is partial, and both the capability and this design say so rather than
+letting the entry read as a guarantee.
 
 ### Curation drops rather than promotes by default
 
