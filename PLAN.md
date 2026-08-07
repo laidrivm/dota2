@@ -81,16 +81,18 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
   three touched no file under `src/`, this one among them.
 
 ### Open
-- [ ] **`tracked-permission-policy`** — group 1 implemented bar its
-      fresh-session check, group 2 open
+- [ ] **`tracked-permission-policy`** — group 1 implemented, group 2 open
       (`openspec/changes/tracked-permission-policy`). Gates `bunfig.toml` and
-      `.npmrc` with `Edit` rules, and curates the 170 auto-accepted allow
-      entries out of the untracked settings file into the tracked one. Two task
-      groups, two PRs. Group 1 measured what the two rules leak, against the
-      design's assumption that a shell redirection passes both: on Claude Code
-      2.1.221 `deny` refuses a redirection to the denied path and `ask` does
-      not gate one. Task 1.5 still owes a fresh session the `bunfig.toml`
-      prompt, which fired here for neither the `Edit` tool nor a redirection.
+      `.npmrc` with `Edit` rules, and curates the auto-accepted allow entries
+      out of the untracked settings file into the tracked one. Two task groups,
+      two PRs. Group 1 measured what the two rules hold, against the design's
+      assumption that both gate a tool-layer call: on Claude Code 2.1.221 the
+      `deny` half is enforced through every route tried and the `ask` half is
+      not enforced at all — loaded and listed in `/permissions`, never
+      consulted, in `acceptEdits` and Manual alike. The rules stay; what holds
+      `bunfig.toml` meanwhile is task 1.7's content test. Worth re-measuring
+      on a later Claude Code, since the boundary returns by itself if the
+      defect is fixed.
 - [ ] **`spec-test-traceability`** — not yet proposed. Extends
       `openspec/config.yaml`'s "every criterion is cited by a task" one step:
       cited by a **test**, via a criterion identifier in the test name and a
