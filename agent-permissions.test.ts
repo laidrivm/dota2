@@ -236,6 +236,17 @@ describe("the supply-chain configuration files are gated", () => {
 			expect(entry).not.toMatch(/^(Write|NotebookEdit|Glob)\(/);
 		}
 	});
+
+	test("nothing gated is granted back by the allow list", () => {
+		// Whether `allow` outranks `ask` is not recorded here and is not
+		// measured, so this does not depend on it: an entry duplicating a
+		// gated one either re-opens the gate or is dead weight that reads
+		// like a grant. Neither belongs, and group 2 fills this list.
+		const allow: string[] = settings.permissions?.allow ?? [];
+		for (const entry of [...deny, ...ask]) {
+			expect(allow).not.toContain(entry);
+		}
+	});
 });
 
 describe("the keys the gate is for still hold their reserved value", () => {
@@ -245,23 +256,19 @@ describe("the keys the gate is for still hold their reserved value", () => {
 	// the `ask` half does not gate one, though the `deny` half does refuse a
 	// redirection to `.npmrc`. None of them passes these, which read the
 	// settled content instead of the call that produced it.
-	test("the release-age gate exempts nothing", () => {
-		// `bunfig.toml`'s own comment: keep empty, add entries only with an
-		// explicit user decision.
-		expect(bunfig.install.minimumReleaseAgeExcludes).toEqual([]);
-	});
-
-	test("the install section carries no key but the three it is for", () => {
+	test("the install section is exactly what it was decided to be", () => {
+		// The whole section, keys and values together. Keys, because
 		// `CLAUDE.md` reserves a registry *or a scoped registry override* for
-		// the user. Pinning the key set rather than the absence of `registry`
-		// is what makes that hold without this test having to know how bun
-		// spells every route to one: any key arriving here fails, and a human
-		// decides what it was.
-		expect(Object.keys(bunfig.install).sort()).toEqual([
-			"exact",
-			"minimumReleaseAge",
-			"minimumReleaseAgeExcludes",
-		]);
+		// the user, and pinning the set is what holds that without this test
+		// knowing how bun spells every route to one — any key arriving here
+		// fails and a human decides what it was. Values, because a key set
+		// says nothing about `exact` being flipped off or the age gate being
+		// wound down to zero, which weaken the same boundary from inside.
+		expect(bunfig.install).toEqual({
+			exact: true,
+			minimumReleaseAge: 259200,
+			minimumReleaseAgeExcludes: [],
+		});
 	});
 
 	test("no .npmrc is tracked at any depth", () => {

@@ -37,11 +37,11 @@ Applied after `mechanised-prohibitions`, which rewrites `deny` and adds a
       where `mechanised-prohibitions`' mechanisms are total. The redirection
       route named here at propose time was measured during implementation and
       splits: the deny half covers it, the ask half does not
-- [x] 1.7 Pin the two reserved keys by their settled value — `[install]`
-      carries `exact`, `minimumReleaseAge` and `minimumReleaseAgeExcludes` and
-      no fourth key, which catches a scoped override as well as a plain
-      `registry`; `minimumReleaseAgeExcludes` empty; no tracked
-      `.npmrc` at any depth — reading `bunfig.toml` through bun's own TOML
+- [x] 1.7 Pin `[install]` whole — `exact`, `minimumReleaseAge` and
+      `minimumReleaseAgeExcludes` by key *and* value, so a scoped override
+      fails on the key set and a wound-down age gate fails on the value — and
+      pin that no `.npmrc` is tracked at any depth. Also refuse an `allow`
+      entry restating a gated one, since group 2 fills that list — reading `bunfig.toml` through bun's own TOML
       import rather than by pattern. Raised by `/zombies` against 1.3: the
       three routes 1.6 records as passing the prompt all fail this, which is
       the half a permission rule structurally cannot hold — *The supply-chain
