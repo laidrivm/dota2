@@ -39,3 +39,29 @@
   enumeration missed: `:` and wildcards, `-o` shifting the operand, `--prune`,
   then unambiguous abbreviations
 - Not run: preflight, security-review, code-review
+
+## 2026-08-07 — feat/tracked-permission-policy-gates (group 1)
+
+- zombies: PASS — 4 gaps, 4 acted on. All four were one hole: the change
+  pinned the permission rules and nothing pinned the values they stand in
+  front of, which is the half a rule structurally cannot hold
+- warm: not run — no manifest changed
+- ponytail-review: PASS — 1 finding, 1 applied, net 0 lines. Nothing to cut;
+  the finding was a comment restating a claim the session had just falsified
+- triage: PASS — 2 groups, 1 high-risk group read, 3 findings, 3 applied. The
+  best of them: `git ls-files` was checked by stdout and not `exitCode`, and
+  outside a repository git exits 128 printing nothing — the test would have
+  passed on no evidence, which is the same shape as the 2026-07-27 entry
+- coderabbit-local: PASS — 12 findings over three passes, 7 applied,
+  4 Major dismissed with the user's approval, 1 Minor skipped
+- **The measurement was worth more than any finding.** The design asserted
+  that a shell redirection passes both rules. It splits: on Claude Code
+  2.1.221 `deny` refuses a redirection to the denied path, `ask` does not
+  gate one. Seven sites restated the wrong version — four artefacts, the
+  test's own comment, `PLAN.md`, and a scenario block. The grep rule found
+  four of them and the ponytail pass found the fifth, which is an argument
+  for running a pass whose axis is not correctness
+- **Three of the four dismissals were one position**: the bot asserting Claude
+  Code's permission semantics from priors against a measurement recorded in
+  the diff with its method. The fourth named a test layer that does not exist
+- Not run: preflight, security-review, code-review
