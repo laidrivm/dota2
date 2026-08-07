@@ -37,8 +37,10 @@ Applied after `mechanised-prohibitions`, which rewrites `deny` and adds a
       where `mechanised-prohibitions`' mechanisms are total. The redirection
       route named here at propose time was measured during implementation and
       splits: the deny half covers it, the ask half does not
-- [x] 1.7 Pin the two reserved keys by their settled value — no `registry`
-      under `[install]`, `minimumReleaseAgeExcludes` empty, no tracked
+- [x] 1.7 Pin the two reserved keys by their settled value — `[install]`
+      carries `exact`, `minimumReleaseAge` and `minimumReleaseAgeExcludes` and
+      no fourth key, which catches a scoped override as well as a plain
+      `registry`; `minimumReleaseAgeExcludes` empty; no tracked
       `.npmrc` at any depth — reading `bunfig.toml` through bun's own TOML
       import rather than by pattern. Raised by `/zombies` against 1.3: the
       three routes 1.6 records as passing the prompt all fail this, which is
