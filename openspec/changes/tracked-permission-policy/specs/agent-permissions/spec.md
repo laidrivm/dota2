@@ -91,6 +91,13 @@ already ships.
   section holds rather than enumerating the routes to a registry, and no
   enumeration stays complete
 
+#### Scenario: A reserved key weakened rather than added
+
+- **WHEN** `exact` is flipped to `false`, or `minimumReleaseAge` wound down
+  from `259200`
+- **THEN** `bun test` fails, because the section is pinned by value and not
+  only by key set — a boundary weakened from inside is not an added key
+
 #### Scenario: The release-age gate is given an exemption
 
 - **WHEN** `minimumReleaseAgeExcludes` holds any entry
@@ -145,6 +152,17 @@ check can tell a command that is policy from one that was convenient once.
 Entries accumulated in the untracked `.claude/settings.local.json` by approving
 a prompt are not decisions: at the time of writing it holds 170, of which 19
 name a machine-local or `/tmp` path and 8 a one-off `sed`, `cp` or `mv`.
+
+An entry SHALL NOT restate one the `deny` or `ask` list already carries.
+Whether `allow` outranks `ask` is not settled here; the entry is refused
+either way, because it either re-opens a gate or reads as a grant while doing
+nothing.
+
+#### Scenario: An allow entry restates a gated one
+
+- **WHEN** `permissions.allow` carries `Edit(bunfig.toml)`, which `ask`
+  already holds
+- **THEN** `bun test` fails
 
 #### Scenario: A machine-local entry
 
