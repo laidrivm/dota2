@@ -66,7 +66,7 @@ Applied after `mechanised-prohibitions`, which rewrites `deny` and adds a
 - [ ] 2.3 Record the promoted count and the reason for the largest dropped
       group in the PR body, so the curation is reviewable without diffing an
       untracked file the reviewer does not have
-- [ ] 2.4 Extend `agent-permissions.test.ts` with the hygiene check, as two
+- [x] 2.4 Extend `agent-permissions.test.ts` with the hygiene check, as two
       rules over two forms — 145 of the 170 entries are `Bash(...)` command
       strings and only 6 are `Read(...)` path specifiers, so one rule cannot
       cover both. (a) No entry, whatever its tool, contains an absolute path
@@ -78,7 +78,7 @@ Applied after `mechanised-prohibitions`, which rewrites `deny` and adds a
       is a shell parser with quoting, globs and expansions. Assert the entry
       set is non-empty first, so an emptied `allow` fails rather than passing
       every per-entry check vacuously (1)
-- [ ] 2.5 Watch the hygiene check fail three ways before it passes — a
+- [x] 2.5 Watch the hygiene check fail three ways before it passes — a
       `Read(//Users/…)` entry, a `Bash(… /tmp/…)` entry, and an
       `Edit(../../…)` traversal — then remove each. Confirm a pathless
       `Bash(bun test)` stays green throughout

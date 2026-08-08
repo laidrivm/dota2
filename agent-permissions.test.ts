@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+import { resolve } from "node:path";
 // Imported rather than pattern-matched: bun parses TOML natively, and a
 // regex over the text would read a commented-out key as a live one.
 import bunfig from "./bunfig.toml";
@@ -19,6 +20,7 @@ const ghWrites = ["gh pr comment", "gh issue comment", "gh pr review"];
 
 const deny: string[] = settings.permissions?.deny ?? [];
 const ask: string[] = settings.permissions?.ask ?? [];
+const allow: string[] = settings.permissions?.allow ?? [];
 
 /**
  * The command rules. Both lists also carry file rules, whose specifier is a
@@ -231,20 +233,72 @@ describe("the supply-chain configuration files are gated", () => {
 		// the same reason, so all three are named here. All three lists too,
 		// not just the two that carry a file rule today: `allow` takes the
 		// same specifier and would exempt one.
-		const allow: string[] = settings.permissions?.allow ?? [];
 		for (const entry of [...deny, ...ask, ...allow]) {
 			expect(entry).not.toMatch(/^(Write|NotebookEdit|Glob)\(/);
 		}
 	});
 
 	test("nothing gated is granted back by the allow list", () => {
-		// Whether `allow` outranks `ask` is not recorded here and is not
-		// measured, so this does not depend on it: an entry duplicating a
-		// gated one either re-opens the gate or is dead weight that reads
-		// like a grant. Neither belongs, and group 2 fills this list.
-		const allow: string[] = settings.permissions?.allow ?? [];
+		// This does not depend on which tier outranks which: an entry
+		// duplicating a gated one either re-opens the gate or is dead weight
+		// that reads like a grant. Neither belongs. Exact restatements only —
+		// a narrower entry under a broader gate, `Bash(npm view *)` under the
+		// `Bash(npm *)` deny, is not caught here and was dropped by review.
 		for (const entry of [...deny, ...ask]) {
 			expect(allow).not.toContain(entry);
+		}
+	});
+});
+
+describe("the tracked allow list holds only what a clone can use", () => {
+	/**
+	 * What a rule is written about: the text inside `Tool(...)`, and the empty
+	 * string for a bare tool name like `WebSearch`. Taken before any token is
+	 * read, because the entry itself starts with the tool — `Read(//Users/…)`
+	 * begins with `R`, and a check over the whole string would miss it.
+	 */
+	function argument(entry: string): string {
+		const open = entry.indexOf("(");
+		return open === -1 ? "" : entry.slice(open + 1, -1);
+	}
+
+	/**
+	 * Whitespace-separated tokens that begin a path at the filesystem root or
+	 * at home — `//` is covered by `/`. Quotes are deliberately not stripped,
+	 * so an `awk '/^## Rules/'` regex is not read as a path; the cost is that
+	 * a quoted absolute path passes, which review catches and this cannot.
+	 */
+	function absoluteTokens(entry: string): string[] {
+		return argument(entry)
+			.split(/\s+/)
+			.filter((token) => token.startsWith("/") || token.startsWith("~/"));
+	}
+
+	test("the list is not empty", () => {
+		// Every assertion below iterates the list, so an `allow` emptied by a
+		// bad edit would satisfy all of them without testing anything.
+		expect(allow.length).toBeGreaterThan(0);
+	});
+
+	test("no entry carries an absolute path token", () => {
+		// Lexical, and deliberately not a shell parser: extracting the paths
+		// inside a Bash command means handling quoting, globs, redirections
+		// and expansions to gate a file a human reads on review. Forbidding
+		// the shape covers the class instead — a machine-local `//Users/…`
+		// and a `/tmp` scratch path fail by the same sentence.
+		for (const entry of allow) {
+			expect(absoluteTokens(entry)).toEqual([]);
+		}
+	});
+
+	test("a path specifier resolves inside the repository", () => {
+		// The second rule, for the two tools whose argument is a path by
+		// definition. It is what catches `Edit(../../secrets/**)`, which
+		// carries no absolute token and so passes the rule above.
+		for (const entry of allow) {
+			const path = entry.match(/^(?:Read|Edit)\((.+)\)$/)?.[1];
+			if (path === undefined) continue;
+			expect(resolve(import.meta.dir, path)).toStartWith(`${import.meta.dir}/`);
 		}
 	});
 });
