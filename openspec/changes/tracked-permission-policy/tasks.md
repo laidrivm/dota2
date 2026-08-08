@@ -55,12 +55,12 @@ Applied after `mechanised-prohibitions`, which rewrites `deny` and adds a
 
 ## 2. The allow list
 
-- [ ] 2.1 Read `.claude/settings.local.json`'s 170 allow entries and sort each
+- [x] 2.1 Read `.claude/settings.local.json`'s 170 allow entries and sort each
       into promote or drop: promote only what this project's documented
       workflow runs; drop anything naming a path outside the repository, a
       path under `/tmp`, or a one-off `sed`, `cp` or `mv` against a single
       named file — *The tracked allow list holds only what a clone can use*
-- [ ] 2.2 Move the promoted subset into `.claude/settings.json` and remove it
+- [x] 2.2 Move the promoted subset into `.claude/settings.json` and remove it
       from the untracked file; leave that file in place with what is genuinely
       local — *The tracked allow list holds only what a clone can use*
 - [ ] 2.3 Record the promoted count and the reason for the largest dropped
