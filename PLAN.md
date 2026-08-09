@@ -124,15 +124,22 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
 - [ ] **Decide whether MCP earns its place in the review.** After four pull
       requests under `knowledge_base.mcp.usage: "enabled"`, ask whether any
       finding of the API-existence class actually appeared. Silence answers
-      that question only if the source was working and had something to read:
-      Context7 was connected in the dashboard on 2026-08-01, so the count
-      starts at the pull request that ships this entry, but still confirm those
-      PRs actually called into Preact, Bun or Playwright. Without both, the
-      result is unverified and the setting stays — flipping it on silence would
-      make an unretrieved source and an absent defect class the same evidence,
-      which is the confusion `.coderabbit.yaml` tells the bot not to make. With
-      both, set `usage` back to `"disabled"`: a knowledge source that finds
-      nothing is a widened trust boundary bought for nothing.
+      that question only if the source was working *and* the defect class was
+      possible, and both halves are checkable:
+      - **The source retrieved.** Context7's dashboard shows requests per day;
+        compare them with the dates CodeRabbit submitted reviews.
+      - **The class was possible.** The pull request touched `src/**` or
+        `e2e/**` — the code that calls Preact, Bun and Playwright for real. A
+        run over configuration, docs and root-level tests cannot produce the
+        finding, so it does not count towards the four however cleanly it
+        retrieved. #66 to #69 were four such runs and are why this half is
+        written down: they touched no file under either path.
+
+      Without both, the result is unverified and the setting stays — flipping
+      it on silence would make an unretrieved source and an absent defect class
+      the same evidence, which is the confusion `.coderabbit.yaml` tells the
+      bot not to make. With both, set `usage` back to `"disabled"`: a knowledge
+      source that finds nothing is a widened trust boundary bought for nothing.
 
 ## Standing constraints
 
