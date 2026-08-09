@@ -6,9 +6,11 @@
 
 The project SHALL run mutation testing over `src/model.ts` alone, killing
 mutants with `bun test src/model.test.ts` through Stryker's built-in command
-runner. No Stryker runner plugin SHALL be installed: none exists for
-`bun:test`, and the command runner's documented cost — the whole suite runs for
-every mutant — is 53 ms per mutant against this suite.
+runner. No Stryker runner plugin SHALL be installed. Two third-party ones for
+`bun:test` exist, and what they offer is per-test optimisation; the command
+runner's documented cost — the whole suite runs for every mutant — is 53 ms
+against this suite, so the optimisation is worth nothing and the second
+supply-chain root is not.
 
 The scope SHALL stay at one source file and one command. A second file under
 the same configuration would share one floor, and a number that moves whenever
