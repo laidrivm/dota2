@@ -23,18 +23,22 @@ those lines are broken.
   per-test optimisation, and the command runner's documented cost — the whole
   suite per mutant — is 53 ms here, so the optimisation buys nothing and the
   second supply-chain root costs something.
-- `scripts/mutation-floor.ts` runs Stryker, reads the survivor count out of its
-  JSON report, and compares it against a floor constant declared in the script.
-  The count is absolute, not a percentage: Stryker's own `thresholds.break` is
-  a mutation-score percentage, which moves whenever the mutant total moves and
-  so cannot carry a reason for a single admitted survivor.
+- `scripts/mutation-floor.ts` reads the survivor count out of Stryker's JSON
+  report and compares it against a floor constant declared in the script. It
+  runs nothing itself — the CI job runs Stryker and then the check as two
+  commands. The count is absolute, not a percentage: Stryker's own
+  `thresholds.break` is a mutation-score percentage, which moves whenever the
+  mutant total moves and so cannot carry a reason for a single admitted
+  survivor.
 - The floor may be lowered freely and raised only with a reason written on that
   line; a count below the floor also fails, naming the value to write, so the
   number tracks reality instead of drifting into a meaningless upper bound.
 - An equivalent mutant is marked at the site it occurs, with
   `// Stryker disable next-line <Mutator>: <reason>`, and drops out of the
   count. That is the whole exemption mechanism — no register, no per-mutator
-  exclusion in configuration.
+  exclusion in configuration. The check scans `src/model.ts` for disable
+  comments that name `all` or carry no reason; it does not police
+  `stryker.config.json`, which is fifteen lines a reviewer reads whole.
 - A new `.github/workflows/mutation.yml` job. Stryker declares
   `engines.node >= 20.0.0`, so this is the first job in the repository that may
   need `setup-node` beside `setup-bun`.

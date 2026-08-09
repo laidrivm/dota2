@@ -162,6 +162,13 @@ The named-mutator form is required rather than `all`, because `disable
 next-line all` would also silence a future mutant on that line that nobody has
 judged.
 
+Only (1) is enforced by a scan. An earlier draft also had the check reject
+`mutator.excludedMutations` in the configuration, and that was cut: a
+fifteen-line JSON file is read whole by whoever reviews an edit to it, while a
+disable comment is one line inside 296 lines of arithmetic. The scan exists for
+the thing that hides, and mechanising the other one buys a guarantee review
+already gives.
+
 The residual hole is that a disable comment can be used to bury a real
 survivor. Nothing mechanical distinguishes the two — it is the same trust a
 test name already carries — but the comment must name the mutator and give a
@@ -174,6 +181,13 @@ which is blocking in CI for free because CI already runs `bun test`. That
 shape is wrong here: this gate spawns a process per mutant, and `bun test` is
 what `pre-push` runs on every push. A separate `mutation.yml` keeps the pushes
 fast and keeps a Stryker failure legible as itself.
+
+The job runs Stryker and the check as two commands rather than having the
+script spawn Stryker. That keeps `scripts/mutation-floor.ts` a pure function of
+a report file — testable against synthetic JSON with no process management —
+and it means a crashed Stryker fails the job through the shell instead of
+through a branch in our code that has to tell "the tool broke" apart from "the
+floor was exceeded".
 
 Stryker declares `engines.node >= 20`, so the job may need `setup-node`
 alongside `setup-bun`. Whether `bunx stryker run` works without Node is a
@@ -192,10 +206,12 @@ them before the tool runs for the first time.
 - **A `Timeout` mutant counts as killed, and timeouts are timing-dependent.**
   → A mutant that loops near the timeout boundary could be killed on one runner
   and survive on another, which under a floor that fails in both directions is
-  a CI flake rather than a warning. Mitigated by raising `timeoutMS` well above
-  the default relative to a 53 ms suite; if a flip is observed anyway, it is a
-  fact about a specific mutant and gets a disable comment with that as its
-  reason.
+  a CI flake rather than a warning. The default already carries the margin —
+  `netTime × timeoutFactor + timeoutMS` is 5000 ms plus change against a 53 ms
+  suite, ~75× headroom — so `timeoutMS` is left alone rather than tuned against
+  a flake nobody has seen. If a flip is observed, it is a fact about a specific
+  mutant: raise `timeoutMS` then, or give that mutant a disable comment with
+  the flip as its reason.
 - **The command runner reruns the whole model suite per mutant, so cost is
   linear in both.** → 53 ms and ~34 tests today. A slow test added to
   `src/model.test.ts` later multiplies by the mutant count. Acceptable while

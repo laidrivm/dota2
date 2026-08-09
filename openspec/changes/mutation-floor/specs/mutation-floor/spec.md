@@ -53,6 +53,11 @@ mutation-score percentage whose denominator moves with every edit to
 `src/model.ts`, so the same set of survivors yields a different score after an
 unrelated refactor and no one can write a reason about it.
 
+The check SHALL read a report and run nothing. Whoever invokes it runs Stryker
+first — the CI job runs the two as separate commands — so a Stryker that
+crashed is a non-zero exit the shell already surfaces, and the check never has
+to tell its own verdict apart from the tool's failure.
+
 The check SHALL fail when the count is above the floor, reporting both numbers.
 It SHALL also fail when the count is *below* the floor, naming the value to
 write, so a gain is recorded rather than absorbed into slack.
@@ -101,10 +106,11 @@ The check SHALL fail on a disable comment in `src/model.ts` that names `all`
 rather than a mutator, or that carries no reason after the colon. `all` would
 also silence a mutant added to that line later, which no one has judged.
 
-The check SHALL fail when `stryker.config.json` declares
-`mutator.excludedMutations`. Excluding a mutator disables it across every file
-and leaves no trace at the line it affects, which is the property the disable
-comment exists to provide.
+`mutator.excludedMutations` in `stryker.config.json` would achieve the same
+exemption with no trace at the line it affects, and it is not taken. It is not
+checked for either: a fifteen-line configuration file is read whole by whoever
+reviews a change to it, where a disable comment hides in 296 lines of
+arithmetic. The scan exists for the one that hides.
 
 #### Scenario: An equivalent mutant is marked
 
@@ -124,8 +130,3 @@ comment exists to provide.
 - **WHEN** a disable comment names a mutator but the text after the colon is
   absent, empty or whitespace
 - **THEN** the check fails
-
-#### Scenario: A mutator excluded in configuration
-
-- **WHEN** `stryker.config.json` contains a `mutator.excludedMutations` entry
-- **THEN** the check fails, naming the entry
