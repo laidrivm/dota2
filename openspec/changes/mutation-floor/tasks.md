@@ -17,12 +17,17 @@ test already use, and it is what keeps `bun test` in milliseconds.
 
 ## 1. The tool and its scope
 
-- [ ] 1.1 Run `/warm` on `@stryker-mutator/core` and report the verdict before
-      anything is installed. The inputs already gathered: 9.6.1, Apache-2.0,
+- [ ] 1.1 Confirm the `/warm` verdict still holds before installing. It was run
+      while this change was proposed and returned **Keep**: 9.6.1, Apache-2.0,
       `github.com/stryker-mutator/stryker-js`, first published 2019-02-13,
       latest 2026-04-10, 1.9 M weekly downloads, no install scripts,
-      `engines.node >= 20`, 24 direct dependencies. A rejection ends the change
-      here rather than being worked around
+      `engines.node >= 20`, 26 direct dependencies, 1.2 MB unpacked over 626
+      files. The one advisory in this package family, CVE-2024-57085 in
+      `@stryker-mutator/util` below 8.7.1, does not reach core 9.6.1, which
+      pins that package at 9.6.1 exactly. The single ⚠️ was right-sizing: the
+      `stryker init` wizard, the dashboard client and the IDE server ship with
+      core and cannot be sliced off. Re-run it if the resolved version differs
+      from 9.6.1; a rejection ends the change rather than being worked around
 - [ ] 1.2 Add `.stryker-tmp/` and `reports/` to `.gitignore` **before** the
       first run — Stryker creates both, and the sandbox holds a full copy of
       the working tree
