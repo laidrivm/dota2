@@ -58,7 +58,7 @@ the scan after 157 tokens.
 So the fallback was never zero-dependency: it needed a real parser plus roughly
 150 lines of mutator, runner and reporter that this repository would then own
 forever. Against that, `@stryker-mutator/core` is one dependency and about
-fifteen lines of configuration. It is not a cheap dependency — 24 direct
+fifteen lines of configuration. It is not a cheap dependency — 26 direct
 dependencies of its own — but the alternative is not cheaper, only differently
 expensive, and the expensive part of it is ours to maintain.
 
@@ -188,7 +188,7 @@ them before the tool runs for the first time.
   which the command deliberately does not run. A mutant killed only by an e2e
   test counts as a survivor here, which overstates the gap rather than hiding
   it.
-- **24 direct dependencies enter a tree that had seven.** → The largest
+- **26 direct dependencies enter a tree that had seven.** → The largest
   supply-chain expansion in the repository so far, in a repository whose
   premise is hardening. It is a devDependency, never shipped to a client, and
   `bunfig.toml`'s three-day release-age gate and `exact = true` apply to the

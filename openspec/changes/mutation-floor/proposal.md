@@ -86,7 +86,7 @@ neither states anything this change contradicts.
 - New files: `stryker.config.json`, `scripts/mutation-floor.ts`,
   `.github/workflows/mutation.yml`. Modified: `package.json`, `bun.lock`,
   `.gitignore`, `docs/testing.md`.
-- One new devDependency with 24 direct dependencies of its own, in a repository
+- One new devDependency with 26 direct dependencies of its own, in a repository
   that currently has one runtime and six development dependencies. This is the
   largest single expansion of the dependency tree so far and the reason `/warm`
   runs before the install, not after.
