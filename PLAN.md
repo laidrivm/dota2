@@ -86,10 +86,14 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
   its entries means anything about.
 
 ### Open
-- [ ] **`spec-test-traceability`** — not yet proposed. Extends
-      `openspec/config.yaml`'s "every criterion is cited by a task" one step:
-      cited by a **test**, via a criterion identifier in the test name and a
-      script that greps both sides.
+- [ ] **`spec-test-traceability`** — proposed, two steps, not yet applied.
+      Extends `openspec/config.yaml`'s "every criterion is cited by a task" one
+      step: cited by a **test**. The identifier is derived from the scenario
+      heading rather than written into the spec, and it lives in a `// spec:`
+      comment above the test rather than in the test name — a single act may
+      close several criteria, and three identifiers do not fit in a name. The
+      existing ~380 uncited criteria stay uncited behind a floor that may not
+      rise without a reason on its line.
 - [ ] **`mutation-floor`** — not yet proposed. Mutation testing over
       `src/model.ts` and `src/types.ts` only, its own CI job, floor set from the
       first measurement and forbidden to fall. Tool through `/warm` first; a
