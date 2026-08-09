@@ -65,3 +65,24 @@
   Code's permission semantics from priors against a measurement recorded in
   the diff with its method. The fourth named a test layer that does not exist
 - Not run: preflight, security-review, code-review
+
+## 2026-08-09 — feat/tracked-permission-policy-allowlist (group 2, PRs #69–#71)
+
+- coderabbit: PASS — 5 findings, 5 dispositioned (3 applied, 1 rejected,
+  1 Trivial skipped). The Major that mattered was mine: `Bash(bunx openspec *)`
+  had been promoted into the tracked allow list, pre-approving a registry
+  fetch that `CLAUDE.md` forbids
+- Not run: triage, zombies, warm, ponytail-review, coderabbit-local, preflight,
+  security-review, code-review
+- **A rejected finding was a fabrication**: the bot asked to change `behavior`
+  to `behaviour` at a line where the word does not appear, and `git log -S`
+  finds it in no commit on the branch. Same class as the 2026-08-07 entry's
+  dismissals — the bot asserting a fact about the diff rather than reading it
+- **The session's real finding came from the user, not a skill.** Three of the
+  four review skills did not run, and the one that did could not have caught
+  it: the wrong claim was a measurement error, and the diff it produced was
+  internally consistent. What caught it was the user saying "но я одобрял
+  bun outdated в диалоге" — see docs/context/permission-tiers-2026-08.md
+- **CodeRabbit re-reviewed after the fixes were pushed and raised 3 more**,
+  which the disposition pass had already closed as PASS. A gate line is true
+  of the run that produced it, not of the pull request afterwards
