@@ -55,8 +55,9 @@ Applied after `mechanised-prohibitions`, which rewrites `deny` and adds a
 
 ## 2. The allow list
 
-- [x] 2.1 Read `.claude/settings.local.json`'s 170 allow entries and sort each
-      into promote or drop: promote only what this project's documented
+- [x] 2.1 Read `.claude/settings.local.json`'s allow entries — 170 when this
+      was written, 291 at curation — and sort each into promote or drop:
+      promote only what this project's documented
       workflow runs; drop anything naming a path outside the repository, a
       path under `/tmp`, or a one-off `sed`, `cp` or `mv` against a single
       named file — *The tracked allow list holds only what a clone can use*
@@ -67,7 +68,7 @@ Applied after `mechanised-prohibitions`, which rewrites `deny` and adds a
       group in the PR body, so the curation is reviewable without diffing an
       untracked file the reviewer does not have
 - [x] 2.4 Extend `agent-permissions.test.ts` with the hygiene check, as two
-      rules over two forms — 145 of the 170 entries are `Bash(...)` command
+      rules over two forms — 261 of the 291 entries are `Bash(...)` command
       strings and only 6 are `Read(...)` path specifiers, so one rule cannot
       cover both. (a) No entry, whatever its tool, contains an absolute path
       token — `/`, `//` or `~/` — which is lexical and catches `//Users/…` (5)
@@ -82,7 +83,7 @@ Applied after `mechanised-prohibitions`, which rewrites `deny` and adds a
       `Read(//Users/…)` entry, a `Bash(… /tmp/…)` entry, and an
       `Edit(../../…)` traversal — then remove each. Confirm a pathless
       `Bash(bun test)` stays green throughout
-- [ ] 2.6 Grep for sites restating what these two groups change —
+- [x] 2.6 Grep for sites restating what these two groups change —
       `openspec/specs/agent-permissions/spec.md`, `PLAN.md`'s decision for this
       change and the `3a` entries that describe the current policy,
       `README.md`'s ownership row for `.claude/settings.json`, and `CLAUDE.md`'s

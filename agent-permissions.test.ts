@@ -304,12 +304,14 @@ describe("the tracked allow list holds only what a clone can use", () => {
 });
 
 describe("the keys the gate is for still hold their reserved value", () => {
-	// The prompt is not a proof. A permission mode answers it without the
-	// user, and a subprocess writes outside the tool layer; both pass the
-	// rules above. So does a shell redirection to `bunfig.toml`, measured —
-	// the `ask` half does not gate one, though the `deny` half does refuse a
-	// redirection to `.npmrc`. None of them passes these, which read the
-	// settled content instead of the call that produced it.
+	// The prompt is not a proof, and for `bunfig.toml` it is not even a
+	// prompt: measured on Claude Code 2.1.221, the `ask` tier loads, appears
+	// in `/permissions`, and gates nothing — an `Edit` of the file, a `Write`
+	// of a copy at depth and a redirection all land unremarked, in Manual
+	// mode as much as in `acceptEdits`. The `deny` half does refuse all three
+	// for `.npmrc`. A subprocess passes both halves whatever the version.
+	// None of them passes these, which read the settled content instead of
+	// the call that produced it.
 	test("the install section is exactly what it was decided to be", () => {
 		// The whole section, keys and values together. Keys, because
 		// `CLAUDE.md` reserves a registry *or a scoped registry override* for

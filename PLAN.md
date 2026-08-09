@@ -81,11 +81,13 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
   three touched no file under `src/`, this one among them.
 
 ### Open
-- [ ] **`tracked-permission-policy`** — group 1 implemented, group 2 open
+- [ ] **`tracked-permission-policy`** — both groups implemented; group 2 owes
+      only its pull request
       (`openspec/changes/tracked-permission-policy`). Gates `bunfig.toml` and
       `.npmrc` with `Edit` rules, and curates the auto-accepted allow entries
-      out of the untracked settings file into the tracked one. Two task groups,
-      two PRs. Group 1 measured what the two rules hold, against the design's
+      out of the untracked settings file into the tracked one — 59 of 291
+      promoted, the rest left as the scratch space they are. Group 1 measured
+      what the two rules hold, against the design's
       assumption that both gate a tool-layer call: on Claude Code 2.1.221 the
       `deny` half is enforced through every route tried and the `ask` half is
       not enforced at all — loaded and listed in `/permissions`, never
