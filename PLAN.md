@@ -94,10 +94,15 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       close several criteria, and three identifiers do not fit in a name. The
       existing ~380 uncited criteria stay uncited behind a floor that may not
       rise without a reason on its line.
-- [ ] **`mutation-floor`** — not yet proposed. Mutation testing over
-      `src/model.ts` and `src/types.ts` only, its own CI job, floor set from the
-      first measurement and forbidden to fall. Tool through `/warm` first; a
-      hand-rolled AST mutator is the fallback.
+- [ ] **`mutation-floor`** — proposed, three steps, not yet applied. Mutation
+      testing over `src/model.ts` alone, its own CI job, floor set from the
+      first measurement as an absolute survivor count and failing in both
+      directions. `src/types.ts` left out: it holds no branch and no
+      arithmetic, so its only mutants edit constants. The hand-rolled AST
+      mutator is no longer the fallback — TypeScript 7's native port exposes a
+      scanner and no parser, and the scanner mis-reads the template literals
+      `model.ts` is full of, so Stryker's command runner is the tool. `/warm`
+      on it is the change's first task and can still end it.
 - [ ] **`reviewable-diff-gates` — reverse two non-goals**. The file-size cap
       (~300 `.ts`, ~200 `.css`) and the rule of two are recorded there as
       deliberate non-goals. An `/opsx:update` on that change, not a new
