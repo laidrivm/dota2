@@ -64,7 +64,7 @@ Applied after `mechanised-prohibitions`, which rewrites `deny` and adds a
 - [x] 2.2 Move the promoted subset into `.claude/settings.json` and remove it
       from the untracked file; leave that file in place with what is genuinely
       local — *The tracked allow list holds only what a clone can use*
-- [ ] 2.3 Record the promoted count and the reason for the largest dropped
+- [x] 2.3 Record the promoted count and the reason for the largest dropped
       group in the PR body, so the curation is reviewable without diffing an
       untracked file the reviewer does not have
 - [x] 2.4 Extend `agent-permissions.test.ts` with the hygiene check, as two
