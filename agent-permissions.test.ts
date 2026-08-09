@@ -264,14 +264,17 @@ describe("the tracked allow list holds only what a clone can use", () => {
 
 	/**
 	 * Whitespace-separated tokens that begin a path at the filesystem root or
-	 * at home — `//` is covered by `/`. Quotes are deliberately not stripped,
-	 * so an `awk '/^## Rules/'` regex is not read as a path; the cost is that
-	 * a quoted absolute path passes, which review catches and this cannot.
+	 * at home — `//` is covered by `/`. A leading quote is allowed before the
+	 * slash, so `cp x "/tmp/x.bak"` fails here rather than passing on its
+	 * quoting. The cost is a quoted regex that opens with a slash — an
+	 * `awk '/^## Rules/' file` entry reads as a path and fails too. That
+	 * direction is the safe one: a false failure is read on review, while a
+	 * machine-local path admitted here reaches every clone.
 	 */
 	function absoluteTokens(entry: string): string[] {
 		return argument(entry)
 			.split(/\s+/)
-			.filter((token) => token.startsWith("/") || token.startsWith("~/"));
+			.filter((token) => /^["']?(\/|~\/)/.test(token));
 	}
 
 	test("the list is not empty", () => {
