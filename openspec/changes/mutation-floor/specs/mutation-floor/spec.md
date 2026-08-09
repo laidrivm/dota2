@@ -29,7 +29,8 @@ The gate SHALL run as its own CI job rather than as a `*.test.ts` file, because
 #### Scenario: A mutant the tests assert against
 
 - **WHEN** Stryker mutates an arithmetic operator on a line of `src/model.ts`
-  that `src/model.test.ts` asserts a value for
+  such that a value `src/model.test.ts` asserts on changes, and
+  `bun test src/model.test.ts` fails while the mutant is active
 - **THEN** the mutant's status is `Killed` and it does not count towards the
   floor
 
@@ -46,17 +47,38 @@ The gate SHALL run as its own CI job rather than as a `*.test.ts` file, because
 
 ### Requirement: The count of surviving mutants may not rise silently
 
-A check SHALL read Stryker's JSON report, count the mutants whose status is
-`Survived`, and compare that count against a floor constant declared in the
-check itself. Stryker's own `thresholds.break` SHALL stay `null`: it compares a
+A check SHALL read Stryker's JSON report, count the mutants that survived, and
+compare that count against a floor constant declared in the check itself. A
+mutant counts as surviving when its status is `Survived` or `NoCoverage`:
+`Killed`, `Timeout`, `Ignored`, `CompileError` and `RuntimeError` all mean
+something other than "the tests let this through", and `NoCoverage` means no
+test ran against it at all. `NoCoverage` should not arise under the command
+runner, which performs no coverage analysis, and is counted rather than
+excluded precisely because its appearance would mean the setup is not what this
+requirement assumes.
+
+Stryker's own `thresholds.break` SHALL stay `null`: it compares a
 mutation-score percentage whose denominator moves with every edit to
 `src/model.ts`, so the same set of survivors yields a different score after an
 unrelated refactor and no one can write a reason about it.
 
-The check SHALL read a report and run nothing. Whoever invokes it runs Stryker
-first — the CI job runs the two as separate commands — so a Stryker that
-crashed is a non-zero exit the shell already surfaces, and the check never has
-to tell its own verdict apart from the tool's failure.
+`stryker.config.json` SHALL list `json` among its `reporters`. The default is
+`clear-text`, `progress` and `html`, and `jsonReporter.fileName` names a path
+without enabling the reporter that writes it — a configuration setting only the
+filename produces no report, and the check then fails on an absent file at
+every run.
+
+The check SHALL run no tool. Whoever invokes it runs Stryker first — the CI job
+runs the two as separate commands — so a Stryker that crashed is a non-zero
+exit the shell already surfaces, and the check never has to tell its own
+verdict apart from the tool's failure. For the same reason the invoker, not the
+check, SHALL delete the previous report before the run: a reader cannot tell a
+stale file from a fresh one, and an absent report already fails.
+
+A mutant whose status appears in neither list above SHALL fail the check,
+naming the status. Counting the known survivors and ignoring the rest would
+silently under-count if Stryker ever reports a not-killed mutant under a name this
+check predates.
 
 The check SHALL fail when the count is above the floor, reporting both numbers.
 It SHALL also fail when the count is *below* the floor, naming the value to
@@ -96,15 +118,26 @@ guarantee the diff already gives.
 ### Requirement: An equivalent mutant is admitted at the line it occupies
 
 A mutant that cannot be killed because it does not change behaviour SHALL be
-admitted with a `// Stryker disable next-line <Mutator>: <reason>` comment on
-the line above it, naming the single mutator concerned and giving a reason.
-Stryker then reports the mutant as `Ignored`, the reason travels into the
-report, and both sit in the diff beside the code they excuse. This SHALL be the
-only exemption mechanism: there is no register of exempt mutants.
+admitted with a `// Stryker disable next-line <Mutator>[,<Mutator>…]: <reason>`
+comment on the line above it, naming the mutators concerned and giving a
+reason. Stryker then reports the mutant as `Ignored`, the reason travels into
+the report, and both sit in the diff beside the code they excuse. This SHALL be
+the exemption mechanism the project uses: there is no register of exempt
+mutants.
 
-The check SHALL fail on a disable comment in `src/model.ts` that names `all`
-rather than a mutator, or that carries no reason after the colon. `all` would
-also silence a mutant added to that line later, which no one has judged.
+That form SHALL be the only one the check accepts in `src/model.ts`, and it
+SHALL fail on every other, naming the line. Specifically: a comment naming
+`all` rather than mutators, because `all` would also silence a mutant added to
+that line later which no one has judged; a comment without `next-line`, whose
+scope runs to the end of the file or to a matching `// Stryker restore`; and a
+comment carrying no reason, or none after its colon. A comma-separated list of
+named mutators is accepted — a single line can carry two mutants that are both
+equivalent for the same reason.
+
+Stryker offers exemptions this requirement does not cover — `// Stryker
+restore`, and an ignore-plugin declared in `ignorers`. Neither is used, and
+neither is checked for: an ignore-plugin is a new file and a new dependency,
+and a `restore` without a matching `disable` changes nothing.
 
 `mutator.excludedMutations` in `stryker.config.json` would achieve the same
 exemption with no trace at the line it affects, and it is not taken. It is not
