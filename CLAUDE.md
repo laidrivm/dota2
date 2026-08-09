@@ -245,6 +245,10 @@ Rules about how work is carried out here. They do not age with the code.
   calling the change done: the change's own sibling artefacts,
   `openspec/specs/**`, `PLAN.md`, and the README ownership map. Search the
   wording of the claim being replaced, never the wording replacing it.
+- Re-run the older probe before overwriting a recorded measurement your new
+  one contradicts.
+- Execute a pre-written decision rule only on a sample that could have
+  produced the opposite outcome.
 - A rules or docs edit that no artefact of the change under way asks for goes
   in its own commit.
 - Never silence a linter or type-checker finding by disabling its rule in
