@@ -94,7 +94,7 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       close several criteria, and three identifiers do not fit in a name. The
       existing ~380 uncited criteria stay uncited behind a floor that may not
       rise without a reason on its line.
-- [ ] **`mutation-floor`** — proposed, three steps, not yet applied. Mutation
+- [ ] **`mutation-floor`** — proposed, two steps, not yet applied. Mutation
       testing over `src/model.ts` alone, its own CI job, floor set from the
       first measurement as an absolute survivor count and failing in both
       directions. `src/types.ts` left out: it holds no branch and no
