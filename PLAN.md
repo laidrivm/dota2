@@ -53,9 +53,8 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
   `archive/2026-07-26-coderabbit-local-gate`.
 - **`agent-permissions-gaps`** — PR #30,
   `archive/2026-07-27-agent-permissions-gaps`. Its outstanding verification is
-  closed the other way: `tracked-permission-policy` measured the same 14 `ask`
-  entries on Claude Code 2.1.221 and none of them prompts. They load, they
-  appear in `/permissions`, and the tier is never consulted.
+  closed: a session started after the merge was prompted on `bun update --help`,
+  so the 14 `ask` entries are live rather than decorative.
 - **`readme-drift`** — PR #33, `archive/2026-07-27-readme-drift`.
 - **`reviewable-diff-gates`** — PRs #44, #45, #46 and the arrow step,
   `archive/2026-07-30-reviewable-diff-gates`. Every change after it is measured
@@ -88,14 +87,10 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       `.npmrc` with `Edit` rules, and curates the auto-accepted allow entries
       out of the untracked settings file into the tracked one — 59 of 291
       promoted, the rest left as the scratch space they are. Group 1 measured
-      what the two rules hold, against the design's
-      assumption that both gate a tool-layer call: on Claude Code 2.1.221 the
-      `deny` half is enforced through every route tried and the `ask` half is
-      not enforced at all — loaded and listed in `/permissions`, never
-      consulted, in `acceptEdits` and Manual alike. The rules stay; what holds
-      `bunfig.toml` meanwhile is task 1.7's content test. Worth re-measuring
-      on a later Claude Code, since the boundary returns by itself if the
-      defect is fixed.
+      both halves on Claude Code 2.1.221 by refusing each probe rather than
+      approving it — the only outcome an agent can observe: `deny` refuses a
+      redirection to the denied path, and the `ask` entry on `bunfig.toml`
+      prompts where the same edit to an unruled file does not.
 - [ ] **`spec-test-traceability`** — not yet proposed. Extends
       `openspec/config.yaml`'s "every criterion is cited by a task" one step:
       cited by a **test**, via a criterion identifier in the test name and a

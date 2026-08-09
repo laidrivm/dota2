@@ -20,52 +20,58 @@ release-age gate; what must not pass unremarked is a registry key or an entry
 in `minimumReleaseAgeExcludes`, and both are reached only through that file.
 
 The boundary is a prompt, not a proof, and the capability SHALL say so rather
-than imply otherwise — but the two halves do not hold alike, and the difference
-was measured rather than assumed. On Claude Code 2.1.221 the `deny` half is
-enforced and the `ask` half is not enforced at all.
+than imply otherwise. Both halves were measured on Claude Code 2.1.221 by
+refusing the call rather than approving it, which is the only outcome the agent
+can observe: an approval and an absent prompt look identical to it.
 
-A denied path is refused by every route tried: an `Edit` call, a `Write` call,
-and a Bash output redirection — `printf … > tmpprobe/.npmrc` was blocked while
+`Edit(bunfig.toml)` prompts, and the prompt is the rule's rather than the
+mode's. The same edit to a file carrying no rule went through unremarked in
+the same session and the same permission mode; adding an `ask` entry for that
+file made it prompt, and refusing the prompt refused the edit. `.npmrc` is
+refused outright, by an `Edit` call, a `Write` call, and a Bash output
+redirection alike — `printf … > tmpprobe/.npmrc` was blocked while
 `printf … > tmpprobe/other.txt` in the same directory went through.
 
-An asked call is not gated. `/permissions` lists all fifteen `ask` entries as
-loaded from this file, and four calls matching them ran with no prompt: an
-`Edit` of `bunfig.toml`, a `Write` of `scripts/bunfig.toml`, `bun update
---help`, and `bun pm pkg get name` — across the `acceptEdits` and the `default`
-permission mode, against targets no earlier approval in the session covered. A
-`deny` entry of the same pattern shape in the same object is enforced in the
-same session, so what fails is the tier and not the rule's spelling.
+What passes both halves is a permission mode such as `acceptEdits` or
+`bypassPermissions`, which answers a prompt without the user, and a subprocess,
+which writes outside the tool layer entirely. The prose rule in `CLAUDE.md`
+keeps its subject for that reason, where a rule fully replaced by a mechanism
+is deleted.
 
-The `ask` rules SHALL stay. They are written in the matched form, they load,
-and they cost nothing while the defect stands, so the boundary returns when it
-is fixed. What holds the asked file meanwhile is the content requirement
-below, which fails on a settled value rather than on a call and so covers every
-route alike. What passes every route is a subprocess, which writes outside the
-tool layer altogether. The prose rule in `CLAUDE.md` keeps its subject for that
-reason, where a rule fully replaced by a mechanism is deleted.
+`bunfig.toml` and `.npmrc` are also on Claude Code's built-in protected-file
+list, so a write to either prompts in `acceptEdits` before any rule of this
+project applies. The rules here are what carry the boundary into a mode or a
+version where that list does not, and what state it where a reader looks.
 
-#### Scenario: An edit to bunfig.toml is not stopped by the ask rule
+The scenarios below describe a tool-layer call under a permission mode that
+honours the configured rules. That is the scope the rules have, not a
+qualification bolted onto them: the paragraph above names what falls outside
+it, and the three content scenarios further down — the ones that fail on a
+settled value rather than on a call — are what cover those routes instead.
 
-- **WHEN** the agent edits `bunfig.toml` — a `registry` key, an entry in
-  `minimumReleaseAgeExcludes`, or `[test] pathIgnorePatterns` alike
-- **THEN** on Claude Code 2.1.221 no prompt fires and the edit lands
-- **AND** what refuses the first two is the content requirement below, which
-  runs after the write rather than in front of it
+#### Scenario: A registry added to bunfig.toml
 
-#### Scenario: The ask entries are loaded
+- **WHEN** the agent edits `bunfig.toml` to add a `registry` key
+- **THEN** Claude Code prompts, and the edit needs the user
 
-- **WHEN** `/permissions` is read in a session started after the change
-- **THEN** `Edit(bunfig.toml)` and the fourteen `Bash(bun …)` entries are
-  listed under Ask, sourced from `.claude/settings.json` — which is what
-  separates a tier that is not consulted from a rule that never loaded
+#### Scenario: An exclusion added to the release-age gate
+
+- **WHEN** the agent adds an entry to `minimumReleaseAgeExcludes`
+- **THEN** the same prompt fires, because the rule is scoped to the file that
+  holds both keys
+
+#### Scenario: A legitimate edit to the same file
+
+- **WHEN** the agent edits `[test] pathIgnorePatterns`
+- **THEN** the prompt fires too, which is accepted: the file changes about
+  twice in a repository's life
 
 #### Scenario: An .npmrc is created
 
 - **WHEN** the agent attempts to create `.npmrc` anywhere under the repository
 - **THEN** the call is blocked without prompting
-- **AND** a Bash output redirection to that path is blocked too, which is one
-  of the routes the deny half covers and the ask half, on this version, does
-  not cover at all
+- **AND** a Bash output redirection to that path is blocked too, which is the
+  one route measured against both halves and confirmed only for `deny`
 
 #### Scenario: The rules use the matched specifier
 
@@ -73,11 +79,10 @@ reason, where a rule fully replaced by a mechanism is deleted.
 - **THEN** both rules are written as `Edit(...)` and neither as `Write(...)`,
   which Claude Code accepts but never matches
 
-Because the prompt is partial — and on this version absent for the asked file —
-the two keys it stands in front of SHALL also be pinned by their settled value.
-A test that reads the content catches every route the rules miss — the
-redirection, the permission mode, the unenforced tier and the subprocess
-alike — after the write rather than before it. This is not the rejected hook:
+Because the prompt is partial, the two keys it stands in front of SHALL also be
+pinned by their settled value. A test that reads the content catches every
+route the rules miss — the permission mode and the subprocess alike — after
+the write rather than before it. This is not the rejected hook:
 it parses no edit and registers nothing, it reads two files the repository
 already ships.
 
