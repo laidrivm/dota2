@@ -14,8 +14,9 @@ Criteria are cited by their scenario heading; all fifteen belong to the
 - [ ] 1.1 Write the criterion parser's tests first, all failing: a heading
       derives its slug (*An identifier is derived from a heading*), the real
       `draft-model` heading `Insufficient hero picked (model-spec §7.5)` leaves
-      no leading, trailing or doubled hyphen [12], a spec with no scenario
-      heading yields zero criteria rather than throwing [1], and a
+      exactly `draft-model/insufficient-hero-picked-model-spec-7-5` rather than
+      a shape a parser dropping `§7.5` would also satisfy [12], a spec with no
+      scenario heading yields zero criteria rather than throwing [1], and a
       `#### Scenario:` line inside a fenced code block is not a criterion [24]
 - [ ] 1.2 Implement the parser over `openspec/specs/*/spec.md`, keeping each
       criterion's requirement heading for the ambiguity message
@@ -25,8 +26,9 @@ Criteria are cited by their scenario heading; all fifteen belong to the
       [5], identifiers on consecutive comment lines all count [6], five tests
       citing one criterion reduce the uncited count by one (*One criterion
       needs several tests*) [7], two blank lines between comment and test still
-      count [13], and a non-blank non-comment line between them fails
-      (*A citation floating in a file*) [14]
+      count [13], a non-blank non-comment line between them fails
+      (*A citation floating in a file*) [14], and a citation above a
+      `test.each(` call counts, since `docs/testing.md` treats a row as a test
 - [ ] 1.4 Add the scanner's negative tests: `// spec:` inside a string literal
       or a block comment is not a citation [25], a `// spec:` comment naming no
       identifier fails [21], and an identifier without its `/` or carrying
@@ -35,7 +37,7 @@ Criteria are cited by their scenario heading; all fifteen belong to the
       outside `node_modules`; break each assertion above before it passes
 - [ ] 1.6 Write the validation-set tests first: a citation matching no
       criterion fails, naming citation, file and line (*A criterion renamed
-      under its test*) [16][18]; a citation to a criterion living only in an
+      under its test*) [16] [18]; a citation to a criterion living only in an
       active change's delta spec is valid (*A criterion still in flight*); and
       an absent or empty `openspec/changes/` leaves the validation set equal to
       the counted set [3]
@@ -67,9 +69,10 @@ Criteria are cited by their scenario heading; all fifteen belong to the
       [10], a count one below it fails and names the value to write
       (*A criterion newly covered*) [11], and the failure reports both count
       and floor rather than only failing [17]
-- [ ] 2.2 Write the reason-line test first: the floor's line without a trailing
-      comment fails, whichever direction the number moved (*The floor changed
-      with no reason given*) [23]
+- [ ] 2.2 Write the reason-line tests first: the floor's line without a trailing
+      comment fails, and so does one whose comment text is empty or whitespace —
+      `const FLOOR = 380; //` is not a reason (*The floor changed with no reason
+      given*) [23]
 - [ ] 2.3 Implement the floor constant and the three comparisons in
       `scripts/spec-coverage.test.ts`; break each before it passes
 - [ ] 2.4 Measure the count over the tree and write it as the floor with its

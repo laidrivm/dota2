@@ -1,3 +1,5 @@
+# spec-test-traceability — delta spec
+
 ## ADDED Requirements
 
 ### Requirement: A criterion is identified by its capability and its heading
@@ -60,7 +62,10 @@ and cited in one move, leaving the count where it was.
 
 A test SHALL cite a criterion in a `// spec:` comment placed directly above a
 `test`, `it` or `describe` call, separated from it by nothing but blank lines
-and further comment lines. One comment SHALL carry any number of identifiers,
+and further comment lines. A member form of those three SHALL be accepted as
+well — `test.each`, `test.skip`, `describe.each` — because `docs/testing.md`
+counts a `test.each` row as a test, and a scanner that recognised only `test(`
+would call a citation above one unmatched. One comment SHALL carry any number of identifiers,
 whitespace-separated or one per continuation line, because a single act may
 satisfy several criteria; and several tests SHALL be free to cite one
 criterion, because `docs/testing.md` requires one arrange and one act per test
@@ -114,8 +119,9 @@ floor SHALL also be failed when the count is *below* it, reporting the value to
 write instead, so the number tracks reality rather than drifting into a
 meaningless upper bound.
 
-The floor's line SHALL carry a trailing comment, and the check SHALL fail when
-it does not. That is the whole exemption mechanism: a criterion no runtime can
+The floor's line SHALL carry a trailing comment holding at least one
+non-whitespace character after the marker, and the check SHALL fail when it does
+not — `const FLOOR = 380; //` states no reason and SHALL NOT pass. That is the whole exemption mechanism: a criterion no runtime can
 assert — 86 of the 380 today are discharged by a person, not a process — is
 admitted by raising the floor with a reason a reviewer reads, rather than by a
 register of its own listing them one by one.
@@ -143,7 +149,8 @@ test`, so no workflow changes and the gate is blocking from the first commit.
 
 #### Scenario: The floor changed with no reason given
 
-- **WHEN** the floor's line carries no trailing comment
+- **WHEN** the floor's line carries no trailing comment, or one whose text is
+  empty or whitespace
 - **THEN** the check fails, whichever direction the number moved
 
 #### Scenario: A criterion newly covered
