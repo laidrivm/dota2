@@ -18,8 +18,9 @@ exist, which is worse than the empty state.
 ## What Changes
 
 - A new check, shipped as `scripts/spec-coverage.test.ts`, that reads every
-  `openspec/specs/*/spec.md` and every test file, and compares the criteria it
-  finds against the citations.
+  `openspec/specs/*/spec.md` and every tracked `*.test.ts` and `*.spec.ts`
+  file outside `node_modules`, and compares the criteria it finds against the
+  citations.
 - A criterion is identified by `<capability>/<slug of its scenario heading>`,
   derived rather than stored — no identifier is written into any spec.
 - A test cites a criterion in a `// spec:` comment above it; one comment may
@@ -74,6 +75,7 @@ capability owns, and it is left as written — it governs tasks, not tests.
   `.github/workflows/`, no change to `package.json` scripts.
 - Every future test that closes a criterion carries a `// spec:` comment;
   existing tests are untouched.
-- The check reads `openspec/specs/**` only. Delta specs inside
-  `openspec/changes/**` are not scanned, so a criterion enters the count when
-  the change is archived, not while it is in flight.
+- Criteria are counted from `openspec/specs/**` only, so one enters the count
+  when its change is archived rather than while it is in flight. Citations are
+  validated against those plus active changes' delta specs, which is what lets
+  a test written during apply cite the criterion it is being written for.

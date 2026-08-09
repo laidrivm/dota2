@@ -29,7 +29,8 @@ against 0 of `draft-board`'s 34 and 0 of `hero-picker`'s 27.
 - A criterion added from now on cannot reach `openspec/specs/` uncited without
   someone writing down why.
 - The join, where it is claimed, is exact — no fuzzy matching anywhere.
-- Zero migration: no spec edits, no test edits, no backlog work.
+- Zero migration: no edits to existing specs or existing tests, and no
+  backlog work.
 
 **Non-Goals:**
 
