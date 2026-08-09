@@ -52,9 +52,8 @@ honours — `bun install --help` on 1.3.14 lists it beside `bunfig.toml` and the
 environment as what `--registry` overrides — and this repository deliberately
 has none. So it is a live channel that is intentionally unused, *the file
 existing* is the thing to prevent, and `deny` is exactly as coarse as the rule. `bunfig.toml` has legitimate content, so `deny` would
-block the `[test]` key this project already relies on; `ask` was chosen for
-costing a prompt on a file that has been edited twice since it was created,
-and turned out to cost nothing at all — see the measurement below.
+block the `[test]` key this project already relies on; `ask` costs a prompt on
+a file that has been edited twice since it was created.
 
 Rejected: a `PreToolUse` hook parsing `tool_input.new_string` for the actual
 key syntax — `registry = "…"` under `[install]` in `bunfig.toml`, `registry=…`
@@ -70,45 +69,36 @@ form Claude Code never matches.
 
 ### The prompt is a boundary against the agent, not a proof
 
-This was measured during implementation, on Claude Code 2.1.221, and neither
-half answered the way this section first assumed.
+This was measured during implementation, on Claude Code 2.1.221, and measured
+by refusing each call rather than approving it. That direction is not a
+preference: a refusal comes back to the agent as an error it can read, while an
+approval and an absent prompt are the same successful result. A probe answered
+"yes" measures nothing.
 
-The `deny` half holds. A Bash output redirection to a denied path is refused:
-`printf … > tmpprobe/.npmrc` was blocked, while `printf … >
-tmpprobe/other.txt` beside it went through, and neither `settings.local.json`,
-the user-level settings nor `command-guard.ts` mentions `.npmrc` — so the
-`Edit(.npmrc)` deny rule is what stopped it, at a subdirectory depth and in a
-session that had started before the rule was written. A `Write` of `.npmrc` at
-the repository root is refused the same way, which is the `Edit` specifier
-covering every file-editing tool.
+Both halves hold. `.npmrc` is refused by an `Edit` call, a `Write` call and a
+Bash output redirection alike: `printf … > tmpprobe/.npmrc` was blocked while
+`printf … > tmpprobe/other.txt` beside it went through, and neither
+`settings.local.json`, the user-level settings nor `command-guard.ts` mentions
+`.npmrc` — so the `Edit(.npmrc)` deny rule is what stopped it, at a
+subdirectory depth and in a session that had started before the rule was
+written.
 
-The `ask` half does not hold at all. Four calls matching a loaded `ask` entry —
-an `Edit` of `bunfig.toml`, a `Write` of `scripts/bunfig.toml`, `bun update
---help`, and `bun pm pkg get name` — ran with no prompt, across the
-`acceptEdits` and the `default` permission mode and against targets no earlier
-approval in the session covered. `/permissions` lists all fifteen `ask` entries
-as loaded from this file, while `deny` entries in the same object are enforced
-in the same session. So the tier is registered and not consulted, and the cause
-sits in Claude Code rather than in how the rule is written: the shapes match
-the documented gitignore syntax, `Bash(npm *)` under `deny` and `Bash(bun
-update *)` under `ask` are the same shape, and only the first one fires.
+`Edit(bunfig.toml)` prompts, and a contrast pair separates the rule from the
+mode: in `acceptEdits`, editing a file with no rule on it went through
+unremarked, and editing the same file with an `ask` entry added prompted, with
+the refusal rejecting the edit. `bunfig.toml` and `.npmrc` are also on Claude
+Code's built-in protected-file list, so in this mode they would prompt without
+this project's rules; the rules are what carry the boundary into a mode or a
+version where that list does not, and what state it where a reader looks.
 
-An earlier reading blamed a permission mode — `acceptEdits` answering the
-prompt before the user sees it. Manual mode refutes it: the same calls pass
-there too. What still passes both halves is a subprocess, which writes outside
-the tool layer altogether.
-
-So on this version the `deny` half stops what the agent actually does in an
-ordinary session, which is the failure mode this repository has, and the `ask`
-half stops nothing. What holds the asked file is task 1.7's content
-assertions, which read `bunfig.toml` through bun's own TOML import and fail on
-a wound-down age gate or an added registry key whichever route wrote it. The
-rules stay because they are correctly written and cost nothing until the defect
-is fixed, but the capability records the measurement rather than the intent.
-That is also why the prose rule keeps its subject rather than being deleted the
-way `mechanised-prohibitions` deletes what it fully replaces — the mechanism
-here is partial, and both the capability and this design say so rather than
-letting the entry read as a guarantee.
+What passes both halves is a permission mode that answers the prompt without
+the user, and a subprocess, which writes outside the tool layer altogether. So
+the rules stop what the agent actually does in an ordinary session, which is
+the failure mode this repository has, and they are not a security boundary
+against a determined caller. That is why the prose rule keeps its subject
+rather than being deleted the way `mechanised-prohibitions` deletes what it
+fully replaces — the mechanism here is partial, and both the capability and
+this design say so rather than letting the entry read as a guarantee.
 
 ### Curation drops rather than promotes by default
 
@@ -126,14 +116,12 @@ place, and stays true as the list grows.
 ## Risks / Trade-offs
 
 - **A prompt on every `bunfig.toml` edit, including the innocent ones.** →
-  the risk did not materialise, and not because the file is rarely edited:
-  on Claude Code 2.1.221 the `ask` tier never prompts at all.
-- **The `ask` tier is inert, so the file has no prompt in front of it.** →
-  the content assertions are what hold it; the rule stays for the version
-  that fixes this.
-- **The Bash redirection escapes the rule.** → true of the `ask` half and
-  not of the `deny` half, which refuses one; recorded in the capability
-  rather than hidden, and the prose rule stays for that reason.
+  the file has changed twice since 25 July; the prompt is cheaper than the
+  script that would avoid it.
+- **The Bash redirection escapes the rule.** → measured against `deny`, which
+  refuses one; against `ask` it is untested, since the probe was answered
+  rather than refused and only a refusal is observable. Recorded in the
+  capability rather than hidden, and the prose rule stays for that reason.
 - **The curated allow list gets stale as the workflow changes.** → it is
   additive convenience, so a missing entry costs a prompt and nothing else.
 - **`settings.local.json` refills.** → it is untracked scratch space and
