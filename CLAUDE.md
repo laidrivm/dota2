@@ -241,9 +241,10 @@ Rules about how work is carried out here. They do not age with the code.
   result, and an approval outlives the mode that granted it.
 - Never report what a permission prompt did; report what the call returned.
 - When a statement changes — a rule, a recorded decision, or one artefact of
-  a change under review — grep the three places that restate one before
+  a change under review — grep the four places that restate one before
   calling the change done: the change's own sibling artefacts,
-  `openspec/specs/**`, and the README ownership map.
+  `openspec/specs/**`, `PLAN.md`, and the README ownership map. Search the
+  wording of the claim being replaced, never the wording replacing it.
 - A rules or docs edit that no artefact of the change under way asks for goes
   in its own commit.
 - Never silence a linter or type-checker finding by disabling its rule in
