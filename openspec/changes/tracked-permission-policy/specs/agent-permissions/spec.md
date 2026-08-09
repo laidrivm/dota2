@@ -122,8 +122,9 @@ appear in it: such an entry is a fact about one machine, and the tracked file
 is read by every clone.
 
 **The entries are not uniformly paths, so the check is two rules over two
-forms.** Of the 170 entries as they stand, 145 are `Bash(...)` — a command
-string — and 6 are `Read(...)`, a path specifier.
+forms.** Of the 291 entries at curation — 170 when this change was proposed,
+which is the rate the untracked file accumulates at — 261 are `Bash(...)`, a
+command string, and 6 are `Read(...)`, a path specifier.
 
 1. **Every entry, whatever its tool**: no absolute path token — nothing
    beginning `/`, `//` or `~/`. A command this project's workflow runs needs
@@ -154,8 +155,9 @@ promotions and the largest dropped group in the pull request body, because no
 check can tell a command that is policy from one that was convenient once.
 
 Entries accumulated in the untracked `.claude/settings.local.json` by approving
-a prompt are not decisions: at the time of writing it holds 170, of which 19
-name a machine-local or `/tmp` path and 8 a one-off `sed`, `cp` or `mv`.
+a prompt are not decisions: at curation it holds 291, of which 51 carry an
+absolute path token by the rule above and 46 are a `perl -0pi -e` one-liner
+carrying its own regex for one file. 59 entries earned the tracked file.
 
 An entry SHALL NOT restate one the `deny` or `ask` list already carries.
 Whether `allow` outranks `ask` is not settled here; the entry is refused

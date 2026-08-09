@@ -16,7 +16,7 @@
 | `openspec/specs/*/spec.md` | what each shipped capability must do (EARS) | when changing behaviour it covers |
 | `openspec/config.yaml` → `context:` | architecture choices (SSE, BFF, cache, N+1) | on artifact generation |
 | `openspec/config.yaml` → `rules:` | artifact shape requirements (referencing CLAUDE.md) | on artifact generation |
-| `.claude/settings.json` | the agent's permission policy — what is denied, what prompts, which hooks run | before granting a tool call |
+| `.claude/settings.json` | the agent's permission policy — what is denied, what prompts, what is pre-approved, which hooks run | before granting a tool call |
 | `scripts/command-guard.ts` | the git and `gh` prohibitions no permission pattern can express | when a git or `gh` call is refused |
 | `scripts/no-suppressions.ts` | which linter and type-checker suppressions are approved, and how many | when a suppression is unavoidable |
 | `.coderabbit.yaml` | how CodeRabbit reviews this repo | when the bot reviews the wrong things |
