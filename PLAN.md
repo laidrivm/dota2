@@ -79,18 +79,13 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
   `archive/2026-08-02-review-bot-instructions`. The proposal comparison ended
   up on `**` rather than `src/**`: of the five most recent changes at the time,
   three touched no file under `src/`, this one among them.
+- **`tracked-permission-policy`** — PRs #68 and #69, corrected by #70,
+  `archive/2026-08-09-tracked-permission-policy`; both requirements are in
+  `openspec/specs/agent-permissions/`. The untracked `settings.local.json`
+  keeps refilling by design, so the tracked file is the only one a count of
+  its entries means anything about.
 
 ### Open
-- [ ] **`tracked-permission-policy`** — both groups implemented; group 2 owes
-      only its pull request
-      (`openspec/changes/tracked-permission-policy`). Gates `bunfig.toml` and
-      `.npmrc` with `Edit` rules, and curates the auto-accepted allow entries
-      out of the untracked settings file into the tracked one — 59 of 291
-      promoted, the rest left as the scratch space they are. Group 1 measured
-      both halves on Claude Code 2.1.221 by refusing each probe rather than
-      approving it — the only outcome an agent can observe: `deny` refuses a
-      redirection to the denied path, and the `ask` entry on `bunfig.toml`
-      prompts where the same edit to an unruled file does not.
 - [ ] **`spec-test-traceability`** — not yet proposed. Extends
       `openspec/config.yaml`'s "every criterion is cited by a task" one step:
       cited by a **test**, via a criterion identifier in the test name and a
