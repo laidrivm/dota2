@@ -52,8 +52,9 @@ honours — `bun install --help` on 1.3.14 lists it beside `bunfig.toml` and the
 environment as what `--registry` overrides — and this repository deliberately
 has none. So it is a live channel that is intentionally unused, *the file
 existing* is the thing to prevent, and `deny` is exactly as coarse as the rule. `bunfig.toml` has legitimate content, so `deny` would
-block the `[test]` key this project already relies on; `ask` costs a prompt on
-a file that has been edited twice since it was created.
+block the `[test]` key this project already relies on; `ask` was chosen for
+costing a prompt on a file that has been edited twice since it was created,
+and turned out to cost nothing at all — see the measurement below.
 
 Rejected: a `PreToolUse` hook parsing `tool_input.new_string` for the actual
 key syntax — `registry = "…"` under `[install]` in `bunfig.toml`, `registry=…`
@@ -125,9 +126,13 @@ place, and stays true as the list grows.
 ## Risks / Trade-offs
 
 - **A prompt on every `bunfig.toml` edit, including the innocent ones.** →
-  the file has changed twice since 25 July; the prompt is cheaper than the
-  script that would avoid it.
-- **The Bash redirection escapes the rule.** → recorded in the capability
+  the risk did not materialise, and not because the file is rarely edited:
+  on Claude Code 2.1.221 the `ask` tier never prompts at all.
+- **The `ask` tier is inert, so the file has no prompt in front of it.** →
+  the content assertions are what hold it; the rule stays for the version
+  that fixes this.
+- **The Bash redirection escapes the rule.** → true of the `ask` half and
+  not of the `deny` half, which refuses one; recorded in the capability
   rather than hidden, and the prose rule stays for that reason.
 - **The curated allow list gets stale as the workflow changes.** → it is
   additive convenience, so a missing entry costs a prompt and nothing else.

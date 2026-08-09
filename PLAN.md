@@ -53,8 +53,9 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
   `archive/2026-07-26-coderabbit-local-gate`.
 - **`agent-permissions-gaps`** — PR #30,
   `archive/2026-07-27-agent-permissions-gaps`. Its outstanding verification is
-  closed: a session started after the merge was prompted on `bun update --help`,
-  so the 14 `ask` entries are live rather than decorative.
+  closed the other way: `tracked-permission-policy` measured the same 14 `ask`
+  entries on Claude Code 2.1.221 and none of them prompts. They load, they
+  appear in `/permissions`, and the tier is never consulted.
 - **`readme-drift`** — PR #33, `archive/2026-07-27-readme-drift`.
 - **`reviewable-diff-gates`** — PRs #44, #45, #46 and the arrow step,
   `archive/2026-07-30-reviewable-diff-gates`. Every change after it is measured
