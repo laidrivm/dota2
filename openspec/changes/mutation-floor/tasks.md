@@ -99,6 +99,10 @@ test already use, and it is what keeps `bun test` in milliseconds.
       (*A survivor newly killed*)
 - [ ] 2.10 Make `mutation.yml` run the check rather than Stryker directly, so
       the job now gates
+- [ ] 2.11 Add `scripts/mutation-floor.ts` to the README's knowledge ownership
+      map — `scripts/command-guard.ts` and `scripts/no-suppressions.ts` both
+      have rows, and `readme-map.test.ts` only checks that a row's path
+      resolves, never that a script has a row, so nothing catches the omission
 
 ## 3. Admitting a survivor
 

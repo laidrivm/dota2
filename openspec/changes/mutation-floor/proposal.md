@@ -18,10 +18,11 @@ those lines are broken.
 - `@stryker-mutator/core` is added as an exact-pinned devDependency, after
   `/warm`.
 - `stryker.config.json` mutates `src/model.ts` only and runs the tests through
-  the built-in command runner: `bun test src/model.test.ts`. There is no
-  Stryker plugin for `bun:test` and none is needed — the command runner's
-  documented cost is that it runs the whole suite per mutant, and that suite is
-  53 ms.
+  the built-in command runner: `bun test src/model.test.ts`. Two third-party
+  `bun:test` runner plugins exist; neither is taken. What they offer is
+  per-test optimisation, and the command runner's documented cost — the whole
+  suite per mutant — is 53 ms here, so the optimisation buys nothing and the
+  second supply-chain root costs something.
 - `scripts/mutation-floor.ts` runs Stryker, reads the survivor count out of its
   JSON report, and compares it against a floor constant declared in the script.
   The count is absolute, not a percentage: Stryker's own `thresholds.break` is

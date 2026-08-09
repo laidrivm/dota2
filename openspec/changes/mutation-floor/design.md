@@ -51,9 +51,9 @@ two keys and no `createSourceFile`. What remains is `typescript/unstable/ast`,
 which exposes `createScanner` but no parser — and a scanner without a parser
 cannot handle template literals, because `${` needs the parser to call
 `reScanTemplateToken`. Run over `src/model.ts`, it reads the closing backtick of
-`` Record<`${Role}`, number> `` at offset 8025 as the opening of a new template
-and swallows the remaining 1200 characters of the file as literal text, ending
-the scan after 157 tokens.
+`` Record<`${Role}`, number> `` at offset 8025 as the opening of a new template;
+by offset 8074 it is swallowing the remaining 1188 characters of the file as
+literal text, and the scan ends after 157 tokens.
 
 So the fallback was never zero-dependency: it needed a real parser plus roughly
 150 lines of mutator, runner and reporter that this repository would then own
@@ -69,18 +69,36 @@ downloads in the week of 2026-08-02, no install scripts, `engines.node >= 20`.
 `/warm` still runs before the install — this is the input to it, not a
 substitute for it.
 
-### The command runner, because there is no `bun:test` plugin and none is needed
+### The command runner, in preference to the Bun runner plugins that exist
 
-Stryker's runner plugins cover Jest, Mocha, Karma, Jasmine, Vitest, Tap and
-Cucumber. There is no Bun runner on the registry under any name. The default
-`testRunner` is `command`: it runs a configured shell command per mutant and
-reads only the exit code. Its documented drawback is that Stryker can do no
-per-test optimisation and must run the whole suite for every mutant.
+Stryker's own runner plugins cover Jest, Mocha, Karma, Jasmine, Vitest, Tap and
+Cucumber — not Bun. Two third-party ones do exist, and both are ruled out on
+what they are rather than on being absent:
+
+| | `@hughescr/stryker-bun-runner` | `stryker-mutator-bun-runner` |
+|---|---|---|
+| latest | 1.3.8, 2026-07-17 | 0.4.0, 2025-07-07 |
+| first published | 2026-01-16 | 2025-07-07 |
+| versions | 18 | 1 |
+| weekly downloads | 11 637 | 4 312 |
+
+The second has not been touched in thirteen months and has exactly one
+published version, which fails **A** on sight. The first is genuinely
+maintained — eighteen releases in seven months — but it is a seven-month-old
+package under a personal scope, and taking it means a second supply-chain root
+of trust beside `@stryker-mutator/core`.
+
+What that trust would buy is per-test optimisation: the runner hooks into
+`bun:test` so Stryker can run only the tests covering each mutant. The default
+`testRunner` is `command`, which instead runs a configured shell command per
+mutant and reads only the exit code, and whose documented drawback is exactly
+that it cannot optimise and must run the whole suite every time.
 
 That drawback costs 53 ms per mutant here. Even several hundred mutants run
 serially would finish in under a minute, and Stryker parallelises across cores
-by default. The optimisation the plugins exist to provide is worth nothing at
-this suite size, so the missing plugin is not a gap.
+by default. So the plugin's entire benefit is worth nothing at this suite size,
+and it is declined for a reason that would reverse if the model's suite ever
+grew by two orders of magnitude.
 
 ### One file, one command, one floor
 
