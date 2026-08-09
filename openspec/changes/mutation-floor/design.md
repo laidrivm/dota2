@@ -124,8 +124,15 @@ after an unrelated refactor. Nobody can write "raised by one, because X" about
 a number that moves on its own.
 
 So `thresholds.break` stays `null` and `scripts/mutation-floor.ts` reads the
-JSON report (`jsonReporter.fileName`) and counts mutants with status
-`Survived`. The floor is a constant in that script.
+JSON report and counts the mutants that survived — `Survived` plus
+`NoCoverage`, since a mutant no test ran against was not killed either. The
+floor is a constant in that script.
+
+Getting that report written takes two settings, not one: `reporters` must list
+`json`, because its default is `clear-text`, `progress` and `html`, and
+`jsonReporter.fileName` only names a path for a reporter that has to be
+switched on separately. Setting the filename alone yields no file and a check
+that fails on every run.
 
 Its semantics are taken from `spec-test-traceability`'s coverage floor
 deliberately, so the repository has one floor idiom rather than two:
@@ -183,16 +190,30 @@ what `pre-push` runs on every push. A separate `mutation.yml` keeps the pushes
 fast and keeps a Stryker failure legible as itself.
 
 The job runs Stryker and the check as two commands rather than having the
-script spawn Stryker. That keeps `scripts/mutation-floor.ts` a pure function of
-a report file — testable against synthetic JSON with no process management —
-and it means a crashed Stryker fails the job through the shell instead of
-through a branch in our code that has to tell "the tool broke" apart from "the
-floor was exceeded".
+script spawn Stryker. That keeps the script's own work to reading files —
+testable against synthetic input with no process management — and it means a
+crashed Stryker fails the job through the shell instead of through a branch in
+our code that has to tell "the tool broke" apart from "the floor was exceeded".
+
+Reading files, not one file: the script has three inputs, and they are three
+separate exported functions over three separate strings. The report gives the
+survivor count; the script's own source gives the floor line and its reason;
+and from step 2, `src/model.ts` gives the disable comments. Each takes its text
+as an argument and resolves nothing, so all three are testable without a
+filesystem. Only the CLI entry point resolves paths, and it resolves them from
+the repository root.
 
 Stryker declares `engines.node >= 20`, so the job may need `setup-node`
-alongside `setup-bun`. Whether `bunx stryker run` works without Node is a
-genuine unknown and is resolved by trying it in the first task, not by
-guessing here.
+alongside `setup-bun`. Whether `bunx --no-install stryker run` works without
+Node is a genuine unknown and is resolved by trying it in the first task, not
+by guessing here. `--no-install` is required, not incidental: a bare `bunx`
+fetches on a cache miss and so bypasses the release-age gate, which is the
+`playwright-cli` rule in `CLAUDE.md` applied to a second tool.
+
+Deleting `reports/mutation/` is the job's first step, because it is where
+staleness can actually be prevented. A check that only reads a file cannot tell
+last run's report from this one's; the invoker can guarantee there is no last
+run's report at all.
 
 ### Sandbox and report directories
 
@@ -209,9 +230,10 @@ them before the tool runs for the first time.
   a CI flake rather than a warning. The default already carries the margin —
   `netTime × timeoutFactor + timeoutMS` is 5000 ms plus change against a 53 ms
   suite, ~75× headroom — so `timeoutMS` is left alone rather than tuned against
-  a flake nobody has seen. If a flip is observed, it is a fact about a specific
-  mutant: raise `timeoutMS` then, or give that mutant a disable comment with
-  the flip as its reason.
+  a flake nobody has seen. A flip that does happen is fixed by raising
+  `timeoutMS` or by stabilising the test, never by a disable comment: a mutant
+  that flips is a live mutant with a timing problem, not an equivalent one, and
+  marking it `Ignored` would retire a real mutant on a false description.
 - **The command runner reruns the whole model suite per mutant, so cost is
   linear in both.** → 53 ms and ~34 tests today. A slow test added to
   `src/model.test.ts` later multiplies by the mutant count. Acceptable while

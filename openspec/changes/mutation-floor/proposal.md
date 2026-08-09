@@ -30,9 +30,10 @@ those lines are broken.
   `thresholds.break` is a mutation-score percentage, which moves whenever the
   mutant total moves and so cannot carry a reason for a single admitted
   survivor.
-- The floor may be lowered freely and raised only with a reason written on that
-  line; a count below the floor also fails, naming the value to write, so the
-  number tracks reality instead of drifting into a meaningless upper bound.
+- The floor's line carries a reason whichever direction the number moved: a
+  count above it fails, and a count below it fails too, naming the value to
+  write, so the number tracks reality instead of drifting into a meaningless
+  upper bound.
 - An equivalent mutant is marked at the site it occurs, with
   `// Stryker disable next-line <Mutator>: <reason>`, and drops out of the
   count. That is the whole exemption mechanism — no register, no per-mutator
@@ -90,7 +91,9 @@ neither states anything this change contradicts.
 
 - New files: `stryker.config.json`, `scripts/mutation-floor.ts`,
   `.github/workflows/mutation.yml`. Modified: `package.json`, `bun.lock`,
-  `.gitignore`, `docs/testing.md`.
+  `.gitignore`, `docs/testing.md`, and `README.md` — the knowledge ownership
+  map carries a row per check script, and `readme-map.test.ts` cannot demand
+  one.
 - One new devDependency with 26 direct dependencies of its own, in a repository
   that currently has one runtime and six development dependencies. This is the
   largest single expansion of the dependency tree so far and the reason `/warm`
