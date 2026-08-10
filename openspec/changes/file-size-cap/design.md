@@ -1,0 +1,145 @@
+# file-size-cap — design
+
+## Context
+
+`change-slicing` already owns one size gate: `scripts/diff-budget.sh`, warning
+at 500 changed lines and failing at 800, measured over `<base>...HEAD`. It is
+a property of a change. Nothing measures a property of a file, and the tree has
+drifted: nine files sit over the caps this change adopts, the largest at 4.7×.
+
+The drift is invisible to the existing gate by construction. A 943-line
+stylesheet reached that size across many changes, none of them large.
+
+Current CSS delivery is a `<link rel="stylesheet" href="./src/app/styles/styles.css">`
+in `index.html`; `styles.css` is five `@import` lines pulling three token files,
+`base.css` and `app.css`. Nothing about styling passes through JavaScript today.
+
+## Goals / Non-Goals
+
+**Goals:**
+
+- No file in the tree exceeds its cap on the day the cap lands, and none can
+  afterwards.
+- Component styles live beside the components and cannot leak into each other.
+- The decomposition is behaviour-preserving, and something other than reading
+  says so.
+
+**Non-Goals:**
+
+Carried from `proposal.md`, not restated here.
+
+## Decisions
+
+### The cap lands last, not first
+
+Two orders were available. Land the gate first with the nine files exempted and
+shrink the exemption list; or decompose first and land the gate green.
+
+The first is the shape `spec-test-traceability` uses for acceptance criteria,
+and it is right there because that backlog is ~380 items nobody proposes to
+clear. Here the backlog is nine files and clearing it is the point of the
+change. A cap whose first act is to grandfather every existing violation
+enforces nothing for as long as the list survives, and the list is what gets
+forgotten.
+
+So the cap's own step is the last one, and it goes green the day it merges.
+The cost is that during the intervening steps nothing stops a tenth file
+crossing the line; the diff budget still applies throughout, and the window is
+this change.
+
+### 300 for `.ts`/`.tsx`, 200 for `.css`
+
+Taken unchanged from the numbers `reviewable-diff-gates` recorded, rather than
+re-derived. They were chosen once with reasons; re-picking them now would be
+churn, and the measurement that matters — nine files over, everything else
+comfortably under — is the same either way. The next value below 300 that would
+change the outcome is 254 (`src/app/app.tsx`), which is close enough to the
+line to argue about and far enough from a reading problem not to.
+
+Tests count. `reviewable-diff-gates` refused to exempt tests from the diff
+budget on the grounds that test code is where agent-written slop hides, and
+`docs/testing.md` says so directly. A 831-line test file is exactly that
+hiding place.
+
+### CSS Modules, not co-located plain CSS
+
+The lazier option was to split `app.css` into `board/board.css`,
+`picker/picker.css` and so on, keep the `@import` chain in `styles.css`, and
+touch no component. It reaches the stated goal — styles beside components —
+for a fraction of the diff.
+
+It was declined because it leaves the property that made a 943-line stylesheet
+possible: one global class namespace. Split or not, `.slot` is still reachable
+from any file, so nothing prevents the next drift, and a reader still cannot
+tell which rules a component actually depends on. `.module.css` makes the
+dependency an import and the name local, which is what stops the file growing
+back.
+
+The cost is real and lands in one place: styles start arriving through the
+JavaScript bundle. `index.html` no longer links `styles.css`; the entry point
+imports the global layer (tokens, base, fonts) and each component imports its
+own module. `build.test.ts` asserts on the single `*.css` file the bundler
+emits into `dist`, so its expectations move with the mechanism.
+
+Bun's bundler detects `.module.css` with no configuration and rewrites locally
+scoped class names to unique identifiers — checked in Bun's bundler
+documentation, not recalled.
+
+### The global layer stays global
+
+Tokens, `base.css` and `fonts.css` are not modules. A design token is a custom
+property on `:root` whose whole purpose is to be reachable everywhere, and
+scoping it would defeat it. `base.css` styles bare elements, which have no
+class to scope. Only component rules become modules.
+
+### The token check is rescoped, not extended
+
+`styles.test.ts` builds its file list with `Bun.Glob("**/*.css")` rooted at
+`src/app/styles/`, then asserts no colour literal outside `tokens/`. Move
+component CSS to `src/app/board/` and those files leave the glob silently — the
+assertion still passes, over a smaller set, which is the failure mode that
+looks most like success.
+
+`CLAUDE.md` already has the rule: scope a scan by what it exempts, never by an
+enumeration of what it covers. The glob becomes every tracked `*.css` in the
+repository minus `tokens/`, so a stylesheet added anywhere is covered by
+default. The same test also gains the guard that its own sweep found more than
+zero files.
+
+### The e2e suite is the witness for the CSS move
+
+A rename of every class in the application is the kind of change that type
+checking cannot see. What can see it is the e2e suite, and it is fit for the
+job by an existing rule rather than by luck: `docs/testing.md` forbids CSS and
+class selectors in e2e in favour of `getByRole`/`getByLabel`/`getByText`, and a
+grep of `e2e/smoke.spec.ts` finds no class selector. Scoped names therefore
+cannot break a locator, and a rule that stopped applying to a moved component
+shows up as a failing assertion about what the user sees.
+
+That is weaker than a visual diff and is stated as such in the risks.
+
+## Risks / Trade-offs
+
+- **The e2e suite covers user paths, not appearance.** A component that loses a
+  rule in the move keeps working and looks wrong. → Accepted for now; the
+  mitigation is that each component moves in its own step, so the diff for any
+  one of them is small enough to read against the block it came from. A visual
+  regression tool is a separate proposal, not a precondition for this one.
+- **The cap can be satisfied by moving lines rather than by simplifying.** A
+  700-line module becomes three 250-line modules with the same tangle. → No
+  mechanism prevents this and none is proposed; `/ponytail-review` and the diff
+  budget are what read the split. The cap buys a ceiling on what one file
+  demands at once, not good decomposition.
+- **Nothing enforces the cap during the change's own steps.** → The window is
+  bounded by this change, and the diff budget still applies to every step in
+  it.
+- **`app.css` carries comments that explain design decisions** (why the radio
+  covers the whole chip, why the design tints one button separately). Splitting
+  a file is where comments get orphaned from the rules they explain. → Each
+  comment moves with the rules it describes; the reviewer's check is that no
+  comment lands in a module whose rules it does not mention.
+- **Styles moving into the JS bundle changes what a broken build looks like.**
+  A missing stylesheet becomes a missing import rather than a 404. → The
+  existing `build.test.ts` assertions on `dist` move with it, and
+  `static-routes.test.ts` continues to cover `fonts.css`, which stays served as
+  a file.
