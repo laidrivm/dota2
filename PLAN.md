@@ -112,10 +112,13 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       this entry used to ask: that change is archived, and the growth protocol
       above forbids editing an archive to receive a fact discovered later, so
       the cap lands in the living `change-slicing` spec.
-- [ ] **The rule of two** — the other half, still outstanding. Lift a helper on
-      the second consumer, never the first. `reviewable-diff-gates` prescribed
-      its vehicle when it deferred it — "its own one-line rule, separately" —
-      so it is a Code rule in `CLAUDE.md`, not a proposal.
+- [ ] **The rule of two** — the other half, still outstanding and **not yet
+      written anywhere**. Lift a helper on the second consumer, never the
+      first. `reviewable-diff-gates` prescribed its vehicle when it deferred it
+      — "its own one-line rule, separately" — so it belongs in `CLAUDE.md`'s
+      Code list rather than in a proposal. The nearest rule there today covers
+      only the opposite direction, checking for duplication before inlining a
+      single-caller helper.
 - [ ] **Task 7** — Docker + VPS deploy (open decisions: registry GHCR or Docker
       Hub, same VPS or a new one). Carries `ui-foundation` **(e2e)** 1.5, which
       Task 4 deferred here: serving `dist/` under a plain static server is
