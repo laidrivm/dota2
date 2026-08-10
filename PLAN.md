@@ -103,7 +103,7 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       scanner and no parser, and the scanner mis-reads the template literals
       `model.ts` is full of, so Stryker's command runner is the tool. `/warm`
       on it is the change's first task and can still end it.
-- [ ] **`file-size-cap`** — proposed, nine steps, not yet applied. The
+- [ ] **`file-size-cap`** — proposed, eight steps, not yet applied. The
       file-size cap half of "reverse two non-goals": 300 lines for `.ts`/`.tsx`,
       200 for `.css`, adopted with no exemption list because the same change
       decomposes all nine files currently over the line. `app.css` (943 lines)
