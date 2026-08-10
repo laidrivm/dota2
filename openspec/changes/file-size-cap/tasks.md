@@ -14,7 +14,8 @@ split on their own; then the cap.
 `/zombies` in diff mode runs before each pull request, per the pre-PR sequence.
 Only step 9 introduces logic for it to find; the test tasks in steps 1–8 are
 the existing suites, which must stay green unchanged except where a file is
-renamed.
+renamed. Numbers in brackets in step 9 are `/zombies` items from the pass over
+this proposal.
 
 ## 1. Styles arrive through the bundle
 
@@ -112,22 +113,37 @@ renamed.
       like any other (*A test file is not exempt*); an untracked 400-line file
       does not fail the check (*An untracked file over the cap*); a `.md`,
       `.json` or `.yml` file over 300 lines does not fail it
-- [ ] 9.3 Write the sweep guard's test: a run that found zero files fails
-      rather than passing every assertion vacuously
-- [ ] 9.4 Implement the check as `scripts/file-size.test.ts`, reading the file
+- [ ] 9.3 Write the extension tests first: a 301-line `.tsx` file fails, since
+      the requirement covers `.tsx` and not only `.ts` [2]; a 250-line `.css`
+      file fails while a 250-line `.ts` file passes, proving the cap is chosen
+      by extension rather than one number applied to everything [3]; and a
+      `*.module.css` file is counted under the 200-line cap, which is the
+      extension the whole CSS migration produces [6]
+- [ ] 9.4 Write the counting and sweep tests first: three files over the cap
+      are all reported in one run rather than only the first [1] — a check that
+      stops at the first turns a nine-file backlog into a nine-round game; a
+      file whose last line carries no terminating newline counts that line [4],
+      because `wc -l` counts newlines and would read a 301-line file as 300;
+      and a run that found zero files fails rather than passing every assertion
+      vacuously
+- [ ] 9.5 Write the environment tests first: a file `git ls-files` lists but
+      that is absent from the working tree is skipped rather than throwing [5],
+      and the check run from a subdirectory resolves the file list from the
+      repository root [7]
+- [ ] 9.6 Implement the check as `scripts/file-size.test.ts`, reading the file
       list from `git ls-files` so an untracked file is out of scope and a
       gitignored one cannot pass locally and fail in a clone; break each
       assertion above before it passes
-- [ ] 9.5 Run it over the tree and confirm it passes with nothing exempted
+- [ ] 9.7 Run it over the tree and confirm it passes with nothing exempted
       (*The tree as it stands*). A file still over the cap here means a
       previous step's seam was wrong and is fixed there, not exempted here
-- [ ] 9.6 Add `scripts/file-size.test.ts` to the README's knowledge ownership
+- [ ] 9.8 Add `scripts/file-size.test.ts` to the README's knowledge ownership
       map, beside `command-guard.ts` and `no-suppressions.ts`
-- [ ] 9.7 Update `PLAN.md`: the queue entry asking for an `/opsx:update` on
+- [ ] 9.9 Update `PLAN.md`: the queue entry asking for an `/opsx:update` on
       `reviewable-diff-gates` is answered — the cap landed here, and the rule of
       two remains outstanding as its own one-line Code rule, which is what the
       archived proposal prescribed for it
-- [ ] 9.8 Grep the four sites that restate a claim like this one before calling
+- [ ] 9.10 Grep the four sites that restate a claim like this one before calling
       the change done: this change's sibling artefacts, `openspec/specs/**`,
       `PLAN.md` and the README ownership map — searching the wording being
       replaced, not the wording replacing it
