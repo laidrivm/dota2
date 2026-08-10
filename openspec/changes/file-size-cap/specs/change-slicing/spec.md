@@ -5,9 +5,14 @@
 ### Requirement: No source file exceeds its per-file cap
 
 A tracked `.ts` or `.tsx` file SHALL NOT exceed 300 lines, and a tracked `.css`
-file SHALL NOT exceed 200. The check SHALL ship as a test, so that CI's
-existing `bun test` run and the pre-push hook both carry it without a new
-workflow.
+file SHALL NOT exceed 200. Both bounds are inclusive: 300 passes and 301 fails.
+The check SHALL ship as a test, so that CI's existing `bun test` run and the
+pre-push hook both carry it without a new workflow.
+
+A line is a physical line, blank ones included. A final line with no
+terminating newline counts, and `\r\n` is one ending, not two — `wc -l` counts
+newline characters and so reads a 301-line file whose last line is unterminated
+as 300, which is the arithmetic that would let a file over the cap through.
 
 Test files SHALL be counted like any other. `docs/testing.md` records that test
 code is where agent-written slop hides, and the diff budget in this capability

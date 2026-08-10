@@ -35,9 +35,16 @@ this proposal.
       each explanatory comment moves with the rules it describes
 - [ ] 1.4 Move the `picker and dialogs` block into
       `src/app/picker/picker.module.css`
-- [ ] 1.5 Confirm no rule was left behind and none duplicated: `app.css` shrinks
+- [ ] 1.5 Rewrite every `class` on the migrated markup to read from the
+      imported mapping — `class={s.heroTile}`, not `class="hero-tile"` — in
+      `hero-tile.tsx`, `picker.tsx` and wherever else those classes are
+      written, `board.tsx`'s re-pick badge included. The bundler rewrites the
+      names in the stylesheet, so a literal left behind matches nothing and the
+      rule silently stops applying. Every step that moves a block owes this,
+      not only this one
+- [ ] 1.6 Confirm no rule was left behind and none duplicated: `app.css` shrinks
       by exactly the lines the two modules gained, comments included
-- [ ] 1.6 Run the e2e suite and confirm the rendered page is unchanged — a
+- [ ] 1.7 Run the e2e suite and confirm the rendered page is unchanged — a
       mistake here is a blank stylesheet, which is loud
 
 ## 2. The board owns its styles
@@ -56,11 +63,14 @@ this proposal.
 - [ ] 3.2 Delete `src/app/styles/app.css` and its `@import`; `styles.css` is
       left with tokens and `base.css`, the global layer that has no class to
       scope
-- [ ] 3.3 Rescope the token check in `src/app/styles/styles.test.ts`: glob every
-      tracked `*.css` in the repository and exempt `tokens/`, rather than
-      enumerating one directory — a moved stylesheet must not leave the
-      no-colour-literal assertion silently. Add the guard that the sweep found
-      more than zero files
+- [ ] 3.3 Rescope the token check in `src/app/styles/styles.test.ts`: take the
+      file list from `git ls-files -z` at the repository root, keep the `*.css`
+      entries and exempt `src/app/styles/tokens/`, rather than enumerating one
+      directory — a moved stylesheet must not leave the no-colour-literal
+      assertion silently. Not a filesystem-wide `Bun.Glob`, which would walk
+      `node_modules` and pick up untracked files; the shape is
+      `scripts/no-suppressions.ts`'s. Add the guard that the sweep found more
+      than zero files
 - [ ] 3.4 Break the rescoped check before trusting it: put a hex literal in a
       component module and watch it fail
 
@@ -70,8 +80,8 @@ this proposal.
       `hotkeyContext`, `ownsKeystroke`, `closesEditor`, `hotkeyFor` — into
       `src/app/hotkeys.ts`, leaving session state and its reducer behind
 - [ ] 4.2 Split `src/app/session.test.ts` along the same seam into
-      `hotkeys.test.ts` and a smaller `session.test.ts`; both files land under
-      300 lines or the seam was wrong
+      `hotkeys.test.ts` and a smaller `session.test.ts`; both files land at 300
+      lines or fewer, the cap being inclusive, or the seam was wrong
 
 ## 5. `scripts/command-guard.ts` splits
 
@@ -79,9 +89,12 @@ this proposal.
       `SHELLS`, `invocation` — into `scripts/command-parse.ts`, leaving the git
       and `gh` prohibitions in `command-guard.ts`
 - [ ] 5.2 Split `scripts/command-guard.test.ts` along the same seam
-- [ ] 5.3 Confirm the hook still blocks: run the guard against one command it
-      must refuse and one it must allow, since this file is a safety gate and a
-      refactor that quietly stops refusing is the failure that matters
+- [ ] 5.3 Confirm the hook still blocks, on the terms `CLAUDE.md` sets for
+      probing a gate: refuse it with an input this session has not already
+      cleared, and report what the call returned rather than what a prompt did.
+      One command it must refuse, one it must allow — this file is a safety
+      gate, and a refactor that quietly stops refusing is the failure that
+      matters
 
 ## 6. `src/app/board/board.tsx` splits
 
