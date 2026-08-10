@@ -137,9 +137,9 @@ this proposal.
       are all reported in one run rather than only the first [1] — a check that
       stops at the first turns a nine-file backlog into a nine-round game; a
       file whose last line carries no terminating newline counts that line [4],
-      because `wc -l` counts newlines and would read a 301-line file as 300;
-      and a run that found zero files fails rather than passing every assertion
-      vacuously
+      because `wc -l` counts newlines and would read a 301-line file as 300; a
+      file with `\r\n` endings counts each pair as one line, not two; and a run
+      that found zero files fails rather than passing every assertion vacuously
 - [ ] 8.5 Write the environment tests first: a file `git ls-files` lists but
       that is absent from the working tree is skipped rather than throwing [5],
       and the check run from a subdirectory resolves the file list from the

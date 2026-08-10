@@ -77,13 +77,20 @@ back.
 
 The cost is real and lands in one place: styles start arriving through the
 JavaScript bundle. `index.html` no longer links `styles.css`; the entry point
-imports the global layer (tokens, base, fonts) and each component imports its
+imports the global layer (tokens and base) and each component imports its
 own module. `build.test.ts` asserts on the single `*.css` file the bundler
 emits into `dist`, so its expectations move with the mechanism.
 
 Bun's bundler detects `.module.css` with no configuration and rewrites locally
 scoped class names to unique identifiers — checked in Bun's bundler
 documentation, not recalled.
+
+Fonts are the exception and do not move at all. `index.html` owns
+`@import url("/fonts/fonts.css")` in an inline `<style>`, so the faces are
+requested from the document rather than from the bundle; `build.test.ts`
+asserts that import survives the build and `static-routes.test.ts` asserts the
+served file's `content-type` and revalidation. `styles.css` never imported
+`fonts.css` and still does not. Nothing about fonts changes here.
 
 ### The global layer stays global
 
