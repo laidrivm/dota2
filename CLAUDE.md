@@ -240,6 +240,9 @@ Rules about how work is carried out here. They do not age with the code.
   cleared — an approval and an absent prompt reach you as the same successful
   result, and an approval outlives the mode that granted it.
 - Never report what a permission prompt did; report what the call returned.
+- Treat an empty result as evidence of absence only after the same query has
+  returned a non-empty one — a broken query and a true absence print the same
+  nothing.
 - When a statement changes — a rule, a recorded decision, or one artefact of
   a change under review — grep the four places that restate one before
   calling the change done: the change's own sibling artefacts,
