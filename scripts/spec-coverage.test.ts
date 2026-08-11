@@ -244,6 +244,7 @@ const world = (source: string, ...scenarios: string[]) =>
 const cited = (dir: string) => [...check(dir).cited].sort();
 const problems = (dir: string) => check(dir).problems;
 
+// spec: spec-test-traceability/an-identifier-is-derived-from-a-heading
 describe("an identifier is derived from a heading", () => {
 	test("a heading becomes its capability and slug", () => {
 		const dir = fabricate({
@@ -277,6 +278,7 @@ describe("an identifier is derived from a heading", () => {
 	});
 });
 
+// spec: spec-test-traceability/a-test-cites-one-criterion
 describe("a test cites one criterion", () => {
 	test("a citation above a test call marks its criterion", () => {
 		const dir = world(
@@ -307,6 +309,7 @@ describe("a test cites one criterion", () => {
 	});
 });
 
+// spec: spec-test-traceability/one-act-closes-several-criteria
 describe("one act closes several criteria", () => {
 	test("two identifiers on one line both count", () => {
 		const dir = world(
@@ -333,6 +336,7 @@ describe("one act closes several criteria", () => {
 	});
 });
 
+// spec: spec-test-traceability/one-criterion-needs-several-tests
 describe("one criterion needs several tests", () => {
 	test("five tests citing one leave one criterion cited", () => {
 		const one = '// spec: capability/a-first-thing\ntest("acts", () => {});\n';
@@ -343,6 +347,7 @@ describe("one criterion needs several tests", () => {
 	});
 });
 
+// spec: spec-test-traceability/a-citation-floating-in-a-file
 describe("a citation floating in a file", () => {
 	test("a statement between the comment and the call fails", () => {
 		const dir = world(
@@ -401,6 +406,7 @@ describe("what is not a citation", () => {
 	});
 });
 
+// spec: spec-test-traceability/a-criterion-renamed-under-its-test
 describe("a criterion renamed under its test", () => {
 	test("a citation matching no criterion names citation, file and line", () => {
 		const dir = world(
@@ -413,6 +419,7 @@ describe("a criterion renamed under its test", () => {
 	});
 });
 
+// spec: spec-test-traceability/a-criterion-still-in-flight
 describe("a criterion still in flight", () => {
 	test("a citation to an active change's delta spec is valid", () => {
 		const dir = fabricate({
@@ -451,6 +458,7 @@ describe("a criterion still in flight", () => {
 const twice = (heading: string) =>
 	`# capability\n\n### Requirement: The first rule\n\n#### Scenario: ${heading}\n\n- **WHEN** a\n- **THEN** b\n\n### Requirement: The second rule\n\n#### Scenario: ${heading}\n\n- **WHEN** c\n- **THEN** d\n`;
 
+// spec: spec-test-traceability/an-ambiguous-identifier-is-cited
 describe("an ambiguous identifier is cited", () => {
 	test("a cited slug matching two criteria names both requirements", () => {
 		const dir = fabricate({
@@ -464,6 +472,7 @@ describe("an ambiguous identifier is cited", () => {
 	});
 });
 
+// spec: spec-test-traceability/an-ambiguous-identifier-nobody-cites
 describe("an ambiguous identifier nobody cites", () => {
 	test("the same slug uncited passes", () => {
 		const dir = fabricate({
@@ -526,5 +535,9 @@ describe("the repository as it stands", () => {
 	test("the sweep read criteria and test files rather than nothing", () => {
 		expect(here.criteria.length).toBeGreaterThan(0);
 		expect(here.files.length).toBeGreaterThan(0);
+		// Without this the check passes vacuously: a scanner finding nothing
+		// reports no problems either, and this file's own citations are the
+		// only ones in the tree.
+		expect(here.cited.size).toBeGreaterThan(0);
 	});
 });
