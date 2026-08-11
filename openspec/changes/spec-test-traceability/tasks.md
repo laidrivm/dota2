@@ -48,7 +48,7 @@ Criteria are cited by their scenario heading; all fifteen belong to the
       (*An ambiguous identifier is cited*) [19]; the same slug uncited passes
       (*An ambiguous identifier nobody cites*) [20]; the same heading text in
       two different capabilities yields two distinct identifiers [8]
-- [ ] 1.9 Implement ambiguity detection, and confirm it against the three real
+- [x] 1.9 Implement ambiguity detection, and confirm it against the three real
       duplicates — `draft-session / Board is not an active context`,
       `local-review-loop / A skipped Minor`,
       `review-bot-config / An archived change`
