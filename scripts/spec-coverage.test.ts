@@ -134,7 +134,11 @@ function cite(path: string, text: string) {
 	let open = false;
 	const enclosed = lines.map((line) => {
 		const was = open;
-		for (const token of line.match(/\/\*|\*\//g) ?? []) open = token === "/*";
+		// Single-line string literals first: `const opener = "/*"` opens no
+		// comment, and treating it as one would silently blind the scanner to
+		// every citation below it.
+		const bare = line.replace(/'[^']*'|"[^"]*"|`[^`]*`/g, "");
+		for (const token of bare.match(/\/\*|\*\//g) ?? []) open = token === "/*";
 		return was;
 	});
 
@@ -152,17 +156,33 @@ function cite(path: string, text: string) {
 
 		let next = index + 1;
 		for (; next < lines.length; next++) {
-			const comment = /^\s*\/\/(.*)$/.exec(lines[next] ?? "");
+			const comment = enclosed[next]
+				? null
+				: /^\s*\/\/(.*)$/.exec(lines[next] ?? "");
 			const more = comment ? words(comment[1] ?? "") : [];
 			if (!more.length || !more.every((id) => IDENTIFIER.test(id))) break;
 			for (const id of more) found.push({ id, path, line: next + 1 });
 		}
-		while (next < lines.length && SEPARATOR.test(lines[next] ?? "")) next++;
+		// A line inside a block comment separates whatever its text looks like:
+		// only the first line of `/* note` starts with a comment marker.
+		while (
+			next < lines.length &&
+			(enclosed[next] || SEPARATOR.test(lines[next] ?? ""))
+		)
+			next++;
 		if (!CALL.test(lines[next] ?? ""))
 			wrong.push(`${at}: not directly above a test, it or describe call`);
 	});
 	return { found, wrong };
 }
+
+/**
+ * Every file `bun test` runs, taken from Bun's own discovery contract rather
+ * than from the two suffixes this repository happens to use: a `_test.ts` file
+ * runs, and a scanner blind to it would report full coverage of a criterion
+ * only that file cites.
+ */
+const TEST_FILE = /[._](?:test|spec)\.[cm]?[jt]sx?$/;
 
 /** Tracked test files, listed at the repository root whatever `cwd` is. */
 function tests(root: string): string[] {
@@ -172,9 +192,7 @@ function tests(root: string): string[] {
 		.toString()
 		.split("\0")
 		.filter(
-			(path) =>
-				(path.endsWith(".test.ts") || path.endsWith(".spec.ts")) &&
-				!`/${path}`.includes("/node_modules/"),
+			(path) => TEST_FILE.test(path) && !`/${path}`.includes("/node_modules/"),
 		);
 }
 
@@ -420,6 +438,24 @@ describe("what is not a citation", () => {
 		expect(problems(dir)).toEqual([]);
 	});
 
+	test("a string literal holding a comment opener blinds nothing below it", () => {
+		const dir = world(
+			'const opener = "/*";\n// spec: capability/a-first-thing\ntest("acts", () => {});\n',
+			"A first thing",
+		);
+		expect(cited(dir)).toEqual(["capability/a-first-thing"]);
+		expect(problems(dir)).toEqual([]);
+	});
+
+	test("a block comment between a citation and its call separates them", () => {
+		const dir = world(
+			'// spec: capability/a-first-thing\n/* note\ntext */\ntest("acts", () => {});\n',
+			"A first thing",
+		);
+		expect(cited(dir)).toEqual(["capability/a-first-thing"]);
+		expect(problems(dir)).toEqual([]);
+	});
+
 	test("a citation naming no identifier fails", () => {
 		const dir = world('// spec:\ntest("acts", () => {});\n', "A first thing");
 		expect(problems(dir).join("\n")).toContain("src/thing.test.ts:1");
@@ -615,20 +651,28 @@ describe("what the sweep reads", () => {
 		]);
 	});
 
-	test("a .spec.ts file is scanned and its citations join a .test.ts file's", () => {
+	test("every file bun runs is scanned, whichever form its name takes", () => {
 		const dir = fabricate({
 			"openspec/specs/capability/spec.md": spec(
 				"A first thing",
 				"A second thing",
+				"A third thing",
+				"A fourth thing",
 			),
 			"src/thing.test.ts":
 				'// spec: capability/a-first-thing\ntest("acts", () => {});\n',
 			"e2e/thing.spec.ts":
 				'// spec: capability/a-second-thing\ntest("acts", () => {});\n',
+			"src/thing_test.ts":
+				'// spec: capability/a-third-thing\ntest("acts", () => {});\n',
+			"src/thing_spec.tsx":
+				'// spec: capability/a-fourth-thing\ntest("acts", () => {});\n',
 		});
 		expect(cited(dir)).toEqual([
 			"capability/a-first-thing",
+			"capability/a-fourth-thing",
 			"capability/a-second-thing",
+			"capability/a-third-thing",
 		]);
 	});
 

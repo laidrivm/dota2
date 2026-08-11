@@ -18,8 +18,8 @@ exist, which is worse than the empty state.
 ## What Changes
 
 - A new check, shipped as `scripts/spec-coverage.test.ts`, that reads every
-  `openspec/specs/*/spec.md` and every tracked `*.test.ts` and `*.spec.ts`
-  file outside `node_modules`, and compares the criteria it finds against the
+  `openspec/specs/*/spec.md` and every tracked file `bun test` discovers as a
+  test outside `node_modules`, and compares the criteria it finds against the
   citations.
 - A criterion is identified by `<capability>/<slug of its scenario heading>`,
   derived rather than stored — no identifier is written into any spec.
