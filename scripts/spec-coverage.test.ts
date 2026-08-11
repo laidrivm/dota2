@@ -36,8 +36,8 @@ function parse(file: string, capability: string): Criterion[] {
 	const found: Criterion[] = [];
 	let requirement = "";
 	// A fenced block quoting a `#### Scenario:` line illustrates the format
-	// rather than declaring a criterion, and the delta specs of this very
-	// change are where that first happens.
+	// rather than declaring a criterion. No spec file carries a fence today;
+	// the first one to explain this identifier scheme will.
 	let fenced = false;
 	for (const line of readFileSync(file, "utf8").split("\n")) {
 		if (line.startsWith("```")) fenced = !fenced;
@@ -128,7 +128,18 @@ function cite(path: string, text: string) {
 	const lines = text.split("\n");
 	const found: Citation[] = [];
 	const wrong: string[] = [];
+	// Whether each line begins inside a `/* … */` block. Without it a `// spec:`
+	// line inside a commented-out block reads as a citation, and the `*/` under
+	// it reads as a separator, so the block silently credits a criterion.
+	let open = false;
+	const enclosed = lines.map((line) => {
+		const was = open;
+		for (const token of line.match(/\/\*|\*\//g) ?? []) open = token === "/*";
+		return was;
+	});
+
 	lines.forEach((line, index) => {
+		if (enclosed[index]) return;
 		const marker = CITATION.exec(line);
 		if (!marker) return;
 		const at = `${path}:${index + 1}`;
@@ -391,6 +402,15 @@ describe("what is not a citation", () => {
 		expect(problems(dir)).toEqual([]);
 	});
 
+	test("a spec marker inside a multi-line block comment is ignored", () => {
+		const dir = world(
+			'/*\n// spec: capability/a-first-thing\n*/\ntest("acts", () => {});\n',
+			"A first thing",
+		);
+		expect(cited(dir)).toEqual([]);
+		expect(problems(dir)).toEqual([]);
+	});
+
 	test("a spec marker inside a block comment is ignored", () => {
 		const dir = world(
 			'/* // spec: capability/a-first-thing */\ntest("acts", () => {});\n',
@@ -460,6 +480,18 @@ describe("a criterion still in flight", () => {
 				'// spec: capability/an-archived-thing\ntest("acts", () => {});\n',
 		});
 		expect(problems(dir).join("\n")).toContain("capability/an-archived-thing");
+	});
+
+	test("an empty changes directory leaves the two sets equal", () => {
+		const dir = world(
+			'// spec: capability/a-settled-thing\ntest("acts", () => {});\n',
+			"A settled thing",
+		);
+		// git tracks no empty directory, so this one exists only on disk —
+		// which is exactly the state a freshly archived change leaves behind.
+		mkdirSync(join(dir, "openspec/changes"), { recursive: true });
+		expect(problems(dir)).toEqual([]);
+		expect(cited(dir)).toEqual(["capability/a-settled-thing"]);
 	});
 
 	test("an absent changes directory leaves the two sets equal", () => {
