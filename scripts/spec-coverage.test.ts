@@ -159,8 +159,7 @@ function tests(root: string): string[] {
 		.filter(
 			(path) =>
 				(path.endsWith(".test.ts") || path.endsWith(".spec.ts")) &&
-				!path.startsWith("node_modules/") &&
-				!path.includes("/node_modules/"),
+				!`/${path}`.includes("/node_modules/"),
 		);
 }
 
@@ -213,14 +212,6 @@ afterAll(() => {
 	for (const dir of made) rmSync(dir, { recursive: true, force: true });
 });
 
-function write(dir: string, files: Record<string, string>): void {
-	for (const [path, text] of Object.entries(files)) {
-		const full = join(dir, path);
-		mkdirSync(dirname(full), { recursive: true });
-		writeFileSync(full, text);
-	}
-}
-
 /** A throwaway repository holding `files`, all tracked. */
 function fabricate(files: Record<string, string>): string {
 	const dir = mkdtempSync(join(tmpdir(), "spec-coverage-"));
@@ -230,7 +221,11 @@ function fabricate(files: Record<string, string>): string {
 		if (run.exitCode !== 0) throw new Error(run.stderr.toString());
 	};
 	git("init", "-b", "main");
-	write(dir, files);
+	for (const [path, text] of Object.entries(files)) {
+		const full = join(dir, path);
+		mkdirSync(dirname(full), { recursive: true });
+		writeFileSync(full, text);
+	}
 	git("add", "-A");
 	return dir;
 }
