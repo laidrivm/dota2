@@ -58,14 +58,32 @@ function subdirs(path: string): string[] {
 		.map((entry) => entry.name);
 }
 
-/** Every criterion under `openspec/specs/` — the set the count is taken over. */
-const counted = (root: string): Criterion[] =>
-	subdirs(join(root, "openspec/specs")).flatMap((capability) => {
-		const file = join(root, "openspec/specs", capability, "spec.md");
+/** Every criterion in `<specs>/<capability>/spec.md`, for one such directory. */
+const under = (specs: string): Criterion[] =>
+	subdirs(specs).flatMap((capability) => {
+		const file = join(specs, capability, "spec.md");
 		return lstatSync(file, { throwIfNoEntry: false })?.isFile()
 			? parse(file, capability)
 			: [];
 	});
+
+/** The set the count is taken over. */
+const counted = (root: string) => under(join(root, "openspec/specs"));
+
+/**
+ * The criteria a citation may name: the counted set plus every active change's
+ * delta spec. The asymmetry is what lets a change dogfood the check — its
+ * tests cite criteria still in its own delta, valid but not yet counted, and
+ * archiving moves criterion and citation into the count together. An archived
+ * change sits one directory deeper and so is not read here; its criteria
+ * reached `openspec/specs/` when it was archived.
+ */
+const validated = (root: string): Criterion[] => [
+	...counted(root),
+	...subdirs(join(root, "openspec/changes")).flatMap((change) =>
+		under(join(root, "openspec/changes", change, "specs")),
+	),
+];
 
 /**
  * A citation identifier. Anchored at both ends, so `capability/A Thing` is a
@@ -144,6 +162,7 @@ function check(cwd?: string) {
 	const root = top.stdout.toString().trim();
 
 	const criteria = counted(root);
+	const known = new Set(validated(root).map((c) => c.id));
 	const files = tests(root);
 	const problems: string[] = [];
 	const citations: Citation[] = [];
@@ -154,6 +173,10 @@ function check(cwd?: string) {
 		const { found, wrong } = cite(path, readFileSync(full, "utf8"));
 		citations.push(...found);
 		problems.push(...wrong);
+	}
+
+	for (const { id, path, line } of citations) {
+		if (!known.has(id)) problems.push(`${path}:${line}: no criterion ${id}`);
 	}
 
 	return {
