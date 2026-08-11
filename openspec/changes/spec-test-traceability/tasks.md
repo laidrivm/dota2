@@ -52,11 +52,11 @@ Criteria are cited by their scenario heading; all fifteen belong to the
       duplicates — `draft-session / Board is not an active context`,
       `local-review-loop / A skipped Minor`,
       `review-bot-config / An archived change`
-- [ ] 1.10 Add the environment tests: run from a subdirectory the check reads
+- [x] 1.10 Add the environment tests: run from a subdirectory the check reads
       the whole repository [26], outside a git repository it throws rather than
       passing [27], and a tracked file deleted from the work tree is skipped
       [28]
-- [ ] 1.11 Add the guard on the sweep itself — the run found more than zero
+- [x] 1.11 Add the guard on the sweep itself — the run found more than zero
       criteria and more than zero test files, so an empty scan cannot pass
       every assertion [15]
 - [ ] 1.12 Cite this change's own criteria from the tests written above, which

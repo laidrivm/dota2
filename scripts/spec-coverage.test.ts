@@ -487,3 +487,44 @@ describe("an ambiguous identifier nobody cites", () => {
 		]);
 	});
 });
+
+describe("a tree the check cannot read straight through", () => {
+	test("run from a subdirectory it still reads the whole repository", () => {
+		const dir = world(
+			'// spec: capability/a-settled-thing\ntest("acts", () => {});\n',
+			"A settled thing",
+		);
+		const seen = check(join(dir, "src"));
+		expect([...seen.cited]).toEqual(["capability/a-settled-thing"]);
+		expect(seen.files).toEqual(["src/thing.test.ts"]);
+	});
+
+	test("outside a repository it throws rather than passing", () => {
+		const dir = mkdtempSync(join(tmpdir(), "spec-coverage-bare-"));
+		made.push(dir);
+		expect(() => check(dir)).toThrow();
+	});
+
+	test("a tracked test file deleted from the work tree is skipped", () => {
+		const dir = world(
+			'// spec: capability/a-settled-thing\ntest("acts", () => {});\n',
+			"A settled thing",
+		);
+		rmSync(join(dir, "src/thing.test.ts"));
+		expect(problems(dir)).toEqual([]);
+		expect(cited(dir)).toEqual([]);
+	});
+});
+
+describe("the repository as it stands", () => {
+	const here = check(repo);
+
+	test("nothing is cited wrongly", () => {
+		expect(here.problems).toEqual([]);
+	});
+
+	test("the sweep read criteria and test files rather than nothing", () => {
+		expect(here.criteria.length).toBeGreaterThan(0);
+		expect(here.files.length).toBeGreaterThan(0);
+	});
+});
