@@ -95,7 +95,16 @@ const IDENTIFIER = /^[a-z0-9]+(?:-[a-z0-9]+)*\/[a-z0-9]+(?:-[a-z0-9]+)*$/;
 /** A `test`, `it` or `describe` call, member forms — `test.each` — included. */
 const CALL = /^\s*(?:test|it|describe)(?:\.\w+)*\s*[(`]/;
 
-/** A line-leading `// spec:` comment. Anything indented past code is not one. */
+/**
+ * A line-leading `// spec:` comment. Anything with code before it on the line
+ * is not one, which is what keeps a single-line string literal out.
+ *
+ * ponytail: line-based, so a `// spec:` line inside a multi-line template
+ * literal reads as a citation. Costs a TypeScript parser to fix, and the
+ * failure is loud — a false citation either names a real criterion, wrongly
+ * crediting one this file's fixtures never assert, or names none and fails the
+ * check. Write fixtures with `\n` rather than as multi-line templates.
+ */
 const CITATION = /^\s*\/\/\s*spec:(.*)$/;
 
 /** Blank, or any comment line: what may sit between a citation and its call. */
@@ -539,5 +548,52 @@ describe("the repository as it stands", () => {
 		// reports no problems either, and this file's own citations are the
 		// only ones in the tree.
 		expect(here.cited.size).toBeGreaterThan(0);
+	});
+});
+
+describe("what the sweep reads", () => {
+	test("a scenario before any requirement heading keeps an empty requirement", () => {
+		const dir = fabricate({
+			"openspec/specs/capability/spec.md":
+				"# capability\n\n#### Scenario: An orphan\n\n- **WHEN** a\n- **THEN** b\n",
+		});
+		expect(counted(dir)).toEqual([
+			{ id: "capability/an-orphan", requirement: "" },
+		]);
+	});
+
+	test("a .spec.ts file is scanned and its citations join a .test.ts file's", () => {
+		const dir = fabricate({
+			"openspec/specs/capability/spec.md": spec(
+				"A first thing",
+				"A second thing",
+			),
+			"src/thing.test.ts":
+				'// spec: capability/a-first-thing\ntest("acts", () => {});\n',
+			"e2e/thing.spec.ts":
+				'// spec: capability/a-second-thing\ntest("acts", () => {});\n',
+		});
+		expect(cited(dir)).toEqual([
+			"capability/a-first-thing",
+			"capability/a-second-thing",
+		]);
+	});
+
+	test("a tracked file under node_modules is not scanned", () => {
+		const dir = fabricate({
+			"openspec/specs/capability/spec.md": spec("A first thing"),
+			"node_modules/pkg/thing.test.ts": "// spec: capability/the-old-wording\n",
+		});
+		expect(check(dir).files).toEqual([]);
+		expect(problems(dir)).toEqual([]);
+	});
+
+	test("a citation indented inside a describe block counts", () => {
+		const dir = world(
+			'describe("outer", () => {\n\t// spec: capability/a-first-thing\n\ttest("acts", () => {});\n});\n',
+			"A first thing",
+		);
+		expect(cited(dir)).toEqual(["capability/a-first-thing"]);
+		expect(problems(dir)).toEqual([]);
 	});
 });
