@@ -74,7 +74,7 @@ Criteria are cited by their scenario heading; all fifteen belong to the
       comment fails, and so does one whose comment text is empty or whitespace —
       `const FLOOR = 380; //` is not a reason (*The floor changed with no reason
       given*) [23]
-- [ ] 2.3 Implement the floor constant and the three comparisons in
+- [x] 2.3 Implement the floor constant and the three comparisons in
       `scripts/spec-coverage.test.ts`; break each before it passes
 - [ ] 2.4 Measure the count over the tree and write it as the floor with its
       reason on the line (*The repository as it stands*) [29]; a tree with no
