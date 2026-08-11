@@ -701,3 +701,52 @@ describe("what the sweep reads", () => {
 		expect(problems(dir)).toEqual([]);
 	});
 });
+
+// spec: spec-test-traceability/a-criterion-added-without-a-test
+// spec: spec-test-traceability/a-criterion-newly-covered
+describe("the count of uncited criteria against its floor", () => {
+	const reasoned = "const FLOOR = 380; // first measurement";
+
+	test("a count equal to the floor passes", () => {
+		expect(gauge(380, 380, reasoned)).toEqual([]);
+	});
+
+	test("a count one above the floor fails", () => {
+		expect(gauge(381, 380, reasoned).length).toBe(1);
+	});
+
+	test("a count one below the floor fails, naming the value to write", () => {
+		expect(gauge(379, 380, reasoned).join("\n")).toContain("write 379");
+	});
+
+	test("either failure reports the count and the floor, not only that it failed", () => {
+		for (const count of [381, 379]) {
+			const said = gauge(count, 380, reasoned).join("\n");
+			expect(said).toContain(String(count));
+			expect(said).toContain("380");
+		}
+	});
+});
+
+// spec: spec-test-traceability/the-floor-changed-with-no-reason-given
+describe("the floor's line carries a reason", () => {
+	test("a line with no trailing comment fails", () => {
+		expect(gauge(380, 380, "const FLOOR = 380;").length).toBe(1);
+	});
+
+	test("a trailing marker with no text after it is not a reason", () => {
+		expect(gauge(380, 380, "const FLOOR = 380; //").length).toBe(1);
+	});
+
+	test("a trailing comment of whitespace alone is not a reason", () => {
+		expect(gauge(380, 380, "const FLOOR = 380; //   ").length).toBe(1);
+	});
+
+	test("the reason is demanded whichever direction the number moved", () => {
+		for (const count of [379, 380, 381]) {
+			expect(gauge(count, 380, "const FLOOR = 380;").join("\n")).toContain(
+				"reason",
+			);
+		}
+	});
+});

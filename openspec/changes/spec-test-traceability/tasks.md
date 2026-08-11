@@ -65,12 +65,12 @@ Criteria are cited by their scenario heading; all fifteen belong to the
 
 ## 2. The floor
 
-- [ ] 2.1 Write the floor's tests first: a count equal to the floor passes
+- [x] 2.1 Write the floor's tests first: a count equal to the floor passes
       [9], a count one above it fails (*A criterion added without a test*)
       [10], a count one below it fails and names the value to write
       (*A criterion newly covered*) [11], and the failure reports both count
       and floor rather than only failing [17]
-- [ ] 2.2 Write the reason-line tests first: the floor's line without a trailing
+- [x] 2.2 Write the reason-line tests first: the floor's line without a trailing
       comment fails, and so does one whose comment text is empty or whitespace —
       `const FLOOR = 380; //` is not a reason (*The floor changed with no reason
       given*) [23]
