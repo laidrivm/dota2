@@ -104,6 +104,16 @@ const spec = (...scenarios: string[]) =>
 
 const ids = (list: Criterion[]) => list.map((c) => c.id);
 
+/** A repository holding one capability's `scenarios` and one test file. */
+const world = (source: string, ...scenarios: string[]) =>
+	fabricate({
+		"openspec/specs/capability/spec.md": spec(...scenarios),
+		"src/thing.test.ts": source,
+	});
+
+const cited = (dir: string) => [...check(dir).cited].sort();
+const problems = (dir: string) => check(dir).problems;
+
 describe("an identifier is derived from a heading", () => {
 	test("a heading becomes its capability and slug", () => {
 		const dir = fabricate({
@@ -134,5 +144,127 @@ describe("an identifier is derived from a heading", () => {
 			"openspec/specs/fenced/spec.md": `${spec("A real one")}\n\`\`\`md\n#### Scenario: An illustrated one\n\`\`\`\n`,
 		});
 		expect(ids(counted(dir))).toEqual(["fenced/a-real-one"]);
+	});
+});
+
+describe("a test cites one criterion", () => {
+	test("a citation above a test call marks its criterion", () => {
+		const dir = world(
+			'// spec: capability/a-first-thing\ntest("acts", () => {});\n',
+			"A first thing",
+			"A second thing",
+		);
+		expect(cited(dir)).toEqual(["capability/a-first-thing"]);
+		expect(problems(dir)).toEqual([]);
+	});
+
+	test("a citation above a test.each call counts", () => {
+		const dir = world(
+			'// spec: capability/a-first-thing\ntest.each([1])("acts %i", () => {});\n',
+			"A first thing",
+		);
+		expect(cited(dir)).toEqual(["capability/a-first-thing"]);
+	});
+
+	test("blank lines between the comment and the call do not break it", () => {
+		const dir = world(
+			'// spec: capability/a-first-thing\n\n\ndescribe("acts", () => {});\n',
+			"A first thing",
+		);
+		expect(cited(dir)).toEqual(["capability/a-first-thing"]);
+	});
+});
+
+describe("one act closes several criteria", () => {
+	test("two identifiers on one line both count", () => {
+		const dir = world(
+			'// spec: capability/a-first-thing capability/a-second-thing\nit("acts", () => {});\n',
+			"A first thing",
+			"A second thing",
+		);
+		expect(cited(dir)).toEqual([
+			"capability/a-first-thing",
+			"capability/a-second-thing",
+		]);
+	});
+
+	test("identifiers on consecutive comment lines all count", () => {
+		const dir = world(
+			'// spec: capability/a-first-thing\n//       capability/a-second-thing\ntest("acts", () => {});\n',
+			"A first thing",
+			"A second thing",
+		);
+		expect(cited(dir)).toEqual([
+			"capability/a-first-thing",
+			"capability/a-second-thing",
+		]);
+	});
+});
+
+describe("one criterion needs several tests", () => {
+	test("five tests citing one leave one criterion cited", () => {
+		const one = '// spec: capability/a-first-thing\ntest("acts", () => {});\n';
+		const dir = world(one.repeat(5), "A first thing", "A second thing");
+		expect(cited(dir)).toEqual(["capability/a-first-thing"]);
+		const { criteria } = check(dir);
+		expect(criteria.length - cited(dir).length).toBe(1);
+	});
+});
+
+describe("a citation floating in a file", () => {
+	test("a statement between the comment and the call fails", () => {
+		const dir = world(
+			'// spec: capability/a-first-thing\nconst x = 1;\ntest("acts", () => {});\n',
+			"A first thing",
+		);
+		expect(problems(dir).join("\n")).toContain("src/thing.test.ts:1");
+	});
+
+	test("a citation with no call after it at all fails", () => {
+		const dir = world("// spec: capability/a-first-thing\n", "A first thing");
+		expect(problems(dir).join("\n")).toContain("src/thing.test.ts:1");
+	});
+});
+
+describe("what is not a citation", () => {
+	test("a spec marker inside a string literal is ignored", () => {
+		const dir = world(
+			'const source = "// spec: capability/a-first-thing";\ntest("acts", () => {});\n',
+			"A first thing",
+		);
+		expect(cited(dir)).toEqual([]);
+		expect(problems(dir)).toEqual([]);
+	});
+
+	test("a spec marker inside a block comment is ignored", () => {
+		const dir = world(
+			'/* // spec: capability/a-first-thing */\ntest("acts", () => {});\n',
+			"A first thing",
+		);
+		expect(cited(dir)).toEqual([]);
+		expect(problems(dir)).toEqual([]);
+	});
+
+	test("a citation naming no identifier fails", () => {
+		const dir = world('// spec:\ntest("acts", () => {});\n', "A first thing");
+		expect(problems(dir).join("\n")).toContain("src/thing.test.ts:1");
+	});
+
+	test("an identifier without its capability fails", () => {
+		const dir = world(
+			'// spec: a-first-thing\ntest("acts", () => {});\n',
+			"A first thing",
+		);
+		expect(problems(dir).join("\n")).toContain("a-first-thing");
+		expect(cited(dir)).toEqual([]);
+	});
+
+	test("an identifier carrying uppercase or a space fails", () => {
+		const dir = world(
+			'// spec: capability/A First Thing\ntest("acts", () => {});\n',
+			"A first thing",
+		);
+		expect(problems(dir).length).toBeGreaterThan(0);
+		expect(cited(dir)).toEqual([]);
 	});
 });
