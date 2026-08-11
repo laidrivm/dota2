@@ -11,7 +11,7 @@ Criteria are cited by their scenario heading; all fifteen belong to the
 
 ## 1. Identifiers and citations
 
-- [ ] 1.1 Write the criterion parser's tests first, all failing: a heading
+- [x] 1.1 Write the criterion parser's tests first, all failing: a heading
       derives its slug (*An identifier is derived from a heading*), the real
       `draft-model` heading `Insufficient hero picked (model-spec §7.5)` leaves
       exactly `draft-model/insufficient-hero-picked-model-spec-7-5` rather than
