@@ -33,7 +33,7 @@ Criteria are cited by their scenario heading; all fifteen belong to the
       or a block comment is not a citation [25], a `// spec:` comment naming no
       identifier fails [21], and an identifier without its `/` or carrying
       uppercase or spaces fails rather than silently matching nothing [22]
-- [ ] 1.5 Implement the scanner over tracked `*.test.ts` and `*.spec.ts`
+- [x] 1.5 Implement the scanner over tracked `*.test.ts` and `*.spec.ts`
       outside `node_modules`; break each assertion above before it passes
 - [ ] 1.6 Write the validation-set tests first: a citation matching no
       criterion fails, naming citation, file and line (*A criterion renamed
