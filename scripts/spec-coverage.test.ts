@@ -162,7 +162,10 @@ function check(cwd?: string) {
 	const root = top.stdout.toString().trim();
 
 	const criteria = counted(root);
-	const known = new Set(validated(root).map((c) => c.id));
+	// Grouped rather than a set: three headings repeat under different
+	// requirements today, and a slug matching two of them is an error only
+	// once a test cites it — until then both simply count as uncited.
+	const known = Map.groupBy(validated(root), (c) => c.id);
 	const files = tests(root);
 	const problems: string[] = [];
 	const citations: Citation[] = [];
@@ -176,7 +179,14 @@ function check(cwd?: string) {
 	}
 
 	for (const { id, path, line } of citations) {
-		if (!known.has(id)) problems.push(`${path}:${line}: no criterion ${id}`);
+		const matched = known.get(id);
+		if (!matched) problems.push(`${path}:${line}: no criterion ${id}`);
+		else if (matched.length > 1)
+			problems.push(
+				`${path}:${line}: ${id} is ambiguous, carried by ${matched
+					.map((c) => `"${c.requirement}"`)
+					.join(" and ")} — rename one heading`,
+			);
 	}
 
 	return {
