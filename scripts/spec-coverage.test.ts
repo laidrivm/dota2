@@ -7,9 +7,65 @@
  * so it is blocking from the first commit with no workflow edit.
  */
 import { afterAll, describe, expect, test } from "bun:test";
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import {
+	lstatSync,
+	mkdirSync,
+	mkdtempSync,
+	readdirSync,
+	readFileSync,
+	rmSync,
+	writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
+
+type Criterion = { id: string; requirement: string };
+
+/** The scenario heading, lowercased, every other run of characters a hyphen. */
+const slug = (heading: string) =>
+	heading
+		.toLowerCase()
+		.replace(/[^a-z0-9]+/g, "-")
+		.replace(/^-|-$/g, "");
+
+/**
+ * The criteria one spec file declares. Each keeps its requirement heading,
+ * which is what the ambiguity message names when one slug matches two.
+ */
+function parse(file: string, capability: string): Criterion[] {
+	const found: Criterion[] = [];
+	let requirement = "";
+	// A fenced block quoting a `#### Scenario:` line illustrates the format
+	// rather than declaring a criterion, and the delta specs of this very
+	// change are where that first happens.
+	let fenced = false;
+	for (const line of readFileSync(file, "utf8").split("\n")) {
+		if (line.startsWith("```")) fenced = !fenced;
+		else if (fenced) continue;
+		else if (line.startsWith("### Requirement:"))
+			requirement = line.slice(16).trim();
+		else if (line.startsWith("#### Scenario:"))
+			found.push({ id: `${capability}/${slug(line.slice(14))}`, requirement });
+	}
+	return found;
+}
+
+/** Subdirectory names of `path`, none when it does not exist. */
+function subdirs(path: string): string[] {
+	if (!lstatSync(path, { throwIfNoEntry: false })?.isDirectory()) return [];
+	return readdirSync(path, { withFileTypes: true })
+		.filter((entry) => entry.isDirectory())
+		.map((entry) => entry.name);
+}
+
+/** Every criterion under `openspec/specs/` — the set the count is taken over. */
+const counted = (root: string): Criterion[] =>
+	subdirs(join(root, "openspec/specs")).flatMap((capability) => {
+		const file = join(root, "openspec/specs", capability, "spec.md");
+		return lstatSync(file, { throwIfNoEntry: false })?.isFile()
+			? parse(file, capability)
+			: [];
+	});
 
 const repo = join(import.meta.dir, "..");
 const made: string[] = [];
