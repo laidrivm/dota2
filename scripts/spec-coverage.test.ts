@@ -177,10 +177,14 @@ function cite(path: string, text: string) {
 }
 
 /**
- * Every file `bun test` runs, taken from Bun's own discovery contract rather
- * than from the two suffixes this repository happens to use: a `_test.ts` file
- * runs, and a scanner blind to it would report full coverage of a criterion
- * only that file cites.
+ * Every tracked test file, whichever runner owns it. The four name forms are
+ * Bun's own discovery set, so a `_test.ts` file the runner executes cannot hide
+ * from the scanner.
+ *
+ * Deliberately not narrowed by `bunfig.toml`, whose `pathIgnorePatterns` hands
+ * `e2e/**` to Playwright: an end-to-end test closes a criterion exactly as a
+ * unit test does, and a scanner honouring that ignore list would make every
+ * criterion only e2e can reach permanently uncitable.
  */
 const TEST_FILE = /[._](?:test|spec)\.[cm]?[jt]sx?$/;
 
@@ -651,8 +655,11 @@ describe("what the sweep reads", () => {
 		]);
 	});
 
-	test("every file bun runs is scanned, whichever form its name takes", () => {
+	test("every test file is scanned, whichever runner owns it", () => {
 		const dir = fabricate({
+			// Playwright owns `e2e/**` here, so bun test never runs it — and its
+			// citations count all the same.
+			"bunfig.toml": '[test]\npathIgnorePatterns = ["e2e/**"]\n',
 			"openspec/specs/capability/spec.md": spec(
 				"A first thing",
 				"A second thing",

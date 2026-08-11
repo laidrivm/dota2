@@ -78,11 +78,17 @@ the test that closed it — the identifier is derived from the heading, so
 rewording a heading is what breaks the link, and breaking it loudly is the
 point.
 
-The scanned set SHALL be every tracked file `bun test` discovers as a test,
-outside `node_modules` — the `.test.`, `.spec.`, `_test.` and `_spec.` forms
-alike. It is taken from Bun's discovery contract rather than from the suffixes
-this repository happens to use, because a test file the runner executes and the
-scanner cannot see reports coverage that nothing counted.
+The scanned set SHALL be every tracked test file outside `node_modules`,
+whichever runner owns it — a name carrying `.test.`, `.spec.`, `_test.` or
+`_spec.` before a JavaScript or TypeScript extension. Those four forms are
+Bun's own, so a `_test.ts` file the runner executes cannot hide from the
+scanner.
+
+The set SHALL NOT be narrowed by any runner's configuration. `bunfig.toml`'s
+`pathIgnorePatterns` hands `e2e/**` to Playwright, and an end-to-end test
+closes a criterion exactly as a unit test does; honouring that ignore list
+would make every criterion only e2e can reach permanently uncitable, which is
+the opposite of what this capability is for.
 
 #### Scenario: A test cites one criterion
 

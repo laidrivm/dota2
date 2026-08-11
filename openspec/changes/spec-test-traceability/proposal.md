@@ -18,9 +18,9 @@ exist, which is worse than the empty state.
 ## What Changes
 
 - A new check, shipped as `scripts/spec-coverage.test.ts`, that reads every
-  `openspec/specs/*/spec.md` and every tracked file `bun test` discovers as a
-  test outside `node_modules`, and compares the criteria it finds against the
-  citations.
+  `openspec/specs/*/spec.md` and every tracked test file outside
+  `node_modules`, whichever runner owns it, and compares the criteria it finds
+  against the citations.
 - A criterion is identified by `<capability>/<slug of its scenario heading>`,
   derived rather than stored — no identifier is written into any spec.
 - A test cites a criterion in a `// spec:` comment above it; one comment may
