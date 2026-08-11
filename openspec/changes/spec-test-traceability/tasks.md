@@ -35,7 +35,7 @@ Criteria are cited by their scenario heading; all fifteen belong to the
       uppercase or spaces fails rather than silently matching nothing [22]
 - [x] 1.5 Implement the scanner over tracked `*.test.ts` and `*.spec.ts`
       outside `node_modules`; break each assertion above before it passes
-- [ ] 1.6 Write the validation-set tests first: a citation matching no
+- [x] 1.6 Write the validation-set tests first: a citation matching no
       criterion fails, naming citation, file and line (*A criterion renamed
       under its test*) [16] [18]; a citation to a criterion living only in an
       active change's delta spec is valid (*A criterion still in flight*); and

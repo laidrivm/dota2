@@ -367,3 +367,49 @@ describe("what is not a citation", () => {
 		expect(cited(dir)).toEqual([]);
 	});
 });
+
+describe("a criterion renamed under its test", () => {
+	test("a citation matching no criterion names citation, file and line", () => {
+		const dir = world(
+			'const a = 1;\n// spec: capability/the-old-wording\ntest("acts", () => {});\n',
+			"The new wording",
+		);
+		expect(problems(dir).join("\n")).toContain(
+			"src/thing.test.ts:2: no criterion capability/the-old-wording",
+		);
+	});
+});
+
+describe("a criterion still in flight", () => {
+	test("a citation to an active change's delta spec is valid", () => {
+		const dir = fabricate({
+			"openspec/specs/capability/spec.md": spec("A settled thing"),
+			"openspec/changes/in-flight/specs/capability/spec.md":
+				spec("A proposed thing"),
+			"src/thing.test.ts":
+				'// spec: capability/a-proposed-thing\ntest("acts", () => {});\n',
+		});
+		expect(problems(dir)).toEqual([]);
+		expect(ids(check(dir).criteria)).toEqual(["capability/a-settled-thing"]);
+	});
+
+	test("an archived change's delta spec is not in the validation set", () => {
+		const dir = fabricate({
+			"openspec/specs/capability/spec.md": spec("A settled thing"),
+			"openspec/changes/archive/2026-01-01-done/specs/capability/spec.md":
+				spec("An archived thing"),
+			"src/thing.test.ts":
+				'// spec: capability/an-archived-thing\ntest("acts", () => {});\n',
+		});
+		expect(problems(dir).join("\n")).toContain("capability/an-archived-thing");
+	});
+
+	test("an absent changes directory leaves the two sets equal", () => {
+		const dir = world(
+			'// spec: capability/a-settled-thing\ntest("acts", () => {});\n',
+			"A settled thing",
+		);
+		expect(problems(dir)).toEqual([]);
+		expect(cited(dir)).toEqual(["capability/a-settled-thing"]);
+	});
+});
