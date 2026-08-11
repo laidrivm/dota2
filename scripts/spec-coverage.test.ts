@@ -19,7 +19,7 @@ import {
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 
-type Criterion = { id: string; requirement: string };
+type Criterion = { id: string; requirement: string; source: string };
 
 /** The scenario heading, lowercased, every other run of characters a hyphen. */
 const slug = (heading: string) =>
@@ -45,7 +45,11 @@ function parse(file: string, capability: string): Criterion[] {
 		else if (line.startsWith("### Requirement:"))
 			requirement = line.slice(16).trim();
 		else if (line.startsWith("#### Scenario:"))
-			found.push({ id: `${capability}/${slug(line.slice(14))}`, requirement });
+			found.push({
+				id: `${capability}/${slug(line.slice(14))}`,
+				requirement,
+				source: file,
+			});
 	}
 	return found;
 }
@@ -188,10 +192,20 @@ function check(cwd?: string) {
 
 	for (const { id, path, line } of citations) {
 		const matched = known.get(id);
-		if (!matched) problems.push(`${path}:${line}: no criterion ${id}`);
-		else if (matched.length > 1)
+		if (!matched) {
+			problems.push(`${path}:${line}: no criterion ${id}`);
+			continue;
+		}
+		// Ambiguity is judged inside one spec file. A `## MODIFIED Requirements`
+		// delta repeats the headings it modifies verbatim, so the same criterion
+		// legitimately appears twice across the two sets — that is one criterion,
+		// not two, and only two requirements in one file are the real clash.
+		const clash = [...Map.groupBy(matched, (c) => c.source).values()].find(
+			(list) => list.length > 1,
+		);
+		if (clash)
 			problems.push(
-				`${path}:${line}: ${id} is ambiguous, carried by ${matched
+				`${path}:${line}: ${id} is ambiguous, carried by ${clash
 					.map((c) => `"${c.requirement}"`)
 					.join(" and ")} — rename one heading`,
 			);
@@ -478,6 +492,18 @@ describe("an ambiguous identifier is cited", () => {
 
 // spec: spec-test-traceability/an-ambiguous-identifier-nobody-cites
 describe("an ambiguous identifier nobody cites", () => {
+	test("a delta restating a criterion it modifies is not ambiguity", () => {
+		const dir = fabricate({
+			"openspec/specs/capability/spec.md": spec("A modified thing"),
+			"openspec/changes/in-flight/specs/capability/spec.md":
+				spec("A modified thing"),
+			"src/thing.test.ts":
+				'// spec: capability/a-modified-thing\ntest("acts", () => {});\n',
+		});
+		expect(problems(dir)).toEqual([]);
+		expect(cited(dir)).toEqual(["capability/a-modified-thing"]);
+	});
+
 	test("the same slug uncited passes", () => {
 		const dir = fabricate({
 			"openspec/specs/capability/spec.md": twice("A skipped minor"),
@@ -552,7 +578,7 @@ describe("what the sweep reads", () => {
 			"openspec/specs/capability/spec.md":
 				"# capability\n\n#### Scenario: An orphan\n\n- **WHEN** a\n- **THEN** b\n",
 		});
-		expect(counted(dir)).toEqual([
+		expect(counted(dir)).toMatchObject([
 			{ id: "capability/an-orphan", requirement: "" },
 		]);
 	});
