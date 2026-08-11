@@ -18,7 +18,7 @@ Criteria are cited by their scenario heading; all fifteen belong to the
       a shape a parser dropping `§7.5` would also satisfy [12], a spec with no
       scenario heading yields zero criteria rather than throwing [1], and a
       `#### Scenario:` line inside a fenced code block is not a criterion [24]
-- [ ] 1.2 Implement the parser over `openspec/specs/*/spec.md`, keeping each
+- [x] 1.2 Implement the parser over `openspec/specs/*/spec.md`, keeping each
       criterion's requirement heading for the ambiguity message
 - [ ] 1.3 Write the citation scanner's tests first: one citation above a
       `test(` marks one criterion (*A test cites one criterion*), two
