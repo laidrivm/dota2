@@ -227,6 +227,8 @@ describes is rewritten, the rule is a candidate for deletion.
 - A guard against malformed input must cover the whole value, not a prefix —
   anchor both ends or parse it.
 - Scope a scan by what it exempts, never by an enumeration of what it covers.
+- State a scan's exemptions in the scan; never inherit them from another tool's
+  configuration.
 - Strip string literals before a line-based scan reads comment delimiters.
 - Comment what a reader would otherwise "fix": a deliberate departure from the
   obvious implementation, or a precondition the code does not check.
