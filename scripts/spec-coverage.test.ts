@@ -252,6 +252,41 @@ function check(cwd?: string) {
 	};
 }
 
+/**
+ * The criteria in `openspec/specs/` that no test cites. Counted per criterion
+ * rather than per identifier: two criteria sharing a slug are two uncited
+ * criteria, which is what makes an ambiguous pair nobody cites cost two.
+ */
+function uncited(cwd?: string): Criterion[] {
+	const { criteria, cited } = check(cwd);
+	return criteria.filter((c) => !cited.has(c.id));
+}
+
+/**
+ * What a count owes its floor. Both directions fail: a rise admits a criterion
+ * nothing asserts, and a floor left above reality stops being a measurement.
+ *
+ * The reason is demanded on every run rather than only on a rise, because
+ * telling a rise from a drop needs the previously committed value, and reading
+ * git history to decide whether to ask is more machinery than one comment.
+ */
+function gauge(count: number, floor: number, declaration: string): string[] {
+	const problems: string[] = [];
+	if (!/\/\/.*\S/.test(declaration))
+		problems.push(
+			`the floor states no reason: ${declaration.trim()} — write why on that line`,
+		);
+	if (count !== floor)
+		problems.push(
+			`${count} uncited criteria against a floor of ${floor} — ${
+				count > floor
+					? "cite one, or raise the floor with the reason on its line"
+					: `write ${count} as the floor, so the gain is recorded`
+			}`,
+		);
+	return problems;
+}
+
 const repo = join(import.meta.dir, "..");
 const made: string[] = [];
 
