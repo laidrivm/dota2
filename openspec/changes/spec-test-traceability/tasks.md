@@ -59,7 +59,7 @@ Criteria are cited by their scenario heading; all fifteen belong to the
 - [x] 1.11 Add the guard on the sweep itself — the run found more than zero
       criteria and more than zero test files, so an empty scan cannot pass
       every assertion [15]
-- [ ] 1.12 Cite this change's own criteria from the tests written above, which
+- [x] 1.12 Cite this change's own criteria from the tests written above, which
       is what 1.6 makes valid, and confirm `bun test` passes with them
 
 ## 2. The floor
