@@ -20,7 +20,7 @@ Criteria are cited by their scenario heading; all fifteen belong to the
       `#### Scenario:` line inside a fenced code block is not a criterion [24]
 - [x] 1.2 Implement the parser over `openspec/specs/*/spec.md`, keeping each
       criterion's requirement heading for the ambiguity message
-- [ ] 1.3 Write the citation scanner's tests first: one citation above a
+- [x] 1.3 Write the citation scanner's tests first: one citation above a
       `test(` marks one criterion (*A test cites one criterion*), two
       identifiers on one line both count (*One act closes several criteria*)
       [5], identifiers on consecutive comment lines all count [6], five tests
@@ -29,7 +29,7 @@ Criteria are cited by their scenario heading; all fifteen belong to the
       count [13], a non-blank non-comment line between them fails
       (*A citation floating in a file*) [14], and a citation above a
       `test.each(` call counts, since `docs/testing.md` treats a row as a test
-- [ ] 1.4 Add the scanner's negative tests: `// spec:` inside a string literal
+- [x] 1.4 Add the scanner's negative tests: `// spec:` inside a string literal
       or a block comment is not a citation [25], a `// spec:` comment naming no
       identifier fails [21], and an identifier without its `/` or carrying
       uppercase or spaces fails rather than silently matching nothing [22]
