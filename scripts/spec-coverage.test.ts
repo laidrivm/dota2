@@ -67,6 +67,103 @@ const counted = (root: string): Criterion[] =>
 			: [];
 	});
 
+/**
+ * A citation identifier. Anchored at both ends, so `capability/A Thing` is a
+ * malformed citation the check reports rather than one silently matching
+ * nothing.
+ */
+const IDENTIFIER = /^[a-z0-9]+(?:-[a-z0-9]+)*\/[a-z0-9]+(?:-[a-z0-9]+)*$/;
+
+/** A `test`, `it` or `describe` call, member forms — `test.each` — included. */
+const CALL = /^\s*(?:test|it|describe)(?:\.\w+)*\s*[(`]/;
+
+/** A line-leading `// spec:` comment. Anything indented past code is not one. */
+const CITATION = /^\s*\/\/\s*spec:(.*)$/;
+
+/** Blank, or any comment line: what may sit between a citation and its call. */
+const SEPARATOR = /^\s*(?:\/\/|\/?\*|$)/;
+
+const words = (text: string) => text.trim().split(/\s+/).filter(Boolean);
+
+type Citation = { id: string; path: string; line: number };
+
+/**
+ * The citations one test file carries, and every way it got them wrong. A
+ * citation is the `// spec:` line plus any comment line under it reading as
+ * nothing but identifiers; the first comment line that does not is prose, and
+ * prose may sit between the citation and the call it belongs to.
+ */
+function cite(path: string, text: string) {
+	const lines = text.split("\n");
+	const found: Citation[] = [];
+	const wrong: string[] = [];
+	lines.forEach((line, index) => {
+		const marker = CITATION.exec(line);
+		if (!marker) return;
+		const at = `${path}:${index + 1}`;
+		const named = words(marker[1] ?? "");
+		if (!named.length) wrong.push(`${at}: a spec comment naming no criterion`);
+		for (const id of named) {
+			if (IDENTIFIER.test(id)) found.push({ id, path, line: index + 1 });
+			else wrong.push(`${at}: malformed identifier "${id}"`);
+		}
+
+		let next = index + 1;
+		for (; next < lines.length; next++) {
+			const comment = /^\s*\/\/(.*)$/.exec(lines[next] ?? "");
+			const more = comment ? words(comment[1] ?? "") : [];
+			if (!more.length || !more.every((id) => IDENTIFIER.test(id))) break;
+			for (const id of more) found.push({ id, path, line: next + 1 });
+		}
+		while (next < lines.length && SEPARATOR.test(lines[next] ?? "")) next++;
+		if (!CALL.test(lines[next] ?? ""))
+			wrong.push(`${at}: not directly above a test, it or describe call`);
+	});
+	return { found, wrong };
+}
+
+/** Tracked test files, listed at the repository root whatever `cwd` is. */
+function tests(root: string): string[] {
+	const ls = Bun.spawnSync(["git", "ls-files", "-z"], { cwd: root });
+	if (ls.exitCode !== 0) throw new Error(ls.stderr.toString());
+	return ls.stdout
+		.toString()
+		.split("\0")
+		.filter(
+			(path) =>
+				(path.endsWith(".test.ts") || path.endsWith(".spec.ts")) &&
+				!path.startsWith("node_modules/") &&
+				!path.includes("/node_modules/"),
+		);
+}
+
+/** Everything the check knows about one repository. */
+function check(cwd?: string) {
+	const top = Bun.spawnSync(["git", "rev-parse", "--show-toplevel"], { cwd });
+	if (top.exitCode !== 0) throw new Error(top.stderr.toString());
+	const root = top.stdout.toString().trim();
+
+	const criteria = counted(root);
+	const files = tests(root);
+	const problems: string[] = [];
+	const citations: Citation[] = [];
+	for (const path of files) {
+		const full = join(root, path);
+		// The entry may be tracked but deleted from the work tree.
+		if (!lstatSync(full, { throwIfNoEntry: false })?.isFile()) continue;
+		const { found, wrong } = cite(path, readFileSync(full, "utf8"));
+		citations.push(...found);
+		problems.push(...wrong);
+	}
+
+	return {
+		criteria,
+		files,
+		problems,
+		cited: new Set(citations.map((c) => c.id)),
+	};
+}
+
 const repo = join(import.meta.dir, "..");
 const made: string[] = [];
 
@@ -164,6 +261,7 @@ describe("a test cites one criterion", () => {
 			"A first thing",
 		);
 		expect(cited(dir)).toEqual(["capability/a-first-thing"]);
+		expect(problems(dir)).toEqual([]);
 	});
 
 	test("blank lines between the comment and the call do not break it", () => {
@@ -172,6 +270,7 @@ describe("a test cites one criterion", () => {
 			"A first thing",
 		);
 		expect(cited(dir)).toEqual(["capability/a-first-thing"]);
+		expect(problems(dir)).toEqual([]);
 	});
 });
 
