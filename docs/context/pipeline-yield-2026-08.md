@@ -86,3 +86,53 @@
 - **CodeRabbit re-reviewed after the fixes were pushed and raised 3 more**,
   which the disposition pass had already closed as PASS. A gate line is true
   of the run that produced it, not of the pull request afterwards
+
+## 2026-08-10 — spec/mutation-floor (PR #75)
+
+- zombies: OPEN — 31 gaps, 31 acted on (feature-description mode, at propose
+  time; two became requirements the conversation had not reached — `NoCoverage`
+  counts as a survivor, and a numeric `thresholds.break` must fail the check)
+- warm: PASS — 1 dependency vetted, 0 blocking findings, 1 ⚠️ right-sizing
+  (`stryker init`, the dashboard client and the IDE server ship inside
+  `@stryker-mutator/core` and cannot be sliced off). CVE-2024-57085 does not
+  reach 9.6.1
+- triage: PASS — 3 groups, 0 findings of its own; reading the two Medium
+  groups produced 3. **The pattern holds from 2026-08-07**: triage's value here
+  was again the reading it forces, not the map
+- ponytail-review: 5 findings, 5 acted on (−1 pull request, −1 requirement,
+  −1 criterion)
+- coderabbit-local: OPEN — 16 findings, 13 applied, 1 dismissed, 2 skipped
+- coderabbit: PASS — 9 findings, 5 applied, 3 already fixed, 1 no-op
+- Not run: preflight, security-review, code-review
+- **The load-bearing finding was the bot's**: `jsonReporter.fileName` names a
+  path without enabling the reporter that writes it — the default `reporters`
+  is `clear-text`, `progress`, `html` — so the configuration as proposed would
+  have produced no report and failed the gate on every run
+- **The load-bearing correction was mine and came from triage**: three
+  artefacts said no Stryker runner plugin for `bun:test` exists. Two do. The
+  earlier check tried three guessed package names, all 404, and read an empty
+  registry search as an absence when the emptiness was a parsing failure. That
+  is the session's new `CLAUDE.md` Process rule
+
+## 2026-08-10 — spec/file-size-cap (PR #77)
+
+- zombies: OPEN — 7 gaps, 7 acted on (diff mode over a proposal, so the gaps
+  were in the *planned* test list; two would have shipped a check that does not
+  check — `.tsx` was never named though the requirement covers it, and `wc -l`
+  counts newlines, so a 301-line file with an unterminated last line reads
+  as 300)
+- ponytail-review: 2 findings, 2 acted on (−1 pull request)
+- triage: PASS — 3 groups, 0 findings. First triage this month to produce
+  nothing on reading either
+- coderabbit-local: OPEN — 7 findings, 5 applied, 2 dismissed
+- coderabbit: OPEN — 7 findings, 4 applied, 3 dismissed
+- Not run: warm (no manifest changed), preflight, security-review, code-review
+- **The load-bearing finding was the bot's again**: the CSS Modules steps said
+  to move rules into a `*.module.css` and import it, and never to rewrite the
+  markup's class literals to read from the mapping. The bundler renames the
+  classes, so a literal left behind matches nothing — every migrated component
+  renders fine and unstyled
+- **Five dismissals across the two branches are still open with the user.**
+  Four of them are one shape: the bot applying a rule to the wrong artefact
+  (criteria into `proposal.md`, a task contract into `PLAN.md`), where this
+  repo's answer already lives in two merged changes
