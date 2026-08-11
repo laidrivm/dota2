@@ -78,8 +78,11 @@ the test that closed it — the identifier is derived from the heading, so
 rewording a heading is what breaks the link, and breaking it loudly is the
 point.
 
-The scanned set SHALL be every tracked `*.test.ts` and `*.spec.ts` file outside
-`node_modules`.
+The scanned set SHALL be every tracked file `bun test` discovers as a test,
+outside `node_modules` — the `.test.`, `.spec.`, `_test.` and `_spec.` forms
+alike. It is taken from Bun's discovery contract rather than from the suffixes
+this repository happens to use, because a test file the runner executes and the
+scanner cannot see reports coverage that nothing counted.
 
 #### Scenario: A test cites one criterion
 
