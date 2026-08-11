@@ -436,3 +436,44 @@ describe("a criterion still in flight", () => {
 		expect(cited(dir)).toEqual(["capability/a-settled-thing"]);
 	});
 });
+
+/** Two requirements in one capability, each carrying the same heading. */
+const twice = (heading: string) =>
+	`# capability\n\n### Requirement: The first rule\n\n#### Scenario: ${heading}\n\n- **WHEN** a\n- **THEN** b\n\n### Requirement: The second rule\n\n#### Scenario: ${heading}\n\n- **WHEN** c\n- **THEN** d\n`;
+
+describe("an ambiguous identifier is cited", () => {
+	test("a cited slug matching two criteria names both requirements", () => {
+		const dir = fabricate({
+			"openspec/specs/capability/spec.md": twice("A skipped minor"),
+			"src/thing.test.ts":
+				'// spec: capability/a-skipped-minor\ntest("acts", () => {});\n',
+		});
+		const said = problems(dir).join("\n");
+		expect(said).toContain("The first rule");
+		expect(said).toContain("The second rule");
+	});
+});
+
+describe("an ambiguous identifier nobody cites", () => {
+	test("the same slug uncited passes", () => {
+		const dir = fabricate({
+			"openspec/specs/capability/spec.md": twice("A skipped minor"),
+			"src/thing.test.ts": 'test("acts", () => {});\n',
+		});
+		expect(problems(dir)).toEqual([]);
+	});
+
+	test("one heading in two capabilities is two identifiers, not ambiguity", () => {
+		const dir = fabricate({
+			"openspec/specs/one/spec.md": spec("A shared heading"),
+			"openspec/specs/two/spec.md": spec("A shared heading"),
+			"src/thing.test.ts":
+				'// spec: one/a-shared-heading two/a-shared-heading\ntest("acts", () => {});\n',
+		});
+		expect(problems(dir)).toEqual([]);
+		expect(cited(dir)).toEqual([
+			"one/a-shared-heading",
+			"two/a-shared-heading",
+		]);
+	});
+});

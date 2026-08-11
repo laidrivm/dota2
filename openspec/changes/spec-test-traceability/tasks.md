@@ -43,7 +43,7 @@ Criteria are cited by their scenario heading; all fifteen belong to the
       the counted set [3]
 - [x] 1.7 Implement the two sets — counted from `openspec/specs/`, validated
       against those plus `openspec/changes/*/specs/*/spec.md`
-- [ ] 1.8 Write the ambiguity tests first: a cited slug matching two criteria
+- [x] 1.8 Write the ambiguity tests first: a cited slug matching two criteria
       in one capability fails and names both requirement headings
       (*An ambiguous identifier is cited*) [19]; the same slug uncited passes
       (*An ambiguous identifier nobody cites*) [20]; the same heading text in
