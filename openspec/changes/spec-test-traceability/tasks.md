@@ -85,7 +85,7 @@ Criteria are cited by their scenario heading; all fifteen belong to the
       untestable* for the raised-with-reason path) [30]
 - [x] 2.6 Add the citation convention to `docs/testing.md` — the `// spec:`
       comment, its placement, and that the floor is lowered by a visible line
-- [ ] 2.7 Grep the four sites that restate a claim like this one before calling
+- [x] 2.7 Grep the four sites that restate a claim like this one before calling
       the change done: this change's sibling artefacts, `openspec/specs/**`,
       `PLAN.md` and the README ownership map — searching the wording being
       replaced, not the wording replacing it
