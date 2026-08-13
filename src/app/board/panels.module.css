@@ -1,0 +1,150 @@
+/* What a panel is, and the rows the two team panels carry. Suggestions and
+   Result are panels too and read the first three names from here.
+   Every value is a token reference — literals belong in tokens/ only. */
+
+.teams {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: var(--sp-7);
+}
+
+/* My team is the first of the two, so mirroring is a property of the grid and
+   needs no class on the panel it moves. */
+.teamsMirrored > :first-child {
+	order: 1;
+}
+
+.panel {
+	border: 1px solid var(--border-1);
+	border-radius: var(--r-panel);
+	background: var(--bg-1);
+	overflow: hidden;
+}
+
+.panelHead {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--sp-3);
+	margin: 0;
+	padding: var(--sp-4) var(--sp-5);
+}
+
+/* Suggestions and Result rule their head off from the rows below it; a team
+   panel's first row draws that line itself. */
+.panelHeadRuled {
+	border-bottom: 1px solid var(--border-0);
+}
+
+.panelHead .sideName {
+	font-size: var(--fs-label);
+	font-weight: 700;
+	letter-spacing: var(--ls-label);
+	text-transform: uppercase;
+	margin-right: auto;
+}
+
+/* The header names a side too, out of its own module — the tint is the same
+   token either way, so nothing crosses the boundary. */
+.sideRadiant {
+	color: var(--radiant);
+}
+
+.sideDire {
+	color: var(--dire);
+}
+
+.slot {
+	display: flex;
+	align-items: center;
+	gap: var(--sp-3);
+	min-height: var(--row-h);
+	padding: 0 var(--sp-5);
+	border-top: 1px solid var(--border-0);
+}
+
+.slot:hover,
+.slot:focus-within {
+	--remove-fade: 1;
+}
+
+.slotMine {
+	background: var(--accent-row-bg);
+}
+
+.slotNumber {
+	font-family: var(--font-mono);
+	font-size: var(--fs-meta);
+	color: var(--text-5);
+}
+
+.slotRole {
+	width: 6rem;
+	font-size: var(--fs-meta);
+	font-weight: 500;
+	color: var(--text-3);
+}
+
+.slotMine .slotNumber,
+.slotMine .slotRole {
+	color: var(--accent);
+}
+
+.slotHero {
+	display: flex;
+	align-items: center;
+	gap: var(--sp-4);
+	flex: 1;
+	min-width: 0;
+}
+
+.heroName {
+	font-size: var(--fs-body);
+	font-weight: 600;
+	color: var(--text-1);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.enemyText {
+	display: flex;
+	align-items: baseline;
+	gap: var(--sp-4);
+	min-width: 0;
+}
+
+.enemyRoles {
+	font-family: var(--font-mono);
+	font-size: var(--fs-meta);
+	color: var(--text-2);
+	white-space: nowrap;
+}
+
+/* One column: the board has to fit a phone held beside the game (US-25). */
+
+@media (max-width: 720px) {
+	.teams {
+		grid-template-columns: 1fr;
+		gap: var(--sp-5);
+	}
+
+	.slot {
+		padding: 0 var(--sp-4);
+	}
+
+	.slotRole {
+		width: 5.5rem;
+	}
+
+	/* The name and its role probabilities stack, so a 390px row still fits. */
+	.enemyText {
+		display: block;
+		flex: 1;
+	}
+
+	.enemyText .heroName,
+	.enemyText .enemyRoles {
+		display: block;
+	}
+}
