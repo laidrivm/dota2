@@ -191,3 +191,39 @@ Three branches, one change, run end to end in one session.
   session's own wrap-up, not by any gate: a regex literal containing a
   backtick silences the scan for the rest of the file
 - warm is the only step this month to have blocked a branch outright
+
+## 2026-08-13 — file-size-cap step 1 (chore/dev-serves-the-bundle, feat/file-size-cap-1, chore/module-class-scan, chore/collapse-plan-done)
+
+- zombies: PASS — 8 gaps, 6 acted on (2 skipped: dev-harness timing)
+- ponytail-review: 6 findings, 4 acted on (2 skipped: a lift the diff budget
+  and the task order both argued against, and a one-line duplicate)
+- triage: PASS — 6 groups, 3 High/Medium read, 0 findings by design
+- coderabbit-local: PASS — 4 findings, 3 acted on (1 dismissal, settled by the
+  user: the picker grid is operable through its tiles' roving tabIndex)
+- coderabbit #85: PASS — 10 findings over three rounds, 9 acted on (1 skipped:
+  a single-caller helper whose name carries what the branch consumes)
+- coderabbit #86: PASS — 3 findings, 3 acted on
+- coderabbit #87: PASS — 9 findings, 6 acted on, 1 rejected, 2 skipped
+- Not run: warm (no dependency manifest changed), preflight, code-review,
+  security-review, first-five, review-order
+
+**What the pipeline caught that nothing else would have**
+
+- Nine findings across three coderabbit rounds on #85, every one of them in a
+  single source scanner, and each in the direction that passes wrongly: a read
+  inside `${…}`, a class named only inside a CSS string, an import spelled
+  inside a string, a bracket read, `//` read as a comment in CSS, an optional
+  read. The bot said three times that no rule covered the shape; it was right,
+  and the `CLAUDE.md` scan rule was tightened and split in two because of it
+- The JSX finding on #87 was the sharpest: `/>`, `</span>` and an apostrophe in
+  element text each erased the rest of their line. Reproduced before fixing,
+  and answered by putting Bun's transpiler in front of the scan rather than by
+  adding heuristics — the family of bugs the rule already names
+- coderabbit's one Major that did not survive verification claimed the dist
+  listing could serve a symlink out of the tree. `scanSync` does not follow
+  symlinks; the fix that finding prompted was dead code, deleted, and what
+  stayed is a test pinning the default
+- Two defects were found by neither a gate nor the bot: the dev server never
+  emitting a CSS module's class-name mapping (found by running e2e, which the
+  task list required), and `dist/` growing without bound across a dev session
+  (found while reading the diff for the zombies pass)
