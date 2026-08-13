@@ -276,6 +276,9 @@ Rules about how work is carried out here. They do not age with the code.
   result both read as a successful edit.
 - Create a branch with `git switch -c <name>` or `--no-track`, never tracking
   `origin/main`.
+- Rebase a branch whose base was amended with `git rebase --onto <new base>
+  <old base> <branch>`, never `git rebase <new base>`.
+- Split a file to the cap that will apply to it, not the one that applies today.
 - Commit the work before a probe whose undo is `git checkout <path>`,
   `git reset --hard`, or `git stash drop`.
 - Never state another repository's mutable properties — visibility, default
