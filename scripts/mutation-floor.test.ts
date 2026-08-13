@@ -317,9 +317,11 @@ describe("an exemption with no reason", () => {
 // spec: mutation-floor/a-blanket-disable-comment
 describe("a blanket disable comment", () => {
 	test("`all` instead of a mutator fails", () => {
-		expect(exemptions(marked("// Stryker disable next-line all"))).not.toEqual(
-			[],
-		);
+		// On the form, not on the name: with no colon it never reaches the
+		// `all` branch, and asserting that branch here would assert a lie.
+		expect(exemptions(marked("// Stryker disable next-line all"))).toEqual([
+			expect.stringContaining("write `// Stryker disable next-line"),
+		]);
 	});
 
 	test("`all` with a reason still fails", () => {
@@ -331,7 +333,7 @@ describe("a blanket disable comment", () => {
 					"// Stryker disable next-line all: the whole line is a constant",
 				),
 			),
-		).not.toEqual([]);
+		).toEqual([expect.stringContaining("names `all`")]);
 	});
 
 	test("a disable without next-line fails, whatever it names", () => {
@@ -340,10 +342,11 @@ describe("a blanket disable comment", () => {
 			exemptions(
 				marked("// Stryker disable EqualityOperator: bound is deliberate"),
 			),
-		).not.toEqual([]);
+		).toEqual([expect.stringContaining("write `// Stryker disable next-line")]);
 	});
 });
 
+// spec: mutation-floor/a-well-formed-directive-in-a-block-comment
 describe("a directive Stryker honours outside a line comment", () => {
 	test("a single-line block comment is scanned too", () => {
 		// Stryker matches every comment Babel gives it, so this silences the
@@ -413,6 +416,22 @@ describe("what is not a disable comment", () => {
 				`const s = "he said \\"// Stryker disable next-line all\\"";\n`,
 			),
 		).toEqual([]);
+	});
+
+	test("a quote that opens no string does not silence the file", () => {
+		// The `'` in a regex literal closes nowhere. If it were treated as a
+		// string opener the scan would run to the end of the file and report
+		// nothing at all, which is the one failure it must never have.
+		expect(
+			exemptions(`const re = /['"]/;\n// Stryker disable next-line all\n`),
+		).not.toEqual([]);
+	});
+
+	test("an escaped newline still counts as a line", () => {
+		const [problem] = exemptions(
+			"const s = `a\\\nb`;\n// Stryker disable next-line all\nconst x = 1;\n",
+		);
+		expect(problem).toContain("src/model.ts:3");
 	});
 
 	test("one inside a multi-line template literal is not one", () => {

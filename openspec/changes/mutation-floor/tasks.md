@@ -7,7 +7,7 @@ step 1 further into "run Stryker" and "put a floor under it" would leave a
 pull request whose job can only fail when Stryker itself breaks, and would
 carry the first measurement from one PR's description into the next one's code.
 
-Criteria are cited by their scenario heading; all ten belong to the
+Criteria are cited by their scenario heading; all eleven belong to the
 `mutation-floor` capability. Numbers in brackets are `/zombies` items.
 
 Four of the 31 `/zombies` items fell out with the cuts a `/ponytail-review`
@@ -28,9 +28,11 @@ hand to obtain the first measurement, and the CI job. This is the shape
       `github.com/stryker-mutator/stryker-js`, first published 2019-02-13,
       latest 2026-04-10, 1.9 M weekly downloads, no install scripts,
       `engines.node >= 20`, 26 direct dependencies, 1.2 MB unpacked over 626
-      files. The one advisory in this package family, CVE-2024-57085 in
-      `@stryker-mutator/util` below 8.7.1, does not reach core 9.6.1, which
-      pins that package at 9.6.1 exactly. The single ⚠️ was right-sizing: the
+      files. Of the two advisories in this tree, CVE-2024-57085 in
+      `@stryker-mutator/util` below 8.7.1 does not reach core 9.6.1, which pins
+      that package at 9.6.1 exactly; the other, GHSA-q8mj-m7cp-5q26 in `qs`,
+      does reach it through `typed-rest-client`’s exact pin and is held off by
+      an `overrides` entry. The single ⚠️ was right-sizing: the
       `stryker init` wizard, the dashboard client and the IDE server ship with
       core and cannot be sliced off. Re-run it if the resolved version differs
       from 9.6.1; a rejection ends the change rather than being worked around.
@@ -147,7 +149,10 @@ hand to obtain the first measurement, and the CI job. This is the shape
       disable comment in a file other than `src/model.ts` does not fail the
       check [26]
 - [x] 2.4 Implement the disable-comment scan over `src/model.ts`; break each
-      assertion above before it passes
+      assertion above before it passes — including that a well-formed directive
+      written in a block comment fails, since Stryker honours both spellings
+      and only the `//` one is accepted
+      (*A well-formed directive in a block comment*)
 - [x] 2.5 Take the survivors from the run in 1.5 one at a time: judge each
       equivalent or real, mark the equivalent ones with
       `// Stryker disable next-line <Mutator>: <reason>` in `src/model.ts`, and

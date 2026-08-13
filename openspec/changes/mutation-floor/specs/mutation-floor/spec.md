@@ -163,6 +163,13 @@ arithmetic. The scan exists for the one that hides.
 - **THEN** its status becomes `Ignored`, the survivor count falls by one, and
   the floor is lowered to match
 
+#### Scenario: A well-formed directive in a block comment
+
+- **WHEN** a comment in `src/model.ts` reads
+  `/* Stryker disable next-line ArithmeticOperator: <reason> */`
+- **THEN** the check fails, because the accepted form is the `//` spelling,
+  even though Stryker honours this one
+
 #### Scenario: A blanket disable comment
 
 - **WHEN** a comment in `src/model.ts` reads `// Stryker disable next-line all`

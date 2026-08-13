@@ -182,11 +182,24 @@ function comments(source: string): Comment[] {
 			i++;
 		} else if (c === "'" || c === '"' || c === "`") {
 			const opened = c;
-			for (i++; i < source.length && source[i] !== opened; i++) {
-				if (source[i] === "\\") i++;
-				else if (source[i] === "\n") line++;
-			}
 			i++;
+			while (i < source.length && source[i] !== opened) {
+				if (source[i] === "\\") {
+					if (source[i + 1] === "\n") line++;
+					i += 2;
+					continue;
+				}
+				if (source[i] === "\n") {
+					// A raw newline cannot sit inside a '' or "" literal, so a
+					// quote that opened no string — one inside a regex literal,
+					// say — stops here instead of swallowing the rest of the
+					// file and taking the scan silent with it.
+					if (opened !== "`") break;
+					line++;
+				}
+				i++;
+			}
+			if (source[i] === opened) i++;
 		} else if (c === "/" && next === "/") {
 			i += 2;
 			const start = i;
