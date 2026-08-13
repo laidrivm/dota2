@@ -40,60 +40,40 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
   audit, Biome + tsc + YAML check + actionlint, git hooks, the `CLAUDE.md`
   split, and the `bun:test` setup.
 - **Phase 1 — model module** — PR #8, `archive/2026-07-23-model-module`.
-- **Phase 2 — draft board UI**, three sequenced proposals: `ui-foundation`
-  (PR #10, `archive/2026-07-24-ui-foundation`), `draft-board` (PR #13,
-  `archive/2026-07-24-draft-board`), `hero-picker` (PRs #15 and #16,
-  `archive/2026-07-24-hero-picker`).
-- **Task 4 — Playwright smoke** — PR #19,
-  `archive/2026-07-25-playwright-smoke`.
+- **Phase 2 — draft board UI** — `ui-foundation` (PR #10), `draft-board`
+  (PR #13), `hero-picker` (PRs #15, #16); archives under `archive/2026-07-24-`.
+- **Task 4 — Playwright smoke** — PR #19, `archive/2026-07-25-playwright-smoke`.
 - **`coderabbit-config`** — PR #24, `archive/2026-07-25-coderabbit-config`.
 - **`vendored-skill-permissions`** — PR #26,
   `archive/2026-07-26-vendored-skill-permissions`.
 - **`coderabbit-local-gate`** — PR #28,
   `archive/2026-07-26-coderabbit-local-gate`.
 - **`agent-permissions-gaps`** — PR #30,
-  `archive/2026-07-27-agent-permissions-gaps`. Its outstanding verification is
-  closed: a session started after the merge was prompted on `bun update --help`,
-  so the 14 `ask` entries are live rather than decorative.
+  `archive/2026-07-27-agent-permissions-gaps`; its `ask` entries were later
+  confirmed live, which the archive does not record.
 - **`readme-drift`** — PR #33, `archive/2026-07-27-readme-drift`.
 - **`reviewable-diff-gates`** — PRs #44, #45, #46 and the arrow step,
-  `archive/2026-07-30-reviewable-diff-gates`. Every change after it is measured
-  by `bun run diff-budget`. The living spec corrects one boundary the archived
-  delta stated wrongly, at a count of exactly 800.
+  `archive/2026-07-30-reviewable-diff-gates`.
 - **`mechanised-prohibitions`** — four PRs ending #50,
   `archive/2026-08-01-mechanised-prohibitions`.
 - **`review-approval-direction`** — PR #57,
   `archive/2026-08-01-review-approval-direction`.
 - **`always-on-context-budget`** — two PRs,
-  `archive/2026-08-01-always-on-context-budget`; capability spec at
-  `openspec/specs/context-budget/`. The always-on set went 1301 lines to 417
-  against its new ~500 budget.
+  `archive/2026-08-01-always-on-context-budget`; spec at
+  `openspec/specs/context-budget/`.
 - **`push-destination-guard`** — `archive/2026-08-01-push-destination-guard`.
-  The guard reads every operand as a refspec; a destination that comes from git
-  configuration is what it cannot see, and that residue is the `CLAUDE.md` rule.
-- **`skill-provenance`** — PR #63, `archive/2026-08-01-skill-provenance`;
-  capability spec at `openspec/specs/skill-provenance/`. The
-  `skills-lock.json` patch it drafted is the user's to apply in the skills
-  repo, and its `ref` needs the upstream commit in `microsoft/playwright-cli`.
+- **`skill-provenance`** — PR #63, `archive/2026-08-01-skill-provenance`; spec
+  at `openspec/specs/skill-provenance/`.
 - **`review-bot-instructions`** — PR #65,
-  `archive/2026-08-02-review-bot-instructions`. The proposal comparison ended
-  up on `**` rather than `src/**`: of the five most recent changes at the time,
-  three touched no file under `src/`, this one among them.
-- **`spec-test-traceability`** — PRs #78 and #79,
-  `archive/2026-08-13-spec-test-traceability`; capability spec at
-  `openspec/specs/spec-test-traceability/`. The floor stands at 382 of 406
-  criteria, and it moves only on a line carrying the reason it moved.
-- **`mutation-floor`** — PRs #81 and #82,
-  `archive/2026-08-13-mutation-floor`; capability spec at
-  `openspec/specs/mutation-floor/`. The floor stands at 67 survivors of 267
-  mutants. All 67 were judged and none could be exempted: a disable comment
-  addresses a line and a mutator, and each of the four equivalent mutants
-  shares both with one the tests kill.
+  `archive/2026-08-02-review-bot-instructions`.
 - **`tracked-permission-policy`** — PRs #68 and #69, corrected by #70,
   `archive/2026-08-09-tracked-permission-policy`; both requirements are in
-  `openspec/specs/agent-permissions/`. The untracked `settings.local.json`
-  keeps refilling by design, so the tracked file is the only one a count of
-  its entries means anything about.
+  `openspec/specs/agent-permissions/`.
+- **`spec-test-traceability`** — PRs #78 and #79,
+  `archive/2026-08-13-spec-test-traceability`; spec at
+  `openspec/specs/spec-test-traceability/`.
+- **`mutation-floor`** — PRs #81 and #82, `archive/2026-08-13-mutation-floor`;
+  spec at `openspec/specs/mutation-floor/`.
 
 ### Open
 - [ ] **`file-size-cap`** — proposed, eight steps, the first applied. The
@@ -134,6 +114,10 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       line it costs it. `scripts/scan.ts` is where that lift lands: extracted
       to bring its file under the cap, and already the module the older copy
       should switch to — which is what makes it a lift and not speculation.
+- [ ] **The `skills-lock.json` patch `skill-provenance` drafted** is still the
+      user's to apply, in the skills repository rather than here, and its `ref`
+      needs the upstream commit in `microsoft/playwright-cli`. It sat under
+      Done, where a thing nobody has done does not belong.
 - [ ] **Task 7** — Docker + VPS deploy (open decisions: registry GHCR or Docker
       Hub, same VPS or a new one). Carries `ui-foundation` **(e2e)** 1.5, which
       Task 4 deferred here: serving `dist/` under a plain static server is
