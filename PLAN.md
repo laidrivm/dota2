@@ -96,7 +96,7 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
   its entries means anything about.
 
 ### Open
-- [ ] **`file-size-cap`** — proposed, eight steps, not yet applied. The
+- [ ] **`file-size-cap`** — proposed, eight steps, the first applied. The
       file-size cap half of "reverse two non-goals": 300 lines for `.ts`/`.tsx`,
       200 for `.css`, adopted with no exemption list because the same change
       decomposes all nine files currently over the line. `app.css` (943 lines)
@@ -104,7 +104,10 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       JavaScript bundle. Not an `/opsx:update` on `reviewable-diff-gates` as
       this entry used to ask: that change is archived, and the growth protocol
       above forbids editing an archive to receive a fact discovered later, so
-      the cap lands in the living `change-slicing` spec.
+      the cap lands in the living `change-slicing` spec. Step 1 cost a change
+      to how the application is served, which shipped beside it: Bun's HTML dev
+      server cannot emit a CSS module's class-name mapping, so development
+      builds and serves `dist/` — the constraint below carries it.
 - [ ] **The comment scan goes quiet on a regex literal.** A backtick inside one
       — `` /[`]/ `` — opens what `scripts/mutation-floor.ts:183-199` takes for a
       template literal and runs to end of input, so every comment below it is
