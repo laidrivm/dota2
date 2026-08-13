@@ -25,20 +25,26 @@ let listedAt = -1n;
 let listing = new Set<string>();
 
 /**
- * What `dist/` holds, scoped by what it exempts: an asset the bundler emits
- * under an extension nobody thought of is served, rather than 404ing while the
- * document links it.
+ * What `dist/` holds at its top level, scoped by what it exempts: an asset the
+ * bundler emits under an extension nobody thought of is served, rather than
+ * 404ing while the document links it.
  *
- * The scan is recursive and synchronous, so it does not belong on the request
- * path. A rebuild renames every hashed asset — it adds and removes entries —
- * so the directory's own mtime is what says the set is stale, and a `stat`
- * costs a fiftieth of the scan. Content that changes under an unchanged name
- * needs no refresh: `Bun.file` reads it when the response is sent.
+ * The top level is where the bundler emits, and it is also as deep as the
+ * cache key reaches: a write inside a child directory changes that child's
+ * mtime, not this one's. Listing deeper would promise a freshness the key
+ * cannot give, and the only subdirectory `dist/` has is `fonts/`, which
+ * `staticRoutes` owns. A bundler that starts emitting into a subdirectory
+ * 404s on the first page load rather than serving something stale.
+ *
+ * A rebuild renames every hashed asset — it adds and removes entries — so the
+ * directory's own mtime is what says the set is stale, and a `stat` costs a
+ * fiftieth of the scan. Content that changes under an unchanged name needs no
+ * refresh: `Bun.file` reads it when the response is sent.
  */
 function listed(): Set<string> {
 	const at = statSync(distDir, { bigint: true }).mtimeNs;
 	if (at !== listedAt) {
-		listing = new Set(new Bun.Glob("**/*").scanSync(distDir.pathname));
+		listing = new Set(new Bun.Glob("*").scanSync(distDir.pathname));
 		listedAt = at;
 	}
 	return listing;
