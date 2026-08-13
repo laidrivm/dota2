@@ -61,7 +61,9 @@ const SYNTAX = {
  */
 export function blank(source: string, language: keyof typeof SYNTAX): string {
 	const { lineComments, regex, templates } = SYNTAX[language];
-	const out = [...source];
+	// Indexed by UTF-16 unit, as `source[i]` is, so an astral character does not
+	// shift every offset after it.
+	const out = source.split("");
 	const erase = (from: number, to: number) => {
 		for (let k = from; k < to && k < out.length; k++) {
 			if (out[k] !== "\n") out[k] = " ";
