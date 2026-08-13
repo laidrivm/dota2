@@ -17,6 +17,7 @@ import type {
 import { ROLES } from "../../types.ts";
 import type { Action, PickTarget, Position } from "../session.ts";
 import { ROLE_UI, SIDE_LABEL } from "../session-controls.tsx";
+import s from "./board.module.css";
 import {
 	formatAdvantage,
 	formatPhase,
@@ -27,7 +28,7 @@ import {
 } from "./format.ts";
 // The re-pick marker is the tile's other half: it stands in for a hero the
 // snapshot dropped, so its rule lives beside the tile it replaces.
-import s from "./hero-tile.module.css";
+import tile from "./hero-tile.module.css";
 import { HeroTile } from "./hero-tile.tsx";
 
 type Apply = (action: Action) => void;
@@ -55,7 +56,7 @@ function PickEntry({
 	return (
 		<button
 			type="button"
-			class="pick-entry"
+			class={s.pickEntry}
 			data-pick={position}
 			aria-label={label}
 			disabled={disabled}
@@ -84,20 +85,23 @@ function RemoveButton({
 	return (
 		<button
 			type="button"
-			class="remove"
+			class={s.remove}
 			data-remove={position}
 			aria-label={label}
 			onClick={(event) => {
-				const row = event.currentTarget.closest(".slot, .ban");
-				const region = event.currentTarget.closest(".panel, .bans");
+				// The bundler owns the class names now, so the walk up to the row and
+				// the region reads the markers instead — the same `data-` attributes
+				// the post-pick focus redirect in `app.tsx` already navigates by.
+				const row = event.currentTarget.closest("[data-row]");
+				const region = event.currentTarget.closest("[data-region]");
 				onClick();
 				// After Preact commits: it renders on a microtask, so a macrotask is
 				// the first point the replacement control exists. `rAF` is not — it
 				// runs before the commit, and never at all in a hidden tab.
 				setTimeout(() => {
 					const next =
-						(row?.isConnected ? row.querySelector(".pick-entry") : null) ??
-						region?.querySelector(".pick-entry");
+						(row?.isConnected ? row.querySelector("[data-pick]") : null) ??
+						region?.querySelector("[data-pick]");
 					if (next instanceof HTMLElement) next.focus();
 				}, 0);
 			}}
@@ -110,11 +114,11 @@ function RemoveButton({
 /** A hero the loaded snapshot no longer carries (screens-spec §6.4): the entry
  * stays put, says so, and waits to be replaced. */
 const RepickBadge = ({ hero }: { hero: HeroEntry | undefined }) =>
-	hero === undefined ? <span class={s.repickBadge}>re-pick</span> : null;
+	hero === undefined ? <span class={tile.repickBadge}>re-pick</span> : null;
 
 const ThinBadge = ({ hero }: { hero: HeroEntry | undefined }) =>
 	hero?.sufficient === false ? (
-		<span class="thin-badge">insufficient data</span>
+		<span class={s.thinBadge}>insufficient data</span>
 	) : null;
 
 function BansRow({
@@ -133,13 +137,13 @@ function BansRow({
 	const atLimit = session.bans.length >= banLimit;
 
 	return (
-		<section class="bans" aria-label="Bans">
-			<h2 class="section-label">Bans</h2>
-			<div class="bans-strip">
+		<section class={s.bans} data-region="bans" aria-label="Bans">
+			<h2 class={s.sectionLabel}>Bans</h2>
+			<div class={s.bansStrip}>
 				{session.bans.map((id, index) => {
 					const hero = byId.get(id);
 					return (
-						<div class="ban" key={id}>
+						<div class={s.ban} data-row="ban" key={id}>
 							<HeroTile
 								hero={hero}
 								size="lg"
@@ -191,9 +195,9 @@ function TeamPanel({
 	const side = session.side as Side;
 
 	return (
-		<section class="panel my-team" aria-label="My team">
+		<section class="panel my-team" data-region="my-team" aria-label="My team">
 			<h2 class="panel-head">
-				<span class="section-label">My team</span>
+				<span class={s.sectionLabel}>My team</span>
 				<span class={`side-name side-${side}`}>{SIDE_LABEL[side]}</span>
 			</h2>
 			{ROLES.map((role) => {
@@ -202,9 +206,13 @@ function TeamPanel({
 				const mine = session.myRole === role;
 
 				return (
-					<div class={`slot${mine ? " slot-mine" : ""}`} key={role}>
+					<div
+						class={`slot${mine ? " slot-mine" : ""}`}
+						data-row={`team-${role}`}
+						key={role}
+					>
 						<span class="slot-number">{role}</span>
-						<span class="slot-star">{mine ? "★" : ""}</span>
+						<span class={s.roleStar}>{mine ? "★" : ""}</span>
 						<span class="slot-role">{ROLE_UI[role].label}</span>
 						<div class="slot-hero">
 							{id === null ? (
@@ -258,9 +266,13 @@ function EnemyPanel({
 	const free = 5 - session.enemyPicks.length;
 
 	return (
-		<section class="panel enemy-team" aria-label="Enemy team">
+		<section
+			class="panel enemy-team"
+			data-region="enemy"
+			aria-label="Enemy team"
+		>
 			<h2 class="panel-head">
-				<span class="section-label">Enemy team</span>
+				<span class={s.sectionLabel}>Enemy team</span>
 				<span class={`side-name side-${side}`}>{SIDE_LABEL[side]}</span>
 			</h2>
 			{session.enemyPicks.map((id, index) => {
@@ -268,7 +280,7 @@ function EnemyPanel({
 				const probs = roles.get(id);
 
 				return (
-					<div class="slot" key={id}>
+					<div class="slot" data-row="enemy" key={id}>
 						<div class="slot-hero">
 							<HeroTile hero={hero} size="md" />
 							<div class="enemy-text">
@@ -288,7 +300,7 @@ function EnemyPanel({
 				);
 			})}
 			{Array.from({ length: free }, (_, i) => (
-				<div class="slot" key={`free-${i}`}>
+				<div class="slot" data-row="enemy" key={`free-${i}`}>
 					<div class="slot-hero">
 						<PickEntry
 							label="Enemy pick"
@@ -315,7 +327,7 @@ function Suggestions({
 	return (
 		<section class="panel suggestions" aria-label="Suggestions">
 			<h2 class="panel-head">
-				<span class="section-label">Suggestions</span>
+				<span class={s.sectionLabel}>Suggestions</span>
 				<span class="phase">phase: {formatPhase(model.phase)}</span>
 			</h2>
 			{model.suggestions.map((block) => (
@@ -324,7 +336,7 @@ function Suggestions({
 					key={block.role}
 				>
 					<h3 class="suggestion-role">
-						<span class="slot-star">{block.isMyRole ? "★" : ""}</span>
+						<span class={s.roleStar}>{block.isMyRole ? "★" : ""}</span>
 						{ROLE_UI[block.role].label}
 					</h3>
 					<div class="suggestion-strip">
@@ -365,7 +377,7 @@ function Suggestions({
 const Result = ({ estimate }: { estimate: WinEstimate }) => (
 	<section class="panel result" aria-label="Result">
 		<h2 class="panel-head">
-			<span class="section-label">Result</span>
+			<span class={s.sectionLabel}>Result</span>
 		</h2>
 		<p class="result-line">
 			<span class="result-label">Draft advantage:</span>
@@ -402,7 +414,7 @@ export function Board({
 	const teams = `teams${session.side === "dire" ? " teams-mirrored" : ""}`;
 
 	return (
-		<main class="board">
+		<main class={s.board}>
 			<BansRow
 				session={session}
 				byId={byId}
@@ -428,7 +440,7 @@ export function Board({
 			{model.winEstimate !== null ? (
 				<Result estimate={model.winEstimate} />
 			) : model.suggestions.length === 0 ? (
-				<p class="board-hint" role="status">
+				<p class={s.boardHint} role="status">
 					Add enemy picks to see win probability
 				</p>
 			) : (

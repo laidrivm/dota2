@@ -34,6 +34,19 @@
 	padding: 0 var(--sp-6) var(--sp-4);
 }
 
+/* The search field is labelled but the design shows no label, and the picker
+   is the only place in the app that needs one hidden. */
+.visuallyHidden {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	margin: -1px;
+	padding: 0;
+	overflow: hidden;
+	clip-path: inset(50%);
+	white-space: nowrap;
+}
+
 .pickerSearch input {
 	width: 100%;
 	padding: var(--sp-3) var(--sp-4);

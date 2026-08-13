@@ -1,0 +1,163 @@
+/* The board frame, the bans row, and the pieces every panel shares — the
+   entry control, the removal control and the two markers `board.tsx` keeps.
+   Every value is a token reference — literals belong in tokens/ only. */
+
+.board {
+	display: flex;
+	flex-direction: column;
+	gap: var(--sp-7);
+	padding: var(--sp-6) var(--sp-7) var(--sp-8);
+}
+
+.sectionLabel {
+	margin: 0;
+	font-size: var(--fs-label);
+	font-weight: 600;
+	letter-spacing: var(--ls-label);
+	text-transform: uppercase;
+	color: var(--text-5);
+}
+
+/* Every empty position carries one of these, and each opens the picker. */
+.pickEntry {
+	padding: var(--sp-2) var(--sp-4);
+	border: 1px dashed var(--border-3);
+	border-radius: var(--r-control);
+	background: transparent;
+	color: var(--text-4);
+	font-family: var(--font-ui);
+	font-size: var(--fs-control);
+}
+
+.pickEntry:hover:not(:disabled) {
+	border-color: var(--border-hover);
+	color: var(--text-2);
+}
+
+.pickEntry:disabled {
+	color: var(--text-6);
+	border-color: var(--border-2);
+}
+
+/* Removal is revealed by hover *or* focus — a keyboard user gets the same
+   affordance a pointer does. Both come from the row, which is a ban here and a
+   slot in `panels.module.css`: it sets the knob rather than naming this class
+   across a module boundary, and `:focus-within` on the row covers the control
+   itself, so this class needs no `:focus-visible` rule of its own. */
+.remove {
+	width: var(--tile-sm);
+	height: var(--tile-sm);
+	border: 1px solid var(--border-3);
+	border-radius: var(--r-tile-sm);
+	background: transparent;
+	color: var(--text-4);
+	font-size: var(--fs-meta);
+	opacity: var(--remove-fade, 0);
+}
+
+.remove:hover {
+	border-color: var(--dire);
+	color: var(--dire);
+}
+
+/* ★ against the role the draft is being read for — a slot's and a suggestion
+   block's alike. */
+.roleStar {
+	width: var(--sp-4);
+	font-size: var(--fs-label);
+	color: var(--accent);
+}
+
+.thinBadge {
+	padding: 0 var(--sp-1);
+	border: 1px solid var(--accent-border);
+	border-radius: var(--r-kbd);
+	font-family: var(--font-mono);
+	font-size: var(--fs-tile-sm);
+	font-weight: 600;
+	color: var(--accent);
+	white-space: nowrap;
+}
+
+/* bans */
+
+.bans {
+	display: flex;
+	align-items: center;
+	gap: var(--sp-5);
+}
+
+.bansStrip {
+	display: flex;
+	align-items: center;
+	gap: var(--sp-3);
+	overflow-x: auto;
+	padding-bottom: var(--sp-1);
+}
+
+.ban {
+	position: relative;
+	flex-shrink: 0;
+}
+
+.ban:hover,
+.ban:focus-within {
+	--remove-fade: 1;
+}
+
+.ban .remove {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	border-radius: var(--r-tile);
+	background: var(--bg-0);
+	font-size: var(--fs-control);
+	color: var(--text-1);
+}
+
+.boardHint {
+	margin: 0;
+	padding: var(--sp-6) var(--sp-5);
+	border: 1px solid var(--border-1);
+	border-radius: var(--r-panel);
+	background: var(--bg-1);
+	color: var(--text-3);
+}
+
+/* One column: the board has to fit a phone held beside the game (US-25). */
+
+@media (max-width: 720px) {
+	.board {
+		gap: var(--sp-5);
+		padding: var(--sp-5) var(--sp-5) var(--sp-8);
+	}
+
+	.bans {
+		display: block;
+	}
+
+	.bans .sectionLabel {
+		margin-bottom: var(--sp-3);
+	}
+
+	/* Hover cannot reveal anything on a touch screen. */
+	.remove {
+		opacity: 1;
+	}
+
+	.bansStrip {
+		padding-top: var(--sp-2);
+	}
+
+	.ban .remove {
+		inset: calc(var(--sp-2) * -1) calc(var(--sp-2) * -1) auto auto;
+		width: var(--sp-6);
+		height: var(--sp-6);
+		border-radius: 50%;
+		background: var(--bg-3);
+		border-color: var(--border-3);
+		color: var(--text-4);
+		font-size: var(--fs-kbd);
+	}
+}
