@@ -151,22 +151,59 @@ export function gauge(
  * leading space: a directive written with two is one Stryker ignores in
  * silence, and failing on it is what tells the author so.
  */
-const DISABLE = /^\s*Stryker disable\b(.*)$/;
+// Unanchored at the end, like Stryker's own: a block comment's text runs past
+// the directive's line, and `$` would refuse every multi-line one.
+const DISABLE = /^\s*Stryker disable\b(.*)/;
+
+type Comment = { text: string; line: number; block: boolean };
 
 /**
- * Every comment in `bare`, a line whose string literals have been stripped.
+ * Every comment in `source`, with the line it opens on and which kind it is.
  *
- * ponytail: line-based, so a comment inside a multi-line template literal
- * reads as a real one. Costs a TypeScript parser to fix; `src/model.ts` holds
- * no multi-line template today, and the failure is loud rather than silent.
+ * A left-to-right scan rather than a line-based one, because the line-based
+ * version this replaces had three separate holes of one shape: an escaped
+ * quote ended a string early and made the rest of it read as code, a `/*`
+ * inside a line comment opened a block that never closed, and a block comment
+ * spanning lines hid a directive Stryker honours. All three are the same
+ * mistake — deciding what a character means without knowing what it sits
+ * inside — and a scanner that tracks that is the smallest thing that cannot
+ * make it. It is not a parser and does not need to be: Stryker anchors its
+ * directive to the start of a comment's text, so the text is all that matters.
  */
-function comments(bare: string): { text: string; block: boolean }[] {
-	const found = [...bare.matchAll(/\/\*(.*?)\*\//g)].map((m) => ({
-		text: m[1] ?? "",
-		block: true,
-	}));
-	const trailing = /\/\/(.*)$/.exec(bare.replace(/\/\*.*?\*\//g, ""));
-	if (trailing) found.push({ text: trailing[1] ?? "", block: false });
+function comments(source: string): Comment[] {
+	const found: Comment[] = [];
+	let line = 1;
+	let i = 0;
+	while (i < source.length) {
+		const c = source[i];
+		const next = source[i + 1];
+		if (c === "\n") {
+			line++;
+			i++;
+		} else if (c === "'" || c === '"' || c === "`") {
+			const opened = c;
+			for (i++; i < source.length && source[i] !== opened; i++) {
+				if (source[i] === "\\") i++;
+				else if (source[i] === "\n") line++;
+			}
+			i++;
+		} else if (c === "/" && next === "/") {
+			i += 2;
+			const start = i;
+			while (i < source.length && source[i] !== "\n") i++;
+			found.push({ text: source.slice(start, i), line, block: false });
+		} else if (c === "/" && next === "*") {
+			i += 2;
+			const start = i;
+			const at = line;
+			for (; i < source.length; i++) {
+				if (source[i] === "\n") line++;
+				else if (source[i] === "*" && source[i + 1] === "/") break;
+			}
+			found.push({ text: source.slice(start, i), line: at, block: true });
+			i += 2;
+		} else i++;
+	}
 	return found;
 }
 
@@ -189,41 +226,25 @@ const ADMITTED = /^\s+next-line\s+([A-Za-z]+(?:\s*,\s*[A-Za-z]+)*)\s*:(.*)$/;
  */
 export function exemptions(source: string): string[] {
 	const lines = source.split("\n");
-	// Each line with its string literals stripped, or null when the line begins
-	// inside a `/* … */` block — a directive in commented-out code is not one
-	// to Stryker either, whose matcher sees the outer comment's text and finds
-	// it does not start with `Stryker`. Stripping literals first is what stops
-	// `const opener = "/*"` from blinding the scan to every line below it.
-	let open = false;
-	const bares = lines.map((line) => {
-		const was = open;
-		const bare = line.replace(/'[^']*'|"[^"]*"|`[^`]*`/g, "");
-		for (const token of bare.match(/\/\*|\*\//g) ?? []) open = token === "/*";
-		return was ? null : bare;
-	});
-
 	const problems: string[] = [];
-	bares.forEach((bare, index) => {
-		if (bare === null) return;
-		for (const { text, block } of comments(bare)) {
-			const marker = DISABLE.exec(text);
-			if (!marker) continue;
-			const at = `${MODEL_NAME}:${index + 1}: ${lines[index]?.trim()}`;
-			// A directive in a block comment fails however well it is formed:
-			// Stryker honours both spellings, and one spelling in the codebase
-			// is what keeps a reader from having to know that.
-			const tail = block ? null : ADMITTED.exec(marker[1] ?? "");
-			if (!tail)
-				problems.push(
-					`${at} — write \`// Stryker disable next-line <Mutator>: <reason>\``,
-				);
-			else if (tail[1]?.split(",").some((name) => name.trim() === "all"))
-				problems.push(
-					`${at} — names \`all\`, which would also silence a mutant added to that line later`,
-				);
-			else if (!tail[2]?.trim()) problems.push(`${at} — states no reason`);
-		}
-	});
+	for (const { text, line, block } of comments(source)) {
+		const marker = DISABLE.exec(text);
+		if (!marker) continue;
+		const at = `${MODEL_NAME}:${line}: ${lines[line - 1]?.trim()}`;
+		// A directive in a block comment fails however well it is formed:
+		// Stryker honours both spellings, and one spelling in the codebase is
+		// what keeps a reader from having to know that.
+		const tail = block ? null : ADMITTED.exec(marker[1] ?? "");
+		if (!tail)
+			problems.push(
+				`${at} — write \`// Stryker disable next-line <Mutator>: <reason>\``,
+			);
+		else if (tail[1]?.split(",").some((name) => name.trim() === "all"))
+			problems.push(
+				`${at} — names \`all\`, which would also silence a mutant added to that line later`,
+			);
+		else if (!tail[2]?.trim()) problems.push(`${at} — states no reason`);
+	}
 	return problems;
 }
 
