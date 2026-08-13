@@ -44,6 +44,17 @@ describe("build output", () => {
 		expect(html).toContain('@import url("/fonts/fonts.css")');
 	});
 
+	// Styles reach the page through the entry point now, so nothing in the
+	// source `index.html` names them: a stylesheet that stopped being bundled
+	// is a missing import rather than a 404, and this is what would notice.
+	test("emits one stylesheet and links it from the document", async () => {
+		const sheets = [...new Bun.Glob("*.css").scanSync(dist)];
+		const html = await Bun.file(`${dist}/index.html`).text();
+
+		expect(sheets).toHaveLength(1);
+		expect(html).toContain(`href="./${sheets[0]}"`);
+	});
+
 	test("leaves no font inlined as a data URI", async () => {
 		const [css] = [...new Bun.Glob("*.css").scanSync(dist)];
 		const text = await Bun.file(`${dist}/${css}`).text();
