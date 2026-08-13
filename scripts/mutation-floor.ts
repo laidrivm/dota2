@@ -76,9 +76,13 @@ export function survivors(report: Report): number {
 
 	let count = 0;
 	for (const { status } of mutants) {
-		if (typeof status === "string" && SURVIVING.includes(status)) count++;
-		else if (typeof status !== "string" || !COUNTED_OUT.includes(status))
-			throw new Error(`unrecognised mutant status: ${String(status)}`);
+		// Stringified rather than type-guarded: a mutant carrying no status, or
+		// one carrying a number, matches neither list and so throws by name,
+		// which is what a guard would have to do anyway.
+		const name = String(status);
+		if (SURVIVING.includes(name)) count++;
+		else if (!COUNTED_OUT.includes(name))
+			throw new Error(`unrecognised mutant status: ${name}`);
 	}
 	return count;
 }
