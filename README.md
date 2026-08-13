@@ -29,9 +29,10 @@ One fact lives in exactly one file; everything else links to it.
 ## Running it
 
 - `bun run dev` — `scripts/dev.ts` on http://localhost:3000: it clears `dist/`
-  as `bun run build` does, bundles into it, rebuilds on a change under `src/`,
-  and starts `server.ts` over the result. The page in development is the bundle
-  production ships, so a build left in `dist/` does not survive starting it.
+  as `bun run build` does, bundles into it, rebuilds on a change under `src/`
+  or to `index.html`, and starts `server.ts` over the result. Same entry point,
+  same bundler, same serving; the one difference is that it does not minify. A
+  build left in `dist/` does not survive starting it.
 - `bun run build` — the same bundle minified, plus the fonts and the snapshot
   copied in. `dist/` is fully static: `cd dist && python3 -m http.server`
   serves a working app. `server.ts` serves `dist/` too, adding the two routes

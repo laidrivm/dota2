@@ -1,6 +1,7 @@
 /**
  * Dev and production server. Both serve `dist/`, so the page opened in
- * development is the page that ships.
+ * development went through the bundler that built the one that ships —
+ * unminified, which is the only way the two differ.
  *
  * The HTML entry point is deliberately not a route here. Bun's HTML dev
  * bundler is a second implementation of the one `bun build` runs, and it
