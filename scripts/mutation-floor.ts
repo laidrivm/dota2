@@ -142,15 +142,14 @@ export function gauge(
 }
 
 /**
- * A `Stryker disable` directive, matched against a comment's text rather than
- * against a line. Stryker runs its own matcher over every comment Babel hands
- * it, so a scan that only read line-leading `//` would be blind to
- * `/* Stryker disable next-line all *␘/` — which Stryker honours. Verified by
- * inserting one and watching the survivor count fall.
+ * A `Stryker disable` directive, matched against a comment's text rather than a
+ * line, because Stryker runs its own matcher over every comment Babel hands it
+ * — a block-comment directive is one it honours, and one a line-leading scan
+ * would never see.
  *
- * Looser than Stryker's own `^\s?Stryker`, which tolerates a single leading
- * space: a directive written with two is one Stryker silently ignores, and
- * failing on it tells the author that rather than leaving them to wonder.
+ * Deliberately looser than Stryker's `^\s?Stryker`, which allows a single
+ * leading space: a directive written with two is one Stryker ignores in
+ * silence, and failing on it is what tells the author so.
  */
 const DISABLE = /^\s*Stryker disable\b(.*)$/;
 
