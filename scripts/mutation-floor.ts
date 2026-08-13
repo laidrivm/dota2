@@ -35,7 +35,12 @@ const COUNTED_OUT = [
 ];
 
 type Mutant = { status?: unknown };
-type Report = { files: Record<string, { mutants?: Mutant[] }> };
+/**
+ * As loose as `JSON.parse` leaves it: every field is optional and an entry may
+ * be null, because the only thing checked before the cast is that `files` is an
+ * object. Narrowing it here would describe a report nobody verified.
+ */
+type Report = { files: Record<string, { mutants?: Mutant[] } | null> };
 
 /**
  * Stryker's report at `file`. Throws naming `file` when it is absent, truncated
@@ -70,7 +75,10 @@ export function loadReport(file: string): Report {
  * zero survivors is the answer that would hide it.
  */
 export function survivors(report: Report): number {
-	const mutants = Object.values(report.files).flatMap((f) => f.mutants ?? []);
+	// `f?.` rather than a per-entry validator: a null entry contributes nothing,
+	// and a report made entirely of them reaches the throw below rather than
+	// reading as zero survivors.
+	const mutants = Object.values(report.files).flatMap((f) => f?.mutants ?? []);
 	if (mutants.length === 0)
 		throw new Error("the mutation report holds no mutants");
 
@@ -115,8 +123,10 @@ export function gauge(
 ): string[] {
 	const problems: string[] = [];
 	// Anchored to the semicolon: a reason is the comment trailing the
-	// declaration, never a `//` quoted elsewhere on the line.
-	if (!/;\s*\/\/.*\S/.test(declaration))
+	// declaration, never a `//` quoted elsewhere on the line. The gap is spaces
+	// and tabs rather than `\s`, which would let a reason on the *next* line
+	// satisfy a check whose whole point is that it sits on this one.
+	if (!/;[ \t]*\/\/.*\S/.test(declaration))
 		problems.push(
 			`the floor states no reason: ${declaration.trim()} — write why on that line`,
 		);

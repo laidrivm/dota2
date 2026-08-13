@@ -90,6 +90,12 @@ describe("the survivor count", () => {
 		expect(() => survivors({ files: {} })).toThrow(/no mutants/);
 	});
 
+	test("a report of null file entries fails rather than counting zero", () => {
+		expect(() => survivors({ files: { "src/model.ts": null } })).toThrow(
+			/no mutants/,
+		);
+	});
+
 	test("a file entry with no mutants key contributes none", () => {
 		const partial = {
 			files: {
@@ -202,6 +208,12 @@ describe("the floor changed with no reason given", () => {
 		expect(floorLine(`\texport const FLOOR = 9; // indented\n`)).toBe("");
 		expect(floorLine(`export const FLOOR = 9; // real\n`)).toBe(
 			"export const FLOOR = 9; // real",
+		);
+	});
+
+	test("a reason on the next line is not a reason", () => {
+		expect(gauge(12, 12, "export const FLOOR = 12;\n// measured")).not.toEqual(
+			[],
 		);
 	});
 
