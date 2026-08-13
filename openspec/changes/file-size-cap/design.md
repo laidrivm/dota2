@@ -85,6 +85,42 @@ Bun's bundler detects `.module.css` with no configuration and rewrites locally
 scoped class names to unique identifiers — checked in Bun's bundler
 documentation, not recalled.
 
+### Development serves the built bundle
+
+The documentation describes `bun build`. Bun's *other* implementation — the
+HTML entry point served by `Bun.serve` — emits the scoped stylesheet correctly
+and never defines the class-name mapping the components import, so every
+component reading one throws and the page renders nothing (oven-sh/bun#18258,
+open since March 2025; fix PR #33405 unmerged as of Bun 1.3.14). Only the dev
+path is affected.
+
+So `bun run dev` is `scripts/dev.ts`: it bundles into `dist/`, rebuilds on a
+change under `src/`, and starts `server.ts` over the result. `server.ts` no
+longer routes the HTML entry point; it serves `dist/` in development and in
+production alike. It ships ahead of step 1 rather than inside it: it changes
+how the application is served, which is its own reviewable unit.
+
+That costs hot module replacement and buys a development page that is the
+bundle production ships — so a defect the bundler introduces is under the e2e
+suite rather than only under `build.test.ts`. The asset lookup is
+`dist-routes.ts` rather than inline in `server.ts`, for the reason
+`static-routes.ts` is its own file: its listing guard, which is what keeps a
+request from naming a path outside `dist/`, can then be exercised without
+starting a server.
+
+### A picker rule that reaches into the hero tile becomes a custom property
+
+Two rules crossed what became a module boundary: the picker rings the tile
+`Enter` would take and fades the tile of a hero already drafted. A scoped class
+name cannot be written from another module's stylesheet, so the tile reads
+`box-shadow: var(--tile-ring, …)` and `opacity: var(--tile-fade, 1)`, and the
+picker sets those two on its own classes.
+
+Custom properties inherit, so nothing crosses the boundary and specificity
+never enters it. The alternative — a `class` prop on `HeroTile` carrying one of
+the picker's classes — puts two single-class selectors on the same declaration
+and lets emission order decide, which the source does not state.
+
 Fonts are the exception and do not move at all. `index.html` owns
 `@import url("/fonts/fonts.css")` in an inline `<style>`, so the faces are
 requested from the document rather than from the bundle; `build.test.ts`

@@ -1,0 +1,44 @@
+/* The shell's own styles — currently the reset dialog (screens-spec §4).
+   Every value is a token reference — literals belong in tokens/ only. */
+
+.confirm {
+	width: min(320px, 100% - var(--sp-8));
+	padding: var(--sp-7);
+}
+
+.confirm h2 {
+	margin-bottom: var(--sp-2);
+	font-size: var(--fs-body);
+	font-weight: 600;
+}
+
+.confirm p {
+	margin-bottom: var(--sp-6);
+	color: var(--text-4);
+	font-size: var(--fs-meta);
+}
+
+.confirmActions {
+	display: flex;
+	gap: var(--sp-3);
+	justify-content: flex-end;
+}
+
+.confirmActions button {
+	padding: var(--sp-2) var(--sp-5);
+	border: 1px solid var(--border-3);
+	border-radius: var(--r-control);
+	background: var(--bg-2);
+	color: var(--text-2);
+	font-family: var(--font-ui);
+	font-size: var(--fs-control);
+	font-weight: 600;
+}
+
+/* The design tints this button with its own colour rather than a new one, so
+   the tint is mixed from the token instead of restating the palette here. */
+.confirmActions .danger {
+	border-color: color-mix(in srgb, var(--dire) 45%, transparent);
+	background: color-mix(in srgb, var(--dire) 8%, transparent);
+	color: var(--dire);
+}

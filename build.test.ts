@@ -1,4 +1,5 @@
 import { beforeAll, describe, expect, test } from "bun:test";
+import { symlinkSync, unlinkSync } from "node:fs";
 import { distFile } from "./dist-routes.ts";
 
 /**
@@ -44,6 +45,21 @@ describe("build output", () => {
 		expect(html).toContain('@import url("/fonts/fonts.css")');
 	});
 
+	// Styles reach the page through the entry point now, so nothing in the
+	// source `index.html` names them: a stylesheet that stopped being bundled
+	// is a missing import rather than a 404, and this is what would notice.
+	test("emits one stylesheet and links it from the document", async () => {
+		const sheets = [...new Bun.Glob("*.css").scanSync(dist)];
+		const html = await Bun.file(`${dist}/index.html`).text();
+
+		expect(sheets).toHaveLength(1);
+		// The element, not the string: an `href` anywhere in the document would
+		// satisfy a substring match without the browser loading anything.
+		expect(html).toMatch(
+			new RegExp(`<link[^>]+rel="stylesheet"[^>]+href="\\./${sheets[0]}"`),
+		);
+	});
+
 	test("leaves no font inlined as a data URI", async () => {
 		const [css] = [...new Bun.Glob("*.css").scanSync(dist)];
 		const text = await Bun.file(`${dist}/${css}`).text();
@@ -68,6 +84,18 @@ describe("serving the build output", () => {
 
 		expect(response?.headers.get("content-type")).toContain(type);
 		expect((await response?.text())?.length).toBeGreaterThan(0);
+	});
+
+	// `Bun.file` follows a symlink, so the listing has to resolve one.
+	test("refuses an entry that resolves outside dist/", async () => {
+		const planted = `${dist}/escape.js`;
+		symlinkSync(`${import.meta.dir}/package.json`, planted);
+
+		try {
+			expect(distFile("/escape.js")).toBeNull();
+		} finally {
+			unlinkSync(planted);
+		}
 	});
 
 	// The listing is cached, so what it costs is a stale answer after a rebuild.

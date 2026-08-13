@@ -1,0 +1,57 @@
+/* The hero tile, and the marker for a hero the snapshot no longer carries.
+   Every value is a token reference — literals belong in tokens/ only. */
+
+.tile {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+	border-radius: var(--r-tile);
+	/* Both knobs belong to whoever places the tile: the picker rings the one
+	   `Enter` would take and fades the one already in the draft. A scoped class
+	   name cannot cross a module boundary; an inherited custom property can. */
+	box-shadow: var(--tile-ring, var(--tile-inset));
+	opacity: var(--tile-fade, 1);
+	font-family: var(--font-mono);
+	font-weight: 700;
+}
+
+.tileLg {
+	width: var(--tile-lg);
+	height: var(--tile-lg);
+	font-size: var(--fs-tile-lg);
+}
+
+.tileMd {
+	width: var(--tile-md);
+	height: var(--tile-md);
+	border-radius: var(--r-control);
+	font-size: var(--fs-tile-md);
+}
+
+.tileSm {
+	width: var(--tile-sm);
+	height: var(--tile-sm);
+	border-radius: var(--r-tile-sm);
+	font-size: var(--fs-tile-sm);
+}
+
+.tileInkDark {
+	color: var(--tile-ink-dark);
+}
+
+.tileInkLight {
+	color: var(--tile-ink-light);
+}
+
+/* re-pick marker: the hero left the snapshot (screens-spec §6.4) */
+
+.repickBadge {
+	padding: 2px var(--sp-2);
+	border: 1px solid var(--accent-border);
+	border-radius: var(--r-kbd);
+	background: var(--accent-banner-bg);
+	color: var(--accent);
+	font-family: var(--font-mono);
+	font-size: var(--fs-kbd);
+}

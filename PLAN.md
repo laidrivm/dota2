@@ -96,7 +96,7 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
   its entries means anything about.
 
 ### Open
-- [ ] **`file-size-cap`** — proposed, eight steps, not yet applied. The
+- [ ] **`file-size-cap`** — proposed, eight steps, the first applied. The
       file-size cap half of "reverse two non-goals": 300 lines for `.ts`/`.tsx`,
       200 for `.css`, adopted with no exemption list because the same change
       decomposes all nine files currently over the line. `app.css` (943 lines)
@@ -104,7 +104,10 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       JavaScript bundle. Not an `/opsx:update` on `reviewable-diff-gates` as
       this entry used to ask: that change is archived, and the growth protocol
       above forbids editing an archive to receive a fact discovered later, so
-      the cap lands in the living `change-slicing` spec.
+      the cap lands in the living `change-slicing` spec. Step 1 cost a change
+      to how the application is served, which shipped beside it: Bun's HTML dev
+      server cannot emit a CSS module's class-name mapping, so development
+      builds and serves `dist/` — the constraint below carries it.
 - [ ] **The comment scan goes quiet on a regex literal.** A backtick inside one
       — `` /[`]/ `` — opens what `scripts/mutation-floor.ts:183-199` takes for a
       template literal and runs to end of input, so every comment below it is
@@ -113,7 +116,11 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       nothing is passing wrongly yet. Either teach the scanner that `/` in
       expression position starts one, or assert that the file contains none —
       the second is a line and fails loudly, the first ends the family of bugs
-      that produced five holes in one session.
+      that produced five holes in one session. The first is now done and lives
+      in `scripts/scan.ts`: it treats a `/` whose last token opens a value as a
+      regex literal and stops it at a newline rather than at end of input, and
+      it tells the two languages apart, CSS having neither `//` nor a regex
+      literal. What is left here is switching `mutation-floor.ts` to it.
 - [ ] **The rule of two** — the other half, still outstanding and **not yet
       written anywhere**. Lift a helper on the second consumer, never the
       first. `reviewable-diff-gates` prescribed its vehicle when it deferred it
@@ -124,7 +131,9 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       in both `scripts/spec-coverage.test.ts` and `scripts/mutation-floor.ts`,
       the second is strictly better, and the Code rule the first implements was
       replaced on 2026-08-13. What that costs the older copy is commented at the
-      line it costs it.
+      line it costs it. `scripts/scan.ts` is where that lift lands: extracted
+      to bring its file under the cap, and already the module the older copy
+      should switch to — which is what makes it a lift and not speculation.
 - [ ] **Task 7** — Docker + VPS deploy (open decisions: registry GHCR or Docker
       Hub, same VPS or a new one). Carries `ui-foundation` **(e2e)** 1.5, which
       Task 4 deferred here: serving `dist/` under a plain static server is

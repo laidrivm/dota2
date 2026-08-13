@@ -1,0 +1,140 @@
+/* The hero picker (screens-spec §3). Every value is a token reference —
+   literals belong in tokens/ only. */
+
+.picker {
+	width: min(640px, 100% - var(--sp-8));
+	padding: 0;
+	overflow: hidden;
+}
+
+.pickerHead {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: var(--sp-5) var(--sp-6) var(--sp-4);
+}
+
+.pickerTitle {
+	font-size: var(--fs-body);
+	font-weight: 600;
+}
+
+.pickerClose {
+	width: var(--tile-sm);
+	height: var(--tile-sm);
+	border: 1px solid var(--border-3);
+	border-radius: var(--r-tile-sm);
+	background: transparent;
+	color: var(--text-4);
+	font-size: var(--fs-meta);
+}
+
+.pickerSearch {
+	display: block;
+	padding: 0 var(--sp-6) var(--sp-4);
+}
+
+.pickerSearch input {
+	width: 100%;
+	padding: var(--sp-3) var(--sp-4);
+	border: 1px solid var(--border-3);
+	border-radius: var(--r-control);
+	background: var(--bg-0);
+	color: var(--text-1);
+	font-family: var(--font-ui);
+	font-size: var(--fs-body);
+}
+
+.pickerEmpty {
+	padding: 0 var(--sp-6) var(--sp-5);
+	color: var(--text-4);
+	font-size: var(--fs-control);
+}
+
+.pickerGrid {
+	display: grid;
+	grid-template-columns: repeat(8, 1fr);
+	gap: var(--sp-3) var(--sp-2);
+	max-height: 50vh;
+	padding: var(--sp-1) var(--sp-6) var(--sp-5);
+	overflow-y: auto;
+}
+
+.pickerTile {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 5px;
+	padding: var(--sp-2) 2px;
+	border: 0;
+	border-radius: var(--r-tile);
+	background: transparent;
+	color: var(--text-4);
+	font-family: var(--font-ui);
+	font-size: var(--fs-kbd);
+	text-align: center;
+}
+
+.pickerFirst {
+	background: var(--bg-3);
+	--tile-ring: var(--tile-inset), 0 0 0 2px var(--accent);
+}
+
+.pickerTile[aria-disabled="true"] {
+	cursor: not-allowed;
+	/* The design fades the whole cell; fading the words with it would leave the
+	   one thing a taken tile has to say — where the hero already sits — below any
+	   readable contrast. Only the artwork dims, so the fade is handed to the
+	   tile alone and the name is coloured on its own. */
+	--tile-fade: 0.35;
+}
+
+.pickerTile[aria-disabled="true"] .pickerName {
+	color: var(--text-5);
+}
+
+.pickerUsed {
+	color: var(--accent);
+}
+
+.pickerHints {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--sp-5);
+	padding: var(--sp-3) var(--sp-6);
+	border-top: 1px solid var(--border-0);
+	color: var(--text-5);
+	font-family: var(--font-mono);
+	font-size: var(--fs-kbd);
+}
+
+/* One column: the board has to fit a phone held beside the game (US-25). */
+
+@media (max-width: 720px) {
+	/* Full-screen picker: the search field has to be reachable with a thumb
+	   and the grid still has to show whole rows (screens-spec §3). */
+	.picker {
+		display: flex;
+		flex-direction: column;
+		width: 100%;
+		max-width: none;
+		height: 100%;
+		max-height: none;
+		margin: 0;
+		border: 0;
+		border-radius: 0;
+	}
+
+	/* The grid is the only part that may shrink, so the hint bar stays on
+	   screen and the heroes scroll inside instead of being clipped away. */
+	.pickerGrid {
+		grid-template-columns: repeat(4, 1fr);
+		min-height: 0;
+		max-height: none;
+	}
+
+	.pickerHints {
+		margin-top: auto;
+		gap: var(--sp-4);
+	}
+}
