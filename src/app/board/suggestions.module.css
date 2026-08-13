@@ -1,0 +1,120 @@
+/* The per-role suggestion strips and the win-estimate readout (screens-spec
+   §2.6–2.7). Every value is a token reference — literals belong in tokens/
+   only. */
+
+.phase {
+	font-family: var(--font-mono);
+	font-size: var(--fs-meta);
+	color: var(--text-5);
+}
+
+.suggestionRow {
+	display: grid;
+	grid-template-columns: 7rem 1fr;
+	align-items: center;
+	gap: var(--sp-4);
+	padding: var(--sp-2) var(--sp-4);
+}
+
+.suggestionMine {
+	background: var(--accent-row-bg);
+}
+
+.suggestionRole {
+	display: flex;
+	align-items: center;
+	gap: var(--sp-2);
+	margin: 0;
+	font-size: var(--fs-meta);
+	font-weight: 600;
+	color: var(--text-3);
+}
+
+.suggestionMine .suggestionRole {
+	color: var(--accent);
+}
+
+.suggestionStrip {
+	display: flex;
+	align-items: center;
+	gap: var(--sp-3);
+	overflow-x: auto;
+	padding-bottom: var(--sp-1);
+}
+
+.suggestion {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--sp-3);
+	flex-shrink: 0;
+	padding: var(--sp-1) var(--sp-4) var(--sp-1) var(--sp-1);
+	border: 1px solid var(--border-2);
+	border-radius: var(--r-tile);
+	background: var(--bg-2);
+}
+
+.suggestion:hover {
+	border-color: var(--border-hover);
+	background: var(--bg-3);
+}
+
+.score {
+	font-family: var(--font-mono);
+	font-size: var(--fs-meta);
+	font-weight: 600;
+}
+
+.scorePos {
+	color: var(--score-pos);
+}
+
+.scoreMuted {
+	color: var(--text-4);
+}
+
+/* result */
+
+.resultLine {
+	display: flex;
+	align-items: baseline;
+	gap: var(--sp-4);
+	flex-wrap: wrap;
+	margin: 0;
+	padding: var(--sp-6) var(--sp-5);
+}
+
+.resultLabel {
+	color: var(--text-3);
+}
+
+.resultAdvantage,
+.resultWin {
+	font-family: var(--font-mono);
+	font-size: var(--fs-tile-lg);
+	font-weight: 600;
+}
+
+.resultWin {
+	color: var(--text-1);
+}
+
+.resultArrow {
+	color: var(--text-6);
+}
+
+/* One column: the board has to fit a phone held beside the game (US-25). */
+
+@media (max-width: 720px) {
+	.suggestionRow {
+		display: block;
+		padding: var(--sp-2) 0;
+	}
+
+	.suggestionRole {
+		padding: 0 var(--sp-4) var(--sp-2);
+	}
+
+	.suggestionStrip {
+		padding: 0 var(--sp-4) var(--sp-1);
+	}
+}
