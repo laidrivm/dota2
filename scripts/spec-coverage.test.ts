@@ -252,6 +252,18 @@ function check(cwd?: string) {
 	};
 }
 
+const FLOOR = 380; // first measurement: nothing in openspec/specs is cited yet
+
+/**
+ * This file's own `FLOOR` line — the reason lives on it, so the check reads it
+ * back. Anchored to the start of a line, which is why the malformed
+ * declarations the tests below pass in, all of them indented arguments, are not
+ * mistaken for it.
+ */
+const DECLARATION =
+	/^const FLOOR = \d+;.*$/m.exec(readFileSync(import.meta.path, "utf8"))?.[0] ??
+	"";
+
 /**
  * The criteria in `openspec/specs/` that no test cites. Counted per criterion
  * rather than per identifier: two criteria sharing a slug are two uncited
@@ -669,6 +681,15 @@ describe("the repository as it stands", () => {
 		expect(here.problems).toEqual([]);
 	});
 
+	// spec: spec-test-traceability/the-repository-as-it-stands
+	test("the count of uncited criteria sits exactly on the floor", () => {
+		expect(gauge(uncited(repo).length, FLOOR, DECLARATION)).toEqual([]);
+	});
+
+	test("the floor's own line is the one the check read", () => {
+		expect(DECLARATION).toContain(`= ${FLOOR};`);
+	});
+
 	test("the sweep read criteria and test files rather than nothing", () => {
 		expect(here.criteria.length).toBeGreaterThan(0);
 		expect(here.files.length).toBeGreaterThan(0);
@@ -725,6 +746,15 @@ describe("what the sweep reads", () => {
 		});
 		expect(check(dir).files).toEqual([]);
 		expect(problems(dir)).toEqual([]);
+	});
+
+	test("a tree with no citations counts every criterion as uncited", () => {
+		const dir = world(
+			'test("acts", () => {});\n',
+			"A first thing",
+			"A second thing",
+		);
+		expect(uncited(dir).length).toBe(2);
 	});
 
 	test("a citation indented inside a describe block counts", () => {
