@@ -229,7 +229,7 @@ describes is rewritten, the rule is a candidate for deletion.
 - Scope a scan by what it exempts, never by an enumeration of what it covers.
 - State a scan's exemptions in the scan; never inherit them from another tool's
   configuration.
-- Strip string literals before a line-based scan reads comment delimiters.
+- Scan source left to right carrying string and comment state, never line by line.
 - Comment what a reader would otherwise "fix": a deliberate departure from the
   obvious implementation, or a precondition the code does not check.
 
