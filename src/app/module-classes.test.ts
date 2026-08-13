@@ -67,14 +67,23 @@ const OPENS_VALUE_WORDS = new Set([
 ]);
 
 /**
- * `source` with its comments — and, as asked, its string and regex literals —
- * replaced by spaces, so what is left at a given offset is code and nothing
- * else. Lengths and newlines are preserved, so a token found in the result can
- * be read back out of the original at the same place.
- *
- * `regex` is off for CSS, which has no regex literals: a `/` there opens a
- * path inside `url()`, and treating it as a literal would erase to the next
- * one.
+ * What each language encloses text in, and therefore what this scan erases.
+ * Stated here rather than left to a default, because the two mistakes worth
+ * making are both silent: CSS has no `//` comment, so reading one would blank
+ * a rule from `url(//cdn/x.png)` to the end of the line, and it has no regex
+ * literal, so a `/` inside a path would erase to the next one.
+ */
+const SYNTAX = {
+	css: { lineComments: false, regex: false, templates: false },
+	ts: { lineComments: true, regex: true, templates: true },
+} as const;
+
+/**
+ * `source` with its comments, strings and — where the language has them —
+ * template text and regex literals replaced by spaces, so what is left at a
+ * given offset is code and nothing else. Lengths and newlines are preserved,
+ * so a token found in the result can be read back out of the original at the
+ * same place.
  *
  * A left-to-right scan carrying state, because deciding what a character means
  * without knowing what it sits inside is one mistake, and the shapes it takes
@@ -85,10 +94,8 @@ const OPENS_VALUE_WORDS = new Set([
  *
  * Not a parser: the only question asked of each character is what encloses it.
  */
-function blank(
-	source: string,
-	{ strings, regex }: { strings: boolean; regex: boolean },
-): string {
+function blank(source: string, language: keyof typeof SYNTAX): string {
+	const { lineComments, regex, templates } = SYNTAX[language];
 	const out = [...source];
 	const erase = (from: number, to: number) => {
 		for (let k = from; k < to && k < out.length; k++) {
@@ -99,7 +106,7 @@ function blank(
 	// One entry per template literal currently open, holding the `{` nesting
 	// inside its interpolation, or `null` while its text rather than an
 	// expression is being read. An empty stack is ordinary code.
-	const templates: (number | null)[] = [];
+	const open: (number | null)[] = [];
 	let span = 0; // where the template text being blanked started
 	let previous = "";
 	let i = 0;
@@ -114,19 +121,19 @@ function blank(
 	while (i < source.length) {
 		const c = source[i] as string;
 		const next = source[i + 1];
-		const inText = templates.length > 0 && templates.at(-1) === null;
+		const inText = open.length > 0 && open.at(-1) === null;
 
 		if (inText) {
 			if (c === "\\") {
 				i += 2;
 			} else if (c === "`") {
-				if (strings) erase(span, i);
-				templates.pop();
+				erase(span, i);
+				open.pop();
 				i++;
 				previous = "`";
 			} else if (c === "$" && next === "{") {
-				if (strings) erase(span, i);
-				templates[templates.length - 1] = 0;
+				erase(span, i);
+				open[open.length - 1] = 0;
 				i += 2;
 				previous = "{";
 			} else {
@@ -150,27 +157,27 @@ function blank(
 				i++;
 			}
 			if (source[i] === c) i++;
-			if (strings) erase(start, i);
+			erase(start, i);
 			previous = c;
-		} else if (c === "`") {
-			templates.push(null);
+		} else if (c === "`" && templates) {
+			open.push(null);
 			span = i + 1;
 			i++;
-		} else if (c === "}" && templates.length > 0 && templates.at(-1) === 0) {
+		} else if (c === "}" && open.length > 0 && open.at(-1) === 0) {
 			// The brace that closes the interpolation, so its template's text
 			// resumes here.
-			templates[templates.length - 1] = null;
+			open[open.length - 1] = null;
 			span = i + 1;
 			i++;
-		} else if (c === "{" && templates.length > 0 && templates.at(-1) !== null) {
-			templates[templates.length - 1] = (templates.at(-1) as number) + 1;
+		} else if (c === "{" && open.length > 0 && open.at(-1) !== null) {
+			open[open.length - 1] = (open.at(-1) as number) + 1;
 			previous = c;
 			i++;
-		} else if (c === "}" && templates.length > 0 && templates.at(-1) !== null) {
-			templates[templates.length - 1] = (templates.at(-1) as number) - 1;
+		} else if (c === "}" && open.length > 0 && open.at(-1) !== null) {
+			open[open.length - 1] = (open.at(-1) as number) - 1;
 			previous = c;
 			i++;
-		} else if (c === "/" && next === "/") {
+		} else if (lineComments && c === "/" && next === "/") {
 			const start = i;
 			while (i < source.length && source[i] !== "\n") i++;
 			erase(start, i);
@@ -220,16 +227,25 @@ function blank(
 	return out.join("");
 }
 
-/** The class selectors a module defines. Strings go, because a quoted `.name`
- * in a `content` or a `url()` names no class and would define one. */
-const defined = (css: string) =>
-	new Set(
-		[
-			...blank(css, { strings: true, regex: false }).matchAll(
-				/\.([A-Za-z][\w-]*)/g,
-			),
-		].map((match) => match[1] as string),
-	);
+/**
+ * The class selectors a module defines.
+ *
+ * Only a rule's prelude is read — the text running up to the `{` that opens
+ * its block. That is the one place a class selector can be: inside a block a
+ * `.` opens a decimal or a file extension in `url(...)`, and a quoted `.name`
+ * in a `content` selects nothing either.
+ */
+const defined = (css: string) => {
+	const found = new Set<string>();
+
+	for (const rule of blank(css, "css").matchAll(/([^;{}]*)\{/g)) {
+		for (const name of (rule[1] as string).matchAll(/\.([A-Za-z][\w-]*)/g)) {
+			found.add(name[1] as string);
+		}
+	}
+
+	return found;
+};
 
 /**
  * Every class a source file reads off an imported CSS module, as `[module path
@@ -243,7 +259,7 @@ const defined = (css: string) =>
  */
 function reads(path: string, source: string): [string, string][] {
 	const found: [string, string][] = [];
-	const code = blank(source, { strings: true, regex: true });
+	const code = blank(source, "ts");
 	const after = (match: RegExpExecArray | RegExpMatchArray) =>
 		source.slice((match.index as number) + match[0].length);
 
@@ -262,7 +278,12 @@ function reads(path: string, source: string): [string, string][] {
 		const binding = statement[1] as string;
 
 		for (const access of code.matchAll(
-			new RegExp(`(?<![\\w.])${binding}(?:\\.(\\w+)|\\[)`, "g"),
+			new RegExp(
+				// Optional access is what `noUncheckedIndexedAccess` invites, so a
+				// read spelled `s?.name` is a read like any other.
+				`(?<![\\w.])${binding}(?:\\??\\.(\\w+)|(?:\\?\\.)?\\[)`,
+				"g",
+			),
 		)) {
 			const dotted = access[1];
 			if (dotted !== undefined) {
@@ -297,6 +318,12 @@ describe("the classes a module defines", () => {
 	test("not one named inside a value, which selects nothing", () => {
 		expect(defined('.real { content: ".fake"; }')).toEqual(new Set(["real"]));
 	});
+
+	// CSS has no `//` comment; reading one would blank the rest of the line.
+	test("one after an unquoted URL on the same line", () => {
+		const css = ".a { background: url(//cdn/x.png); } .b { color: red; }";
+		expect(defined(css)).toEqual(new Set(["a", "b"]));
+	});
 });
 
 describe("the classes a file reads", () => {
@@ -320,12 +347,17 @@ describe("the classes a file reads", () => {
 		["a read inside a nested template", `const a = \`\${\`\${s.name}\`}\`;`],
 		["a read after an interpolation closes", `const a = \`\${1}\` + s.name;`],
 		["a bracket read", 'const a = s["name"];'],
+		["an optional read", "const a = s?.name;"],
+		["an optional bracket read", 'const a = s?.["name"];'],
 		["a division before a read", "const a = 1 / 2; const b = s.name;"],
 	])("finds %s", (_, body) => expect(names(body)).toEqual(["name"]));
 
-	test("finds a hyphenated name, which only a bracket read can spell", () => {
-		expect(names('const a = s["hero-name"];')).toEqual(["hero-name"]);
-	});
+	test.each([
+		["a bracket read", 'const a = s["hero-name"];'],
+		["an optional bracket read", 'const a = s?.["hero-name"];'],
+	])("finds a hyphenated name, which only %s can spell", (_, body) =>
+		expect(names(body)).toEqual(["hero-name"]),
+	);
 
 	test.each([
 		["a string", "const a = 's.name';"],
