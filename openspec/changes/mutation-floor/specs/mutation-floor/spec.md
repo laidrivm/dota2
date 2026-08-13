@@ -134,10 +134,20 @@ comment carrying no reason, or none after its colon. A comma-separated list of
 named mutators is accepted — a single line can carry two mutants that are both
 equivalent for the same reason.
 
+The check SHALL read the same comments Stryker does — a `/* … */` comment as
+well as a `//` one, and either anywhere on the line rather than only leading it
+— because Stryker matches its directive against every comment the parser hands
+it. It SHALL nonetheless accept only the `//` spelling, so a block-comment
+directive fails however well it is formed: Stryker honours both, and one
+spelling in `src/model.ts` is what stops an exemption from hiding inside a
+comment that does not look like one.
+
 Stryker offers exemptions this requirement does not cover — `// Stryker
 restore`, and an ignore-plugin declared in `ignorers`. Neither is used, and
 neither is checked for: an ignore-plugin is a new file and a new dependency,
-and a `restore` without a matching `disable` changes nothing.
+and a `restore` without a matching `disable` changes nothing — and the paired
+`disable` that would give it meaning is itself rejected, since it cannot carry
+`next-line`.
 
 `mutator.excludedMutations` in `stryker.config.json` would achieve the same
 exemption with no trace at the line it affects, and it is not taken. It is not
