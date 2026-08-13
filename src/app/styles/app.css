@@ -250,110 +250,11 @@
 
 /* ---------------------------------------------------------------- board */
 
-.board {
-	display: flex;
-	flex-direction: column;
-	gap: var(--sp-7);
-	padding: var(--sp-6) var(--sp-7) var(--sp-8);
-}
-
-.section-label {
-	margin: 0;
-	font-size: var(--fs-label);
-	font-weight: 600;
-	letter-spacing: var(--ls-label);
-	text-transform: uppercase;
-	color: var(--text-5);
-}
-
-.visually-hidden {
-	position: absolute;
-	width: 1px;
-	height: 1px;
-	margin: -1px;
-	padding: 0;
-	overflow: hidden;
-	clip-path: inset(50%);
-	white-space: nowrap;
-}
-
-/* Every empty position carries one of these, and each opens the picker. */
-.pick-entry {
-	padding: var(--sp-2) var(--sp-4);
-	border: 1px dashed var(--border-3);
-	border-radius: var(--r-control);
-	background: transparent;
-	color: var(--text-4);
-	font-family: var(--font-ui);
-	font-size: var(--fs-control);
-}
-
-.pick-entry:hover:not(:disabled) {
-	border-color: var(--border-hover);
-	color: var(--text-2);
-}
-
-.pick-entry:disabled {
-	color: var(--text-6);
-	border-color: var(--border-2);
-}
-
-/* Removal is revealed by hover *or* focus — a keyboard user gets the same
-   affordance a pointer does. */
-.remove {
-	width: var(--tile-sm);
-	height: var(--tile-sm);
-	border: 1px solid var(--border-3);
-	border-radius: var(--r-tile-sm);
-	background: transparent;
-	color: var(--text-4);
-	font-size: var(--fs-meta);
-	opacity: 0;
-}
-
-.slot:hover .remove,
-.ban:hover .remove,
-.slot:focus-within .remove,
-.ban:focus-within .remove,
-.remove:focus-visible {
-	opacity: 1;
-}
-
-.remove:hover {
-	border-color: var(--dire);
-	color: var(--dire);
-}
-
-/* bans */
-
-.bans {
-	display: flex;
-	align-items: center;
-	gap: var(--sp-5);
-}
-
-.bans-strip {
-	display: flex;
-	align-items: center;
-	gap: var(--sp-3);
-	overflow-x: auto;
-	padding-bottom: var(--sp-1);
-}
-
-.ban {
-	position: relative;
-	flex-shrink: 0;
-}
-
-.ban .remove {
-	position: absolute;
-	inset: 0;
-	width: 100%;
-	height: 100%;
-	border-radius: var(--r-tile);
-	background: var(--bg-0);
-	font-size: var(--fs-control);
-	color: var(--text-1);
+/* The removal control is `board.module.css`'s now, and a scoped class name
+   cannot be written from here — the row sets the knob it reads instead. */
+.slot:hover,
+.slot:focus-within {
+	--remove-fade: 1;
 }
 
 /* teams */
@@ -411,12 +312,6 @@
 	color: var(--text-5);
 }
 
-.slot-star {
-	width: var(--sp-4);
-	font-size: var(--fs-label);
-	color: var(--accent);
-}
-
 .slot-role {
 	width: 6rem;
 	font-size: var(--fs-meta);
@@ -457,17 +352,6 @@
 	font-family: var(--font-mono);
 	font-size: var(--fs-meta);
 	color: var(--text-2);
-	white-space: nowrap;
-}
-
-.thin-badge {
-	padding: 0 var(--sp-1);
-	border: 1px solid var(--accent-border);
-	border-radius: var(--r-kbd);
-	font-family: var(--font-mono);
-	font-size: var(--fs-tile-sm);
-	font-weight: 600;
-	color: var(--accent);
 	white-space: nowrap;
 }
 
@@ -578,15 +462,6 @@
 	color: var(--text-6);
 }
 
-.board-hint {
-	margin: 0;
-	padding: var(--sp-6) var(--sp-5);
-	border: 1px solid var(--border-1);
-	border-radius: var(--r-panel);
-	background: var(--bg-1);
-	color: var(--text-3);
-}
-
 /* undo toast — the transient half of the undo window (screens-spec §4) */
 
 .toast {
@@ -618,19 +493,6 @@
 /* One column: the board has to fit a phone held beside the game (US-25). */
 
 @media (max-width: 720px) {
-	.board {
-		gap: var(--sp-5);
-		padding: var(--sp-5) var(--sp-5) var(--sp-8);
-	}
-
-	.bans {
-		display: block;
-	}
-
-	.bans .section-label {
-		margin-bottom: var(--sp-3);
-	}
-
 	.teams {
 		grid-template-columns: 1fr;
 		gap: var(--sp-5);
@@ -666,25 +528,5 @@
 
 	.suggestion-strip {
 		padding: 0 var(--sp-4) var(--sp-1);
-	}
-
-	/* Hover cannot reveal anything on a touch screen. */
-	.remove {
-		opacity: 1;
-	}
-
-	.bans-strip {
-		padding-top: var(--sp-2);
-	}
-
-	.ban .remove {
-		inset: calc(var(--sp-2) * -1) calc(var(--sp-2) * -1) auto auto;
-		width: var(--sp-6);
-		height: var(--sp-6);
-		border-radius: 50%;
-		background: var(--bg-3);
-		border-color: var(--border-3);
-		color: var(--text-4);
-		font-size: var(--fs-kbd);
 	}
 }

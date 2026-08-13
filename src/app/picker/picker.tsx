@@ -146,7 +146,7 @@ export function Picker({
 			</div>
 
 			<label class={s.pickerSearch}>
-				<span class="visually-hidden">Search heroes</span>
+				<span class={s.visuallyHidden}>Search heroes</span>
 				<input
 					ref={search}
 					// Not `type="search"`: Chrome gives that one its own `Esc`, which
