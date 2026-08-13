@@ -132,6 +132,16 @@ function cite(path: string, text: string) {
 	// Whether each line begins inside a `/* … */` block. Without it a `// spec:`
 	// line inside a commented-out block reads as a citation, and the `*/` under
 	// it reads as a separator, so the block silently credits a criterion.
+	//
+	// ponytail: superseded, and knowingly left. `CLAUDE.md` replaced the rule
+	// this implements — strip literals, then read delimiters per line — with a
+	// left-to-right scan carrying string and comment state, after the per-line
+	// form produced five holes in `scripts/mutation-floor.ts`. One is live here:
+	// an escaped quote ends the literal early, so `"he said \"/*\""` leaves a
+	// stray `/*`, `open` sticks true, and every citation below is dropped. The
+	// count then rises and the floor fails, naming a breach rather than this.
+	// The fix is to lift the scanner out of `mutation-floor.ts` — the rule of
+	// two in `PLAN.md` — not to patch the expression below.
 	let open = false;
 	const enclosed = lines.map((line) => {
 		const was = open;
