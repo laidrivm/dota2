@@ -86,17 +86,15 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
   its entries means anything about.
 
 ### Open
-- [ ] **`spec-test-traceability`** — step 1, identifiers and citations, is
-      PR #78; step 2, the count and its floor, is not started. Extends
-      `openspec/config.yaml`'s "every criterion is cited by a task" one step:
-      cited by a **test**. The identifier is derived from the scenario heading
-      rather than written into the spec, and it lives in a `// spec:` comment
-      above the test rather than in the test name — a single act may close
-      several criteria, and three identifiers do not fit in a name. The
-      existing ~380 uncited criteria stay uncited behind a floor that may not
-      rise without a reason on its line. Nine of the change's fifteen criteria
-      are cited by step 1; the six the floor describes are step 2's, which is
-      why its citations stop at nine.
+- [ ] **`spec-test-traceability`** — both steps applied, awaiting archive.
+      Extends `openspec/config.yaml`'s "every criterion is cited by a task" one
+      step: cited by a **test**. The identifier is derived from the scenario
+      heading rather than written into the spec, and it lives in a `// spec:`
+      comment above the test rather than in the test name — a single act may
+      close several criteria, and three identifiers do not fit in a name. The
+      380 uncited criteria stay uncited behind a floor in
+      `scripts/spec-coverage.test.ts` that fails in both directions and moves
+      only on a line carrying the reason it moved.
 - [ ] **`mutation-floor`** — proposed, two steps, not yet applied. Mutation
       testing over `src/model.ts` alone, its own CI job, floor set from the
       first measurement as an absolute survivor count and failing in both

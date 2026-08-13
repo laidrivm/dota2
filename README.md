@@ -6,7 +6,7 @@
 |------|------|------|
 | `CLAUDE.md` | agent rules, code style, fix & capture loop; indexes `docs/` | every session |
 | `docs/api-design.md` | endpoint response contract | when an endpoint changes |
-| `docs/testing.md` | what tests assert, e2e rules | when tests change |
+| `docs/testing.md` | what tests assert, how a test cites the criterion it closes, e2e rules | when tests change |
 | `docs/feature-workflow.md` | the four OpenSpec stages and their gates | on any feature, new tooling, or gate change |
 | `docs/review-toolkit.md` | which review skill to run, the pre-PR sequence, and the commit each shared-repo gate was verified against | before every PR |
 | `docs/verification.md` | what counts as evidence for a claim | before a claim or a decision rests on one |
@@ -19,6 +19,7 @@
 | `.claude/settings.json` | the agent's permission policy — what is denied, what prompts, what is pre-approved, which hooks run | before granting a tool call |
 | `scripts/command-guard.ts` | the git and `gh` prohibitions no permission pattern can express | when a git or `gh` call is refused |
 | `scripts/no-suppressions.ts` | which linter and type-checker suppressions are approved, and how many | when a suppression is unavoidable |
+| `scripts/spec-coverage.test.ts` | how many acceptance criteria no test cites, and why that floor last moved | when a criterion or the test citing it changes |
 | `.coderabbit.yaml` | how CodeRabbit reviews this repo | when the bot reviews the wrong things |
 | `.claude/skills/` — symlinks into the [skills repo](https://github.com/laidrivm/skills) | the review skills' own text, which is untracked here | on skill invocation |
 
