@@ -27,7 +27,11 @@ single-source rule this file inherits.
 - A test cites a criterion in a `// spec:` comment directly above a `test`,
   `it` or `describe` call, separated from it by nothing but blank lines and
   comments. The identifier is `<capability>/<slug of the scenario heading>`,
-  derived from `openspec/specs/**` and never written into a spec.
+  derived and never written into a spec.
+- A citation may name a criterion in `openspec/specs/**` or one still in an
+  active change's delta spec, which is what lets a test written during apply
+  cite the criterion it is being written for. Only the first set is counted, so
+  a criterion and its citation join the count together at archive.
 - One comment carries any number of identifiers, whitespace-separated or one
   per continuation line, and several tests may cite one criterion.
 - A citation naming no criterion fails `scripts/spec-coverage.test.ts`, and so
