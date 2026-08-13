@@ -142,11 +142,34 @@ export function gauge(
 }
 
 /**
- * A line-leading `// Stryker disable` comment. Code before it on the line means
- * it is not one, which is what keeps a single-line string literal out without
- * the scanner having to understand strings.
+ * A `Stryker disable` directive, matched against a comment's text rather than
+ * against a line. Stryker runs its own matcher over every comment Babel hands
+ * it, so a scan that only read line-leading `//` would be blind to
+ * `/* Stryker disable next-line all *␘/` — which Stryker honours. Verified by
+ * inserting one and watching the survivor count fall.
+ *
+ * Looser than Stryker's own `^\s?Stryker`, which tolerates a single leading
+ * space: a directive written with two is one Stryker silently ignores, and
+ * failing on it tells the author that rather than leaving them to wonder.
  */
-const DISABLE = /^\s*\/\/\s*Stryker disable\b(.*)$/;
+const DISABLE = /^\s*Stryker disable\b(.*)$/;
+
+/**
+ * Every comment in `bare`, a line whose string literals have been stripped.
+ *
+ * ponytail: line-based, so a comment inside a multi-line template literal
+ * reads as a real one. Costs a TypeScript parser to fix; `src/model.ts` holds
+ * no multi-line template today, and the failure is loud rather than silent.
+ */
+function comments(bare: string): { text: string; block: boolean }[] {
+	const found = [...bare.matchAll(/\/\*(.*?)\*\//g)].map((m) => ({
+		text: m[1] ?? "",
+		block: true,
+	}));
+	const trailing = /\/\/(.*)$/.exec(bare.replace(/\/\*.*?\*\//g, ""));
+	if (trailing) found.push({ text: trailing[1] ?? "", block: false });
+	return found;
+}
 
 /**
  * The one accepted tail: `next-line <Mutator>[,<Mutator>…]: <reason>`. A list
@@ -167,34 +190,40 @@ const ADMITTED = /^\s+next-line\s+([A-Za-z]+(?:\s*,\s*[A-Za-z]+)*)\s*:(.*)$/;
  */
 export function exemptions(source: string): string[] {
 	const lines = source.split("\n");
-	// Whether each line begins inside a `/* … */` block, so a disable comment
-	// in commented-out code is not read as a live one. String literals are
-	// stripped first: `const opener = "/*"` opens no comment, and treating it
-	// as one would blind the scan to every comment below it.
+	// Each line with its string literals stripped, or null when the line begins
+	// inside a `/* … */` block — a directive in commented-out code is not one
+	// to Stryker either, whose matcher sees the outer comment's text and finds
+	// it does not start with `Stryker`. Stripping literals first is what stops
+	// `const opener = "/*"` from blinding the scan to every line below it.
 	let open = false;
-	const enclosed = lines.map((line) => {
+	const bares = lines.map((line) => {
 		const was = open;
 		const bare = line.replace(/'[^']*'|"[^"]*"|`[^`]*`/g, "");
 		for (const token of bare.match(/\/\*|\*\//g) ?? []) open = token === "/*";
-		return was;
+		return was ? null : bare;
 	});
 
 	const problems: string[] = [];
-	lines.forEach((line, index) => {
-		if (enclosed[index]) return;
-		const marker = DISABLE.exec(line);
-		if (!marker) return;
-		const at = `${MODEL_NAME}:${index + 1}: ${line.trim()}`;
-		const tail = ADMITTED.exec(marker[1] ?? "");
-		if (!tail)
-			problems.push(
-				`${at} — write \`// Stryker disable next-line <Mutator>: <reason>\``,
-			);
-		else if (tail[1]?.split(",").some((name) => name.trim() === "all"))
-			problems.push(
-				`${at} — names \`all\`, which would also silence a mutant added to that line later`,
-			);
-		else if (!tail[2]?.trim()) problems.push(`${at} — states no reason`);
+	bares.forEach((bare, index) => {
+		if (bare === null) return;
+		for (const { text, block } of comments(bare)) {
+			const marker = DISABLE.exec(text);
+			if (!marker) continue;
+			const at = `${MODEL_NAME}:${index + 1}: ${lines[index]?.trim()}`;
+			// A directive in a block comment fails however well it is formed:
+			// Stryker honours both spellings, and one spelling in the codebase
+			// is what keeps a reader from having to know that.
+			const tail = block ? null : ADMITTED.exec(marker[1] ?? "");
+			if (!tail)
+				problems.push(
+					`${at} — write \`// Stryker disable next-line <Mutator>: <reason>\``,
+				);
+			else if (tail[1]?.split(",").some((name) => name.trim() === "all"))
+				problems.push(
+					`${at} — names \`all\`, which would also silence a mutant added to that line later`,
+				);
+			else if (!tail[2]?.trim()) problems.push(`${at} — states no reason`);
+		}
 	});
 	return problems;
 }
