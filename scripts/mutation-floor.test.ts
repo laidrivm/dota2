@@ -405,6 +405,37 @@ describe("what is not a disable comment", () => {
 		).toEqual([]);
 	});
 
+	test("one behind an escaped quote is still inside the string", () => {
+		// The escape must not end the literal early: everything after it is
+		// string, not code, and flagging it would fail the build on innocence.
+		expect(
+			exemptions(
+				`const s = "he said \\"// Stryker disable next-line all\\"";\n`,
+			),
+		).toEqual([]);
+	});
+
+	test("one inside a multi-line template literal is not one", () => {
+		expect(
+			exemptions("const s = `a\n// Stryker disable next-line all\nb`;\n"),
+		).toEqual([]);
+	});
+
+	test("a `/*` inside a line comment opens no block", () => {
+		// If it did, every comment below would be swallowed and the scan would
+		// go quiet for the rest of the file.
+		expect(
+			exemptions("// see /* the note\n// Stryker disable next-line all\n"),
+		).not.toEqual([]);
+	});
+
+	test("a directive spanning a block comment's first line is found", () => {
+		// Stryker anchors at the comment's text, so this one it honours.
+		expect(
+			exemptions("/* Stryker disable next-line all\n   because reasons */\n"),
+		).not.toEqual([]);
+	});
+
 	test("one on a line whose block comment opened earlier is not one", () => {
 		expect(
 			exemptions(`const opener = "/*";\n// Stryker disable next-line all\n`),

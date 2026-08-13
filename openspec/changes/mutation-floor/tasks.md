@@ -153,7 +153,11 @@ hand to obtain the first measurement, and the CI job. This is the shape
       `// Stryker disable next-line <Mutator>: <reason>` in `src/model.ts`, and
       lower the floor by however many became `Ignored`
       (*An equivalent mutant is marked*). A survivor judged real stays in the
-      count — writing its test is not this change
+      count — writing its test is not this change. Outcome: all 67 judged, none
+      marked, floor unchanged at 67. Four are equivalent and each shares its
+      line **and** its mutator with a mutant the tests kill, which a disable
+      comment cannot separate; the 44 that could be marked without touching a
+      killed sibling are all real. `design.md` records the reasoning
 - [x] 2.6 Add the convention to `docs/testing.md`: what the floor counts, that
       an equivalent mutant is admitted at its line with a named mutator and a
       reason, and that the floor is lowered by a visible line
