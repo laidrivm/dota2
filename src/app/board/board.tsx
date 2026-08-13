@@ -15,6 +15,7 @@ import type {
 	WinEstimate,
 } from "../../types.ts";
 import { ROLES } from "../../types.ts";
+import { cx } from "../cx.ts";
 import type { Action, PickTarget, Position } from "../session.ts";
 import { ROLE_UI, SIDE_LABEL } from "../session-controls.tsx";
 import s from "./board.module.css";
@@ -30,9 +31,17 @@ import {
 // snapshot dropped, so its rule lives beside the tile it replaces.
 import tile from "./hero-tile.module.css";
 import { HeroTile } from "./hero-tile.tsx";
+import panels from "./panels.module.css";
 
 type Apply = (action: Action) => void;
 type OpenPicker = (target: PickTarget) => void;
+
+/** A side's tint is the same token wherever it is named. */
+const sideClass = (side: Side) =>
+	cx(
+		panels.sideName,
+		side === "radiant" ? panels.sideRadiant : panels.sideDire,
+	);
 
 /**
  * The one way a hero enters the draft: a button that opens the picker for this
@@ -195,10 +204,10 @@ function TeamPanel({
 	const side = session.side as Side;
 
 	return (
-		<section class="panel my-team" data-region="my-team" aria-label="My team">
-			<h2 class="panel-head">
+		<section class={panels.panel} data-region="my-team" aria-label="My team">
+			<h2 class={panels.panelHead}>
 				<span class={s.sectionLabel}>My team</span>
-				<span class={`side-name side-${side}`}>{SIDE_LABEL[side]}</span>
+				<span class={sideClass(side)}>{SIDE_LABEL[side]}</span>
 			</h2>
 			{ROLES.map((role) => {
 				const id = session.teamPicks[`${role}`];
@@ -207,14 +216,14 @@ function TeamPanel({
 
 				return (
 					<div
-						class={`slot${mine ? " slot-mine" : ""}`}
+						class={cx(panels.slot, mine ? panels.slotMine : undefined)}
 						data-row={`team-${role}`}
 						key={role}
 					>
-						<span class="slot-number">{role}</span>
+						<span class={panels.slotNumber}>{role}</span>
 						<span class={s.roleStar}>{mine ? "★" : ""}</span>
-						<span class="slot-role">{ROLE_UI[role].label}</span>
-						<div class="slot-hero">
+						<span class={panels.slotRole}>{ROLE_UI[role].label}</span>
+						<div class={panels.slotHero}>
 							{id === null ? (
 								<PickEntry
 									label={`Pick for ${ROLE_UI[role].label}`}
@@ -225,7 +234,7 @@ function TeamPanel({
 							) : (
 								<>
 									<HeroTile hero={hero} size="md" />
-									<span class="hero-name">{hero?.name ?? ""}</span>
+									<span class={panels.heroName}>{hero?.name ?? ""}</span>
 									<ThinBadge hero={hero} />
 									<RepickBadge hero={hero} />
 								</>
@@ -266,26 +275,22 @@ function EnemyPanel({
 	const free = 5 - session.enemyPicks.length;
 
 	return (
-		<section
-			class="panel enemy-team"
-			data-region="enemy"
-			aria-label="Enemy team"
-		>
-			<h2 class="panel-head">
+		<section class={panels.panel} data-region="enemy" aria-label="Enemy team">
+			<h2 class={panels.panelHead}>
 				<span class={s.sectionLabel}>Enemy team</span>
-				<span class={`side-name side-${side}`}>{SIDE_LABEL[side]}</span>
+				<span class={sideClass(side)}>{SIDE_LABEL[side]}</span>
 			</h2>
 			{session.enemyPicks.map((id, index) => {
 				const hero = byId.get(id);
 				const probs = roles.get(id);
 
 				return (
-					<div class="slot" data-row="enemy" key={id}>
-						<div class="slot-hero">
+					<div class={panels.slot} data-row="enemy" key={id}>
+						<div class={panels.slotHero}>
 							<HeroTile hero={hero} size="md" />
-							<div class="enemy-text">
-								<span class="hero-name">{hero?.name ?? ""}</span>
-								<span class="enemy-roles">
+							<div class={panels.enemyText}>
+								<span class={panels.heroName}>{hero?.name ?? ""}</span>
+								<span class={panels.enemyRoles}>
 									{probs === undefined ? "" : topRoles(probs)}
 								</span>
 								<RepickBadge hero={hero} />
@@ -300,8 +305,8 @@ function EnemyPanel({
 				);
 			})}
 			{Array.from({ length: free }, (_, i) => (
-				<div class="slot" data-row="enemy" key={`free-${i}`}>
-					<div class="slot-hero">
+				<div class={panels.slot} data-row="enemy" key={`free-${i}`}>
+					<div class={panels.slotHero}>
 						<PickEntry
 							label="Enemy pick"
 							placeholder="+ pick"
@@ -325,8 +330,8 @@ function Suggestions({
 	apply: Apply;
 }) {
 	return (
-		<section class="panel suggestions" aria-label="Suggestions">
-			<h2 class="panel-head">
+		<section class={panels.panel} aria-label="Suggestions">
+			<h2 class={cx(panels.panelHead, panels.panelHeadRuled)}>
 				<span class={s.sectionLabel}>Suggestions</span>
 				<span class="phase">phase: {formatPhase(model.phase)}</span>
 			</h2>
@@ -375,8 +380,8 @@ function Suggestions({
 }
 
 const Result = ({ estimate }: { estimate: WinEstimate }) => (
-	<section class="panel result" aria-label="Result">
-		<h2 class="panel-head">
+	<section class={panels.panel} aria-label="Result">
+		<h2 class={cx(panels.panelHead, panels.panelHeadRuled)}>
 			<span class={s.sectionLabel}>Result</span>
 		</h2>
 		<p class="result-line">
@@ -411,7 +416,10 @@ export function Board({
 	const byId = new Map(bundle.heroes.map((hero) => [hero.id, hero]));
 
 	// My team reads left on Radiant and right on Dire, as the game client puts it.
-	const teams = `teams${session.side === "dire" ? " teams-mirrored" : ""}`;
+	const teams = cx(
+		panels.teams,
+		session.side === "dire" ? panels.teamsMirrored : undefined,
+	);
 
 	return (
 		<main class={s.board}>
