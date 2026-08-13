@@ -3,6 +3,8 @@ import { lstatSync, readFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { blank } from "../../scripts/scan.ts";
 
+const TSX = new Bun.Transpiler({ loader: "tsx" });
+
 /**
  * Every class a component reads off a CSS module is one that module defines.
  *
@@ -75,14 +77,30 @@ const defined = (css: string) => {
  * `import s from "./x.module.css"` would read as an import.
  */
 function reads(path: string, source: string): [string, string][] {
+	// JSX is not TypeScript. To a lexical scan `/>` opens a regex literal, so
+	// does `</span>`, and an apostrophe in element text opens a string — each
+	// erasing the rest of its line and losing a read, which is the direction
+	// that passes wrongly. Bun's transpiler removes JSX and keeps both the
+	// import and the reads, so what gets scanned is plain JavaScript.
+	let transpiled: string;
+	try {
+		transpiled = TSX.transformSync(source);
+	} catch {
+		// It does not parse, so it performs no import of a CSS module. Every
+		// tracked file is offered here, most of them not source at all.
+		return [];
+	}
+
 	const found: [string, string][] = [];
-	const code = blank(source, "ts");
+	const code = blank(transpiled, "ts");
 	const after = (match: RegExpExecArray | RegExpMatchArray) =>
-		source.slice((match.index as number) + match[0].length);
+		transpiled.slice((match.index as number) + match[0].length);
 
 	// `from` is not followed by `\s+` here: the specifier is blanked to spaces,
 	// so a greedy run would swallow it and `after` would point past the string.
-	for (const statement of code.matchAll(/\bimport\s+(\w+)\s+from\b/g)) {
+	for (const statement of code.matchAll(
+		/\bimport\s+([A-Za-z_$][\w$]*)\s+from\b/g,
+	)) {
 		const specifier = /^\s*(["'])([^"']+)\1/.exec(after(statement));
 		if (specifier === null) continue;
 		const target = specifier[2] as string;
@@ -91,14 +109,15 @@ function reads(path: string, source: string): [string, string][] {
 		const module = resolve(dirname(join(root, path)), target).slice(
 			root.length + 1,
 		);
-		// `binding` is `\w+` by construction, so it carries nothing to escape.
-		const binding = statement[1] as string;
+		// A `$` is a valid identifier character and a regex metacharacter, so the
+		// binding is escaped before it becomes part of a pattern.
+		const binding = (statement[1] as string).replace(/[$]/g, "\\$&");
 
 		for (const access of code.matchAll(
 			new RegExp(
 				// Optional access is what `noUncheckedIndexedAccess` invites, so a
 				// read spelled `s?.name` is a read like any other.
-				`(?<![\\w.])${binding}(?:\\??\\.(\\w+)|(?:\\?\\.)?\\[)`,
+				`(?<![\\w.$])${binding}(?:\\??\\.(\\w+)|(?:\\?\\.)?\\[)`,
 				"g",
 			),
 		)) {
@@ -175,6 +194,21 @@ describe("the classes a file reads", () => {
 	])("finds a hyphenated name, which only %s can spell", (_, body) =>
 		expect(names(body)).toEqual(["hero-name"]),
 	);
+
+	// JSX is what a lexical scan reads as regex and string syntax; each of these
+	// erased the rest of its line before the transpiler was put in front of it.
+	test.each([
+		["a self-closing tag", "<T hero={hero} /> {s.name}"],
+		["a closing tag", "<p>x</p> {s.name}"],
+		["an apostrophe in element text", "<p>it's fine</p> {s.name}"],
+	])("finds a read after %s", (_, body) =>
+		expect(names(`export const T = () => <>${body}</>;`)).toEqual(["name"]),
+	);
+
+	test("finds a read off a binding spelled with a dollar", () => {
+		const source = `import $s from "./hero-tile.module.css";\nconst a = $s.name;`;
+		expect(reads(at, source)).toEqual([[module, "name"]]);
+	});
 
 	// What the scan erases is `scripts/scan.test.ts`'s; this is only that a
 	// binding named in something erased is not a read.

@@ -20,8 +20,8 @@ ahead of the step rather than inside it: Bun's HTML dev server cannot emit a
 CSS module's class-name mapping, so development now builds and serves `dist/`.
 It is its own pull request because it changes how the application is served and
 stands on its own — `design.md` records the decision. The scan that checks a
-component reads only names its module defines follows the step for the same
-reason, in a third.
+component reads only names its module defines was opened as a third, and merged
+into this step's pull request rather than behind it, so it ships here.
 
 `/zombies` in diff mode runs before each pull request, per the pre-PR sequence.
 Only step 8 introduces logic for it to find; the test tasks in steps 1–7 are
@@ -54,8 +54,11 @@ this proposal.
       names in the stylesheet, so a literal left behind matches nothing and the
       rule silently stops applying. Every step that moves a block owes this,
       not only this one
-- [x] 1.6 Confirm no rule was left behind and none duplicated: `app.css` shrinks
-      by exactly the lines the two modules gained, comments included
+- [x] 1.6 Confirm no rule was left behind and none duplicated. Not by counting
+      lines: the block splits across two modules, `app.module.css` and
+      `base.css`, and two rules become custom properties, so no equality holds.
+      Compare the multiset of declarations and of selectors before and after,
+      and account for every difference
 - [x] 1.7 Run the e2e suite and confirm the rendered page is unchanged — a
       mistake here is a blank stylesheet, which is loud
 

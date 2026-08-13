@@ -44,6 +44,10 @@ let listing = new Set<string>();
 function listed(): Set<string> {
 	const at = statSync(distDir, { bigint: true }).mtimeNs;
 	if (at !== listedAt) {
+		// `scanSync` does not follow symlinks unless asked to, measured against
+		// Bun 1.3.14, so a link planted in `dist/` is not listed and `Bun.file`
+		// never receives one. That default is what the containment above rests
+		// on, and `build.test.ts` pins it.
 		listing = new Set(new Bun.Glob("*").scanSync(distDir.pathname));
 		listedAt = at;
 	}

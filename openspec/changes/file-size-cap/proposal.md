@@ -96,8 +96,10 @@ implementing it has to stop enumerating a directory.
   request beside step 1: `scripts/dev.ts` and `dist-routes.ts`, because Bun's
   HTML dev server never defines a CSS module's class-name mapping
   (oven-sh/bun#18258) and development therefore builds and serves `dist/` — see
-  `design.md`; and `src/app/module-classes.test.ts`, which checks that a
-  component reads only names its module defines.
+  `design.md`. And `src/app/module-classes.test.ts` with `scripts/scan.ts`
+  behind it, which check that a component reads only names its module defines —
+  opened separately and merged into step 1's own pull request rather than
+  landing behind it.
 - Deleted: `src/app/styles/app.css`.
 - Modified: `index.html`, every `.tsx` that carries a `class`, `styles.css`,
   `base.css` (the bare `dialog` panel has no class to scope),
