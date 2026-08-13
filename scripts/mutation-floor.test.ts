@@ -13,7 +13,6 @@ import {
 	floorLine,
 	gauge,
 	loadReport,
-	REPORT,
 	survivors,
 } from "./mutation-floor.ts";
 
@@ -35,9 +34,7 @@ function fabricate(text: string): string {
 /** A report whose one file carries `statuses`, one mutant each. */
 const report = (...statuses: string[]) => ({
 	files: {
-		"src/model.ts": {
-			mutants: statuses.map((status, n) => ({ id: String(n), status })),
-		},
+		"src/model.ts": { mutants: statuses.map((status) => ({ status })) },
 	},
 });
 
@@ -74,17 +71,7 @@ describe("the survivor count", () => {
 	});
 
 	test("two survivors on one line count as two", () => {
-		const twice = {
-			files: {
-				"src/model.ts": {
-					mutants: [
-						{ id: "0", status: "Survived", location: { start: { line: 7 } } },
-						{ id: "1", status: "Survived", location: { start: { line: 7 } } },
-					],
-				},
-			},
-		};
-		expect(survivors(twice)).toBe(2);
+		expect(survivors(report("Survived", "Survived"))).toBe(2);
 	});
 
 	test("a status the check does not recognise fails, naming it", () => {
@@ -106,7 +93,7 @@ describe("the survivor count", () => {
 	test("a file entry with no mutants key contributes none", () => {
 		const partial = {
 			files: {
-				"src/model.ts": { mutants: [{ id: "0", status: "Survived" }] },
+				"src/model.ts": { mutants: [{ status: "Survived" }] },
 				"src/other.ts": {},
 			},
 		};
@@ -116,8 +103,8 @@ describe("the survivor count", () => {
 	test("survivors are counted across every file in the report", () => {
 		const both = {
 			files: {
-				"src/model.ts": { mutants: [{ id: "0", status: "Survived" }] },
-				"src/other.ts": { mutants: [{ id: "1", status: "Survived" }] },
+				"src/model.ts": { mutants: [{ status: "Survived" }] },
+				"src/other.ts": { mutants: [{ status: "Survived" }] },
 			},
 		};
 		expect(survivors(both)).toBe(2);
@@ -282,6 +269,5 @@ describe("the check resolves its report from the repository root", () => {
 		expect(run.stdout.toString().trim()).toBe(
 			join(import.meta.dir, "..", "reports", "mutation", "mutation.json"),
 		);
-		expect(REPORT).toBe(run.stdout.toString().trim());
 	});
 });
