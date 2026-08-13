@@ -41,6 +41,29 @@ single-source rule this file inherits.
   that file, and the floor moves only on a line carrying the reason it moved,
   in either direction.
 
+## The mutation floor
+
+- `scripts/mutation-floor.ts` counts the mutants surviving in `src/model.ts` —
+  those Stryker reports as `Survived` or `NoCoverage` — and compares that count
+  against a floor declared in its own source. A count above the floor fails, and
+  so does one below it: the floor is a measurement, not an upper bound.
+- The floor's line carries a trailing comment giving the reason it holds that
+  value, whichever direction it last moved. A floor with no reason fails.
+- An equivalent mutant — one no test could kill, because it does not change
+  behaviour — is admitted at the line it occupies, with
+  `// Stryker disable next-line <Mutator>[,<Mutator>…]: <reason>`. It then
+  reports as `Ignored`, drops out of the count, and the floor is lowered by a
+  visible line. There is no register of exempt mutants: the exemption and the
+  code it excuses sit together in the diff.
+- `all` in place of a mutator name is rejected, so is a comment without
+  `next-line`, and so is one with no reason after its colon.
+- **A line may be exempted only when every mutant its named mutator produces
+  there is equivalent.** The comment is addressed to a line and a mutator, not
+  to one mutant, so exempting a line whose mutator also produces a mutant the
+  tests kill retires that one too — buying a lower floor by discarding a
+  guarded behaviour. Where a line carries both, the survivor stays in the count
+  and the floor stays where it is.
+
 ## E2E (Playwright)
 
 The e2e suite exists to prove agentic changes didn't break real user paths.

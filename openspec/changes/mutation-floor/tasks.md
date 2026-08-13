@@ -148,20 +148,20 @@ hand to obtain the first measurement, and the CI job. This is the shape
       check [26]
 - [x] 2.4 Implement the disable-comment scan over `src/model.ts`; break each
       assertion above before it passes
-- [ ] 2.5 Take the survivors from the run in 1.5 one at a time: judge each
+- [x] 2.5 Take the survivors from the run in 1.5 one at a time: judge each
       equivalent or real, mark the equivalent ones with
       `// Stryker disable next-line <Mutator>: <reason>` in `src/model.ts`, and
       lower the floor by however many became `Ignored`
       (*An equivalent mutant is marked*). A survivor judged real stays in the
       count — writing its test is not this change
-- [ ] 2.6 Add the convention to `docs/testing.md`: what the floor counts, that
+- [x] 2.6 Add the convention to `docs/testing.md`: what the floor counts, that
       an equivalent mutant is admitted at its line with a named mutator and a
       reason, and that the floor is lowered by a visible line
-- [ ] 2.7 Cite this change's criteria from the tests written above if
+- [x] 2.7 Cite this change's criteria from the tests written above if
       `scripts/spec-coverage.test.ts` has landed by then; if it has not, note
       in the pull request that archiving this change will raise its floor by
       ten
-- [ ] 2.8 Grep the four sites that restate a claim like this one before calling
+- [x] 2.8 Grep the four sites that restate a claim like this one before calling
       the change done: this change's sibling artefacts, `openspec/specs/**`,
       `PLAN.md` and the README ownership map — searching the wording being
       replaced, not the wording replacing it. `PLAN.md`'s entry names
