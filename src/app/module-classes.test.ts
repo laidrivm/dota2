@@ -67,10 +67,14 @@ const OPENS_VALUE_WORDS = new Set([
 ]);
 
 /**
- * `source` with its comments and regex literals — and, when `strings` is set,
- * its string literals — replaced by spaces, so what is left at a given offset
- * is code and nothing else. Lengths and newlines are preserved, so the result
- * can be matched in place of the original.
+ * `source` with its comments — and, as asked, its string and regex literals —
+ * replaced by spaces, so what is left at a given offset is code and nothing
+ * else. Lengths and newlines are preserved, so a token found in the result can
+ * be read back out of the original at the same place.
+ *
+ * `regex` is off for CSS, which has no regex literals: a `/` there opens a
+ * path inside `url()`, and treating it as a literal would erase to the next
+ * one.
  *
  * A left-to-right scan carrying state, because deciding what a character means
  * without knowing what it sits inside is one mistake, and the shapes it takes
@@ -81,7 +85,10 @@ const OPENS_VALUE_WORDS = new Set([
  *
  * Not a parser: the only question asked of each character is what encloses it.
  */
-function blank(source: string, strings: boolean): string {
+function blank(
+	source: string,
+	{ strings, regex }: { strings: boolean; regex: boolean },
+): string {
 	const out = [...source];
 	const erase = (from: number, to: number) => {
 		for (let k = from; k < to && k < out.length; k++) {
@@ -176,6 +183,7 @@ function blank(source: string, strings: boolean): string {
 			erase(start, i);
 		} else if (
 			c === "/" &&
+			regex &&
 			(previous === "" ||
 				OPENS_VALUE.includes(previous) ||
 				OPENS_VALUE_WORDS.has(previous))
@@ -212,34 +220,59 @@ function blank(source: string, strings: boolean): string {
 	return out.join("");
 }
 
-/** The class selectors a module defines. */
+/** The class selectors a module defines. Strings go, because a quoted `.name`
+ * in a `content` or a `url()` names no class and would define one. */
 const defined = (css: string) =>
 	new Set(
-		[...blank(css, false).matchAll(/\.([A-Za-z][\w-]*)/g)].map(
-			(match) => match[1] as string,
-		),
+		[
+			...blank(css, { strings: true, regex: false }).matchAll(
+				/\.([A-Za-z][\w-]*)/g,
+			),
+		].map((match) => match[1] as string),
 	);
 
-/** Every `<binding>.<name>` a source file reads off an imported CSS module, as
- * `[module path relative to the repository root, name]`. */
+/**
+ * Every class a source file reads off an imported CSS module, as `[module path
+ * relative to the repository root, name]`.
+ *
+ * Both an import's specifier and a bracket read's name are strings, and the
+ * blanked source no longer carries either. Blanking preserves offsets, so each
+ * is taken back out of the source at the place the surrounding code was proved
+ * to be code — rather than matched in a source where a string spelling
+ * `import s from "./x.module.css"` would read as an import.
+ */
 function reads(path: string, source: string): [string, string][] {
 	const found: [string, string][] = [];
-	// The import's specifier is itself a string, so it is read from the source
-	// that still has them; the reads are read from the source that does not.
-	const spelled = blank(source, false);
-	const code = blank(source, true);
+	const code = blank(source, { strings: true, regex: true });
+	const after = (match: RegExpExecArray | RegExpMatchArray) =>
+		source.slice((match.index as number) + match[0].length);
 
-	for (const [, binding, specifier] of spelled.matchAll(
-		/import\s+(\w+)\s+from\s+["']([^"']+\.module\.css)["']/g,
-	)) {
-		const module = resolve(
-			dirname(join(root, path)),
-			specifier as string,
-		).slice(root.length + 1);
-		for (const [, name] of code.matchAll(
-			new RegExp(`(?<![\\w.])${binding}\\.(\\w+)`, "g"),
+	// `from` is not followed by `\s+` here: the specifier is blanked to spaces,
+	// so a greedy run would swallow it and `after` would point past the string.
+	for (const statement of code.matchAll(/\bimport\s+(\w+)\s+from\b/g)) {
+		const specifier = /^\s*(["'])([^"']+)\1/.exec(after(statement));
+		if (specifier === null) continue;
+		const target = specifier[2] as string;
+		if (!target.endsWith(".module.css")) continue;
+
+		const module = resolve(dirname(join(root, path)), target).slice(
+			root.length + 1,
+		);
+		// `binding` is `\w+` by construction, so it carries nothing to escape.
+		const binding = statement[1] as string;
+
+		for (const access of code.matchAll(
+			new RegExp(`(?<![\\w.])${binding}(?:\\.(\\w+)|\\[)`, "g"),
 		)) {
-			found.push([module, name as string]);
+			const dotted = access[1];
+			if (dotted !== undefined) {
+				found.push([module, dotted]);
+				continue;
+			}
+			// A bracket read is how a hyphenated class name is spelled, and
+			// `defined` accepts those, so leaving it unmatched leaves it unchecked.
+			const quoted = /^\s*(["'])([A-Za-z][\w-]*)\1\s*\]/.exec(after(access));
+			if (quoted !== null) found.push([module, quoted[2] as string]);
 		}
 	}
 
@@ -256,8 +289,28 @@ const readers = tracked
 	.map((path) => [path, reads(path, read(path))] as const)
 	.filter(([, names]) => names.length > 0);
 
-describe("what the scan counts as code", () => {
-	const kept = (source: string) => blank(source, true).includes("s.name");
+describe("the classes a module defines", () => {
+	test("a selector", () => {
+		expect(defined(".real { color: red; }")).toEqual(new Set(["real"]));
+	});
+
+	test("not one named inside a value, which selects nothing", () => {
+		expect(defined('.real { content: ".fake"; }')).toEqual(new Set(["real"]));
+	});
+});
+
+describe("the classes a file reads", () => {
+	// Placed beside a real module, so the resolved path is the real one.
+	const at = "src/app/board/probe.tsx";
+	const module = "src/app/board/hero-tile.module.css";
+	const imports = 'import s from "./hero-tile.module.css";\n';
+	const names = (body: string) => reads(at, imports + body).map(([, n]) => n);
+
+	test("resolves the module a read belongs to", () => {
+		expect(reads(at, `${imports}const a = s.name;`)).toEqual([
+			[module, "name"],
+		]);
+	});
 
 	// The fixtures are written as template literals so an interpolation can be
 	// escaped into them: a plain string spelling `${` reads as one nobody meant.
@@ -266,7 +319,13 @@ describe("what the scan counts as code", () => {
 		["a read inside a template expression", `const a = \`\${s.name}\`;`],
 		["a read inside a nested template", `const a = \`\${\`\${s.name}\`}\`;`],
 		["a read after an interpolation closes", `const a = \`\${1}\` + s.name;`],
-	])("keeps %s", (_, source) => expect(kept(source)).toBe(true));
+		["a bracket read", 'const a = s["name"];'],
+		["a division before a read", "const a = 1 / 2; const b = s.name;"],
+	])("finds %s", (_, body) => expect(names(body)).toEqual(["name"]));
+
+	test("finds a hyphenated name, which only a bracket read can spell", () => {
+		expect(names('const a = s["hero-name"];')).toEqual(["hero-name"]);
+	});
 
 	test.each([
 		["a string", "const a = 's.name';"],
@@ -277,12 +336,11 @@ describe("what the scan counts as code", () => {
 		["a regex after return", "function f() { return /s.name/; }"],
 		["a regex after an arrow", "const f = () => /s.name/;"],
 		["a regex after typeof", "const a = typeof /s.name/;"],
-	])("drops %s", (_, source) => expect(kept(source)).toBe(false));
+	])("ignores %s", (_, body) => expect(names(body)).toEqual([]));
 
-	test("a division is not a regex, so what follows it is still code", () => {
-		expect(blank("const a = 1 / 2; const b = s.name;", true)).toContain(
-			"s.name",
-		);
+	test("ignores an import spelled inside a string, which imports nothing", () => {
+		const source = `const a = "import s from './fake.module.css'";\nconst b = s.name;`;
+		expect(reads(at, source)).toEqual([]);
 	});
 });
 
