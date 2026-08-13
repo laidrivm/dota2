@@ -90,17 +90,22 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
   its entries means anything about.
 
 ### Open
-- [ ] **`mutation-floor`** — step 1 applied on `feat/mutation-floor-1`, step 2
-      outstanding. The first measurement is 267 mutants, 200 killed, 67
-      surviving, and 67 is the floor. Mutation
+- [ ] **`mutation-floor`** — both steps applied, ready to archive. Mutation
       testing over `src/model.ts` alone, its own CI job, floor set from the
       first measurement as an absolute survivor count and failing in both
-      directions. `src/types.ts` left out: it holds no branch and no
+      directions. The measurement is 267 mutants, 200 killed, 67 surviving, and
+      67 is the floor. `src/types.ts` left out: it holds no branch and no
       arithmetic, so its only mutants edit constants. The hand-rolled AST
       mutator is no longer the fallback — TypeScript 7's native port exposes a
       scanner and no parser, and the scanner mis-reads the template literals
       `model.ts` is full of, so Stryker's command runner is the tool. `/warm`
-      on it is the change's first task and can still end it.
+      returned **Keep**; the one advisory it surfaced reaches `qs` through
+      `typed-rest-client`'s exact pin and is held off by an `overrides` entry.
+      Stryker needs Node — `bunx` runs it on Bun when none is on `PATH` and the
+      instrumenter dies on `@babel/generator`'s CommonJS default — so
+      `mutation.yml` is the first job here carrying `setup-node`. Two of the
+      ten criteria have no test by an earlier decision, so archiving raises
+      `spec-coverage`'s floor by two.
 - [ ] **`file-size-cap`** — proposed, eight steps, not yet applied. The
       file-size cap half of "reverse two non-goals": 300 lines for `.ts`/`.tsx`,
       200 for `.css`, adopted with no exemption list because the same change

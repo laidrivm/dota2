@@ -4,8 +4,8 @@
 
 Which module may import which, enforced by the linter already wired into the
 pre-commit hook and `lint.yml`. One arrow, not a lattice: the prediction model
-must stay testable without the application around it, and it is the module a
-mutation-testing pass would target. Cycles are forbidden repository wide
+must stay testable without the application around it, and it is the module the
+mutation-testing pass targets. Cycles are forbidden repository wide
 because the rule costs one line and catches the wrong-way import the arrow
 does not cover.
 
