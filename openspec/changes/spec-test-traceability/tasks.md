@@ -76,7 +76,7 @@ Criteria are cited by their scenario heading; all fifteen belong to the
       given*) [23]
 - [x] 2.3 Implement the floor constant and the three comparisons in
       `scripts/spec-coverage.test.ts`; break each before it passes
-- [ ] 2.4 Measure the count over the tree and write it as the floor with its
+- [x] 2.4 Measure the count over the tree and write it as the floor with its
       reason on the line (*The repository as it stands*) [29]; a tree with no
       citations at all counts every criterion as uncited [2]
 - [ ] 2.5 Add the archive test: a change archived with every new criterion
