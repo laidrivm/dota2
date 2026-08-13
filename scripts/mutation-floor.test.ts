@@ -39,6 +39,7 @@ const report = (...statuses: string[]) => ({
 	},
 });
 
+// spec: mutation-floor/a-mutant-the-tests-assert-against
 describe("the survivor count", () => {
 	test("a report with no mutants fails rather than counting zero", () => {
 		expect(() => survivors(report())).toThrow(/no mutants/);
@@ -151,6 +152,7 @@ describe("the count against the floor", () => {
 		expect(gauge(12, 12, declared(12))).toEqual([]);
 	});
 
+	// spec: mutation-floor/a-branch-added-without-a-test
 	test("a count above the floor fails", () => {
 		expect(gauge(13, 12, declared(12))).not.toEqual([]);
 	});
@@ -174,6 +176,7 @@ describe("the count against the floor", () => {
 		expect(problem).toContain("write 11");
 	});
 
+	// spec: mutation-floor/a-survivor-newly-killed
 	test("a survivor newly killed fails until the floor is lowered", () => {
 		const before = report(...Array(5).fill("Survived"), "Killed");
 		expect(survivors(before)).toBe(5);
@@ -185,6 +188,7 @@ describe("the count against the floor", () => {
 	});
 });
 
+// spec: mutation-floor/the-floor-changed-with-no-reason-given
 describe("the floor changed with no reason given", () => {
 	test("a declaration with no trailing comment fails", () => {
 		expect(gauge(12, 12, declared(12, ""))).not.toEqual([]);
@@ -226,6 +230,7 @@ describe("the floor changed with no reason given", () => {
 		);
 	});
 
+	// spec: mutation-floor/the-repository-as-it-stands
 	test("this script's own floor line states a reason", () => {
 		expect(gauge(FLOOR, FLOOR, floorLine(source))).toEqual([]);
 	});
@@ -235,7 +240,9 @@ describe("the floor changed with no reason given", () => {
 const marked = (...lines: string[]) =>
 	lines.map((line) => `${line}\nconst x = 1;`).join("\n");
 
+// spec: mutation-floor/an-exemption-with-no-reason
 describe("an exemption with no reason", () => {
+	// spec: mutation-floor/an-equivalent-mutant-is-marked
 	test("a named mutator with a reason is accepted", () => {
 		expect(
 			exemptions(
@@ -284,6 +291,7 @@ describe("an exemption with no reason", () => {
 	});
 });
 
+// spec: mutation-floor/a-blanket-disable-comment
 describe("a blanket disable comment", () => {
 	test("`all` instead of a mutator fails", () => {
 		expect(exemptions(marked("// Stryker disable next-line all"))).not.toEqual(
