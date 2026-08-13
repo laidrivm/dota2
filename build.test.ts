@@ -70,6 +70,17 @@ describe("serving the build output", () => {
 		expect((await response?.text())?.length).toBeGreaterThan(0);
 	});
 
+	// The listing is cached, so what it costs is a stale answer after a rebuild.
+	test("follows an asset appearing and disappearing", async () => {
+		const probe = `${dist}/probe-listing.js`;
+
+		expect(distFile("/probe-listing.js")).toBeNull();
+		await Bun.write(probe, "//\n");
+		expect(distFile("/probe-listing.js")).not.toBeNull();
+		await Bun.file(probe).delete();
+		expect(distFile("/probe-listing.js")).toBeNull();
+	});
+
 	// The listing is the whole guard: a name it does not carry is not a file.
 	// `/snapshot.json` is the sharp case — the build copies one into `dist`, and
 	// serving it from there would drop the `no-cache` its own route carries.
