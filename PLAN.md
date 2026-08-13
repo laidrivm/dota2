@@ -136,7 +136,10 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       dark. The fix is to reference the tokens; the shortened swatch labels are
       hand-authored, so the pages cannot simply be regenerated.
 - [ ] **The e2e backlog** — the ~25 **(e2e)** bullets in `draft-board`'s and
-      `hero-picker`'s archived task lists.
+      `hero-picker`'s archived task lists, plus one this file owns because no
+      task list does: at 720px the board's one-column rules now live in three
+      modules, and nothing checks that each landed in the module whose
+      selectors it names. A rule in the wrong one matches nothing, silently.
 - [ ] **Decide whether MCP earns its place in the review.** After four pull
       requests under `knowledge_base.mcp.usage: "enabled"`, ask whether any
       finding of the API-existence class actually appeared. Silence answers
