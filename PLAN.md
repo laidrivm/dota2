@@ -81,7 +81,7 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
   three touched no file under `src/`, this one among them.
 - **`spec-test-traceability`** — PRs #78 and #79,
   `archive/2026-08-13-spec-test-traceability`; capability spec at
-  `openspec/specs/spec-test-traceability/`. The floor stands at 380 of 395
+  `openspec/specs/spec-test-traceability/`. The floor stands at 382 of 406
   criteria, and it moves only on a line carrying the reason it moved.
 - **`mutation-floor`** — PRs #81 and #82,
   `archive/2026-08-13-mutation-floor`; capability spec at

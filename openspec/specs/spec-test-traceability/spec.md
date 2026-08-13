@@ -141,7 +141,7 @@ meaningless upper bound.
 The floor's line SHALL carry a trailing comment holding at least one
 non-whitespace character after the marker, and the check SHALL fail when it does
 not — `const FLOOR = 380; //` states no reason and SHALL NOT pass. That is the whole exemption mechanism: a criterion no runtime can
-assert — 86 of the 380 are discharged by a person, not a process — is
+assert — 88 of the 382 are discharged by a person, not a process — is
 admitted by raising the floor with a reason a reviewer reads, rather than by a
 register of its own listing them one by one.
 
