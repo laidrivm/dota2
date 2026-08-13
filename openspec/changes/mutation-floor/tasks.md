@@ -131,22 +131,22 @@ hand to obtain the first measurement, and the CI job. This is the shape
 
 ## 2. Admitting a survivor
 
-- [ ] 2.1 Write the disable-comment tests first, all failing:
+- [x] 2.1 Write the disable-comment tests first, all failing:
       `// Stryker disable next-line all` fails because no mutator is named [21]
       (*A blanket disable comment*), a file-scoped
       `// Stryker disable EqualityOperator` without `next-line` fails because it
       silences every line below it [22], a named mutator with nothing after the
       colon fails [23] and one with no colon at all fails [24] — both
       *An exemption with no reason*
-- [ ] 2.2 Write the accepting tests: a single named mutator with a reason
+- [x] 2.2 Write the accepting tests: a single named mutator with a reason
       passes, and so does a comma-separated list of named mutators with one
       reason — one line can carry two mutants equivalent for the same reason,
       and a scan that rejected the list would push the author towards `all`
-- [ ] 2.3 Write the scanner's negative tests: `// Stryker disable` inside a
+- [x] 2.3 Write the scanner's negative tests: `// Stryker disable` inside a
       string literal or a block comment is not a disable comment [25], and a
       disable comment in a file other than `src/model.ts` does not fail the
       check [26]
-- [ ] 2.4 Implement the disable-comment scan over `src/model.ts`; break each
+- [x] 2.4 Implement the disable-comment scan over `src/model.ts`; break each
       assertion above before it passes
 - [ ] 2.5 Take the survivors from the run in 1.5 one at a time: judge each
       equivalent or real, mark the equivalent ones with

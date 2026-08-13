@@ -142,23 +142,84 @@ export function gauge(
 }
 
 /**
- * Resolved from this file rather than from the working directory, so the check
- * reads the same report whichever directory it is run from.
+ * A line-leading `// Stryker disable` comment. Code before it on the line means
+ * it is not one, which is what keeps a single-line string literal out without
+ * the scanner having to understand strings.
  */
-export const REPORT = join(
-	import.meta.dir,
-	"..",
-	"reports",
-	"mutation",
-	"mutation.json",
-);
+const DISABLE = /^\s*\/\/\s*Stryker disable\b(.*)$/;
+
+/**
+ * The one accepted tail: `next-line <Mutator>[,<Mutator>…]: <reason>`. A list
+ * is accepted because one line can carry two mutants equivalent for the same
+ * reason, and rejecting it would push the author towards `all`.
+ */
+const ADMITTED = /^\s+next-line\s+([A-Za-z]+(?:\s*,\s*[A-Za-z]+)*)\s*:(.*)$/;
+
+/**
+ * Every disable comment in `source` that is not the accepted form. Stryker
+ * silently ignores a malformed one, so an author who mistypes it believes a
+ * mutant is admitted while it still counts — this is what turns that into a
+ * failure.
+ *
+ * `// Stryker restore` and an ignore-plugin are not checked for: a `restore`
+ * with no matching `disable` changes nothing, and a plugin is a new file and a
+ * new dependency, both of which a reviewer sees.
+ */
+export function exemptions(source: string): string[] {
+	const lines = source.split("\n");
+	// Whether each line begins inside a `/* … */` block, so a disable comment
+	// in commented-out code is not read as a live one. String literals are
+	// stripped first: `const opener = "/*"` opens no comment, and treating it
+	// as one would blind the scan to every comment below it.
+	let open = false;
+	const enclosed = lines.map((line) => {
+		const was = open;
+		const bare = line.replace(/'[^']*'|"[^"]*"|`[^`]*`/g, "");
+		for (const token of bare.match(/\/\*|\*\//g) ?? []) open = token === "/*";
+		return was;
+	});
+
+	const problems: string[] = [];
+	lines.forEach((line, index) => {
+		if (enclosed[index]) return;
+		const marker = DISABLE.exec(line);
+		if (!marker) return;
+		const at = `${MODEL_NAME}:${index + 1}: ${line.trim()}`;
+		const tail = ADMITTED.exec(marker[1] ?? "");
+		if (!tail)
+			problems.push(
+				`${at} — write \`// Stryker disable next-line <Mutator>: <reason>\``,
+			);
+		else if (tail[1]?.split(",").some((name) => name.trim() === "all"))
+			problems.push(
+				`${at} — names \`all\`, which would also silence a mutant added to that line later`,
+			);
+		else if (!tail[2]?.trim()) problems.push(`${at} — states no reason`);
+	});
+	return problems;
+}
+
+const root = join(import.meta.dir, "..");
+
+/**
+ * Resolved from this file rather than from the working directory, so the check
+ * reads the same report and the same model whichever directory it runs from.
+ */
+export const REPORT = join(root, "reports", "mutation", "mutation.json");
+
+/** The one file Stryker mutates, and so the only one the scan is scoped to. */
+const MODEL_NAME = "src/model.ts";
+export const MODEL = join(root, MODEL_NAME);
 
 if (import.meta.main) {
-	const problems = gauge(
-		survivors(loadReport(REPORT)),
-		FLOOR,
-		floorLine(readFileSync(import.meta.path, "utf8")),
-	);
+	const problems = [
+		...gauge(
+			survivors(loadReport(REPORT)),
+			FLOOR,
+			floorLine(readFileSync(import.meta.path, "utf8")),
+		),
+		...exemptions(readFileSync(MODEL, "utf8")),
+	];
 	for (const problem of problems) console.error(problem);
 	if (problems.length) process.exit(1);
 }
