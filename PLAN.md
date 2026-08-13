@@ -90,7 +90,9 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
   its entries means anything about.
 
 ### Open
-- [ ] **`mutation-floor`** — proposed, two steps, not yet applied. Mutation
+- [ ] **`mutation-floor`** — step 1 applied on `feat/mutation-floor-1`, step 2
+      outstanding. The first measurement is 267 mutants, 200 killed, 67
+      surviving, and 67 is the floor. Mutation
       testing over `src/model.ts` alone, its own CI job, floor set from the
       first measurement as an absolute survivor count and failing in both
       directions. `src/types.ts` left out: it holds no branch and no
