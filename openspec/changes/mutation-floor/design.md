@@ -257,6 +257,22 @@ not for the developer. `spec-inbox` is excluded on its own terms: a sandbox copy
 of private product specs is worth not making. `node_modules`, `.git`, `/reports`
 and `.stryker-tmp` are ignored by Stryker unconditionally and need no entry.
 
+### An override for a transitive advisory the tool pins shut
+
+`package.json` gains `overrides: { "qs": "6.15.3" }`. Stryker reaches `qs`
+through `typed-rest-client@2.3.1`, which pins it at exactly `6.15.1` — inside
+GHSA-q8mj-m7cp-5q26's `>= 6.11.1 <= 6.15.1` range, fixed in 6.15.2. An exact
+pin one level down is not something resolution can climb past, so without the
+override `bun audit` exits 1 and `audit.yml`, which triggers on any pull
+request touching `package.json` or `bun.lock`, fails on this very change.
+
+The override is the narrowest instrument available: it names one package and
+one version, leaves the rest of Stryker's 26-dependency subtree alone, and
+reverts by deleting two lines once `typed-rest-client` moves. Silencing the
+audit job instead was not on the table — `CLAUDE.md` forbids clearing a gate by
+editing its configuration. 6.15.3 was published 2026-06-24, carries no install
+script and comes from `ljharb/qs`, the canonical repository.
+
 ### Sandbox and report directories
 
 Stryker copies the project into `.stryker-tmp` (its `tempDirName` default) and

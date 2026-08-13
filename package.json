@@ -29,5 +29,8 @@
 	},
 	"dependencies": {
 		"preact": "10.29.8"
+	},
+	"overrides": {
+		"qs": "6.15.3"
 	}
 }
