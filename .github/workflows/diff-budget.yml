@@ -1,7 +1,12 @@
 name: Diff budget
 
 on:
+  # `edited` alongside the defaults, because the override this gate honours
+  # lives in the pull request body: without it a marker added after the last
+  # push is never read, and the check reports a verdict on a body that is no
+  # longer there.
   pull_request:
+    types: [opened, synchronize, reopened, edited]
 
 permissions:
   contents: read
