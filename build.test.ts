@@ -101,6 +101,8 @@ describe("serving the build output", () => {
 		"/..%2f..%2fpackage.json",
 		"/snapshot.json",
 		"/fonts/fonts.css",
+		// Nested and not a route's: the listing stops where its cache key does.
+		"/fonts/LICENSE.txt",
 	])("refuses %s", (path) => {
 		expect(distFile(path)).toBeNull();
 	});

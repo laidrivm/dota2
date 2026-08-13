@@ -181,7 +181,8 @@ Kept because no single file in the tree is where a reader would look for them.
   and the bundle contract all take renamed keys on import.
 - **Bun's native bundler, no Vite** — `bun run build` is `bun build
   ./index.html --outdir=dist` plus the copy steps; `bun run dev` is
-  `scripts/dev.ts`, which runs the same bundle, watches it and serves it.
+  `scripts/dev.ts`, which runs the same build unminified, watches it and
+  serves it.
   Bun's HTML dev server is not used: it never defines a CSS module's
   class-name mapping (oven-sh/bun#18258).
 - **Dependabot, not Renovate** — first-party, so no third-party GitHub App
