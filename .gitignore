@@ -9,6 +9,10 @@ test-results/
 playwright-report/
 blob-report/
 
+# Stryker's sandbox (a full copy of the working tree) and its reports
+.stryker-tmp/
+reports/
+
 # Private product specs in a public repo
 spec-inbox/*
 !spec-inbox/README.md

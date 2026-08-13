@@ -69,6 +69,12 @@ downloads in the week of 2026-08-02, no install scripts, `engines.node >= 20`.
 `/warm` still runs before the install — this is the input to it, not a
 substitute for it.
 
+The `/warm` **Keep** verdict was re-confirmed on 2026-08-13 against 9.6.1, the
+version installed: the registry still resolves `latest` to 9.6.1, so every
+figure above stands, and `@stryker-mutator/util` is pinned at 9.6.1 in the
+lockfile, out of CVE-2024-57085's `< 8.7.1` range. Weekly downloads for
+2026-08-03→09 were 1 899 116.
+
 ### The command runner, in preference to the Bun runner plugins that exist
 
 Stryker's own runner plugins cover Jest, Mocha, Karma, Jasmine, Vitest, Tap and
@@ -203,17 +209,53 @@ as an argument and resolves nothing, so all three are testable without a
 filesystem. Only the CLI entry point resolves paths, and it resolves them from
 the repository root.
 
-Stryker declares `engines.node >= 20`, so the job may need `setup-node`
-alongside `setup-bun`. Whether `bunx --no-install stryker run` works without
-Node is a genuine unknown and is resolved by trying it in the first task, not
-by guessing here. `--no-install` is required, not incidental: a bare `bunx`
-fetches on a cache miss and so bypasses the release-age gate, which is the
-`playwright-cli` rule in `CLAUDE.md` applied to a second tool.
+Stryker declares `engines.node >= 20`, and the job does need `setup-node`
+alongside `setup-bun` — measured, not assumed. With no `node` on `PATH`, `bunx`
+falls back to running `bin/stryker.js` on Bun instead of honouring its
+`#!/usr/bin/env node` shebang, and `@stryker-mutator/instrumenter` then throws
+`generator is not a function` constructing its first mutant, because
+`@babel/generator`'s CommonJS default resolves differently under Bun. With
+`node` present the shebang is honoured and the run completes. `--no-install` is
+required, not incidental: a bare `bunx` fetches on a cache miss and so bypasses
+the release-age gate, which is the `playwright-cli` rule in `CLAUDE.md` applied
+to a second tool.
 
 Deleting `reports/mutation/` is the job's first step, because it is where
 staleness can actually be prevented. A check that only reads a file cannot tell
 last run's report from this one's; the invoker can guarantee there is no last
 run's report at all.
+
+### Two settings whose reason is not visible at the setting
+
+`stryker.config.json` carries two entries that look like noise and are not.
+JSON has no comments, so the reason lives here; the alternative — a
+`stryker.config.js` that could hold them inline — was declined to keep the
+configuration data rather than code.
+
+**`tsconfigFile` points at `tsconfig.stryker-none.json`, a file the project does
+not contain.** Stryker's `TSConfigPreprocessor` is the only place in the whole
+package that imports `typescript`, and it calls `ts.parseConfigFileTextToJson`,
+which TypeScript 7.0.2 does not expose — the same missing compiler API that
+ruled out a mutator of our own, arriving a second time from inside the tool
+that replaced it. The preprocessor exists to rewrite `extends`, `references`,
+`include`, `exclude` and `files` when the sandbox moves them out of reach;
+`tsconfig.json` here has none of the five, so its entire work would be to parse
+the file and write it back unchanged. It skips itself when the configured root
+tsconfig is not among the project's files, which is what naming an absent one
+buys. The sandbox still receives the real `tsconfig.json` untouched — the
+narrower-looking alternative, adding `tsconfig.json` to `ignorePatterns`, would
+skip the preprocessor by removing the file from the sandbox instead, and a
+later `paths` alias or JSX in the model's tests would then run against a
+different configuration than a developer sees.
+
+**`ignorePatterns` holds `.claude` and `spec-inbox`.** The sandbox is a copy of
+the working tree, and `.claude/skills/*` are symlinks into a skills directory
+outside the repository; copying them fails `ENOTSUP` and takes the run with it.
+Both paths are gitignored, so this never reaches CI — it breaks local runs only,
+which is the harder failure to diagnose, since the tool works for the job and
+not for the developer. `spec-inbox` is excluded on its own terms: a sandbox copy
+of private product specs is worth not making. `node_modules`, `.git`, `/reports`
+and `.stryker-tmp` are ignored by Stryker unconditionally and need no entry.
 
 ### Sandbox and report directories
 
