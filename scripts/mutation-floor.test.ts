@@ -7,8 +7,9 @@ import {
 	writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 import {
+	exemptions,
 	FLOOR,
 	floorLine,
 	gauge,
@@ -230,20 +231,134 @@ describe("the floor changed with no reason given", () => {
 	});
 });
 
+/** `src/model.ts` as the scan sees it: `lines` with the code they annotate. */
+const marked = (...lines: string[]) =>
+	lines.map((line) => `${line}\nconst x = 1;`).join("\n");
+
+describe("an exemption with no reason", () => {
+	test("a named mutator with a reason is accepted", () => {
+		expect(
+			exemptions(
+				marked(
+					"// Stryker disable next-line EqualityOperator: bound is <=, = is a typo",
+				),
+			),
+		).toEqual([]);
+	});
+
+	test("a comma-separated list of mutators shares one reason", () => {
+		// One line can carry two mutants equivalent for the same reason, and
+		// rejecting the list would push the author towards `all`.
+		expect(
+			exemptions(
+				marked(
+					"// Stryker disable next-line EqualityOperator,ArithmeticOperator: both re-derive the same total",
+				),
+			),
+		).toEqual([]);
+	});
+
+	test("a mutator named with nothing after the colon fails", () => {
+		expect(
+			exemptions(marked("// Stryker disable next-line EqualityOperator:")),
+		).not.toEqual([]);
+	});
+
+	test("a reason of whitespace alone fails", () => {
+		expect(
+			exemptions(marked("// Stryker disable next-line EqualityOperator:   ")),
+		).not.toEqual([]);
+	});
+
+	test("a mutator named with no colon at all fails", () => {
+		expect(
+			exemptions(marked("// Stryker disable next-line EqualityOperator")),
+		).not.toEqual([]);
+	});
+
+	test("the failure names the line it sits on", () => {
+		const [problem] = exemptions(
+			`const a = 1;\nconst b = 2;\n// Stryker disable next-line EqualityOperator\nconst c = 3;\n`,
+		);
+		expect(problem).toContain("3");
+	});
+});
+
+describe("a blanket disable comment", () => {
+	test("`all` instead of a mutator fails", () => {
+		expect(exemptions(marked("// Stryker disable next-line all"))).not.toEqual(
+			[],
+		);
+	});
+
+	test("`all` with a reason still fails", () => {
+		// The reason does not redeem it: `all` would also silence a mutant
+		// added to that line later that nobody has judged.
+		expect(
+			exemptions(
+				marked(
+					"// Stryker disable next-line all: the whole line is a constant",
+				),
+			),
+		).not.toEqual([]);
+	});
+
+	test("a disable without next-line fails, whatever it names", () => {
+		// Its scope runs to the end of the file or to a matching restore.
+		expect(
+			exemptions(
+				marked("// Stryker disable EqualityOperator: bound is deliberate"),
+			),
+		).not.toEqual([]);
+	});
+});
+
+describe("what is not a disable comment", () => {
+	test("one inside a string literal is not one", () => {
+		expect(
+			exemptions(
+				`const s = "// Stryker disable next-line all";\nconst x = 1;\n`,
+			),
+		).toEqual([]);
+	});
+
+	test("one inside a block comment is not one", () => {
+		expect(
+			exemptions(`/*\n// Stryker disable next-line all\n*/\nconst x = 1;\n`),
+		).toEqual([]);
+	});
+
+	test("one on a line whose block comment opened earlier is not one", () => {
+		expect(
+			exemptions(`const opener = "/*";\n// Stryker disable next-line all\n`),
+		).not.toEqual([]);
+	});
+});
+
 describe("the command line entry point", () => {
-	const cli = (report: string | null) => {
+	const cli = (
+		report: string | null,
+		files: Record<string, string> = { "src/model.ts": "const x = 1;\n" },
+	) => {
 		const dir = mkdtempSync(join(tmpdir(), "mutation-floor-cli-"));
 		made.push(dir);
-		// A copy of the check beside a `reports/` of our own, so the CLI
-		// resolves this report rather than the repository's real one.
+		// A copy of the check beside a tree of our own, so it resolves this
+		// report and this model rather than the repository's real ones.
 		mkdirSync(join(dir, "scripts"), { recursive: true });
 		writeFileSync(join(dir, "scripts", "mutation-floor.ts"), source);
+		for (const [path, text] of Object.entries(files)) {
+			mkdirSync(join(dir, dirname(path)), { recursive: true });
+			writeFileSync(join(dir, path), text);
+		}
 		if (report !== null) {
 			mkdirSync(join(dir, "reports", "mutation"), { recursive: true });
 			writeFileSync(join(dir, "reports", "mutation", "mutation.json"), report);
 		}
 		return Bun.spawnSync(["bun", join(dir, "scripts", "mutation-floor.ts")]);
 	};
+
+	const holding = () =>
+		JSON.stringify(report(...Array(FLOOR).fill("Survived"), "Killed"));
 
 	test("it exits 0 and says nothing when the count equals the floor", () => {
 		const run = cli(
@@ -264,6 +379,30 @@ describe("the command line entry point", () => {
 
 	test("it fails when the report is absent rather than passing", () => {
 		const run = cli(null);
+		expect(run.exitCode).not.toBe(0);
+	});
+
+	test("a malformed exemption in the model fails the check", () => {
+		const run = cli(holding(), {
+			"src/model.ts": "// Stryker disable next-line all\nconst x = 1;\n",
+		});
+		expect(run.stderr.toString()).toContain("all");
+		expect(run.exitCode).toBe(1);
+	});
+
+	test("the same comment in another file does not fail it", () => {
+		// The scan is scoped to the one file that is mutated; elsewhere the
+		// comment means nothing to Stryker and so means nothing here.
+		const run = cli(holding(), {
+			"src/model.ts": "const x = 1;\n",
+			"src/app/session.ts": "// Stryker disable next-line all\nconst y = 2;\n",
+		});
+		expect(run.stderr.toString()).toBe("");
+		expect(run.exitCode).toBe(0);
+	});
+
+	test("it fails when the model is absent rather than passing", () => {
+		const run = cli(holding(), {});
 		expect(run.exitCode).not.toBe(0);
 	});
 });
