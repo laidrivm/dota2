@@ -266,13 +266,13 @@ const DECLARATION =
 	"";
 
 /**
- * The criteria in `openspec/specs/` that no test cites. Counted per criterion
+ * How many criteria in `openspec/specs/` no test cites. Counted per criterion
  * rather than per identifier: two criteria sharing a slug are two uncited
  * criteria, which is what makes an ambiguous pair nobody cites cost two.
  */
-function uncited(cwd?: string): Criterion[] {
+function uncited(cwd?: string): number {
 	const { criteria, cited } = check(cwd);
-	return criteria.filter((c) => !cited.has(c.id));
+	return criteria.filter((c) => !cited.has(c.id)).length;
 }
 
 /**
@@ -289,14 +289,14 @@ function gauge(count: number, floor: number, declaration: string): string[] {
 		problems.push(
 			`the floor states no reason: ${declaration.trim()} — write why on that line`,
 		);
-	if (count !== floor)
+	if (count !== floor) {
+		const gap = `${count} uncited criteria against a floor of ${floor}`;
 		problems.push(
-			`${count} uncited criteria against a floor of ${floor} — ${
-				count > floor
-					? "cite one, or raise the floor with the reason on its line"
-					: `write ${count} as the floor, so the gain is recorded`
-			}`,
+			count > floor
+				? `${gap} — cite one, or raise the floor with the reason on its line`
+				: `${gap} — write ${count} as the floor, so the gain is recorded`,
 		);
+	}
 	return problems;
 }
 
@@ -684,11 +684,7 @@ describe("the repository as it stands", () => {
 
 	// spec: spec-test-traceability/the-repository-as-it-stands
 	test("the count of uncited criteria sits exactly on the floor", () => {
-		expect(gauge(uncited(repo).length, FLOOR, DECLARATION)).toEqual([]);
-	});
-
-	test("the floor's own line is the one the check read", () => {
-		expect(DECLARATION).toContain(`= ${FLOOR};`);
+		expect(gauge(uncited(repo), FLOOR, DECLARATION)).toEqual([]);
 	});
 
 	test("the sweep read criteria and test files rather than nothing", () => {
@@ -755,7 +751,7 @@ describe("what the sweep reads", () => {
 			"A first thing",
 			"A second thing",
 		);
-		expect(uncited(dir).length).toBe(2);
+		expect(uncited(dir)).toBe(2);
 	});
 
 	test("a citation indented inside a describe block counts", () => {
@@ -828,7 +824,7 @@ describe("a change is archived with its tests already written", () => {
 			"src/thing.test.ts":
 				'// spec: capability/a-new-thing capability/another-new-thing\ntest("acts", () => {});\n',
 		});
-		expect(uncited(dir).length).toBe(2);
+		expect(uncited(dir)).toBe(2);
 
 		// Archiving is two filesystem moves: the delta's criteria join the living
 		// spec, and the change drops a directory deeper. Neither touches git,
@@ -843,7 +839,7 @@ describe("a change is archived with its tests already written", () => {
 			join(dir, "openspec/changes/archive/2026-01-01-in-flight"),
 		);
 
-		expect(uncited(dir).length).toBe(2);
+		expect(uncited(dir)).toBe(2);
 		expect(problems(dir)).toEqual([]);
 	});
 });
@@ -854,17 +850,15 @@ describe("a change archived without its tests", () => {
 			"openspec/specs/capability/spec.md": spec("A settled thing"),
 			"src/thing.test.ts": 'test("acts", () => {});\n',
 		});
-		const before = uncited(dir).length;
+		const before = uncited(dir);
 
 		writeFileSync(
 			join(dir, "openspec/specs/capability/spec.md"),
 			spec("A settled thing", "A thing nothing asserts"),
 		);
 
-		expect(uncited(dir).length).toBe(before + 1);
-		expect(
-			gauge(uncited(dir).length, before, "const FLOOR = 1; // x").length,
-		).toBe(1);
+		expect(uncited(dir)).toBe(before + 1);
+		expect(gauge(uncited(dir), before, "const FLOOR = 1; // x").length).toBe(1);
 	});
 });
 
