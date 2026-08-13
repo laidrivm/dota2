@@ -116,7 +116,10 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       nothing is passing wrongly yet. Either teach the scanner that `/` in
       expression position starts one, or assert that the file contains none —
       the second is a line and fails loudly, the first ends the family of bugs
-      that produced five holes in one session.
+      that produced five holes in one session. The first now has a worked
+      implementation to copy: `src/app/module-classes.test.ts` treats a `/`
+      whose last non-space predecessor opens a value as a regex literal, and
+      stops it at a newline rather than at end of input.
 - [ ] **The rule of two** — the other half, still outstanding and **not yet
       written anywhere**. Lift a helper on the second consumer, never the
       first. `reviewable-diff-gates` prescribed its vehicle when it deferred it
