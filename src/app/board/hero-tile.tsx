@@ -1,7 +1,22 @@
 import type { HeroEntry } from "../../types.ts";
+import { cx } from "../cx.ts";
 import { heroAbbr, type Ink, tileInk } from "./format.ts";
+import s from "./hero-tile.module.css";
 
 type TileSize = "lg" | "md" | "sm";
+
+/** The bundler owns the class names, so a variant is looked up rather than
+ * spelled out from the prop — a name assembled here would match nothing. */
+const SIZE: Record<TileSize, string | undefined> = {
+	lg: s.tileLg,
+	md: s.tileMd,
+	sm: s.tileSm,
+};
+
+const INK: Record<Ink, string | undefined> = {
+	dark: s.tileInkDark,
+	light: s.tileInkLight,
+};
 
 /**
  * The palette lives in `tokens/colors.css` and is never restated here: the
@@ -47,7 +62,7 @@ export function HeroTile({
 
 	return (
 		<span
-			class={`tile tile-${size} tile-ink-${inkFor(slug)}`}
+			class={cx(s.tile, SIZE[size], INK[inkFor(slug)])}
 			style={{ background: `var(--hero-${slug}, var(--hero-fallback))` }}
 			{...(label === undefined
 				? { "aria-hidden": true }

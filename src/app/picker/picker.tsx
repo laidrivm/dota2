@@ -9,8 +9,10 @@
 import { useEffect, useRef, useState } from "preact/hooks";
 import type { HeroEntry, HeroId, SnapshotBundle } from "../../types.ts";
 import { HeroTile } from "../board/hero-tile.tsx";
+import { cx } from "../cx.ts";
 import type { PickTarget, Used } from "../session.ts";
 import { ROLE_UI } from "../session-controls.tsx";
+import s from "./picker.module.css";
 import { matchHeroes } from "./search.ts";
 
 /** What the header says we are picking for. */
@@ -123,19 +125,19 @@ export function Picker({
 
 	return (
 		<dialog
-			class="picker"
+			class={s.picker}
 			ref={dialog}
 			aria-labelledby="picker-title"
 			// `close` covers every way out — `Esc`, the ✕, the backdrop, a pick.
 			onClose={onClose}
 		>
-			<div class="picker-head">
-				<h2 class="picker-title" id="picker-title">
+			<div class={s.pickerHead}>
+				<h2 class={s.pickerTitle} id="picker-title">
 					Pick for: {targetLabel(target)}
 				</h2>
 				<button
 					type="button"
-					class="picker-close"
+					class={s.pickerClose}
 					aria-label="Close the picker"
 					onClick={() => dialog.current?.close()}
 				>
@@ -143,7 +145,7 @@ export function Picker({
 				</button>
 			</div>
 
-			<label class="picker-search">
+			<label class={s.pickerSearch}>
 				<span class="visually-hidden">Search heroes</span>
 				<input
 					ref={search}
@@ -166,18 +168,21 @@ export function Picker({
 			</label>
 
 			{matches.length === 0 ? (
-				<p class="picker-empty" role="status">
+				<p class={s.pickerEmpty} role="status">
 					No hero matches “{query.trim()}”
 				</p>
 			) : (
-				<div class="picker-grid" ref={grid}>
+				<div class={s.pickerGrid} ref={grid}>
 					{matches.map((hero) => {
 						const used = usedOf(hero.id);
 						return (
 							<button
 								type="button"
 								key={hero.id}
-								class={`picker-tile${hero.id === first?.id ? " picker-first" : ""}`}
+								class={cx(
+									s.pickerTile,
+									hero.id === first?.id ? s.pickerFirst : undefined,
+								)}
 								// Taken heroes stay focusable so the arrow keys keep the grid's
 								// geometry; `aria-disabled` is what tells everyone they are out.
 								aria-disabled={used !== null}
@@ -185,15 +190,15 @@ export function Picker({
 								onClick={() => choose(hero)}
 							>
 								<HeroTile hero={hero} size="lg" />
-								<span class="picker-name">{hero.name}</span>
-								{used !== null && <span class="picker-used">{used}</span>}
+								<span class={s.pickerName}>{hero.name}</span>
+								{used !== null && <span class={s.pickerUsed}>{used}</span>}
 							</button>
 						);
 					})}
 				</div>
 			)}
 
-			<p class="picker-hints">
+			<p class={s.pickerHints}>
 				<span>type to filter</span>
 				<span>Enter — pick first</span>
 				<span>← ↑ ↓ → — move</span>

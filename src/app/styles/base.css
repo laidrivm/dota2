@@ -18,3 +18,17 @@ body {
 	outline: 2px solid var(--accent);
 	outline-offset: 2px;
 }
+
+/* The picker and the reset dialog are both bare <dialog>s, so the panel they
+   share has no class to scope and stays here rather than in either module. */
+dialog {
+	border: 1px solid var(--border-2);
+	border-radius: var(--r-panel);
+	background: var(--bg-1);
+	color: var(--text-1);
+	box-shadow: var(--shadow-modal);
+}
+
+dialog::backdrop {
+	background: var(--backdrop);
+}

@@ -25,6 +25,9 @@ import {
 	scoreTone,
 	topRoles,
 } from "./format.ts";
+// The re-pick marker is the tile's other half: it stands in for a hero the
+// snapshot dropped, so its rule lives beside the tile it replaces.
+import s from "./hero-tile.module.css";
 import { HeroTile } from "./hero-tile.tsx";
 
 type Apply = (action: Action) => void;
@@ -107,7 +110,7 @@ function RemoveButton({
 /** A hero the loaded snapshot no longer carries (screens-spec §6.4): the entry
  * stays put, says so, and waits to be replaced. */
 const RepickBadge = ({ hero }: { hero: HeroEntry | undefined }) =>
-	hero === undefined ? <span class="repick-badge">re-pick</span> : null;
+	hero === undefined ? <span class={s.repickBadge}>re-pick</span> : null;
 
 const ThinBadge = ({ hero }: { hero: HeroEntry | undefined }) =>
 	hero?.sufficient === false ? (

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "preact/hooks";
 import { computeModel } from "../model.ts";
 import type { HeroId, SnapshotBundle } from "../types.ts";
+import s from "./app.module.css";
 import { Board } from "./board/board.tsx";
 import { Header } from "./header.tsx";
 import { Picker } from "./picker/picker.tsx";
@@ -213,7 +214,7 @@ function ResetDialog({ onAnswer }: { onAnswer: (confirmed: boolean) => void }) {
 
 	return (
 		<dialog
-			class="confirm"
+			class={s.confirm}
 			ref={dialog}
 			aria-labelledby="reset-title"
 			onClose={() => onAnswer(dialog.current?.returnValue === "reset")}
@@ -221,13 +222,13 @@ function ResetDialog({ onAnswer }: { onAnswer: (confirmed: boolean) => void }) {
 			<form method="dialog">
 				<h2 id="reset-title">Reset draft?</h2>
 				<p>Bans and all picks will be cleared. Side and role stay.</p>
-				<div class="confirm-actions">
+				<div class={s.confirmActions}>
 					<button type="submit" value="cancel">
 						Cancel
 					</button>
 					{/* `showModal()` honours `autofocus`, which is what makes `Enter`
 					    confirm — without it the first control, Cancel, would answer. */}
-					<button type="submit" value="reset" class="danger" autofocus>
+					<button type="submit" value="reset" class={s.danger} autofocus>
 						Reset
 					</button>
 				</div>
