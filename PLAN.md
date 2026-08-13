@@ -105,13 +105,26 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       this entry used to ask: that change is archived, and the growth protocol
       above forbids editing an archive to receive a fact discovered later, so
       the cap lands in the living `change-slicing` spec.
+- [ ] **The comment scan goes quiet on a regex literal.** A backtick inside one
+      — `` /[`]/ `` — opens what `scripts/mutation-floor.ts:183-199` takes for a
+      template literal and runs to end of input, so every comment below it is
+      dropped and the check reports nothing. Silent success is the one failure
+      that check must not have. `src/model.ts` holds no regex literal today, so
+      nothing is passing wrongly yet. Either teach the scanner that `/` in
+      expression position starts one, or assert that the file contains none —
+      the second is a line and fails loudly, the first ends the family of bugs
+      that produced five holes in one session.
 - [ ] **The rule of two** — the other half, still outstanding and **not yet
       written anywhere**. Lift a helper on the second consumer, never the
       first. `reviewable-diff-gates` prescribed its vehicle when it deferred it
       — "its own one-line rule, separately" — so it belongs in `CLAUDE.md`'s
       Code list rather than in a proposal. The nearest rule there today covers
       only the opposite direction, checking for duplication before inlining a
-      single-caller helper.
+      single-caller helper. It has a dated candidate now: comment scanning lives
+      in both `scripts/spec-coverage.test.ts` and `scripts/mutation-floor.ts`,
+      the second is strictly better, and the Code rule the first implements was
+      replaced on 2026-08-13 — so that file is the one known carrier of a
+      superseded approach, including its escaped-quote weakness.
 - [ ] **Task 7** — Docker + VPS deploy (open decisions: registry GHCR or Docker
       Hub, same VPS or a new one). Carries `ui-foundation` **(e2e)** 1.5, which
       Task 4 deferred here: serving `dist/` under a plain static server is
