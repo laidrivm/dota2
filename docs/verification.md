@@ -13,6 +13,9 @@ What counts as evidence for a claim, and what a claim may rest on.
   data — not the one it targeted.
 - Verify an external contract against its machine-readable artefact —
   schema, reference page, `--help` — never against a prose summary of it.
+- Exercise a documented capability on every path the project runs it —
+  documentation describes one implementation, and a bundler and a dev server
+  are two.
 - Verify every external recommendation before implementing it; report which
   parts failed verification and what replaces them.
 - Never infer a permission outcome from a command that succeeded — an
