@@ -83,7 +83,7 @@ Criteria are cited by their scenario heading; all fifteen belong to the
       cited leaves the count unchanged, so no floor edit is needed (*A change
       is archived with its tests already written*, *A criterion admitted as
       untestable* for the raised-with-reason path) [30]
-- [ ] 2.6 Add the citation convention to `docs/testing.md` — the `// spec:`
+- [x] 2.6 Add the citation convention to `docs/testing.md` — the `// spec:`
       comment, its placement, and that the floor is lowered by a visible line
 - [ ] 2.7 Grep the four sites that restate a claim like this one before calling
       the change done: this change's sibling artefacts, `openspec/specs/**`,

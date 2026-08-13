@@ -22,6 +22,21 @@ single-source rule this file inherits.
   the rules above survive — delete the rest, especially negative tests
   ("feature X no longer exists") and implementation-detail assertions.
 
+## Citing the criterion a test closes
+
+- A test cites a criterion in a `// spec:` comment directly above a `test`,
+  `it` or `describe` call, separated from it by nothing but blank lines and
+  comments. The identifier is `<capability>/<slug of the scenario heading>`,
+  derived from `openspec/specs/**` and never written into a spec.
+- One comment carries any number of identifiers, whitespace-separated or one
+  per continuation line, and several tests may cite one criterion.
+- A citation naming no criterion fails `scripts/spec-coverage.test.ts`, and so
+  does one whose slug two scenario headings share — rename a heading rather
+  than guess.
+- Existing tests stay uncited: the count of uncited criteria sits on a floor in
+  that file, and the floor moves only on a line carrying the reason it moved,
+  in either direction.
+
 ## E2E (Playwright)
 
 The e2e suite exists to prove agentic changes didn't break real user paths.
