@@ -1,6 +1,7 @@
 # file-size-cap — tasks
 
-Eight steps, eight pull requests, in this order. Seven of them close no
+Eight steps in this order, one pull request each unless the step's own note
+says otherwise — two of them say so. Seven of them close no
 acceptance criterion: they are the decomposition the cap costs, and each one
 leaves the application working and every test green. The eighth adds the cap
 and closes all five criteria at once, which is only possible because the seven
@@ -64,20 +65,20 @@ this proposal.
 
 ## 2. The board owns its styles
 
-This step ships as three pull requests, not one, and is the second exception
-to "eight steps, eight pull requests" after the dev server that shipped beside
-step 1. Both halves of the reason are the numbers: the blocks are ~350 lines
+This step ships as three pull requests, not one — the second step to take more
+than one, after the dev server that shipped beside step 1. Both halves of the
+reason are the numbers: the blocks are ~350 lines
 together against the 200-line cap step 8 brings, so one module would only have
 to be split again there; and moving them costs ~1000 budgeted lines against a
 gate that fails at 800. One module per pull request answers both, and the seam
 is the one step 6 splits `board.tsx` on.
 
-- [ ] 2.1 Move the `board`, `bans`, `teams`, `suggestions` and `result` blocks
+- [x] 2.1 Move the `board`, `bans`, `teams`, `suggestions` and `result` blocks
       into `src/app/board/`, across `board.module.css` (the frame, the bans row
       and the pieces every panel shares), `panels.module.css` (what a panel is
       and the rows the team panels carry) and `suggestions.module.css` (the
       strips and the result readout)
-- [ ] 2.2 Move the one-column rule under `/* One column: the board has to fit a
+- [x] 2.2 Move the one-column rule under `/* One column: the board has to fit a
       phone… */` with the rules it governs, splitting it per module rather than
       leaving a media query orphaned in `app.css`
 

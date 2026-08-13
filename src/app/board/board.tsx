@@ -32,6 +32,7 @@ import {
 import tile from "./hero-tile.module.css";
 import { HeroTile } from "./hero-tile.tsx";
 import panels from "./panels.module.css";
+import readout from "./suggestions.module.css";
 
 type Apply = (action: Action) => void;
 type OpenPicker = (target: PickTarget) => void;
@@ -42,6 +43,10 @@ const sideClass = (side: Side) =>
 		panels.sideName,
 		side === "radiant" ? panels.sideRadiant : panels.sideDire,
 	);
+
+/** A draft that is behind must not be printed in the winning colour. */
+const toneClass = (pp: number) =>
+	scoreTone(pp) === "pos" ? readout.scorePos : readout.scoreMuted;
 
 /**
  * The one way a hero enters the draft: a button that opens the picker for this
@@ -333,24 +338,27 @@ function Suggestions({
 		<section class={panels.panel} aria-label="Suggestions">
 			<h2 class={cx(panels.panelHead, panels.panelHeadRuled)}>
 				<span class={s.sectionLabel}>Suggestions</span>
-				<span class="phase">phase: {formatPhase(model.phase)}</span>
+				<span class={readout.phase}>phase: {formatPhase(model.phase)}</span>
 			</h2>
 			{model.suggestions.map((block) => (
 				<div
-					class={`suggestion-row${block.isMyRole ? " suggestion-mine" : ""}`}
+					class={cx(
+						readout.suggestionRow,
+						block.isMyRole ? readout.suggestionMine : undefined,
+					)}
 					key={block.role}
 				>
-					<h3 class="suggestion-role">
+					<h3 class={readout.suggestionRole}>
 						<span class={s.roleStar}>{block.isMyRole ? "★" : ""}</span>
 						{ROLE_UI[block.role].label}
 					</h3>
-					<div class="suggestion-strip">
+					<div class={readout.suggestionStrip}>
 						{block.entries.map((entry) => {
 							const hero = byId.get(entry.hero);
 							return (
 								<button
 									type="button"
-									class="suggestion"
+									class={readout.suggestion}
 									key={entry.hero}
 									onClick={() =>
 										apply({
@@ -365,7 +373,7 @@ function Suggestions({
 										size="sm"
 										label={hero?.name ?? "Unknown hero"}
 									/>
-									<span class={`score score-${scoreTone(entry.score)}`}>
+									<span class={cx(readout.score, toneClass(entry.score))}>
 										{formatScore(entry.score)}
 									</span>
 									<ThinBadge hero={hero} />
@@ -384,14 +392,13 @@ const Result = ({ estimate }: { estimate: WinEstimate }) => (
 		<h2 class={cx(panels.panelHead, panels.panelHeadRuled)}>
 			<span class={s.sectionLabel}>Result</span>
 		</h2>
-		<p class="result-line">
-			<span class="result-label">Draft advantage:</span>
-			{/* A draft that is behind must not be printed in the winning colour. */}
-			<span class={`result-advantage score-${scoreTone(estimate.advantage)}`}>
+		<p class={readout.resultLine}>
+			<span class={readout.resultLabel}>Draft advantage:</span>
+			<span class={cx(readout.resultAdvantage, toneClass(estimate.advantage))}>
 				{formatAdvantage(estimate.advantage)}
 			</span>
-			<span class="result-arrow">→</span>
-			<span class="result-win">
+			<span class={readout.resultArrow}>→</span>
+			<span class={readout.resultWin}>
 				{formatWinProbability(estimate.winProbability)}
 			</span>
 		</p>
