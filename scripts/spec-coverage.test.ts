@@ -135,9 +135,9 @@ function cite(path: string, text: string) {
 	let open = false;
 	const enclosed = lines.map((line) => {
 		const was = open;
-		// Single-line string literals first: `const opener = "/*"` opens no
-		// comment, and treating it as one would silently blind the scanner to
-		// every citation below it.
+		// String literals first: `const opener = "/*"` opens no comment, and
+		// treating it as one would silently blind the scanner to every citation
+		// below it.
 		const bare = line.replace(/'[^']*'|"[^"]*"|`[^`]*`/g, "");
 		for (const token of bare.match(/\/\*|\*\//g) ?? []) open = token === "/*";
 		return was;
@@ -285,7 +285,11 @@ function uncited(cwd?: string): number {
  */
 function gauge(count: number, floor: number, declaration: string): string[] {
 	const problems: string[] = [];
-	if (!/\/\/.*\S/.test(declaration))
+	// Anchored to the semicolon: a reason is the comment trailing the
+	// declaration, never a `//` quoted elsewhere on the line. Position is what
+	// pins it — stripping string literals as well was measurably a no-op here,
+	// because nothing may sit between the semicolon and the marker.
+	if (!/;\s*\/\/.*\S/.test(declaration))
 		problems.push(
 			`the floor states no reason: ${declaration.trim()} — write why on that line`,
 		);
@@ -802,6 +806,11 @@ describe("the floor's line carries a reason", () => {
 
 	test("a trailing comment of whitespace alone is not a reason", () => {
 		expect(gauge(380, 380, "const FLOOR = 380; //   ").length).toBe(1);
+	});
+
+	test("a quoted marker on the line is not a reason", () => {
+		const quoted = 'const FLOOR = 380; const note = "// not a reason";';
+		expect(gauge(380, 380, quoted).length).toBe(1);
 	});
 
 	test("the reason is demanded whichever direction the number moved", () => {
