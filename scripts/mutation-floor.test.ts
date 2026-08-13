@@ -283,6 +283,29 @@ describe("an exemption with no reason", () => {
 		).not.toEqual([]);
 	});
 
+	test("a list written with spaces after the commas is accepted", () => {
+		expect(
+			exemptions(
+				marked(
+					"// Stryker disable next-line EqualityOperator, ArithmeticOperator: one reason",
+				),
+			),
+		).toEqual([]);
+	});
+
+	test("two malformed comments yield two problems", () => {
+		// Every other case here asserts only that something was reported, so a
+		// scan that stopped at the first would satisfy them all.
+		expect(
+			exemptions(
+				marked(
+					"// Stryker disable next-line EqualityOperator",
+					"// Stryker disable next-line all",
+				),
+			),
+		).toHaveLength(2);
+	});
+
 	test("the failure names the line it sits on", () => {
 		const [problem] = exemptions(
 			`const a = 1;\nconst b = 2;\n// Stryker disable next-line EqualityOperator\nconst c = 3;\n`,
@@ -316,6 +339,52 @@ describe("a blanket disable comment", () => {
 		expect(
 			exemptions(
 				marked("// Stryker disable EqualityOperator: bound is deliberate"),
+			),
+		).not.toEqual([]);
+	});
+});
+
+describe("a directive Stryker honours outside a line comment", () => {
+	test("a single-line block comment is scanned too", () => {
+		// Stryker matches every comment Babel gives it, so this silences the
+		// line's mutants exactly as a `//` directive would.
+		expect(
+			exemptions(marked("/* Stryker disable next-line all */")),
+		).not.toEqual([]);
+	});
+
+	test("one trailing a line of code is scanned too", () => {
+		expect(
+			exemptions(
+				"const a = 1; /* Stryker disable next-line all */\nconst x = 1;\n",
+			),
+		).not.toEqual([]);
+	});
+
+	test("a trailing line comment is scanned too", () => {
+		expect(
+			exemptions(
+				"const a = 1; // Stryker disable next-line all\nconst x = 1;\n",
+			),
+		).not.toEqual([]);
+	});
+
+	test("one hiding behind an innocuous comment on the same line is found", () => {
+		expect(
+			exemptions(
+				"const a = 1; /* a note */ // Stryker disable next-line all\nconst x = 1;\n",
+			),
+		).not.toEqual([]);
+	});
+
+	test("a well-formed one still fails, because the spelling is not the form", () => {
+		// Stryker honours both spellings; the check accepts one, so a reader
+		// of src/model.ts never has to know there are two.
+		expect(
+			exemptions(
+				marked(
+					"/* Stryker disable next-line ArithmeticOperator: re-derives the same total */",
+				),
 			),
 		).not.toEqual([]);
 	});
