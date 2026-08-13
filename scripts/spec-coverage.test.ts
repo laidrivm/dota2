@@ -848,6 +848,26 @@ describe("a change is archived with its tests already written", () => {
 	});
 });
 
+describe("a change archived without its tests", () => {
+	test("the count rises by one, so the floor has to move or the criterion be cited", () => {
+		const dir = fabricate({
+			"openspec/specs/capability/spec.md": spec("A settled thing"),
+			"src/thing.test.ts": 'test("acts", () => {});\n',
+		});
+		const before = uncited(dir).length;
+
+		writeFileSync(
+			join(dir, "openspec/specs/capability/spec.md"),
+			spec("A settled thing", "A thing nothing asserts"),
+		);
+
+		expect(uncited(dir).length).toBe(before + 1);
+		expect(
+			gauge(uncited(dir).length, before, "const FLOOR = 1; // x").length,
+		).toBe(1);
+	});
+});
+
 // spec: spec-test-traceability/a-criterion-admitted-as-untestable
 describe("a criterion admitted as untestable", () => {
 	test("the raised floor passes once its line carries the reason", () => {
