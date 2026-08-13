@@ -15,6 +15,14 @@ Moving a rule counts twice in the diff budget — once removed, once added — s
 the 943 lines of `app.css` are ~1900 budgeted lines on their own. That, not
 caution, is why the migration takes three steps.
 
+Step 1 turned out to need one thing this list did not foresee, and it shipped
+ahead of the step rather than inside it: Bun's HTML dev server cannot emit a
+CSS module's class-name mapping, so development now builds and serves `dist/`.
+It is its own pull request because it changes how the application is served and
+stands on its own — `design.md` records the decision. The scan that checks a
+component reads only names its module defines follows the step for the same
+reason, in a third.
+
 `/zombies` in diff mode runs before each pull request, per the pre-PR sequence.
 Only step 8 introduces logic for it to find; the test tasks in steps 1–7 are
 the existing suites, which must stay green unchanged except where a file is
@@ -23,28 +31,32 @@ this proposal.
 
 ## 1. Styles arrive through the bundle, and the first components own theirs
 
-- [ ] 1.1 Import `src/app/styles/styles.css` from `src/app/main.tsx` and drop
+- [x] 1.1 Import `src/app/styles/styles.css` from `src/app/main.tsx` and drop
       the `<link rel="stylesheet">` from `index.html`, leaving the `@import`
       chain and every rule exactly as they are — this changes the delivery path
       and nothing else, and it is the commit to bisect to if styles vanish
-- [ ] 1.2 Update `build.test.ts`, which globs `*.css` in `dist` and asserts on
+- [x] 1.2 Update `build.test.ts`, which globs `*.css` in `dist` and asserts on
       the single emitted stylesheet; confirm the `@import url("/fonts/fonts.css")`
       assertion still holds, since fonts stay a served file
-- [ ] 1.3 Move the `hero tile` and `re-pick marker` blocks out of `app.css`
+- [x] 1.3 Move the `hero tile` and `re-pick marker` blocks out of `app.css`
       into `src/app/board/hero-tile.module.css`, imported by `hero-tile.tsx`;
       each explanatory comment moves with the rules it describes
-- [ ] 1.4 Move the `picker and dialogs` block into
-      `src/app/picker/picker.module.css`
-- [ ] 1.5 Rewrite every `class` on the migrated markup to read from the
+- [x] 1.4 Move the `picker and dialogs` block into
+      `src/app/picker/picker.module.css` — except the confirm dialog, which is
+      `app.tsx`'s and goes to `src/app/app.module.css` (step 3's file, brought
+      forward) rather than making the shell import the picker's stylesheet, and
+      the bare `dialog` panel both share, which has no class to scope and goes
+      to `base.css`
+- [x] 1.5 Rewrite every `class` on the migrated markup to read from the
       imported mapping — `class={s.heroTile}`, not `class="hero-tile"` — in
       `hero-tile.tsx`, `picker.tsx` and wherever else those classes are
       written, `board.tsx`'s re-pick badge included. The bundler rewrites the
       names in the stylesheet, so a literal left behind matches nothing and the
       rule silently stops applying. Every step that moves a block owes this,
       not only this one
-- [ ] 1.6 Confirm no rule was left behind and none duplicated: `app.css` shrinks
+- [x] 1.6 Confirm no rule was left behind and none duplicated: `app.css` shrinks
       by exactly the lines the two modules gained, comments included
-- [ ] 1.7 Run the e2e suite and confirm the rendered page is unchanged — a
+- [x] 1.7 Run the e2e suite and confirm the rendered page is unchanged — a
       mistake here is a blank stylesheet, which is loud
 
 ## 2. The board owns its styles

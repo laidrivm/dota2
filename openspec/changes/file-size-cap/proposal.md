@@ -89,12 +89,23 @@ implementing it has to stop enumerating a directory.
 ## Impact
 
 - New: a cap check and its test; one `*.module.css` beside each component; new
-  modules for the eight splits.
+  modules for the eight splits; `src/css.d.ts` so TypeScript resolves a
+  stylesheet import at all, and `src/app/cx.ts` to join the names a module
+  hands back.
+- New, and not foreseen when this was written, each shipping as its own pull
+  request beside step 1: `scripts/dev.ts` and `dist-routes.ts`, because Bun's
+  HTML dev server never defines a CSS module's class-name mapping
+  (oven-sh/bun#18258) and development therefore builds and serves `dist/` — see
+  `design.md`; and `src/app/module-classes.test.ts`, which checks that a
+  component reads only names its module defines.
 - Deleted: `src/app/styles/app.css`.
 - Modified: `index.html`, every `.tsx` that carries a `class`, `styles.css`,
+  `base.css` (the bare `dialog` panel has no class to scope),
   `src/app/styles/styles.test.ts`, `build.test.ts` (it globs `*.css` in `dist`
-  and asserts on the single emitted stylesheet), `README.md`'s ownership map,
-  and `openspec/specs/change-slicing/`.
+  and asserts on the single emitted stylesheet), `server.ts`, `package.json`,
+  `playwright.config.ts`, `README.md`'s ownership map and its "Running it"
+  section, `PLAN.md`'s bundler constraint, and
+  `openspec/specs/change-slicing/`.
 - The e2e suite is the safety net for the CSS migration, and it is a usable
   one: `docs/testing.md` forbids CSS and class selectors in e2e, and a grep of
   `e2e/smoke.spec.ts` finds none, so scoped class names cannot break a locator.
