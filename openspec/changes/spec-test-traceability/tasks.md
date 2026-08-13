@@ -79,7 +79,7 @@ Criteria are cited by their scenario heading; all fifteen belong to the
 - [x] 2.4 Measure the count over the tree and write it as the floor with its
       reason on the line (*The repository as it stands*) [29]; a tree with no
       citations at all counts every criterion as uncited [2]
-- [ ] 2.5 Add the archive test: a change archived with every new criterion
+- [x] 2.5 Add the archive test: a change archived with every new criterion
       cited leaves the count unchanged, so no floor edit is needed (*A change
       is archived with its tests already written*, *A criterion admitted as
       untestable* for the raised-with-reason path) [30]
