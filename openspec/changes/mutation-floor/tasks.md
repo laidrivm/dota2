@@ -23,7 +23,7 @@ hand to obtain the first measurement, and the CI job. This is the shape
 
 ## 1. The gate
 
-- [ ] 1.1 Confirm the `/warm` verdict still holds before installing. It was run
+- [x] 1.1 Confirm the `/warm` verdict still holds before installing. It was run
       while this change was proposed and returned **Keep**: 9.6.1, Apache-2.0,
       `github.com/stryker-mutator/stryker-js`, first published 2019-02-13,
       latest 2026-04-10, 1.9 M weekly downloads, no install scripts,
@@ -37,14 +37,14 @@ hand to obtain the first measurement, and the CI job. This is the shape
       Record the date the verdict was confirmed against the version actually
       installed, in `design.md`'s provenance paragraph — a verdict without a
       date cannot be told from one nobody re-read
-- [ ] 1.2 Add `.stryker-tmp/` and `reports/` to `.gitignore` **before** the
+- [x] 1.2 Add `.stryker-tmp/` and `reports/` to `.gitignore` **before** the
       first run — Stryker creates both, and the sandbox holds a full copy of
       the working tree
-- [ ] 1.3 Install the dependency at exactly 9.6.1 — `bunfig.toml` pins exact
+- [x] 1.3 Install the dependency at exactly 9.6.1 — `bunfig.toml` pins exact
       versions, so confirm `package.json` and `bun.lock` both carry that
       version and no range; confirm `bun pm untrusted` is empty rather than
       assuming it from the manifest's absent install scripts
-- [ ] 1.4 Write `stryker.config.json`: `mutate` exactly `["src/model.ts"]`,
+- [x] 1.4 Write `stryker.config.json`: `mutate` exactly `["src/model.ts"]`,
       `testRunner` left at its `command` default with
       `commandRunner.command` = `bun test src/model.test.ts`, `thresholds.break`
       explicitly `null`, `reporters` including `json`, and
@@ -52,74 +52,79 @@ hand to obtain the first measurement, and the CI job. This is the shape
       every task below resolves from the repository root. Both reporter
       settings are needed: the default `reporters` is `clear-text`, `progress`
       and `html`, so a filename alone names a path nothing writes to. Confirm
-      after 1.5 that the file exists. Leave `timeoutMS` at its default — 5000 ms plus
+      after 1.5 that the file exists. Two further settings turned out to be
+      load-bearing and are justified in `design.md`: `tsconfigFile` naming an
+      absent file, without which Stryker's sandbox preprocessor crashes on a
+      compiler API TypeScript 7.0.2 does not expose, and `ignorePatterns`
+      excluding `.claude` and `spec-inbox`, whose gitignored symlinks break the
+      sandbox copy. Leave `timeoutMS` at its default — 5000 ms plus
       `netTime × 1.5` against a 53 ms suite is already ~75× headroom, and
       tuning it now would be tuning against a flake nobody has seen
-- [ ] 1.5 Run Stryker for real once and record, in the pull request: the mutant
+- [x] 1.5 Run Stryker for real once and record, in the pull request: the mutant
       total, the survivor count, the status histogram and the wall time. These
       are not knowable before this task — counting mutants needs a parser, and
       TypeScript 7.0.2 ships only a scanner
-- [ ] 1.6 Confirm from that run: at least one mutant is `Killed`
+- [x] 1.6 Confirm from that run: at least one mutant is `Killed`
       (*A mutant the tests assert against*), no mutant names
       `src/app/session.ts` or `src/types.ts` (*A file outside the scope*), and
       the only command executed was `bun test src/model.test.ts`, with no
       Playwright test in the killing set (*The suite is the only killer*)
-- [ ] 1.7 Settle whether `bunx --no-install stryker run` works without Node by
+- [x] 1.7 Settle whether `bunx --no-install stryker run` works without Node by
       trying it — the package declares `engines.node >= 20` and this repository
       installs only Bun in CI. Record the answer; it decides whether
       `mutation.yml` needs `setup-node`. `--no-install` is not optional: a bare
       `bunx` would fetch a package on a miss and bypass the release-age gate,
       which `CLAUDE.md` forbids
-- [ ] 1.8 Write the survivor-count tests first, all failing: a report with zero
+- [x] 1.8 Write the survivor-count tests first, all failing: a report with zero
       mutants fails rather than reporting zero survivors [1], a report whose
       mutants are all `Killed` counts zero [2], one `Survived` among many
       `Killed` counts one [3], a report mixing `Killed`, `Survived`, `Timeout`,
       `Ignored`, `CompileError` and `RuntimeError` counts only the `Survived`
       ones [4], a `NoCoverage` mutant counts as surviving [5], and two
       survivors on one line count as two [6]
-- [ ] 1.9 Write the report-loading tests first: a missing report file fails
+- [x] 1.9 Write the report-loading tests first: a missing report file fails
       rather than reading as zero survivors [14], a truncated or malformed
       report fails naming the file [16], and a mutant carrying a status the
       check does not recognise fails, naming the status
-- [ ] 1.10 Implement the report loading and the survivor count in
+- [x] 1.10 Implement the report loading and the survivor count in
       `scripts/mutation-floor.ts` as exported functions over a parsed report;
       break each assertion above before it passes. The script runs no tool: a
       crashed Stryker is a non-zero exit the shell already reports
-- [ ] 1.11 Put staleness on the invoker rather than in the check [15]: the
+- [x] 1.11 Put staleness on the invoker rather than in the check [15]: the
       workflow deletes `reports/mutation/` before running Stryker, so a report
       from a previous run cannot be read as this one's. A reader cannot tell a
       stale file from a fresh one, and an absent report already fails by 1.9
-- [ ] 1.12 Write the comparison tests first: a count equal to the floor passes
+- [x] 1.12 Write the comparison tests first: a count equal to the floor passes
       [7], one above fails [8] (*A branch added without a test*), one below
       fails [9] (*A survivor newly killed*), a floor of 0 with 0 survivors
       passes [10], the above-floor failure names both count and floor [11], and
       the below-floor failure names the value to write [12]
-- [ ] 1.13 Write the reason-line tests first: a floor line with no trailing
+- [x] 1.13 Write the reason-line tests first: a floor line with no trailing
       comment fails, one whose comment is `//` with nothing after fails [19],
       one whose comment is whitespace only fails [20], and a floor constant
       absent from the script altogether fails [18] — all four under
       *The floor changed with no reason given*
-- [ ] 1.14 Add the environment test: run from a subdirectory the check still
+- [x] 1.14 Add the environment test: run from a subdirectory the check still
       resolves the report, and in step 2 `src/model.ts`, from the repository
       root [29]. The exported functions take their input as an argument and
       resolve nothing; only the CLI entry point resolves paths, and it does so
       from the repository root rather than the working directory
-- [ ] 1.15 Implement the floor constant, the three comparisons **and** the
+- [x] 1.15 Implement the floor constant, the three comparisons **and** the
       reason-line validation — the check reads its own source to find the floor
       line and rejects one whose trailing comment is missing or blank. Break
       each assertion from 1.12 and 1.13 before it passes; the reason-line half
       is what closes *The floor changed with no reason given*, and 1.13 writes
       its tests but nothing else implements it
-- [ ] 1.16 Set the floor to the count measured in 1.5, with its reason on that
+- [x] 1.16 Set the floor to the count measured in 1.5, with its reason on that
       line, and confirm the tree passes [30] (*The repository as it stands*)
-- [ ] 1.17 Add the round-trip test: killing a survivor with a new test leaves
+- [x] 1.17 Add the round-trip test: killing a survivor with a new test leaves
       the count below the floor and fails until the floor is lowered [31]
       (*A survivor newly killed*)
-- [ ] 1.18 Add `.github/workflows/mutation.yml`, pinned by SHA like every other
+- [x] 1.18 Add `.github/workflows/mutation.yml`, pinned by SHA like every other
       workflow here: `bun install --frozen-lockfile`, delete
       `reports/mutation/`, `bunx --no-install stryker run`, then the check —
       the job fails on any of them, and the shell keeps the failures apart
-- [ ] 1.19 Add `scripts/mutation-floor.ts` to the README's knowledge ownership
+- [x] 1.19 Add `scripts/mutation-floor.ts` to the README's knowledge ownership
       map — `scripts/command-guard.ts` and `scripts/no-suppressions.ts` both
       have rows, and `readme-map.test.ts` only checks that a row's path
       resolves, never that a script has a row, so nothing catches the omission
