@@ -229,7 +229,10 @@ describes is rewritten, the rule is a candidate for deletion.
 - Scope a scan by what it exempts, never by an enumeration of what it covers.
 - State a scan's exemptions in the scan; never inherit them from another tool's
   configuration.
-- Scan source left to right carrying string and comment state, never line by line.
+- Scan source left to right carrying string, comment, template-expression and
+  regex-literal state, and name which of those the language being scanned has.
+- Read a literal's contents from the source at the offset the scan reached,
+  never from the copy the scan blanked.
 - Comment what a reader would otherwise "fix": a deliberate departure from the
   obvious implementation, or a precondition the code does not check.
 
