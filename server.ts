@@ -1,23 +1,34 @@
 /**
- * Dev and production server.
+ * Dev and production server. Both serve `dist/`, so the page opened in
+ * development is the page that ships.
  *
- * Bun's HTML entry point bundles the app, but its CSS bundler inlines every
- * `url()` asset as base64 — which would put ~80 KB of fonts inside a
- * render-blocking stylesheet. Serving the woff2 files from their own routes
- * keeps them cacheable and the stylesheet small; `fonts.css` therefore stays
- * out of the bundle and is pulled in by an inline `@import` in index.html.
+ * The HTML entry point is deliberately not a route here. Bun's HTML dev
+ * bundler is a second implementation of the one `bun build` runs, and it
+ * cannot emit a CSS module's class-name mapping (oven-sh/bun#18258), so a
+ * component that imported one would read `undefined` off a binding that was
+ * never defined. `bun run dev` builds and watches instead.
+ *
+ * The fonts and the snapshot keep their own routes rather than being read out
+ * of `dist`: their headers are the contract `static-routes.test.ts` asserts,
+ * and the woff2 files stay out of the bundle so they remain cacheable files.
  */
 
 import { serve } from "bun";
-import homepage from "./index.html";
+import { distDir, distFile } from "./dist-routes.ts";
 import { staticRoutes } from "./static-routes.ts";
 
+// Nothing to serve otherwise, and an empty page is a worse answer than this.
+if (!(await Bun.file(new URL("index.html", distDir)).exists())) {
+	throw new Error(
+		"dist/ carries no index.html — run `bun run build`, or `bun run dev` to build and watch",
+	);
+}
+
 const server = serve({
-	development: { hmr: true },
-	routes: {
-		...staticRoutes(),
-		"/": homepage,
-	},
+	routes: staticRoutes(),
+	fetch: (request) =>
+		distFile(new URL(request.url).pathname) ??
+		new Response("Not found", { status: 404 }),
 });
 
 console.log(`listening on ${server.url}`);

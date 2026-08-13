@@ -1,9 +1,10 @@
 import { defineConfig, devices } from "@playwright/test";
 
 /**
- * The suite runs against `bun run dev`, not against `dist/` — the dev server
- * is the only thing that serves `/snapshot.json`, and the build output's
- * contents are already asserted by `build.test.ts`.
+ * The suite runs against `bun run dev`, which builds and serves `dist/` — the
+ * same bundle production ships, so a defect the bundler introduces is under
+ * test here rather than only in `build.test.ts`. `/snapshot.json` and the
+ * fonts keep their own routes and are served from source either way.
  *
  * The port follows `Bun.serve`'s own precedence rather than hard-coding 3000:
  * `webServer` inherits this environment, so a developer with `PORT` set gets

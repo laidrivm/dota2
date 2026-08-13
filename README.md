@@ -28,14 +28,13 @@ One fact lives in exactly one file; everything else links to it.
 
 ## Running it
 
-- `bun run dev` — `server.ts` under `--hot` on http://localhost:3000. It
-  bundles `index.html` on request and serves the two things the bundler
-  cannot: `/fonts/*` and `/snapshot.json`.
-- `bun run build` — bundles into `dist/`, then copies the fonts and the
-  snapshot in. `dist/` is fully static: `cd dist && python3 -m http.server`
-  serves a working app. `server.ts` is the other way to run in production —
-  it bundles from source instead of serving `dist/`, so the two are
-  alternatives, not a pipeline.
+- `bun run dev` — `scripts/dev.ts` on http://localhost:3000: it bundles into
+  `dist/`, rebuilds on a change under `src/`, and starts `server.ts` over the
+  result. The page in development is the bundle production ships.
+- `bun run build` — the same bundle minified, plus the fonts and the snapshot
+  copied in. `dist/` is fully static: `cd dist && python3 -m http.server`
+  serves a working app. `server.ts` serves `dist/` too, adding the two routes
+  a static server cannot give their headers: `/fonts/*` and `/snapshot.json`.
 - `bun test` — the whole unit suite. It shells out to `bun run build` once, so
   a broken copy step or a bundler upgrade that starts inlining the fonts fails
   here rather than in the browser. `e2e/` is excluded (`pathIgnorePatterns` in
