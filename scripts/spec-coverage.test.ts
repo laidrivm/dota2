@@ -13,6 +13,7 @@ import {
 	mkdtempSync,
 	readdirSync,
 	readFileSync,
+	renameSync,
 	rmSync,
 	writeFileSync,
 } from "node:fs";
@@ -813,5 +814,45 @@ describe("the floor's line carries a reason", () => {
 				"reason",
 			);
 		}
+	});
+});
+
+// spec: spec-test-traceability/a-change-is-archived-with-its-tests-already-written
+describe("a change is archived with its tests already written", () => {
+	test("the count is unchanged, so no floor edit is needed", () => {
+		const settled = ["A settled thing", "Another settled thing"];
+		const added = ["A new thing", "Another new thing"];
+		const dir = fabricate({
+			"openspec/specs/capability/spec.md": spec(...settled),
+			"openspec/changes/in-flight/specs/capability/spec.md": spec(...added),
+			"src/thing.test.ts":
+				'// spec: capability/a-new-thing capability/another-new-thing\ntest("acts", () => {});\n',
+		});
+		expect(uncited(dir).length).toBe(2);
+
+		// Archiving is two filesystem moves: the delta's criteria join the living
+		// spec, and the change drops a directory deeper. Neither touches git,
+		// because only the test files are listed from the index.
+		writeFileSync(
+			join(dir, "openspec/specs/capability/spec.md"),
+			spec(...settled, ...added),
+		);
+		mkdirSync(join(dir, "openspec/changes/archive"), { recursive: true });
+		renameSync(
+			join(dir, "openspec/changes/in-flight"),
+			join(dir, "openspec/changes/archive/2026-01-01-in-flight"),
+		);
+
+		expect(uncited(dir).length).toBe(2);
+		expect(problems(dir)).toEqual([]);
+	});
+});
+
+// spec: spec-test-traceability/a-criterion-admitted-as-untestable
+describe("a criterion admitted as untestable", () => {
+	test("the raised floor passes once its line carries the reason", () => {
+		const raised =
+			"const FLOOR = 381; // one criterion is discharged at review";
+		expect(gauge(381, 381, raised)).toEqual([]);
 	});
 });
