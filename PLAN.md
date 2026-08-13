@@ -79,6 +79,10 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
   `archive/2026-08-02-review-bot-instructions`. The proposal comparison ended
   up on `**` rather than `src/**`: of the five most recent changes at the time,
   three touched no file under `src/`, this one among them.
+- **`spec-test-traceability`** — PRs #78 and #79,
+  `archive/2026-08-13-spec-test-traceability`; capability spec at
+  `openspec/specs/spec-test-traceability/`. The floor stands at 380 of 395
+  criteria, and it moves only on a line carrying the reason it moved.
 - **`tracked-permission-policy`** — PRs #68 and #69, corrected by #70,
   `archive/2026-08-09-tracked-permission-policy`; both requirements are in
   `openspec/specs/agent-permissions/`. The untracked `settings.local.json`
@@ -86,15 +90,6 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
   its entries means anything about.
 
 ### Open
-- [ ] **`spec-test-traceability`** — both steps applied, awaiting archive.
-      Extends `openspec/config.yaml`'s "every criterion is cited by a task" one
-      step: cited by a **test**. The identifier is derived from the scenario
-      heading rather than written into the spec, and it lives in a `// spec:`
-      comment above the test rather than in the test name — a single act may
-      close several criteria, and three identifiers do not fit in a name. The
-      380 uncited criteria stay uncited behind a floor in
-      `scripts/spec-coverage.test.ts` that fails in both directions and moves
-      only on a line carrying the reason it moved.
 - [ ] **`mutation-floor`** — proposed, two steps, not yet applied. Mutation
       testing over `src/model.ts` alone, its own CI job, floor set from the
       first measurement as an absolute survivor count and failing in both
