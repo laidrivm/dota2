@@ -171,8 +171,10 @@ Kept because no single file in the tree is where a reader would look for them.
 - **camelCase in every JSON payload** — `types.ts`, the fixture, the generator
   and the bundle contract all take renamed keys on import.
 - **Bun's native bundler, no Vite** — `bun run build` is `bun build
-  ./index.html --outdir=dist` plus the copy steps; `bun run dev` is `server.ts`
-  under `--hot`.
+  ./index.html --outdir=dist` plus the copy steps; `bun run dev` is
+  `scripts/dev.ts`, which runs the same bundle, watches it and serves it.
+  Bun's HTML dev server is not used: it never defines a CSS module's
+  class-name mapping (oven-sh/bun#18258).
 - **Dependabot, not Renovate** — first-party, so no third-party GitHub App
   gets write access to a hardening-focused repository. The trade is no
   dependency dashboard and no lockfile maintenance; the nightly `bun audit`

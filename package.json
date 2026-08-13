@@ -3,7 +3,7 @@
 	"private": true,
 	"type": "module",
 	"scripts": {
-		"dev": "bun --hot server.ts",
+		"dev": "bun scripts/dev.ts",
 		"build": "rm -rf dist && bun build ./index.html --outdir=dist --minify && cp -R src/app/styles/fonts dist/fonts && cp src/fixtures/snapshot.json dist/snapshot.json",
 		"lint": "biome ci .",
 		"lint:fix": "biome check --write .",
