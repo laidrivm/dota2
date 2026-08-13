@@ -280,6 +280,39 @@ symlinks `node_modules` into it, and the JSON reporter writes under `reports/`
 by default. Both are new untracked output directories, so `.gitignore` covers
 them before the tool runs for the first time.
 
+### What judging the first 67 survivors found
+
+All 67 were judged. **None was marked, and the floor stayed at 67** — not
+because equivalents are rare, but because of where the exemption mechanism can
+address them.
+
+Four are genuinely equivalent, all of them guards the runtime can never need or
+shortcuts the general path reproduces:
+
+| line | mutant | why it cannot change behaviour |
+|---|---|---|
+| 114 | `enemyHeroes.length === 0` → `false` | with no enemies the general path yields the same value: `roleAssignments(0)` is `[[]]`, `total` is 1, and every `open[r]` stays 1. Checked by running both versions over 120 sessions that reach the line — identical output on all of them |
+| 123 | `if (hero)` → `true` | `asg` is as long as `enemyHeroes`, so `enemyHeroes[e]` is always defined; the guard exists for `noUncheckedIndexedAccess`, not for a case |
+| 133 | `if (m)` → `true` | same, for `marginals[e]` |
+| 161 | `id === null ? …` → `false` | the else branch is `byId.get(null) ?? null`, and `null` is never a key of a map built from hero ids, so both branches give `null` |
+
+Every one of the four shares its line **and its mutator** with a mutant the
+tests kill. A disable comment is addressed to a line and a mutator, never to a
+single mutant, so marking any of them would retire a killed mutant to admit an
+equivalent one — a lower floor bought by discarding a guarded behaviour, which
+is the burying this design set out to avoid.
+
+The complement does not help either: 44 of the 67 could be marked without
+touching a killed sibling, and not one of them is equivalent. They change a
+sign, an operator, a filter bound, or empty a loop body, and they survive
+because the model's tests asserts no value that those components reach.
+
+So the mechanism is right and still unexercised: the first population of
+survivors happens to contain nothing it can express. The rule this produces —
+exempt a line only when every mutant its mutator produces there is equivalent —
+is in `docs/testing.md`, where the next person to reach for a disable comment
+will read it.
+
 ## Risks / Trade-offs
 
 - **A `Timeout` mutant counts as killed, and timeouts are timing-dependent.**
