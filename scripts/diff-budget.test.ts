@@ -446,3 +446,21 @@ test("an unrelated base exits non-zero — no merge base to measure from", () =>
 	expect(g.code).not.toBe(0);
 	expect(g.stderr).toContain("no merge base");
 });
+
+// The override lives in the pull request body, and a body edit is its own
+// activity type. Without it the workflow reports a verdict on a body that has
+// since changed — a marker added after the last push is never read.
+test("the workflow re-runs when the pull request body is edited", async () => {
+	const workflow = await Bun.file(
+		`${import.meta.dir}/../.github/workflows/diff-budget.yml`,
+	).text();
+	const types = (
+		Bun.YAML.parse(workflow) as { on: { pull_request: { types: string[] } } }
+	).on.pull_request.types;
+
+	expect(types).toContain("edited");
+	// The defaults stop applying the moment `types` is named at all.
+	expect(types).toEqual(
+		expect.arrayContaining(["opened", "synchronize", "reopened"]),
+	);
+});
