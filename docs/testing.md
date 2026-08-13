@@ -57,6 +57,8 @@ single-source rule this file inherits.
   code it excuses sit together in the diff.
 - `all` in place of a mutator name is rejected, so is a comment without
   `next-line`, and so is one with no reason after its colon.
+- Delete `reports/mutation/` before a local Stryker run — the workflow does it,
+  a shell does not, and the check cannot tell last run's report from this one's.
 - Stryker reads its directives from every comment, a `/* … */` one included and
   anywhere on the line. The check reads the same surface but accepts only the
   `//` spelling, so a block-comment directive fails however well it is formed —
