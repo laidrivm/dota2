@@ -123,8 +123,8 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       single-caller helper. It has a dated candidate now: comment scanning lives
       in both `scripts/spec-coverage.test.ts` and `scripts/mutation-floor.ts`,
       the second is strictly better, and the Code rule the first implements was
-      replaced on 2026-08-13 — so that file is the one known carrier of a
-      superseded approach, including its escaped-quote weakness.
+      replaced on 2026-08-13. What that costs the older copy is commented at the
+      line it costs it.
 - [ ] **Task 7** — Docker + VPS deploy (open decisions: registry GHCR or Docker
       Hub, same VPS or a new one). Carries `ui-foundation` **(e2e)** 1.5, which
       Task 4 deferred here: serving `dist/` under a plain static server is
