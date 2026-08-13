@@ -136,3 +136,58 @@
   Four of them are one shape: the bot applying a rule to the wrong artefact
   (criteria into `proposal.md`, a task contract into `PLAN.md`), where this
   repo's answer already lives in two merged changes
+
+## 2026-08-13 — feat/mutation-floor-1, feat/mutation-floor-2, chore/archive-mutation-floor
+
+Three branches, one change, run end to end in one session.
+
+**feat/mutation-floor-1 (PR #81)**
+
+- zombies: OPEN — 6 gaps, 6 acted on. The load-bearing one: the CLI entry
+  point CI actually runs had no test at all, so deleting `process.exit(1)`
+  would have broken the gate silently
+- warm: BLOCKED then PASS — 1 dependency, 1 finding, 1 acted on.
+  GHSA-q8mj-m7cp-5q26 in `qs`, reached through `typed-rest-client`'s exact
+  pin; `bun audit` exits 1 and `audit.yml` triggers on any package.json
+  change, so the branch would have failed CI. Held off by an `overrides` entry
+- ponytail-review: 3 findings, 3 acted on (−6 lines, plus a dead import the
+  cut exposed that biome caught and tsc did not)
+- triage: PASS — 6 groups, 2 high-risk read, 0 defects
+- coderabbit-local: PASS — 2 findings, 2 applied
+
+**feat/mutation-floor-2 (PR #82)**
+
+- zombies: OPEN — 4 gaps, 4 acted on. One of them found a real hole: Stryker
+  honours a directive in a block comment, and the scan read only `//`
+- warm: PASS — no manifest changed, 0 findings
+- ponytail-review: 2 findings, 2 acted on, one of them a control character
+  smuggled into a doc comment to avoid closing the block
+- triage: PASS — 4 groups, 2 read, 0 defects. Its grep confirmed the floor
+  value and report path agree across all three sites that state them
+- coderabbit-local: PASS over 2 passes — 5 findings, 2 applied, 3 skipped or
+  rejected. The Major was right: the line-based comment scan mishandled
+  escaped quotes and multi-line blocks
+- coderabbit (PR #82): PASS — 6 findings, 4 applied, 2 skipped. Its Major was
+  right again — a quote that opened no string ran to end of input and took
+  every comment below it, so the scan reported nothing and the gate passed
+
+**chore/archive-mutation-floor**
+
+- triage: PASS — 2 groups, 0 defects, but its mandatory grep found two stale
+  numbers nothing else would have: `PLAN.md` said the coverage floor was
+  380 of 395, and spec-test-traceability's own spec said 86 of the 380
+- coderabbit-local: OPEN — 2 findings, 0 applied, 2 dismissals put to the
+  user and merged before they were settled
+
+- Not run: preflight, code-review, security-review, first-five, review-order
+
+**What the pipeline caught that nothing else would have**
+
+- Four separate holes in one comment scanner, found by four different steps:
+  zombies (block comments), coderabbit-local (escaped quotes, multi-line
+  blocks), coderabbit (unterminated quote). Each was verified by running
+  Stryker or the scan, never by argument
+- A fifth of the same family is still live in `main` and was found by this
+  session's own wrap-up, not by any gate: a regex literal containing a
+  backtick silences the scan for the rest of the file
+- warm is the only step this month to have blocked a branch outright
