@@ -1,5 +1,11 @@
 import { afterAll, describe, expect, test } from "bun:test";
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import {
+	mkdirSync,
+	mkdtempSync,
+	readFileSync,
+	rmSync,
+	writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
@@ -83,6 +89,28 @@ describe("the survivor count", () => {
 
 	test("a status the check does not recognise fails, naming it", () => {
 		expect(() => survivors(report("Killed", "Pending"))).toThrow(/Pending/);
+	});
+
+	test("a mutant carrying no status fails rather than counting as killed", () => {
+		expect(() =>
+			survivors({ files: { "src/model.ts": { mutants: [{}] } } }),
+		).toThrow(/undefined/);
+	});
+
+	test("a report naming no file at all fails", () => {
+		// What Stryker writes when `mutate` matches nothing — the wrong-scope
+		// case, which zero survivors would report as a clean run.
+		expect(() => survivors({ files: {} })).toThrow(/no mutants/);
+	});
+
+	test("a file entry with no mutants key contributes none", () => {
+		const partial = {
+			files: {
+				"src/model.ts": { mutants: [{ id: "0", status: "Survived" }] },
+				"src/other.ts": {},
+			},
+		};
+		expect(survivors(partial)).toBe(1);
 	});
 
 	test("survivors are counted across every file in the report", () => {
@@ -190,8 +218,54 @@ describe("the floor changed with no reason given", () => {
 		);
 	});
 
+	test("a comment before the semicolon is not a reason", () => {
+		// Position is what pins a reason to the declaration, so a marker
+		// anywhere but after the semicolon leaves the floor unexplained.
+		expect(gauge(12, 12, "export const FLOOR = 12 // measured")).not.toEqual(
+			[],
+		);
+	});
+
 	test("this script's own floor line states a reason", () => {
 		expect(gauge(FLOOR, FLOOR, floorLine(source))).toEqual([]);
+	});
+});
+
+describe("the command line entry point", () => {
+	const cli = (report: string | null) => {
+		const dir = mkdtempSync(join(tmpdir(), "mutation-floor-cli-"));
+		made.push(dir);
+		// A copy of the check beside a `reports/` of our own, so the CLI
+		// resolves this report rather than the repository's real one.
+		mkdirSync(join(dir, "scripts"), { recursive: true });
+		writeFileSync(join(dir, "scripts", "mutation-floor.ts"), source);
+		if (report !== null) {
+			mkdirSync(join(dir, "reports", "mutation"), { recursive: true });
+			writeFileSync(join(dir, "reports", "mutation", "mutation.json"), report);
+		}
+		return Bun.spawnSync(["bun", join(dir, "scripts", "mutation-floor.ts")]);
+	};
+
+	test("it exits 0 and says nothing when the count equals the floor", () => {
+		const run = cli(
+			JSON.stringify(report(...Array(FLOOR).fill("Survived"), "Killed")),
+		);
+		expect(run.stderr.toString()).toBe("");
+		expect(run.exitCode).toBe(0);
+	});
+
+	test("it exits 1 and names the gap on stderr when the count differs", () => {
+		const run = cli(
+			JSON.stringify(report(...Array(FLOOR + 1).fill("Survived"), "Killed")),
+		);
+		expect(run.stderr.toString()).toContain(String(FLOOR + 1));
+		expect(run.stdout.toString()).toBe("");
+		expect(run.exitCode).toBe(1);
+	});
+
+	test("it fails when the report is absent rather than passing", () => {
+		const run = cli(null);
+		expect(run.exitCode).not.toBe(0);
 	});
 });
 
