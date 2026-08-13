@@ -44,6 +44,29 @@ const tracked = ls.stdout
 const read = (path: string) => readFileSync(join(root, path), "utf8");
 
 /**
+ * A `/` opens a regex literal only where a value may begin; after one it is
+ * division. The token before it is what tells them apart — a character for
+ * punctuation, a word for the keywords a value may follow.
+ */
+const OPENS_VALUE = "(,=:[!&|?{};+-*%~^<>";
+const OPENS_VALUE_WORDS = new Set([
+	"return",
+	"typeof",
+	"instanceof",
+	"in",
+	"of",
+	"case",
+	"do",
+	"else",
+	"yield",
+	"await",
+	"new",
+	"delete",
+	"void",
+	"throw",
+]);
+
+/**
  * `source` with its comments and regex literals — and, when `strings` is set,
  * its string literals — replaced by spaces, so what is left at a given offset
  * is code and nothing else. Lengths and newlines are preserved, so the result
@@ -53,6 +76,9 @@ const read = (path: string) => readFileSync(join(root, path), "utf8");
  * without knowing what it sits inside is one mistake, and the shapes it takes
  * — an escaped quote ending a string early, a `/*` inside a line comment, a
  * quote inside a regex literal swallowing the rest of the file — are one bug.
+ * A template literal is two things at once, so its text is blanked and its
+ * `${…}` is not: the expression is code, and a read inside one is a read.
+ *
  * Not a parser: the only question asked of each character is what encloses it.
  */
 function blank(source: string, strings: boolean): string {
@@ -63,17 +89,46 @@ function blank(source: string, strings: boolean): string {
 		}
 	};
 
-	// A `/` opens a regex literal only where a value may begin; after one it is
-	// division. The last non-space character is what tells them apart.
-	const OPENS_VALUE = "(,=:[!&|?{};+-*%~^<>";
+	// One entry per template literal currently open, holding the `{` nesting
+	// inside its interpolation, or `null` while its text rather than an
+	// expression is being read. An empty stack is ordinary code.
+	const templates: (number | null)[] = [];
+	let span = 0; // where the template text being blanked started
 	let previous = "";
 	let i = 0;
+
+	const word = (at: number) => {
+		let end = at;
+		while (end < source.length && /[A-Za-z_$]/.test(source[end] as string))
+			end++;
+		return source.slice(at, end);
+	};
 
 	while (i < source.length) {
 		const c = source[i] as string;
 		const next = source[i + 1];
+		const inText = templates.length > 0 && templates.at(-1) === null;
 
-		if (c === "'" || c === '"' || c === "`") {
+		if (inText) {
+			if (c === "\\") {
+				i += 2;
+			} else if (c === "`") {
+				if (strings) erase(span, i);
+				templates.pop();
+				i++;
+				previous = "`";
+			} else if (c === "$" && next === "{") {
+				if (strings) erase(span, i);
+				templates[templates.length - 1] = 0;
+				i += 2;
+				previous = "{";
+			} else {
+				i++;
+			}
+			continue;
+		}
+
+		if (c === "'" || c === '"') {
 			const start = i;
 			i++;
 			while (i < source.length && source[i] !== c) {
@@ -84,12 +139,30 @@ function blank(source: string, strings: boolean): string {
 				// A raw newline cannot sit inside a '' or "" literal, so a quote
 				// that opened no string stops here instead of swallowing the rest
 				// of the file and taking the scan silent with it.
-				if (source[i] === "\n" && c !== "`") break;
+				if (source[i] === "\n") break;
 				i++;
 			}
 			if (source[i] === c) i++;
 			if (strings) erase(start, i);
 			previous = c;
+		} else if (c === "`") {
+			templates.push(null);
+			span = i + 1;
+			i++;
+		} else if (c === "}" && templates.length > 0 && templates.at(-1) === 0) {
+			// The brace that closes the interpolation, so its template's text
+			// resumes here.
+			templates[templates.length - 1] = null;
+			span = i + 1;
+			i++;
+		} else if (c === "{" && templates.length > 0 && templates.at(-1) !== null) {
+			templates[templates.length - 1] = (templates.at(-1) as number) + 1;
+			previous = c;
+			i++;
+		} else if (c === "}" && templates.length > 0 && templates.at(-1) !== null) {
+			templates[templates.length - 1] = (templates.at(-1) as number) - 1;
+			previous = c;
+			i++;
 		} else if (c === "/" && next === "/") {
 			const start = i;
 			while (i < source.length && source[i] !== "\n") i++;
@@ -103,7 +176,9 @@ function blank(source: string, strings: boolean): string {
 			erase(start, i);
 		} else if (
 			c === "/" &&
-			(previous === "" || OPENS_VALUE.includes(previous))
+			(previous === "" ||
+				OPENS_VALUE.includes(previous) ||
+				OPENS_VALUE_WORDS.has(previous))
 		) {
 			const start = i;
 			i++;
@@ -124,6 +199,10 @@ function blank(source: string, strings: boolean): string {
 			if (source[i] === "/") i++;
 			erase(start, i);
 			previous = "/";
+		} else if (/[A-Za-z_$]/.test(c)) {
+			const found = word(i);
+			previous = found;
+			i += found.length;
 		} else {
 			if (c.trim() !== "") previous = c;
 			i++;
@@ -176,6 +255,36 @@ const classes = new Map(
 const readers = tracked
 	.map((path) => [path, reads(path, read(path))] as const)
 	.filter(([, names]) => names.length > 0);
+
+describe("what the scan counts as code", () => {
+	const kept = (source: string) => blank(source, true).includes("s.name");
+
+	// The fixtures are written as template literals so an interpolation can be
+	// escaped into them: a plain string spelling `${` reads as one nobody meant.
+	test.each([
+		["a plain read", "const a = s.name;"],
+		["a read inside a template expression", `const a = \`\${s.name}\`;`],
+		["a read inside a nested template", `const a = \`\${\`\${s.name}\`}\`;`],
+		["a read after an interpolation closes", `const a = \`\${1}\` + s.name;`],
+	])("keeps %s", (_, source) => expect(kept(source)).toBe(true));
+
+	test.each([
+		["a string", "const a = 's.name';"],
+		["a line comment", "// s.name"],
+		["a block comment", "/* s.name */"],
+		["template text", "const a = `text s.name`;"],
+		["a regex literal", "const a = /s.name/;"],
+		["a regex after return", "function f() { return /s.name/; }"],
+		["a regex after an arrow", "const f = () => /s.name/;"],
+		["a regex after typeof", "const a = typeof /s.name/;"],
+	])("drops %s", (_, source) => expect(kept(source)).toBe(false));
+
+	test("a division is not a regex, so what follows it is still code", () => {
+		expect(blank("const a = 1 / 2; const b = s.name;", true)).toContain(
+			"s.name",
+		);
+	});
+});
 
 describe("class names read off a CSS module", () => {
 	// A sweep that found nothing would pass every assertion below vacuously.
