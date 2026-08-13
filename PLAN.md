@@ -83,6 +83,12 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
   `archive/2026-08-13-spec-test-traceability`; capability spec at
   `openspec/specs/spec-test-traceability/`. The floor stands at 380 of 395
   criteria, and it moves only on a line carrying the reason it moved.
+- **`mutation-floor`** — PRs #81 and #82,
+  `archive/2026-08-13-mutation-floor`; capability spec at
+  `openspec/specs/mutation-floor/`. The floor stands at 67 survivors of 267
+  mutants. All 67 were judged and none could be exempted: a disable comment
+  addresses a line and a mutator, and each of the four equivalent mutants
+  shares both with one the tests kill.
 - **`tracked-permission-policy`** — PRs #68 and #69, corrected by #70,
   `archive/2026-08-09-tracked-permission-policy`; both requirements are in
   `openspec/specs/agent-permissions/`. The untracked `settings.local.json`
@@ -90,24 +96,6 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
   its entries means anything about.
 
 ### Open
-- [ ] **`mutation-floor`** — both steps applied, ready to archive. Mutation
-      testing over `src/model.ts` alone, its own CI job, floor set from the
-      first measurement as an absolute survivor count and failing in both
-      directions. The measurement is 267 mutants, 200 killed, 67 surviving, and
-      67 is the floor. `src/types.ts` left out: it holds no branch and no
-      arithmetic, so its only mutants edit constants. The hand-rolled AST
-      mutator is no longer the fallback — TypeScript 7's native port exposes a
-      scanner and no parser, and the scanner mis-reads the template literals
-      `model.ts` is full of, so Stryker's command runner is the tool. `/warm`
-      returned **Keep** against two advisories: CVE-2024-57085 in
-      `@stryker-mutator/util` below 8.7.1, which the exact 9.6.1 pin puts out of
-      range, and GHSA-q8mj-m7cp-5q26 in `qs`, which does reach the tree through
-      `typed-rest-client`'s exact pin and is held off by an `overrides` entry.
-      Stryker needs Node — `bunx` runs it on Bun when none is on `PATH` and the
-      instrumenter dies on `@babel/generator`'s CommonJS default — so
-      `mutation.yml` is the first job here carrying `setup-node`. Two of the
-      eleven criteria have no test by an earlier decision, so archiving raises
-      `spec-coverage`'s floor by two.
 - [ ] **`file-size-cap`** — proposed, eight steps, not yet applied. The
       file-size cap half of "reverse two non-goals": 300 lines for `.ts`/`.tsx`,
       200 for `.css`, adopted with no exemption list because the same change

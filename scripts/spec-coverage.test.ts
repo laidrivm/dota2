@@ -253,7 +253,7 @@ function check(cwd?: string) {
 	};
 }
 
-const FLOOR = 380; // first measurement: nothing in openspec/specs is cited yet
+const FLOOR = 382; // +2: mutation-floor's two criteria about stryker.config.json, whose tests a ponytail-review pass cut because a reviewer reads that file whole
 
 /**
  * This file's own `FLOOR` line — the reason lives on it, so the check reads it
