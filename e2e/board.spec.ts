@@ -87,7 +87,9 @@ for (const { side, reads, mirrored } of [
 
 		const mine = await leftEdge(page, "My team");
 		const enemy = await leftEdge(page, "Enemy team");
-		expect(mine > enemy).toBe(mirrored);
+		// Strict both ways: `mine > enemy` being false would also accept the two
+		// panels sitting at the same x, which is a collapsed grid, not a layout.
+		expect(mirrored ? mine > enemy : mine < enemy).toBe(true);
 	});
 }
 
