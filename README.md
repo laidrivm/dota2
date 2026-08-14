@@ -4,7 +4,8 @@
 
 | File | Owns | Read |
 |------|------|------|
-| `CLAUDE.md` | agent rules, code style, fix & capture loop; indexes `docs/` | every session |
+| `CLAUDE.md` | agent rules, fix & capture loop; indexes `docs/` | every session |
+| `docs/code-style.md` | the ponytail ladder, dependency safety, accessibility | before adding code or a dependency |
 | `docs/api-design.md` | endpoint response contract | when an endpoint changes |
 | `docs/testing.md` | what tests assert, how a test cites the criterion it closes, e2e rules | when tests change |
 | `docs/feature-workflow.md` | the four OpenSpec stages and their gates | on any feature, new tooling, or gate change |
