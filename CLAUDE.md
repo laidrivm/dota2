@@ -52,8 +52,9 @@
   over ARIA-patched divs. Reach for ARIA only where no native element
   exists. Style natives (`appearance: base-select`) instead of rebuilding
   them.
-- Every interactive element is keyboard-reachable and operable; scrollable
-  regions get `::scroll-button` or are focusable.
+- Every interactive element is keyboard-reachable and operable; a scrollable
+  region is operable too — by `::scroll-button`, by being focusable, or by
+  content the tab order scrolls into view.
 - Every image has an `alt` (empty `alt=""` for decorative); every form
   control has an associated label.
 - Dynamic announcements via `role="status"` (`role="alert"` only for
