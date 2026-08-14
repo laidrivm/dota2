@@ -135,6 +135,18 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       mars, slark, spectre, storm-spirit, treant-protector all move light →
       dark. The fix is to reference the tokens; the shortened swatch labels are
       hand-authored, so the pages cannot simply be regenerated.
+- [ ] **A scroll-strip criterion the board does not meet as written.**
+      `openspec/specs/draft-board/spec.md` §*Scroll strips are operable without
+      a pointer* admits two means only, "through scroll buttons or by being
+      focusable", and the bans and suggestion strips have neither: they are
+      operable because every entry carries a focusable control the tab order
+      scrolls into view. Measured on the bans strip at 400px with 12 bans —
+      overflowing 717 against 372, axe's `scrollable-region-focusable` passing,
+      `scrollLeft` 0 → 345 on focusing the last entry. `CLAUDE.md`'s
+      accessibility rule now admits that third means; the criterion still does
+      not, so one of the two has to move. Either the strips gain
+      `::scroll-button`, or a change amends the criterion — which is a delta
+      spec, not an edit here.
 - [ ] **The e2e backlog** — the ~25 **(e2e)** bullets in `draft-board`'s and
       `hero-picker`'s archived task lists, plus one this file owns because no
       task list does: at 720px the board's one-column rules now live in three
