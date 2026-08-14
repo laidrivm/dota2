@@ -79,7 +79,7 @@ reviews:
     - path: "**/*.{ts,tsx}"
       instructions: |
         Apply the rules from /docs/api-design.md, /docs/testing.md, and the
-        "Accessibility" section of /CLAUDE.md. Flag violations of those
+        "Accessibility" section of /docs/code-style.md. Flag violations of those
         rules explicitly, quoting the rule. Do not restate general style
         opinions the linters already cover.
 
