@@ -227,3 +227,46 @@ Three branches, one change, run end to end in one session.
   emitting a CSS module's class-name mapping (found by running e2e, which the
   task list required), and `dist/` growing without bound across a dev session
   (found while reading the diff for the zombies pass)
+
+## 2026-08-15 — feat/file-size-cap-2a, -2b, -2c
+
+- zombies: OPEN — 7 gaps, 5 acted on (2 routed to the e2e backlog: the 720px
+  split, and the a11y tree under `opacity: 0` whose risk the diff did not change)
+- warm: SKIPPED — no dependency manifest changed
+- ponytail-review: 1 finding, 1 acted on — `.remove:focus-visible` was dead once
+  the row's `:focus-within` set the knob, probed with the rule removed
+- triage: PASS — 5 groups, 0 high-risk, 2 medium read, 0 defects
+- coderabbit-local: PASS — 1 finding, 1 dispositioned (0 fixed, 1 skipped)
+- coderabbit (PR #92): OPEN — 3 findings, 1 fixed, 1 rejected, 1 dismissal with
+  the user
+- Not run: code-review, preflight, first-five, review-order
+
+**What the pipeline caught that nothing else would have**
+
+- zombies was the only gate that produced code. The three mechanics the CSS
+  move invented — the `--remove-fade` knob, `.teamsMirrored > :first-child`,
+  and the `data-` walk replacing `closest(".slot, .ban")` — each replaced a
+  working rule and none had a test. `e2e/board.spec.ts` exists because of it
+- Break-checking those five tests is what earned the session's sharpest
+  finding, and it was against my own work: two of them passed with their
+  mechanism broken. The focus test passed through `.remove:focus-visible`
+  instead of the row's knob; the focus-walk test passed through the region
+  fallback, because Carry's entry control is the panel's first either way and
+  the walk never had to reach the row. Both were rewritten to Offlane and to a
+  row hover, and both then failed on cue
+- coderabbit's PR round found the one hole break-checking could not:
+  `expect(mine > enemy).toBe(mirrored)` also accepts `mine === enemy`, so a
+  collapsed grid read as a valid Radiant layout. Collapsing
+  `grid-template-columns` now fails both sides; before, only Dire
+- Its Major was about artefacts, not code, and it was right in substance: the
+  prescribed grep found `openspec/specs/draft-board/spec.md` restating the
+  accessibility rule that was widened, and the divergence was recorded in
+  `PLAN.md` rather than closed. Recording is not reconciling
+- Its third finding was the only rejection: it read the base's `tasks.md`, not
+  the head's, where both step-2 boxes are ticked
+- Two things were found by no gate at all. The diff budget — a measurement, not
+  a review — refused step 2 at 1011 lines against 800 and is why the step
+  became three pull requests. And the seam the task list prescribed would have
+  produced a ~350-line `board.module.css` against the 200-line cap the same
+  change introduces at step 8; that was caught by writing the file and counting
+  it, and became a Process rule
