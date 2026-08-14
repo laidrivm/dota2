@@ -254,7 +254,8 @@ Rules about how work is carried out here. They do not age with the code.
   a change under review — grep the four places that restate one before
   calling the change done: the change's own sibling artefacts,
   `openspec/specs/**`, `PLAN.md`, and the README ownership map. Search the
-  wording of the claim being replaced, never the wording replacing it.
+  wording of the claim being replaced, never the wording replacing it, and
+  reconcile each site in the same change or name the change that will.
 - Re-run the older probe before overwriting a recorded measurement your new
   one contradicts.
 - Execute a pre-written decision rule only on a sample that could have
