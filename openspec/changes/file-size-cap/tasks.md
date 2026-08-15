@@ -1,7 +1,7 @@
 # file-size-cap — tasks
 
 Eight steps in this order, one pull request each unless the step's own note
-says otherwise — four of them say so. Seven of them close no
+says otherwise — five of them say so. Seven of them close no
 acceptance criterion: they are the decomposition the cap costs, and each one
 leaves the application working and every test green. The eighth adds the cap
 and closes all five criteria at once, which is only possible because the seven
@@ -138,16 +138,40 @@ extracts, so no pull request needs an `oversize:` marker to pass the budget.
 
 ## 5. `scripts/command-guard.ts` splits
 
-- [ ] 5.1 Move the shell-line parser — `SEPARATORS`, `commands`, `WRAPPERS`,
+This step ships as three pull requests, not one — the fifth step to take more
+than one, and for the reason step 4 gives: the test file is 595 lines, moving
+one costs it twice, and 595 against a gate that fails at 800 leaves no room for
+the code split beside it. 5.1 and 5.2 are one, being the code change and the
+probe that it still refuses; 5.3 and 5.4 are one each.
+
+The seam is the same one 5.1 cuts, but it does not reach the cap on its own:
+the parser's own cases are 98 lines and the remainder is still ~500. The
+prohibitions divide once more, at the boundary the guard's own reasons already
+draw — a commit or a `gh` write is refused by name, a push by what it would
+reach — so 5.4 takes the push cases.
+
+- [x] 5.1 Move the shell-line parser — `SEPARATORS`, `commands`, `WRAPPERS`,
       `SHELLS`, `invocation` — into `scripts/command-parse.ts`, leaving the git
-      and `gh` prohibitions in `command-guard.ts`
-- [ ] 5.2 Split `scripts/command-guard.test.ts` along the same seam
-- [ ] 5.3 Confirm the hook still blocks, on the terms `CLAUDE.md` sets for
+      and `gh` prohibitions in `command-guard.ts`. `SHELLS` is exported rather
+      than internal: the recursion into a shell's `-c` argument is a
+      prohibition's decision, not the parser's. Final: 245 / 103
+- [x] 5.2 Confirm the hook still blocks, on the terms `CLAUDE.md` sets for
       probing a gate: refuse it with an input this session has not already
       cleared, and report what the call returned rather than what a prompt did.
       One command it must refuse, one it must allow — this file is a safety
       gate, and a refactor that quietly stops refusing is the failure that
-      matters
+      matters. The refusing input carries `--dry-run`, so the probe is a probe
+      either way: allowed, it would have changed nothing
+- [ ] 5.3 Split `scripts/command-guard.test.ts` along the same seam: the two
+      describes that exercise the parser — spellings and quoting — become
+      `scripts/command-parse.test.ts`. The harness both files need, being a
+      fabricated repository and a spawned guard rather than a stub, is lifted to
+      one module rather than copied; `afterAll` stays with each test file, which
+      is where a lifecycle hook registers
+- [ ] 5.4 Move the push describes into `scripts/command-guard-push.test.ts`,
+      leaving the unreadable event, the commit and the `gh` cases behind.
+      Confirm across both extractions that the set of full describe paths is
+      unchanged, per the check `CLAUDE.md` carries
 
 ## 6. `src/app/board/board.tsx` splits
 
