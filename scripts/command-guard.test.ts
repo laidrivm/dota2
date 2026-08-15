@@ -253,6 +253,15 @@ describe("a spelling that walks around a permission pattern", () => {
 		);
 	});
 
+	test("a wrapper option's operand does not become the command", () => {
+		// `env -u PATH git commit` runs git: `-u` takes the next word. Which
+		// options take one cannot be enumerated per wrapper, so every word after
+		// a wrapper is read as a possible command rather than only the first.
+		expect(
+			run(event("env -u PATH git commit -m fix"), fabricate("main")).code,
+		).toBe(2);
+	});
+
 	test("a redirection in front of the command is not the command", () => {
 		expect(
 			run(event(">/tmp/nope git commit -m fix"), fabricate("main")).code,
@@ -324,6 +333,16 @@ describe("quoting that hides the command from a naive tokeniser", () => {
 		// the separator included — was swallowed into one quoted word.
 		expect(
 			run(event('echo "$(true)"; git commit -m fix'), fabricate("main")).code,
+		).toBe(2);
+	});
+
+	test("a group inside a substitution does not close the substitution", () => {
+		// The inner `)` closes the group, not the `$(`. Restoring the enclosing
+		// quote there put the rest of the substitution back inside quotes, and
+		// the commit went unchecked.
+		expect(
+			run(event('echo "$( ( true ); git commit -m fix )"'), fabricate("main"))
+				.code,
 		).toBe(2);
 	});
 
@@ -410,6 +429,14 @@ describe("force-pushing", () => {
 	test("a lease with a value blocks", () => {
 		expect(
 			run(event("git push --force-with-lease=feat/x:abc123"), branch()).code,
+		).toBe(2);
+	});
+
+	test("a dry run does not exempt a force", () => {
+		// What a probe of this gate is run with, so it stays a probe: the flag
+		// decides, not whether the push would have changed anything.
+		expect(
+			run(event("git push --dry-run --force-with-lease"), branch()).code,
 		).toBe(2);
 	});
 
