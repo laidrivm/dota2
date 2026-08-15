@@ -70,6 +70,11 @@ None.
   capability already owns "how work is cut into pull requests, and how a cut
   that failed is detected"; a file nobody can read whole is the same failure
   measured on the other axis.
+- `module-boundaries`: one scenario only. Its cycle ban is illustrated with
+  `src/app/session.ts` importing `board.tsx`, "which already imports
+  `src/app/session.ts`" — and step 6 moves that import to
+  `src/app/board/pieces.tsx`, so the example is restated there. The
+  requirement itself is untouched.
 
 `app-shell` is deliberately **not** modified. Its "Style values come from
 design tokens" requirement already scopes itself to "the app's CSS outside
@@ -119,7 +124,8 @@ implementing it has to stop enumerating a directory.
   `design.md`. And `src/app/module-classes.test.ts` with `scripts/scan.ts`
   behind it, which check that a component reads only names its module defines —
   opened separately and merged into step 1's own pull request rather than
-  landing behind it.
+  landing behind it. And `src/app/board/pieces.tsx`, which step 6 assumed
+  `board.tsx` would keep — it cannot, and `design.md` records why.
 - Deleted: `src/app/styles/app.css`.
 - Modified: `src/types.ts`, which takes `MAX_ENEMY_PICKS` when the keyboard
   layer leaves `session.ts` and the two would otherwise have to import each
@@ -129,7 +135,8 @@ implementing it has to stop enumerating a directory.
   and asserts on the single emitted stylesheet), `server.ts`, `package.json`,
   `playwright.config.ts`, `README.md`'s ownership map and its "Running it"
   section, `PLAN.md`'s bundler constraint, and
-  `openspec/specs/change-slicing/`.
+  `openspec/specs/change-slicing/` and one scenario of
+  `openspec/specs/module-boundaries/`.
 - The e2e suite is the safety net for the CSS migration, and it is a usable
   one: `docs/testing.md` forbids CSS and class selectors in e2e, and a grep of
   `e2e/smoke.spec.ts` finds none, so scoped class names cannot break a locator.

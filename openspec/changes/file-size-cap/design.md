@@ -149,6 +149,29 @@ repository minus `tokens/`, so a stylesheet added anywhere is covered by
 default. The same test also gains the guard that its own sweep found more than
 zero files.
 
+### The board's shared pieces get a module, not a home in `board.tsx`
+
+The task list had `board.tsx` keep `PickEntry`, `RemoveButton`, `RepickBadge`
+and `ThinBadge` — the pieces more than one panel is built from — while the
+panels moved out. That cannot stand: `board.tsx` imports every panel, so a
+panel importing a piece back out of it is a cycle, and `noImportCycles` is an
+error here. The choice is between a fifth module and passing four components
+down as props, and the second is an abstraction bought to avoid a file.
+
+`src/app/board/pieces.tsx` is that module, and it is the one every other file
+in the directory depends on. The two helpers that look like they belong beside
+it do not: `sideClass` is read by the two team panels and `toneClass` by
+suggestions and the result, so each has exactly one destination and travels
+with it. A piece is shared when two files that do *not* leave together read it.
+
+It costs one live spec a scenario. `module-boundaries` illustrates the cycle
+ban with `src/app/session.ts` importing `board.tsx`, "which already imports
+`src/app/session.ts`" — and after this step `board.tsx` does not: the types it
+took from there left with the pieces. The probe as written would report no
+cycle and the scenario would read as a failure of the rule rather than of the
+example, so the delta spec beside this one moves it to `pieces.tsx`, which is
+where that import went.
+
 ### `spec-coverage` gives up its implementation before its tests are cut
 
 It is the largest file in the tree and the seam is not a matter of taste. Its
