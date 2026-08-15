@@ -52,12 +52,31 @@ describe("every manifest-mutating invocation prompts", () => {
 	test("the alias bun documents for each command is gated too", () => {
 		// Read from the binary, so an upgrade that renames an alias fails here
 		// rather than silently leaving a manifest write ungated. Only the one
-		// alias per command that `--help` prints is discoverable this way.
-		for (const command of ["add", "install", "remove"]) {
+		// alias per command that `--help` prints is discoverable this way, and
+		// several gated commands print none — those are skipped rather than
+		// enumerated out, so a command that gains an alias is covered the day
+		// it does.
+		//
+		// The commands come from the gated list itself rather than a list
+		// written here: an entry added above would otherwise have its alias
+		// unchecked, which is the hole this test exists to close.
+		const commands = [
+			...new Set(
+				bashAsk
+					.map((entry) => /^Bash\(bun (\S+)/.exec(entry)?.[1])
+					.filter((command) => command !== undefined),
+			),
+		];
+		let found = 0;
+		for (const command of commands) {
 			const alias = bunHelp(command).match(/^Alias: bun (\S+)$/m)?.[1];
-			expect(alias).toBeTruthy();
+			if (alias === undefined) continue;
+			found++;
 			expect(ask).toContain(`Bash(bun ${alias} *)`);
 		}
+		// A bun that stopped printing aliases would skip every command and
+		// pass every assertion above vacuously.
+		expect(found).toBeGreaterThan(0);
 	});
 
 	test("every top-level form still resolves to a manifest write", () => {
