@@ -125,13 +125,16 @@ extracts, so no pull request needs an `oversize:` marker to pass the budget.
       present, and presence let `side` through as `undefined`, which the screen
       choice — asking `side === null` — reads as a set-up session and answers
       with the board. It now checks each field against its own domain
-- [ ] 4.2 Split `src/app/session.test.ts` along the same seam; every file
+- [x] 4.2 Split `src/app/session.test.ts` along the same seam; every file
       lands at 300 lines or fewer, the cap being inclusive, or the seam was
       wrong. Four files, because the module split was three and the remainder
-      was still ~500: `hotkeys.test.ts`, `session-storage.test.ts`,
-      `session.test.ts` (the reducer) and `session-undo.test.ts` (reset and the
-      undo window, plus the round trip that needs both the reducer and a
-      storage stub). Confirm the test count is unchanged at each extraction
+      was still ~500: `hotkeys.test.ts` (241), `session-storage.test.ts` (166),
+      `session.test.ts` (281, the reducer) and `session-undo.test.ts` (247,
+      reset and the undo window, plus the round trip that needs both the
+      reducer and a storage stub). Confirm at each extraction that no test was
+      lost — by the full describe path of every test, not by the count: a block
+      absorbed into its neighbour because a closing brace moved with the text
+      above it runs exactly as many tests as before, and twice did
 
 ## 5. `scripts/command-guard.ts` splits
 
