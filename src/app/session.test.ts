@@ -152,8 +152,14 @@ describe("restore", () => {
 		expect(() => {
 			session = restore();
 		}).not.toThrow();
-		expect(session?.side).toBeNull();
-		expect(session?.myRole).toBeNull();
+		// The whole session, not `side` and `myRole` alone: a stored value may
+		// carry those two correctly and be malformed elsewhere, and asking only
+		// about them passes whether the value was discarded or handed back.
+		// `createdAt` is the one field a fresh session sets to now.
+		expect(session).toEqual({
+			...EMPTY_SESSION(),
+			createdAt: session?.createdAt as string,
+		});
 	});
 
 	test("an unreadable storage still yields a session", () => {
