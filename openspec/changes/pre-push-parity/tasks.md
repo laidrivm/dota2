@@ -1,9 +1,10 @@
 # pre-push-parity — tasks
 
-One step, so one pull request, on `feat/pre-push-parity`. It closes all four of
-the `commit-gates` criteria and both restatements; the other two steps' worth of
-work does not exist because the change is one line of `package.json` and the
-specifications that bind it.
+One step, so one pull request, on `feat/pre-push-parity` — the implementation
+branch, this proposal's own being `spec/pre-push-parity`. The four groups below
+are that step's tasks, not four steps: the change is one line of
+`package.json`, the tests over it, and the specifications that bind it. It
+closes all five of the `commit-gates` criteria and both restatements.
 
 **Ordering.** This change SHALL archive after `file-size-cap`, for the reason
 `design.md` gives: both carry a `MODIFIED` delta on `mutation-floor`'s first
@@ -48,21 +49,52 @@ defect that started this.
       estimate of 17 s. Re-run the older measurement if the new one contradicts
       it, per the rule
 
-## 3. The list gets one home
+## 3. The tests derived from /zombies
 
-- [ ] 3.1 Update `README.md`'s hook section: it names two of the three checks
+The `/zombies` pass over this proposal is where these come from; its numbering
+is kept so a reader can find the item each one closes. They land in
+`commit-gates.test.ts`, which already drives the pre-commit hook with stubbed
+binaries on a `PATH` — the same harness this half needs, and the reason no new
+one is written.
+
+- [ ] 3.1 With neither optional binary on `PATH`, the hook exits 0 and names
+      neither tool [1] (*A tool the machine does not have*)
+- [ ] 3.2 `gitleaks` present and reporting a finding exits non-zero [9], and
+      `actionlint` present and reporting a workflow error exits non-zero [10].
+      The shape that breaks both is `command -v … && tool …`, which swallows
+      the failure — the pre-commit half already guards its own case that way
+      (*A tool the machine has, reporting a finding*)
+- [ ] 3.3 A surviving-mutant count above the floor exits non-zero [8] (*A gate
+      that CI would fail blocks the push instead*)
+- [ ] 3.4 A branch at exactly 800 counted lines exits 0 from the hook [5], the
+      same count that fails the CI check (*The budget is still soft*)
+- [ ] 3.5 With two gates failing, the hook stops at the first and names it [4,
+      7] — `&&` chaining is what makes the message name one gate
+- [ ] 3.6 The hook on disk at `.git/hooks/pre-push` matches `package.json`
+      after `bun run prepare` [13] — the file is what runs, and the two drift
+      silently
+- [ ] 3.7 Dispositioned without a test, with the reason: [2] the report
+      deletion is asserted by 3.3 reaching a verdict at all; [3] and [6] are the
+      happy path and the exit-code contract, which every case above rests on and
+      none can pass without; [11] a missing `node` is a tool problem the
+      `design.md` risk names and a stub cannot reproduce faithfully; [12] a
+      missing script is caught by the suite that runs those scripts
+
+## 4. The list gets one home
+
+- [ ] 4.1 Update `README.md`'s hook section: it names two of the three checks
       the hook runs today and will name none of the four added. It is the
       ownership map's entry point for a clone, so it links to `commit-gates`
       rather than restating the list (*The list has one home*)
-- [ ] 3.2 Grep the four places a claim like this is restated — this change's
+- [ ] 4.2 Grep the four places a claim like this is restated — this change's
       sibling artefacts, `openspec/specs/**`, `PLAN.md`, and the README
       ownership map — searching the wording being replaced (`type check and
       \`bun test\` only`, `its own CI job`), not the wording replacing it
-- [ ] 3.3 Record in `PLAN.md` that this change archives after `file-size-cap`,
+- [ ] 4.3 Record in `PLAN.md` that this change archives after `file-size-cap`,
       so the ordering survives a session boundary rather than living only in
       `design.md`
 
-## 4. The criteria this change carries but does not implement
+## 5. The criteria this change carries but does not implement
 
 The two `MODIFIED` deltas restate whole requirements, so they carry scenarios
 this change does not touch. Each is confirmed still true rather than cited for
@@ -70,14 +102,14 @@ work that does not exist — a citation for a criterion nothing implements is
 bookkeeping, and the two that describe CI-only behaviour are named here as not
 being this change's to verify.
 
-- [ ] 4.1 Confirm the push path still starts no browser: no Playwright binary
+- [ ] 5.1 Confirm the push path still starts no browser: no Playwright binary
       is spawned by the hook, checked by running it and looking for the process
       rather than by reading the command (*The push path starts no browser*)
-- [ ] 4.2 Confirm the mutation gate still kills the same set after the hook
+- [ ] 5.2 Confirm the mutation gate still kills the same set after the hook
       change — the survivor count is the floor, not merely below it (*A mutant
       the tests assert against*, *The suite is the only killer*, *The model's
       tests move to another file*)
-- [ ] 4.3 `smoke-suite`'s *A green run uploads nothing* is CI workflow
+- [ ] 5.3 `smoke-suite`'s *A green run uploads nothing* is CI workflow
       behaviour this change does not touch and cannot exercise from a hook. It
       is carried by the delta because `MODIFIED` takes whole requirements, and
       no task claims it
