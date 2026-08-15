@@ -7,27 +7,52 @@
  * reducer, so it imports nothing from `session.ts`.
  */
 
-import { EMPTY_SESSION, ROLES, type Session } from "../types.ts";
+import {
+	EMPTY_SESSION,
+	type HeroId,
+	ROLES,
+	type Role,
+	type Session,
+} from "../types.ts";
 import { read, remove, write } from "./storage.ts";
 
 export const SESSION_KEY = "draft.session";
 export const BACKUP_KEY = "draft.backup";
 
 /**
- * A stored session is only usable if every field the UI indexes is there —
- * a `{"v":1}` fragment would restore fine and then break the first slot
- * that reads `teamPicks`.
+ * A stored session is only usable if every field the UI reads holds a value the
+ * UI's own comparisons recognise. Presence is not enough: a fragment without
+ * `side` restores it as `undefined`, and the screen choice asks `side === null`,
+ * so the board opens over a session that never chose a side.
+ *
+ * Hence every scalar is checked against its own domain and every list against
+ * its members, and `teamPicks` is rejected when it is an array — indices `1` to
+ * `5` answer `in` exactly as the role keys do.
  */
+const isHeroId = (value: unknown): value is HeroId => typeof value === "number";
+
 function isSession(value: unknown): value is Session {
 	if (typeof value !== "object" || value === null || Array.isArray(value)) {
 		return false;
 	}
 	const s = value as Partial<Session>;
 	if (s.v !== 1) return false;
-	if (!Array.isArray(s.bans) || !Array.isArray(s.enemyPicks)) return false;
+	if (typeof s.createdAt !== "string") return false;
+	if (s.side !== null && s.side !== "radiant" && s.side !== "dire")
+		return false;
+	if (s.myRole !== null && !ROLES.includes(s.myRole as Role)) return false;
+	if (!Array.isArray(s.bans) || !s.bans.every(isHeroId)) return false;
+	if (!Array.isArray(s.enemyPicks) || !s.enemyPicks.every(isHeroId)) {
+		return false;
+	}
 	const picks: unknown = s.teamPicks;
-	if (typeof picks !== "object" || picks === null) return false;
-	return ROLES.every((role) => `${role}` in picks);
+	if (typeof picks !== "object" || picks === null || Array.isArray(picks)) {
+		return false;
+	}
+	return ROLES.every((role) => {
+		const slot = (picks as Record<string, unknown>)[`${role}`];
+		return `${role}` in picks && (slot === null || isHeroId(slot));
+	});
 }
 
 /** Anything we cannot read back as a v1 session is treated as no session. */
