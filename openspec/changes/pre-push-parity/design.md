@@ -4,7 +4,7 @@
 
 The pre-push hook is one line in `package.json`, run by `simple-git-hooks`:
 
-```
+```sh
 bun run typecheck && bun test --pass-with-no-tests && { bash scripts/diff-budget.sh || true; }
 ```
 
