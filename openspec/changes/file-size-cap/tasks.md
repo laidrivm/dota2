@@ -118,7 +118,13 @@ extracts, so no pull request needs an `oversize:` marker to pass the budget.
       `ROLE_KEYS` through the seam, which moved `MAX_ENEMY_PICKS` to
       `types.ts`. `hotkeys.ts` takes `PickTarget` type-only, which is what
       keeps the two modules off `noImportCycles` — verified by adding a value
-      import and watching the linter report both. Final: 137 / 257 / 69
+      import and watching the linter report both. Final: 137 / 257 / 69.
+      The move is behaviour-preserving with one exception, which a CodeRabbit
+      finding on the pull request forced and which is a fix rather than a
+      decomposition: `isSession` checked that the keys the UI indexes were
+      present, and presence let `side` through as `undefined`, which the screen
+      choice — asking `side === null` — reads as a set-up session and answers
+      with the board. It now checks each field against its own domain
 - [ ] 4.2 Split `src/app/session.test.ts` along the same seam; every file
       lands at 300 lines or fewer, the cap being inclusive, or the seam was
       wrong. Four files, because the module split was three and the remainder

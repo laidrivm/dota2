@@ -103,6 +103,42 @@ describe("restore", () => {
 			"a v1 session whose bans are not a list",
 			'{"v":1,"bans":null,"enemyPicks":[],"teamPicks":{"1":null,"2":null,"3":null,"4":null,"5":null}}',
 		],
+		// An array answers `in` for "1" through "5" exactly as the role keys do,
+		// so key presence alone lets one through as the five slots.
+		[
+			"a v1 session whose teamPicks is an array",
+			'{"v":1,"createdAt":"2026-08-15T00:00:00.000Z","side":null,"myRole":null,"bans":[],"enemyPicks":[],"teamPicks":[0,1,2,3,4,5]}',
+		],
+		// Absent, not null: the screen choice asks `side === null`, so restoring
+		// this as `undefined` opens the board over a session with no side.
+		[
+			"a v1 session with no side",
+			'{"v":1,"createdAt":"2026-08-15T00:00:00.000Z","myRole":null,"bans":[],"enemyPicks":[],"teamPicks":{"1":null,"2":null,"3":null,"4":null,"5":null}}',
+		],
+		[
+			"a v1 session with no myRole",
+			'{"v":1,"createdAt":"2026-08-15T00:00:00.000Z","side":null,"bans":[],"enemyPicks":[],"teamPicks":{"1":null,"2":null,"3":null,"4":null,"5":null}}',
+		],
+		[
+			"a v1 session with no createdAt",
+			'{"v":1,"side":null,"myRole":null,"bans":[],"enemyPicks":[],"teamPicks":{"1":null,"2":null,"3":null,"4":null,"5":null}}',
+		],
+		[
+			"a v1 session whose side is not a side",
+			'{"v":1,"createdAt":"2026-08-15T00:00:00.000Z","side":"purple","myRole":null,"bans":[],"enemyPicks":[],"teamPicks":{"1":null,"2":null,"3":null,"4":null,"5":null}}',
+		],
+		[
+			"a v1 session whose myRole is not a role",
+			'{"v":1,"createdAt":"2026-08-15T00:00:00.000Z","side":null,"myRole":9,"bans":[],"enemyPicks":[],"teamPicks":{"1":null,"2":null,"3":null,"4":null,"5":null}}',
+		],
+		[
+			"a v1 session whose bans hold something other than a hero id",
+			'{"v":1,"createdAt":"2026-08-15T00:00:00.000Z","side":null,"myRole":null,"bans":["oops"],"enemyPicks":[],"teamPicks":{"1":null,"2":null,"3":null,"4":null,"5":null}}',
+		],
+		[
+			"a v1 session whose team slot holds something other than a hero id",
+			'{"v":1,"createdAt":"2026-08-15T00:00:00.000Z","side":null,"myRole":null,"bans":[],"enemyPicks":[],"teamPicks":{"1":"x","2":null,"3":null,"4":null,"5":null}}',
+		],
 	])("discards %s for an empty session", (_label, raw) => {
 		store.set(SESSION_KEY, raw);
 
