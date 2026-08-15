@@ -76,7 +76,7 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
   spec at `openspec/specs/mutation-floor/`.
 
 ### Open
-- [ ] **`file-size-cap`** — proposed, eight steps, the first two applied, the
+- [ ] **`file-size-cap`** — proposed, eight steps, the first three applied, the
       second across three pull requests, one stylesheet each. The
       file-size cap half of "reverse two non-goals": 300 lines for `.ts`/`.tsx`,
       200 for `.css`, adopted with no exemption list because the same change
@@ -88,7 +88,11 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       the cap lands in the living `change-slicing` spec. Step 1 cost a change
       to how the application is served, which shipped beside it: Bun's HTML dev
       server cannot emit a CSS module's class-name mapping, so development
-      builds and serves `dist/` — the constraint below carries it.
+      builds and serves `dist/` — the constraint below carries it. Step 3 left
+      no global class layer: `styles.css` is tokens and `base.css`, and the
+      no-colour-literal sweep now reads every tracked `*.css` rather than one
+      directory, so `app-shell`'s *No third-party runtime requests* is checked
+      over component stylesheets it previously never saw.
 - [ ] **The comment scan goes quiet on a regex literal.** A backtick inside one
       — `` /[`]/ `` — opens what `scripts/mutation-floor.ts:183-199` takes for a
       template literal and runs to end of input, so every comment below it is
