@@ -270,3 +270,58 @@ Three branches, one change, run end to end in one session.
   produced a ~350-line `board.module.css` against the 200-line cap the same
   change introduces at step 8; that was caught by writing the file and counting
   it, and became a Process rule
+
+## 2026-08-15 — file-size-cap steps 3 and 4 (feat/file-size-cap-3, spec/file-size-cap-late-arrivals, feat/file-size-cap-4a to -4d, fix/session-storage-max-import)
+
+Seven branches, so the counts below are the session's totals with the branch
+named where one gate carried the whole result.
+
+- zombies: PASS — 3 gaps on step 3, 1 acted on (the reverse module-class check:
+  a class a module defines that nothing reads); 2 routed to `PLAN.md`'s rule of
+  two. 0 gaps on every branch after, all of them pure moves
+- warm: SKIPPED on all seven — no dependency manifest changed
+- ponytail-review: 2 findings, 1 acted on (a per-module `Map.groupBy` rebuilt a
+  Set inside every case; one keyed set replaced it). 1 skipped — the tracked-file
+  sweep's third copy, recorded in `PLAN.md` rather than lifted inside a step
+  about stylesheets
+- triage: PASS on all seven — 2 defects, both in artefacts and both found by the
+  grep the gate mandates: `PLAN.md` still said "the first two applied", and the
+  step-7 note claimed 7.4 and 7.5 "each move more than the other three
+  combined", false of either file (891 and 551 against 1238)
+- coderabbit-local: PASS on six, OPEN on 4a — 6 findings across the session,
+  4 dispositioned as fixed, 1 rejected, 1 skipped
+- coderabbit (PR #96): PASS — 2 findings, 1 fixed, 1 rejected
+- Not run: code-review, preflight, first-five, review-order
+
+**What the pipeline caught that nothing else would have**
+
+- `coderabbit` on PR #96 produced the session's only user-visible defect, and no
+  local gate came near it. `isSession` checked that the keys the UI indexes were
+  present, so a stored fragment without `side` restored it as `undefined`; the
+  screen choice asks `side === null`, so the board opened over a session that
+  never chose a side — against `app-shell` §*Offline start on a warm cache*. An
+  array passed as `teamPicks` too, indices 1 to 5 answering `in` as the role keys
+  do. Both were pre-existing and both were moved verbatim by the step, which is
+  why every "the diff changed no behaviour" check stayed quiet
+- `coderabbit-local` on 4c turned `toEqual` into `toStrictEqual` in the discard
+  assertion. Small, and the reason is not: `toEqual` treats a key holding
+  `undefined` as absent, so the assertion written to catch a half-validated
+  session was the one comparison willing to overlook one
+- `triage` earned its place twice, both times through the grep rather than
+  through reading code
+
+**What no gate caught**
+
+- `main` arrived broken. A CodeRabbit suggestion accepted through GitHub's
+  button added `enemyPicks.length > MAX_ENEMY_PICKS` without the import; the
+  button commits without running `pre-push`, so `tsc` failed and five tests died
+  on the ReferenceError. Found by running the checks on a fresh `main` before
+  branching, not by any review skill
+- Two structural breaks in the test split. A line-range cut took the closing
+  brace of the neighbouring `describe` with it, eight blocks folded into one,
+  and the suite reported 768 either way. Caught by comparing full describe paths
+  by hand; that comparison is now a Process rule in `CLAUDE.md`, and step 7.6
+  was rewritten to ask for paths instead of the count
+- The discard tests asserted only `side` and `myRole`, and four fixtures store
+  both correctly — so those cases passed whether the session was discarded or
+  handed back. Found by removing a guard clause and watching nothing fail
