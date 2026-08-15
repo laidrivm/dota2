@@ -22,7 +22,7 @@ export function cleanup(): void {
 	made.length = 0;
 }
 
-export function git(cwd: string, ...args: string[]): void {
+function git(cwd: string, ...args: string[]): void {
 	const run = Bun.spawnSync(["git", ...args], { cwd });
 	if (run.exitCode !== 0) throw new Error(run.stderr.toString());
 }
