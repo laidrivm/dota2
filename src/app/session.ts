@@ -9,15 +9,26 @@ import { useEffect, useRef, useState } from "preact/hooks";
 import {
 	EMPTY_SESSION,
 	type HeroId,
+	MAX_ENEMY_PICKS,
 	ROLES,
 	type Role,
 	type Session,
 	type Side,
 } from "../types.ts";
-import { read, remove, write } from "./storage.ts";
-
-export const SESSION_KEY = "draft.session";
-export const BACKUP_KEY = "draft.backup";
+import {
+	type HotkeyContext,
+	hotkeyContext,
+	hotkeyFor,
+	ownsKeystroke,
+	pickerHotkey,
+} from "./hotkeys.ts";
+import {
+	clearBackup,
+	persist,
+	readBackup,
+	restore,
+	writeBackup,
+} from "./session-storage.ts";
 
 /** Every way the draft can change. The picker in proposal 2c dispatches
  * these same actions, so it adds a trigger and not a second write path. */
@@ -30,98 +41,6 @@ export type Action =
 	| { kind: "teamClear"; role: Role }
 	| { kind: "enemyAdd"; hero: HeroId }
 	| { kind: "enemyRemove"; index: number };
-
-/** The two actions a keystroke can produce. */
-export type Hotkey = Extract<Action, { kind: "side" | "role" }>;
-
-/** Just the parts of a keystroke the hotkey layer reads, so it is testable
- * without a DOM. */
-export type Keystroke = Pick<
-	KeyboardEvent,
-	"key" | "ctrlKey" | "metaKey" | "altKey"
->;
-
-const SIDE_KEYS: Record<string, Side> = { r: "radiant", d: "dire" };
-
-const ROLE_KEYS: Record<string, Role> = {
-	"1": 1,
-	"2": 2,
-	"3": 3,
-	"4": 4,
-	"5": 5,
-	c: 1,
-	m: 2,
-	o: 3,
-	s: 4,
-	f: 5,
-};
-
-/**
- * Where a keystroke lands (screens-spec §5). Side and role keys belong to
- * Setup and to the header editor; on the board the same keys open the picker
- * for a slot instead, and while a modal is up nothing outside it fires.
- */
-export type HotkeyContext = "modal" | "setup" | "editor" | "board";
-
-/**
- * The topmost active context. A modal `<dialog>` still bubbles its keystrokes
- * to the document listener underneath, so it has to be asked about first.
- */
-export function hotkeyContext(
-	session: Session,
-	editorOpen: boolean,
-	modalOpen: boolean,
-): HotkeyContext {
-	if (modalOpen) return "modal";
-	if (editorOpen) return "editor";
-	return session.side === null || session.myRole === null ? "setup" : "board";
-}
-
-const unmodified = (event: Keystroke) =>
-	!(event.ctrlKey || event.metaKey || event.altKey);
-
-/**
- * A focused control that reads characters itself owns the keystroke — a
- * `<select>` types ahead, and the picker's search field in 2c will too.
- * Radios and checkboxes are excluded: the side and role chips are radios, and
- * they are the very controls these hotkeys exist to drive.
- */
-export function ownsKeystroke(
-	target: {
-		tagName?: string;
-		type?: string;
-		isContentEditable?: boolean;
-	} | null,
-): boolean {
-	if (target === null) return false;
-	if (target.isContentEditable === true) return true;
-	if (target.tagName === "SELECT" || target.tagName === "TEXTAREA") return true;
-	const type = target.type?.toLowerCase();
-	return target.tagName === "INPUT" && type !== "radio" && type !== "checkbox";
-}
-
-/** `Esc` leaves the header editor; 2c gives it the picker and the dialog. */
-export const closesEditor = (event: Keystroke): boolean =>
-	event.key === "Escape" && unmodified(event);
-
-/**
- * A modified keystroke belongs to the browser, not to us — Cmd+R has to stay
- * a reload.
- */
-export function hotkeyFor(
-	event: Keystroke,
-	context: HotkeyContext,
-): Hotkey | null {
-	if ((context !== "setup" && context !== "editor") || !unmodified(event)) {
-		return null;
-	}
-	const key = event.key.toLowerCase();
-	const side = SIDE_KEYS[key];
-	if (side) return { kind: "side", side };
-	const role = ROLE_KEYS[key];
-	if (role) return { kind: "role", role };
-	return null;
-}
 
 /** Where a hero sits, if anywhere — and the word the picker prints on it. */
 export type Used = "ban" | "team" | "enemy" | null;
@@ -142,8 +61,6 @@ export function usedAs(session: Session, hero: HeroId): Used {
 export const isUsed = (session: Session, hero: HeroId): boolean =>
 	usedAs(session, hero) !== null;
 
-const MAX_ENEMY_PICKS = 5;
-
 /** Which position the picker is being opened for (screens-spec §3). */
 export type PickTarget =
 	| { kind: "ban" }
@@ -158,33 +75,6 @@ export type Position = "ban" | "enemy" | `team-${Role}`;
 
 export const positionOf = (target: PickTarget): Position =>
 	target.kind === "team" ? `team-${target.role}` : target.kind;
-
-/**
- * What the board's own keys do (screens-spec §5): open the picker for a
- * position rather than change the session. A position that cannot take a hero
- * opens nothing — the picker would have no action to dispatch.
- *
- * Kept apart from `hotkeyFor` because a UI intent and a session mutation are
- * different things; the caller picks between them on the context.
- */
-export function pickerHotkey(
-	event: Keystroke,
-	session: Session,
-	banLimit: number,
-): PickTarget | null {
-	if (!unmodified(event)) return null;
-	const key = event.key.toLowerCase();
-	if (key === "b") {
-		return session.bans.length >= banLimit ? null : { kind: "ban" };
-	}
-	if (key === "e") {
-		return session.enemyPicks.length >= MAX_ENEMY_PICKS
-			? null
-			: { kind: "enemy" };
-	}
-	const role = ROLE_KEYS[key];
-	return role ? { kind: "team", role } : null;
-}
 
 const removeAt = <T>(list: T[], index: number): T[] =>
 	index < 0 || index >= list.length ? list : list.filter((_, i) => i !== index);
@@ -278,61 +168,6 @@ export const closesUndoWindow = (
 	(action.kind === "banAdd" ||
 		action.kind === "teamSet" ||
 		action.kind === "enemyAdd");
-
-/**
- * A stored session is only usable if every field the UI indexes is there —
- * a `{"v":1}` fragment would restore fine and then break the first slot
- * that reads `teamPicks`.
- */
-function isSession(value: unknown): value is Session {
-	if (typeof value !== "object" || value === null || Array.isArray(value)) {
-		return false;
-	}
-	const s = value as Partial<Session>;
-	if (s.v !== 1) return false;
-	if (!Array.isArray(s.bans) || !Array.isArray(s.enemyPicks)) return false;
-	const picks: unknown = s.teamPicks;
-	if (typeof picks !== "object" || picks === null) return false;
-	return ROLES.every((role) => `${role}` in picks);
-}
-
-/** Anything we cannot read back as a v1 session is treated as no session. */
-export function restore(): Session {
-	const raw = read(SESSION_KEY);
-	if (raw === null) return EMPTY_SESSION();
-	try {
-		const parsed: unknown = JSON.parse(raw);
-		return isSession(parsed) ? parsed : EMPTY_SESSION();
-	} catch {
-		return EMPTY_SESSION();
-	}
-}
-
-export function persist(session: Session): void {
-	write(SESSION_KEY, JSON.stringify(session));
-}
-
-/**
- * The one draft an undo can bring back (US-24). Persisted rather than held in
- * memory so a reload inside the toast window does not strand the draft; read
- * back through the same check as the session, because an undo offering a
- * broken draft is worse than no undo.
- */
-export function readBackup(): Session | null {
-	const raw = read(BACKUP_KEY);
-	if (raw === null) return null;
-	try {
-		const parsed: unknown = JSON.parse(raw);
-		return isSession(parsed) ? parsed : null;
-	} catch {
-		return null;
-	}
-}
-
-export const writeBackup = (session: Session): void =>
-	write(BACKUP_KEY, JSON.stringify(session));
-
-export const clearBackup = (): void => remove(BACKUP_KEY);
 
 export function useSession({
 	banLimit,

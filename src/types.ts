@@ -33,6 +33,9 @@ export type PickPhase = "p1" | "p2" | "last";
 
 export const ROLES: readonly Role[] = [1, 2, 3, 4, 5] as const;
 
+/** A team is five heroes, so five is what the enemy side can hold. */
+export const MAX_ENEMY_PICKS = 5;
+
 // ---------------------------------------------------------------------------
 // 1. Snapshot bundle (published data, immutable)
 
