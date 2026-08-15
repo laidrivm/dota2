@@ -10,6 +10,7 @@
 import {
 	EMPTY_SESSION,
 	type HeroId,
+	MAX_ENEMY_PICKS,
 	ROLES,
 	type Role,
 	type Session,
