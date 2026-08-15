@@ -17,9 +17,10 @@ import {
 
 afterAll(cleanup);
 
-describe("force-pushing", () => {
-	const branch = () => fabricate("feat/x");
+/** Every push case runs from a branch, unless it is about pushing from main. */
+const branch = () => fabricate("feat/x");
 
+describe("force-pushing", () => {
 	test("the flag last still blocks", () => {
 		const { code, reason } = run(
 			event("git push origin feat/x --force"),
@@ -115,8 +116,6 @@ describe("force-pushing", () => {
 });
 
 describe("a push whose destination is main", () => {
-	const branch = () => fabricate("feat/x");
-
 	test("named by refspec", () => {
 		const { code, reason } = run(event("git push origin HEAD:main"), branch());
 		expect(code).toBe(2);
@@ -147,8 +146,6 @@ describe("a push whose destination is main", () => {
 });
 
 describe("a push whose destination cannot be bounded", () => {
-	const branch = () => fabricate("feat/x");
-
 	test("the matching refspec", () => {
 		const { code, reason } = run(event("git push origin :"), branch());
 		expect(code).toBe(2);
@@ -189,28 +186,26 @@ describe("a push whose destination cannot be bounded", () => {
 });
 
 describe("a push while HEAD is on main", () => {
-	const branch = () => fabricate("main");
+	const onMain = () => fabricate("main");
 
 	test("with no refspec at all", () => {
-		const { code, reason } = run(event("git push"), branch());
+		const { code, reason } = run(event("git push"), onMain());
 		expect(code).toBe(2);
 		expect(reason).toContain("never pushes from there");
 	});
 
 	test("aimed at a feature branch", () => {
-		expect(run(event("git push origin feat/x"), branch()).code).toBe(2);
+		expect(run(event("git push origin feat/x"), onMain()).code).toBe(2);
 	});
 
 	test("behind an option whose value is a separate word", () => {
 		// The form an operand split misreads: `ci.skip` is read as the
 		// repository and `origin` as the only refspec, and the push passes.
-		expect(run(event("git push -o ci.skip origin"), branch()).code).toBe(2);
+		expect(run(event("git push -o ci.skip origin"), onMain()).code).toBe(2);
 	});
 });
 
 describe("pushes the destination check must not block", () => {
-	const branch = () => fabricate("feat/x");
-
 	test("a branch whose name merely starts with main", () => {
 		expect(run(event("git push origin HEAD:mainline"), branch()).code).toBe(0);
 	});
