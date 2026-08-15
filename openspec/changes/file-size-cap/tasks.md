@@ -202,14 +202,36 @@ reach — so 5.4 takes the push cases.
 
 ## 6. `src/app/board/board.tsx` splits
 
-- [ ] 6.1 Move `BansRow` into `src/app/board/bans.tsx`, `TeamPanel` and
-      `EnemyPanel` into `panels.tsx`, and `Suggestions` with `Result` into
-      `suggestions.tsx`; `board.tsx` keeps `Board` and the pieces more than one
-      of them uses — `PickEntry`, `RemoveButton`, `RepickBadge`, `ThinBadge`
-- [ ] 6.2 Before moving a shared piece, grep for the logic it duplicates
-      elsewhere rather than moving a near-copy
-- [ ] 6.3 Run the e2e suite: this file has no unit test by design, so e2e is the
-      only thing that will notice a panel that stopped rendering
+This step ships as two pull requests, not one — the sixth to take more than
+one. 466 lines moved cost ~850 budgeted against a gate that fails at 800, and
+the marker exists for a step that cannot be cut, not for one that can.
+
+`board.tsx` cannot keep the shared pieces the way 6.1 was written: it imports
+every panel, so a panel importing a piece back out of it is the cycle
+`noImportCycles` refuses. They go to `pieces.tsx` instead — a fifth file, and
+the one every other file here depends on.
+
+- [x] 6.1 Move `BansRow` into `src/app/board/bans.tsx` and the shared pieces —
+      `PickEntry`, `RemoveButton`, `RepickBadge`, `ThinBadge`, with the `Apply`
+      and `OpenPicker` types — into `pieces.tsx`. `sideClass` and `toneClass`
+      stay behind: each is read by two panels that leave together, so each
+      travels with them rather than to `pieces.tsx`. Final so far: 321 / 104 /
+      75, and `board.tsx` comes under the cap in 6.4
+- [x] 6.2 Before moving a shared piece, grep for the logic it duplicates
+      elsewhere rather than moving a near-copy. One near-copy found and not
+      lifted here: `app.tsx`'s `focusAfterPick` and `RemoveButton`'s handler
+      share the macrotask-then-focus idiom `CLAUDE.md` has a rule for, but not
+      the selection around it — one searches the document by position, the other
+      walks up to the row and then the region. Three lines of idiom against two
+      different strategies, and the second consumer predates this change, so it
+      is a rule-of-two candidate recorded in `PLAN.md` rather than a lift inside
+      a decomposition
+- [x] 6.3 Run the e2e suite: this file has no unit test by design, so e2e is the
+      only thing that will notice a panel that stopped rendering. Run per pull
+      request, not once at the end — the intermediate tree ships too
+- [ ] 6.4 Move `TeamPanel` and `EnemyPanel` into `panels.tsx`, and `Suggestions`
+      with `Result` into `suggestions.tsx`, each taking the helper only its own
+      pair reads; `board.tsx` keeps `Board`
 
 ## 7. The remaining test files split
 
