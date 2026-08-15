@@ -137,8 +137,10 @@ is the one step 6 splits `board.tsx` on.
 ## 7. The remaining test files split
 
 This step ships as three pull requests, not one — the third to take more than
-one. 7.1 to 7.3 are small splits and travel together; 7.4 and 7.5 each move
-more than the other three combined and each earns its own.
+one. 7.1 to 7.3 are small splits and travel together, 1238 lines between them;
+7.4 and 7.5 carry 1442 between just the two, and each earns its own — 7.4
+because it moves a whole implementation into a new file, 7.5 because it waits
+on a lift that is not this change's.
 
 - [ ] 7.1 Split `scripts/diff-budget.test.ts` (466) by what it exercises —
       the counting rules, the task-line pairing, and the override marker
