@@ -121,7 +121,9 @@ implementing it has to stop enumerating a directory.
   opened separately and merged into step 1's own pull request rather than
   landing behind it.
 - Deleted: `src/app/styles/app.css`.
-- Modified: `index.html`, every `.tsx` that carries a `class`, `styles.css`,
+- Modified: `src/types.ts`, which takes `MAX_ENEMY_PICKS` when the keyboard
+  layer leaves `session.ts` and the two would otherwise have to import each
+  other for it; `index.html`, every `.tsx` that carries a `class`, `styles.css`,
   `base.css` (the bare `dialog` panel has no class to scope),
   `src/app/styles/styles.test.ts`, `build.test.ts` (it globs `*.css` in `dist`
   and asserts on the single emitted stylesheet), `server.ts`, `package.json`,

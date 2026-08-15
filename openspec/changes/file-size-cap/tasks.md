@@ -1,7 +1,7 @@
 # file-size-cap — tasks
 
 Eight steps in this order, one pull request each unless the step's own note
-says otherwise — three of them say so. Seven of them close no
+says otherwise — four of them say so. Seven of them close no
 acceptance criterion: they are the decomposition the cap costs, and each one
 leaves the application working and every test green. The eighth adds the cap
 and closes all five criteria at once, which is only possible because the seven
@@ -103,12 +103,29 @@ is the one step 6 splits `board.tsx` on.
 
 ## 4. `src/app/session.ts` splits
 
-- [ ] 4.1 Move the keyboard layer — `SIDE_KEYS`, `ROLE_KEYS`, `unmodified`,
+This step ships as four pull requests, not one — the fourth step to take more
+than one, and for the reason the preamble gives: the test file is 831 lines and
+moving it costs every one of them twice. 4.1 is one; 4.2 is one per file it
+extracts, so no pull request needs an `oversize:` marker to pass the budget.
+
+- [x] 4.1 Move the keyboard layer — `SIDE_KEYS`, `ROLE_KEYS`, `unmodified`,
       `hotkeyContext`, `ownsKeystroke`, `closesEditor`, `hotkeyFor` — into
-      `src/app/hotkeys.ts`, leaving session state and its reducer behind
-- [ ] 4.2 Split `src/app/session.test.ts` along the same seam into
-      `hotkeys.test.ts` and a smaller `session.test.ts`; both files land at 300
-      lines or fewer, the cap being inclusive, or the seam was wrong
+      `src/app/hotkeys.ts`, leaving session state and its reducer behind. That
+      list alone left `session.ts` at 340, so the persistence layer became
+      `src/app/session-storage.ts` too: it is neither the state nor the
+      reducer, and it already stood on `storage.ts`. `pickerHotkey` went with
+      the rest of the keyboard layer rather than staying behind to read
+      `ROLE_KEYS` through the seam, which moved `MAX_ENEMY_PICKS` to
+      `types.ts`. `hotkeys.ts` takes `PickTarget` type-only, which is what
+      keeps the two modules off `noImportCycles` — verified by adding a value
+      import and watching the linter report both. Final: 137 / 257 / 69
+- [ ] 4.2 Split `src/app/session.test.ts` along the same seam; every file
+      lands at 300 lines or fewer, the cap being inclusive, or the seam was
+      wrong. Four files, because the module split was three and the remainder
+      was still ~500: `hotkeys.test.ts`, `session-storage.test.ts`,
+      `session.test.ts` (the reducer) and `session-undo.test.ts` (reset and the
+      undo window, plus the round trip that needs both the reducer and a
+      storage stub). Confirm the test count is unchanged at each extraction
 
 ## 5. `scripts/command-guard.ts` splits
 
