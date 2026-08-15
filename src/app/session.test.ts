@@ -139,6 +139,12 @@ describe("restore", () => {
 			"a v1 session whose team slot holds something other than a hero id",
 			'{"v":1,"createdAt":"2026-08-15T00:00:00.000Z","side":null,"myRole":null,"bans":[],"enemyPicks":[],"teamPicks":{"1":"x","2":null,"3":null,"4":null,"5":null}}',
 		],
+		// The type says at most five; the reducer refuses a sixth, so a stored
+		// sixth can only have come from somewhere the reducer never wrote.
+		[
+			"a v1 session holding a sixth enemy pick",
+			'{"v":1,"createdAt":"2026-08-15T00:00:00.000Z","side":null,"myRole":null,"bans":[],"enemyPicks":[1,2,3,4,5,6],"teamPicks":{"1":null,"2":null,"3":null,"4":null,"5":null}}',
+		],
 	])("discards %s for an empty session", (_label, raw) => {
 		store.set(SESSION_KEY, raw);
 
