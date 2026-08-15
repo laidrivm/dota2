@@ -84,10 +84,10 @@ is the one step 6 splits `board.tsx` on.
 
 ## 3. The shell owns its styles, and app.css goes
 
-- [ ] 3.1 Move the header, side, setup and undo-toast blocks into
+- [x] 3.1 Move the header, side, setup and undo-toast blocks into
       `header.module.css`, `session-controls.module.css` and
       `app.module.css` beside their components
-- [ ] 3.2 Delete `src/app/styles/app.css` and its `@import`; `styles.css` is
+- [x] 3.2 Delete `src/app/styles/app.css` and its `@import`; `styles.css` is
       left with tokens and `base.css`, the global layer that has no class to
       scope
 - [ ] 3.3 Rescope the token check in `src/app/styles/styles.test.ts`: take the
