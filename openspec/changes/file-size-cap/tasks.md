@@ -90,7 +90,7 @@ is the one step 6 splits `board.tsx` on.
 - [x] 3.2 Delete `src/app/styles/app.css` and its `@import`; `styles.css` is
       left with tokens and `base.css`, the global layer that has no class to
       scope
-- [ ] 3.3 Rescope the token check in `src/app/styles/styles.test.ts`: take the
+- [x] 3.3 Rescope the token check in `src/app/styles/styles.test.ts`: take the
       file list from `git ls-files -z` at the repository root, keep the `*.css`
       entries and exempt `src/app/styles/tokens/`, rather than enumerating one
       directory — a moved stylesheet must not leave the no-colour-literal
@@ -98,7 +98,7 @@ is the one step 6 splits `board.tsx` on.
       `node_modules` and pick up untracked files; the shape is
       `scripts/no-suppressions.ts`'s. Add the guard that the sweep found more
       than zero files
-- [ ] 3.4 Break the rescoped check before trusting it: put a hex literal in a
+- [x] 3.4 Break the rescoped check before trusting it: put a hex literal in a
       component module and watch it fail
 
 ## 4. `src/app/session.ts` splits
