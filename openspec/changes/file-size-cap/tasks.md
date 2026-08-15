@@ -1,7 +1,7 @@
 # file-size-cap — tasks
 
 Eight steps in this order, one pull request each unless the step's own note
-says otherwise — two of them say so. Seven of them close no
+says otherwise — three of them say so. Seven of them close no
 acceptance criterion: they are the decomposition the cap costs, and each one
 leaves the application working and every test green. The eighth adds the cap
 and closes all five criteria at once, which is only possible because the seven
@@ -9,7 +9,7 @@ before it brought the tree under the line.
 
 The order is deliberate. CSS first, because it changes how styles are delivered
 and everything after it should run against the finished mechanism; then the
-three source splits, each with its test file; then the three test files that
+three source splits, each with its test file; then the five test files that
 split on their own; then the cap.
 
 Moving a rule counts twice in the diff budget — once removed, once added — so
@@ -136,13 +136,35 @@ is the one step 6 splits `board.tsx` on.
 
 ## 7. The remaining test files split
 
-- [ ] 7.1 Split `scripts/diff-budget.test.ts` (448) by what it exercises —
+This step ships as three pull requests, not one — the third to take more than
+one. 7.1 to 7.3 are small splits and travel together; 7.4 and 7.5 each move
+more than the other three combined and each earns its own.
+
+- [ ] 7.1 Split `scripts/diff-budget.test.ts` (466) by what it exercises —
       the counting rules, the task-line pairing, and the override marker
 - [ ] 7.2 Split `src/model.test.ts` (425) by the model spec's sections — enemy
       role inference, scoring, and the win estimate
 - [ ] 7.3 Split `agent-permissions.test.ts` (347) by the policy areas it reads
-- [ ] 7.4 Confirm the total test count is unchanged across all three splits: a
-      test lost in a move is the one failure a green run cannot show
+- [ ] 7.4 `scripts/spec-coverage.test.ts` (891): extract the check it
+      implements — `parse`, `cite`, `tests`, `check`, `uncited`, `gauge` and
+      the patterns they read — into `scripts/spec-coverage.ts`, the shape
+      `no-suppressions.ts` and `mutation-floor.ts` already have and this file
+      is alone in lacking. Then split what is left by what it exercises: the
+      citation reader, the sweep over the repository, and the floor with the
+      archive rules. `design.md` records why the extraction comes first. The
+      README's ownership map names the test file as the owner of that
+      knowledge; the script becomes the owner, so that row moves in this task
+- [ ] 7.5 `scripts/mutation-floor.test.ts` (551): switch
+      `scripts/mutation-floor.ts` to `scripts/scan.ts` first — `PLAN.md`
+      carries that as outstanding and it is the reason this file is the size
+      it is — then measure again before cutting. The disable-comment scanner's
+      own cases leave with the scanner they duplicate, so split what remains
+      only if it is still over the cap, and record the measurement either way
+- [ ] 7.6 Confirm the total test count is unchanged across all five splits: a
+      test lost in a move is the one failure a green run cannot show. The two
+      tasks above both delete cases on purpose — the extraction moves none and
+      the scanner lift removes duplicates — so state the expected delta before
+      measuring it, or the check confirms whatever happened
 
 ## 8. The cap
 
@@ -162,8 +184,8 @@ is the one step 6 splits `board.tsx` on.
       extension the whole CSS migration produces [6]
 - [ ] 8.4 Write the counting and sweep tests first: three files over the cap
       are all reported in one run rather than only the first [1] — a check that
-      stops at the first turns a nine-file backlog into a nine-round game; a
-      file whose last line carries no terminating newline counts that line [4],
+      stops at the first turns an eleven-file backlog into an eleven-round
+      game; a file whose last line carries no terminating newline counts it [4],
       because `wc -l` counts newlines and would read a 301-line file as 300; a
       file with `\r\n` endings counts each pair as one line, not two; and a run
       that found zero files fails rather than passing every assertion vacuously

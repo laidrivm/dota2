@@ -5,7 +5,7 @@
 `change-slicing` already owns one size gate: `scripts/diff-budget.sh`, warning
 at 500 changed lines and failing at 800, measured over `<base>...HEAD`. It is
 a property of a change. Nothing measures a property of a file, and the tree has
-drifted: nine files sit over the caps this change adopts, the largest at 4.7×.
+drifted: eleven files sit over the caps this change adopts, the largest at 4.7×.
 
 The drift is invisible to the existing gate by construction. A 943-line
 stylesheet reached that size across many changes, none of them large.
@@ -32,12 +32,12 @@ Carried from `proposal.md`, not restated here.
 
 ### The cap lands last, not first
 
-Two orders were available. Land the gate first with the nine files exempted and
+Two orders were available. Land the gate first with the eleven files exempted and
 shrink the exemption list; or decompose first and land the gate green.
 
 The first is the shape `spec-test-traceability` uses for acceptance criteria,
 and it is right there because that backlog is ~380 items nobody proposes to
-clear. Here the backlog is nine files and clearing it is the point of the
+clear. Here the backlog is eleven files and clearing it is the point of the
 change. A cap whose first act is to grandfather every existing violation
 enforces nothing for as long as the list survives, and the list is what gets
 forgotten.
@@ -51,7 +51,7 @@ this change.
 
 Taken unchanged from the numbers `reviewable-diff-gates` recorded, rather than
 re-derived. They were chosen once with reasons; re-picking them now would be
-churn, and the measurement that matters — nine files over, everything else
+churn, and the measurement that matters — eleven files over, everything else
 comfortably under — is the same either way. The next value below 300 that would
 change the outcome is 254 (`src/app/app.tsx`), which is close enough to the
 line to argue about and far enough from a reading problem not to.
@@ -149,6 +149,20 @@ repository minus `tokens/`, so a stylesheet added anywhere is covered by
 default. The same test also gains the guard that its own sweep found more than
 zero files.
 
+### `spec-coverage` gives up its implementation before its tests are cut
+
+It is the largest file in the tree and the seam is not a matter of taste. Its
+two siblings are a script and a test — `no-suppressions.ts`,
+`mutation-floor.ts` — and this one is a test carrying both roles: the parser,
+the citation reader, the sweep and the floor gauge all sit above the first
+`describe`. Extracting `scripts/spec-coverage.ts` moves the larger half out,
+matches the shape twice established, and leaves a test file small enough that
+what remains splits by what it exercises rather than by where a line fell.
+
+Splitting the tests without extracting first would have produced three test
+files each carrying a copy of the implementation, or one of them exporting it
+to the others — which is a script file with a test file's name.
+
 ### The e2e suite is the witness for the CSS move
 
 A rename of every class in the application is the kind of change that type
@@ -173,9 +187,14 @@ That is weaker than a visual diff and is stated as such in the risks.
   mechanism prevents this and none is proposed; `/ponytail-review` and the diff
   budget are what read the split. The cap buys a ceiling on what one file
   demands at once, not good decomposition.
-- **Nothing enforces the cap during the change's own steps.** → The window is
-  bounded by this change, and the diff budget still applies to every step in
-  it.
+- **Nothing enforces the cap during the change's own steps.** Two files crossed
+  the line inside that window — `scripts/spec-coverage.test.ts` and
+  `scripts/mutation-floor.test.ts`, both written by changes that merged after
+  this one was proposed. → The window is bounded by this change, and the diff
+  budget still applies to every step in it. A file that crosses it is given a
+  step of its own, never an exemption at the cap's step: the tree is
+  re-measured against the caps before that step runs, because the list a
+  proposal writes down is a measurement and measurements go stale.
 - **`app.css` carries comments that explain design decisions** (why the radio
   covers the whole chip, why the design tints one button separately). Splitting
   a file is where comments get orphaned from the rules they explain. → Each

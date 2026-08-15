@@ -26,7 +26,7 @@ someone clears a list nobody is scheduled to clear.
 
 This cap and the diff budget measure different things and both SHALL stand: the
 budget bounds what one change asks a reviewer to read, the cap bounds what one
-file asks them to hold at once. Nine files reached between 1.1× and 4.7× their
+file asks them to hold at once. Eleven files reached between 1.1× and 4.7× their
 cap without any single change exceeding the budget, which is what makes the
 second gate more than a duplicate of the first.
 
