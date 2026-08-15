@@ -263,7 +263,13 @@ share a pull request even if the third stayed home.
       the model should not have been given). Final: 102 / 145 / 154 over a
       61-line fixture. The file cites no criterion, so the split can lose none
       — checked rather than assumed
-- [ ] 7.3 Split `agent-permissions.test.ts` (347) by the policy areas it reads
+- [x] 7.3 Split `agent-permissions.test.ts` (347) by the policy areas it reads:
+      what is refused outright and the guard behind it, what prompts instead,
+      and what is pre-approved with the configuration keys the gates rest on.
+      Final: 87 / 159 / 108 over a 33-line fixture. Only the four slices every
+      area starts from were lifted — `ghWrites` and `isDenied` have one reader
+      each and stayed with it, and `bunHelp` stayed with the prompts, which are
+      the only cases that spawn `bun --help`
 - [ ] 7.4 `scripts/spec-coverage.test.ts` (891): extract the check it
       implements — `parse`, `cite`, `tests`, `check`, `uncited`, `gauge` and
       the patterns they read — into `scripts/spec-coverage.ts`, the shape
