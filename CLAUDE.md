@@ -216,9 +216,7 @@ Rules about how work is carried out here. They do not age with the code.
   produced the opposite outcome.
 - A rules or docs edit that no artefact of the change under way asks for goes
   in its own commit.
-- Copy a `MODIFIED` requirement whole from the live spec before editing it — a
-  delta replaces the requirement, so a paragraph left out is deleted at archive
-  time.
+- Copy a `MODIFIED` requirement whole from the live spec before editing it.
 - Never silence a linter or type-checker finding by disabling its rule in
   configuration; fix the code or ask the user to approve a suppression.
 - All repo artifacts — docs, plans, specs, code comments, commit messages —
