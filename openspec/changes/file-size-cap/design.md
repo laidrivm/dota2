@@ -195,6 +195,14 @@ That is weaker than a visual diff and is stated as such in the risks.
   step of its own, never an exemption at the cap's step: the tree is
   re-measured against the caps before that step runs, because the list a
   proposal writes down is a measurement and measurements go stale.
+- **Step 7.5 would rather run after work this change does not own** — the
+  `scan.ts` lift `PLAN.md` carries, which deletes the duplicated scanner cases
+  and so decides how much of `scripts/mutation-floor.test.ts` is left to cut.
+  → Kept as an ordering preference and never a precondition, so "green on the
+  day it lands" stays a property of this change alone: if the lift has not
+  landed, 7.5 splits the file as it stands and the lift shrinks the pieces
+  afterwards. Absorbing the lift instead would put another change's deletions
+  inside a step whose own check is that no test is lost.
 - **`app.css` carries comments that explain design decisions** (why the radio
   covers the whole chip, why the design tints one button separately). Splitting
   a file is where comments get orphaned from the rules they explain. → Each
