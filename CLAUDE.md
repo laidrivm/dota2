@@ -229,6 +229,8 @@ Rules about how work is carried out here. They do not age with the code.
 - Script a string replacement only for a pattern repeating across files, assert
   the match, and read the resulting diff — a silent no-op and a malformed
   result both read as a successful edit.
+- Verify a test file's split by the full describe path of every test, never by
+  their count — a block absorbed into its neighbour runs exactly as many.
 - Create a branch with `git switch -c <name>` or `--no-track`, never tracking
   `origin/main`.
 - Rebase a branch whose base was amended with `git rebase --onto <new base>

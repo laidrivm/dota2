@@ -192,10 +192,13 @@ on a lift that is not this change's.
       the lift has not landed when this step is reached, split the file as it
       stands — the cap is reachable without it, and waiting would make another
       change's schedule this one's
-- [ ] 7.6 Confirm the total test count is unchanged across all five splits: a
-      test lost in a move is the one failure a green run cannot show. Every
-      split here moves cases and deletes none — the deletions the scanner lift
-      makes belong to the lift's own change and are outside this measurement
+- [ ] 7.6 Confirm across all five splits that the set of full describe paths is
+      unchanged, which is the check `CLAUDE.md` now carries and step 4 is why:
+      a test lost in a move is the one failure a green run cannot show, and a
+      block absorbed into its neighbour is a failure the count cannot show
+      either. Every split here moves cases and deletes none — the deletions the
+      scanner lift makes belong to the lift's own change and are outside this
+      measurement
 
 ## 8. The cap
 
