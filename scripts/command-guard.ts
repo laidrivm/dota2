@@ -20,7 +20,7 @@
  * holds is what the prohibitions themselves are.
  */
 
-import { commands, invocation, SHELLS } from "./command-parse.ts";
+import { commands, invocations, SHELLS } from "./command-parse.ts";
 
 function block(reason: string): never {
 	process.stderr.write(`${reason}\n`);
@@ -127,50 +127,51 @@ const GH_WRITES = [
 
 function check(command: string): void {
 	for (const part of commands(command)) {
-		const found = invocation(part);
-		if (!found) continue;
-		const [name, rest] = found;
+		// Every candidate, not the first: past a wrapper the parser cannot tell
+		// an option's operand from the command it wraps, and a candidate naming
+		// nothing this file guards costs a comparison.
+		for (const [name, rest] of invocations(part)) {
+			// `bash -c "git push --force"`, and `bash -lc …` too: short flags
+			// bundle, so `-c` neither stands alone nor has to come first.
+			const dashC = rest.findIndex((word) => /^-[a-z]*c[a-z]*$/.test(word));
+			if (SHELLS.has(name) && dashC >= 0) {
+				check(rest.slice(dashC + 1).join(" "));
+				continue;
+			}
 
-		// `bash -c "git push --force"`, and `bash -lc …` too: short flags
-		// bundle, so `-c` neither stands alone nor has to come first.
-		const dashC = rest.findIndex((word) => /^-[a-z]*c[a-z]*$/.test(word));
-		if (SHELLS.has(name) && dashC >= 0) {
-			check(rest.slice(dashC + 1).join(" "));
-			continue;
-		}
+			if (name === "gh") {
+				// Adjacent anywhere, not the first two words: a global flag's value
+				// sits in front of them in `gh --repo a/b pr comment`.
+				const plain = rest.filter((word) => !word.startsWith("-"));
+				const write = GH_WRITES.find(([a, b]) =>
+					plain.some((word, at) => word === a && plain[at + 1] === b),
+				);
+				if (write) {
+					block(
+						`command-guard: \`gh ${write.join(" ")}\` publishes text under the user's name. Report what you would have written and let them send it.`,
+					);
+				}
+				continue;
+			}
 
-		if (name === "gh") {
-			// Adjacent anywhere, not the first two words: a global flag's value
-			// sits in front of them in `gh --repo a/b pr comment`.
-			const plain = rest.filter((word) => !word.startsWith("-"));
-			const write = GH_WRITES.find(([a, b]) =>
-				plain.some((word, at) => word === a && plain[at + 1] === b),
-			);
-			if (write) {
+			if (name !== "git") continue;
+
+			let at = 0;
+			let target: string | undefined;
+			for (let word = rest[at]; word?.startsWith("-"); word = rest[at]) {
+				if (word === "-C") target = rest[at + 1];
+				at += VALUE_OPTIONS.has(word) ? 2 : 1;
+			}
+			const subcommand = rest[at];
+			const args = rest.slice(at + 1);
+
+			if (subcommand === "commit" && currentBranch(target) === "main") {
 				block(
-					`command-guard: \`gh ${write.join(" ")}\` publishes text under the user's name. Report what you would have written and let them send it.`,
+					"command-guard: HEAD is on main and this project never commits there. Branch first, then commit on the branch.",
 				);
 			}
-			continue;
+			if (subcommand === "push") checkPush(args, target);
 		}
-
-		if (name !== "git") continue;
-
-		let at = 0;
-		let target: string | undefined;
-		for (let word = rest[at]; word?.startsWith("-"); word = rest[at]) {
-			if (word === "-C") target = rest[at + 1];
-			at += VALUE_OPTIONS.has(word) ? 2 : 1;
-		}
-		const subcommand = rest[at];
-		const args = rest.slice(at + 1);
-
-		if (subcommand === "commit" && currentBranch(target) === "main") {
-			block(
-				"command-guard: HEAD is on main and this project never commits there. Branch first, then commit on the branch.",
-			);
-		}
-		if (subcommand === "push") checkPush(args, target);
 	}
 }
 

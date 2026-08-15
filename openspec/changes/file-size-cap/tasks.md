@@ -154,24 +154,32 @@ reach — so 5.4 takes the push cases.
       `SHELLS`, `invocation` — into `scripts/command-parse.ts`, leaving the git
       and `gh` prohibitions in `command-guard.ts`. `SHELLS` is exported rather
       than internal: the recursion into a shell's `-c` argument is a
-      prohibition's decision, not the parser's. Final: 245 / 135.
-      The move is behaviour-preserving with two exceptions, both of them
-      CodeRabbit findings on the extracted file and both fixes rather than
-      decompositions — a guard that quietly stopped refusing, which is the
-      failure 5.2 exists to catch: a substitution reset the enclosing quote
-      instead of suspending it, so the quote closing `$(…)` was read as one
-      opening and everything after it became a single quoted word; and
-      `invocation` stopped at the first word that was neither an assignment nor
-      a wrapper, so `env -i git commit` resolved to `-i`. It now skips by what a
-      command name cannot be — an option, a redirection — rather than by a list
-      of the forms seen so far
+      prohibition's decision, not the parser's. Final: 246 / 154.
+      The move is behaviour-preserving with four exceptions, every one of them a
+      CodeRabbit finding on the extracted file and a fix rather than a
+      decomposition — a guard that quietly stopped refusing, which is the
+      failure 5.2 exists to catch. Two in `commands`: a substitution reset the
+      enclosing quote instead of suspending it, so the quote closing `$(…)` was
+      read as one opening and everything after it became a single quoted word;
+      and once suspension was a stack, a `)` closing a group *inside* a
+      substitution popped the substitution's own entry, so a subshell now
+      suspends its quote as well. Two in what was `invocation`: it stopped at
+      the first word that was neither an assignment nor a wrapper, so `env -i
+      git commit` resolved to `-i` — it now skips by what a command name cannot
+      be, an option or a redirection, rather than by a list of the forms seen so
+      far; and skipping an option is not enough when the option takes an operand
+      (`env -u PATH git commit`), so past a wrapper it returns every word as a
+      candidate and the guard checks each. That plural is the rename to
+      `invocations`
 - [x] 5.2 Confirm the hook still blocks, on the terms `CLAUDE.md` sets for
       probing a gate: refuse it with an input this session has not already
       cleared, and report what the call returned rather than what a prompt did.
       One command it must refuse, one it must allow — this file is a safety
       gate, and a refactor that quietly stops refusing is the failure that
       matters. The refusing input carries `--dry-run`, so the probe is a probe
-      either way: allowed, it would have changed nothing
+      either way: allowed, it would have changed nothing. That the flag does not
+      exempt a force is pinned by a test as well, since a probe run once says
+      nothing about the next change to `FORCE`
 - [ ] 5.3 Split `scripts/command-guard.test.ts` along the same seam: the two
       describes that exercise the parser — spellings and quoting — become
       `scripts/command-parse.test.ts`. The harness both files need, being a
