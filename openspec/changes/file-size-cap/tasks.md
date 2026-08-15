@@ -190,10 +190,15 @@ reach — so 5.4 takes the push cases.
       harness's own list. Final: 462 / 165 / 73 — the first is still over the
       cap, which is 5.4's. The 93 full describe paths are identical before and
       after
-- [ ] 5.4 Move the push describes into `scripts/command-guard-push.test.ts`,
+- [x] 5.4 Move the push describes into `scripts/command-guard-push.test.ts`,
       leaving the unreadable event, the commit and the `gh` cases behind.
       Confirm across both extractions that the set of full describe paths is
-      unchanged, per the check `CLAUDE.md` carries
+      unchanged, per the check `CLAUDE.md` carries. Final: 214 / 267, and with
+      5.3's 165 the step's four files are all under the cap. The 73 paths this
+      extraction moves are identical before and after, as are the source-level
+      `describe` and `test` titles against the base — a second reading, since a
+      block absorbed into its neighbour keeps its title in the source and loses
+      it at run time
 
 ## 6. `src/app/board/board.tsx` splits
 
