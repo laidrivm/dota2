@@ -19,6 +19,7 @@
 | `openspec/config.yaml` → `rules:` | artifact shape requirements (referencing CLAUDE.md) | on artifact generation |
 | `.claude/settings.json` | the agent's permission policy — what is denied, what prompts, what is pre-approved, which hooks run | before granting a tool call |
 | `scripts/command-guard.ts` | the git and `gh` prohibitions no permission pattern can express | when a git or `gh` call is refused |
+| `scripts/command-parse.ts` | what a shell line resolves to — which commands it runs, under which name | when a call the guard covers is not refused |
 | `scripts/no-suppressions.ts` | which linter and type-checker suppressions are approved, and how many | when a suppression is unavoidable |
 | `scripts/spec-coverage.test.ts` | how many acceptance criteria no test cites, and why that floor last moved | when a criterion or the test citing it changes |
 | `scripts/mutation-floor.ts` | how many mutants survive in `src/model.ts`, and why that floor last moved | when the model's arithmetic or its tests change |
