@@ -1,8 +1,7 @@
 /**
- * The draft board (screens-spec §2).
- *
- * Every panel is markup over `(session, model)` — the branches live in
- * `format.ts`, and the only writes go through the `apply` this is handed.
+ * The draft board (screens-spec §2): which panels are on screen, in what
+ * order, and which of the three the model's state calls for. Each panel is
+ * markup over `(session, model)` in a module of its own.
  */
 
 import type { ModelOutput, Session, SnapshotBundle } from "../../types.ts";
