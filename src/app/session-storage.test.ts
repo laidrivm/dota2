@@ -111,8 +111,10 @@ describe("restore", () => {
 		// The whole session, not `side` and `myRole` alone: a stored value may
 		// carry those two correctly and be malformed elsewhere, and asking only
 		// about them passes whether the value was discarded or handed back.
-		// `createdAt` is the one field a fresh session sets to now.
-		expect(session).toEqual({
+		// `createdAt` is the one field a fresh session sets to now. Strictly,
+		// because `toEqual` treats a key holding `undefined` as absent — and a
+		// field the guard let through unset is exactly what these cases store.
+		expect(session).toStrictEqual({
 			...EMPTY_SESSION(),
 			createdAt: session?.createdAt as string,
 		});
