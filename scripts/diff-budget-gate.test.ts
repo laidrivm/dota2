@@ -144,7 +144,10 @@ test("the default comes from origin/HEAD, not from a local branch", () => {
 test("outside a git repository the script exits non-zero", () => {
 	const dir = emptyDir("diff-budget-bare-");
 	const p = Bun.spawnSync(["bash", script, "main"], { cwd: dir });
-	expect(p.exitCode).not.toBe(0);
+	// 2 rather than merely non-zero, for the reason the unresolvable-base case
+	// above gives: this is a diff that could not be measured, not one over
+	// budget, and CI has to tell them apart.
+	expect(p.exitCode).toBe(2);
 	expect(p.stdout.toString()).not.toContain("PASS");
 });
 
@@ -155,7 +158,7 @@ test("an unrelated base exits non-zero — no merge base to measure from", () =>
 	git(dir, "branch", "-f", "main", "detached");
 	git(dir, "checkout", "-q", "feature");
 	const g = gate(dir);
-	expect(g.code).not.toBe(0);
+	expect(g.code).toBe(2);
 	expect(g.stderr).toContain("no merge base");
 });
 
