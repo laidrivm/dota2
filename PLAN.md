@@ -130,6 +130,13 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       subdirectory run and the tracked-but-absent file. Those two tests are
       worth writing against one lifted sweep and not against a third copy,
       which is why they are here rather than in that step.
+      A third arrived with `file-size-cap` step 6: `src/app/app.tsx`'s
+      `focusAfterPick` and `RemoveButton`'s click handler, now in
+      `src/app/board/pieces.tsx`, both restore focus in a macrotask after the
+      commit and both carry a comment saying why. What differs is the search —
+      the document by position against the row then the region — so what lifts
+      is the idiom taking a finder, not the strategy. Left where it is by that
+      step because the second consumer predates it.
 - [ ] **The `skills-lock.json` patch `skill-provenance` drafted** is still the
       user's to apply, in the skills repository rather than here, and its `ref`
       needs the upstream commit in `microsoft/playwright-cli`. It sat under
