@@ -115,6 +115,14 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       line it costs it. `scripts/scan.ts` is where that lift lands: extracted
       to bring its file under the cap, and already the module the older copy
       should switch to — which is what makes it a lift and not speculation.
+      A second candidate arrived with `file-size-cap` step 3: the tracked-file
+      sweep — `git rev-parse --show-toplevel`, then `git ls-files -z` at that
+      root, then an `lstatSync` filter — now stands in three copies,
+      `scripts/no-suppressions.ts`, `src/app/module-classes.test.ts` and
+      `src/app/styles/styles.test.ts`, and only the first has tests for the
+      subdirectory run and the tracked-but-absent file. Those two tests are
+      worth writing against one lifted sweep and not against a third copy,
+      which is why they are here rather than in that step.
 - [ ] **The `skills-lock.json` patch `skill-provenance` drafted** is still the
       user's to apply, in the skills repository rather than here, and its `ref`
       needs the upstream commit in `microsoft/playwright-cli`. It sat under
