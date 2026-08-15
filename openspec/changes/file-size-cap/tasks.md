@@ -156,17 +156,20 @@ on a lift that is not this change's.
       archive rules. `design.md` records why the extraction comes first. The
       README's ownership map names the test file as the owner of that
       knowledge; the script becomes the owner, so that row moves in this task
-- [ ] 7.5 `scripts/mutation-floor.test.ts` (551): switch
-      `scripts/mutation-floor.ts` to `scripts/scan.ts` first — `PLAN.md`
-      carries that as outstanding and it is the reason this file is the size
-      it is — then measure again before cutting. The disable-comment scanner's
-      own cases leave with the scanner they duplicate, so split what remains
-      only if it is still over the cap, and record the measurement either way
+- [ ] 7.5 `scripts/mutation-floor.test.ts` (551), after the lift it waits on.
+      Switching `scripts/mutation-floor.ts` to `scripts/scan.ts` is `PLAN.md`'s
+      outstanding item and not this change's work, but it is what makes this
+      file the size it is: the disable-comment scanner's own cases leave with
+      the scanner they duplicate. So measure the file again once that lands,
+      and split it — by the floor arithmetic and the command-line entry point —
+      only if it is still over the cap. Record the measurement either way. If
+      the lift has not landed when this step is reached, split the file as it
+      stands — the cap is reachable without it, and waiting would make another
+      change's schedule this one's
 - [ ] 7.6 Confirm the total test count is unchanged across all five splits: a
-      test lost in a move is the one failure a green run cannot show. The two
-      tasks above both delete cases on purpose — the extraction moves none and
-      the scanner lift removes duplicates — so state the expected delta before
-      measuring it, or the check confirms whatever happened
+      test lost in a move is the one failure a green run cannot show. Every
+      split here moves cases and deletes none — the deletions the scanner lift
+      makes belong to the lift's own change and are outside this measurement
 
 ## 8. The cap
 

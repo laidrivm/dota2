@@ -88,6 +88,13 @@ implementing it has to stop enumerating a directory.
   `reviewable-diff-gates` rejected exempting tests from the *diff* budget
   because test code is where agent-written slop hides; the same reasoning
   holds one axis over.
+- **Performing the `scan.ts` lift.** `scripts/mutation-floor.ts` still carries
+  its own comment scanner where `scripts/scan.ts` is the better one, and
+  `PLAN.md` owns that as its own item. This change waits for it rather than
+  doing it, because the lift is what decides how much of
+  `scripts/mutation-floor.test.ts` is left to split. It is a preference in the
+  ordering, not a precondition: if it has not landed, step 7.5 splits the file
+  as it stands and the lift shrinks the pieces later.
 - **A cap on any other file type.** Markdown is capped by the always-on
   context budget where it matters, and YAML and JSON configuration files are
   read by key, not by line.
