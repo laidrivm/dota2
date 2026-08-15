@@ -9,10 +9,17 @@ pushed green: the type check passed, the suite passed, and the gate that had
 broken runs only in CI. The push had already happened by the time anything
 said so.
 
-That gate is not alone. Of the ten checks CI runs, the push path runs three.
-The other seven are reachable locally in seconds — the four static ones cost
-0.24 s between them and the mutation gate 4.9 s, against a hook that already
-takes 11.8 s.
+That gate is not alone. Ten checks run on a pull request; the push path runs
+three of them — the type check, the suite, and the diff budget. Of the seven
+left, six need no browser: `biome`, the YAML syntax check, the suppression
+scan, `actionlint`, `gitleaks` and the mutation floor. Three of those are
+measured at 0.24 s between them and the floor at 4.9 s, against a hook that
+already takes 11.8 s; `actionlint` and `gitleaks` are unmeasured because
+neither is installed here, which is itself why they have to be optional.
+
+`coverage` is not among the seven in any useful sense: it runs the same suite
+the hook already runs, and what is CI-only about it is the number, which
+`smoke-suite` requires not to gate anything.
 
 The second half of the problem is that nothing owns the answer. What the hook
 runs is stated in fragments across four specifications, and two of them

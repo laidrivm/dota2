@@ -11,15 +11,19 @@ of them SHALL block the push. The diff budget SHALL remain the single
 exception, absorbed as `change-slicing` requires, because it measures rather
 than judges.
 
-The list SHALL be stated here and nowhere else. It was previously spread
-across four specifications, two of which disagreed, and a gate that no single
-file claims is one a change can break without contradicting anything.
+No specification under `openspec/specs/` other than this one SHALL enumerate
+what the hook runs. The list was previously spread across four of them, two of
+which disagreed, and a gate no single file claims is one a change can break
+without contradicting anything. A change's own artefacts and `README.md` may
+name individual checks and SHALL link here for the list.
 
-A check whose tool may be absent from a developer's machine — `actionlint`,
-`gitleaks` — SHALL run when the binary is on `PATH` and SHALL be skipped
-silently when it is not, so a fresh clone can push. Absence SHALL NOT fail the
-hook: CI runs both from pinned versions, and that is where their verdict is
-binding.
+A check whose tool may be absent from a developer's machine — `actionlint` over
+`.github/workflows/`, `gitleaks` over the working tree — SHALL be guarded by
+`command -v` and SHALL be skipped silently when the binary is not on `PATH`, so
+a fresh clone can push. Absence SHALL NOT fail the hook: CI runs both from
+pinned versions, and that is where their verdict is binding. Presence SHALL be
+treated like any other gate — a non-zero exit blocks the push, because a
+finding a developer can see before pushing is one they should not push past.
 
 The hook SHALL NOT run the browser suite or the coverage report. `smoke-suite`
 owns why for both.
@@ -35,6 +39,12 @@ owns why for both.
 - **WHEN** `actionlint` is not on `PATH` and a branch is pushed
 - **THEN** the hook completes without error and without linting the workflows
 
+#### Scenario: A tool the machine has, reporting a finding
+
+- **WHEN** `gitleaks` is on `PATH` and the branch carries a recognisable API
+  token
+- **THEN** the hook exits non-zero and the push does not happen
+
 #### Scenario: The budget is still soft
 
 - **WHEN** a branch at 950 counted lines is pushed and every other gate passes
@@ -42,7 +52,7 @@ owns why for both.
 
 #### Scenario: The list has one home
 
-- **WHEN** a specification other than this one enumerates what the pre-push
-  hook runs
+- **WHEN** a file under `openspec/specs/` other than this one enumerates what
+  the pre-push hook runs
 - **THEN** the change is rejected at review — the fragment belongs here, and
   the other specification states only the part it owns

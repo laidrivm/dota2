@@ -8,10 +8,11 @@ The pre-push hook is one line in `package.json`, run by `simple-git-hooks`:
 bun run typecheck && bun test --pass-with-no-tests && { bash scripts/diff-budget.sh || true; }
 ```
 
-CI runs ten checks. Three of them are on that line. The rest — `biome`, the
-YAML syntax check, the suppression scan, `actionlint`, `gitleaks`, the mutation
-floor, the browser suite, and coverage — arrive minutes after a push, on a
-branch that is already public.
+Ten checks run on a pull request. Three are on that line: `typecheck`,
+`coverage` (which is the suite plus a number), and `budget`. The seven left —
+`biome`, `yaml-syntax`, `suppressions`, `actionlint`, `gitleaks`, `floor` and
+`smoke` — arrive minutes after a push, on a branch that is already public.
+`audit` is scheduled rather than per-pull-request and is out of scope here.
 
 Measured on the author's machine, one run each, against the tree at
 `713e634`:
@@ -96,7 +97,8 @@ task list says so.
 ## Risks / Trade-offs
 
 - **The hook grows to 17 s and someone starts reaching for `--no-verify`** →
-  the four static checks are 0.24 s together; the mutation gate is the 4.9 s
+  the three measured static checks are 0.24 s together; the mutation gate is
+  the 4.9 s
   and it is the one that broke this month. If the pass becomes slow enough to
   route around, that is a signal to split the hook, not to shorten it quietly.
 - **A developer's `bunx --no-install stryker` needs Node on `PATH`** — the

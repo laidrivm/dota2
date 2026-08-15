@@ -32,15 +32,19 @@ defect that started this.
       names the survivor count, then restore. The work is committed first, per
       the rule about a probe whose undo is `git checkout` (*A gate that CI would
       fail blocks the push instead*)
-- [ ] 2.2 Probe the skip path with an input the session has not cleared: with
+- [ ] 2.2 Probe an optional tool that is present and failing: install neither,
+      but stand in for one with a `command -v`-visible stub that exits non-zero,
+      and confirm the push is blocked (*A tool the machine has, reporting a
+      finding*)
+- [ ] 2.3 Probe the skip path with an input the session has not cleared: with
       neither binary on `PATH`, confirm the hook completes and says nothing
       about them. Report what the hook returned, not what a prompt did
-- [ ] 2.3 Probe the budget's exception: confirm a diff over 800 lines still
+- [ ] 2.4 Probe the budget's exception: confirm a diff over 800 lines still
       prints `FAIL` and still pushes. `file-size-cap`'s own branches are over
       500 already, so a real one is at hand rather than fabricated
-- [ ] 2.4 Confirm `bun test` does not execute Stryker in either place it runs
+- [ ] 2.5 Confirm `bun test` does not execute Stryker in either place it runs
       (*The gate is not picked up by the suite*)
-- [ ] 2.5 Time the full hook and record the number here beside `design.md`'s
+- [ ] 2.6 Time the full hook and record the number here beside `design.md`'s
       estimate of 17 s. Re-run the older measurement if the new one contradicts
       it, per the rule
 
@@ -57,3 +61,23 @@ defect that started this.
 - [ ] 3.3 Record in `PLAN.md` that this change archives after `file-size-cap`,
       so the ordering survives a session boundary rather than living only in
       `design.md`
+
+## 4. The criteria this change carries but does not implement
+
+The two `MODIFIED` deltas restate whole requirements, so they carry scenarios
+this change does not touch. Each is confirmed still true rather than cited for
+work that does not exist — a citation for a criterion nothing implements is
+bookkeeping, and the two that describe CI-only behaviour are named here as not
+being this change's to verify.
+
+- [ ] 4.1 Confirm the push path still starts no browser: no Playwright binary
+      is spawned by the hook, checked by running it and looking for the process
+      rather than by reading the command (*The push path starts no browser*)
+- [ ] 4.2 Confirm the mutation gate still kills the same set after the hook
+      change — the survivor count is the floor, not merely below it (*A mutant
+      the tests assert against*, *The suite is the only killer*, *The model's
+      tests move to another file*)
+- [ ] 4.3 `smoke-suite`'s *A green run uploads nothing* is CI workflow
+      behaviour this change does not touch and cannot exercise from a hook. It
+      is carried by the delta because `MODIFIED` takes whole requirements, and
+      no task claims it
