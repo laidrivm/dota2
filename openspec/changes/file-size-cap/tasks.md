@@ -154,7 +154,17 @@ reach — so 5.4 takes the push cases.
       `SHELLS`, `invocation` — into `scripts/command-parse.ts`, leaving the git
       and `gh` prohibitions in `command-guard.ts`. `SHELLS` is exported rather
       than internal: the recursion into a shell's `-c` argument is a
-      prohibition's decision, not the parser's. Final: 245 / 103
+      prohibition's decision, not the parser's. Final: 245 / 135.
+      The move is behaviour-preserving with two exceptions, both of them
+      CodeRabbit findings on the extracted file and both fixes rather than
+      decompositions — a guard that quietly stopped refusing, which is the
+      failure 5.2 exists to catch: a substitution reset the enclosing quote
+      instead of suspending it, so the quote closing `$(…)` was read as one
+      opening and everything after it became a single quoted word; and
+      `invocation` stopped at the first word that was neither an assignment nor
+      a wrapper, so `env -i git commit` resolved to `-i`. It now skips by what a
+      command name cannot be — an option, a redirection — rather than by a list
+      of the forms seen so far
 - [x] 5.2 Confirm the hook still blocks, on the terms `CLAUDE.md` sets for
       probing a gate: refuse it with an input this session has not already
       cleared, and report what the call returned rather than what a prompt did.
