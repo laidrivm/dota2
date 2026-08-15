@@ -239,8 +239,9 @@ the one every other file here depends on.
 
 ## 7. The remaining test files split
 
-This step ships as five pull requests, one per task — not the three written
-here, which had 7.1 to 7.3 travelling together on 1238 lines between them. That
+This step ships as five splits, one pull request each, with 7.6's confirmation
+riding on the last — not the three written here, which had 7.1 to 7.3
+travelling together on 1238 lines between them. That
 arithmetic was the wrong one: a split costs the moved lines twice, and 7.1
 alone measured 719 against a gate that fails at 800. Two of these could not
 share a pull request even if the third stayed home.
