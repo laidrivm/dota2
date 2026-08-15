@@ -180,12 +180,16 @@ reach — so 5.4 takes the push cases.
       either way: allowed, it would have changed nothing. That the flag does not
       exempt a force is pinned by a test as well, since a probe run once says
       nothing about the next change to `FORCE`
-- [ ] 5.3 Split `scripts/command-guard.test.ts` along the same seam: the two
+- [x] 5.3 Split `scripts/command-guard.test.ts` along the same seam: the two
       describes that exercise the parser — spellings and quoting — become
       `scripts/command-parse.test.ts`. The harness both files need, being a
       fabricated repository and a spawned guard rather than a stub, is lifted to
       one module rather than copied; `afterAll` stays with each test file, which
-      is where a lifecycle hook registers
+      is where a lifecycle hook registers. `fabricate` took a prefix parameter
+      so the one case needing a path with a space in it stops reaching into the
+      harness's own list. Final: 462 / 165 / 73 — the first is still over the
+      cap, which is 5.4's. The 93 full describe paths are identical before and
+      after
 - [ ] 5.4 Move the push describes into `scripts/command-guard-push.test.ts`,
       leaving the unreadable event, the commit and the `gh` cases behind.
       Confirm across both extractions that the set of full describe paths is
