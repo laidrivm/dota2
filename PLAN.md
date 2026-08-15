@@ -169,6 +169,17 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       not, so one of the two has to move. Either the strips gain
       `::scroll-button`, or a change amends the criterion — which is a delta
       spec, not an edit here.
+- [ ] **Three glyphs carry meaning nothing else states.** The `★` marking
+      `session.myRole` in `src/app/board/panels.tsx` and again in
+      `suggestions.tsx`, and the `→` in the result line there, are announced by
+      their glyph names and by nothing better; the accent colour that carries
+      the same meaning visually is not announced at all. Raised by CodeRabbit on
+      the board split and left there on purpose, because the fix is not a move's
+      to make: `draft-board`'s result criterion pins the block's text as `Draft
+      advantage: +3.2 pp → ~58% win`, so hiding the arrow and adding words needs
+      a delta spec, and the `visuallyHidden` class this wants lives in
+      `src/app/picker/picker.module.css` — a second consumer, so a rule-of-two
+      lift rather than a copy.
 - [ ] **The e2e backlog** — the ~25 **(e2e)** bullets in `draft-board`'s and
       `hero-picker`'s archived task lists, plus one this file owns because no
       task list does: at 720px the board's one-column rules now live in three
