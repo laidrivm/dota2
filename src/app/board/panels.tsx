@@ -1,6 +1,12 @@
 /**
  * The two team panels (screens-spec §2): my team by role, and the enemy team
  * by pick order with the roles the model infers for each.
+ *
+ * Both read a side off `session`, where it types as `Side | null`, and neither
+ * checks it: `app.tsx` renders `Board` only under `isSetUp`, which is `side !==
+ * null && myRole !== null`. That guarantee is the caller's and holds for every
+ * path into this file, which is why the cast below stands and why a null side
+ * reaching here would be a bug two files up rather than one to handle here.
  */
 
 import type {
