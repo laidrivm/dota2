@@ -1,0 +1,99 @@
+/* The side and role chips, in Setup and in the header's editor alike
+   (screens-spec §2.2). Every value is a token reference — literals belong in
+   tokens/ only. */
+
+.sessionControls {
+	display: flex;
+	gap: var(--sp-8);
+	flex-wrap: wrap;
+	align-items: flex-start;
+	padding: var(--sp-5) var(--sp-6);
+	border: 1px solid var(--border-2);
+	border-radius: var(--r-panel);
+	background: var(--bg-1);
+}
+
+.controlGroup {
+	margin: 0;
+	padding: 0;
+	border: 0;
+}
+
+.controlGroup legend {
+	padding: 0 0 var(--sp-3);
+	font-size: var(--fs-label);
+	font-weight: 600;
+	letter-spacing: var(--ls-label);
+	text-transform: uppercase;
+	color: var(--text-5);
+}
+
+.chips {
+	display: flex;
+	gap: var(--sp-3);
+	flex-wrap: wrap;
+}
+
+.chip {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	gap: var(--sp-3);
+	padding: var(--sp-2) var(--sp-4);
+	border: 1px solid var(--border-3);
+	border-radius: var(--r-control);
+	background: var(--bg-2);
+	color: var(--text-2);
+	font-size: var(--fs-control);
+	font-weight: 600;
+}
+
+.chip:hover {
+	border-color: var(--border-hover);
+	background: var(--bg-3);
+}
+
+/* The radio is transparent but covers the whole chip, so it keeps a real
+   hit area and a real size — a zero-sized control reads as hidden to some
+   tooling — while the group semantics, checked state and keyboard
+   behaviour stay the platform's. */
+.chip input {
+	appearance: none;
+	position: absolute;
+	inset: 0;
+	margin: 0;
+	border-radius: var(--r-control);
+	opacity: 0;
+	cursor: pointer;
+	outline: none;
+}
+
+.chip:has(input:checked) {
+	border-color: var(--accent-border);
+	background: var(--accent-row-bg);
+	color: var(--accent);
+}
+
+.chipRadiant:has(input:checked) {
+	color: var(--radiant);
+}
+
+.chipDire:has(input:checked) {
+	color: var(--dire);
+}
+
+.chip:has(input:focus-visible) {
+	outline: 2px solid var(--accent);
+	outline-offset: 2px;
+}
+
+.kbd {
+	padding: 1px var(--sp-2);
+	border: 1px solid var(--border-3);
+	border-radius: var(--r-kbd);
+	background: var(--bg-0);
+	color: var(--text-4);
+	font-family: var(--font-mono);
+	font-size: var(--fs-kbd);
+	font-weight: 400;
+}

@@ -3,6 +3,10 @@ import { computeModel } from "../model.ts";
 import type { HeroId, SnapshotBundle } from "../types.ts";
 import s from "./app.module.css";
 import { Board } from "./board/board.tsx";
+// The product name and the `·` are the header's, and both appear here where
+// the header itself does not: on the failure screen, which renders instead of
+// it, and in the toast, which echoes its undo control.
+import header from "./header.module.css";
 import { Header } from "./header.tsx";
 import { Picker } from "./picker/picker.tsx";
 import {
@@ -125,7 +129,7 @@ export function App() {
 					onPick={setPickTarget}
 				/>
 			) : (
-				<main class="setup">
+				<main class={s.setup}>
 					<SessionControls session={session} apply={apply} />
 				</main>
 			)}
@@ -140,12 +144,12 @@ export function App() {
 				/>
 			)}
 			{toast && canUndo && (
-				<p class="toast" role="status">
+				<p class={s.toast} role="status">
 					Draft reset
-					<span class="separator">·</span>
+					<span class={header.separator}>·</span>
 					<button
 						type="button"
-						class="link-button"
+						class={s.linkButton}
 						onClick={() => {
 							undo();
 							setToast(false);
@@ -239,10 +243,10 @@ function ResetDialog({ onAnswer }: { onAnswer: (confirmed: boolean) => void }) {
 
 function SnapshotError({ onRetry }: { onRetry: () => void }) {
 	return (
-		<main class="snapshot-error">
+		<main class={s.snapshotError}>
 			{/* The header never renders in this state, so the screen carries its
 			    own h1 — a page with no heading names nothing. */}
-			<h1 class="brand">Dota 2 Pick Assistant</h1>
+			<h1 class={header.brand}>Dota 2 Pick Assistant</h1>
 			{/* role lives on the message, not on <main>, so the landmark survives */}
 			<p role="status">
 				No snapshot could be loaded, and nothing is cached from before.

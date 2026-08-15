@@ -1,4 +1,5 @@
 import type { Session, SnapshotBundle } from "../types.ts";
+import s from "./header.module.css";
 import type { Action } from "./session.ts";
 import { ROLE_UI, SessionControls, SIDE_LABEL } from "./session-controls.tsx";
 import { formatProvenance } from "./snapshot.ts";
@@ -31,13 +32,13 @@ export function Header({
 	const isSetUp = session.side !== null && session.myRole !== null;
 
 	return (
-		<header class="header">
-			<div class="header-bar">
+		<header class={s.header}>
+			<div class={s.headerBar}>
 				{isSetUp && (
 					<>
 						<button
 							type="button"
-							class="header-button"
+							class={s.headerButton}
 							aria-label="New draft"
 							onClick={onNew}
 						>
@@ -47,7 +48,7 @@ export function Header({
 						{onUndo !== undefined && (
 							<button
 								type="button"
-								class="header-button"
+								class={s.headerButton}
 								aria-label="Undo the reset"
 								onClick={onUndo}
 							>
@@ -56,35 +57,37 @@ export function Header({
 						)}
 						<button
 							type="button"
-							class="session-summary"
+							class={s.sessionSummary}
 							aria-expanded={editorOpen}
 							onClick={onToggleEditor}
 						>
-							<span class={`side-name side-${session.side}`}>
+							<span
+								class={session.side === "dire" ? s.sideDire : s.sideRadiant}
+							>
 								{session.side === null ? "" : SIDE_LABEL[session.side]}
 							</span>
-							<span class="separator">·</span>
-							<span class="role-name">
+							<span class={s.separator}>·</span>
+							<span>
 								{session.myRole === null ? "" : ROLE_UI[session.myRole].label}
 							</span>
-							<span class="edit-hint">edit</span>
+							<span class={s.editHint}>edit</span>
 						</button>
 					</>
 				)}
 				{/* The page's one h1: the product names this screen, and the
 				    panels' h2s have nothing else above them. */}
-				<h1 class="brand">Dota 2 Pick Assistant</h1>
-				<span class="provenance">{formatProvenance(bundle)}</span>
+				<h1 class={s.brand}>Dota 2 Pick Assistant</h1>
+				<span class={s.provenance}>{formatProvenance(bundle)}</span>
 			</div>
 
 			{bundle.stabilizing && (
-				<p class="banner">new patch — stats are still stabilizing</p>
+				<p class={s.banner}>new patch — stats are still stabilizing</p>
 			)}
 
 			{isSetUp && editorOpen && (
-				<div class="session-editor">
+				<div class={s.sessionEditor}>
 					<SessionControls session={session} apply={apply} />
-					<button type="button" class="header-button" onClick={onToggleEditor}>
+					<button type="button" class={s.headerButton} onClick={onToggleEditor}>
 						done
 					</button>
 				</div>

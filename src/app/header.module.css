@@ -1,0 +1,115 @@
+/* The header strip, the collapsed session summary and the editor it reopens
+   (screens-spec §2.2). Every value is a token reference — literals belong in
+   tokens/ only. */
+
+.header {
+	padding: 0 var(--sp-7) var(--sp-4);
+	border-bottom: 1px solid var(--border-0);
+}
+
+.headerBar {
+	display: flex;
+	align-items: center;
+	gap: var(--sp-6);
+	flex-wrap: wrap;
+	min-height: var(--row-h);
+}
+
+.headerButton {
+	padding: var(--sp-2) var(--sp-6);
+	border: 1px solid var(--border-3);
+	border-radius: var(--r-control);
+	background: var(--bg-2);
+	color: var(--text-2);
+	font-family: var(--font-ui);
+	font-size: var(--fs-control);
+	font-weight: 600;
+}
+
+.headerButton:hover:not(:disabled) {
+	border-color: var(--border-hover);
+	background: var(--bg-3);
+}
+
+.headerButton:disabled {
+	color: var(--text-5);
+	border-color: var(--border-2);
+}
+
+/* The collapsed side · role, and the affordance that reopens the editor. */
+.sessionSummary {
+	display: flex;
+	align-items: baseline;
+	gap: var(--sp-2);
+	padding: var(--sp-1) var(--sp-3);
+	border: 0;
+	border-radius: var(--r-control);
+	background: none;
+	font-family: var(--font-ui);
+	font-size: var(--fs-body);
+	font-weight: 600;
+	color: var(--text-1);
+}
+
+.sessionSummary:hover {
+	background: var(--bg-2);
+}
+
+/* The board panels name a side too, out of their own module — the tint is the
+   same token either way, so nothing crosses the boundary. */
+.sideRadiant {
+	color: var(--radiant);
+}
+
+.sideDire {
+	color: var(--dire);
+}
+
+.separator {
+	color: var(--text-6);
+}
+
+.editHint {
+	border-bottom: 1px dashed var(--border-3);
+	font-size: var(--fs-meta);
+	font-weight: 400;
+	color: var(--text-5);
+}
+
+.sessionEditor {
+	display: flex;
+	align-items: flex-start;
+	gap: var(--sp-6);
+	margin-top: var(--sp-4);
+}
+
+.sessionEditor .headerButton {
+	margin-left: auto;
+}
+
+.brand {
+	/* An h1 for the accessibility tree, sized by its context like every other
+	   line in the bar — the design gives the product name no extra weight. */
+	margin: 0;
+	font-size: inherit;
+	font-weight: 600;
+	color: var(--text-2);
+}
+
+.provenance {
+	margin-left: auto;
+	font-family: var(--font-mono);
+	font-size: var(--fs-meta);
+	color: var(--text-5);
+}
+
+.banner {
+	margin: 0;
+	padding: var(--sp-1) var(--sp-3);
+	border: 1px solid var(--accent-border);
+	border-radius: var(--r-kbd);
+	background: var(--accent-banner-bg);
+	font-family: var(--font-mono);
+	font-size: var(--fs-meta);
+	color: var(--accent);
+}

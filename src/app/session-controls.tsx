@@ -1,5 +1,7 @@
 import { ROLES, type Role, type Session, type Side } from "../types.ts";
+import { cx } from "./cx.ts";
 import type { Action } from "./session.ts";
+import s from "./session-controls.module.css";
 
 export const SIDE_LABEL: Record<Side, string> = {
 	radiant: "Radiant",
@@ -32,12 +34,18 @@ export function SessionControls({
 	apply: (action: Action) => void;
 }) {
 	return (
-		<div class="session-controls">
-			<fieldset class="control-group">
+		<div class={s.sessionControls}>
+			<fieldset class={s.controlGroup}>
 				<legend>Side</legend>
-				<div class="chips">
+				<div class={s.chips}>
 					{SIDES.map(({ side, hotkey }) => (
-						<label key={side} class={`chip chip-${side}`}>
+						<label
+							key={side}
+							class={cx(
+								s.chip,
+								side === "radiant" ? s.chipRadiant : s.chipDire,
+							)}
+						>
 							<input
 								type="radio"
 								name="side"
@@ -45,18 +53,18 @@ export function SessionControls({
 								checked={session.side === side}
 								onChange={() => apply({ kind: "side", side })}
 							/>
-							<span class="kbd">{hotkey}</span>
+							<span class={s.kbd}>{hotkey}</span>
 							{SIDE_LABEL[side]}
 						</label>
 					))}
 				</div>
 			</fieldset>
 
-			<fieldset class="control-group">
+			<fieldset class={s.controlGroup}>
 				<legend>Role</legend>
-				<div class="chips">
+				<div class={s.chips}>
 					{ROLES.map((role) => (
-						<label key={role} class="chip">
+						<label key={role} class={s.chip}>
 							<input
 								type="radio"
 								name="role"
@@ -64,7 +72,7 @@ export function SessionControls({
 								checked={session.myRole === role}
 								onChange={() => apply({ kind: "role", role })}
 							/>
-							<span class="kbd">{`${role} ${ROLE_UI[role].letter}`}</span>
+							<span class={s.kbd}>{`${role} ${ROLE_UI[role].letter}`}</span>
 							{ROLE_UI[role].label}
 						</label>
 					))}
