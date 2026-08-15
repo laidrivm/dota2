@@ -244,6 +244,29 @@ describe("a spelling that walks around a permission pattern", () => {
 		).toBe(2);
 	});
 
+	test("a wrapper's own option does not become the command", () => {
+		// `env -i` clears the environment and still runs what follows. Stopping
+		// at the first word that is neither an assignment nor a wrapper resolved
+		// the invocation to `-i`, and the commit went unchecked.
+		expect(run(event("env -i git commit -m fix"), fabricate("main")).code).toBe(
+			2,
+		);
+	});
+
+	test("a redirection in front of the command is not the command", () => {
+		expect(
+			run(event(">/tmp/nope git commit -m fix"), fabricate("main")).code,
+		).toBe(2);
+	});
+
+	test("a redirection with a spaced target is not the command", () => {
+		// Two words rather than one, so skipping the operator alone would take
+		// the target for the command name.
+		expect(
+			run(event("> /tmp/nope git commit -m fix"), fabricate("main")).code,
+		).toBe(2);
+	});
+
 	test("a command merely ending in git does not block", () => {
 		expect(run(event("mygit commit -m fix"), fabricate("main")).code).toBe(0);
 	});
@@ -292,6 +315,21 @@ describe("quoting that hides the command from a naive tokeniser", () => {
 				event("git --config-env user.name=X commit -m fix"),
 				fabricate("main"),
 			).code,
+		).toBe(2);
+	});
+
+	test("a command after a substitution inside quotes blocks", () => {
+		// The substitution suspends the enclosing double quote; the closing one
+		// used to be read as an opening quote instead, and everything after it —
+		// the separator included — was swallowed into one quoted word.
+		expect(
+			run(event('echo "$(true)"; git commit -m fix'), fabricate("main")).code,
+		).toBe(2);
+	});
+
+	test("a command after a backtick substitution inside quotes blocks", () => {
+		expect(
+			run(event('echo "`true`"; git commit -m fix'), fabricate("main")).code,
 		).toBe(2);
 	});
 
