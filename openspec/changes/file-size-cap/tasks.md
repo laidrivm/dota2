@@ -229,9 +229,13 @@ the one every other file here depends on.
 - [x] 6.3 Run the e2e suite: this file has no unit test by design, so e2e is the
       only thing that will notice a panel that stopped rendering. Run per pull
       request, not once at the end — the intermediate tree ships too
-- [ ] 6.4 Move `TeamPanel` and `EnemyPanel` into `panels.tsx`, and `Suggestions`
+- [x] 6.4 Move `TeamPanel` and `EnemyPanel` into `panels.tsx`, and `Suggestions`
       with `Result` into `suggestions.tsx`, each taking the helper only its own
-      pair reads; `board.tsx` keeps `Board`
+      pair reads; `board.tsx` keeps `Board`. Final: 75 / 164 / 109, with 6.1's
+      104 and 75 — six files where there was one of 466, all under the cap.
+      `board.tsx` still imports `panels.module.css`: the mirrored two-column
+      frame is the board's, not a panel's, which is why the stylesheet is read
+      by two files and the components by one each
 
 ## 7. The remaining test files split
 
