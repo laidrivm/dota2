@@ -2,7 +2,7 @@
 	"$schema": "./node_modules/@stryker-mutator/core/schema/stryker-schema.json",
 	"mutate": ["src/model.ts"],
 	"commandRunner": {
-		"command": "bun test src/model.test.ts"
+		"command": "bun test src/model"
 	},
 	"thresholds": {
 		"break": null

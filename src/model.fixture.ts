@@ -16,6 +16,15 @@ import {
 	type SnapshotBundle,
 } from "./types.ts";
 
+/**
+ * A cast, so nothing here checks that `snapshot.json` still matches
+ * `SnapshotBundle` — and every case in all three files is written against the
+ * shape this asserts. What stands in for the check is
+ * `src/app/snapshot.test.ts`'s *accepts the shipped fixture*, which runs the
+ * application's own `isBundle` over the same file: if the fixture drifts from
+ * the contract, that fails rather than these silently testing a shape the
+ * application would reject. The spelling matches the one there.
+ */
 export const bundle = rawSnapshot as unknown as SnapshotBundle;
 
 /** Assert a lookup the test knows must succeed; throws instead of `!`. */
