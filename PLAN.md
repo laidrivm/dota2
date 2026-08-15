@@ -80,7 +80,10 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       second across three pull requests, one stylesheet each. The
       file-size cap half of "reverse two non-goals": 300 lines for `.ts`/`.tsx`,
       200 for `.css`, adopted with no exemption list because the same change
-      decomposes all nine files currently over the line. `app.css` (943 lines)
+      decomposes all eleven files over the line — nine measured when it was
+      proposed, plus `scripts/spec-coverage.test.ts` and
+      `scripts/mutation-floor.test.ts`, which changes merged after it wrote
+      the list. `app.css` (943 lines)
       becomes co-located CSS Modules, which moves style delivery into the
       JavaScript bundle. Not an `/opsx:update` on `reviewable-diff-gates` as
       this entry used to ask: that change is archived, and the growth protocol

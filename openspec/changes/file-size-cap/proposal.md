@@ -6,20 +6,28 @@
 "a second mechanism overlapping the PR budget. Revisit only if the PR budget
 alone fails to bite." The revisit is now asked for, and the measurement says
 why it is not redundant: the PR budget governs how much a *change* adds, and
-nine files have grown past a readable size without any single change ever
+eleven files have grown past a readable size without any single change ever
 exceeding 800 lines.
 
 | file | lines | cap |
 |---|---|---|
 | `src/app/styles/app.css` | 943 | 200 |
+| `scripts/spec-coverage.test.ts` | 891 | 300 |
 | `src/app/session.test.ts` | 831 | 300 |
 | `scripts/command-guard.test.ts` | 595 | 300 |
-| `scripts/diff-budget.test.ts` | 448 | 300 |
-| `src/app/board/board.tsx` | 436 | 300 |
+| `scripts/mutation-floor.test.ts` | 551 | 300 |
+| `src/app/board/board.tsx` | 466 | 300 |
+| `scripts/diff-budget.test.ts` | 466 | 300 |
 | `src/model.test.ts` | 425 | 300 |
 | `src/app/session.ts` | 422 | 300 |
 | `agent-permissions.test.ts` | 347 | 300 |
 | `scripts/command-guard.ts` | 333 | 300 |
+
+Two of them are later arrivals than the rest: `scripts/spec-coverage.test.ts`
+and `scripts/mutation-floor.test.ts` were written by changes that merged after
+this proposal, which is the risk `design.md` records about the window this
+change leaves open. They are decomposed here like the other nine rather than
+exempted at the end.
 
 A budget on the diff and a cap on the file answer different questions. The
 first asks what a reviewer must read to approve a change; the second asks what
@@ -33,7 +41,7 @@ they must hold in their head to understand the file they are reading.
 - **Every file over the cap is decomposed in this change.** The cap lands last,
   green on the day it lands. There is no exemption list and no floor with a
   backlog behind it — that shape was considered and rejected, because a cap
-  whose first act is to grandfather nine violations gates nothing.
+  whose first act is to grandfather eleven violations gates nothing.
 - `src/app/styles/app.css` is replaced by co-located CSS Modules: each
   component owns a `*.module.css` beside it and imports it, and class names are
   scoped by the bundler. Bun detects `.module.css` with no configuration.
@@ -46,8 +54,9 @@ they must hold in their head to understand the file they are reading.
   The glob becomes the whole tree minus `tokens/`, which is what `CLAUDE.md`
   already requires: scope a scan by what it exempts, never by an enumeration
   of what it covers.
-- Five test files and three source files are split along seams named in
-  `tasks.md`.
+- Seven test files and three source files are split along seams named in
+  `tasks.md`, and `scripts/spec-coverage.test.ts` gives up the check it
+  implements to a script file first.
 
 ## Capabilities
 
@@ -74,7 +83,8 @@ implementing it has to stop enumerating a directory.
   written where it is enforced, so the cap lands in the living
   `change-slicing` spec instead. The queue entry asking for an `/opsx:update`
   on that change is answered by this proposal and removed.
-- **Exempting tests from the cap.** Five of the nine over-cap files are tests.
+- **Exempting tests from the cap.** Seven of the eleven over-cap files are
+  tests.
   `reviewable-diff-gates` rejected exempting tests from the *diff* budget
   because test code is where agent-written slop hides; the same reasoning
   holds one axis over.
@@ -89,9 +99,12 @@ implementing it has to stop enumerating a directory.
 ## Impact
 
 - New: a cap check and its test; one `*.module.css` beside each component; new
-  modules for the eight splits; `src/css.d.ts` so TypeScript resolves a
-  stylesheet import at all, and `src/app/cx.ts` to join the names a module
-  hands back.
+  modules for the splits, `scripts/spec-coverage.ts` among them — that check is
+  the only one of the three whose implementation lives inside its own test
+  file, and extracting it is both what the shape of `no-suppressions.ts` and
+  `mutation-floor.ts` already asks for and most of what brings the test under
+  the cap; `src/css.d.ts` so TypeScript resolves a stylesheet import at all,
+  and `src/app/cx.ts` to join the names a module hands back.
 - New, and not foreseen when this was written, each shipping as its own pull
   request beside step 1: `scripts/dev.ts` and `dist-routes.ts`, because Bun's
   HTML dev server never defines a CSS module's class-name mapping
