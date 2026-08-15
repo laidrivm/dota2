@@ -239,14 +239,21 @@ the one every other file here depends on.
 
 ## 7. The remaining test files split
 
-This step ships as three pull requests, not one — the third to take more than
-one. 7.1 to 7.3 are small splits and travel together, 1238 lines between them;
-7.4 and 7.5 carry 1442 between just the two, and each earns its own — 7.4
-because it moves a whole implementation into a new file, 7.5 because it waits
-on a lift that is not this change's.
+This step ships as five pull requests, one per task — not the three written
+here, which had 7.1 to 7.3 travelling together on 1238 lines between them. That
+arithmetic was the wrong one: a split costs the moved lines twice, and 7.1
+alone measured 719 against a gate that fails at 800. Two of these could not
+share a pull request even if the third stayed home.
 
-- [ ] 7.1 Split `scripts/diff-budget.test.ts` (466) by what it exercises —
-      the counting rules, the task-line pairing, and the override marker
+- [x] 7.1 Split `scripts/diff-budget.test.ts` (466) by what it exercises —
+      the counting rules, the task-line pairing, and the override marker. The
+      third file takes the ways the gate declines to measure as well: an
+      unresolvable base, no repository, no merge base. They are the same
+      question the marker asks — what verdict comes out — rather than what the
+      count is, and each must read as an error rather than as a passing diff of
+      zero lines. Final: 144 / 101 / 178, over a 104-line fixture. `script`,
+      `git` and an `emptyDir` are exported from it because the invocation cases
+      build their repositories in ways `repo` cannot
 - [ ] 7.2 Split `src/model.test.ts` (425) by the model spec's sections — enemy
       role inference, scoring, and the win estimate
 - [ ] 7.3 Split `agent-permissions.test.ts` (347) by the policy areas it reads
