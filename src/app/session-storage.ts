@@ -42,7 +42,11 @@ function isSession(value: unknown): value is Session {
 		return false;
 	if (s.myRole !== null && !ROLES.includes(s.myRole as Role)) return false;
 	if (!Array.isArray(s.bans) || !s.bans.every(isHeroId)) return false;
-	if (!Array.isArray(s.enemyPicks) || !s.enemyPicks.every(isHeroId)) {
+	if (
+		!Array.isArray(s.enemyPicks) ||
+		s.enemyPicks.length > MAX_ENEMY_PICKS ||
+		!s.enemyPicks.every(isHeroId)
+	) {
 		return false;
 	}
 	const picks: unknown = s.teamPicks;
