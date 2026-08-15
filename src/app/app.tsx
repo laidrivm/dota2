@@ -8,10 +8,10 @@ import { Board } from "./board/board.tsx";
 // it, and in the toast, which echoes its undo control.
 import header from "./header.module.css";
 import { Header } from "./header.tsx";
+import { closesEditor } from "./hotkeys.ts";
 import { Picker } from "./picker/picker.tsx";
 import {
 	type Action,
-	closesEditor,
 	confirmsReset,
 	type PickTarget,
 	positionOf,

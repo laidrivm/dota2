@@ -1,26 +1,30 @@
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import { EMPTY_SESSION, type Role, type Session } from "../types.ts";
 import {
-	type Action,
-	applyAction,
-	BACKUP_KEY,
-	clearBackup,
 	closesEditor,
-	closesUndoWindow,
-	confirmsReset,
 	type HotkeyContext,
 	hotkeyContext,
 	hotkeyFor,
 	ownsKeystroke,
-	persist,
 	pickerHotkey,
-	readBackup,
+} from "./hotkeys.ts";
+import {
+	type Action,
+	applyAction,
+	closesUndoWindow,
+	confirmsReset,
 	resetDraft,
+	usedAs,
+} from "./session.ts";
+import {
+	BACKUP_KEY,
+	clearBackup,
+	persist,
+	readBackup,
 	restore,
 	SESSION_KEY,
-	usedAs,
 	writeBackup,
-} from "./session.ts";
+} from "./session-storage.ts";
 
 /** Every test that is not about the ban limit works far below it. */
 const NO_LIMIT = 100;
