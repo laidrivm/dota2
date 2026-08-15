@@ -240,19 +240,17 @@ describe("class names read off a CSS module", () => {
 
 	// The other direction. A module's own descendant selectors are not reads —
 	// `.chip input` and `.snapshotError p` name one class between them — so
-	// `defined` yielding a name is not evidence anything reads it.
-	const readNames = Map.groupBy(
-		readers.flatMap(([, names]) => names),
-		([module]) => module,
+	// `defined` yielding a name is not evidence anything reads it. Keyed by
+	// `<module> <name>`, the shape `scripts/no-suppressions.ts` keys its own
+	// pairs by: two modules may each define a class of the same name.
+	const wasRead = new Set(
+		readers.flatMap(([, names]) => names.map((pair) => pair.join(" "))),
 	);
 
 	test.each([...classes])(
 		"%s defines only names a file reads",
 		(module, names) => {
-			const read = new Set(
-				(readNames.get(module) ?? []).map(([, name]) => name),
-			);
-			for (const name of names) expect(read).toContain(name);
+			for (const name of names) expect(wasRead).toContain(`${module} ${name}`);
 		},
 	);
 });
