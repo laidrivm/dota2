@@ -231,6 +231,9 @@ Rules about how work is carried out here. They do not age with the code.
   result both read as a successful edit.
 - Verify a test file's split by the full describe path of every test, never by
   their count — a block absorbed into its neighbour runs exactly as many.
+- Run the typecheck and the suite on a freshly pulled base before branching
+  from it — a commit made through a web UI never ran the pre-push hook, and
+  CI's verdict on it may land after the merge that carried it.
 - Create a branch with `git switch -c <name>` or `--no-track`, never tracking
   `origin/main`.
 - Rebase a branch whose base was amended with `git rebase --onto <new base>

@@ -312,11 +312,15 @@ named where one gate carried the whole result.
 
 **What no gate caught**
 
-- `main` arrived broken. A CodeRabbit suggestion accepted through GitHub's
-  button added `enemyPicks.length > MAX_ENEMY_PICKS` without the import; the
-  button commits without running `pre-push`, so `tsc` failed and five tests died
-  on the ReferenceError. Found by running the checks on a fresh `main` before
-  branching, not by any review skill
+- `main` arrived broken, though not for want of a gate. A CodeRabbit suggestion
+  accepted through GitHub's button added `enemyPicks.length > MAX_ENEMY_PICKS`
+  without the import; the button commits without running `pre-push`, so `tsc`
+  failed and five tests died on the ReferenceError. CI did catch it — `Test`,
+  `E2E` and `Lint` all failed on `feat/file-size-cap-4a` — but those runs were
+  created at 12:32:37 and the merge landed at 12:32:40, so no verdict existed to
+  read when the button was pressed. What found it locally was running the checks
+  on a fresh `main` before branching, which is now a Process rule; no review
+  skill was involved either way
 - Two structural breaks in the test split. A line-range cut took the closing
   brace of the neighbouring `describe` with it, eight blocks folded into one,
   and the suite reported 768 either way. Caught by comparing full describe paths
