@@ -96,6 +96,16 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       no-colour-literal sweep now reads every tracked `*.css` rather than one
       directory, so `app-shell`'s *No third-party runtime requests* is checked
       over component stylesheets it previously never saw.
+- [ ] **`pre-push-parity`** — proposed, one step. Every CI gate that needs no
+      browser moves onto the pre-push hook: `biome`, the YAML check, the
+      suppression scan and the mutation floor, with `actionlint` and `gitleaks`
+      skipped when absent. Written because `file-size-cap` step 7.2 split
+      `model.test.ts`, left `stryker.config.json` naming one of the three
+      files, and pushed green — 185 survivors against a floor of 67, reported
+      by CI after the push. **Archives after `file-size-cap`**: both carry a
+      `MODIFIED` delta on `mutation-floor`'s first requirement, this one
+      carries the other's text in full, and the reverse order would put the
+      command back to a file name.
 - [ ] **The comment scan goes quiet on a regex literal.** A backtick inside one
       — `` /[`]/ `` — opens what `scripts/mutation-floor.ts:183-199` takes for a
       template literal and runs to end of input, so every comment below it is
