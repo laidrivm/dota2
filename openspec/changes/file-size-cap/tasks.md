@@ -255,8 +255,14 @@ share a pull request even if the third stayed home.
       zero lines. Final: 144 / 101 / 178, over a 104-line fixture. `script`,
       `git` and an `emptyDir` are exported from it because the invocation cases
       build their repositories in ways `repo` cannot
-- [ ] 7.2 Split `src/model.test.ts` (425) by the model spec's sections — enemy
-      role inference, scoring, and the win estimate
+- [x] 7.2 Split `src/model.test.ts` (425) by the model spec's sections — enemy
+      role inference, scoring, and the win estimate. Seven describes into three
+      files, each section whole: what the model reads off the draft (§2, §1),
+      what it recommends (§3, §7.5), and what it concludes (§4, §7.6, plus the
+      robustness cases, which are about the same conclusions reached from input
+      the model should not have been given). Final: 102 / 145 / 154 over a
+      61-line fixture. The file cites no criterion, so the split can lose none
+      — checked rather than assumed
 - [ ] 7.3 Split `agent-permissions.test.ts` (347) by the policy areas it reads
 - [ ] 7.4 `scripts/spec-coverage.test.ts` (891): extract the check it
       implements — `parse`, `cite`, `tests`, `check`, `uncited`, `gauge` and
