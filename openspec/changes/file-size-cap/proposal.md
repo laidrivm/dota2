@@ -70,6 +70,10 @@ None.
   capability already owns "how work is cut into pull requests, and how a cut
   that failed is detected"; a file nobody can read whole is the same failure
   measured on the other axis.
+- `mutation-floor`: the killing command. It named `src/model.test.ts`, which
+  step 7.2 split into three files, and Stryker went on running the first — 185
+  survivors against a floor of 67. It takes the prefix `bun test src/model`
+  instead, and gains the scenario about a case moving between the files.
 - `module-boundaries`: one scenario only. Its cycle ban is illustrated with
   `src/app/session.ts` importing `board.tsx`, "which already imports
   `src/app/session.ts`" — and step 6 moves that import to
