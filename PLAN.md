@@ -76,7 +76,7 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
   spec at `openspec/specs/mutation-floor/`.
 
 ### Open
-- [ ] **`file-size-cap`** — proposed, eight steps, the first four applied, the
+- [ ] **`file-size-cap`** — proposed, eight steps, the first five applied, the
       second across three pull requests, one stylesheet each. The
       file-size cap half of "reverse two non-goals": 300 lines for `.ts`/`.tsx`,
       200 for `.css`, adopted with no exemption list because the same change
