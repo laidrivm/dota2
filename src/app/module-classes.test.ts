@@ -6,12 +6,16 @@ import { blank } from "../../scripts/scan.ts";
 const TSX = new Bun.Transpiler({ loader: "tsx" });
 
 /**
- * Every class a component reads off a CSS module is one that module defines.
+ * A class and its rule stay in step: every class a component reads off a CSS
+ * module is one that module defines, and every class a module defines is one
+ * some component reads.
  *
- * This is the migration's one silent failure: the bundler owns the names, so a
- * read that matches nothing is `undefined` rather than an error. The rule stops
- * applying, the component still renders, and neither the type checker nor the
- * e2e suite — which locates by role and text, never by class — says a word.
+ * Both directions fail silently, which is why both are checked. The bundler
+ * owns the names, so a read that matches nothing is `undefined` rather than an
+ * error — the rule stops applying, the component still renders, and neither the
+ * type checker nor the e2e suite, which locates by role and text and never by
+ * class, says a word. A rule left behind by a move is the same failure facing
+ * the other way: it ships in the bundle styling nothing.
  */
 
 // The listing is taken at the repository root, never at `cwd`, the shape
@@ -233,4 +237,22 @@ describe("class names read off a CSS module", () => {
 			expect(classes.get(module) ?? new Set()).toContain(name);
 		}
 	});
+
+	// The other direction. A module's own descendant selectors are not reads —
+	// `.chip input` and `.snapshotError p` name one class between them — so
+	// `defined` yielding a name is not evidence anything reads it.
+	const readNames = Map.groupBy(
+		readers.flatMap(([, names]) => names),
+		([module]) => module,
+	);
+
+	test.each([...classes])(
+		"%s defines only names a file reads",
+		(module, names) => {
+			const read = new Set(
+				(readNames.get(module) ?? []).map(([, name]) => name),
+			);
+			for (const name of names) expect(read).toContain(name);
+		},
+	);
 });
