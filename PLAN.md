@@ -74,30 +74,17 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
   `openspec/specs/spec-test-traceability/`.
 - **`mutation-floor`** — PRs #81 and #82, `archive/2026-08-13-mutation-floor`;
   spec at `openspec/specs/mutation-floor/`.
+- **`file-size-cap`** — twenty-two implementation pull requests where the task
+  list foresaw eight, `archive/2026-08-16-file-size-cap`; the cap requirement
+  is in `openspec/specs/change-slicing/`, and the change also widened
+  `module-boundaries` and `mutation-floor`. Moving a line costs it twice
+  against a budget that fails at 800, and four steps discovered that only on
+  measuring. Two of its consequences outlive it: development builds and serves
+  `dist/`, because Bun's HTML dev server cannot emit a CSS module's class-name
+  mapping; and there is no global class layer, so the no-colour-literal sweep
+  reads every tracked `*.css` rather than one directory.
 
 ### Open
-- [ ] **`file-size-cap`** — applied, awaiting the archive. Eight steps became
-      twenty-two implementation pull requests where the list foresaw eight:
-      moving a line costs it twice against a budget that fails at 800, and four
-      steps discovered that only on measuring. The
-      file-size cap half of "reverse two non-goals": 300 lines for `.ts`/`.tsx`,
-      200 for `.css`, adopted with no exemption list because the same change
-      decomposes all eleven files over the line — nine measured when it was
-      proposed, plus `scripts/spec-coverage.test.ts` and
-      `scripts/mutation-floor.test.ts`, which changes merged after it wrote
-      the list. `app.css` (943 lines)
-      becomes co-located CSS Modules, which moves style delivery into the
-      JavaScript bundle. Not an `/opsx:update` on `reviewable-diff-gates` as
-      this entry used to ask: that change is archived, and the growth protocol
-      above forbids editing an archive to receive a fact discovered later, so
-      the cap lands in the living `change-slicing` spec. Step 1 cost a change
-      to how the application is served, which shipped beside it: Bun's HTML dev
-      server cannot emit a CSS module's class-name mapping, so development
-      builds and serves `dist/` — the constraint below carries it. Step 3 left
-      no global class layer: `styles.css` is tokens and `base.css`, and the
-      no-colour-literal sweep now reads every tracked `*.css` rather than one
-      directory, so `app-shell`'s *No third-party runtime requests* is checked
-      over component stylesheets it previously never saw.
 - [ ] **`pre-push-parity`** — applied, awaiting the archive. The CI gates
       that can refuse a push moved onto the pre-push hook: `biome`, the YAML
       check, the suppression scan and the mutation floor, with `actionlint`
@@ -105,10 +92,10 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       step 7.2 split `model.test.ts`, left `stryker.config.json` naming one
       of the three files, and pushed green — 185 survivors against a floor of
       67, reported by CI only after the push had happened.
-      **Archives after `file-size-cap`**: both carry a
-      `MODIFIED` delta on `mutation-floor`'s first requirement, this one
-      carries the other's text in full, and the reverse order would put the
-      command back to a file name. Measured at 20 s end to end rather than the
+      Its `MODIFIED` delta on `mutation-floor`'s first requirement carries the
+      text `file-size-cap` left there in full, `bun test src/model` included,
+      so syncing it does not put the command back to a file name.
+      Measured at 20 s end to end rather than the
       17 s `design.md` estimated — the estimate summed the checks, and the sum
       omits one bun start per command.
 - [ ] **The comment scan goes quiet on a regex literal.** A backtick inside one
