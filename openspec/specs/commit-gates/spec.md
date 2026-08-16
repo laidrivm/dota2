@@ -148,14 +148,21 @@ touches `package.json`, and nightly.
 - **WHEN** `actionlint` is not on `PATH` and a branch is pushed
 - **THEN** the hook completes without error and without linting the workflows
 
-The secret scan SHALL be bounded to the range the push would send —
+The secret scan SHALL be bounded to the checked-out branch's range —
 `--log-opts` from the base branch to `HEAD`, resolved as
 `scripts/diff-budget.sh` resolves its own base — and SHALL NOT walk the whole
-history the way CI does. Two failure modes decide it: an unbounded scan means
-one secret ever reaching history blocks every push by everyone until a baseline
-is written, and a working-tree scan reads the gitignored files that exist for
-one author and in no clone. CI keeps the history-wide scan, where a failure
-stops one pull request rather than everybody's pushes.
+history the way CI does. Two failure modes decide the bound: an unbounded scan
+means one secret ever reaching history blocks every push by everyone until a
+baseline is written, and a working-tree scan reads the gitignored files that
+exist for one author and in no clone.
+
+`HEAD` is the supported push shape, and the hook SHALL NOT be read as covering
+more. It does not consume the ref-update records git writes to a pre-push
+hook's standard input, so a push of some ref other than the checked-out one
+leaves its commits unscanned here. That is the same gap as a machine without
+`gitleaks`, and it closes the same way: CI keeps the history-wide scan, where a
+failure stops one pull request rather than everybody's pushes, and that is
+where the verdict is binding.
 
 #### Scenario: A tool the machine has, reporting a finding
 

@@ -50,8 +50,8 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
 - **`coderabbit-local-gate`** — PR #28,
   `archive/2026-07-26-coderabbit-local-gate`.
 - **`agent-permissions-gaps`** — PR #30,
-  `archive/2026-07-27-agent-permissions-gaps`; its `ask` entries were later
-  confirmed live, which the archive does not record.
+  `archive/2026-07-27-agent-permissions-gaps`; spec at
+  `openspec/specs/agent-permissions/`.
 - **`readme-drift`** — PR #33, `archive/2026-07-27-readme-drift`.
 - **`reviewable-diff-gates`** — PRs #44, #45, #46 and the arrow step,
   `archive/2026-07-30-reviewable-diff-gates`.
