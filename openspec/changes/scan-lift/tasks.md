@@ -25,7 +25,10 @@ acceptance criteria: `mutation-floor`'s *A directive below a regex literal* and
       is returned rather than what survives: a block comment's opening line
       when its text spans lines, a `//` inside a block comment and a `/*`
       inside a line comment, a comment inside a template interpolation, and a
-      CSS file where `//` is not a comment
+      CSS file where `//` is not a comment. `blank`'s own cases have gaps that
+      matter more once every scan routes through this module — a regex literal
+      containing `/*`, an escaped backtick, an unterminated template, CRLF —
+      so close the ones the new export makes reachable and name the rest here
 - [ ] 1.4 Switch `scripts/mutation-floor.ts` to the new export and delete its
       private `comments()`. 1.1's case now passes. Run `bunx --no-install
       stryker run && bun scripts/mutation-floor.ts` and record the surviving
@@ -40,11 +43,16 @@ acceptance criteria: `mutation-floor`'s *A directive below a regex literal* and
       it. 1.1's case now passes. Keep two cases the derivation must not lose: a
       citation inside a commented-out block still does not count, and one below
       a block that has closed still does
-- [ ] 1.6 Record `bun scripts/spec-coverage.ts`'s uncited count before and
-      after 1.5. A citation the old scanner dropped becomes visible, so the
-      count can only fall or hold; lower `FLOOR` to whatever it now reads, with
-      the reason on its line. A count that *rises* means the derivation is
-      wrong and 1.5 is not done
+- [ ] 1.6 Record the *set* of cited identifiers before and after 1.5, not only
+      the count, and set `FLOOR` to whatever the new count reads with the
+      reason on its line. The count moves in either direction and neither is a
+      defect on its own: a citation the old scanner dropped becomes visible and
+      lowers it, and a false one it accepted disappears and raises it —
+      `CITATION` matches a line-leading `// spec:` inside a multi-line template
+      literal today, measured, because the per-line strip only removes quoted
+      spans that open and close on one line. Read the set difference and say
+      which citations moved and why; a count compared alone cannot tell the two
+      apart
 - [ ] 1.7 Delete `scripts/mutation-floor-exemptions.test.ts`, redistributing
       its cases by what they exercise: scanning to `scripts/scan.test.ts`,
       directive grammar to `scripts/mutation-floor.test.ts`. Drop a case only
@@ -56,8 +64,11 @@ acceptance criteria: `mutation-floor`'s *A directive below a regex literal* and
       `scripts/spec-coverage.test.ts` before and after 1.7, per `CLAUDE.md`.
       The set changes by exactly the cases named in 1.7 and by 1.1's two
       additions
-- [ ] 1.9 Measure every file this change touched against its cap and record the
-      numbers, whether or not any is over: `scripts/scan.ts`,
+- [ ] 1.9 Measure every capped file this change touched and record the numbers,
+      whether or not any is over. The cap covers `.ts`, `.tsx` and `.css`, so
+      `CLAUDE.md` is not in this list — the always-on budget in its own
+      §*Structure & growth of this file* is what governs it, and 1.10 is where
+      that is checked. Capped: `scripts/scan.ts`,
       `scripts/scan.test.ts`, `scripts/mutation-floor.ts`,
       `scripts/mutation-floor.test.ts`, `scripts/spec-coverage.ts`,
       `scripts/spec-coverage.test.ts`. `file-size-cap` step 7.5 left
@@ -67,7 +78,8 @@ acceptance criteria: `mutation-floor`'s *A directive below a regex literal* and
       neighbouring rule rather than appending a variant if it already covers
       the direction: the existing one is *Before inlining a single-caller
       helper, grep for the logic it duplicates elsewhere*, which is the
-      opposite direction and stays
+      opposite direction and stays. Check the always-on budget after adding it:
+      `CLAUDE.md` plus `PLAN.md` against ~500 lines
 - [ ] 1.11 Confirm `src/app/module-classes.test.ts` is untouched by this change
       and passes — it is `blank`'s only production caller and therefore the
       control on the parameterisation in 1.2
