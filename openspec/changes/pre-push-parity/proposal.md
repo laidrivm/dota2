@@ -9,8 +9,9 @@ pushed green: the type check passed, the suite passed, and the gate that had
 broken runs only in CI. The push had already happened by the time anything
 said so.
 
-That gate is not alone. Ten checks run on a pull request; the push path runs
-three of them — the type check, the suite, and the diff budget. Of the seven
+That gate is not alone. Ten checks run on every pull request — an eleventh,
+`bun audit`, runs only on one that touches `package.json` — and the push path
+runs three of them — the type check, the suite, and the diff budget. Of the seven
 left, six need no browser: `biome`, the YAML syntax check, the suppression
 scan, `actionlint`, `gitleaks` and the mutation floor. Three of those are
 measured at 0.24 s between them and the floor at 4.9 s, against a hook that
@@ -19,7 +20,9 @@ neither is installed here, which is itself why they have to be optional.
 
 `coverage` is not among the seven in any useful sense: it runs the same suite
 the hook already runs, and what is CI-only about it is the number, which
-`smoke-suite` requires not to gate anything.
+`smoke-suite` requires not to gate anything. `bun audit` stays in CI for a
+reason of its own: it queries an advisory database over the network, and a hook
+that needs the network fails an offline push on something other than the branch.
 
 The second half of the problem is that nothing owns the answer. What the hook
 runs is stated in fragments across four specifications, and two of them

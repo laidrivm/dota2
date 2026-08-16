@@ -2,7 +2,7 @@
 
 ## ADDED Requirements
 
-### Requirement: The pre-push hook runs every gate that needs no browser
+### Requirement: The pre-push hook runs the gates named here
 
 The pre-push hook SHALL run, in addition to the type check and `bun test`:
 `biome ci`, the YAML syntax check, the suppression scan, and the mutation
@@ -25,8 +25,11 @@ pinned versions, and that is where their verdict is binding. Presence SHALL be
 treated like any other gate — a non-zero exit blocks the push, because a
 finding a developer can see before pushing is one they should not push past.
 
-The hook SHALL NOT run the browser suite or the coverage report. `smoke-suite`
-owns why for both.
+The hook SHALL NOT run the browser suite or the coverage report — `smoke-suite`
+owns why for both — nor `bun audit`, which queries an advisory database over
+the network and would make an offline push fail on a gate about published
+vulnerabilities rather than about the branch. CI runs it on a pull request that
+touches `package.json`, and nightly.
 
 #### Scenario: A gate that CI would fail blocks the push instead
 

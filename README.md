@@ -94,7 +94,7 @@ Installed automatically by `bun install` (the `prepare` script runs
 - **pre-commit** — `biome check --staged`: blocks the commit if any staged
   file has format/lint problems. It does **not** autofix (simple-git-hooks
   can't re-stage) — run `bun run lint:fix`, re-stage, commit again.
-- **pre-push** — every CI gate that needs no browser, about 20 seconds:
+- **pre-push** — the CI gates that can refuse a push, about 20 seconds:
   `openspec/specs/commit-gates/` names them and is the one place that does,
   so this list is deliberately not repeated here. `actionlint` and
   `gitleaks` run only if they are on `PATH`; a clone without them still
