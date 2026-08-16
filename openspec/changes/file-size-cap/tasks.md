@@ -326,48 +326,52 @@ requests on its own.
 
 ## 8. The cap
 
-- [ ] 8.1 Write the check's tests first, all failing: a 301-line `.ts` file
+- [x] 8.1 Write the check's tests first, all failing: a 301-line `.ts` file
       fails naming file, count and cap (*A file over the cap*); a 300-line one
       passes; a 201-line `.css` fails (*A stylesheet over the cap*); a
       200-line one passes
-- [ ] 8.2 Write the scope tests first: a `*.test.ts` file over the cap fails
+- [x] 8.2 Write the scope tests first: a `*.test.ts` file over the cap fails
       like any other (*A test file is not exempt*); an untracked 400-line file
       does not fail the check (*An untracked file over the cap*); a `.md`,
       `.json` or `.yml` file over 300 lines does not fail it
-- [ ] 8.3 Write the extension tests first: a 301-line `.tsx` file fails, since
+- [x] 8.3 Write the extension tests first: a 301-line `.tsx` file fails, since
       the requirement covers `.tsx` and not only `.ts` [2]; a 250-line `.css`
       file fails while a 250-line `.ts` file passes, proving the cap is chosen
       by extension rather than one number applied to everything [3]; and a
       `*.module.css` file is counted under the 200-line cap, which is the
       extension the whole CSS migration produces [6]
-- [ ] 8.4 Write the counting and sweep tests first: three files over the cap
+- [x] 8.4 Write the counting and sweep tests first: three files over the cap
       are all reported in one run rather than only the first [1] — a check that
       stops at the first turns an eleven-file backlog into an eleven-round
       game; a file whose last line carries no terminating newline counts it [4],
       because `wc -l` counts newlines and would read a 301-line file as 300; a
       file with `\r\n` endings counts each pair as one line, not two; and a run
       that found zero files fails rather than passing every assertion vacuously
-- [ ] 8.5 Write the environment tests first: a file `git ls-files` lists but
+- [x] 8.5 Write the environment tests first: a file `git ls-files` lists but
       that is absent from the working tree is skipped rather than throwing [5],
       and the check run from a subdirectory resolves the file list from the
       repository root [7]
-- [ ] 8.6 Implement the check as `scripts/file-size.test.ts`, taking the file
+- [x] 8.6 Implement the check as `scripts/file-size.test.ts`, taking the file
       list the way `scripts/no-suppressions.ts` already does — `git ls-files
       -z` spawned at the repository root rather than at `cwd`, with the comment
       there explaining why — so an untracked file is out of scope and a
       gitignored one cannot pass locally and fail in a clone. This is the
       fourth site to do it; match the established shape instead of inventing
       one. Break each assertion above before it passes
-- [ ] 8.7 Run it over the tree and confirm it passes with nothing exempted
+- [x] 8.7 Run it over the tree and confirm it passes with nothing exempted
       (*The tree as it stands*). A file still over the cap here means a
-      previous step's seam was wrong and is fixed there, not exempted here
-- [ ] 8.8 Add `scripts/file-size.test.ts` to the README's knowledge ownership
+      previous step's seam was wrong and is fixed there, not exempted here. One
+      was: `spec-coverage-sweep.test.ts` at 303, having grown past 290 on two
+      assertions a review pass tightened. The seam moved — *the repository as
+      it stands* asserts this tree's floor, which is the floor file's subject
+      — rather than the cap admitting an exception
+- [x] 8.8 Add `scripts/file-size.test.ts` to the README's knowledge ownership
       map, beside `command-guard.ts` and `no-suppressions.ts`
-- [ ] 8.9 Update `PLAN.md`: the queue entry asking for an `/opsx:update` on
+- [x] 8.9 Update `PLAN.md`: the queue entry asking for an `/opsx:update` on
       `reviewable-diff-gates` is answered — the cap landed here, and the rule of
       two remains outstanding as its own one-line Code rule, which is what the
       archived proposal prescribed for it
-- [ ] 8.10 Grep the four sites that restate a claim like this one before calling
+- [x] 8.10 Grep the four sites that restate a claim like this one before calling
       the change done: this change's sibling artefacts, `openspec/specs/**`,
       `PLAN.md` and the README ownership map — searching the wording being
       replaced, not the wording replacing it
