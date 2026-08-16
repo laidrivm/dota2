@@ -151,6 +151,32 @@ describe("quoting that hides the command from a naive tokeniser", () => {
 		).toBe(2);
 	});
 
+	test("a pattern's own parenthesis and alternation open nothing", () => {
+		// `(` opening a pattern is not a subshell and `|` between alternatives is
+		// not a pipe: reading them as shell syntax suspended a frame the
+		// substitution's `)` then restored, and counted the literal `case` in the
+		// pattern as a keyword — the closing quote swallowed the commit.
+		expect(
+			run(
+				event('echo "$(case x in (foo|case) true ;; esac)"; git commit -m fix'),
+				fabricate("main"),
+			).code,
+		).toBe(2);
+	});
+
+	test("a parenthesised pattern after the first is read as one too", () => {
+		// The scan re-enters a pattern at `;;`, without which the second pattern's
+		// `(` suspends a frame nothing restores.
+		expect(
+			run(
+				event(
+					'echo "$(case x in a) true ;; (b|case) true ;; esac)"; git commit -m fix',
+				),
+				fabricate("main"),
+			).code,
+		).toBe(2);
+	});
+
 	test("the word case as an argument opens none inside a substitution", () => {
 		// The one input that still tells the two apart once the depth travels on
 		// the stack: counting it here leaves the substitution unable to close.

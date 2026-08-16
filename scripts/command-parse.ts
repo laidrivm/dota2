@@ -43,7 +43,7 @@ export function commands(line: string): string[][] {
 	 * would stop its `)` closing, so `case x in a) echo "$(true)"; git commit`
 	 * came through as one quoted word.
 	 */
-	const suspended: { quote: string; cases: number }[] = [];
+	const suspended: { quote: string; cases: number; pattern: boolean }[] = [];
 	/** Backticks do not nest, so one flag tells the opening one from the close. */
 	let backtick = false;
 	/**
@@ -58,24 +58,41 @@ export function commands(line: string): string[][] {
 	 * reached the guard as one quoted word.
 	 */
 	let cases = 0;
+	/**
+	 * Whether the scan stands in a `case` pattern — between `in` (or a `;;`)
+	 * and the `)` that ends the pattern. There `(`, `|` and every word are
+	 * pattern syntax rather than shell syntax, and reading them as shell syntax
+	 * is what let `echo "$(case x in (foo|case) true ;; esac)"; git commit`
+	 * through: the leading `(` suspended a frame nothing would restore, `|`
+	 * opened a command for the literal `case` to be counted as a keyword in,
+	 * and the substitution's own `)` went to that stray frame instead of the
+	 * substitution — leaving the commit inside a quote.
+	 */
+	let pattern = false;
 
 	const suspend = () => {
-		suspended.push({ quote, cases });
+		suspended.push({ quote, cases, pattern });
 		quote = "";
 		cases = 0;
+		pattern = false;
 	};
 	const resume = () => {
 		const was = suspended.pop();
 		quote = was?.quote ?? "";
 		cases = was?.cases ?? 0;
+		pattern = was?.pattern ?? false;
 	};
 
 	const endWord = () => {
 		if (word) {
 			if (words.length === 0) {
-				if (word === "case") cases++;
-				else if (word === "esac") cases = Math.max(0, cases - 1);
-			}
+				// `esac` closes the statement from a pattern position too, because
+				// that is where the last `;;` leaves the scan standing.
+				if (word === "esac") {
+					cases = Math.max(0, cases - 1);
+					pattern = false;
+				} else if (!pattern && word === "case") cases++;
+			} else if (word === "in" && words[0] === "case") pattern = true;
 			words.push(word);
 		}
 		word = "";
@@ -107,17 +124,28 @@ export function commands(line: string): string[][] {
 			else word += char;
 		} else if (char === '"' || char === "'") {
 			quote = char;
+		} else if (pattern && (char === "(" || char === "|")) {
+			// Pattern syntax: the optional `(` opening a pattern is not a subshell,
+			// and `|` between alternatives is not a pipe.
+			endWord();
 		} else if (SEPARATORS.has(char)) {
+			// `;;` ends the command list and puts the scan back in a pattern, so
+			// the `(` and `|` of every pattern after the first are read as such.
+			if (char === ";" && line[at + 1] === ";" && cases > 0) pattern = true;
 			endCommand();
 			// A subshell suspends as a substitution does. That is what keeps the
 			// `)` closing a group inside `$( … )` from restoring the quote the
 			// substitution suspended and putting the rest of it back in quotes.
 			if (char === "(") suspend();
-			// Not inside a `case`: there a `)` ends a pattern, and resuming would
-			// restore the quote of a substitution that is still open — which put
-			// `echo "$(case x in a) git commit ;; esac)"` back inside quotes and
-			// hid the commit.
-			if (char === ")" && cases === 0) resume();
+			// A `)` ending a pattern closes nothing this scan opened. Resuming
+			// there would restore the quote of a substitution that is still open —
+			// which put `echo "$(case x in a) git commit ;; esac)"` back inside
+			// quotes and hid the commit. The `cases` test stands behind the
+			// pattern flag for a pattern the flag did not see begin.
+			if (char === ")") {
+				if (pattern) pattern = false;
+				else if (cases === 0) resume();
+			}
 		} else if (/\s/.test(char)) {
 			endWord();
 		} else {
