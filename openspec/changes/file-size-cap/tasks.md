@@ -270,7 +270,7 @@ share a pull request even if the third stayed home.
       area starts from were lifted — `ghWrites` and `isDenied` have one reader
       each and stayed with it, and `bunHelp` stayed with the prompts, which are
       the only cases that spawn `bun --help`
-- [ ] 7.4 `scripts/spec-coverage.test.ts` (891): extract the check it
+- [x] 7.4 `scripts/spec-coverage.test.ts` (891): extract the check it
       implements — `parse`, `cite`, `tests`, `check`, `uncited`, `gauge` and
       the patterns they read — into `scripts/spec-coverage.ts`, the shape
       `no-suppressions.ts` and `mutation-floor.ts` already have and this file
@@ -278,7 +278,15 @@ share a pull request even if the third stayed home.
       citation reader, the sweep over the repository, and the floor with the
       archive rules. `design.md` records why the extraction comes first. The
       README's ownership map names the test file as the owner of that
-      knowledge; the script becomes the owner, so that row moves in this task
+      knowledge; the script becomes the owner, so that row moves in this task. This task ships as three pull requests: 891 lines
+      moved cost ~1800 budgeted, and the whole of it measured 1496 against a
+      gate that fails at 800. The extraction is the first, the remaining two
+      carry the test split. The implementation came to 306 lines, six over the
+      cap, so it splits once more at the seam already in it: `spec-criteria.ts`
+      answers what criteria exist and `spec-coverage.ts` which are covered —
+      81 / 242. Two things the extraction broke and the suite caught rather than
+      the eye: `DECLARATION` matched `^const FLOOR`, which `export` in front of
+      defeats, so the floor read no reason on its own line
 - [ ] 7.5 `scripts/mutation-floor.test.ts` (551), after the lift it waits on.
       Switching `scripts/mutation-floor.ts` to `scripts/scan.ts` is `PLAN.md`'s
       outstanding item and not this change's work, but it is what makes this
