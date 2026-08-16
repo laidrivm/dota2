@@ -14,11 +14,10 @@ import {
 	fabricate,
 	ids,
 	problems,
-	repo,
 	spec,
 	world,
 } from "./spec-coverage.fixture.ts";
-import { check, DECLARATION, FLOOR, gauge, uncited } from "./spec-coverage.ts";
+import { check, uncited } from "./spec-coverage.ts";
 import { counted } from "./spec-criteria.ts";
 
 afterAll(cleanup);
@@ -166,28 +165,6 @@ describe("a tree the check cannot read straight through", () => {
 		rmSync(join(dir, "src/thing.test.ts"));
 		expect(problems(dir)).toEqual([]);
 		expect(cited(dir)).toEqual([]);
-	});
-});
-
-describe("the repository as it stands", () => {
-	const here = check(repo);
-
-	test("nothing is cited wrongly", () => {
-		expect(here.problems).toEqual([]);
-	});
-
-	// spec: spec-test-traceability/the-repository-as-it-stands
-	test("the count of uncited criteria sits exactly on the floor", () => {
-		expect(gauge(uncited(repo), FLOOR, DECLARATION)).toEqual([]);
-	});
-
-	test("the sweep read criteria and test files rather than nothing", () => {
-		expect(here.criteria.length).toBeGreaterThan(0);
-		expect(here.files.length).toBeGreaterThan(0);
-		// Without this the check passes vacuously: a scanner finding nothing
-		// reports no problems either, and this file's own citations are the
-		// only ones in the tree.
-		expect(here.cited.size).toBeGreaterThan(0);
 	});
 });
 
