@@ -58,7 +58,9 @@ export type Finding = { path: string; line: number; marker: string };
 export function scan(cwd?: string, approved = APPROVED): Finding[] {
 	const top = Bun.spawnSync(["git", "rev-parse", "--show-toplevel"], { cwd });
 	if (top.exitCode !== 0) throw new Error(top.stderr.toString());
-	const root = top.stdout.toString().trim();
+	// Only the terminator git adds, not `trim()`: a repository whose path ends
+	// in a space is unusual and not this check's to corrupt.
+	const root = top.stdout.toString().replace(/\n$/, "");
 
 	const ls = Bun.spawnSync(["git", "ls-files", "-z"], { cwd: root });
 	if (ls.exitCode !== 0) throw new Error(ls.stderr.toString());

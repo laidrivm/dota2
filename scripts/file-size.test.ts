@@ -143,6 +143,13 @@ describe("counting a line", () => {
 		expect(oversize(dir)).toEqual([{ path: "src/a.ts", count: 301, cap: 300 }]);
 	});
 
+	test("a lone carriage return ends a line too", () => {
+		// An editor shows a CR-terminated file as separate lines, so a count
+		// that saw one line here would pass a file no reader could hold.
+		const dir = fabricate({ "src/a.ts": long(301).replaceAll("\n", "\r") });
+		expect(oversize(dir)).toEqual([{ path: "src/a.ts", count: 301, cap: 300 }]);
+	});
+
 	test("a CRLF ending is one line, not two", () => {
 		const dir = fabricate({ "src/a.ts": long(301).replaceAll("\n", "\r\n") });
 		expect(oversize(dir)).toEqual([{ path: "src/a.ts", count: 301, cap: 300 }]);
@@ -154,8 +161,49 @@ describe("counting a line", () => {
 		["x\n", 1],
 		["x\ny", 2],
 		["x\ny\n", 2],
+		["x\r\ny", 2],
+		["x\ry\r", 2],
 		["\n", 1],
 	])("%o counts as %i", (text, n) => expect(count(text as string)).toBe(n));
+});
+
+describe("the extensions this repository carries", () => {
+	test("a type nobody has ruled on cannot arrive unnoticed", () => {
+		// The caps enumerate what they cover, which `CLAUDE.md` warns against.
+		// Inverting it here would exempt eleven extensions to cap three, and
+		// would newly cap `.sh`, `.py`, `.html` and `.txt` — types the proposal
+		// declines to cap. The hazard the rule guards against is real all the
+		// same: a new source extension would be capped by nothing and say
+		// nothing about it. This is what says something. A type arriving in the
+		// tree fails here until somebody decides whether it is capped.
+		const root = Bun.spawnSync(["git", "rev-parse", "--show-toplevel"])
+			.stdout.toString()
+			.replace(/\n$/, "");
+		const tracked = Bun.spawnSync(["git", "ls-files", "-z"], { cwd: root })
+			.stdout.toString()
+			.split("\0")
+			.filter(Boolean);
+		const extensions = [
+			...new Set(tracked.map((path) => path.slice(path.lastIndexOf(".")))),
+		].sort();
+		expect(extensions).toEqual([
+			".css",
+			".gitignore",
+			".html",
+			".json",
+			".lock",
+			".md",
+			".py",
+			".sh",
+			".toml",
+			".ts",
+			".tsx",
+			".txt",
+			".woff2",
+			".yaml",
+			".yml",
+		]);
+	});
 });
 
 describe("the sweep", () => {
@@ -196,7 +244,10 @@ describe("the tree the sweep reads", () => {
 		// other thing `.isFile()` rejects besides an absent entry.
 		const dir = fabricate({ "src/a.ts": long(10), "src/big.txt": long(400) });
 		symlinkSync(join(dir, "src/big.txt"), join(dir, "src/link.ts"));
-		Bun.spawnSync(["git", "add", "-A"], { cwd: dir });
+		// Unchecked, a staging failure would leave the link untracked and this
+		// case would pass on the tracked file beside it having nothing wrong.
+		const staged = Bun.spawnSync(["git", "add", "-A"], { cwd: dir });
+		expect(staged.exitCode).toBe(0);
 		expect(paths(dir)).toEqual([]);
 	});
 

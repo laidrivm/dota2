@@ -153,7 +153,9 @@ describe("the repository as it stands", () => {
 
 	test("the sweep read criteria and test files rather than nothing", () => {
 		expect(here.criteria.length).toBeGreaterThan(0);
-		expect(here.files.length).toBeGreaterThan(0);
+		// A named file rather than a count: this file supplies citations of its
+		// own, so a sweep that read only this one would satisfy a count.
+		expect(here.files).toContain("scripts/spec-coverage-sweep.test.ts");
 		// Without this the check passes vacuously: a scanner finding nothing
 		// reports no problems either, and this file's own citations are the
 		// only ones in the tree.
