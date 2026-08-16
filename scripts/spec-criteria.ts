@@ -13,7 +13,7 @@ import { join } from "node:path";
 export type Criterion = { id: string; requirement: string; source: string };
 
 /** The scenario heading, lowercased, every other run of characters a hyphen. */
-export const slug = (heading: string) =>
+const slug = (heading: string) =>
 	heading
 		.toLowerCase()
 		.replace(/[^a-z0-9]+/g, "-")
@@ -23,7 +23,7 @@ export const slug = (heading: string) =>
  * The criteria one spec file declares. Each keeps its requirement heading,
  * which is what the ambiguity message names when one slug matches two.
  */
-export function parse(file: string, capability: string): Criterion[] {
+function parse(file: string, capability: string): Criterion[] {
 	const found: Criterion[] = [];
 	let requirement = "";
 	// A fenced block quoting a `#### Scenario:` line illustrates the format
@@ -46,7 +46,7 @@ export function parse(file: string, capability: string): Criterion[] {
 }
 
 /** Subdirectory names of `path`, none when it does not exist. */
-export function subdirs(path: string): string[] {
+function subdirs(path: string): string[] {
 	if (!lstatSync(path, { throwIfNoEntry: false })?.isDirectory()) return [];
 	return readdirSync(path, { withFileTypes: true })
 		.filter((entry) => entry.isDirectory())
@@ -54,7 +54,7 @@ export function subdirs(path: string): string[] {
 }
 
 /** Every criterion in `<specs>/<capability>/spec.md`, for one such directory. */
-export const under = (specs: string): Criterion[] =>
+const under = (specs: string): Criterion[] =>
 	subdirs(specs).flatMap((capability) => {
 		const file = join(specs, capability, "spec.md");
 		return lstatSync(file, { throwIfNoEntry: false })?.isFile()
