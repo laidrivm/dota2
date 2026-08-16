@@ -10,8 +10,8 @@ broken runs only in CI. The push had already happened by the time anything
 said so.
 
 That gate is not alone. Ten checks run on every pull request — an eleventh,
-`bun audit`, runs only on one that touches `package.json` — and the push path
-runs three of them — the type check, the suite, and the diff budget. Of the seven
+`bun audit`, runs only on one touching `package.json`, `bun.lock` or
+`bunfig.toml` — and the push path runs three of them — the type check, the suite, and the diff budget. Of the seven
 left, six need no browser: `biome`, the YAML syntax check, the suppression
 scan, `actionlint`, `gitleaks` and the mutation floor. Three of those are
 measured at 0.24 s between them and the floor at 4.9 s, against a hook that
