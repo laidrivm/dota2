@@ -110,16 +110,20 @@ function cite(path: string, text: string) {
 }
 
 /**
- * Every tracked test file, whichever runner owns it. The four name forms are
- * Bun's own discovery set, so a `_test.ts` file the runner executes cannot hide
- * from the scanner.
+ * Every tracked test file, whichever runner owns it. The extension set is
+ * Bun's own, measured rather than inferred — twelve plausible spellings under
+ * `bun test`, of which it discovers `.ts .tsx .js .jsx .cts .cjs .mts .mjs`
+ * and not `.ctsx .cjsx .mtsx .mjsx`. An enumeration is right here for once:
+ * the set is the runner's, not this project's, so widening it is a decision
+ * about what Bun does. Admitting a spelling Bun never runs is the direction
+ * that passes wrongly — a citation there closes a criterion no test executes.
  *
  * Deliberately not narrowed by `bunfig.toml`, whose `pathIgnorePatterns` hands
  * `e2e/**` to Playwright: an end-to-end test closes a criterion exactly as a
  * unit test does, and a scanner honouring that ignore list would make every
  * criterion only e2e can reach permanently uncitable.
  */
-const TEST_FILE = /[._](?:test|spec)\.[cm]?[jt]sx?$/;
+const TEST_FILE = /[._](?:test|spec)\.(?:[cm][jt]s|[jt]sx?)$/;
 
 /** Tracked test files, listed at the repository root whatever `cwd` is. */
 function tests(root: string): string[] {
