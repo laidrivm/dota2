@@ -150,8 +150,12 @@ describe("a tree the check cannot read straight through", () => {
 	});
 
 	test("outside a repository it throws rather than passing", () => {
+		// The message matters, not merely that something threw: a typo in the
+		// check would also throw and would pass a bare `toThrow()`. Rests on
+		// `tmpdir()` sitting outside any work tree, which is what makes git
+		// fail here rather than resolve upward to some enclosing repository.
 		const dir = emptyDir("spec-coverage-bare-");
-		expect(() => check(dir)).toThrow();
+		expect(() => check(dir)).toThrow(/not a git repository/i);
 	});
 
 	test("a tracked test file deleted from the work tree is skipped", () => {
@@ -266,6 +270,15 @@ describe("what the sweep reads", () => {
 			"openspec/specs/capability/spec.md": spec("A first thing"),
 			"node_modules/pkg/thing.test.ts": "// spec: capability/the-old-wording\n",
 		});
+		// Tracked is the premise: a global `core.excludesFile` ignoring
+		// `node_modules` would leave it out of `git ls-files`, and both
+		// assertions below would then pass without the scanner filtering
+		// anything.
+		expect(
+			Bun.spawnSync(["git", "ls-files", "node_modules"], { cwd: dir })
+				.stdout.toString()
+				.trim(),
+		).toBe("node_modules/pkg/thing.test.ts");
 		expect(check(dir).files).toEqual([]);
 		expect(problems(dir)).toEqual([]);
 	});
