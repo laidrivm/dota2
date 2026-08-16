@@ -413,6 +413,17 @@ describe("the repository as it stands", () => {
 });
 
 describe("what the sweep reads", () => {
+	test("a test file under a dot-directory is not read", () => {
+		// Bun does not run it, so a citation there would close a criterion no
+		// test ever executes.
+		const dir = fabricate({
+			"openspec/specs/capability/spec.md": spec("A settled thing"),
+			".vendor/thing.test.ts":
+				'// spec: capability/a-settled-thing\ntest("acts", () => {});\n',
+		});
+		expect(cited(dir)).toEqual([]);
+	});
+
 	test("a scenario before any requirement heading keeps an empty requirement", () => {
 		const dir = fabricate({
 			"openspec/specs/capability/spec.md":
@@ -513,6 +524,16 @@ describe("the floor's line carries a reason", () => {
 
 	test("a trailing marker with no text after it is not a reason", () => {
 		expect(gauge(380, 380, "const FLOOR = 380; //").length).toBe(1);
+	});
+
+	test("more markers are not a reason either", () => {
+		// `\S` alone accepted `///`: the third slash is not whitespace. A
+		// reason needs a character that is neither.
+		expect(gauge(380, 380, "const FLOOR = 380; ///").length).toBe(1);
+	});
+
+	test("a reason that begins with a slash is still a reason", () => {
+		expect(gauge(380, 380, "const FLOOR = 380; // /docs says why")).toEqual([]);
 	});
 
 	test("a trailing comment of whitespace alone is not a reason", () => {
