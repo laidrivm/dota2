@@ -329,3 +329,46 @@ named where one gate carried the whole result.
 - The discard tests asserted only `side` and `myRole`, and four fixtures store
   both correctly — so those cases passed whether the session was discarded or
   handed back. Found by removing a guard clause and watching nothing fail
+
+## 2026-08-16 — file-size-cap steps 5 to 8, and pre-push-parity
+
+(feat/file-size-cap-5a to -8, spec/ and feat/pre-push-parity,
+fix/mutation-floor-delta)
+
+Sixteen branches, so the counts are the session's totals with the branch named
+where one gate carried the result.
+
+- zombies: 19 ideas across fourteen runs, 9 acted on. Twelve of the fourteen
+  found nothing — every one a pure move. The two that found something were the
+  two branches carrying new logic: `pre-push-parity` (13 ideas, 6 became tasks,
+  7 dispositioned by name) and step 8 (6 ideas, 3 became tests). One of those
+  three was a real defect: `endsWith` is case-sensitive, so a 400-line
+  `src/A.TS` was capped by nothing
+- warm: SKIPPED on all sixteen — no dependency manifest changed
+- ponytail-review: 6 findings across fifteen runs, 6 applied. All structural —
+  an unused `export`, four helpers with one reader each, a header describing
+  code that had left. Nine runs found nothing
+- triage: PASS on all sixteen, 0 findings by design. What it produced is the
+  reading: on `feat/file-size-cap-8` it turned up that dropping `bun run lint`
+  from the pre-push chain failed no test, because every behavioural case stubs
+  the runners; eight membership assertions came out of that
+- coderabbit-local: 36 findings across sixteen runs, all dispositioned. Six
+  runs found nothing. The substantive ones were four guard bypasses in
+  `command-parse.ts`, a machine-local path form the allow-list check could not
+  see, and `TEST_FILE` admitting four extensions Bun does not run
+- coderabbit (on the pull request): 32 findings dispositioned across seven
+  invocations. Two Majors were real and fixed — the range the secret scan
+  covers, and the `MODIFIED` delta that would have deleted ten paragraphs of a
+  live spec at archive time. Four were put to the user as dismissals and
+  settled there
+- Not run: review-order, code-review, preflight, first-five
+
+**The gap this session exposed.** `/coderabbit` disposes of what the bot has
+posted *when it runs*, and the bot re-reviews on every push. Three merged pull
+requests — #102, #106, #111 — carry findings posted after the last pass over
+them, never dispositioned. One is a 🟠 Major on `command-parse.ts`: a `case`
+clause's `)` pops the same stack a `$(` close does, so
+`echo "$(case x in a) git commit -m fix ;; esac)"` reaches the guard as one
+quoted word and returns exit 0 — measured, not inferred. The same shape as the
+group-inside-substitution bug fixed on that branch, found by the bot an hour
+after the branch was reviewed and merged.
