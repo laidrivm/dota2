@@ -351,7 +351,7 @@ requests on its own.
       that is absent from the working tree is skipped rather than throwing [5],
       and the check run from a subdirectory resolves the file list from the
       repository root [7]
-- [x] 8.6 Implement the check as `scripts/file-size.test.ts`, taking the file
+- [x] 8.6 Implement the check as `scripts/file-size.ts`, taking the file
       list the way `scripts/no-suppressions.ts` already does — `git ls-files
       -z` spawned at the repository root rather than at `cwd`, with the comment
       there explaining why — so an untracked file is out of scope and a
@@ -365,8 +365,10 @@ requests on its own.
       assertions a review pass tightened. The seam moved — *the repository as
       it stands* asserts this tree's floor, which is the floor file's subject
       — rather than the cap admitting an exception
-- [x] 8.8 Add `scripts/file-size.test.ts` to the README's knowledge ownership
-      map, beside `command-guard.ts` and `no-suppressions.ts`
+- [x] 8.8 Add `scripts/file-size.ts` to the README's knowledge ownership
+      map, beside `command-guard.ts` and `no-suppressions.ts`. Both lines said
+      `file-size.test.ts`, as the task was written before 7.4 established that
+      a check's implementation does not live inside its own tests
 - [x] 8.9 Update `PLAN.md`: the queue entry asking for an `/opsx:update` on
       `reviewable-diff-gates` is answered — the cap landed here, and the rule of
       two remains outstanding as its own one-line Code rule, which is what the
