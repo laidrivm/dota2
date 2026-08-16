@@ -31,16 +31,27 @@ const capOf = (path: string) => {
 };
 
 /**
+ * What ends a line: a CRLF pair, a bare newline, or a bare carriage return.
+ * Written once and read two ways, so the alternation cannot drift between the
+ * splitting form and the anchored one. A lone `\r` counts because an editor
+ * showing a CR-terminated file shows separate lines, and a cap on what a
+ * reader holds at once has to agree with what the reader sees.
+ */
+const ENDING = String.raw`\r\n|\n|\r`;
+const ENDINGS = new RegExp(ENDING, "g");
+const LAST_ENDING = new RegExp(`(?:${ENDING})$`);
+
+/**
  * Physical lines, blank ones included. A final line carrying no terminating
- * newline counts: `wc -l` counts newline characters and so reads a 301-line
+ * ending counts: `wc -l` counts newline characters and so reads a 301-line
  * file whose last line is unterminated as 300, which is the arithmetic that
- * would let a file over the cap through. `\r\n` is one ending rather than two,
- * because the split is on the newline the pair ends with.
+ * would let a file over the cap through. A CRLF pair is one ending rather than
+ * two, because the alternation tries the pair first.
  */
 export function count(text: string): number {
 	if (text === "") return 0;
-	const newlines = text.split("\n").length - 1;
-	return text.endsWith("\n") ? newlines : newlines + 1;
+	const endings = text.split(ENDINGS).length - 1;
+	return LAST_ENDING.test(text) ? endings : endings + 1;
 }
 
 export type Oversize = { path: string; count: number; cap: number };
@@ -59,7 +70,9 @@ export type Oversize = { path: string; count: number; cap: number };
 export function oversize(cwd?: string): Oversize[] {
 	const top = Bun.spawnSync(["git", "rev-parse", "--show-toplevel"], { cwd });
 	if (top.exitCode !== 0) throw new Error(top.stderr.toString());
-	const root = top.stdout.toString().trim();
+	// Only the terminator git adds, not `trim()`: a repository whose path ends
+	// in a space is unusual and not this check's to corrupt.
+	const root = top.stdout.toString().replace(/\n$/, "");
 
 	const ls = Bun.spawnSync(["git", "ls-files", "-z"], { cwd: root });
 	if (ls.exitCode !== 0) throw new Error(ls.stderr.toString());

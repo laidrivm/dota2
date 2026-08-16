@@ -148,7 +148,9 @@ function tests(root: string): string[] {
 export function check(cwd?: string) {
 	const top = Bun.spawnSync(["git", "rev-parse", "--show-toplevel"], { cwd });
 	if (top.exitCode !== 0) throw new Error(top.stderr.toString());
-	const root = top.stdout.toString().trim();
+	// Only the terminator git adds, not `trim()`: a repository whose path ends
+	// in a space is unusual and not this check's to corrupt.
+	const root = top.stdout.toString().replace(/\n$/, "");
 
 	const criteria = counted(root);
 	// Grouped rather than a set: three headings repeat under different
