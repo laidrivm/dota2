@@ -10,6 +10,14 @@
  *
  * `afterAll` is not registered here: a lifecycle hook belongs to the file it
  * runs for, so each test file registers `cleanup` itself.
+ *
+ * The list of fabricated directories is module state, shared by every file
+ * importing this — which is safe because Bun runs one test file to completion
+ * before loading the next, measured rather than assumed: two files sharing a
+ * module print `B body, B afterAll, A body, A afterAll`. So one file's
+ * `cleanup` cannot reach a directory another is still using. Were that
+ * ordering to change, or were a case to fabricate at collection time rather
+ * than inside a `test`, this would need an instance per file.
  */
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";

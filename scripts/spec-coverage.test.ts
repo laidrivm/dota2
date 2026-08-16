@@ -1,7 +1,7 @@
 /**
  * The coverage check, exercised end to end: how a citation is read, and what
- * the sweep counts. The floor and what a change to it owes are
- * `spec-coverage-floor.test.ts's.
+ * the sweep counts. The floor and what a change to it owes are in
+ * `spec-coverage-floor.test.ts`.
  */
 import { afterAll, describe, expect, test } from "bun:test";
 import { mkdirSync, rmSync } from "node:fs";
