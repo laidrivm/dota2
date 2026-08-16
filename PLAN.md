@@ -96,8 +96,8 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       no-colour-literal sweep now reads every tracked `*.css` rather than one
       directory, so `app-shell`'s *No third-party runtime requests* is checked
       over component stylesheets it previously never saw.
-- [ ] **`pre-push-parity`** — applied, awaiting the archive. Every CI gate
-      that needs no browser moved onto the pre-push hook: `biome`, the YAML
+- [ ] **`pre-push-parity`** — applied, awaiting the archive. The CI gates
+      that can refuse a push moved onto the pre-push hook: `biome`, the YAML
       check, the suppression scan and the mutation floor, with `actionlint`
       and `gitleaks` skipped when absent. Written because `file-size-cap`
       step 7.2 split `model.test.ts`, left `stryker.config.json` naming one

@@ -93,8 +93,8 @@ one is written.
       rather than restating the list (*The list has one home*)
 - [x] 4.2 Grep the four places a claim like this is restated — this change's
       sibling artefacts, `openspec/specs/**`, `PLAN.md`, and the README
-      ownership map — searching the wording being replaced (`type check and
-      \`bun test\` only`, `its own CI job`), not the wording replacing it
+      ownership map — searching the wording being replaced ("the type check and
+      bun test only", "its own CI job"), not the wording replacing it
 - [x] 4.3 Record in `PLAN.md` that this change archives after `file-size-cap`,
       so the ordering survives a session boundary rather than living only in
       `design.md`
