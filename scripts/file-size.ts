@@ -19,9 +19,16 @@ const CAPS: Record<string, number> = {
 	".css": 200,
 };
 
-/** The cap a path is subject to, or `undefined` when it is subject to none. */
-const capOf = (path: string) =>
-	Object.entries(CAPS).find(([ext]) => path.endsWith(ext))?.[1];
+/**
+ * The cap a path is subject to, or `undefined` when it is subject to none.
+ * Matched case-insensitively: `endsWith` is not, so `src/A.TS` would be capped
+ * by nothing at all — and a cap that silently does not apply is the direction
+ * that passes wrongly.
+ */
+const capOf = (path: string) => {
+	const lower = path.toLowerCase();
+	return Object.entries(CAPS).find(([ext]) => lower.endsWith(ext))?.[1];
+};
 
 /**
  * Physical lines, blank ones included. A final line carrying no terminating
