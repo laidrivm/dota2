@@ -19,5 +19,4 @@ report SHALL be uploaded as an artifact only when the run fails.
 - **THEN** the pre-push hook SHALL NOT start a browser
 
 This scenario names only the browser. Which checks the hook does run is
-`commit-gates`'s to say, and enumerating them here contradicts it: the diff
-budget runs on the same path, required by `change-slicing`.
+`commit-gates`'s to say, and naming one here would contradict it.
