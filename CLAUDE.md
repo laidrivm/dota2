@@ -205,6 +205,8 @@ Rules about how work is carried out here. They do not age with the code.
 - Treat an empty result as evidence of absence only after the same query has
   returned a non-empty one — a broken query and a true absence print the same
   nothing.
+- Take a count from the authoritative list, and reconcile it against any count
+  the source states itself.
 - Re-run the older probe before overwriting a recorded measurement your new
   one contradicts.
 - Execute a pre-written decision rule only on a sample that could have
