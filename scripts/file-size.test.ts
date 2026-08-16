@@ -11,6 +11,7 @@ import {
 	mkdirSync,
 	mkdtempSync,
 	rmSync,
+	symlinkSync,
 	unlinkSync,
 	writeFileSync,
 } from "node:fs";
@@ -118,6 +119,11 @@ describe("what the cap covers", () => {
 		},
 	);
 
+	test("an extension in capitals is capped all the same", () => {
+		// `endsWith` is case-sensitive, so this was capped by nothing.
+		expect(paths(fabricate({ "src/A.TS": long(301) }))).toEqual(["src/A.TS"]);
+	});
+
 	// spec: change-slicing/an-untracked-file-over-the-cap
 	test("an untracked file is out of scope", () => {
 		// It is present for its author and absent from a clone, so failing on
@@ -183,6 +189,21 @@ describe("the tree the sweep reads", () => {
 		const dir = fabricate({ "src/a.ts": long(10), "src/gone.ts": long(400) });
 		unlinkSync(join(dir, "src/gone.ts"));
 		expect(paths(dir)).toEqual([]);
+	});
+
+	test("a tracked symlink is skipped, however long its target", () => {
+		// `lstatSync` reads the link rather than following it, which is the
+		// other thing `.isFile()` rejects besides an absent entry.
+		const dir = fabricate({ "src/a.ts": long(10), "src/big.txt": long(400) });
+		symlinkSync(join(dir, "src/big.txt"), join(dir, "src/link.ts"));
+		Bun.spawnSync(["git", "add", "-A"], { cwd: dir });
+		expect(paths(dir)).toEqual([]);
+	});
+
+	test("an empty tracked file counts zero rather than failing to be read", () => {
+		expect(paths(fabricate({ "src/a.ts": "", "src/b.ts": long(10) }))).toEqual(
+			[],
+		);
 	});
 
 	test("run from a subdirectory it still reads the whole repository", () => {
