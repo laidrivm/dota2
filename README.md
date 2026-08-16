@@ -21,6 +21,7 @@
 | `scripts/command-guard.ts` | the git and `gh` prohibitions no permission pattern can express | when a git or `gh` call is refused |
 | `scripts/command-parse.ts` | what a shell line resolves to — which commands it runs, under which name | when a call the guard covers is not refused |
 | `scripts/no-suppressions.ts` | which linter and type-checker suppressions are approved, and how many | when a suppression is unavoidable |
+| `scripts/file-size.ts` | how long a file of each type may be, and which types are capped at all | when a file grows past its cap |
 | `scripts/spec-coverage.ts` | how many acceptance criteria no test cites, and why that floor last moved | when a criterion or the test citing it changes |
 | `scripts/spec-criteria.ts` | what an acceptance criterion is and how its identifier is derived | when a scenario heading is renamed |
 | `scripts/mutation-floor.ts` | how many mutants survive in `src/model.ts`, and why that floor last moved | when the model's arithmetic or its tests change |
