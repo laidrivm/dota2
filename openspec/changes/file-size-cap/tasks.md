@@ -239,12 +239,12 @@ the one every other file here depends on.
 
 ## 7. The remaining test files split
 
-This step ships as five splits, one pull request each, with 7.6's confirmation
-riding on the last — not the three written here, which had 7.1 to 7.3
-travelling together on 1238 lines between them. That
-arithmetic was the wrong one: a split costs the moved lines twice, and 7.1
-alone measured 719 against a gate that fails at 800. Two of these could not
-share a pull request even if the third stayed home.
+This step ships as five splits and seven pull requests, with 7.6's
+confirmation riding on the last — not the three written here, which had 7.1 to
+7.3 travelling together on 1238 lines between them. That arithmetic was the
+wrong one twice over: a split costs the moved lines twice, so 7.1 alone
+measured 719 against a gate that fails at 800, and 7.4 at 1496 took three pull
+requests on its own.
 
 - [x] 7.1 Split `scripts/diff-budget.test.ts` (466) by what it exercises —
       the counting rules, the task-line pairing, and the override marker. The
@@ -278,9 +278,10 @@ share a pull request even if the third stayed home.
       citation reader, the sweep over the repository, and the floor with the
       archive rules. `design.md` records why the extraction comes first. The
       README's ownership map names the test file as the owner of that
-      knowledge; the script becomes the owner, so that row moves in this task. This task ships as three pull requests: 891 lines
-      moved cost ~1800 budgeted, and the whole of it measured 1496 against a
-      gate that fails at 800. The extraction is the first, the remaining two
+      knowledge; the script becomes the owner, so that row moves in this task.
+      This task ships as three pull requests: 891 lines moved cost ~1800
+      budgeted, and the whole of it measured 1496 against a gate that fails at
+      800. The extraction is the first, the remaining two
       carry the test split. The implementation came to 306 lines, six over the
       cap, so it splits once more at the seam already in it: `spec-criteria.ts`
       answers what criteria exist and `spec-coverage.ts` which are covered —
@@ -291,11 +292,10 @@ share a pull request even if the third stayed home.
       them the direction that passes wrongly: `///` read as a reason; a
       citation under a dot-directory counted; and `TEST_FILE` admitting
       `.ctsx`, `.cjsx`, `.mtsx` and `.mjsx`, which `bun test` does not
-      discover — measured against all twelve spellings, not inferred. Three pull requests: the extraction, then the
-      fixture with the floor cases, then the sweep. 891 lines become six files,
-      none over the cap — 81 and 256 for the implementation, 210 / 290 / 133 for
-      the tests, 79 for the fixture. The 53 paths this last extraction moves are
-      identical before and after, as are the block counts
+      discover — measured against all twelve spellings, not inferred. 891 lines
+      become six files, none over the cap: 81 and 256 for the implementation,
+      210 / 290 / 133 for the tests, 79 for the fixture. The 53 paths this last
+      extraction moves are identical before and after, as are the block counts
 - [ ] 7.5 `scripts/mutation-floor.test.ts` (551), after the lift it waits on.
       Switching `scripts/mutation-floor.ts` to `scripts/scan.ts` is `PLAN.md`'s
       outstanding item and not this change's work, but it is what makes this
