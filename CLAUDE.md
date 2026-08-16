@@ -68,7 +68,8 @@ see [docs/review-toolkit.md](docs/review-toolkit.md).
 
 ## Feature workflow (spec-driven, OpenSpec)
 
-The four OpenSpec stages and what gates each one — see
+The four OpenSpec stages, what gates each one, and the discipline every
+change artefact is written under — see
 [docs/feature-workflow.md](docs/feature-workflow.md).
 
 ## Testing
@@ -204,30 +205,17 @@ Rules about how work is carried out here. They do not age with the code.
 - Treat an empty result as evidence of absence only after the same query has
   returned a non-empty one — a broken query and a true absence print the same
   nothing.
-- When a statement changes — a rule, a recorded decision, or one artefact of
-  a change under review — grep the four places that restate one before
-  calling the change done: the change's own sibling artefacts,
-  `openspec/specs/**`, `PLAN.md`, and the README ownership map. Search the
-  wording of the claim being replaced, never the wording replacing it, and
-  reconcile each site in the same change or name the change that will.
 - Re-run the older probe before overwriting a recorded measurement your new
   one contradicts.
 - Execute a pre-written decision rule only on a sample that could have
   produced the opposite outcome.
 - A rules or docs edit that no artefact of the change under way asks for goes
   in its own commit.
-- Copy a `MODIFIED` requirement whole from the live spec before editing it.
 - Never silence a linter or type-checker finding by disabling its rule in
   configuration; fix the code or ask the user to approve a suppression.
 - All repo artifacts — docs, plans, specs, code comments, commit messages —
   are written in British English by default (`behaviour`, `afterwards`);
   identifiers and third-party API names keep whatever spelling they ship with.
-- Maintain `PLAN.md`: read it at session start; update its queue, statuses
-  and decisions in the same turn a task or stage completes. A step's box is
-  ticked in the pull request that implements it, never in a commit after the
-  merge.
-- Open every markdown file with a level-1 heading — OpenSpec's `design.md`
-  and delta-spec templates start at `##`, so the title is yours to add.
 - Script a string replacement only for a pattern repeating across files, assert
   the match, and read the resulting diff — a silent no-op and a malformed
   result both read as a successful edit.

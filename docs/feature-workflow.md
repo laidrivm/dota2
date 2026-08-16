@@ -96,3 +96,24 @@ completes, name the next step and the exact command.
   field of `openspec/config.yaml`. Neither restates the other, and no
   other OpenSpec artifact or rule duplicates either — OpenSpec `rules:`
   may only reference those files, not restate them.
+
+## Across the stages
+
+Discipline every artefact of a change is written under, whichever stage
+produces it. Promoted from `CLAUDE.md`'s Process list, which these four
+outgrew: they age with the workflow rather than with the code, and a reader
+looking for them is already here.
+
+- When a statement changes — a rule, a recorded decision, or one artefact of
+  a change under review — grep the four places that restate one before
+  calling the change done: the change's own sibling artefacts,
+  `openspec/specs/**`, `PLAN.md`, and the README ownership map. Search the
+  wording of the claim being replaced, never the wording replacing it, and
+  reconcile each site in the same change or name the change that will.
+- Copy a `MODIFIED` requirement whole from the live spec before editing it.
+- Maintain `PLAN.md`: read it at session start; update its queue, statuses
+  and decisions in the same turn a task or stage completes. A step's box is
+  ticked in the pull request that implements it, never in a commit after the
+  merge.
+- Open every markdown file with a level-1 heading — OpenSpec's `design.md`
+  and delta-spec templates start at `##`, so the title is yours to add.
