@@ -18,7 +18,8 @@ without contradicting anything. A change's own artefacts and `README.md` may
 name individual checks and SHALL link here for the list.
 
 A check whose tool may be absent from a developer's machine — `actionlint` over
-`.github/workflows/`, `gitleaks` over the working tree — SHALL be guarded by
+`.github/workflows/`, `gitleaks` over the commits the push would add — SHALL be
+guarded by
 `command -v` and SHALL be skipped silently when the binary is not on `PATH`, so
 a fresh clone can push. Absence SHALL NOT fail the hook: CI runs both from
 pinned versions, and that is where their verdict is binding. Presence SHALL be
@@ -42,11 +43,27 @@ touches `package.json`, and nightly.
 - **WHEN** `actionlint` is not on `PATH` and a branch is pushed
 - **THEN** the hook completes without error and without linting the workflows
 
+The secret scan SHALL be bounded to the range the push would send —
+`--log-opts` from the base branch to `HEAD`, resolved as
+`scripts/diff-budget.sh` resolves its own base — and SHALL NOT walk the whole
+history the way CI does. Two failure modes decide it: an unbounded scan means
+one secret ever reaching history blocks every push by everyone until a baseline
+is written, and a working-tree scan reads the gitignored files that exist for
+one author and in no clone. CI keeps the history-wide scan, where a failure
+stops one pull request rather than everybody's pushes.
+
 #### Scenario: A tool the machine has, reporting a finding
 
 - **WHEN** `gitleaks` is on `PATH` and the branch carries a recognisable API
   token
 - **THEN** the hook exits non-zero and the push does not happen
+
+#### Scenario: A secret that is already in the base branch
+
+- **WHEN** `gitleaks` is on `PATH` and a recognisable token sits in a commit
+  the branch did not add
+- **THEN** the hook does not report it, because the scan is bounded to the
+  range the push would send; CI's history-wide scan is what owns that case
 
 #### Scenario: The budget is still soft
 

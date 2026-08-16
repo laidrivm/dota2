@@ -63,6 +63,9 @@ function runHook(command: string, stubs: Record<string, string> = {}) {
 		bunx: "exit 0",
 		bash: "exit 0",
 		rm: "exit 0",
+		// The secret scan resolves its range through `git`, so a case that did
+		// not stub it would read the real repository's refs.
+		git: "echo main",
 		...stubs,
 	};
 	for (const [name, body] of Object.entries(all)) {
@@ -85,11 +88,6 @@ function runHook(command: string, stubs: Record<string, string> = {}) {
 }
 
 describe("the pre-commit secret scan", () => {
-	/**
-	 * Runs the hook's own command string under `sh`, with `PATH` holding only
-	 * the stubs asked for — so "gitleaks is absent" and "gitleaks found
-	 * something" are both reproducible without installing anything.
-	 */
 	test("it passes silently when gitleaks is not installed", () => {
 		// A fresh clone has no gitleaks binary and must still commit, without a
 		// warning on every commit.
@@ -115,16 +113,6 @@ describe("the pre-commit secret scan", () => {
 describe("the pre-push gates", () => {
 	const push = hooks["pre-push"] as string;
 
-	/**
-	 * The same shape the pre-commit block uses, over the other hook: `PATH`
-	 * holds only the stubs asked for, so "the tool is absent" and "the tool
-	 * found something" are both reproducible without installing anything.
-	 *
-	 * `bun` and `bunx` are stubbed to succeed by default, which is what keeps
-	 * each case on the gate it names rather than on the tree's real state —
-	 * running the real suite here would make this file take as long as the
-	 * hook does.
-	 */
 	test("neither optional tool installed passes silently", () => {
 		// A fresh clone has neither binary and must still push, without a
 		// warning naming a tool the developer never asked for.
@@ -141,6 +129,18 @@ describe("the pre-push gates", () => {
 			gitleaks: "echo 'leaks found: 1' >&2; exit 1",
 		});
 		expect(code).not.toBe(0);
+	});
+
+	test("the secret scan reads the commits the push adds, not all history", () => {
+		// `gitleaks git .` with no range walks every commit ever made, so one
+		// secret landing in history would block every push by everyone until a
+		// baseline was added. The range is resolved the way
+		// `scripts/diff-budget.sh` resolves its base.
+		const { output } = runHook(push, {
+			gitleaks: 'echo "ARGS $*"; exit 0',
+			git: "echo main",
+		});
+		expect(output).toContain("--log-opts=main..HEAD");
 	});
 
 	test("an actionlint finding blocks the push", () => {
@@ -193,6 +193,7 @@ describe("the pre-push gates", () => {
 		["Stryker", "bunx --no-install stryker run"],
 		["the mutation floor", "bun scripts/mutation-floor.ts"],
 		["the diff budget", "scripts/diff-budget.sh"],
+		["the secret scan over what it pushes", 'gitleaks git . --log-opts="'],
 	])("the hook runs %s", (_label, command) => {
 		// Membership, which no behavioural case above covers: each of those
 		// stubs the runners, so a gate deleted from the chain simply never runs
