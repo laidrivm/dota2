@@ -1,8 +1,8 @@
 # pre-push-parity — tasks
 
 One step, so one pull request, on `feat/pre-push-parity` — the implementation
-branch, this proposal's own being `spec/pre-push-parity`. The four groups below
-are that step's tasks, not four steps: the change is one line of
+branch, this proposal's own being `spec/pre-push-parity`. The five groups below
+are that step's tasks, not five steps: the change is one line of
 `package.json`, the tests over it, and the specifications that bind it. It
 closes all five of the `commit-gates` criteria and both restatements.
 
@@ -40,11 +40,13 @@ defect that started this.
 - [x] 2.3 Probe the skip path with an input the session has not cleared: with
       neither binary on `PATH`, confirm the hook completes and says nothing
       about them. Report what the hook returned, not what a prompt did
-- [x] 2.4 Probe the budget's exception: confirm a diff over 800 lines still
-      prints `FAIL` and still pushes. No branch in the tree is over 800 — the
-      largest measured 763 — so the live probe was not available and 3.4 covers
-      it with a stub that makes the budget script fail. Recorded rather than
-      ticked as if a real branch had been used
+- [ ] 2.4 **Not done — no input.** Probe the budget's exception on a real diff
+      over 800 lines. No branch in the tree reaches it, the largest measuring
+      763, so the live probe had nothing to run against. 3.4 covers the
+      absorption with a stub that makes the budget script fail, which proves the
+      hook ignores its exit and not that the script counts 800 correctly —
+      `scripts/diff-budget-gate.test.ts` owns that half. Left open rather than
+      ticked: a box that says it was not done is a contradiction
 - [x] 2.5 Confirm `bun test` does not execute Stryker in either place it runs
       (*The gate is not picked up by the suite*)
 - [x] 2.6 Time the full hook and record the number here beside `design.md`'s
