@@ -215,6 +215,8 @@ Rules about how work is carried out here. They do not age with the code.
   produced the opposite outcome.
 - A rules or docs edit that no artefact of the change under way asks for goes
   in its own commit.
+- Before syncing a `MODIFIED` delta, check it carries every scenario the live
+  requirement has — the replacement is whole-requirement.
 - Never silence a linter or type-checker finding by disabling its rule in
   configuration; fix the code or ask the user to approve a suppression.
 - Never bypass a git hook with `--no-verify`, `SKIP_SIMPLE_GIT_HOOKS` or a
