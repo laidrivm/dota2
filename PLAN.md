@@ -83,59 +83,9 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
 
 ### Open
 
-- [ ] **The comment scan goes quiet on a regex literal.** A backtick inside one
-      — `` /[`]/ `` — opens what `scripts/mutation-floor.ts:183-199` takes for a
-      template literal and runs to end of input, so every comment below it is
-      dropped and the check reports nothing. Silent success is the one failure
-      that check must not have. `src/model.ts` holds no regex literal today, so
-      nothing is passing wrongly yet. Either teach the scanner that `/` in
-      expression position starts one, or assert that the file contains none —
-      the second is a line and fails loudly, the first ends the family of bugs
-      that produced five holes in one session. The first is now done and lives
-      in `scripts/scan.ts`: it treats a `/` whose last token opens a value as a
-      regex literal and stops it at a newline rather than at end of input, and
-      it tells the two languages apart, CSS having neither `//` nor a regex
-      literal. What is left here is switching `mutation-floor.ts` to it.
-- [ ] **The rule of two** — the other half, still outstanding and **not yet
-      written anywhere**. Lift a helper on the second consumer, never the
-      first. `reviewable-diff-gates` prescribed its vehicle when it deferred it
-      — "its own one-line rule, separately" — so it belongs in `CLAUDE.md`'s
-      Code list rather than in a proposal. The nearest rule there today covers
-      only the opposite direction, checking for duplication before inlining a
-      single-caller helper. It has a dated candidate now: comment scanning lives
-      in both `scripts/spec-coverage.ts` — moved there out of its test file by
-      `file-size-cap` step 7.4 — and `scripts/mutation-floor.ts`,
-      the second is strictly better, and the Code rule the first implements was
-      replaced on 2026-08-13. What that costs the older copy is commented at the
-      line it costs it. `scripts/scan.ts` is where that lift lands, and it is
-      not a switch: its only export, `blank`, erases comments, including the
-      `// spec:` lines `cite` exists to read, so the lift has to give it an
-      API — which lines sit inside a block comment — before either copy can
-      use it. The defect is reproducible today: one line reading
-      `const s = "he said \\"/*\\"";` drops every citation below it in that
-      file, because the per-line strip stops at the escaped quote and leaves a
-      `/*` behind. It fails loudly and blames the wrong thing — the floor
-      reports uncited criteria rather than a broken scanner — which is why it
-      waits rather than blocks.
-      A second candidate arrived with `file-size-cap` step 3: the tracked-file
-      sweep — `git rev-parse --show-toplevel`, then `git ls-files -z` at that
-      root, then an `lstatSync` filter — now stands in three copies,
-      `scripts/no-suppressions.ts`, `src/app/module-classes.test.ts` and
-      `src/app/styles/styles.test.ts`, and only the first has tests for the
-      subdirectory run and the tracked-but-absent file. Those two tests are
-      worth writing against one lifted sweep and not against a third copy,
-      which is why they are here rather than in that step.
-      A third arrived with `file-size-cap` step 6: `src/app/app.tsx`'s
-      `focusAfterPick` and `RemoveButton`'s click handler, now in
-      `src/app/board/pieces.tsx`, both restore focus in a macrotask after the
-      commit and both carry a comment saying why. What differs is the search —
-      the document by position against the row then the region — so what lifts
-      is the idiom taking a finder, not the strategy. Left where it is by that
-      step because the second consumer predates it.
-- [ ] **The `skills-lock.json` patch `skill-provenance` drafted** is still the
-      user's to apply, in the skills repository rather than here, and its `ref`
-      needs the upstream commit in `microsoft/playwright-cli`. It sat under
-      Done, where a thing nobody has done does not belong.
+Product work first, then the improvements to the system that builds it, then
+the changes already proposed and waiting for a `feat/` branch.
+
 - [ ] **Task 7** — Docker + VPS deploy (open decisions: registry GHCR or Docker
       Hub, same VPS or a new one). Carries `ui-foundation` **(e2e)** 1.5, which
       Task 4 deferred here: serving `dist/` under a plain static server is
@@ -199,6 +149,35 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       the same evidence, which is the confusion `.coderabbit.yaml` tells the
       bot not to make. With both, set `usage` back to `"disabled"`: a knowledge
       source that finds nothing is a widened trust boundary bought for nothing.
+- [ ] **The `skills-lock.json` patch `skill-provenance` drafted** is still the
+      user's to apply, in the skills repository rather than here, and its `ref`
+      needs the upstream commit in `microsoft/playwright-cli`. It is open
+      rather than done: nobody has applied it.
+- [ ] **`scan-lift`** — proposed, awaiting implementation on `feat/scan-lift`.
+      One left-to-right source scanner in three copies, two of them wrong in
+      ways their own specifications forbid: a backtick in a regex literal
+      blinds `scripts/mutation-floor.ts` to every comment below it, and an
+      escaped quote before a `/*` drops every citation below it in
+      `scripts/spec-coverage.ts`. `scripts/scan.ts` is the correct one and
+      cannot be used by either, because its only export erases the comments
+      both callers exist to read. The change also writes the rule of two into
+      `CLAUDE.md`'s Code list, which `reviewable-diff-gates` deferred as "its
+      own one-line rule, separately" and which no artefact has carried since.
+- [ ] **`tracked-file-sweep`** — proposed, awaiting implementation on
+      `feat/tracked-file-sweep`. The listing every check reads the tree
+      through — root, `git ls-files -z` at that root, regular files only —
+      stands in five copies plus an inline sixth, not the three this file used
+      to record. Two have already drifted onto `trim()`, which corrupts a
+      repository path ending in a space where the other three deliberately
+      strip only git's terminator.
+- [ ] **`focus-restore-idiom`** — proposed, awaiting implementation on
+      `feat/focus-restore-idiom`. `focusAfterPick` in `src/app/app.tsx` and
+      `RemoveButton`'s handler in `src/app/board/pieces.tsx` both restore focus
+      in a macrotask after the commit, and the reason it cannot be
+      `requestAnimationFrame` — which never fires in a hidden tab — is written
+      three times and executed nowhere. The finders differ and stay; the wait
+      and the guard lift. Its `design.md` admits abandoning the lift if the
+      helper turns out to be a bare `setTimeout` wrapper.
 
 ## Standing constraints
 
