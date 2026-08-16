@@ -36,13 +36,48 @@ export function commands(line: string): string[][] {
 	let words: string[] = [];
 	let word = "";
 	let quote = "";
-	/** Quotes suspended by an open substitution, innermost last. */
-	const suspended: string[] = [];
+	/**
+	 * What an open substitution or subshell suspended, innermost last. Both
+	 * the enclosing quote and the enclosing `case` depth, because the text
+	 * inside one is a fresh command context: an outer `case` left standing
+	 * would stop its `)` closing, so `case x in a) echo "$(true)"; git commit`
+	 * came through as one quoted word.
+	 */
+	const suspended: { quote: string; cases: number }[] = [];
 	/** Backticks do not nest, so one flag tells the opening one from the close. */
 	let backtick = false;
+	/**
+	 * How many `case` statements are open here. Inside one, a `)` terminates a
+	 * pattern and closes nothing this scan opened.
+	 *
+	 * Counted only where the word opens a command, because `case` is a keyword
+	 * there and an argument anywhere else. Counting it as an argument too is
+	 * not the safe direction it looks: leaving the stack unpopped means the
+	 * real closing quote is read as an opening one, which is the bug this
+	 * whole mechanism exists to stop — `echo case; echo "$(true)"; git commit`
+	 * reached the guard as one quoted word.
+	 */
+	let cases = 0;
+
+	const suspend = () => {
+		suspended.push({ quote, cases });
+		quote = "";
+		cases = 0;
+	};
+	const resume = () => {
+		const was = suspended.pop();
+		quote = was?.quote ?? "";
+		cases = was?.cases ?? 0;
+	};
 
 	const endWord = () => {
-		if (word) words.push(word);
+		if (word) {
+			if (words.length === 0) {
+				if (word === "case") cases++;
+				else if (word === "esac") cases = Math.max(0, cases - 1);
+			}
+			words.push(word);
+		}
 		word = "";
 	};
 	const endCommand = () => {
@@ -60,17 +95,12 @@ export function commands(line: string): string[][] {
 			else word += char;
 		} else if (char === "$" && line[at + 1] === "(") {
 			endCommand();
-			suspended.push(quote); // inside the substitution it is not in force
-			quote = "";
+			suspend(); // inside the substitution neither is in force
 			at++;
 		} else if (char === "`") {
 			endCommand();
-			if (backtick) {
-				quote = suspended.pop() ?? "";
-			} else {
-				suspended.push(quote);
-				quote = "";
-			}
+			if (backtick) resume();
+			else suspend();
 			backtick = !backtick;
 		} else if (quote === '"') {
 			if (char === '"') quote = "";
@@ -79,12 +109,15 @@ export function commands(line: string): string[][] {
 			quote = char;
 		} else if (SEPARATORS.has(char)) {
 			endCommand();
-			// A subshell suspends its quote too — the empty one it is already in,
-			// since `(` reaches here only outside quotes. That is what keeps the
+			// A subshell suspends as a substitution does. That is what keeps the
 			// `)` closing a group inside `$( … )` from restoring the quote the
 			// substitution suspended and putting the rest of it back in quotes.
-			if (char === "(") suspended.push(quote);
-			if (char === ")") quote = suspended.pop() ?? "";
+			if (char === "(") suspend();
+			// Not inside a `case`: there a `)` ends a pattern, and resuming would
+			// restore the quote of a substitution that is still open — which put
+			// `echo "$(case x in a) git commit ;; esac)"` back inside quotes and
+			// hid the commit.
+			if (char === ")" && cases === 0) resume();
 		} else if (/\s/.test(char)) {
 			endWord();
 		} else {
