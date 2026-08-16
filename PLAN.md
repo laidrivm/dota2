@@ -85,6 +85,7 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
   reads every tracked `*.css` rather than one directory.
 
 ### Open
+
 - [ ] **`pre-push-parity`** — applied, awaiting the archive. The CI gates
       that can refuse a push moved onto the pre-push hook: `biome`, the YAML
       check, the suppression scan and the mutation floor, with `actionlint`

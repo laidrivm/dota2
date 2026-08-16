@@ -19,24 +19,36 @@ import config from "../stryker.config.json";
 const filter = config.commandRunner.command.replace(/^bun test /, "");
 
 /**
- * Every test file Bun would run for that filter, as a repository path.
- * Resolved from this file rather than the working directory, because Stryker
- * runs the command at the repository root and a test need not.
+ * Every test file under `src`, as a repository path. Read recursively and
+ * resolved from this file rather than the working directory: Stryker runs the
+ * command at the repository root and a test need not, and eleven of these sit
+ * under `src/app`, where a scan of `src` alone never reaches them.
  */
-const root = join(import.meta.dir, "..");
-const matching = readdirSync(join(root, "src"))
+const tests = readdirSync(join(import.meta.dir, "..", "src"), {
+	recursive: true,
+})
 	.map((name) => `src/${name}`)
-	.filter((path) => path.endsWith(".test.ts") && path.startsWith(filter));
+	.filter((path) => path.endsWith(".test.ts"));
+
+/** The model's own unit tests — the killing set the requirement names. */
+const own = tests.filter((path) => /^src\/model[.-]/.test(path));
+
+/**
+ * What Bun would run for the filter. A positional filter is a substring of the
+ * path, not a prefix: `bun test model-est` runs `src/model-estimate.test.ts`.
+ */
+const matching = tests.filter((path) => path.includes(filter));
 
 describe("the killing command", () => {
 	// spec: mutation-floor/the-model-s-tests-move-to-another-file
-	test("is a prefix the model's test files share, not one file's name", () => {
+	test("reaches the model's test files and no others", () => {
 		expect(config.commandRunner.command).toStartWith("bun test ");
-		// A filter that is itself a test file admits exactly one, and the next
-		// case moved out of it stops killing without anything failing.
-		expect(filter.endsWith(".ts")).toBe(false);
-		expect(matching.length).toBeGreaterThan(1);
-		expect(matching).toContain("src/model.test.ts");
+		// Both directions, because either one alone passes on a broken config:
+		// naming one file kills nothing moved out of it, and widening to `src`
+		// pulls eleven unrelated files into the killing set.
+		expect(matching.toSorted()).toEqual(own.toSorted());
+		// Without siblings the equality above holds for a file name too.
+		expect(own.length).toBeGreaterThan(1);
 	});
 
 	test("mutates the one file the floor is measured over", () => {
