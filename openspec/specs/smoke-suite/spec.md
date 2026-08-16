@@ -153,11 +153,14 @@ report SHALL be uploaded as an artifact only when the run fails.
 - **WHEN** the e2e workflow completes with every test passing
 - **THEN** no report artifact SHALL be uploaded
 
-#### Scenario: The push path is unaffected
+#### Scenario: The push path starts no browser
 
 - **WHEN** a branch is pushed
-- **THEN** the pre-push hook SHALL run the type check and `bun test` only,
-  and SHALL NOT start a browser
+- **THEN** the pre-push hook SHALL NOT start a browser
+
+This scenario names only the browser. Which checks the hook does run is
+`commit-gates`'s to say, and enumerating them here contradicts it: the diff
+budget runs on the same path, required by `change-slicing`.
 
 ### Requirement: Unit coverage is reported on every pull request
 

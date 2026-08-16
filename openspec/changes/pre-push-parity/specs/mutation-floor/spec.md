@@ -47,6 +47,11 @@ it — `commit-gates` owns that list.
 - **THEN** the mutant's status is `Killed` and it does not count towards the
   floor
 
+#### Scenario: A file outside the scope
+
+- **WHEN** `src/app/session.ts` or `src/types.ts` is edited
+- **THEN** the mutant set is unchanged, because neither file is mutated
+
 #### Scenario: The model's tests move to another file
 
 - **WHEN** a case that kills a mutant is moved from `src/model.test.ts` into a
