@@ -189,6 +189,8 @@ describes is rewritten, the rule is a candidate for deletion.
   closes, and name which of those the language being scanned has.
 - Read a literal's contents from the source at the offset the scan reached,
   never from the copy the scan blanked.
+- Where a delimiter's meaning depends on the position within a construct, track
+  that position, never infer it from a nesting count.
 - Comment what a reader would otherwise "fix": a deliberate departure from the
   obvious implementation, or a precondition the code does not check.
 
@@ -215,6 +217,8 @@ Rules about how work is carried out here. They do not age with the code.
   in its own commit.
 - Never silence a linter or type-checker finding by disabling its rule in
   configuration; fix the code or ask the user to approve a suppression.
+- Never bypass a git hook with `--no-verify`, `SKIP_SIMPLE_GIT_HOOKS` or a
+  `core.hooksPath` override; run it or ask.
 - All repo artefacts — docs, plans, specs, code comments, commit messages —
   are written in British English by default (`behaviour`, `afterwards`);
   identifiers and third-party API names keep whatever spelling they ship with.
