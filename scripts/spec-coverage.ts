@@ -39,7 +39,7 @@ const SEPARATOR = /^\s*(?:\/\/|\/?\*|$)/;
 
 const words = (text: string) => text.trim().split(/\s+/).filter(Boolean);
 
-export type Citation = { id: string; path: string; line: number };
+type Citation = { id: string; path: string; line: number };
 
 /**
  * The citations one test file carries, and every way it got them wrong. A
@@ -47,7 +47,7 @@ export type Citation = { id: string; path: string; line: number };
  * nothing but identifiers; the first comment line that does not is prose, and
  * prose may sit between the citation and the call it belongs to.
  */
-export function cite(path: string, text: string) {
+function cite(path: string, text: string) {
 	const lines = text.split("\n");
 	const found: Citation[] = [];
 	const wrong: string[] = [];
@@ -122,7 +122,7 @@ export function cite(path: string, text: string) {
 const TEST_FILE = /[._](?:test|spec)\.[cm]?[jt]sx?$/;
 
 /** Tracked test files, listed at the repository root whatever `cwd` is. */
-export function tests(root: string): string[] {
+function tests(root: string): string[] {
 	const ls = Bun.spawnSync(["git", "ls-files", "-z"], { cwd: root });
 	if (ls.exitCode !== 0) throw new Error(ls.stderr.toString());
 	return ls.stdout
