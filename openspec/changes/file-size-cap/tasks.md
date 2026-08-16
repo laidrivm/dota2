@@ -357,7 +357,16 @@ requests on its own.
       there explaining why — so an untracked file is out of scope and a
       gitignored one cannot pass locally and fail in a clone. This is the
       fourth site to do it; match the established shape instead of inventing
-      one. Break each assertion above before it passes
+      one. Break each assertion above before it passes. Twelve wrong
+      implementations were written in turn — the bound exclusive and off by one
+      the other way, the sweep stopping at the first file, one cap for every
+      extension, `.tsx` left out, `wc -l` arithmetic, a CRLF pair split in
+      two,
+      the empty-sweep guard removed, the listing taken at `cwd`, untracked
+      files swept in, an absent file read anyway, the extension matched
+      case-sensitively — and every one fails a case. The check itself is
+      `scripts/file-size.ts`, since an implementation living inside its own
+      test file is what 7.4 had just finished undoing
 - [x] 8.7 Run it over the tree and confirm it passes with nothing exempted
       (*The tree as it stands*). A file still over the cap here means a
       previous step's seam was wrong and is fixed there, not exempted here. One
