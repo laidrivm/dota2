@@ -67,7 +67,7 @@ the opposite of what this capability is for.
 #### Scenario: A citation below an escaped quote
 
 - **WHEN** a test file holds a line whose string literal contains an escaped
-  quote followed by `/*` — `const s = "he said \\"/*\\"";` — and a `// spec:`
+  quote followed by `/*` — `const s = "he said \"/*\"";` — and a `// spec:`
   citation on a later line
 - **THEN** the citation counts, because the scan carries the string's state
   through the escape rather than ending the literal at it

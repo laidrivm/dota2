@@ -115,5 +115,8 @@ check it from a diff without reading intent.
   the check `CLAUDE.md` carries; a case dropped as a duplicate is named in the
   task list with the `scan.test.ts` case that already covers it.
 - **`blank`'s behaviour drifts while the internals are parameterised.** →
-  `src/app/module-classes.test.ts` and `scripts/scan.test.ts` are not edited by
-  this change, so they are the control.
+  `src/app/module-classes.test.ts` is the control: it is `blank`'s only
+  production caller and this change does not edit it. `scripts/scan.test.ts`
+  is not a control — this change adds cases to it for the new export — so its
+  existing `blank` cases are regression coverage that must keep passing
+  unedited, which is a weaker guarantee and named as one.
