@@ -94,12 +94,17 @@ Installed automatically by `bun install` (the `prepare` script runs
 - **pre-commit** — `biome check --staged`: blocks the commit if any staged
   file has format/lint problems. It does **not** autofix (simple-git-hooks
   can't re-stage) — run `bun run lint:fix`, re-stage, commit again.
-- **pre-push** — `tsc --noEmit` then `bun test --pass-with-no-tests`. The
-  flag is now vestigial (the suite is non-empty); removing it changes a gate,
-  so it goes through the OpenSpec cycle rather than a drive-by edit.
+- **pre-push** — every CI gate that needs no browser, about 20 seconds:
+  `openspec/specs/commit-gates/` names them and is the one place that does,
+  so this list is deliberately not repeated here. `actionlint` and
+  `gitleaks` run only if they are on `PATH`; a clone without them still
+  pushes. `bun test` keeps `--pass-with-no-tests`, now vestigial (the suite
+  is non-empty); removing it changes a gate, so it goes through the OpenSpec
+  cycle rather than a drive-by edit.
 - `--no-verify` bypasses a hook — an emergency exit, not a workflow. CI
-  (`lint.yml`) re-runs the whole-repo checks when a PR is opened or updated,
-  so a bypassed hook only delays the failure until then.
+  re-runs everything when a PR is opened or updated, plus the browser suite
+  and the coverage report, which the hook does not, so a bypassed hook only
+  delays the failure until then.
 
 ## Getting the review skills
 
