@@ -14,11 +14,13 @@ plausible number instead of a crash.
 ### Requirement: Mutation testing covers the model module and nothing else
 
 The project SHALL run mutation testing over `src/model.ts` alone, killing
-mutants with `bun test src/model.test.ts` through Stryker's built-in command
-runner. No Stryker runner plugin SHALL be installed. Two third-party ones for
-`bun:test` exist, and what they offer is per-test optimisation; the command
-runner's documented cost — the whole suite runs for every mutant — is 53 ms
-against this suite, so the optimisation is worth nothing and the second
+mutants with `bun test src/model` through Stryker's built-in command runner —
+the path prefix the model's test files share, never one file's name. A runner
+that enumerates its killers reports a gap the tests do not have, the first time
+one of them moves. No Stryker runner plugin SHALL be installed. Two third-party
+ones for `bun:test` exist, and what they offer is per-test optimisation; the
+command runner's documented cost — the whole suite runs for every mutant — is
+53 ms against this suite, so the optimisation is worth nothing and the second
 supply-chain root is not.
 
 The scope SHALL stay at one source file and one command. A second file under
@@ -38,8 +40,8 @@ The gate SHALL run as its own CI job rather than as a `*.test.ts` file, because
 #### Scenario: A mutant the tests assert against
 
 - **WHEN** Stryker mutates an arithmetic operator on a line of `src/model.ts`
-  such that a value `src/model.test.ts` asserts on changes, and
-  `bun test src/model.test.ts` fails while the mutant is active
+  such that a value one of the model's test files asserts on changes, and
+  `bun test src/model` fails while the mutant is active
 - **THEN** the mutant's status is `Killed` and it does not count towards the
   floor
 
@@ -51,8 +53,14 @@ The gate SHALL run as its own CI job rather than as a `*.test.ts` file, because
 #### Scenario: The suite is the only killer
 
 - **WHEN** the command runner executes for a mutant
-- **THEN** it runs `bun test src/model.test.ts` and no Playwright test, so a
+- **THEN** it runs `bun test src/model` and no Playwright test, so a
   mutant reachable only through `src/app/app.tsx` survives
+
+#### Scenario: The model's tests move to another file
+
+- **WHEN** a case that kills a mutant is moved from `src/model.test.ts` into a
+  sibling matching the same prefix
+- **THEN** the mutant stays killed and the survivor count is unchanged
 
 ### Requirement: The count of surviving mutants may not rise silently
 
@@ -108,8 +116,8 @@ guarantee the diff already gives.
 
 #### Scenario: A branch added without a test
 
-- **WHEN** a line is added to `src/model.ts` whose mutant no test in
-  `src/model.test.ts` kills
+- **WHEN** a line is added to `src/model.ts` whose mutant no test under
+  `src/model` kills
 - **THEN** the check fails, reporting the survivor count and the floor
 
 #### Scenario: A survivor newly killed
