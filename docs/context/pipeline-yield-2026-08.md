@@ -380,3 +380,15 @@ Fixed on `chore/pipeline-yield-2026-08-16`, where the same probe returns
 **exit 2**; two further bypasses came out of fixing it and are recorded in that
 commit. Nothing here says what `bash` does with the line — only what the guard
 read from it.
+
+Then the bot found a third on the fix's own pull request (#118), the same shape
+one level down: `cases` counts how many `case` statements are open and cannot
+say whether the scan stands in a pattern or in a command list. In a pattern the
+leading `(` is not a subshell and `|` is not a pipe, so
+`echo "$(case x in (foo|case) true ;; esac)"; git commit -m fix` suspended a
+frame the substitution's own `)` then restored, and the closing quote took the
+commit. Measured the same way — same Bun, same throwaway repo on `main`, the
+control still exit 2 — the two inputs returned **exit 0** on the parser as
+merged and **exit 2** with a `pattern` flag carried beside `cases`. The gap the
+session opened is what closed it: this finding was posted after the branch's
+last disposition pass and only re-fetching the pull request found it.
