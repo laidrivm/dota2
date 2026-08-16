@@ -296,7 +296,7 @@ requests on its own.
       become six files, none over the cap: 81 and 256 for the implementation,
       210 / 290 / 133 for the tests, 79 for the fixture. The 53 paths this last
       extraction moves are identical before and after, as are the block counts
-- [ ] 7.5 `scripts/mutation-floor.test.ts` (551), after the lift it waits on.
+- [x] 7.5 `scripts/mutation-floor.test.ts` (551), after the lift it waits on.
       Switching `scripts/mutation-floor.ts` to `scripts/scan.ts` is `PLAN.md`'s
       outstanding item and not this change's work, but it is what makes this
       file the size it is: the disable-comment scanner's own cases leave with
@@ -305,14 +305,24 @@ requests on its own.
       only if it is still over the cap. Record the measurement either way. If
       the lift has not landed when this step is reached, split the file as it
       stands — the cap is reachable without it, and waiting would make another
-      change's schedule this one's
-- [ ] 7.6 Confirm across all five splits that the set of full describe paths is
+      change's schedule this one's. It had not: the user settled it as its own
+      change after this one, so the file was split as it stands. Measured 551,
+      still over. Three files: the arithmetic (219), the disable comments an
+      exemption rests on (236), and the command line (98), over a 56-line
+      fixture. The middle one is its own file rather than folded in because it
+      is what leaves when the lift lands — a deletion then, not surgery
+- [x] 7.6 Confirm across all five splits that the set of full describe paths is
       unchanged, which is the check `CLAUDE.md` now carries and step 4 is why:
       a test lost in a move is the one failure a green run cannot show, and a
       block absorbed into its neighbour is a failure the count cannot show
       either. Every split here moves cases and deletes none — the deletions the
       scanner lift makes belong to the lift's own change and are outside this
-      measurement
+      measurement. Confirmed by script rather than by eye, each split against
+      the original file at the parent of the earliest commit that added one of
+      its siblings — the first draft took the parent of the *first listed*
+      sibling and reported a false difference of 19 titles, because that parent
+      was already part-split. 41, 35, 25, 73 and 73 titles, identical on every
+      one
 
 ## 8. The cap
 
