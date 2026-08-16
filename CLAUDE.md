@@ -221,6 +221,8 @@ Rules about how work is carried out here. They do not age with the code.
 - Script a string replacement only for a pattern repeating across files, assert
   the match, and read the resulting diff — a silent no-op and a malformed
   result both read as a successful edit.
+- Edit a file with the editing tool, never a shell heredoc, when its text
+  carries a backtick or `${`.
 - Verify a test file's split by the full describe path of every test, never by
   their count — a block absorbed into its neighbour runs exactly as many.
 - Run the typecheck and the suite on a freshly pulled base before branching
