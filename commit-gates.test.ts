@@ -184,9 +184,31 @@ describe("the pre-push gates", () => {
 		expect(output).not.toContain("REACHED");
 	});
 
+	test.each([
+		["biome", "bun run lint"],
+		["the YAML syntax check", "bun run lint:yaml"],
+		["the suppression scan", "bun run lint:suppressions"],
+		["the type check", "bun run typecheck"],
+		["the suite", "bun test"],
+		["Stryker", "bunx --no-install stryker run"],
+		["the mutation floor", "bun scripts/mutation-floor.ts"],
+		["the diff budget", "scripts/diff-budget.sh"],
+	])("the hook runs %s", (_label, command) => {
+		// Membership, which no behavioural case above covers: each of those
+		// stubs the runners, so a gate deleted from the chain simply never runs
+		// and every one of them still passes.
+		expect(push).toContain(command);
+	});
+
 	test("the hook on disk matches package.json", () => {
 		// `simple-git-hooks` writes the file only when `bun run prepare` runs,
-		// so the two drift the moment one is edited without the other.
-		expect(readFileSync(`${root}/.git/hooks/pre-push`, "utf8")).toContain(push);
+		// so the two drift the moment one is edited without the other. Compared
+		// as the file's last line rather than with `toContain`: a gate dropped
+		// from the front of the chain leaves a string the file still contains.
+		const onDisk = readFileSync(`${root}/.git/hooks/pre-push`, "utf8")
+			.trimEnd()
+			.split("\n")
+			.at(-1);
+		expect(onDisk).toBe(push);
 	});
 });
