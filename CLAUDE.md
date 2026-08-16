@@ -215,7 +215,7 @@ Rules about how work is carried out here. They do not age with the code.
   in its own commit.
 - Never silence a linter or type-checker finding by disabling its rule in
   configuration; fix the code or ask the user to approve a suppression.
-- All repo artifacts — docs, plans, specs, code comments, commit messages —
+- All repo artefacts — docs, plans, specs, code comments, commit messages —
   are written in British English by default (`behaviour`, `afterwards`);
   identifiers and third-party API names keep whatever spelling they ship with.
 - Script a string replacement only for a pattern repeating across files, assert

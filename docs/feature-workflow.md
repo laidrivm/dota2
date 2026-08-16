@@ -58,7 +58,7 @@ completes, name the next step and the exact command.
   so an apply that skipped this stalls at its first commit. Then remind the
   user to `/clear` —
   implementation should start from a clean context, reading only the spec
-  artifacts. Stages 2 and 3 repeat per group, in order, until the last one
+  artefacts. Stages 2 and 3 repeat per group, in order, until the last one
   merges.
 - Never edit spec files by hand and don't rewrite the proposal mid-build.
   Small course corrections go into the rules in `CLAUDE.md` (fix &
@@ -94,7 +94,7 @@ completes, name the next step and the exact command.
 - Single-source rule: agent rules and contract rules live in `CLAUDE.md`
   and the docs it indexes; architecture defaults live in the `context:`
   field of `openspec/config.yaml`. Neither restates the other, and no
-  other OpenSpec artifact or rule duplicates either — OpenSpec `rules:`
+  other OpenSpec artefact or rule duplicates either — OpenSpec `rules:`
   may only reference those files, not restate them.
 
 ## Across the stages
