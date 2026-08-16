@@ -129,7 +129,14 @@ function tests(root: string): string[] {
 		.toString()
 		.split("\0")
 		.filter(
-			(path) => TEST_FILE.test(path) && !`/${path}`.includes("/node_modules/"),
+			(path) =>
+				TEST_FILE.test(path) &&
+				!`/${path}`.includes("/node_modules/") &&
+				// Bun does not discover a test under a dot-directory, so counting a
+				// citation from one would mark a criterion closed by a test that
+				// never runs — measured: `bun test` reports "0 test files matching"
+				// for a suite under `.hidden/`.
+				!path.split("/").some((segment) => segment.startsWith(".")),
 		);
 }
 
@@ -226,7 +233,10 @@ export function gauge(
 	// declaration, never a `//` quoted elsewhere on the line. Position is what
 	// pins it — stripping string literals as well was measurably a no-op here,
 	// because nothing may sit between the semicolon and the marker.
-	if (!/;\s*\/\/.*\S/.test(declaration))
+	//
+	// The reason must carry a character that is neither a slash nor whitespace,
+	// so `///` does not read as one; a reason may still begin with a slash.
+	if (!/;\s*\/\/.*[^/\s]/.test(declaration))
 		problems.push(
 			`the floor states no reason: ${declaration.trim()} — write why on that line`,
 		);

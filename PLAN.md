@@ -129,7 +129,8 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       Code list rather than in a proposal. The nearest rule there today covers
       only the opposite direction, checking for duplication before inlining a
       single-caller helper. It has a dated candidate now: comment scanning lives
-      in both `scripts/spec-coverage.test.ts` and `scripts/mutation-floor.ts`,
+      in both `scripts/spec-coverage.ts` — moved there out of its test file by
+      `file-size-cap` step 7.4 — and `scripts/mutation-floor.ts`,
       the second is strictly better, and the Code rule the first implements was
       replaced on 2026-08-13. What that costs the older copy is commented at the
       line it costs it. `scripts/scan.ts` is where that lift lands: extracted
