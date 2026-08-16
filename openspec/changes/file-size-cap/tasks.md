@@ -291,8 +291,11 @@ share a pull request even if the third stayed home.
       them the direction that passes wrongly: `///` read as a reason; a
       citation under a dot-directory counted; and `TEST_FILE` admitting
       `.ctsx`, `.cjsx`, `.mtsx` and `.mjsx`, which `bun test` does not
-      discover — measured against all twelve spellings, not inferred. The second pull request lifts the fixture and takes the floor cases:
-      133 for them, 71 for the fixture, 478 left
+      discover — measured against all twelve spellings, not inferred. Three pull requests: the extraction, then the
+      fixture with the floor cases, then the sweep. 891 lines become six files,
+      none over the cap — 81 and 256 for the implementation, 210 / 290 / 133 for
+      the tests, 79 for the fixture. The 53 paths this last extraction moves are
+      identical before and after, as are the block counts
 - [ ] 7.5 `scripts/mutation-floor.test.ts` (551), after the lift it waits on.
       Switching `scripts/mutation-floor.ts` to `scripts/scan.ts` is `PLAN.md`'s
       outstanding item and not this change's work, but it is what makes this
