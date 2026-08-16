@@ -75,8 +75,8 @@ starts the sequence in the same turn; never ask whether to run it.
 5. `/coderabbit-local` last, then push.
 
 `bun run diff-budget` is not in that list and is not a review skill: it is a
-measurement, run by CI on every pull request and by the pre-push hook once
-typecheck and the tests have passed. It reports how many lines the reviewer
+measurement, run by CI on every pull request and last of all by the pre-push
+hook, once every gate that can refuse the push has passed. It reports how many lines the reviewer
 must read and names its own thresholds in the gate line, so a reader never
 looks them up here. Over budget says the step was cut too wide, not that the
 code is wrong: cut the step, or put `oversize: <reason>` in the pull request
