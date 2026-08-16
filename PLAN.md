@@ -133,9 +133,16 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       `file-size-cap` step 7.4 — and `scripts/mutation-floor.ts`,
       the second is strictly better, and the Code rule the first implements was
       replaced on 2026-08-13. What that costs the older copy is commented at the
-      line it costs it. `scripts/scan.ts` is where that lift lands: extracted
-      to bring its file under the cap, and already the module the older copy
-      should switch to — which is what makes it a lift and not speculation.
+      line it costs it. `scripts/scan.ts` is where that lift lands, and it is
+      not a switch: its only export, `blank`, erases comments, including the
+      `// spec:` lines `cite` exists to read, so the lift has to give it an
+      API — which lines sit inside a block comment — before either copy can
+      use it. The defect is reproducible today: one line reading
+      `const s = "he said \\"/*\\"";` drops every citation below it in that
+      file, because the per-line strip stops at the escaped quote and leaves a
+      `/*` behind. It fails loudly and blames the wrong thing — the floor
+      reports uncited criteria rather than a broken scanner — which is why it
+      waits rather than blocks.
       A second candidate arrived with `file-size-cap` step 3: the tracked-file
       sweep — `git rev-parse --show-toplevel`, then `git ls-files -z` at that
       root, then an `lstatSync` filter — now stands in three copies,
