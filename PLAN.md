@@ -84,21 +84,21 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
   mapping; and there is no global class layer, so the no-colour-literal sweep
   reads every tracked `*.css` rather than one directory.
 
+- **`pre-push-parity`** — `archive/2026-08-16-pre-push-parity`; the list of
+  what the hook runs is in `openspec/specs/commit-gates/`, and no other spec
+  enumerates it. The CI gates that can refuse a push run before it: `biome`,
+  the YAML check, the suppression scan and the mutation floor, with
+  `actionlint` and `gitleaks` skipped when absent and the diff budget absorbed.
+  Written because `file-size-cap` step 7.2 split `model.test.ts`, left
+  `stryker.config.json` naming one of the three files, and pushed green — 185
+  survivors against a floor of 67, reported by CI only after the push had
+  happened. The hook costs 20 s end to end, against `design.md`'s estimate of
+  17 s: the estimate summed the checks, and the sum omits one bun start per
+  command. Task 2.4 is archived unticked — probing the budget's exception needs
+  a real diff over 800 lines, and no branch in the tree reached one.
+
 ### Open
 
-- [ ] **`pre-push-parity`** — applied, awaiting the archive. The CI gates
-      that can refuse a push moved onto the pre-push hook: `biome`, the YAML
-      check, the suppression scan and the mutation floor, with `actionlint`
-      and `gitleaks` skipped when absent. Written because `file-size-cap`
-      step 7.2 split `model.test.ts`, left `stryker.config.json` naming one
-      of the three files, and pushed green — 185 survivors against a floor of
-      67, reported by CI only after the push had happened.
-      Its `MODIFIED` delta on `mutation-floor`'s first requirement carries the
-      text `file-size-cap` left there in full, `bun test src/model` included,
-      so syncing it does not put the command back to a file name.
-      Measured at 20 s end to end rather than the
-      17 s `design.md` estimated — the estimate summed the checks, and the sum
-      omits one bun start per command.
 - [ ] **The comment scan goes quiet on a regex literal.** A backtick inside one
       — `` /[`]/ `` — opens what `scripts/mutation-floor.ts:183-199` takes for a
       template literal and runs to end of input, so every comment below it is
