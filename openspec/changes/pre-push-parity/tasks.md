@@ -79,8 +79,11 @@ one is written.
       (*A tool the machine has, reporting a finding*)
 - [x] 3.3 A surviving-mutant count above the floor exits non-zero [8] (*A gate
       that CI would fail blocks the push instead*)
-- [x] 3.4 A branch at exactly 800 counted lines exits 0 from the hook [5], the
-      same count that fails the CI check (*The budget is still soft*)
+- [x] 3.4 A budget script that fails exits 0 from the hook [5] — absorption,
+      which is the half a stub can prove. The threshold itself, that 800 counts
+      as over and 799 does not, is `scripts/diff-budget-gate.test.ts`'s: the
+      hook stubs the script away, so no case here can reach its arithmetic
+      (*The budget is still soft*)
 - [x] 3.5 With two gates failing, the hook stops at the first and names it [4,
       7] — `&&` chaining is what makes the message name one gate
 - [x] 3.6 The hook on disk at `.git/hooks/pre-push` matches `package.json`
