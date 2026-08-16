@@ -10,7 +10,8 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
 - **What lives here**: work not yet done, the requirement sources still feeding
   it, and the standing constraints no single file owns.
 - **What evicts an entry**: its change reaching the archive. A completed queue
-  entry collapses to its outcome and its archive path, on one line.
+  entry collapses to its name, its pull requests, its archive path and where
+  its spec landed — nothing else, and no longer than the entries beside it.
 - **Where the evicted thing goes**, tested in this order, because an entry can
   satisfy more than one: a fence a reader would otherwise remove → a comment at
   that line, unless one already stands; then a fact the archive records →
@@ -74,28 +75,11 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
   `openspec/specs/spec-test-traceability/`.
 - **`mutation-floor`** — PRs #81 and #82, `archive/2026-08-13-mutation-floor`;
   spec at `openspec/specs/mutation-floor/`.
-- **`file-size-cap`** — twenty-two implementation pull requests where the task
-  list foresaw eight, `archive/2026-08-16-file-size-cap`; the cap requirement
-  is in `openspec/specs/change-slicing/`, and the change also widened
-  `module-boundaries` and `mutation-floor`. Moving a line costs it twice
-  against a budget that fails at 800, and four steps discovered that only on
-  measuring. Two of its consequences outlive it: development builds and serves
-  `dist/`, because Bun's HTML dev server cannot emit a CSS module's class-name
-  mapping; and there is no global class layer, so the no-colour-literal sweep
-  reads every tracked `*.css` rather than one directory.
-
-- **`pre-push-parity`** — `archive/2026-08-16-pre-push-parity`; the list of
-  what the hook runs is in `openspec/specs/commit-gates/`, and no other spec
-  enumerates it. The CI gates that can refuse a push run before it: `biome`,
-  the YAML check, the suppression scan and the mutation floor, with
-  `actionlint` and `gitleaks` skipped when absent and the diff budget absorbed.
-  Written because `file-size-cap` step 7.2 split `model.test.ts`, left
-  `stryker.config.json` naming one of the three files, and pushed green — 185
-  survivors against a floor of 67, reported by CI only after the push had
-  happened. The hook costs 20 s end to end, against `design.md`'s estimate of
-  17 s: the estimate summed the checks, and the sum omits one bun start per
-  command. Task 2.4 is archived unticked — probing the budget's exception needs
-  a real diff over 800 lines, and no branch in the tree reached one.
+- **`file-size-cap`** — twenty-two PRs, `archive/2026-08-16-file-size-cap`; the
+  cap is in `openspec/specs/change-slicing/`.
+- **`pre-push-parity`** — PRs #111 and #112,
+  `archive/2026-08-16-pre-push-parity`; the hook's gate list is in
+  `openspec/specs/commit-gates/`.
 
 ### Open
 
