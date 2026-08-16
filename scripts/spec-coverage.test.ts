@@ -413,6 +413,30 @@ describe("the repository as it stands", () => {
 });
 
 describe("what the sweep reads", () => {
+	test.each(["ts", "tsx", "js", "jsx", "cts", "cjs", "mts", "mjs"])(
+		"a citation in a .%s test is read",
+		(ext) => {
+			const dir = fabricate({
+				"openspec/specs/capability/spec.md": spec("A settled thing"),
+				[`src/thing.test.${ext}`]:
+					'// spec: capability/a-settled-thing\ntest("acts", () => {});\n',
+			});
+			expect(cited(dir)).toEqual(["capability/a-settled-thing"]);
+		},
+	);
+
+	test.each(["ctsx", "cjsx", "mtsx", "mjsx"])(
+		"a citation in a .%s test is not, because Bun does not run one",
+		(ext) => {
+			const dir = fabricate({
+				"openspec/specs/capability/spec.md": spec("A settled thing"),
+				[`src/thing.test.${ext}`]:
+					'// spec: capability/a-settled-thing\ntest("acts", () => {});\n',
+			});
+			expect(cited(dir)).toEqual([]);
+		},
+	);
+
 	test("a test file under a dot-directory is not read", () => {
 		// Bun does not run it, so a citation there would close a criterion no
 		// test ever executes.

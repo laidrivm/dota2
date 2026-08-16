@@ -284,12 +284,14 @@ share a pull request even if the third stayed home.
       carry the test split. The implementation came to 306 lines, six over the
       cap, so it splits once more at the seam already in it: `spec-criteria.ts`
       answers what criteria exist and `spec-coverage.ts` which are covered —
-      81 / 242. One thing the extraction broke and the suite
-      caught rather than the eye: `DECLARATION` matched `^const FLOOR`, which
-      `export` in front of defeats, so the floor read no reason on its own line.
-      Two gaps CodeRabbit found in the moved code and this pull request closes:
-      `///` read as a reason, and a citation under a dot-directory counted
-      though `bun test` never runs one
+      81 / 256. One thing the extraction broke and the suite caught rather than
+      the eye: `DECLARATION` matched `^const FLOOR`, which `export` in front of
+      defeats, so the floor read no reason on its own line. Three gaps
+      CodeRabbit found in the moved code and this pull request closes, all of
+      them the direction that passes wrongly: `///` read as a reason; a
+      citation under a dot-directory counted; and `TEST_FILE` admitting
+      `.ctsx`, `.cjsx`, `.mtsx` and `.mjsx`, which `bun test` does not
+      discover — measured against all twelve spellings, not inferred
 - [ ] 7.5 `scripts/mutation-floor.test.ts` (551), after the lift it waits on.
       Switching `scripts/mutation-floor.ts` to `scripts/scan.ts` is `PLAN.md`'s
       outstanding item and not this change's work, but it is what makes this
