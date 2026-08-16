@@ -113,6 +113,7 @@ describe("the pre-commit secret scan", () => {
 describe("the pre-push gates", () => {
 	const push = hooks["pre-push"] as string;
 
+	// spec: commit-gates/a-tool-the-machine-does-not-have
 	test("neither optional tool installed passes silently", () => {
 		// A fresh clone has neither binary and must still push, without a
 		// warning naming a tool the developer never asked for.
@@ -122,6 +123,7 @@ describe("the pre-push gates", () => {
 		expect(output).not.toContain("gitleaks");
 	});
 
+	// spec: commit-gates/a-tool-the-machine-has-reporting-a-finding
 	test("a gitleaks finding blocks the push", () => {
 		// The shape that would break this is `command -v gitleaks && gitleaks …`,
 		// which reports and then leaves the chain's status to the guard.
@@ -131,6 +133,7 @@ describe("the pre-push gates", () => {
 		expect(code).not.toBe(0);
 	});
 
+	// spec: commit-gates/a-secret-that-is-already-in-the-base-branch
 	test("the secret scan reads the commits the push adds, not all history", () => {
 		// `gitleaks git .` with no range walks every commit ever made, so one
 		// secret landing in history would block every push by everyone until a
@@ -155,6 +158,7 @@ describe("the pre-push gates", () => {
 		).toBe(0);
 	});
 
+	// spec: commit-gates/a-gate-that-ci-would-fail-blocks-the-push-instead
 	test("a surviving-mutant count over the floor blocks the push", () => {
 		// The floor is the last `bun` invocation in the chain, so a stub that
 		// fails on it and passes on everything else pins this gate alone.
@@ -164,6 +168,7 @@ describe("the pre-push gates", () => {
 		expect(code).not.toBe(0);
 	});
 
+	// spec: commit-gates/the-budget-is-still-soft
 	test("the diff budget is absorbed, so an over-budget branch still pushes", () => {
 		// `change-slicing` requires this one gate to report and not block: it
 		// measures what a reviewer must read, which is not a defect.

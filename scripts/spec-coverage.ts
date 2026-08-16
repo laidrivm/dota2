@@ -198,7 +198,7 @@ export function check(cwd?: string) {
 	};
 }
 
-export const FLOOR = 382; // +2: mutation-floor's two criteria about stryker.config.json, whose tests a ponytail-review pass cut because a reviewer reads that file whole
+export const FLOOR = 384; // +2 stryker.config.json criteria whose tests a ponytail-review pass cut, +1 commit-gates/the-list-has-one-home whose THEN is a review verdict, +1 mutation-floor/the-gate-is-not-picked-up-by-the-suite, confirmed by probe because a test would restate which file the gate lives in
 
 /**
  * This file's own `FLOOR` line — the reason lives on it, so the check reads it

@@ -18,6 +18,6 @@ report SHALL be uploaded as an artifact only when the run fails.
 - **WHEN** a branch is pushed
 - **THEN** the pre-push hook SHALL NOT start a browser
 
-Which checks the hook does run is `commit-gates`'s. This scenario used to
-enumerate them — "the type check and `bun test` only" — and that list was
-already false: `change-slicing` requires the diff budget on the same path.
+This scenario names only the browser. Which checks the hook does run is
+`commit-gates`'s to say, and enumerating them here contradicts it: the diff
+budget runs on the same path, required by `change-slicing`.
