@@ -367,8 +367,16 @@ where one gate carried the result.
 posted *when it runs*, and the bot re-reviews on every push. Three merged pull
 requests — #102, #106, #111 — carry findings posted after the last pass over
 them, never dispositioned. One is a 🟠 Major on `command-parse.ts`: a `case`
-clause's `)` pops the same stack a `$(` close does, so
-`echo "$(case x in a) git commit -m fix ;; esac)"` reaches the guard as one
-quoted word and returns exit 0 — measured, not inferred. The same shape as the
-group-inside-substitution bug fixed on that branch, found by the bot an hour
-after the branch was reviewed and merged.
+clause's `)` popped the same stack a `$(` close does, so
+`echo "$(case x in a) git commit -m fix ;; esac)"` reached the guard as one
+quoted word. The same shape as the group-inside-substitution bug fixed on that
+branch, found by the bot an hour after the branch was reviewed and merged.
+
+Measured rather than inferred, and the environment is the claim's: the hook
+event was fed as JSON on stdin to `bun scripts/command-guard.ts` under Bun
+1.3.14, in a throwaway repository whose `HEAD` is on `main` — the control
+`git commit -m fix` returns exit 2 there. The bypass returned **exit 0**.
+Fixed on `chore/pipeline-yield-2026-08-16`, where the same probe returns
+**exit 2**; two further bypasses came out of fixing it and are recorded in that
+commit. Nothing here says what `bash` does with the line — only what the guard
+read from it.
