@@ -21,7 +21,13 @@ defect that started this.
       (*The budget is still soft*)
 - [x] 1.2 Guard `actionlint` and `gitleaks` with `command -v`, the spelling the
       pre-commit hook already uses for `gitleaks`, so an absent binary skips
-      rather than fails (*A tool the machine does not have*)
+      rather than fails (*A tool the machine does not have*). The secret scan is
+      bounded to `--log-opts=<base>..HEAD` rather than copying CI's history-wide
+      invocation, which a CodeRabbit Major on the pull request caught:
+      unbounded, one secret in history blocks every push by everyone, and the
+      delta said
+      "working tree" while the hook read history (*A secret that is already in
+      the base branch*)
 - [x] 1.3 Run `bun run prepare` so the hook on disk matches `package.json`, and
       confirm `.git/hooks/pre-push` carries the new command — the file is what
       runs, and `simple-git-hooks` rewrites it only when told to
@@ -95,8 +101,8 @@ one is written.
       rather than restating the list (*The list has one home*)
 - [x] 4.2 Grep the four places a claim like this is restated — this change's
       sibling artefacts, `openspec/specs/**`, `PLAN.md`, and the README
-      ownership map — searching the wording being replaced ("the type check and
-      bun test only", "its own CI job"), not the wording replacing it
+      ownership map — searching the wording being replaced ("the type check
+      and bun test only", "its own CI job"), not the wording replacing it
 - [x] 4.3 Record in `PLAN.md` that this change archives after `file-size-cap`,
       so the ordering survives a session boundary rather than living only in
       `design.md`
