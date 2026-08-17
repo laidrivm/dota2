@@ -19,8 +19,8 @@
 		"pre-push": "bun run lint && bun run lint:yaml && bun run lint:suppressions && bun run typecheck && bun test --pass-with-no-tests && if command -v actionlint >/dev/null 2>&1; then actionlint -color; fi && if command -v gitleaks >/dev/null 2>&1; then gitleaks git . --log-opts=\"$(git symbolic-ref --quiet --short refs/remotes/origin/HEAD || echo main)..HEAD\" -v --redact --no-banner; fi && rm -rf reports/mutation && bunx --no-install stryker run && bun scripts/mutation-floor.ts && { bash scripts/diff-budget.sh || true; }"
 	},
 	"devDependencies": {
-		"@axe-core/playwright": "4.12.1",
-		"@biomejs/biome": "2.5.7",
+		"@axe-core/playwright": "4.13.0",
+		"@biomejs/biome": "2.5.8",
 		"@playwright/test": "1.62.1",
 		"@stryker-mutator/core": "9.6.1",
 		"@types/bun": "1.3.14",
