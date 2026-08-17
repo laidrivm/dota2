@@ -16,8 +16,10 @@ What counts as evidence for a claim, and what a claim may rest on.
 - Exercise a documented capability on every path the project runs it —
   documentation describes one implementation, and a bundler and a dev server
   are two.
-- Verify every external recommendation before implementing it; report which
-  parts failed verification and what replaces them.
+- Verify an external recommendation, or a tool mechanism a plan prescribes,
+  before writing it into an artefact — a plan is not an implementation, so a
+  mechanism named from priors reads exactly like one that was tried; report
+  which parts failed verification and what replaces them.
 - Never infer a permission outcome from a command that succeeded — an
   approved prompt and an unprompted call are indistinguishable from inside
   the session.
