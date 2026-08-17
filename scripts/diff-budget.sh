@@ -2,6 +2,14 @@
 # The review budget for one pull request: how many lines a reviewer must
 # actually read between <base> and HEAD. Prints one gate line and exits
 # non-zero when the diff is over budget or cannot be measured.
+#
+# Its two callers read that exit differently, on purpose. CI fails on it, so an
+# unmeasured diff never passes. The pre-push hook wraps the call in `|| true`
+# and absorbs every non-zero, including the unmeasurable one — a developer
+# whose base branch is not fetched is not blocked by a measurement, and CI
+# fails the check instead. That asymmetry is required by `change-slicing`
+# §*The gate is hard in CI and soft before the push*, not an oversight in
+# `package.json`, which carries no comment of its own to say so.
 set -uo pipefail
 
 WARN_AT=500
