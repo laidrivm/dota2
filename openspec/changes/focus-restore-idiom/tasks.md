@@ -19,11 +19,11 @@ hidden tab*.
 - [ ] 1.3 Add the helper — `restoreFocus(find)` in `src/app/focus.ts`, beside
       `cx.ts` and `hotkeys.ts` — owning the macrotask and the `HTMLElement`
       guard. The reason the wait is a macrotask and not a frame moves into its
-      doc comment (*none — infrastructure*)
+      doc comment (*Focus survives the removal in a hidden tab*)
 - [ ] 1.4 Switch `src/app/app.tsx`'s `focusAfterPick` to it, keeping its
       signature and its finder verbatim: `[data-pick="…"]:not(:disabled)` then
       the last `[data-remove="…"]`. Its comment about the wait leaves with the
-      code it explained (*none — infrastructure*)
+      code it explained (*hero-picker/Focus after the pick*)
 - [ ] 1.5 Switch `src/app/board/pieces.tsx`'s `RemoveButton` to it, keeping the
       capture of `row` and `region` before `onClick()` — the capture is the
       caller's, not the helper's, and moving it after the dispatch is the way
@@ -32,12 +32,13 @@ hidden tab*.
       read the diff: if `restoreFocus` is a bare `setTimeout` wrapper and
       neither caller reads better, abandon the lift, keep 1.1's case and the
       new criterion, and record here why. `design.md` names this as an
-      accepted outcome rather than a failure (*none — infrastructure*)
+      accepted outcome rather than a failure (*Focus survives the removal in a hidden tab*)
 - [ ] 1.7 Run the full e2e suite and confirm the two focus cases already in it
       still pass — `e2e/board.spec.ts`'s removal case and the picker's focus
-      case are this change's controls, and neither is edited by it (*none — the controls on 1.4 and 1.5*)
+      case are this change's controls, and neither is edited by it
+      (*hero-picker/Focus after the pick*, *Focus survives the removal*)
 - [ ] 1.8 Cite the new criterion with a `// spec:` line and record the uncited
       count before and after, so the criterion does not land on the floor (*Focus survives the removal in a hidden tab*)
 - [ ] 1.9 Measure `src/app/app.tsx`, `src/app/board/pieces.tsx`,
       `src/app/focus.ts` and `e2e/board.spec.ts` against their caps and record
-      the numbers (*none — infrastructure*)
+      the numbers (*change-slicing/No source file exceeds its per-file cap*)
