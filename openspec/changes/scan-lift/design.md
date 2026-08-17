@@ -29,7 +29,8 @@ only the residue.
 - The two live defects closed, each with a case that fails before the switch.
 - `blank`'s contract unchanged, so `src/app/module-classes.test.ts` is
   untouched and stands as the check that the lift kept it.
-- `scripts/mutation-floor-exemptions.test.ts` leaves as a deletion.
+- `scripts/mutation-floor-exemptions.test.ts` keeps none of the scanning cases
+  it exists for.
 
 **Non-Goals:**
 
@@ -67,7 +68,7 @@ The two exports are one internal scan parameterised by what it collects, so a
 fix to the state machine reaches both. Two walks kept in step by review is the
 arrangement this change exists to end.
 
-### `mutation-floor-exemptions.test.ts` is deleted, not migrated wholesale
+### `mutation-floor-exemptions.test.ts` is emptied and split, not migrated wholesale
 
 Its 236 lines split by what they exercise:
 
@@ -75,12 +76,18 @@ Its 236 lines split by what they exercise:
   multi-line block, a quote inside a regex literal — belong to
   `scripts/scan.test.ts`, and are kept only where `scan.test.ts` has no
   equivalent already. It is a lift, so a duplicate case is a duplicate.
-- cases about the *directive grammar* — `all`, a missing `next-line`, a missing
-  reason, the block-comment spelling — move to
-  `scripts/mutation-floor.test.ts`, which owns `exemptions()`.
+- what is left is two subjects rather than one, and the lift is what separates
+  them: which comments `exemptions()` reaches, now the scan's answer, and what
+  form a directive must take once one is found, still `DISABLE` and
+  `ADMITTED`'s. They ship as `mutation-floor-comments.test.ts` and
+  `mutation-floor-directives.test.ts`, the second a rename of the emptied file
+  so the grammar cases keep their history.
 
-`file-size-cap` step 7.5 recorded 219 for `mutation-floor.test.ts` against a
-300-line cap, so the grammar cases have room. Measure after, not before.
+`mutation-floor.test.ts` receives neither. `file-size-cap` step 7.5 recorded
+219 for it against a 300-line cap and this design read that as room; measured,
+the surviving cases are ~164 lines against 237, so the file it was to receive
+them into would land at ~401. The seam above is what the cap forces, and it was
+already there to be found — measure after, not before.
 
 ### The floor moves if a hidden directive appears
 

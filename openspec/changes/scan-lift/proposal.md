@@ -36,11 +36,14 @@ and both callers exist to read them.
 - `scripts/spec-coverage.ts` drops its per-line strip and derives which lines
   sit inside a block comment from the same export. A citation below an escaped
   quote becomes visible.
-- `scripts/mutation-floor-exemptions.test.ts` is deleted. `file-size-cap` step
-  7.5 made it its own file so this change would be a deletion rather than
-  surgery; the cases that survive the deletion are the ones about the directive
-  grammar, not about scanning, and they move to `scripts/scan.test.ts` or
-  `scripts/mutation-floor.test.ts` by what they exercise.
+- `scripts/mutation-floor-exemptions.test.ts` is emptied of everything about
+  scanning. `file-size-cap` step 7.5 made it its own file so this change would
+  be surgery on nothing else; what survives splits along the seam the lift
+  creates — which comments `exemptions()` reaches goes to a new
+  `scripts/mutation-floor-comments.test.ts`, the directive grammar stays in the
+  file under its accurate name `scripts/mutation-floor-directives.test.ts`, and
+  the scanning cases go to `scripts/scan.test.ts` where they are not already
+  covered.
 - `CLAUDE.md` gains the rule of two in its Code list. `reviewable-diff-gates`
   prescribed that vehicle — "its own one-line rule, separately" — and the
   nearest rule there today covers only the opposite direction.
@@ -82,8 +85,9 @@ a specification where `CLAUDE.md`'s Code rules already govern the technique.
 - `scripts/mutation-floor.ts` — `comments()` deleted, ~50 lines.
 - `scripts/spec-coverage.ts` — the per-line strip and its `ponytail:` comment
   deleted, ~25 lines.
-- `scripts/mutation-floor-exemptions.test.ts` (236 lines) — deleted, its
-  surviving cases redistributed.
+- `scripts/mutation-floor-exemptions.test.ts` (236 lines) — renamed to
+  `scripts/mutation-floor-directives.test.ts` and emptied of everything but the
+  grammar; `scripts/mutation-floor-comments.test.ts` is new.
 - `src/app/module-classes.test.ts` — the existing `blank` caller; unaffected,
   and the check that the lift kept `blank`'s contract.
 - `CLAUDE.md` — one Code rule.
