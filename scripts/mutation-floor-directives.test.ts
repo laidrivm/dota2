@@ -5,14 +5,10 @@
  * scanner both rest on is `scan.test.ts`'s.
  */
 import { afterAll, describe, expect, test } from "bun:test";
-import { cleanup } from "./mutation-floor.fixture.ts";
+import { cleanup, marked } from "./mutation-floor.fixture.ts";
 import { exemptions } from "./mutation-floor.ts";
 
 afterAll(cleanup);
-
-/** `src/model.ts` as the scan sees it: `lines` with the code they annotate. */
-const marked = (...lines: string[]) =>
-	lines.map((line) => `${line}\nconst x = 1;`).join("\n");
 
 // spec: mutation-floor/an-exemption-with-no-reason
 describe("an exemption with no reason", () => {

@@ -212,7 +212,7 @@ export function blank(source: string, language: keyof typeof SYNTAX): string {
 }
 
 /** A comment, its text without its delimiters, and the line it opens on. */
-export type Comment = { text: string; line: number; block: boolean };
+type Comment = { text: string; line: number; block: boolean };
 
 /**
  * Every comment in `source`, in the order the scan met them.

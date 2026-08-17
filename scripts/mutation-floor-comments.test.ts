@@ -10,14 +10,10 @@
  * scanner alone cannot say.
  */
 import { afterAll, describe, expect, test } from "bun:test";
-import { cleanup } from "./mutation-floor.fixture.ts";
+import { cleanup, marked } from "./mutation-floor.fixture.ts";
 import { exemptions } from "./mutation-floor.ts";
 
 afterAll(cleanup);
-
-/** `src/model.ts` as the scan sees it: `lines` with the code they annotate. */
-const marked = (...lines: string[]) =>
-	lines.map((line) => `${line}\nconst x = 1;`).join("\n");
 
 describe("a directive Stryker honours outside a line comment", () => {
 	test("a single-line block comment is scanned too", () => {

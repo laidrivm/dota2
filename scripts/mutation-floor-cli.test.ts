@@ -3,15 +3,9 @@
  * resolves its report from.
  */
 import { afterAll, describe, expect, test } from "bun:test";
-import { mkdirSync, writeFileSync } from "node:fs";
+import { cpSync, mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
-import {
-	cleanup,
-	emptyDir,
-	report,
-	scanner,
-	source,
-} from "./mutation-floor.fixture.ts";
+import { cleanup, emptyDir, report } from "./mutation-floor.fixture.ts";
 import { FLOOR } from "./mutation-floor.ts";
 
 afterAll(cleanup);
@@ -24,9 +18,10 @@ describe("the command line entry point", () => {
 		const dir = emptyDir("mutation-floor-cli-");
 		// A copy of the check beside a tree of our own, so it resolves this
 		// report and this model rather than the repository's real ones.
-		mkdirSync(join(dir, "scripts"), { recursive: true });
-		writeFileSync(join(dir, "scripts", "mutation-floor.ts"), source);
-		writeFileSync(join(dir, "scripts", "scan.ts"), scanner);
+		// The whole directory, not the check alone: it imports `scan.ts`, and a
+		// list of one module's imports kept here by hand goes stale in silence
+		// the next time it gains one.
+		cpSync(import.meta.dir, join(dir, "scripts"), { recursive: true });
 		for (const [path, text] of Object.entries(files)) {
 			mkdirSync(join(dir, dirname(path)), { recursive: true });
 			writeFileSync(join(dir, path), text);

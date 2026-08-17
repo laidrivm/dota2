@@ -26,12 +26,9 @@ export const source = readFileSync(
 	"utf8",
 );
 
-/**
- * The scanner the check imports, which a copy of it has to stand beside: a tree
- * holding only `mutation-floor.ts` fails to resolve the import rather than
- * running the check.
- */
-export const scanner = readFileSync(join(import.meta.dir, "scan.ts"), "utf8");
+/** `src/model.ts` as the scan sees it: `lines` with the code they annotate. */
+export const marked = (...lines: string[]) =>
+	lines.map((line) => `${line}\nconst x = 1;`).join("\n");
 
 const made: string[] = [];
 
