@@ -153,31 +153,21 @@ the changes already proposed and waiting for a `feat/` branch.
       user's to apply, in the skills repository rather than here, and its `ref`
       needs the upstream commit in `microsoft/playwright-cli`. It is open
       rather than done: nobody has applied it.
-- [ ] **`scan-lift`** — proposed, awaiting implementation on `feat/scan-lift`.
-      One left-to-right source scanner in three copies, two of them wrong in
-      ways their own specifications forbid: a backtick in a regex literal
-      blinds `scripts/mutation-floor.ts` to every comment below it, and an
-      escaped quote before a `/*` drops every citation below it in
-      `scripts/spec-coverage.ts`. `scripts/scan.ts` is the correct one and
-      cannot be used by either, because its only export erases the comments
-      both callers exist to read. The change also writes the rule of two into
-      `CLAUDE.md`'s Code list, which `reviewable-diff-gates` deferred as "its
-      own one-line rule, separately" and which no artefact has carried since.
-- [ ] **`tracked-file-sweep`** — proposed, awaiting implementation on
-      `feat/tracked-file-sweep`. The listing every check reads the tree
-      through — root, `git ls-files -z` at that root, regular files only —
-      stands in five copies plus an inline sixth, not the three this file used
-      to record. Two have already drifted onto `trim()`, which corrupts a
-      repository path ending in a space where the other three deliberately
-      strip only git's terminator.
-- [ ] **`focus-restore-idiom`** — proposed, awaiting implementation on
-      `feat/focus-restore-idiom`. `focusAfterPick` in `src/app/app.tsx` and
-      `RemoveButton`'s handler in `src/app/board/pieces.tsx` both restore focus
-      in a macrotask after the commit, and the reason it cannot be
-      `requestAnimationFrame` — which never fires in a hidden tab — is written
-      three times and executed nowhere. The finders differ and stay; the wait
-      and the guard lift. Its `design.md` admits abandoning the lift if the
-      helper turns out to be a bare `setTimeout` wrapper.
+- [ ] **`scan-lift`** — proposed, `openspec/changes/scan-lift/`. One
+      left-to-right source scanner in three copies, two of them blind in ways
+      their own specifications forbid. Ships on `feat/scan-lift`; it also
+      writes the rule of two into `CLAUDE.md`'s Code list, which
+      `reviewable-diff-gates` deferred and no artefact has carried since.
+- [ ] **`tracked-file-sweep`** — proposed,
+      `openspec/changes/tracked-file-sweep/`. The listing every check reads the
+      tree through stands in seven copies, two of them already drifted. Two
+      task groups, so `feat/tracked-file-sweep-1` then `-2`.
+- [ ] **`focus-restore-idiom`** — proposed,
+      `openspec/changes/focus-restore-idiom/`. Two controls restore focus after
+      an unmount and the reason the wait cannot be an animation frame is
+      written three times and executed nowhere. Ships on
+      `feat/focus-restore-idiom`; its `design.md` admits abandoning the lift if
+      the helper turns out to be a bare `setTimeout` wrapper.
 
 ## Standing constraints
 
