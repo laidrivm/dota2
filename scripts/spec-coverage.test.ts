@@ -209,6 +209,28 @@ describe("what is not a citation", () => {
 		expect(problems(dir)).toEqual([]);
 	});
 
+	test("a citation below a block comment that never closes is ignored", () => {
+		// The block encloses the lines its text spans, and an unterminated one
+		// spans the rest of the file — so the citation really is commented out.
+		const dir = world(
+			'/* note\n// spec: capability/a-first-thing\ntest("acts", () => {});\n',
+			"A first thing",
+		);
+		expect(cited(dir)).toEqual([]);
+		expect(problems(dir)).toEqual([]);
+	});
+
+	test("a spec marker trailing code on its line is not a citation", () => {
+		// The scan says there is a comment on that line; that it does not lead
+		// the line is what keeps it out.
+		const dir = world(
+			'const x = 1; // spec: capability/a-first-thing\ntest("acts", () => {});\n',
+			"A first thing",
+		);
+		expect(cited(dir)).toEqual([]);
+		expect(problems(dir)).toEqual([]);
+	});
+
 	test("a string literal holding a comment opener blinds nothing below it", () => {
 		const dir = world(
 			'const opener = "/*";\n// spec: capability/a-first-thing\ntest("acts", () => {});\n',

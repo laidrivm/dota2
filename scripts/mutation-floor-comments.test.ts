@@ -52,6 +52,17 @@ describe("a directive Stryker honours outside a line comment", () => {
 		).not.toEqual([]);
 	});
 
+	test("one inside a template interpolation is found", () => {
+		// The interpolation is code, and Babel hands Stryker the comment in it.
+		// The private scanner this replaced skipped the whole template and so
+		// silenced the line with nobody told.
+		expect(
+			exemptions(
+				`const s = \`x\${/* Stryker disable next-line all */ 1}\`;\nconst x = 1;\n`,
+			),
+		).not.toEqual([]);
+	});
+
 	test("a directive spanning a block comment's first line is found", () => {
 		// Stryker anchors at the comment's text, which runs past the line the
 		// comment opens on, so this one it honours.

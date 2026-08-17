@@ -130,6 +130,15 @@ describe("the comments a scan met", () => {
 		expect(comments("const a = `x\n// not one\n", "ts")).toEqual([]);
 	});
 
+	test("an unterminated block comment runs to the end of input", () => {
+		// The same choice as the template above, and the one both callers rest
+		// on: `spec-coverage.ts` derives the lines a block encloses from this
+		// text, so a block that never closes encloses every line below it.
+		expect(comments("const a = 1;\n/* never closed\nand on\n", "ts")).toEqual([
+			{ text: " never closed\nand on\n", line: 2, block: true },
+		]);
+	});
+
 	test("a CRLF pair ends one line", () => {
 		// The `\r` stays in the text: a line comment runs to the newline, and both
 		// callers' grammars treat it as the whitespace it is.
@@ -148,6 +157,32 @@ describe("the comments a scan met", () => {
 		expect(comments("/* note */\n.a {}\n", "css")).toEqual([
 			{ text: " note ", line: 1, block: true },
 		]);
+	});
+
+	test("every comment reported is one the same source blanked", () => {
+		// The two views are one walk parameterised by what it collects, and this
+		// is what says so: collecting in one branch while erasing in another
+		// would pass every case above and still hand a caller a comment the
+		// other caller reads as code.
+		const source = [
+			'const s = "// not one";',
+			"// a line comment",
+			"const re = /[`]/; /* trailing block */",
+			`const t = \`text \${/* inside */ 1}\`;`,
+			"/* one that",
+			"   spans lines */",
+		].join("\n");
+		const erased = blank(source, "ts");
+		const found = comments(source, "ts");
+
+		// Named first, so the loop below cannot pass by finding nothing.
+		expect(found.map((c) => c.text)).toEqual([
+			" a line comment",
+			" trailing block ",
+			" inside ",
+			" one that\n   spans lines ",
+		]);
+		for (const { text } of found) expect(erased).not.toContain(text);
 	});
 });
 
