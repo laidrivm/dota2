@@ -25,7 +25,10 @@ rules:
       may invalidate the questions that would have followed
     - Write acceptance criteria in EARS form (WHEN <trigger> / IF <unwanted
       condition> THEN / WHILE <state> — the system SHALL <behaviour>), with
-      measurable values, not adjectives
+      measurable values, not adjectives. They are authored in the change's
+      delta specs under specs/ and nowhere else; proposal.md names the
+      capabilities each one belongs to and never restates a criterion, because
+      a second copy is checked by nothing and drifts from the first
     - Scope each step to one to three acceptance criteria, leaving the
       application working when it merges. A step carrying only
       infrastructure may close none and says so. A proposal holds as many
