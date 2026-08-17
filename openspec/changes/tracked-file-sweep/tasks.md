@@ -30,7 +30,7 @@ tree* and *A repository path ending in a space*.
       keeps the space (*A repository path ending in a space*). Fabricate the
       repository — the last case cannot be observed in this one
 - [ ] 1.4 Measure `scripts/tracked.ts` and `scripts/tracked.test.ts` against
-      the 300-line cap and record the numbers (*none — infrastructure*)
+      the 300-line cap and record the numbers (*change-slicing/No source file exceeds its per-file cap*)
 
 ## 2. Six call sites and no seventh
 
@@ -56,10 +56,12 @@ Closes *A second listing is introduced*.
       unfiltered view. It applies no `lstatSync` filter on purpose — a tracked
       path deleted from the work tree still carries an extension somebody has
       to rule on — so confirm the extension set it asserts is unchanged, which
-      is what proves the view is the right one (*A second listing is
-      introduced*)
+      is what proves the view is the right one — the unfiltered view is the
+      requirement's, not this caller's preference (*Every check reads the tree
+      through one tracked-file sweep*, *A second listing is introduced*)
 - [ ] 2.6 Write the check the criterion names: a test failing when any tracked
-      source file other than `scripts/tracked.ts` and its own test invokes
+      source file other than `scripts/tracked.ts` and `scripts/tracked.test.ts`
+      invokes
       `git ls-files` or `git rev-parse --show-toplevel`. Scope it by what it
       exempts, per `CLAUDE.md`, and cite the criterion. Break-check it by
       reintroducing one listing and watching it fail (*A second listing is
@@ -69,4 +71,4 @@ Closes *A second listing is introduced*.
       the code could not be shared, and it now points at a file that no longer
       owns the sweep (*A second listing is introduced*)
 - [ ] 2.8 Measure every switched file against its cap and record the numbers
-      (*none — infrastructure*)
+      (*change-slicing/No source file exceeds its per-file cap*)
