@@ -7,10 +7,12 @@ carry the same explanatory comment pointing at `scripts/no-suppressions.ts` as
 the shape they copy, which is the tell: the comment exists because the code
 could not be shared.
 
-What every caller needs is identical — the repository root, and the tracked
-paths under it that are regular files. What differs is only the filter applied
-afterwards: extensions (`.css`, the test-file spelling set), prose exemptions,
-a check excluding its own two paths.
+What every caller needs is identical — the repository root and the tracked
+paths under it. What differs is what each does next: five open the files and so
+want the regular ones among those paths, one rules on the paths themselves and
+must not lose a deleted-but-tracked one, and each then applies a filter of its
+own — extensions (`.css`, the test-file spelling set), prose exemptions, a
+check excluding its own two paths.
 
 Two copies have already drifted on the root, using `trim()` where the others
 deliberately strip only git's terminator. Nothing failed, because no repository

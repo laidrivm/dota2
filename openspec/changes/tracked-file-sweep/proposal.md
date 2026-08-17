@@ -2,14 +2,22 @@
 
 ## Why
 
-Every check in this repository that reads the tree does it the same way: run
-`git rev-parse --show-toplevel`, run `git ls-files -z` **at that root**, drop
-the empty last field, and keep only entries `lstatSync` reports as regular
-files. Each step exists because of a way the naive version passes wrongly — a
-listing taken at `cwd` names paths relative to a subdirectory and silently
-scopes the check to it, an untracked file is one a clone does not have, and a
-tracked path may be a deleted file, a symlink or a submodule gitlink that reads
-as a directory.
+Every check in this repository that reads the tree starts the same way: run
+`git rev-parse --show-toplevel`, run `git ls-files -z` **at that root**, and
+drop the empty last field. Each step exists because of a way the naive version
+passes wrongly — a listing taken at `cwd` names paths relative to a
+subdirectory and silently scopes the check to it, and an untracked file is one
+a clone does not have.
+
+A check that then *opens* what it listed adds a fourth step, keeping only
+entries `lstatSync` reports as regular files, because a tracked path may be a
+deleted file, a symlink or a submodule gitlink that reads as a directory. Five
+of the six sites do that — `scripts/spec-coverage.ts` among them, filtering in
+`check()` rather than in the listing beside it. The sixth rules on paths
+without opening them: the extension enumeration inside
+`scripts/file-size.test.ts`, where a deleted-but-tracked path still carries an
+extension somebody has to rule on, so the filter would be wrong there rather
+than merely unnecessary.
 
 `PLAN.md` has carried this as a rule-of-two candidate since `file-size-cap`
 step 3, recording three copies. The count is now **five**, and two of them have
@@ -66,8 +74,9 @@ once rather than three times.
 ### New Capabilities
 
 - `tracked-file-sweep`: how a check obtains the repository's files — one shared
-  listing taken at the root, tracked entries only, regular files only, and the
-  root resolved without trimming. Its own capability rather than a requirement
+  listing taken at the root, tracked entries only, the root resolved without
+  trimming, and the regular files among the paths offered as the view a caller
+  that opens them takes. Its own capability rather than a requirement
   inside `commit-gates`, whose Purpose is scoped to two named prohibitions, and
   because three capabilities depend on the sweep — the same reasoning
   `pre-push-parity` used to give the hook's list one home.
