@@ -26,4 +26,4 @@ its row has focus within it, not only on pointer hover.
 - **WHEN** the document is hidden and a removal control is activated
 - **THEN** focus SHALL move to the replacing pick-entry control as it does in a
   visible tab, because the restore waits for the render to commit and not for
-  an animation frame, which a hidden document never delivers
+  an animation frame, which a hidden document offers no opportunity to run

@@ -4,7 +4,7 @@
 
 The two sites, reduced to their shape:
 
-```
+```tsx
 // app.tsx focusAfterPick
 const position = positionOf(target);           // capture before
 setTimeout(() => {                             // wait for the commit
@@ -64,13 +64,26 @@ Those are the precedent for a small shared behaviour module in this tree.
 
 A criterion naming `setTimeout` would specify the implementation and could not
 fail on the mistake it exists to catch — `rAF` also "waits". What distinguishes
-them is observable: with the document hidden, a frame never comes. So the
-scenario is written as *the tab is hidden when the removal happens, and focus
-still moves*, which `rAF` fails and a macrotask passes.
+them is observable: a hidden document has no rendering opportunities, so its
+`rAF` callbacks are paused or throttled for as long as it stays hidden, while a
+macrotask is subject to neither. So the scenario is written as *the document is
+hidden when the removal happens, and focus still moves*.
 
-*Trade-off.* That is an e2e case, not a unit one — it needs a real document
-visibility state. `e2e/board.spec.ts` already drives the removal path and is
-where it goes.
+The wording is deliberately not "a frame never comes". The platform guarantees
+no rendering opportunity, not a callback that never fires, and a criterion
+resting on the stronger claim would be one a conforming browser could satisfy
+by accident.
+
+*How the document is hidden.* Not by overriding `document.hidden`, which
+changes what a page reads and not how the browser schedules. A second page
+opened in the same context and given `bringToFront()` backgrounds the first for
+real: `visibilitychange` fires and its frame callbacks stop. That is the
+mechanism the case uses, and it is why this is an e2e case rather than a unit
+one. `e2e/board.spec.ts` already drives the removal path and is where it goes.
+
+*The assertion is bounded, not instantaneous.* `toBeFocused()` retries to its
+timeout, so the case passes as soon as focus lands and fails only if it never
+does — which is what "paused or throttled" requires of it.
 
 ### The criterion joins `draft-board`, not `hero-picker`
 
@@ -89,8 +102,11 @@ on this the way it already does.
   enough that the helper is nearly all signature.** → It is, and what it buys
   is the wait and the guard being executed once instead of written three times.
   If the diff shows the helper is only a `setTimeout` wrapper with no reader
-  better off, say so in the task list and stop — an unhelpful lift is worth
-  abandoning at the point it becomes visible.
+  better off, abandoning it is the right outcome and not a failure — but it is
+  a decision, so it carries its own work: `proposal.md`'s *What Changes* and
+  this section both name the helper, and both are rewritten in the same pull
+  request that drops it. The criterion, its case and the `CLAUDE.md` rule stand
+  either way, which is what makes the escape safe to leave open.
 - **The hidden-tab case is flaky if the test hides the tab after the
   removal.** → Hide it before, assert focus after; and break-check by
   reverting the helper to `requestAnimationFrame` and watching the case fail.
