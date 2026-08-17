@@ -60,30 +60,45 @@ Those are the precedent for a small shared behaviour module in this tree.
 `src/model.ts` and `src/types.ts` are the only files forbidden from importing
 `src/app/**`, and neither is involved.
 
-### The new criterion is about the background tab, not about `setTimeout`
+### The criterion names the dependency, not the tab
 
 A criterion naming `setTimeout` would specify the implementation and could not
-fail on the mistake it exists to catch — `rAF` also "waits". What distinguishes
-them is observable: a hidden document has no rendering opportunities, so its
-`rAF` callbacks are paused or throttled for as long as it stays hidden, while a
-macrotask is subject to neither. So the scenario is written as *the document is
-hidden when the removal happens, and focus still moves*.
+fail on the mistake it exists to catch — `rAF` also "waits". A criterion naming
+a hidden tab would name the motivation but not the dependency, and would rest
+on a claim the platform does not make: browsers withhold rendering
+opportunities from a backgrounded document, but nothing guarantees a callback
+that never fires. So the scenario is written as *no animation frame callback
+runs, and focus still moves*. That is the property being bought, it holds
+whatever a browser does with a hidden tab, and it is reproducible.
 
-The wording is deliberately not "a frame never comes". The platform guarantees
-no rendering opportunity, not a callback that never fires, and a criterion
-resting on the stronger claim would be one a conforming browser could satisfy
-by accident.
+*What was measured, and why the obvious routes are not used.* Playwright
+1.62.1 with its bundled Chromium, on this machine:
 
-*How the document is hidden.* Not by overriding `document.hidden`, which
-changes what a page reads and not how the browser schedules. A second page
-opened in the same context and given `bringToFront()` backgrounds the first for
-real: `visibilitychange` fires and its frame callbacks stop. That is the
-mechanism the case uses, and it is why this is an e2e case rather than a unit
-one. `e2e/board.spec.ts` already drives the removal path and is where it goes.
+| attempt | result |
+| --- | --- |
+| second page in the same context, `bringToFront()` on it | first page stays `visibilityState: "visible"`, `rAF` still fires — headless **and** headed |
+| CDP `Emulation.setPageVisibilityOverride` | method does not exist |
+| CDP `Page.setWebLifecycleState` `frozen` | `visibilityState: "visible"`, `rAF` still fires |
+| `addInitScript` replacing `requestAnimationFrame` | callback never runs; a macrotask still runs and focus lands |
+
+So there is no reliable way to background a page from the harness, and the
+last row is the mechanism. It creates the condition the criterion names
+directly rather than hoping a browser produces it.
+
+*The stub has to be written one exact way.* `window.requestAnimationFrame = …`
+inside `addInitScript`, followed by `setContent` with no navigation, silently
+does not take — measured, and it is why the first version of this section was
+wrong. `Object.defineProperty(window, "requestAnimationFrame", { … })` plus a
+navigation does take, and the task confirms the stub is in place before relying
+on it.
+
+*Still an e2e case rather than a unit one.* There is no DOM test environment
+here — no `happy-dom`, no `jsdom`, and adding one for this is a dependency the
+change does not need. `e2e/board.spec.ts` already drives the removal path.
 
 *The assertion is bounded, not instantaneous.* `toBeFocused()` retries to its
 timeout, so the case passes as soon as focus lands and fails only if it never
-does — which is what "paused or throttled" requires of it.
+does.
 
 ### The criterion joins `draft-board`, not `hero-picker`
 

@@ -21,9 +21,9 @@ its row has focus within it, not only on pointer hover.
   the same slot's where the slot survives, the region's first otherwise —
   and SHALL NOT fall back to the document body
 
-#### Scenario: Focus survives the removal in a hidden tab
+#### Scenario: Focus survives the removal with no animation frame
 
-- **WHEN** the document is hidden and a removal control is activated
-- **THEN** focus SHALL move to the replacing pick-entry control as it does in a
-  visible tab, because the restore waits for the render to commit and not for
-  an animation frame, which a hidden document offers no opportunity to run
+- **WHEN** a removal control is activated in a document whose animation frame
+  callbacks never run
+- **THEN** focus SHALL move to the replacing pick-entry control exactly as it
+  does otherwise, so the restore depends on no rendering opportunity
