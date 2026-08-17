@@ -5,7 +5,13 @@
 import { afterAll, describe, expect, test } from "bun:test";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
-import { cleanup, emptyDir, report, source } from "./mutation-floor.fixture.ts";
+import {
+	cleanup,
+	emptyDir,
+	report,
+	scanner,
+	source,
+} from "./mutation-floor.fixture.ts";
 import { FLOOR } from "./mutation-floor.ts";
 
 afterAll(cleanup);
@@ -20,6 +26,7 @@ describe("the command line entry point", () => {
 		// report and this model rather than the repository's real ones.
 		mkdirSync(join(dir, "scripts"), { recursive: true });
 		writeFileSync(join(dir, "scripts", "mutation-floor.ts"), source);
+		writeFileSync(join(dir, "scripts", "scan.ts"), scanner);
 		for (const [path, text] of Object.entries(files)) {
 			mkdirSync(join(dir, dirname(path)), { recursive: true });
 			writeFileSync(join(dir, path), text);

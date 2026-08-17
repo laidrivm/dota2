@@ -1,7 +1,8 @@
 /**
- * Which disable comments Stryker honours, and therefore which lines the check
- * must see as exempted. This file leaves with the scanner it exercises when
- * `mutation-floor.ts` switches to `scripts/scan.ts` — `PLAN.md` owns that lift.
+ * What form a disable directive must take for the check to accept it: the
+ * grammar `DISABLE` and `ADMITTED` spell out. Which comments the check reads a
+ * directive out of at all is `mutation-floor-comments.test.ts`'s, and the
+ * scanner both rest on is `scan.test.ts`'s.
  */
 import { afterAll, describe, expect, test } from "bun:test";
 import { cleanup } from "./mutation-floor.fixture.ts";
@@ -120,40 +121,8 @@ describe("a blanket disable comment", () => {
 });
 
 // spec: mutation-floor/a-well-formed-directive-in-a-block-comment
-describe("a directive Stryker honours outside a line comment", () => {
-	test("a single-line block comment is scanned too", () => {
-		// Stryker matches every comment Babel gives it, so this silences the
-		// line's mutants exactly as a `//` directive would.
-		expect(
-			exemptions(marked("/* Stryker disable next-line all */")),
-		).not.toEqual([]);
-	});
-
-	test("one trailing a line of code is scanned too", () => {
-		expect(
-			exemptions(
-				"const a = 1; /* Stryker disable next-line all */\nconst x = 1;\n",
-			),
-		).not.toEqual([]);
-	});
-
-	test("a trailing line comment is scanned too", () => {
-		expect(
-			exemptions(
-				"const a = 1; // Stryker disable next-line all\nconst x = 1;\n",
-			),
-		).not.toEqual([]);
-	});
-
-	test("one hiding behind an innocuous comment on the same line is found", () => {
-		expect(
-			exemptions(
-				"const a = 1; /* a note */ // Stryker disable next-line all\nconst x = 1;\n",
-			),
-		).not.toEqual([]);
-	});
-
-	test("a well-formed one still fails, because the spelling is not the form", () => {
+describe("the accepted spelling", () => {
+	test("a well-formed block-comment directive still fails", () => {
 		// Stryker honours both spellings; the check accepts one, so a reader
 		// of src/model.ts never has to know there are two.
 		expect(
@@ -162,75 +131,6 @@ describe("a directive Stryker honours outside a line comment", () => {
 					"/* Stryker disable next-line ArithmeticOperator: re-derives the same total */",
 				),
 			),
-		).not.toEqual([]);
-	});
-});
-
-describe("what is not a disable comment", () => {
-	test("one inside a string literal is not one", () => {
-		expect(
-			exemptions(
-				`const s = "// Stryker disable next-line all";\nconst x = 1;\n`,
-			),
-		).toEqual([]);
-	});
-
-	test("one inside a block comment is not one", () => {
-		expect(
-			exemptions(`/*\n// Stryker disable next-line all\n*/\nconst x = 1;\n`),
-		).toEqual([]);
-	});
-
-	test("one behind an escaped quote is still inside the string", () => {
-		// The escape must not end the literal early: everything after it is
-		// string, not code, and flagging it would fail the build on innocence.
-		expect(
-			exemptions(
-				`const s = "he said \\"// Stryker disable next-line all\\"";\n`,
-			),
-		).toEqual([]);
-	});
-
-	test("a quote that opens no string does not silence the file", () => {
-		// The `'` in a regex literal closes nowhere. If it were treated as a
-		// string opener the scan would run to the end of the file and report
-		// nothing at all, which is the one failure it must never have.
-		expect(
-			exemptions(`const re = /['"]/;\n// Stryker disable next-line all\n`),
-		).not.toEqual([]);
-	});
-
-	test("an escaped newline still counts as a line", () => {
-		const [problem] = exemptions(
-			"const s = `a\\\nb`;\n// Stryker disable next-line all\nconst x = 1;\n",
-		);
-		expect(problem).toContain("src/model.ts:3");
-	});
-
-	test("one inside a multi-line template literal is not one", () => {
-		expect(
-			exemptions("const s = `a\n// Stryker disable next-line all\nb`;\n"),
-		).toEqual([]);
-	});
-
-	test("a `/*` inside a line comment opens no block", () => {
-		// If it did, every comment below would be swallowed and the scan would
-		// go quiet for the rest of the file.
-		expect(
-			exemptions("// see /* the note\n// Stryker disable next-line all\n"),
-		).not.toEqual([]);
-	});
-
-	test("a directive spanning a block comment's first line is found", () => {
-		// Stryker anchors at the comment's text, so this one it honours.
-		expect(
-			exemptions("/* Stryker disable next-line all\n   because reasons */\n"),
-		).not.toEqual([]);
-	});
-
-	test("one on a line whose block comment opened earlier is not one", () => {
-		expect(
-			exemptions(`const opener = "/*";\n// Stryker disable next-line all\n`),
 		).not.toEqual([]);
 	});
 });

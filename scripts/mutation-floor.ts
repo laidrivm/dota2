@@ -11,6 +11,7 @@
  */
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { comments } from "./scan.ts";
 
 /** Statuses meaning the tests let the mutant through. */
 const SURVIVING = ["Survived", "NoCoverage"];
@@ -155,71 +156,6 @@ export function gauge(
 // the directive's line, and `$` would refuse every multi-line one.
 const DISABLE = /^\s*Stryker disable\b(.*)/;
 
-type Comment = { text: string; line: number; block: boolean };
-
-/**
- * Every comment in `source`, with the line it opens on and which kind it is.
- *
- * A left-to-right scan rather than a line-based one, because the line-based
- * version this replaces had three separate holes of one shape: an escaped
- * quote ended a string early and made the rest of it read as code, a `/*`
- * inside a line comment opened a block that never closed, and a block comment
- * spanning lines hid a directive Stryker honours. All three are the same
- * mistake — deciding what a character means without knowing what it sits
- * inside — and a scanner that tracks that is the smallest thing that cannot
- * make it. It is not a parser and does not need to be: Stryker anchors its
- * directive to the start of a comment's text, so the text is all that matters.
- */
-function comments(source: string): Comment[] {
-	const found: Comment[] = [];
-	let line = 1;
-	let i = 0;
-	while (i < source.length) {
-		const c = source[i];
-		const next = source[i + 1];
-		if (c === "\n") {
-			line++;
-			i++;
-		} else if (c === "'" || c === '"' || c === "`") {
-			const opened = c;
-			i++;
-			while (i < source.length && source[i] !== opened) {
-				if (source[i] === "\\") {
-					if (source[i + 1] === "\n") line++;
-					i += 2;
-					continue;
-				}
-				if (source[i] === "\n") {
-					// A raw newline cannot sit inside a '' or "" literal, so a
-					// quote that opened no string — one inside a regex literal,
-					// say — stops here instead of swallowing the rest of the
-					// file and taking the scan silent with it.
-					if (opened !== "`") break;
-					line++;
-				}
-				i++;
-			}
-			if (source[i] === opened) i++;
-		} else if (c === "/" && next === "/") {
-			i += 2;
-			const start = i;
-			while (i < source.length && source[i] !== "\n") i++;
-			found.push({ text: source.slice(start, i), line, block: false });
-		} else if (c === "/" && next === "*") {
-			i += 2;
-			const start = i;
-			const at = line;
-			for (; i < source.length; i++) {
-				if (source[i] === "\n") line++;
-				else if (source[i] === "*" && source[i + 1] === "/") break;
-			}
-			found.push({ text: source.slice(start, i), line: at, block: true });
-			i += 2;
-		} else i++;
-	}
-	return found;
-}
-
 /**
  * The one accepted tail: `next-line <Mutator>[,<Mutator>…]: <reason>`. A list
  * is accepted because one line can carry two mutants equivalent for the same
@@ -240,7 +176,7 @@ const ADMITTED = /^\s+next-line\s+([A-Za-z]+(?:\s*,\s*[A-Za-z]+)*)\s*:(.*)$/;
 export function exemptions(source: string): string[] {
 	const lines = source.split("\n");
 	const problems: string[] = [];
-	for (const { text, line, block } of comments(source)) {
+	for (const { text, line, block } of comments(source, "ts")) {
 		const marker = DISABLE.exec(text);
 		if (!marker) continue;
 		const at = `${MODEL_NAME}:${line}: ${lines[line - 1]?.trim()}`;
