@@ -169,6 +169,7 @@ observability, causal claims — see [docs/verification.md](docs/verification.md
 Rules about this application's code. They age with it: when the code a rule
 describes is rewritten, the rule is a candidate for deletion.
 
+- Lift logic into one module at its second caller, never into a second copy.
 - Before inlining a single-caller helper, grep for the logic it duplicates
   elsewhere.
 - `src/model.ts` and `src/types.ts` never import from `src/app/**`, type-only
