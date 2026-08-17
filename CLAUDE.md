@@ -207,8 +207,9 @@ Rules about how work is carried out here. They do not age with the code.
 - Treat an empty result as evidence of absence only after the same query has
   returned a non-empty one — a broken query and a true absence print the same
   nothing.
-- Take a count from the authoritative list, and reconcile it against any count
-  the source states itself.
+- Take a count from the authoritative list — found by the token every member
+  must carry, never one they merely tend to share — and reconcile it against
+  any count the source states itself.
 - Re-run the older probe before overwriting a recorded measurement your new
   one contradicts.
 - Execute a pre-written decision rule only on a sample that could have
@@ -225,8 +226,8 @@ Rules about how work is carried out here. They do not age with the code.
   are written in British English by default (`behaviour`, `afterwards`);
   identifiers and third-party API names keep whatever spelling they ship with.
 - Script a string replacement only for a pattern repeating across files, assert
-  the match, and read the resulting diff — a silent no-op and a malformed
-  result both read as a successful edit.
+  the match count, and read the changed passage back — a diff stat, a token
+  count and a silent no-op all read as a successful edit.
 - Edit a file with the editing tool, never a shell heredoc, when its text
   carries a backtick or `${`.
 - Verify a test file's split by the full describe path of every test, never by
