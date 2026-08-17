@@ -14,9 +14,11 @@ relative to it, because `git ls-files` run in a subdirectory reports only what
 is under it and names it relative to it — a check run from `scripts/` would
 otherwise scope itself to `scripts/` and say nothing about doing so.
 
-The sweep SHALL read tracked files only. An ignored or untracked file is one a
-clone does not have, so it cannot be allowed to fail a clone or to satisfy a
-check that a clone would fail.
+The sweep SHALL read tracked files only. An untracked file — whether or not it
+matches an ignore rule — is one a clone does not have, so it cannot be allowed
+to fail a clone or to satisfy a check that a clone would fail. A tracked file
+matching an ignore rule is not that case: the ignore rule does not apply to it,
+a clone receives it, and the sweep returns it.
 
 The sweep SHALL return only entries the filesystem reports as regular files. A
 tracked path may be deleted from the work tree, a symlink, or a submodule
@@ -47,7 +49,8 @@ space is unusual and not a check's to corrupt.
 
 #### Scenario: A second listing is introduced
 
-- **WHEN** a tracked source file other than the sweep's own module invokes
-  `git ls-files` to enumerate the tree
-- **THEN** the change is rejected at review — the filter belongs at the call
-  site and the listing does not
+- **WHEN** a tracked source file other than the sweep's own module and its
+  tests invokes `git ls-files` or `git rev-parse --show-toplevel` to enumerate
+  the tree
+- **THEN** a check in the suite fails, naming that file — the filter belongs at
+  the call site and the listing does not

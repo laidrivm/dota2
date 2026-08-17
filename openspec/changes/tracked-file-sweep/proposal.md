@@ -33,9 +33,13 @@ once rather than three times.
 
 - A tracked-file sweep gains one home, exporting the listing and the root it
   was taken at, so a caller filters the result rather than re-deriving it.
-- The five call sites switch to it. `scripts/file-size.test.ts` holds a sixth,
-  inline inside a test that enumerates tracked extensions; it switches too or
-  is named here as deliberately left, not overlooked.
+- All six call sites switch to it, the inline one in
+  `scripts/file-size.test.ts` included. That one enumerates the extensions
+  tracked paths carry and must not drop a deleted-but-tracked path, so it takes
+  the unfiltered view rather than an exemption — needing the raw listing is
+  what the second view is for.
+- A check fails the suite when any tracked source file other than the sweep's
+  own module enumerates the tree itself, so the count cannot climb back.
 - The two cases only `no-suppressions` and `spec-coverage` have today — run
   from a subdirectory, and a tracked file absent from the work tree — are
   written once against the lifted sweep.
