@@ -14,16 +14,20 @@ first element a fallback chain finds.
 step 6, which left it where it was because the second consumer predated it.
 
 The step that is easy to get wrong is the third. `requestAnimationFrame` looks
-like the right wait and is not: it runs before the commit, and in a hidden tab
-it never runs at all, so focus is silently left on the document body. Both
-sites carry a comment saying so, and `CLAUDE.md` carries the Code rule — three
-statements of one fact, none of them executable. The next site will be a fourth
-statement or a bug.
+like the right wait and is not: it runs before the commit, and a hidden
+document has no rendering opportunities, so the callback is paused or throttled
+for as long as the tab stays hidden and focus is left on the document body
+meanwhile. A macrotask is subject to neither. Both sites carry a comment saying
+so, and `CLAUDE.md` carries the Code rule — three statements of one fact, none
+of them executable. The next site will be a fourth statement or a bug.
 
 ## What Changes
 
 - The idiom moves into one helper taking a finder: it owns the macrotask and
-  the `HTMLElement` guard, and the caller supplies the search.
+  the `HTMLElement` guard, and the caller supplies the search — unless the diff
+  shows the helper to be a bare `setTimeout` wrapper with no reader better off,
+  which `design.md` admits as an outcome and `tasks.md` makes a decision with
+  its own artefact updates. The criterion and its case land either way.
 - `focusAfterPick` and `RemoveButton` call it. Their finders stay as they are —
   the document by position with a `[data-pick]` → last `[data-remove]`
   fallback, and the captured row then region — because the strategies differ
@@ -54,11 +58,16 @@ None.
 
 - `draft-board`: the removal requirement gains a scenario for the wait, so the
   behaviour both focus criteria depend on is stated once where it can be
-  tested rather than three times in comments.
+  tested rather than three times in comments. **WHEN** a removal control is
+  activated **WHILE** the document is hidden, focus SHALL move to the
+  pick-entry control that replaces it and SHALL NOT remain on the removed
+  control or fall back to the document body.
 
 ## Impact
 
-- A helper in `src/app/`, and its test.
+- A helper in `src/app/`, and a unit test covering what its guard decides:
+  a finder returning `null`, `undefined`, a non-`HTMLElement` node, and an
+  `HTMLElement`.
 - `src/app/app.tsx` — `focusAfterPick`'s body, keeping its signature.
 - `src/app/board/pieces.tsx` — `RemoveButton`'s handler.
 - `e2e/board.spec.ts` §*removing a hero moves focus to the entry control that
