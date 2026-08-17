@@ -9,7 +9,7 @@ could not be shared.
 
 What every caller needs is identical — the repository root and the tracked
 paths under it. What differs is what each does next: five open the files and so
-want the regular ones among those paths, one rules on the paths themselves and
+want the regular ones among those paths, two rule on the paths themselves and
 must not lose a deleted-but-tracked one, and each then applies a filter of its
 own — extensions (`.css`, the test-file spelling set), prose exemptions, a
 check excluding its own two paths.
@@ -48,11 +48,23 @@ the module goes beside its siblings in `scripts/`.
 application code, it ships in no bundle, and putting it under `src/` would make
 it the only thing there that the app never runs.
 
-### The export returns both the root and the paths
+### One export, three named results
 
-`{ root, paths }` rather than paths alone. Three callers need the root again to
-build an absolute path for `readFileSync`, and re-deriving it means a second
-spawn and a second chance to disagree about the trailing newline.
+`tracked(cwd?)` returns `{ root, paths, files }`:
+
+- `root` — the repository root, `git rev-parse --show-toplevel` with only its
+  terminating newline removed. Five callers need it again to build an absolute
+  path for `readFileSync`, and re-deriving it means a second spawn and a second
+  chance to disagree about that newline.
+- `paths` — every tracked path, relative to `root`, in git's order, with the
+  empty field `-z` leaves at the end dropped. A path deleted from the work
+  tree, a symlink and a submodule gitlink are all present here.
+- `files` — the subset of `paths` that `lstatSync` reports as regular files, so
+  each of those three is absent. This is what a caller that opens what it lists
+  takes.
+
+Both lists, not one plus a flag: a boolean at a call site says nothing about
+which view it selects.
 
 ### Paths stay relative to the root
 
@@ -80,9 +92,9 @@ An exemption was the alternative and is rejected: `spec.md` requires one
 listing without qualification, and a change whose specification and task list
 disagree about whether a sixth copy may stand is how the count reached five.
 
-*Alternative considered.* A flag on one export rather than two views was
-rejected as the same thing spelled worse; a boolean parameter at a call site
-says nothing about which view it selects.
+*Alternative considered.* An exemption in the specification for the two
+path-only callers was rejected above; a flag rather than two named results is
+rejected under *One export, three named results*.
 
 ## Risks / Trade-offs
 
