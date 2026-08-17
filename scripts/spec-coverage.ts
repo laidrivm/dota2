@@ -10,6 +10,7 @@
 
 import { lstatSync, readFileSync } from "node:fs";
 import { join } from "node:path";
+import { comments } from "./scan.ts";
 import { counted, validated } from "./spec-criteria.ts";
 
 /**
@@ -24,13 +25,8 @@ const CALL = /^\s*(?:test|it|describe)(?:\.\w+)*\s*[(`]/;
 
 /**
  * A line-leading `// spec:` comment. Anything with code before it on the line
- * is not one, which is what keeps a single-line string literal out.
- *
- * ponytail: line-based, so a `// spec:` line inside a multi-line template
- * literal reads as a citation. Costs a TypeScript parser to fix, and the
- * failure is loud — a false citation either names a real criterion, wrongly
- * crediting one this file's fixtures never assert, or names none and fails the
- * check. Write fixtures with `\n` rather than as multi-line templates.
+ * is not one, which is what keeps a trailing comment out; that the `//` opens a
+ * comment at all is the scan's answer, not this pattern's.
  */
 const CITATION = /^\s*\/\/\s*spec:(.*)$/;
 
@@ -51,32 +47,26 @@ function cite(path: string, text: string) {
 	const lines = text.split("\n");
 	const found: Citation[] = [];
 	const wrong: string[] = [];
-	// Whether each line begins inside a `/* … */` block. Without it a `// spec:`
-	// line inside a commented-out block reads as a citation, and the `*/` under
-	// it reads as a separator, so the block silently credits a criterion.
-	//
-	// ponytail: superseded, and knowingly left. `CLAUDE.md` replaced the rule
-	// this implements — strip literals, then read delimiters per line — with a
-	// left-to-right scan carrying string and comment state, after the per-line
-	// form produced five holes in `scripts/mutation-floor.ts`. One is live here:
-	// an escaped quote ends the literal early, so `"he said \"/*\""` leaves a
-	// stray `/*`, `open` sticks true, and every citation below is dropped. The
-	// count then rises and the floor fails, naming a breach rather than this.
-	// The fix is to lift the scanner out of `mutation-floor.ts` — the rule of
-	// two in `PLAN.md` — not to patch the expression below.
-	let open = false;
-	const enclosed = lines.map((line) => {
-		const was = open;
-		// String literals first: `const opener = "/*"` opens no comment, and
-		// treating it as one would silently blind the scanner to every citation
-		// below it.
-		const bare = line.replace(/'[^']*'|"[^"]*"|`[^`]*`/g, "");
-		for (const token of bare.match(/\/\*|\*\//g) ?? []) open = token === "/*";
-		return was;
-	});
+	// Which lines a `//` opens a comment on, and which lines begin inside a
+	// block comment: both read off one scan, so a `// spec:` marker quoted in a
+	// string or a template — or sitting in a commented-out block — is not a
+	// citation, and a `/*` inside one of those blinds nothing below it.
+	const lineComment = new Set<number>();
+	const enclosed: boolean[] = [];
+	for (const { line, block, text: body } of comments(text, "ts")) {
+		if (!block) {
+			lineComment.add(line);
+			continue;
+		}
+		// The line the block opens on is not itself enclosed — code may precede
+		// the `/*` on it, and treating it as inside would let a statement between
+		// a citation and its call pass as a separator.
+		for (let n = line + 1; n < line + body.split("\n").length; n++)
+			enclosed[n - 1] = true;
+	}
 
 	lines.forEach((line, index) => {
-		if (enclosed[index]) return;
+		if (!lineComment.has(index + 1)) return;
 		const marker = CITATION.exec(line);
 		if (!marker) return;
 		const at = `${path}:${index + 1}`;
@@ -89,9 +79,9 @@ function cite(path: string, text: string) {
 
 		let next = index + 1;
 		for (; next < lines.length; next++) {
-			const comment = enclosed[next]
-				? null
-				: /^\s*\/\/(.*)$/.exec(lines[next] ?? "");
+			const comment = lineComment.has(next + 1)
+				? /^\s*\/\/(.*)$/.exec(lines[next] ?? "")
+				: null;
 			const more = comment ? words(comment[1] ?? "") : [];
 			if (!more.length || !more.every((id) => IDENTIFIER.test(id))) break;
 			for (const id of more) found.push({ id, path, line: next + 1 });

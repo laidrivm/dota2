@@ -139,6 +139,28 @@ describe("a citation floating in a file", () => {
 	});
 });
 
+// spec: spec-test-traceability/a-citation-below-an-escaped-quote
+describe("a citation below an escaped quote", () => {
+	test("an escaped quote does not end the string early", () => {
+		const dir = world(
+			'const s = "he said \\"/*\\"";\n// spec: capability/a-first-thing\ntest("acts", () => {});\n',
+			"A first thing",
+		);
+		expect(cited(dir)).toEqual(["capability/a-first-thing"]);
+		expect(problems(dir)).toEqual([]);
+	});
+
+	test("the same source without the escape is the control", () => {
+		// Without it the citation is already found, so the case above pins the
+		// escape rather than the `/*`.
+		const dir = world(
+			'const s = "he said /*";\n// spec: capability/a-first-thing\ntest("acts", () => {});\n',
+			"A first thing",
+		);
+		expect(cited(dir)).toEqual(["capability/a-first-thing"]);
+	});
+});
+
 describe("what is not a citation", () => {
 	test("a spec marker inside a string literal is ignored", () => {
 		const dir = world(
@@ -161,6 +183,26 @@ describe("what is not a citation", () => {
 	test("a spec marker inside a block comment is ignored", () => {
 		const dir = world(
 			'/* // spec: capability/a-first-thing */\ntest("acts", () => {});\n',
+			"A first thing",
+		);
+		expect(cited(dir)).toEqual([]);
+		expect(problems(dir)).toEqual([]);
+	});
+
+	test("a citation below a block comment that has closed counts", () => {
+		// The other half of the derivation: a block encloses the lines its text
+		// spans and no more, so the line after `*/` is code again.
+		const dir = world(
+			'/* note\ntext */\n// spec: capability/a-first-thing\ntest("acts", () => {});\n',
+			"A first thing",
+		);
+		expect(cited(dir)).toEqual(["capability/a-first-thing"]);
+		expect(problems(dir)).toEqual([]);
+	});
+
+	test("a spec marker inside a multi-line template literal is ignored", () => {
+		const dir = world(
+			'const fixture = `\n// spec: capability/a-first-thing\n`;\ntest("acts", () => {});\n',
 			"A first thing",
 		);
 		expect(cited(dir)).toEqual([]);
