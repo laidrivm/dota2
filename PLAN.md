@@ -86,14 +86,20 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
 Product work first, then the improvements to the system that builds it, then
 the changes already proposed and waiting for a `feat/` branch.
 
-- [ ] **Phase 3** — the snapshot producer: fetch from the stats API into
-      staging, build a versioned snapshot in Postgres, export the bundle. It
-      owns no infrastructure — the Postgres service, the schedule and the
-      failure alert are Task 7's. Reads and writes through `Bun.SQL`, so it
-      adds no dependency. Blockers: the user provides the API key, and
-      pick-phase granularity is unresolved — derive it, or ship `phase` as
-      zeros and defer the component to v2. Three contract corrections it must
-      carry are in *Standing constraints* below.
+- [ ] **Phase 3a — snapshot build and export** — the schema, the blending,
+      smoothing and sufficiency maths, and the export: a bundle written beside
+      the served one and renamed over it, carrying an ETag the client can
+      revalidate. It takes staging as given, so it needs no API key and can
+      start now, and the staging shape it settles is the contract 3b fills.
+      Reads and writes through `Bun.SQL`, so it adds no dependency. Owns no
+      infrastructure — the Postgres service, the schedule and the failure
+      alert are Task 7's. Three contract corrections it carries are in
+      *Standing constraints* below.
+- [ ] **Phase 3b — snapshot ingest** — the STRATZ client and its rate-limit
+      budget, the upserts into the reference tables, the icon mirroring, and
+      the nightly job that drives 3a to a published snapshot or a failed one.
+      Blocked on the user's API key. Pick-phase granularity is unresolved —
+      derive it, or ship `phase` as zeros and defer the component to v2.
 - [ ] **Task 7** — the whole deployment: Docker image, compose (`app` +
       `postgres`, bundle on a volume both mount), the snapshot job's entry in
       the VPS's existing crontab, the failure alert, and the deploy workflow.
@@ -193,6 +199,12 @@ Kept because no single file in the tree is where a reader would look for them.
   one request, so the version lives in the payload's `snapshotId` and in
   Postgres, never in the path. The URL is revalidated by ETag; the versioned
   file `data-model.md` §5 proposes, and its `latest` pointer, are not built.
+- **STRATZ, not OpenDota** — OpenDota gives hero winrates by rank bracket and
+  the hero reference with icons, but no lane position: `lane_role` exists only
+  on its parsed-match sample. `hero_position_stats` is what enemy-role
+  inference and the per-role suggestions both rest on, so a source without
+  positions cannot feed this model. Dotabuff and dota2protracker publish no
+  API; the latter's role here is the manual spot-check only.
 - **Hero icons are served from this origin** — `app-shell` forbids a
   third-party runtime request, so the job mirrors each hero's icon when it
   first appears and the bundle's `icon` field names the local copy.
