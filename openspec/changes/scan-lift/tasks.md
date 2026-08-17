@@ -121,8 +121,15 @@ acceptance criteria: `mutation-floor`'s *A directive below a regex literal* and
       The set changes by exactly the cases named in 1.7 and by 1.1's two
       additions (*A directive below a regex literal*, *A citation below an escaped quote*)
       — measured with `bun test --reporter=junit`, whose `classname` is the
-      describe path; the default reporter names passing tests nowhere. 94 paths
-      before 1.7, 86 after, and the difference is exactly the eight drops named
+      describe path; the default reporter names passing tests nowhere. Baseline
+      over `mutation-floor.test.ts`, `mutation-floor-exemptions.test.ts` and
+      `scan.test.ts`; result over `mutation-floor.test.ts`,
+      `mutation-floor-directives.test.ts`, `mutation-floor-comments.test.ts`
+      and `scan.test.ts` — the emptied file on one side and both destinations
+      on the other. `spec-coverage.test.ts` is in this task's list and is
+      deliberately in neither: 1.7 moved no case into or out of it, so
+      including it would add its 1.1 and 1.5 cases to a diff that is 1.7's.
+      94 paths before, 86 after, and the difference is exactly the eight drops named
       there plus two cases that changed describe rather than leaving: *a
       directive spanning a block comment's first line is found* moved to *a
       directive Stryker honours outside a line comment*, and *a well-formed one

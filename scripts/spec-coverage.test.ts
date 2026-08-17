@@ -133,6 +133,17 @@ describe("a citation floating in a file", () => {
 		expect(problems(dir).join("\n")).toContain("src/thing.test.ts:1");
 	});
 
+	test("a statement trailing a closed block comment fails too", () => {
+		// The block closes on its line, so the line is not inside one — what is
+		// left after `*/` is a statement, and a marker-leading test for a
+		// separator would let it through.
+		const dir = world(
+			'// spec: capability/a-first-thing\n/* note */ const x = 1;\ntest("acts", () => {});\n',
+			"A first thing",
+		);
+		expect(problems(dir).join("\n")).toContain("src/thing.test.ts:1");
+	});
+
 	test("a citation with no call after it at all fails", () => {
 		const dir = world("// spec: capability/a-first-thing\n", "A first thing");
 		expect(problems(dir).join("\n")).toContain("src/thing.test.ts:1");

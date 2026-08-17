@@ -10,7 +10,7 @@
 
 import { lstatSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { comments } from "./scan.ts";
+import { blank, comments } from "./scan.ts";
 import { counted, validated } from "./spec-criteria.ts";
 
 /**
@@ -30,9 +30,6 @@ const CALL = /^\s*(?:test|it|describe)(?:\.\w+)*\s*[(`]/;
  */
 const CITATION = /^\s*\/\/\s*spec:(.*)$/;
 
-/** Blank, or any comment line: what may sit between a citation and its call. */
-const SEPARATOR = /^\s*(?:\/\/|\/?\*|$)/;
-
 const words = (text: string) => text.trim().split(/\s+/).filter(Boolean);
 
 type Citation = { id: string; path: string; line: number };
@@ -47,23 +44,20 @@ function cite(path: string, text: string) {
 	const lines = text.split("\n");
 	const found: Citation[] = [];
 	const wrong: string[] = [];
-	// Which lines a `//` opens a comment on, and which lines begin inside a
-	// block comment: both read off one scan, so a `// spec:` marker quoted in a
+	// Which lines a `//` opens a comment on, so a `// spec:` marker quoted in a
 	// string or a template — or sitting in a commented-out block — is not a
 	// citation, and a `/*` inside one of those blinds nothing below it.
 	const lineComment = new Set<number>();
-	const enclosed: boolean[] = [];
-	for (const { line, block, text: body } of comments(text, "ts")) {
-		if (!block) {
-			lineComment.add(line);
-			continue;
-		}
-		// The line the block opens on is not itself enclosed — code may precede
-		// the `/*` on it, and treating it as inside would let a statement between
-		// a citation and its call pass as a separator.
-		for (let n = line + 1; n < line + body.split("\n").length; n++)
-			enclosed[n - 1] = true;
-	}
+	for (const { line, block } of comments(text, "ts"))
+		if (!block) lineComment.add(line);
+
+	// What may sit between a citation and the call it belongs to: a line the
+	// scan blanks entirely carries no code, whether it is empty, a comment, or
+	// a line inside one. Asking the scan rather than matching a leading marker
+	// is what catches code that trails a block comment's close on its line.
+	const codeless = blank(text, "ts")
+		.split("\n")
+		.map((line) => !line.trim());
 
 	lines.forEach((line, index) => {
 		if (!lineComment.has(index + 1)) return;
@@ -86,13 +80,7 @@ function cite(path: string, text: string) {
 			if (!more.length || !more.every((id) => IDENTIFIER.test(id))) break;
 			for (const id of more) found.push({ id, path, line: next + 1 });
 		}
-		// A line inside a block comment separates whatever its text looks like:
-		// only the first line of `/* note` starts with a comment marker.
-		while (
-			next < lines.length &&
-			(enclosed[next] || SEPARATOR.test(lines[next] ?? ""))
-		)
-			next++;
+		while (next < lines.length && codeless[next]) next++;
 		if (!CALL.test(lines[next] ?? ""))
 			wrong.push(`${at}: not directly above a test, it or describe call`);
 	});
