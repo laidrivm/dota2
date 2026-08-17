@@ -392,3 +392,62 @@ control still exit 2 — the two inputs returned **exit 0** on the parser as
 merged and **exit 2** with a `pattern` flag carried beside `cases`. The gap the
 session opened is what closed it: this finding was posted after the branch's
 last disposition pass and only re-fetching the pull request found it.
+
+## 2026-08-17 — two archives, three proposals (PRs #118–#126)
+
+Nine branches in one session, so the counts are per pull request where one
+gate carried the whole result. Every one of them was `/coderabbit`; no other
+review skill ran at all.
+
+- coderabbit (#118): PASS — 1 finding, 1 acted on
+- coderabbit (#119): PASS — 3 findings, 3 acted on
+- coderabbit (#120): PASS — 3 findings, 3 acted on
+- coderabbit (#121): PASS — 5 findings, 5 acted on
+- coderabbit (#122): PASS — 11 findings, 10 acted on, 1 rejected
+- coderabbit (#124): PASS — 13 findings, 11 acted on, 2 rejected
+- Not run: triage, zombies, warm, ponytail-review, coderabbit-local, preflight,
+  code-review, security-review, first-five, review-order, checklist
+
+**36 findings, 33 acted on, and only one of them was about code.** Everything
+after #118 was a change artefact — proposal, design, tasks, delta spec — and
+the bot's cross-artefact instruction earned its place six separate times. The
+shape recurred so reliably it is worth naming: an artefact is edited to fix a
+finding, its three siblings are not, and the next review finds the divergence
+the edit created. Findings 5, 6, 8 and 10 on #122 were four rounds of exactly
+that on one pull request.
+
+**The one code finding was a live guard bypass**, and the second of its family
+on the same parser. `cases` counted open `case` statements without knowing
+whether the scan stood in a pattern or a command list, so
+`echo "$(case x in (foo|case) true ;; esac)"; git commit -m fix` reached the
+guard as one quoted word. Measured in a throwaway repository on `main` under
+Bun 1.3.14, control `git commit -m fix` exit 2: the bypass returned **exit 0**
+before and **exit 2** after a `pattern` flag was carried beside `cases`.
+
+**Three findings were the bot correcting a claim I had not measured**, and this
+is the session's real lesson. On #124 it said `page.bringToFront()` does not
+background a page — it was right, and I had written the mechanism into
+`design.md` and `tasks.md` as fact. Measuring it took three probes and killed
+all three obvious routes (Playwright 1.62.1, its Chromium, headless and
+headed): `bringToFront()` leaves `visibilityState: "visible"` with `rAF` still
+firing, CDP `Emulation.setPageVisibilityOverride` does not exist, and
+`Page.setWebLifecycleState` `frozen` changes neither. What works is an
+`addInitScript` stub of `requestAnimationFrame` — and even that silently fails
+if written as a plain assignment before `setContent`. The acceptance criterion
+was reshaped around the condition that can be created rather than the tab state
+that cannot. `docs/verification.md` gained the rule.
+
+**Two counts I published were wrong and the bot found neither.** The
+tracked-file sweep went 3 → 5 → 7 copies across the session because I searched
+for `show-toplevel`, a token six of the seven sites happen to share and
+`readme-map.test.ts` does not; and a `.replace()` that silently matched nothing
+left the delta spec contradicting its own proposal while a diff stat and a
+`SHALL` count both reported success. Both `CLAUDE.md` rules were tightened
+rather than added to.
+
+**What no gate covered.** Nothing but coderabbit ran, so the three proposals
+have had no `/zombies` pass over their planned test lists, and the two archives
+had no `/triage`. On past evidence that is where the misses live: triage's
+mandatory grep has twice caught stale numbers in `PLAN.md` that nothing else
+read, and this session shipped three `PLAN.md` entries that were stale within
+hours of being written — caught by re-reading them at wrap-up, not by a gate.
