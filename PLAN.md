@@ -91,15 +91,21 @@ the changes already proposed and waiting for a `feat/` branch.
       the served one and renamed over it, carrying an ETag the client can
       revalidate. It takes staging as given, so it needs no API key and can
       start now, and the staging shape it settles is the contract 3b fills.
-      Reads and writes through `Bun.SQL`, so it adds no dependency. Owns no
-      infrastructure — the Postgres service, the schedule and the failure
-      alert are Task 7's. Three contract corrections it carries are in
-      *Standing constraints* below.
+      Reads and writes through `Bun.SQL`, so it adds no dependency, and
+      brings the database it is developed and tested against. Owns no
+      *deployed* infrastructure — the production Postgres service, the
+      schedule and the failure alert are Task 7's, and none of them gates it.
+      Three contract corrections it carries are in *Standing constraints*
+      below.
 - [ ] **Phase 3b — snapshot ingest** — the STRATZ client and its rate-limit
       budget, the upserts into the reference tables, the icon mirroring, and
       the nightly job that drives 3a to a published snapshot or a failed one.
       Blocked on the user's API key. Pick-phase granularity is unresolved —
-      derive it, or ship `phase` as zeros and defer the component to v2.
+      derive it, or zero `phase` for every hero and defer the component to
+      v2. Zeroing only some is what must not ship: `src/model.ts` weighs the
+      delta without asking whether it was measured, so a uniform zero moves
+      no candidate's rank while a partial one ranks the measured above the
+      missing.
 - [ ] **Task 7** — the whole deployment: Docker image, compose (`app` +
       `postgres`, bundle on a volume both mount), the snapshot job's entry in
       the VPS's existing crontab, the failure alert, and the deploy workflow.
