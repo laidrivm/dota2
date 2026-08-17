@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { blank } from "./scan.ts";
+import { blank, comments } from "./scan.ts";
 
 /** `MARK` stands in for whatever a caller is looking for: it survives the scan
  * when it sits in code, and goes when it sits in something the language quotes
@@ -38,6 +38,116 @@ describe("scanning TypeScript", () => {
 		expect(blank(source, "ts").indexOf("const b")).toBe(
 			source.indexOf("const b"),
 		);
+	});
+});
+
+/**
+ * What the walk collects, as against what survives it. These are the shapes
+ * `blank`'s cases cannot reach: which comment a scan met, on which line, and of
+ * which kind — all three erased alike in the blanked form.
+ */
+describe("the comments a scan met", () => {
+	test("a block comment reports the line it opens on", () => {
+		expect(comments("const a = 1;\n/* one\ntwo */\n", "ts")).toEqual([
+			{ text: " one\ntwo ", line: 2, block: true },
+		]);
+	});
+
+	test("a `//` inside a block comment opens no line comment", () => {
+		expect(comments("/*\n// inner\n*/\n", "ts")).toEqual([
+			{ text: "\n// inner\n", line: 1, block: true },
+		]);
+	});
+
+	test("a `/*` inside a line comment opens no block", () => {
+		// If it did, every comment below would be swallowed and the scan would go
+		// quiet for the rest of the file.
+		expect(comments("// see /* the note\n// after\n", "ts")).toEqual([
+			{ text: " see /* the note", line: 1, block: false },
+			{ text: " after", line: 2, block: false },
+		]);
+	});
+
+	test("a comment inside a template interpolation is one", () => {
+		// The interpolation is code, so what is commented out inside it is a
+		// comment — which is why the walk enters it rather than skipping it.
+		expect(comments(`const a = \`\${/* here */ 1}\`;\n`, "ts")).toEqual([
+			{ text: " here ", line: 1, block: true },
+		]);
+	});
+
+	test("a comment marker in template text is text", () => {
+		expect(comments("const a = `// not one`;\n", "ts")).toEqual([]);
+	});
+
+	test("a comment marker inside a string is not one", () => {
+		expect(comments('const s = "// not one";\n', "ts")).toEqual([]);
+	});
+
+	test("an escaped quote does not end its string early", () => {
+		expect(comments('const s = "he said \\"/*\\"";\n// after\n', "ts")).toEqual(
+			[{ text: " after", line: 2, block: false }],
+		);
+	});
+
+	test("a plain comment opener in a string opens no block either", () => {
+		// The control for the case above: without the escape both scanners agree.
+		expect(comments('const opener = "/*";\n// after\n', "ts")).toEqual([
+			{ text: " after", line: 2, block: false },
+		]);
+	});
+
+	test("a quote inside a regex literal opens no string", () => {
+		// It closes nowhere. Were it a string opener the scan would run to the end
+		// of the file and report nothing, the one failure it must never have.
+		expect(comments("const re = /['\"]/;\n// after\n", "ts")).toEqual([
+			{ text: " after", line: 2, block: false },
+		]);
+	});
+
+	test("a `/*` inside a regex literal opens no block", () => {
+		expect(comments("const re = /[/*]/;\n// after\n", "ts")).toEqual([
+			{ text: " after", line: 2, block: false },
+		]);
+	});
+
+	test("an escaped backtick does not close its template", () => {
+		expect(comments("const a = `x\\`y`;\n// after\n", "ts")).toEqual([
+			{ text: " after", line: 2, block: false },
+		]);
+	});
+
+	test("an escaped newline inside a template still ends a line", () => {
+		expect(comments("const s = `a\\\nb`;\n// after\n", "ts")).toEqual([
+			{ text: " after", line: 3, block: false },
+		]);
+	});
+
+	test("an unterminated template swallows what follows", () => {
+		// Deliberate, and the same choice `blank` makes: the source is a syntax
+		// error, and guessing where the author meant it to close would report a
+		// comment on evidence the scan does not have.
+		expect(comments("const a = `x\n// not one\n", "ts")).toEqual([]);
+	});
+
+	test("a CRLF pair ends one line", () => {
+		// The `\r` stays in the text: a line comment runs to the newline, and both
+		// callers' grammars treat it as the whitespace it is.
+		expect(comments("const a = 1;\r\n// after\r\n", "ts")).toEqual([
+			{ text: " after\r", line: 2, block: false },
+		]);
+	});
+
+	test("CSS has no line comment, so a `//` in a url is not one", () => {
+		expect(comments(".a { background: url(//cdn/x.png); }\n", "css")).toEqual(
+			[],
+		);
+	});
+
+	test("CSS still has block comments", () => {
+		expect(comments("/* note */\n.a {}\n", "css")).toEqual([
+			{ text: " note ", line: 1, block: true },
+		]);
 	});
 });
 

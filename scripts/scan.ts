@@ -1,11 +1,12 @@
 /**
- * Blanks out everything in a source file that is not code, so a pattern found
- * in the result is one the language actually evaluates.
+ * One left-to-right scan of a source file, offered in the two views its callers
+ * need: `blank`, which erases everything the language does not evaluate, and
+ * `comments`, which hands back what it erased where the erasure was a comment.
  *
- * Its own module rather than a helper inside its caller, so `mutation-floor.ts`
- * has something to switch to: it carries a scanner of the same shape, and
- * `PLAN.md` records both the hole left in it and that this family of bugs
- * produced five of them in one session.
+ * Its own module, and one walk parameterised by what it collects rather than
+ * two kept in step by review: deciding what a character means without knowing
+ * what it sits inside is a single mistake, and every caller reading source here
+ * routes through the one place that cannot make it.
  */
 
 /**
@@ -43,27 +44,29 @@ const SYNTAX = {
 	ts: { lineComments: true, regex: true, templates: true },
 } as const;
 
+/** A comment as the walk met it: text without its delimiters, and where. */
+type Found = { text: string; start: number; block: boolean };
+
 /**
- * `source` with its comments, strings and — where the language has them —
- * template text and regex literals replaced by spaces, so what is left at a
- * given offset is code and nothing else. Lengths and newlines are preserved,
- * so a token found in the result can be read back out of the original at the
- * same place.
+ * The scan itself: `source` with its comments, strings and — where the language
+ * has them — template text and regex literals replaced by spaces, plus every
+ * comment it passed through. Lengths and newlines are preserved, so a token
+ * found in the blanked form can be read back out of the original at the same
+ * place.
  *
- * A left-to-right scan carrying state, because deciding what a character means
- * without knowing what it sits inside is one mistake, and the shapes it takes
- * — an escaped quote ending a string early, a `/*` inside a line comment, a
- * quote inside a regex literal swallowing the rest of the file — are one bug.
  * A template literal is two things at once, so its text is blanked and its
- * `${…}` is not: the expression is code, and a read inside one is a read.
+ * `${…}` is not: the expression is code, and a read inside one is a read — and
+ * a comment inside one is a comment, which is why the interpolation is walked
+ * rather than skipped.
  *
  * Not a parser: the only question asked of each character is what encloses it.
  */
-export function blank(source: string, language: keyof typeof SYNTAX): string {
+function walk(source: string, language: keyof typeof SYNTAX) {
 	const { lineComments, regex, templates } = SYNTAX[language];
 	// Indexed by UTF-16 unit, as `source[i]` is, so an astral character does not
 	// shift every offset after it.
 	const out = source.split("");
+	const found: Found[] = [];
 	const erase = (from: number, to: number) => {
 		for (let k = from; k < to && k < out.length; k++) {
 			if (out[k] !== "\n") out[k] = " ";
@@ -147,12 +150,18 @@ export function blank(source: string, language: keyof typeof SYNTAX): string {
 		} else if (lineComments && c === "/" && next === "/") {
 			const start = i;
 			while (i < source.length && source[i] !== "\n") i++;
+			// Read out of `source` rather than `out`, which `erase` is about to
+			// blank: the text is what the caller came for.
+			found.push({ text: source.slice(start + 2, i), start, block: false });
 			erase(start, i);
 		} else if (c === "/" && next === "*") {
 			const start = i;
 			i += 2;
 			while (i < source.length && !(source[i] === "*" && source[i + 1] === "/"))
 				i++;
+			// `i` stands on the `*` of the closing pair, or past the end when the
+			// comment never closed — either way the text stops short of `*/`.
+			found.push({ text: source.slice(start + 2, i), start, block: true });
 			i += 2;
 			erase(start, i);
 		} else if (
@@ -182,14 +191,46 @@ export function blank(source: string, language: keyof typeof SYNTAX): string {
 			erase(start, i);
 			previous = "/";
 		} else if (/[A-Za-z_$]/.test(c)) {
-			const found = word(i);
-			previous = found;
-			i += found.length;
+			const token = word(i);
+			previous = token;
+			i += token.length;
 		} else {
 			if (c.trim() !== "") previous = c;
 			i++;
 		}
 	}
 
-	return out.join("");
+	return { blanked: out.join(""), found };
+}
+
+/**
+ * `source` with everything the language does not evaluate replaced by spaces,
+ * so what is left at a given offset is code and nothing else.
+ */
+export function blank(source: string, language: keyof typeof SYNTAX): string {
+	return walk(source, language).blanked;
+}
+
+/** A comment, its text without its delimiters, and the line it opens on. */
+export type Comment = { text: string; line: number; block: boolean };
+
+/**
+ * Every comment in `source`, in the order the scan met them.
+ *
+ * `line` is counted from the offsets the walk recorded rather than tracked
+ * inside it, so the arithmetic cannot drift out of step with a branch that
+ * jumps the cursor — an escaped newline inside a template, say. The walk
+ * reports comments in ascending order, so one cursor over the source counts
+ * every break once.
+ */
+export function comments(
+	source: string,
+	language: keyof typeof SYNTAX,
+): Comment[] {
+	let line = 1;
+	let at = 0;
+	return walk(source, language).found.map(({ text, start, block }) => {
+		for (; at < start; at++) if (source[at] === "\n") line++;
+		return { text, line, block };
+	});
 }
