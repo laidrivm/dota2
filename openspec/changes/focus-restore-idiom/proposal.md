@@ -58,10 +58,7 @@ None.
 
 - `draft-board`: the removal requirement gains a scenario for the wait, so the
   behaviour both focus criteria depend on is stated once where it can be
-  tested rather than three times in comments. **WHEN** a removal control is
-  activated **WHILE** the document is hidden, focus SHALL move to the
-  pick-entry control that replaces it and SHALL NOT remain on the removed
-  control or fall back to the document body.
+  tested rather than three times in comments.
 
 ## Impact
 
