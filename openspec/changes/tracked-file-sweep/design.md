@@ -65,12 +65,22 @@ The three script copies chose it on purpose and wrote the reason down. A
 trailing space in a repository path is unusual; corrupting it silently is worse
 than carrying it.
 
-### `scripts/file-size.test.ts`'s inline copy is decided, not skipped
+### Two views over one listing, so no caller needs an exemption
 
-It enumerates the extensions present in the tree, which is the same listing.
-It switches unless switching would make the test assert through the code it is
-meant to be independent of — in which case the task list says so in that line,
-because an unexplained sixth copy is how this one reached five.
+`scripts/file-size.test.ts`'s inline copy is the one that looked like it needed
+one. It enumerates the extensions tracked paths carry and applies no
+`lstatSync` filter, deliberately: a tracked path deleted from the work tree
+still carries an extension somebody has to rule on, and the filtered view would
+drop it. So the sweep offers both — git's paths, and the regular files among
+them — and that caller takes the first.
+
+An exemption was the alternative and is rejected: `spec.md` requires one
+listing without qualification, and a change whose specification and task list
+disagree about whether a sixth copy may stand is how the count reached five.
+
+*Alternative considered.* A flag on one export rather than two views was
+rejected as the same thing spelled worse; a boolean parameter at a call site
+says nothing about which view it selects.
 
 ## Risks / Trade-offs
 
