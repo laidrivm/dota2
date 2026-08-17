@@ -42,8 +42,10 @@ Response contract rules for every endpoint — see
   reviewer must check by hand. Never write a walkthrough, a file-by-file
   summary, or the text of an acceptance criterion — CodeRabbit generates
   those on every run.
-- Re-check a pushed branch's PR state before every commit to it — a merged
-  PR strands anything added afterwards, whichever merge style closed it.
+- Re-check a pushed branch's PR state before every commit to it, as a call
+  whose output you read before the write — a check chained into the same
+  command as the commit runs but cannot stop it. A merged PR strands anything
+  added afterwards, whichever merge style closed it.
 - Commit a session's wrap-up artefacts — the pipeline-yield ledger, a save
   point — to the branch in hand, never a branch of their own.
 - Never reply, comment or review under the user's name anywhere the `gh` deny
