@@ -147,7 +147,7 @@ acceptance criteria: `mutation-floor`'s *A directive below a regex literal* and
       because the CLI case now stands a copy of the check beside its import:
       `mutation-floor-cli.test.ts` 105 and `mutation-floor.fixture.ts` 63. The
       new file was staged before the gate ran, which reads tracked files only.
-- [ ] 1.10 Add the rule of two to `CLAUDE.md`'s Code list, in its own commit
+- [x] 1.10 Add the rule of two to `CLAUDE.md`'s Code list, in its own commit
       per the rule about a rules edit no artefact asks for. Tighten the
       neighbouring rule rather than appending a variant if it already covers
       the direction: the existing one is *Before inlining a single-caller
@@ -156,6 +156,10 @@ acceptance criteria: `mutation-floor`'s *A directive below a regex literal* and
       `CLAUDE.md` plus `PLAN.md` against ~500 lines (*context-budget/The trigger is read
       against the sum* — this change's own two criteria are closed elsewhere,
       and citing one here would be false)
+      — added as *Lift logic into one module at its second caller, never into a
+      second copy*, above the inlining rule it pairs with; that rule covers the
+      opposite direction and stands unchanged. Budget after: `CLAUDE.md` 263 +
+      `PLAN.md` 197 = 460 against ~500, under the trigger.
 - [x] 1.11 Confirm `src/app/module-classes.test.ts` is untouched by this change
       and passes — it is `blank`'s only production caller and therefore the
       control on the parameterisation in 1.2 (*A directive below a regex literal*, *A citation below an escaped quote*)
