@@ -14,12 +14,17 @@ first element a fallback chain finds.
 step 6, which left it where it was because the second consumer predated it.
 
 The step that is easy to get wrong is the third. `requestAnimationFrame` looks
-like the right wait and is not: it runs before the commit, and a hidden
-document has no rendering opportunities, so the callback is paused or throttled
-for as long as the tab stays hidden and focus is left on the document body
-meanwhile. A macrotask is subject to neither. Both sites carry a comment saying
+like the right wait and is not: it runs before the commit, and its callback is
+tied to a rendering opportunity, which browsers withhold from a backgrounded
+document — so focus can be left on the document body for as long as the tab
+stays hidden. A macrotask is tied to neither. Both sites carry a comment saying
 so, and `CLAUDE.md` carries the Code rule — three statements of one fact, none
 of them executable. The next site will be a fourth statement or a bug.
+
+The criterion below is written as *no animation frame callback runs* rather
+than *the tab is hidden*, because that is the dependency being removed and,
+unlike tab visibility, it is a condition a test can create — see `design.md`
+for what was measured.
 
 ## What Changes
 
