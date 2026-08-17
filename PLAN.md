@@ -86,13 +86,23 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
 Product work first, then the improvements to the system that builds it, then
 the changes already proposed and waiting for a `feat/` branch.
 
-- [ ] **Task 7** — Docker + VPS deploy (open decisions: registry GHCR or Docker
-      Hub, same VPS or a new one). Carries `ui-foundation` **(e2e)** 1.5, which
-      Task 4 deferred here: serving `dist/` under a plain static server is
-      nearly free once the container exists.
-- [ ] **Phase 3** — OpenSpec: STRATZ → Postgres → snapshot bundle pipeline.
-      Blockers: the user provides the API key, and pick-phase granularity in
-      STRATZ is unresolved — extract via GraphQL or defer to v2.
+- [ ] **Phase 3** — the snapshot producer: fetch from the stats API into
+      staging, build a versioned snapshot in Postgres, export the bundle. It
+      owns no infrastructure — the Postgres service, the schedule and the
+      failure alert are Task 7's. Reads and writes through `Bun.SQL`, so it
+      adds no dependency. Blockers: the user provides the API key, and
+      pick-phase granularity is unresolved — derive it, or ship `phase` as
+      zeros and defer the component to v2. Three contract corrections it must
+      carry are in *Standing constraints* below.
+- [ ] **Task 7** — the whole deployment: Docker image, compose (`app` +
+      `postgres`, bundle on a volume both mount), the snapshot job's entry in
+      the VPS's existing crontab, the failure alert, and the deploy workflow.
+      Open decisions: registry GHCR or Docker Hub, same VPS or a new one, and
+      who terminates TLS. Follows Phase 3, because a deploy sized to the static
+      bundle alone is a container, a compose file and a workflow that the
+      database and the job then reopen. Carries `ui-foundation` **(e2e)** 1.5,
+      which Task 4 deferred here: serving `dist/` under a plain static server
+      is nearly free once the container exists.
 - [ ] **Task 5** — error tracking (precondition: the product is deployed).
 - [ ] **The design project's guideline pages show superseded inks.**
       `guidelines/colors-hero-palette.html` (52 swatches) and
@@ -174,8 +184,18 @@ the changes already proposed and waiting for a `feat/` branch.
 Kept because no single file in the tree is where a reader would look for them.
 
 - **Preact** — the UI runtime, and the first runtime dependency.
-- **camelCase in every JSON payload** — `types.ts`, the fixture, the generator
-  and the bundle contract all take renamed keys on import.
+- **camelCase in every JSON payload and every identifier that can hold it** —
+  `types.ts`, the fixture, the generator and the bundle contract all take
+  renamed keys on import. Postgres is the exception `data-model.md` records
+  and the one place it cannot hold: an unquoted identifier folds to lowercase,
+  so columns stay `snake_case` and the exporter renames at that boundary.
+- **The client fetches one snapshot URL** — `snapshot-delivery` allows exactly
+  one request, so the version lives in the payload's `snapshotId` and in
+  Postgres, never in the path. The URL is revalidated by ETag; the versioned
+  file `data-model.md` §5 proposes, and its `latest` pointer, are not built.
+- **Hero icons are served from this origin** — `app-shell` forbids a
+  third-party runtime request, so the job mirrors each hero's icon when it
+  first appears and the bundle's `icon` field names the local copy.
 - **Bun's native bundler, no Vite** — `bun run build` is `bun build
   ./index.html --outdir=dist` plus the copy steps; `bun run dev` is
   `scripts/dev.ts`, which runs the same build unminified, watches it and
