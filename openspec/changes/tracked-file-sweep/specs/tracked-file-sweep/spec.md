@@ -10,6 +10,9 @@ filter to that sweep's result. No tracked source file other than
 `scripts/tracked.ts` and `scripts/tracked.test.ts` SHALL invoke
 `git rev-parse --show-toplevel` or `git ls-files` to enumerate the tree — the
 sweep's own test is exempt because fabricating a repository is what it does.
+Asking git about a named path is not enumerating the tree and is not covered:
+`git ls-files --error-unmatch <path>` and a pathspec-scoped listing both answer
+a question about paths the caller already holds.
 
 The sweep SHALL take the listing at the repository root and SHALL return paths
 relative to it, because `git ls-files` run in a subdirectory reports only what

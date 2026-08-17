@@ -12,16 +12,22 @@ a clone does not have.
 A check that then *opens* what it listed adds a fourth step, keeping only
 entries `lstatSync` reports as regular files, because a tracked path may be a
 deleted file, a symlink or a submodule gitlink that reads as a directory. Five
-of the six sites do that — `scripts/spec-coverage.ts` among them, filtering in
-`check()` rather than in the listing beside it. The sixth rules on paths
-without opening them: the extension enumeration inside
-`scripts/file-size.test.ts`, where a deleted-but-tracked path still carries an
-extension somebody has to rule on, so the filter would be wrong there rather
-than merely unnecessary.
+of the seven sites do that — `scripts/spec-coverage.ts` among them, filtering
+in `check()` rather than in the listing beside it. Two rule on paths without
+opening them, and for them a deleted-but-tracked path is still a path to rule
+on, so the filter would be wrong rather than merely unnecessary: the extension
+enumeration inside `scripts/file-size.test.ts`, and `readme-map.test.ts`,
+which matches the README's map rows against the listing.
+
+Enumerating the tree is what this covers, not every use of the command. Two
+tracked tests ask git about *named* paths — `git ls-files --error-unmatch` in
+`agent-permissions.test.ts` and a pathspec-scoped listing in
+`agent-permissions-allow.test.ts` — and neither derives a tree listing, so
+neither is a copy and neither may be caught by the check below.
 
 `PLAN.md` has carried this as a rule-of-two candidate since `file-size-cap`
-step 3, recording three copies. The count is now **five**, and two of them have
-already drifted:
+step 3, recording three copies. The count is now **seven**, and two of them
+have already drifted:
 
 | site | root trimmed with | subdirectory case tested | absent-file case tested |
 | --- | --- | --- | --- |
@@ -30,23 +36,28 @@ already drifted:
 | `scripts/file-size.ts` | `replace(/\n$/, "")` | yes | no |
 | `src/app/module-classes.test.ts` | `trim()` | no | no |
 | `src/app/styles/styles.test.ts` | `trim()` | no | no |
+| `scripts/file-size.test.ts` (inline) | `replace(/\n$/, "")` | no | n/a — path-only |
+| `readme-map.test.ts` | no root taken | no | n/a — path-only |
 
 The three script copies carry a comment explaining why `trim()` is wrong —
 "a repository whose path ends in a space is unusual and not this check's to
-corrupt" — and the two test copies use `trim()` anyway. That is the drift a
-sixth copy would repeat, and the reason the two missing tests are worth writing
-once rather than three times.
+corrupt" — and the two test copies use `trim()` anyway. That is the drift an
+eighth copy would repeat, and the reason the two missing tests are worth
+writing once rather than five times. `readme-map.test.ts` shows how the count
+grows unnoticed: it takes no root at all, so a search for
+`git rev-parse --show-toplevel` does not find it.
 
 ## What Changes
 
-- A tracked-file sweep gains one home, exporting the root and two views over
-  one listing — git's paths, and the regular files among them — so a caller
-  picks a view and applies its own filter rather than re-deriving either.
-- All six call sites switch to it, the inline one in
-  `scripts/file-size.test.ts` included. That one enumerates the extensions
-  tracked paths carry and must not drop a deleted-but-tracked path, so it takes
-  the unfiltered view rather than an exemption — needing the raw listing is
-  what the second view is for.
+- A tracked-file sweep gains one home: `tracked(cwd?)` returning
+  `{ root, paths, files }` — the repository root, every tracked path relative
+  to it, and the subset of those that are regular files. A caller picks a list
+  and applies its own filter rather than re-deriving either.
+- All seven call sites switch to it, the inline one in
+  `scripts/file-size.test.ts` and `readme-map.test.ts` included. Those two
+  enumerate paths and must not drop a deleted-but-tracked one, so they take the
+  unfiltered view rather than an exemption — needing the raw listing is what
+  the second view is for.
 - A check fails the suite when any tracked source file other than
   `scripts/tracked.ts` and `scripts/tracked.test.ts` enumerates the tree
   itself, so the count cannot climb back. The sweep's own test is the one
