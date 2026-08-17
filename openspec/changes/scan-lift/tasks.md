@@ -28,7 +28,8 @@ acceptance criteria: `mutation-floor`'s *A directive below a regex literal* and
       CSS file where `//` is not a comment. `blank`'s own cases have gaps that
       matter more once every scan routes through this module — a regex literal
       containing `/*`, an escaped backtick, an unterminated template, CRLF —
-      so close the ones the new export makes reachable and name the rest here (*none — infrastructure*)
+      so close the ones the new export makes reachable and name the rest here
+      (*A directive below a regex literal*, *A citation below an escaped quote*)
 - [ ] 1.4 Switch `scripts/mutation-floor.ts` to the new export and delete its
       private `comments()`. 1.1's case now passes. Run `bunx --no-install
       stryker run && bun scripts/mutation-floor.ts` and record the surviving
@@ -58,12 +59,13 @@ acceptance criteria: `mutation-floor`'s *A directive below a regex literal* and
       directive grammar to `scripts/mutation-floor.test.ts`. Drop a case only
       where `scan.test.ts` already covers it, and name each dropped case here
       beside the case that covers it — a lift shrinks the count on purpose, and
-      an unnamed drop is indistinguishable from a case lost by accident (*none — infrastructure*)
+      an unnamed drop is indistinguishable from a case lost by accident
+      (*A directive below a regex literal*, *A citation below an escaped quote*)
 - [ ] 1.8 Compare the full set of describe paths across
       `scripts/scan.test.ts`, `scripts/mutation-floor.test.ts` and
       `scripts/spec-coverage.test.ts` before and after 1.7, per `CLAUDE.md`.
       The set changes by exactly the cases named in 1.7 and by 1.1's two
-      additions (*none — infrastructure*)
+      additions (*A directive below a regex literal*, *A citation below an escaped quote*)
 - [ ] 1.9 Measure every capped file this change touched and record the numbers,
       whether or not any is over. The cap covers `.ts`, `.tsx` and `.css`, so
       `CLAUDE.md` is not in this list — the always-on budget in its own
@@ -72,14 +74,16 @@ acceptance criteria: `mutation-floor`'s *A directive below a regex literal* and
       `scripts/scan.test.ts`, `scripts/mutation-floor.ts`,
       `scripts/mutation-floor.test.ts`, `scripts/spec-coverage.ts`,
       `scripts/spec-coverage.test.ts`. `file-size-cap` step 7.5 left
-      `mutation-floor.test.ts` at 219 against 300 and asked for this (*none — infrastructure*)
+      `mutation-floor.test.ts` at 219 against 300 and asked for this (*change-slicing/No source file exceeds its per-file cap*)
 - [ ] 1.10 Add the rule of two to `CLAUDE.md`'s Code list, in its own commit
       per the rule about a rules edit no artefact asks for. Tighten the
       neighbouring rule rather than appending a variant if it already covers
       the direction: the existing one is *Before inlining a single-caller
       helper, grep for the logic it duplicates elsewhere*, which is the
       opposite direction and stays. Check the always-on budget after adding it:
-      `CLAUDE.md` plus `PLAN.md` against ~500 lines (*none — infrastructure*)
+      `CLAUDE.md` plus `PLAN.md` against ~500 lines (*context-budget/The trigger is read
+      against the sum* — this change's own two criteria are closed elsewhere,
+      and citing one here would be false)
 - [ ] 1.11 Confirm `src/app/module-classes.test.ts` is untouched by this change
       and passes — it is `blank`'s only production caller and therefore the
-      control on the parameterisation in 1.2 (*none — the control on 1.2*)
+      control on the parameterisation in 1.2 (*A directive below a regex literal*, *A citation below an escaped quote*)
