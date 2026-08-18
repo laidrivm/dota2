@@ -12,28 +12,24 @@ the deployment has to mount a volume for.
 
 ## What Changes
 
-- A Postgres schema in three groups: the hero, alias and patch reference
-  tables; the snapshot and per-snapshot statistics tables; and the staging
-  tables that hold raw per-patch aggregates. Reached through `Bun.SQL`, so
-  no dependency is added.
-- The snapshot build: patch blending with a decaying prior, empirical-Bayes
-  smoothing towards neutral, position priors, and the sufficiency thresholds
-  that decide which heroes and positions may be suggested.
-- A snapshot lifecycle — `building`, then `published` or `failed` — with the
-  validation that stands between the last two, and retention that keeps the
-  most recent snapshots plus every predecessor a blend still reads `wr_old`
-  from, and drops the rest.
-- The export: a bundle rendered from the newest published snapshot, written
-  beside the served file and renamed over it, so a half-written bundle is
-  never visible. Keys are renamed to camelCase at that boundary and the
-  stored half-matrices are expanded into the full ones the client reads.
-- `/snapshot.json` is served from the directory the export writes to, with an
-  ETag so a returning client revalidates cheaply, and falls back to the
-  committed fixture when nothing has been published — which is what
-  development, the test suite and the end-to-end suite run on.
+- A Postgres schema in three groups — reference, snapshot and staging tables —
+  reached through `Bun.SQL`, so no dependency is added.
+- The snapshot build: the arithmetic that turns raw per-patch aggregates into
+  the deltas the client reads, and the thresholds that decide which of them
+  may be suggested at all.
+- A snapshot lifecycle, with validation gating publication and retention
+  bounding what is kept.
+- The export: a published snapshot rendered into the bundle, published where
+  a reader can never catch it half-written.
+- `/snapshot.json` served from what the export publishes, falling back to the
+  committed fixture — which is what development, the test suite and the
+  end-to-end suite run on.
 - A CI workflow job running the database-backed suite against a `postgres`
   service container. Without it the only exercised path is the fixture
   fallback, and every SQL line in this change would merge unrun.
+
+The measurable form of each — constants, thresholds, states, header values —
+is in the delta specs, and stated there only.
 
 ## Non-goals
 
