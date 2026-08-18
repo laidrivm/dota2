@@ -15,10 +15,11 @@ The API is a product; its consumer is a TypeScript frontend. Contract rules
   dynamic or conditional keys.
 - camelCase everywhere in JSON — including error bodies and pagination
   metadata.
-- An ID an endpoint accepts or a consumer resolves is UUIDv7 via
-  `Bun.randomUUIDv7()` (time-sortable) — never an incremental integer, no
-  ulid/uuid packages. An ID that only ever travels inside a payload is
-  exempt, and carries that reason where it is declared.
+- An ID an endpoint accepts or a consumer resolves is a UUIDv7 — never an
+  incremental integer, no ulid/uuid packages — and the server mints its own
+  with `Bun.randomUUIDv7()` (time-sortable) rather than a package. An ID that
+  no endpoint accepts and no consumer resolves, travelling only inside a
+  payload, is exempt and carries that reason where it is declared.
 - Display-ready fields are computed server-side once (assembled URLs,
   initials) instead of in every consumer.
 - Errors follow RFC 9457 (`application/problem+json`) with two extension
