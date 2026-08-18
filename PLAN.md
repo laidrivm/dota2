@@ -171,6 +171,14 @@ the changes already proposed and waiting for a `feat/` branch.
       the same evidence, which is the confusion `.coderabbit.yaml` tells the
       bot not to make. With both, set `usage` back to `"disabled"`: a knowledge
       source that finds nothing is a widened trust boundary bought for nothing.
+- [ ] **The diff budget cannot say what it measured against.**
+      `scripts/diff-budget.sh` falls back to the literal `main` when
+      `refs/remotes/origin/HEAD` is unset, and its gate line names the total
+      and the split but never the base — so a count taken against a stale
+      local ref reads exactly like a correct one. Measured: a branch cut from
+      `origin/main` printed 511 where the true count was 455, the difference
+      being a merge the local `main` had not seen. The fix is the base in the
+      gate line, which is a criterion in `change-slicing`.
 - [ ] **The `skills-lock.json` patch `skill-provenance` drafted** is still the
       user's to apply, in the skills repository rather than here, and its `ref`
       needs the upstream commit in `microsoft/playwright-cli`. It is open
