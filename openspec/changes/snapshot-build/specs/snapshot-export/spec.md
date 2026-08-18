@@ -92,9 +92,12 @@ which a major patch's prior reaches zero.
 An exported bundle SHALL satisfy the validation the client applies to a
 fetched snapshot, so that publishing can never produce a payload the client
 rejects as malformed. Because that validation reads four fields, the export
-SHALL additionally assert that every hero entry carries every field
-`SnapshotBundle` declares — a field the client never checks still reaches the
-model, where a missing one computes as `NaN` rather than being refused.
+SHALL additionally assert the whole payload against `SnapshotBundle` at
+runtime: every key that interface declares is present, at every depth, and
+holds a value of the declared type — a number where a number is declared, a
+boolean where a boolean is. A field the client never checks still reaches the
+model, where a missing one computes as `NaN` and a string one compares as
+neither greater nor less, rather than either being refused.
 
 #### Scenario: The client's own check
 
@@ -109,6 +112,12 @@ model, where a missing one computes as `NaN` rather than being refused.
   `sufficient`
 - **THEN** the export SHALL fail rather than publish, although the client's
   own validation would have accepted the payload
+
+#### Scenario: A field of the wrong type
+
+- **IF** a rendered hero's `contest` is the string `"0.13"` rather than the
+  number `0.13`
+- **THEN** the export SHALL fail rather than publish
 
 ### Requirement: The served URL answers from the published bundle
 
