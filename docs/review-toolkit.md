@@ -63,29 +63,33 @@ Before every PR that changes code — a feature, a bugfix, a chore alike, and
 whether or not it goes through the OpenSpec stages. Completing a task group
 starts the sequence in the same turn; never ask whether to run it.
 
-1. `/zombies` with **no arguments** — diff mode reads the real code and
+1. `bun run diff-budget`, first, because over budget says the step was cut too
+   wide rather than that the code is wrong — and re-cutting it changes the
+   diff every gate below reads. It reports how many lines the reviewer must
+   read and names its own thresholds in the gate line, so a reader never looks
+   them up here. Over budget: cut the step, or put `oversize: <reason>` in the
+   pull request body — a marker with nothing after it clears nothing. A gate
+   that reports it could not measure is neither: it means the base is
+   unresolvable, and in CI it fails the check rather than passing unmeasured.
+2. `/zombies` with **no arguments** — diff mode reads the real code and
    existing tests, cross-checks the implementation against the
    proposal-stage edge-case list, and catches the edges only implementation
    decisions create. Fix what it finds.
-2. `/warm`, only when a dependency manifest changed, having walked the
+3. `/warm`, only when a dependency manifest changed, having walked the
    ponytail ladder before ever reaching for a dependency.
-3. `/ponytail-review`, applying the cuts that survive.
-4. `/triage`, over the final diff, so it maps the diff the reviewer
+4. `/ponytail-review`, applying the cuts that survive.
+5. `/triage`, over the final diff, so it maps the diff the reviewer
    will actually see.
-5. `/coderabbit-local` last, then push.
+6. `/coderabbit-local` last, then push.
 
-`bun run diff-budget` is not in that list and is not a review skill: it is a
-measurement, run by CI on every pull request and last of all by the pre-push
-hook, once every gate that can refuse the push has passed. It reports how many lines the reviewer
-must read and names its own thresholds in the gate line, so a reader never
-looks them up here. Over budget says the step was cut too wide, not that the
-code is wrong: cut the step, or put `oversize: <reason>` in the pull request
-body — a marker with nothing after it clears nothing. A gate that reports it
-could not measure is neither: it means the base is unresolvable, and in CI it
-fails the check rather than passing unmeasured.
+CI measures the budget on every pull request and the pre-push hook measures it
+last of all, once every gate that can refuse the push has passed. Neither is
+the first reading: a count that arrives with the push arrives after the step
+it would have told you to re-cut, and a branch never pushed is a branch never
+measured.
 
-A branch of documentation, rules or config runs `/triage` alone, plus a grep
-for every site restating what it changes, then one pass of
+A branch of documentation, rules or config runs step 1, then `/triage` alone,
+plus a grep for every site restating what it changes, then one pass of
 `/coderabbit-local` — one, not three.
 
 Your sequence ends there — the PR link is the deliverable. `/coderabbit`
