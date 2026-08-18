@@ -78,9 +78,18 @@ Two checks stand where a schema library would, and they answer different
 questions. The client's own validator, reached rather than reimplemented,
 answers *would the consumer reject this* — but it reads four fields, so
 passing it is a floor and not a guarantee. The export therefore also asserts
-completeness: every hero entry carries every field `SnapshotBundle` declares,
-because a missing `side` or `phase` reaches the model as `undefined` and
-leaves it computing `NaN` rather than refusing the payload.
+the payload against `SnapshotBundle` at runtime, keys and value types at every
+depth, because a missing `side` reaches the model as `undefined` and leaves it
+computing `NaN`, and a stringified `contest` compares as neither greater nor
+less. That assertion *is* the runtime schema `docs/api-design.md` asks for —
+what the document rules out is a raw DB object reaching the client, not a
+hand-written validator instead of a package.
+
+What stays inverted, deliberately, is which of the two is the source of truth.
+`SnapshotBundle` is declared in `src/types.ts`, shipped, and pinned by
+`snapshot-delivery`; deriving it from a server-side schema would make the
+client's contract a build output of the producer, which is a client change
+this proposal excludes and the layering `snapshot-delivery` exists to prevent.
 
 `matchups` and `synergies` are keyed by hero id, which reads against the same
 document's ban on dynamic keys. That rule guards a record with optional
