@@ -1,3 +1,5 @@
+# snapshot-build — delta spec
+
 ## ADDED Requirements
 
 ### Requirement: The build reads its own database and nothing else
@@ -22,7 +24,7 @@ applies and the window `stabilizing` measures are read from one clock.
 - **WHEN** the build runs twice over identical staging and reference rows
   with the same build instant
 - **THEN** the two snapshots' statistics rows SHALL be equal field by field,
-  differing only in `snapshot_id` and `created_at`
+  their `created_at` SHALL be equal, and only `snapshot_id` SHALL differ
 
 #### Scenario: The build reaches for the network
 
@@ -151,7 +153,9 @@ A snapshot SHALL be created with `status = 'building'` and SHALL reach
 least the count in the newest published snapshot, the position shares of
 every hero *that has any* sum to 1 within 1e-6, and every stored `adj` lies
 within ±25 percentage points. A snapshot that fails any check SHALL be set to
-`status = 'failed'` (data-model §7.3–7.4).
+`status = 'failed'`, and so SHALL one whose build raises before validation is
+reached: `building` is a state a snapshot passes through, never one it is left
+in (data-model §7.3–7.4).
 
 A hero the reference tables know but staging holds no picks for has no
 position rows at all, and SHALL NOT fail this check — it is a hero nobody
@@ -188,8 +192,9 @@ nothing to compare against forever.
 #### Scenario: The build throws part-way
 
 - **IF** the build raises before it reaches validation
-- **THEN** the snapshot SHALL be left at `status = 'building'` or
-  `'failed'`, and never at `'published'`
+- **THEN** the snapshot SHALL be set to `status = 'failed'` before the error
+  propagates, and the newest `published` snapshot SHALL be the one that was
+  newest before the build
 
 ### Requirement: Snapshot retention
 
