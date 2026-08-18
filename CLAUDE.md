@@ -21,47 +21,8 @@ Response contract rules for every endpoint — see
 
 ## Git & PRs
 
-- One reviewable unit = one branch = one PR. The unit is the **step**: a
-  change whose `tasks.md` holds more than one task group ships as one PR per
-  group, in the order the groups appear, on `feat/<proposal-slug>-<step>`. A
-  change whose `tasks.md` holds exactly one group is the exception and ships
-  whole on `feat/<proposal-slug>` (`fix/`, `chore/` for non-feature work).
-- A proposal ships on `spec/<proposal-slug>`; `feat/<proposal-slug>` is the
-  implementation's, and a squash-merged branch is never freed.
-- Commits: imperative subject ≤ 72 chars, body only when the diff doesn't
-  explain itself. Commit per completed task-list item, not per file.
-- Never configure a push to `main` — `remote.<name>.push`, `push.default` set
-  to `matching`, `upstream` or `tracking`, `remote.<name>.mirror` — the guard
-  reads the command's own words and cannot see a destination that comes from
-  configuration.
-- Open PRs ready for review, not as drafts — CodeRabbit's auto-review skips
-  drafts, so a draft is a PR nobody reviews.
-- Keep the PR description to what the diff can't say: a link to the
-  proposal, the criteria the step closes named by their `### Requirement:`
-  headings — or a line saying it closes none — decisions taken, anything the
-  reviewer must check by hand. Never write a walkthrough, a file-by-file
-  summary, or the text of an acceptance criterion — CodeRabbit generates
-  those on every run.
-- Re-check a pushed branch's PR state before every commit to it, as a call
-  whose output you read before the write — a check chained into the same
-  command as the commit runs but cannot stop it. A merged PR strands anything
-  added afterwards, whichever merge style closed it.
-- Commit a session's wrap-up artefacts — the pipeline-yield ledger, a save
-  point — to the branch in hand, never a branch of their own.
-- Never reply, comment or review under the user's name anywhere the `gh` deny
-  entries do not reach — a tracker, a forum, any external service: report what
-  you would have written and let them send it. Opening the pull request they
-  asked for is not that.
-- Never re-run a check whose own output already proved it passed and whose
-  inputs have not changed since — a later command's success is not that proof.
-- Never wait on a result someone else produces — CI, a review bot, a queue:
-  report where it will appear and end the turn.
-- This repo is public: before anything is staged or committed, read every new
-  file whole and `git diff HEAD` for the rest, looking for capability URLs,
-  internal identifiers and machine-local files — what the secret scan cannot
-  recognise. A diff against the index shows nothing of an untracked file and
-  nothing of an unstaged edit. Flag anything questionable instead of
-  committing it.
+Branch and commit shape, PR description, and the git mechanics that
+protect the history — see [docs/git-and-prs.md](docs/git-and-prs.md).
 
 ## Review toolkit
 
@@ -222,8 +183,6 @@ Rules about how work is carried out here. They do not age with the code.
   requirement has — the replacement is whole-requirement.
 - Never silence a linter or type-checker finding by disabling its rule in
   configuration; fix the code or ask the user to approve a suppression.
-- Never bypass a git hook with `--no-verify`, `SKIP_SIMPLE_GIT_HOOKS` or a
-  `core.hooksPath` override; run it or ask.
 - All repo artefacts — docs, plans, specs, code comments, commit messages —
   are written in British English by default (`behaviour`, `afterwards`);
   identifiers and third-party API names keep whatever spelling they ship with.
@@ -234,19 +193,7 @@ Rules about how work is carried out here. They do not age with the code.
   carries a backtick or `${`.
 - Verify a test file's split by the full describe path of every test, never by
   their count — a block absorbed into its neighbour runs exactly as many.
-- Fetch the base before branching from it or measuring against it, and run the
-  typecheck and the suite on it before the branch — a commit made through a
-  web UI never ran the pre-push hook, and a gate that names no base reports a
-  stale one exactly as it reports a fresh one.
-- Create a branch with `git switch -c <name>` or `--no-track`, never tracking
-  `origin/main`.
-- Rebase a branch whose base was amended with `git rebase --onto <new base>
-  <old base> <branch>`, never `git rebase <new base>`.
 - Split a file to the cap that will apply to it, not the one that applies today.
-- Commit the work before a probe whose undo is `git checkout <path>`,
-  `git reset --hard`, or `git stash drop`.
-- Never state another repository's mutable properties — visibility, default
-  branch, owner — anywhere in this repo; link to it instead.
 - A suite that may skip locally fails the CI job that owns it when it skips
   there — supply what it needs, and assert it ran.
 
