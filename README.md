@@ -104,10 +104,10 @@ Installed automatically by `bun install` (the `prepare` script runs
   pushes. `bun test` keeps `--pass-with-no-tests`, now vestigial (the suite
   is non-empty); removing it changes a gate, so it goes through the OpenSpec
   cycle rather than a drive-by edit.
-- `--no-verify` bypasses a hook — an emergency exit, not a workflow. CI
-  re-runs everything when a PR is opened or updated, plus the browser suite
-  and the coverage report, which the hook does not, so a bypassed hook only
-  delays the failure until then.
+- Bypassing a hook is governed by `docs/git-and-prs.md`, not here. What this
+  file adds is the consequence: CI re-runs everything when a PR is opened or
+  updated, plus the browser suite and the coverage report, which the hook does
+  not — so a bypass only delays the failure until then.
 
 ## Getting the review skills
 
