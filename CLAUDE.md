@@ -246,6 +246,8 @@ Rules about how work is carried out here. They do not age with the code.
   `git reset --hard`, or `git stash drop`.
 - Never state another repository's mutable properties — visibility, default
   branch, owner — anywhere in this repo; link to it instead.
+- A suite that may skip locally fails the CI job that owns it when it skips
+  there — supply what it needs, and assert it ran.
 
 #### Safety
 
