@@ -1,0 +1,85 @@
+# snapshot-build
+
+## Why
+
+The client fetches one snapshot URL, validates what comes back and computes
+everything from it, but nothing in the repository produces that bundle: the
+only producer is a hand-authored Python generator whose 33 heroes exist to
+exercise the model's test cases. The half of the real producer that needs no
+API key — the schema, the maths and the export — can be built now, and
+building it first settles the database shape and the published artefact that
+the deployment has to mount a volume for.
+
+## What Changes
+
+- A Postgres schema in three groups: the hero, alias and patch reference
+  tables; the snapshot and per-snapshot statistics tables; and the staging
+  tables that hold raw per-patch aggregates. Reached through `Bun.SQL`, so
+  no dependency is added.
+- The snapshot build: patch blending with a decaying prior, empirical-Bayes
+  smoothing towards neutral, position priors, and the sufficiency thresholds
+  that decide which heroes and positions may be suggested.
+- A snapshot lifecycle — `building`, then `published` or `failed` — with the
+  validation that stands between the last two, and retention that keeps the
+  most recent snapshots plus every predecessor a blend still reads `wr_old`
+  from, and drops the rest.
+- The export: a bundle rendered from the newest published snapshot, written
+  beside the served file and renamed over it, so a half-written bundle is
+  never visible. Keys are renamed to camelCase at that boundary and the
+  stored half-matrices are expanded into the full ones the client reads.
+- `/snapshot.json` is served from the directory the export writes to, with an
+  ETag so a returning client revalidates cheaply, and falls back to the
+  committed fixture when nothing has been published — which is what
+  development, the test suite and the end-to-end suite run on.
+- A CI workflow job running the database-backed suite against a `postgres`
+  service container. Without it the only exercised path is the fixture
+  fallback, and every SQL line in this change would merge unrun.
+
+## Non-goals
+
+- The STRATZ client, its rate-limit budget, and anything that fills staging
+  from a network source. Staging is taken as given here; the shape this
+  change settles is the contract the ingest change fills.
+- The schedule. No cron entry, no timer, no workflow that runs the job — the
+  deployment change owns when the job runs, and the alert when it fails. The
+  CI job above is not that: it runs the tests, never the pipeline.
+- The deployed Postgres service: no compose file, no volume, no image. The
+  database this change provisions is the ephemeral one its tests run against;
+  the one production connects to belongs to the deployment.
+- Mirroring hero icons. The `icon` field keeps whatever staging holds; the
+  ingest change is where a third-party URL becomes a local one.
+- The versioned file and `latest` pointer sketched in the data model. One URL
+  is served, because the client is specified to make exactly one request; the
+  version lives in the payload and in Postgres.
+- Deriving the pick phase. Whatever staging offers for it is carried through,
+  including zeros.
+- Retiring the fixture generator. Its heroes are hand-chosen for named model
+  and search test cases that real data would not reproduce.
+
+## Capabilities
+
+### New Capabilities
+
+- `snapshot-build`: how staging becomes a published snapshot — blending,
+  smoothing, priors, sufficiency, the lifecycle a snapshot moves through, the
+  validation that gates publication, and retention.
+- `snapshot-export`: how a published snapshot becomes the bundle at the served
+  URL — the rename that makes publication atomic, the camelCase boundary, the
+  matrices' expansion, the ETag, and the fixture the URL falls back to.
+
+### Modified Capabilities
+
+None. `snapshot-delivery` specifies the client, and the client is unchanged:
+it already revalidates a `no-cache` URL, so an ETag reaches it as a cheaper
+answer to a request it was going to make anyway.
+
+## Impact
+
+- New server-side modules for the schema, the build and the export, outside
+  `src/app/**` and importing `src/types.ts` for the bundle contract.
+- `static-routes.ts` stops naming the fixture directly and reads the export
+  directory instead, with the fixture as its fallback; `static-routes.test.ts`
+  gains the cases that distinguish the two.
+- A Postgres connection string becomes a runtime input, absent in development
+  and in both test suites, which run on the fallback.
+- No new dependency: `Bun.SQL` ships with the runtime already pinned.
