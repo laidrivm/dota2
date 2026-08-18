@@ -34,17 +34,26 @@ one whole.
 
 ### Requirement: The bundle's keys are camelCase
 
-Every key in the exported bundle SHALL be camelCase, so that the column
-names the database uses never reach the client. The check SHALL walk the
-bundle to every depth and SHALL reject any key containing an underscore at
-all — `patch_id`, `hero_ID` and `phase_1` are the same defect, and a pattern
-matching only an underscore before a lower-case letter admits two of them.
+Every key in the exported bundle SHALL be one of two kinds, checked at every
+depth. A named key SHALL match `^[a-z][A-Za-z0-9]*$` — which rejects
+`patch_id`, `patch-id` and `PatchId` alike, where a test for the underscore
+alone catches only the first. An id key — the entries of `matchups`,
+`synergies` and a hero's `positions` — SHALL be a decimal integer string. A
+key of neither kind SHALL fail the export, so an unknown key cannot ride
+along beside the declared ones.
 
 #### Scenario: Renamed at the boundary
 
 - **WHEN** a bundle is exported
 - **THEN** it SHALL carry `snapshotId`, `createdAt`, `patch.isMajor` and
-  `patch.detectedAt`, and no key at any depth SHALL contain `_`
+  `patch.detectedAt`, and every key at every depth SHALL be a camelCase name
+  or a decimal integer string
+
+#### Scenario: A key that is neither
+
+- **IF** a rendered bundle carries `patch-id`, `PatchId` or a `heroes` entry
+  with a key `SnapshotBundle` does not declare
+- **THEN** the export SHALL fail rather than publish
 
 ### Requirement: Pair statistics are expanded into full matrices
 
@@ -91,13 +100,16 @@ which a major patch's prior reaches zero.
 
 An exported bundle SHALL satisfy the validation the client applies to a
 fetched snapshot, so that publishing can never produce a payload the client
-rejects as malformed. Because that validation reads four fields, the export
-SHALL additionally assert the whole payload against `SnapshotBundle` at
-runtime: every key that interface declares is present, at every depth, and
-holds a value of the declared type — a number where a number is declared, a
-boolean where a boolean is. A field the client never checks still reaches the
-model, where a missing one computes as `NaN` and a string one compares as
-neither greater nor less, rather than either being refused.
+rejects as malformed. That validation reaches further than the four fields
+`snapshot-delivery` names — it also requires `createdAt` to be a real calendar
+date and every hero to carry a numeric `id` and a string `name` — but it stops
+at the hero's identity. The export SHALL therefore assert the whole payload
+against `SnapshotBundle` at runtime: every declared key present at every
+depth, holding a value of the declared type. What that adds over the client's
+own check is the rest of each hero — `side`, `phase`, `positions`, `contest`,
+`sufficient` — and the two matrices, none of which the client inspects, and a
+missing one of which computes as `NaN` in the model rather than being
+refused.
 
 #### Scenario: The client's own check
 
