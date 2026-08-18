@@ -3,7 +3,7 @@
 Test tasks are derived from the proposal-stage `/zombies` run and are written
 before the module they cover (docs/testing.md — TDD for edge cases). The
 bracketed numbers are that run's idea numbers, so every one of its 45 ideas
-is traceable to the group that closes it. Numbers 46 to 51 are the reviews'
+is traceable to the group that closes it. Numbers 46 to 52 are the reviews'
 own, added where a finding named a case the run had missed.
 
 Eight groups, so eight pull requests on `feat/snapshot-build-1` … `-8`, in
@@ -139,8 +139,9 @@ keeps running on the committed fixture until group 8 rewires the route.
 - [ ] 6.2 Write the acceptance tests: an exported bundle passes the validation
       `snapshot-delivery` specifies for a fetched payload [39]; a hero entry
       missing `side`, `phase`, `contest` or `sufficient` fails the export
-      although that validation would accept it [49]. (Req: snapshot-export —
-      The exported bundle is what the client accepts)
+      although that validation would accept it [49]; a `contest` rendered as
+      the string `"0.13"` fails it too [52]. (Req: snapshot-export — The
+      exported bundle is what the client accepts)
 - [ ] 6.3 Implement `stabilizing` from the snapshot's own `patch.is_major`,
       `patch.detected_at` and `created_at` — the build instant itself, so the
       window it measures and the decay a blend applied share one clock —
@@ -148,8 +149,10 @@ keeps running on the committed fixture until group 8 rewires the route.
       marks a settling major patch)
 - [ ] 6.4 Reach the client's validator from the export's test without
       duplicating it, so a second copy cannot drift from the one the client
-      runs. (Req: snapshot-export — The exported bundle is what the client
-      accepts)
+      runs, and add the runtime assertion over `SnapshotBundle`'s keys and
+      value types that the validator's four fields do not reach — by hand,
+      since a schema package would be the change's only new dependency. (Req:
+      snapshot-export — The exported bundle is what the client accepts)
 
 ## 7. Atomic publication
 
