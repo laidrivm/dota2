@@ -114,7 +114,9 @@ keeps running on the committed fixture until group 8 rewires the route.
       writes no file and exits non-zero [27]; a newer `building` snapshot is
       not the one exported [30]. (Req: snapshot-export — The bundle is
       rendered from the newest published snapshot)
-- [ ] 5.2 Write the shape tests: no key at any depth contains `_` [34];
+- [ ] 5.2 Write the shape tests: every key at every depth is a camelCase name
+      or a decimal integer string, so `patch-id` and `PatchId` fail as
+      `patch_id` does, and an undeclared key fails too [34];
       `patch.isMajor` is a JSON boolean and `createdAt` an ISO 8601 timestamp
       carrying an offset, while `patch.detectedAt` stays the bare calendar
       date the shipped contract already holds [35]. (Req: snapshot-export —

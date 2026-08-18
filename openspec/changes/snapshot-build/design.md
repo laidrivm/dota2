@@ -76,12 +76,14 @@ payload would be a runtime dependency where the repository has one.
 
 Two checks stand where a schema library would, and they answer different
 questions. The client's own validator, reached rather than reimplemented,
-answers *would the consumer reject this* — but it reads four fields, so
-passing it is a floor and not a guarantee. The export therefore also asserts
-the payload against `SnapshotBundle` at runtime, keys and value types at every
-depth, because a missing `side` reaches the model as `undefined` and leaves it
-computing `NaN`, and a stringified `contest` compares as neither greater nor
-less. That assertion *is* the runtime schema `docs/api-design.md` asks for —
+answers *would the consumer reject this*. It reaches further than
+`snapshot-delivery`'s four named fields — `isBundle` also requires `createdAt`
+to parse as a calendar date and every hero to carry a numeric `id` and a
+string `name` — but it stops at the hero's identity, so passing it is a floor
+and not a guarantee. The export therefore also asserts the payload against
+`SnapshotBundle` at runtime, keys and value types at every depth, because a
+missing `side` reaches the model as `undefined` and leaves it computing `NaN`,
+and a stringified `contest` compares as neither greater nor less. That assertion *is* the runtime schema `docs/api-design.md` asks for —
 what the document rules out is a raw DB object reaching the client, not a
 hand-written validator instead of a package.
 
