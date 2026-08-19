@@ -8,8 +8,8 @@ nothing above the Simple category for that reason.
 
 ## 1. Widen the requirement's reach
 
-- [ ] 1.1 Sync the delta into `openspec/specs/agent-rulebook/spec.md`,
-      carrying all four scenarios — the replacement is whole-requirement.
+- [x] 1.1 Sync the delta into `openspec/specs/agent-rulebook/spec.md`,
+      carrying all five scenarios — the replacement is whole-requirement.
       (Req: agent-rulebook — A mechanised prohibition leaves its prose home)
 - [ ] 1.2 Re-read `CLAUDE.md` and every doc it indexes — not only
       `docs/git-and-prs.md`, which is merely where the prose moved — against

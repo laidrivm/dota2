@@ -198,7 +198,7 @@ export function check(cwd?: string) {
 	};
 }
 
-export const FLOOR = 384; // +2 stryker.config.json criteria whose tests a ponytail-review pass cut, +1 commit-gates/the-list-has-one-home whose THEN is a review verdict, +1 mutation-floor/the-gate-is-not-picked-up-by-the-suite, confirmed by probe because a test would restate which file the gate lives in
+export const FLOOR = 386; // +2 stryker.config.json criteria whose tests a ponytail-review pass cut, +1 commit-gates/the-list-has-one-home whose THEN is a review verdict, +1 mutation-floor/the-gate-is-not-picked-up-by-the-suite, confirmed by probe because a test would restate which file the gate lives in, +2 agent-rulebook scenarios on where a prohibition's prose may stand, which nothing in the suite can cite because nothing parses prose
 
 /**
  * This file's own `FLOOR` line — the reason lives on it, so the check reads it
