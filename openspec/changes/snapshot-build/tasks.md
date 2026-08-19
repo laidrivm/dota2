@@ -51,6 +51,17 @@ keeps running on the committed fixture until group 8 rewires the route.
 - [ ] 2.4 Implement the two sufficiency thresholds as one predicate per
       scope, so neither can drift from its stated value. (Req: snapshot-build
       — Sufficiency thresholds decide what may be suggested)
+- [ ] 2.5 Write the unmeasured-component tests: staging holding no side and
+      no phase rows leaves every hero row carrying 0 for both, and the
+      snapshot publishes [58]; staging holding side rows for every hero but
+      one fails validation [59]; a component measured for every hero, one of
+      whose blended deltas is exactly 0, publishes — so the rule cannot be
+      passing by treating a measured neutral as unmeasured [60]. (Req:
+      snapshot-build — An unmeasured component is zero for every hero)
+- [ ] 2.6 Implement the per-component measured/unmeasured decision, taken
+      once for the whole snapshot from whether staging holds any row for the
+      component, and returning the zero to write for an unmeasured one. (Req:
+      snapshot-build — An unmeasured component is zero for every hero)
 
 ## 3. Schema and persistence
 
@@ -78,10 +89,12 @@ keeps running on the committed fixture until group 8 rewires the route.
       `a < b` and no mirrored row [22]. (Req: snapshot-build — Stored pair
       statistics carry their symmetry)
 - [ ] 3.6 Implement the staging read and the statistics write, taking the
-      build instant as an argument, writing it to `created_at`, and reading
-      `wr_old` from the predecessor snapshot retention holds for that purpose. (Req: snapshot-build —
-      The build reads its own database and nothing else / Stored pair
-      statistics carry their symmetry)
+      build instant as an argument, writing it to `created_at`, reading
+      `wr_old` from the predecessor snapshot retention holds for that purpose,
+      and writing 0 for a component 2.6 reports unmeasured. (Req:
+      snapshot-build — The build reads its own database and nothing else /
+      Stored pair statistics carry their symmetry / An unmeasured component is
+      zero for every hero)
 
 ## 4. Lifecycle, validation and retention
 
@@ -103,8 +116,10 @@ keeps running on the committed fixture until group 8 rewires the route.
       patch's newest published one, whose `wr_old` the prior still weighs
       [48]. (Req: snapshot-build — Snapshot retention)
 - [ ] 4.4 Implement the `building` → `published` | `failed` transitions and
-      the three validation checks between the last two. (Req: snapshot-build
-      — A snapshot is published only after it validates)
+      the three validation checks between the last two, plus the fourth that
+      fails a measured component staging holds no row for on some hero. (Req:
+      snapshot-build — A snapshot is published only after it validates / An
+      unmeasured component is zero for every hero)
 - [ ] 4.5 Implement retention as a cascade from `snapshots`, so no statistics
       row can outlive its snapshot, exempting from the count the newest
       published snapshot of any patch a blend may still read `wr_old` from.

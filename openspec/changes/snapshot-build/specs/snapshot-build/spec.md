@@ -49,7 +49,10 @@ parameters SHALL be `k0 = 1000`, `h = 1`, `t_max = 4` for a major patch and
 `k0 = 3000`, `h = 2`, `t_max = 7` for a letter patch (data-model §4.1).
 WHERE `n_new + prior(t)` is 0 the statistic SHALL be absent from the
 snapshot rather than blended, because the quotient is undefined and there
-is nothing to smooth towards neutral.
+is nothing to smooth towards neutral. Absence here is a row not written, so
+this reaches only a statistic stored as a row of its own — a position, a
+matchup, a synergy. A statistic stored as a column of a hero's row cannot be
+absent; *An unmeasured component is zero for every hero* governs those.
 
 #### Scenario: A major patch on its first day
 
@@ -86,7 +89,11 @@ After blending, the build SHALL store the delta
 500 for side and phase, and 400 for matchup and synergy (data-model §4.2).
 An `n_eff` of 0 never reaches this formula: the blending requirement above
 leaves that statistic out of the snapshot, because a stored `adj` of 0 and a
-measured neutral delta are the same number.
+measured neutral delta are the same number. That reasoning is what confines
+it to statistics stored as rows — where the two are indistinguishable, the
+row is omitted rather than stored as 0. A component stored as a column has no
+such choice, and *An unmeasured component is zero for every hero* decides it
+once for the whole snapshot instead of hero by hero.
 
 #### Scenario: Sample equal to the constant
 
@@ -97,6 +104,38 @@ measured neutral delta are the same number.
 
 - **WHEN** a statistic has `n_eff = k / 9` and `wr_blend = 60`
 - **THEN** its stored `adj` SHALL equal 1.0 — a tenth of the raw delta
+
+### Requirement: An unmeasured component is zero for every hero
+
+The build SHALL decide per component, once for the whole snapshot, whether
+staging measured it: measured where staging holds any row for it, unmeasured
+where it holds none. An unmeasured component SHALL be stored as 0 on every
+hero row the build writes, and SHALL NOT be omitted — `side` and `phase` are
+the two the source is known not to measure. Zero is the value the model
+already reads as no contribution, `draft-model` specifying that reading for
+an insufficient hero, so a component zeroed throughout moves no candidate's
+rank. Within a *measured* component, a hero staging holds no row for SHALL
+fail validation rather than take a silent 0: `src/model.ts` weighs the delta
+without asking whether it was measured, so a partial zero ranks the measured
+above the missing.
+
+#### Scenario: A component the source does not measure
+
+- **WHEN** staging holds no side rows and no phase rows at all
+- **THEN** every hero row SHALL carry 0 for both, and the snapshot SHALL
+  publish
+
+#### Scenario: A component measured for some heroes only
+
+- **IF** staging holds side rows for every hero but one
+- **THEN** the snapshot SHALL end at `status = 'failed'`
+
+#### Scenario: A measured component that happens to be neutral
+
+- **WHEN** staging measures side for every hero and one hero's blended side
+  delta is exactly 0
+- **THEN** the snapshot SHALL publish — a measured neutral is not an
+  unmeasured component
 
 ### Requirement: Position shares are a distribution over a hero's positions
 
@@ -157,7 +196,9 @@ A snapshot SHALL be created with `status = 'building'` and SHALL reach
 `status = 'published'` only after validation passes: the hero count is at
 least the count in the newest published snapshot, the position shares of
 every hero *that has any* sum to 1 within 1e-6, and every stored `adj` lies
-within ±25 percentage points. A snapshot that fails any check SHALL be set to
+within ±25 percentage points, and every measured component holds a row for
+every hero, which *An unmeasured component is zero for every hero* states and
+this requirement does not restate. A snapshot that fails any check SHALL be set to
 `status = 'failed'`, and so SHALL one whose build raises before validation is
 reached: `building` is a state a snapshot passes through, never one it is left
 in (data-model §7.3–7.4).

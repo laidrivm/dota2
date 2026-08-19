@@ -137,6 +137,13 @@ refused.
 - **THEN** the export SHALL fail rather than publish, although the client's
   own validation would have accepted the payload
 
+#### Scenario: A component rendered as zeros throughout
+
+- **WHEN** every hero's `side` and `phase` hold zeros because staging
+  measured neither
+- **THEN** the export SHALL render both and publish, the fields being present
+  with the value the model reads as no contribution
+
 #### Scenario: A field of the wrong type
 
 - **IF** a rendered hero's `contest` is the string `"0.13"` rather than the

@@ -15,8 +15,10 @@ the deployment has to mount a volume for.
 - A Postgres schema in three groups — reference, snapshot and staging tables —
   reached through `Bun.SQL`, so no dependency is added.
 - The snapshot build: the arithmetic that turns raw per-patch aggregates into
-  the deltas the client reads, and the thresholds that decide which of them
-  may be suggested at all.
+  the deltas the client reads, the thresholds that decide which of them may be
+  suggested at all, and the rule that a component the source never measured is
+  zero on every hero rather than absent — which is what keeps a bundle
+  publishable at all once the ingest fills staging.
 - A snapshot lifecycle, with validation gating publication and retention
   bounding what is kept.
 - The export: a published snapshot rendered into the bundle, published where
@@ -47,8 +49,10 @@ is in the delta specs, and stated there only.
 - The versioned file and `latest` pointer sketched in the data model. One URL
   is served, because the client is specified to make exactly one request; the
   version lives in the payload and in Postgres.
-- Deriving the pick phase. Whatever staging offers for it is carried through,
-  including zeros.
+- Deriving the pick phase or the side split. The ingest's source measures
+  neither, so both are carried through as zeros on every hero — this change
+  specifies what an unmeasured component is and refuses a partly zeroed one,
+  and derives nothing.
 - Retiring the fixture generator. Its heroes are hand-chosen for named model
   and search test cases that real data would not reproduce.
 
