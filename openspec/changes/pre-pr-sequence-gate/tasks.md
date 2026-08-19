@@ -24,7 +24,14 @@ decision module, group 3 wires it up and shortens the prose.
 - [ ] 1.2 Measure the cost the proposal records as owed: the wall time a
       `Stop` hook adds to a turn end, and the wall time the `UserPromptSubmit`
       mark adds to a prompt, both against the guard's existing 16–22 ms figure
-      so the numbers are comparable. Record them where that figure is stated.
+      so the numbers are comparable. Record them in this change's `design.md`,
+      which archives with it — not into that figure's own home, which is a
+      requirement in `openspec/specs/agent-permissions/spec.md` and is a hand
+      edit to a spec this change holds no delta for. Where the combined
+      per-turn cost contradicts what that requirement claims, say so and name
+      the delta it needs. `merged-branch-guard` task 2.3 measures the same
+      surface and carries the same constraint; whichever lands second reads
+      the first's numbers rather than taking its own afresh.
       (Req: commit-gates — A turn that commits reports its gates before it
       ends)
 - [ ] 1.3 Confirm by probe that a `Stop` hook exiting 2 prevents the turn
