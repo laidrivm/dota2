@@ -186,8 +186,9 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
 - [ ] **`pre-pr-sequence-gate`** — proposed,
       `openspec/changes/pre-pr-sequence-gate/`. A `Stop` hook refuses to end a
       turn that committed while a task group stands complete and the message
-      carries no gate line; a `UserPromptSubmit` hook records `HEAD` so that
-      "this turn committed" is answerable. Three task groups, so
+      carries neither a gate line nor `BLOCKED` with what only the user can
+      settle; a `UserPromptSubmit` hook records `HEAD` so that "this turn
+      committed" is answerable. Three task groups, so
       `feat/pre-pr-sequence-gate-1` … `-3`, in order. Group 1 is a measurement
       that can cancel the other two: if a project-level `UserPromptSubmit`
       entry replaces the ponytail plugin's rather than composing with it, the

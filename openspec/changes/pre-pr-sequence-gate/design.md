@@ -85,9 +85,19 @@ admits as a legitimate ending. So no repository state has to change for the
 turn to end, and there is no configuration in which the hook can refuse
 forever.
 
-This matters more than it would elsewhere, because the one field that would
-otherwise carry loop protection could not be found in the documentation. A
-design that cannot loop does not need to know whether that field exists.
+This matters more than it would elsewhere, because the field that would
+otherwise carry loop protection is disputed. One reading of the documentation
+reported a `stop_hook_active`; a second reading for it found nothing; the
+review bot asserts it exists. Three summaries, no source — so this design
+neither uses it nor denies it, and task 1.3 records what an actual event
+payload carries.
+
+What replaces it costs nothing extra, because the mark is already there. A
+refused turn is *continued*, not restarted, so it submits no new prompt and
+writes no new mark; refusing at most once per mark therefore bounds a
+condition the model cannot satisfy to a single turn. Structural safety says a
+loop cannot form; the once-per-mark rule says that even a mistaken condition
+costs one turn rather than a conversation.
 
 ### The hook reads the task files, not the change's status
 
@@ -109,9 +119,14 @@ guarantee the check does not have.
 ## Risks / Trade-offs
 
 - **A second hook event, and a per-turn cost** → every turn end now launches a
-  process, as every Bash call already does. The proposal records the
-  measurement as owed rather than guessed; if it is not small, the trigger
-  narrows to repositories that hold an `openspec/changes/` directory.
+  process, as every Bash call already does. The budget is **100 ms per event**,
+  for each of the two hooks: a turn end happens once per turn where the Bash
+  guard happens dozens of times, so the guard's 16–22 ms is the wrong bar, and
+  100 ms is where a delay in an interactive tool stops being invisible. Over
+  budget, the trigger narrows to repositories holding an `openspec/changes/`
+  directory, which is the cheapest condition that removes the cost from every
+  other repository the agent works in. The number is a judgement; the
+  measurement that tests it is task 1.2.
 - **The mark is written by one hook and read by another** → if
   `UserPromptSubmit` does not fire, `Stop` finds no mark. A missing mark SHALL
   be read as "unknown whether this turn committed" and, unlike the guard's

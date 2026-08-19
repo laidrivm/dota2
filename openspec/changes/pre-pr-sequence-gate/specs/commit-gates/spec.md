@@ -5,9 +5,10 @@
 ### Requirement: A turn that commits reports its gates before it ends
 
 A `Stop` hook registered in the tracked `.claude/settings.json` SHALL refuse
-to end a turn when all of the following hold: the turn produced at least one
-commit, a task group in a change outside `openspec/changes/archive/` has at
-least one box and no unticked one left, and the turn's final assistant message
+to end a turn when all of the following hold: the turn left at least one commit
+on the branch that was not there when control arrived, a task group in a change
+outside `openspec/changes/archive/` has at least one box and no unticked one
+left, and the turn's final assistant message
 carries neither a gate line nor `BLOCKED` naming what only the user can
 settle. It SHALL block by exiting **2** with the reason on stderr, which is
 the only code that prevents the turn ending, and the only channel the model
@@ -24,11 +25,22 @@ pushes before it ends is precisely the case the sequence exists to prevent, so
 treating a push as discharge would build the bypass into the gate. What
 discharges the obligation is the report, and nothing else.
 
-Whether the turn produced a commit SHALL be decided against a mark of `HEAD`
-taken when control arrived, written by a `UserPromptSubmit` hook. The mark
-SHALL live no longer than the turn that follows it: a record of what the
-sequence has already reported would be a second source of truth about work the
-repository already describes, and one that can disagree with it.
+Whether the turn left commits SHALL be decided against a mark of `HEAD` taken
+when control arrived, written by a `UserPromptSubmit` hook. A turn that commits
+and then returns `HEAD` to the mark SHALL be treated as having left none: the
+gate exists so that work reaching a branch is reported, and work withdrawn
+before the turn ends reaches nothing. The mark SHALL be keyed by the session it
+belongs to, since two sessions in one repository otherwise share one mark and
+answer each other's question. It SHALL live no longer than the turn that
+follows it: a record of what the sequence has already reported would be a
+second source of truth about work the repository already describes, and one
+that can disagree with it.
+
+The hook SHALL refuse at most once per mark. A refused turn is continued rather
+than restarted, so no new mark is written, and the second refusal a repeated
+condition would produce is suppressed by that. This bounds the cost of a
+condition the model cannot satisfy to one turn, without depending on any field
+of the hook event to detect the repetition.
 
 Where the hook cannot read what it needs — no mark, no final message, no
 repository, or a `HEAD` naming no branch — it SHALL allow the turn to end.
@@ -49,6 +61,12 @@ This requirement SHALL NOT claim that the sequence ran. The hook reads the
 final message for a gate line; a gate line written without running the gate
 passes it. What it catches is the turn that ends silently, which is the
 failure it was written for.
+
+Nor SHALL it claim to reach every turn. A turn that ends by a path which does
+not invoke this hook — an interruption, or a failure that ends the turn
+without it — is not gated, and the obligation falls back to the prose rule for
+those. Which lifecycle events fire on such a turn is a measurement this change
+takes rather than a behaviour it asserts.
 
 #### Scenario: A task group is completed and the turn ends silently
 
@@ -81,6 +99,23 @@ failure it was written for.
   ends with no gate line
 - **THEN** the hook blocks, because the push is the event the sequence was
   meant to precede rather than a discharge of it
+
+#### Scenario: A turn whose commits are withdrawn before it ends
+
+- **WHEN** a turn commits and then returns `HEAD` to where the mark left it
+- **THEN** the turn ends, because nothing it committed survives to be reported
+
+#### Scenario: A refusal is not repeated
+
+- **WHEN** a turn already refused under this requirement ends again with the
+  same mark and the condition still met
+- **THEN** the turn ends, because the hook refuses at most once per mark
+
+#### Scenario: Two sessions in one repository
+
+- **WHEN** a second session's turn ends while the first session's mark is the
+  most recently written
+- **THEN** the second session is decided against its own mark, not the first's
 
 #### Scenario: A turn that commits nothing
 
