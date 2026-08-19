@@ -14,6 +14,7 @@ nothing above the Simple category for that reason.
 - [x] 1.2 Re-read `CLAUDE.md` and every doc it indexes — not only
       `docs/git-and-prs.md`, which is merely where the prose moved — against
       the mechanisms that already exist: the command guard, the pre-commit and
-      the pre-push hook. Delete or shorten every sentence the widened
+      the pre-push hook, and the CI checks the hooks do not run — `bun audit`
+      and the Playwright job. Delete or shorten every sentence the widened
       requirement now reaches, in whichever of those files holds it. (Req:
       agent-rulebook — A mechanised prohibition leaves its prose home)
