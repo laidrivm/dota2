@@ -183,6 +183,14 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       `origin/main` printed 511 where the true count was 455, the difference
       being a merge the local `main` had not seen. The fix is the base in the
       gate line, which is a criterion in `change-slicing`.
+- [ ] **`isTimestamp` accepts a timestamp with no offset.**
+      `src/app/snapshot.ts`'s `ISO_DATE` anchors only the leading
+      `YYYY-MM-DD`, so `isTimestamp("2026-07-19T00:00:00")` and even
+      `isTimestamp("2026-07-19")` are true — measured. `docs/api-design.md`
+      now says a timestamp carries an offset, so the validator is looser than
+      the contract it guards. Tightening it changes what the client accepts,
+      which `snapshot-delivery` §*Malformed payload* pins, so it needs a delta
+      spec rather than an edit.
 - [ ] **The `skills-lock.json` patch `skill-provenance` drafted** is still the
       user's to apply, in the skills repository rather than here, and its `ref`
       needs the upstream commit in `microsoft/playwright-cli`. It is open
