@@ -83,7 +83,16 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
 
 ### Open
 
-- [x] **`rulebook-doc-reach`** — applied, awaiting `/opsx:archive`;
+- [ ] **`merged-branch-guard`** — proposed,
+      `openspec/changes/merged-branch-guard/`. The command guard gains a
+      second commit refusal: a branch whose work is already upstream, which is
+      what a merged pull request leaves behind. Two task groups, so
+      `feat/merged-branch-guard-1` and `-2`, in order — the first ships a
+      module nothing calls, so the two run in one session. Ahead of Phase 3a
+      because 3a is eight pull requests long and this is the failure that
+      stranded four commits on 2026-08-19; the proposal records what was
+      measured.
+- [x] **`rulebook-doc-reach`** — merged as PR #134, awaiting `/opsx:archive`;
       `openspec/changes/rulebook-doc-reach/`. `agent-rulebook`'s rule that a
       mechanised prohibition loses its prose now reaches the docs indexed from
       `CLAUDE.md` rather than `CLAUDE.md` alone, with `docs/context/` named as
