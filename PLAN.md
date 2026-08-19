@@ -96,19 +96,23 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       `openspec/changes/snapshot-build/`. The schema, the blending, smoothing
       and sufficiency maths, and the export of a bundle to the served URL. It
       takes staging as given, so it needs no API key and can start now, and
-      the staging shape it settles is the contract 3b fills. Eight task
-      groups, so `feat/snapshot-build-1` through `-8`, in order. Owns no
+      the staging shape it settles is the contract 3b fills — revised on
+      `spec/snapshot-build` once the probe showed that contract could not
+      publish a bundle at all. Eight task groups, so `feat/snapshot-build-1`
+      through `-8`, in order. Owns no
       *deployed* infrastructure — the production Postgres service, the
       schedule and the failure alert are Task 7's, and none of them gates it.
 - [ ] **Phase 3b — snapshot ingest** — the STRATZ client and its rate-limit
       budget, the upserts into the reference tables, the icon mirroring, and
       the nightly job that drives 3a to a published snapshot or a failed one.
-      Blocked on the user's API key. Pick-phase granularity is unresolved —
-      derive it, or zero `phase` for every hero and defer the component to
-      v2. Zeroing only some is what must not ship: `src/model.ts` weighs the
-      delta without asking whether it was measured, so a uniform zero moves
-      no candidate's rank while a partial one ranks the measured above the
-      missing.
+      No longer blocked; `docs/context/stratz-probe-2026-08.md` holds what
+      the key measured, including the quota the job fits inside. Neither pick
+      phase nor the side split is reachable from any STRATZ aggregate, so
+      both ship as zeros on every hero — `snapshot-build`'s *An unmeasured
+      component is zero for every hero* specifies that and refuses it by
+      halves. Still open: hero icons, absent from STRATZ's schema entirely;
+      whether per-patch aggregates are retrievable, staging being patch-keyed
+      where STRATZ buckets by week; and `.env.example`.
 - [ ] **Task 7** — the whole deployment: Docker image, compose (`app` +
       `postgres`, bundle on a volume both mount), the snapshot job's entry in
       the VPS's existing crontab, the failure alert, and the deploy workflow.
