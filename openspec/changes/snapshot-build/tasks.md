@@ -3,7 +3,7 @@
 Test tasks are derived from the proposal-stage `/zombies` run and are written
 before the module they cover (docs/testing.md — TDD for edge cases). The
 bracketed numbers are that run's idea numbers, so every one of its 45 ideas
-is traceable to the group that closes it. Numbers 46 to 56 are the reviews'
+is traceable to the group that closes it. Numbers 46 to 57 are the reviews'
 own, added where a finding named a case the run had missed.
 
 Eight groups, so eight pull requests on `feat/snapshot-build-1` … `-8`, in
@@ -136,10 +136,11 @@ keeps running on the committed fixture until group 8 rewires the route.
 
 ## 6. The stabilizing flag and the client's acceptance
 
-- [ ] 6.1 Write the stabilizing tests: true 3 whole days after a major
-      patch's `detected_at`, false at exactly 4 [32]; false for a letter
-      patch however recent [33]. (Req: snapshot-export — The stabilizing flag
-      marks a settling major patch)
+- [ ] 6.1 Write the stabilizing tests: true one day short of `t_max` after a
+      major patch's `detected_at`, false at exactly `t_max` [32]; false for a
+      letter patch however recent [33]; a `created_at` whose offset puts it in
+      a later local date than its UTC one counts by UTC [57]. (Req:
+      snapshot-export — The stabilizing flag marks a settling major patch)
 - [ ] 6.2 Write the acceptance tests: an exported bundle passes the validation
       `snapshot-delivery` specifies for a fetched payload [39]; a hero entry
       missing `side`, `phase`, `contest` or `sufficient` fails the export

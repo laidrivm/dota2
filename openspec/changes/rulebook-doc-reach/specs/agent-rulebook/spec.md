@@ -9,9 +9,8 @@ stating it SHALL be deleted from `CLAUDE.md` or from whichever doc indexed
 there holds it — from whichever section holds it, not only from the rules
 list. A prohibition SHALL NOT be stated in both places, because the prose then
 reads as the boundary while the mechanism is the boundary, and the two can
-drift apart. Extraction SHALL NOT narrow this: a section that moves under
-`docs/` takes the requirement with it, as `CLAUDE.md`'s growth protocol
-already says of the rule quality bar and the single-source rule.
+drift apart. Where the section holding the prose has been extracted under
+`docs/`, this requirement reaches it there.
 
 #### Scenario: A rule fully covered by a mechanism
 
