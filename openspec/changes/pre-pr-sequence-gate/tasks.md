@@ -3,9 +3,10 @@
 Test tasks come from the proposal-stage `/zombies` run and are written before
 the code they cover (docs/testing.md — TDD for edge cases). The bracketed
 numbers are that run's idea numbers, so each of its 23 ideas is traceable to
-the group that closes it. Idea 17 is absent from the list below because it was
-not a test: it named a case the requirement left undefined, and it was fixed
-in the delta spec before this file cited it.
+the group that closes it. Idea 17 is absent from the list below because it
+stopped being a case: it asked what a branch with no remote counterpart does,
+and the review that followed removed the branch's push state from the
+conditions altogether, so there is nothing left to answer.
 
 Three groups, so three pull requests on `feat/pre-pr-sequence-gate-1` … `-3`,
 in order. Group 1 is a measurement that can cancel the rest, group 2 is the
@@ -60,17 +61,20 @@ decision module, group 3 wires it up and shortens the prose.
       [21 mark half]; an unreadable mark ends the turn [18]. (Req:
       commit-gates — A turn that commits reports its gates before it ends,
       §*A turn that commits nothing*, §*The mark was never written*)
-- [ ] 2.3 Write the push-state tests: a branch with commits its counterpart
-      lacks blocks; a branch whose work has all reached the counterpart ends
-      the turn; a branch with no counterpart at all blocks. (Req:
-      commit-gates — A turn that commits reports its gates before it ends,
-      §*The work has been pushed*, §*The branch has never been pushed*)
+- [ ] 2.3 Write the test the removed push condition earned: a turn that
+      commits the last task, pushes the branch, and ends with no gate line is
+      still blocked. The condition it replaces would have passed exactly this
+      case, so the test is what stops it being re-added as an optimisation.
+      (Req: commit-gates — A turn that commits reports its gates before it
+      ends, §*The turn commits and pushes before ending*)
 - [ ] 2.4 Write the message-reading tests: a gate line ends the turn [16
       first half]; the words "gate line" in prose do not [16 second half];
-      `BLOCKED` ends the turn; an empty message blocks [3]; a payload with no
-      `last_assistant_message` ends the turn [21]. (Req: commit-gates — A turn
-      that commits reports its gates before it ends, §*The turn reports its
-      gates*, §*The turn names what only the user can settle*)
+      `BLOCKED` with what the user must settle ends the turn; a bare `BLOCKED`
+      with nothing after it blocks; an empty message blocks [3]; a payload
+      with no final assistant message ends the turn [21]. (Req: commit-gates —
+      A turn that commits reports its gates before it ends, §*The turn reports
+      its gates*, §*The turn names what only the user can settle*, §*A bare
+      marker with nothing after it*, §*The final message cannot be read*)
 - [ ] 2.5 Write `scripts/turn-gate.ts` against those tests, with both halves —
       the mark writer and the turn-end decision — in one file, since they are
       two ends of one contract and splitting them puts the mark's format in
@@ -86,7 +90,7 @@ decision module, group 3 wires it up and shortens the prose.
       the 2026-08-19 shape — last task committed, message ending in a question
       — blocks [23]. (Req: commit-gates — A turn that commits reports its
       gates before it ends, §*A task group is completed and the turn ends
-      silently*)
+      silently*, §*There is no repository, or no branch*)
 - [ ] 3.2 Register both hooks in `.claude/settings.json`, and confirm
       `agent-permissions.test.ts` still passes — it flattens
       `settings.hooks.PreToolUse` before asserting a length of one, so

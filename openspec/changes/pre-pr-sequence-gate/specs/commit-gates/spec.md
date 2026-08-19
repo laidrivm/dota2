@@ -6,19 +6,23 @@
 
 A `Stop` hook registered in the tracked `.claude/settings.json` SHALL refuse
 to end a turn when all of the following hold: the turn produced at least one
-commit, the branch's work has not reached its remote counterpart, a task group
-in a change outside `openspec/changes/archive/` has at least one box and no
-unticked one left, and the turn's final assistant message carries neither a
-gate line nor `BLOCKED`. It SHALL block by exiting **2** with the reason on
-stderr, which is the only code that prevents the turn ending, and the only
-channel the model reads — stderr from a hook exiting 0 reaches the debug log
-alone.
+commit, a task group in a change outside `openspec/changes/archive/` has at
+least one box and no unticked one left, and the turn's final assistant message
+carries neither a gate line nor `BLOCKED` naming what only the user can
+settle. It SHALL block by exiting **2** with the reason on stderr, which is
+the only code that prevents the turn ending, and the only channel the model
+reads — stderr from a hook exiting 0 reaches the debug log alone.
 
-A branch with no remote counterpart at all satisfies the second condition
-rather than exempting itself from it: nothing of it has been pushed, so the
-sequence can still run first, which is the whole of what that condition asks.
-A group with no boxes at all fails the third, because the absence of an
-unticked box is not evidence that a box was ticked.
+A group with no boxes at all SHALL NOT count as complete, because the absence
+of an unticked box is not evidence that a box was ticked. A bare `BLOCKED`
+with nothing after it SHALL NOT satisfy the message condition, on the terms
+this project already applies to an `oversize:` marker in a pull request body:
+a marker with nothing after it clears nothing.
+
+The branch's push state SHALL NOT be a condition. A turn that commits and
+pushes before it ends is precisely the case the sequence exists to prevent, so
+treating a push as discharge would build the bypass into the gate. What
+discharges the obligation is the report, and nothing else.
 
 Whether the turn produced a commit SHALL be decided against a mark of `HEAD`
 taken when control arrived, written by a `UserPromptSubmit` hook. The mark
@@ -26,11 +30,14 @@ SHALL live no longer than the turn that follows it: a record of what the
 sequence has already reported would be a second source of truth about work the
 repository already describes, and one that can disagree with it.
 
-Where the mark is absent, the hook SHALL allow the turn to end. This is the
-one place in this capability where an undecidable case does not block, and it
-is a choice rather than an oversight: a hook that refuses whenever its partner
-did not run makes a partial installation into a session that cannot end a
-turn.
+Where the hook cannot read what it needs — no mark, no final message, no
+repository, or a `HEAD` naming no branch — it SHALL allow the turn to end.
+This is the one place in this capability where an undecidable case does not
+block, and it is a choice rather than an oversight. A hook that refuses when
+its partner did not run makes a partial installation into a session that
+cannot end a turn; and refusing when the final message is unreadable would
+refuse with an instruction that cannot be followed, since the escape from the
+refusal is text in that same message.
 
 The refusal SHALL name both endings the rule already admits — running the
 sequence, or writing `BLOCKED` with what only the user can settle — because
@@ -57,8 +64,23 @@ failure it was written for.
 
 #### Scenario: The turn names what only the user can settle
 
-- **WHEN** the final message carries `BLOCKED` with what the user must decide
+- **WHEN** the final message carries `BLOCKED` followed by what the user must
+  decide
 - **THEN** the turn ends, because that is an ending the rule already admits
+
+#### Scenario: A bare marker with nothing after it
+
+- **WHEN** the final message carries `BLOCKED` and nothing naming what the
+  user must settle
+- **THEN** the hook blocks, because a marker with nothing after it clears
+  nothing
+
+#### Scenario: The turn commits and pushes before ending
+
+- **WHEN** a turn commits the last task of a group, pushes the branch, and
+  ends with no gate line
+- **THEN** the hook blocks, because the push is the event the sequence was
+  meant to precede rather than a discharge of it
 
 #### Scenario: A turn that commits nothing
 
@@ -66,25 +88,11 @@ failure it was written for.
   `HEAD` is where the mark left it
 - **THEN** the turn ends, whatever the message says
 
-#### Scenario: The branch has never been pushed
-
-- **WHEN** a turn commits the last task of a group on a branch with no
-  counterpart under `refs/remotes/origin/`
-- **THEN** the hook blocks, because nothing of the branch has been pushed and
-  the sequence can still run first
-
 #### Scenario: A group that carries no boxes
 
 - **WHEN** the only group whose text holds no `- [ ]` also holds no `- [x]`
 - **THEN** the turn ends, because the absence of an unticked box is not
   evidence that a box was ticked
-
-#### Scenario: The work has been pushed
-
-- **WHEN** a turn commits and the branch carries nothing its remote
-  counterpart lacks
-- **THEN** the turn ends, because the point past which the sequence could
-  have run first has passed
 
 #### Scenario: Every group still has work in it
 
@@ -103,3 +111,16 @@ failure it was written for.
 - **WHEN** `Stop` finds no record of `HEAD` from the start of the turn
 - **THEN** the turn ends, because a partial installation must not make the
   session unusable
+
+#### Scenario: The final message cannot be read
+
+- **WHEN** the hook event carries no final assistant message
+- **THEN** the turn ends, because the escape from a refusal is text in that
+  message, and refusing over an unreadable one cannot be acted on
+
+#### Scenario: There is no repository, or no branch
+
+- **WHEN** the turn ends outside a git repository, or on a `HEAD` that names
+  no branch
+- **THEN** the turn ends, because no commit of a task group can be in
+  question
