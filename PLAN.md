@@ -83,11 +83,6 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
 
 ### Open
 
-Product work first, then the improvements to the system that builds it, then
-the changes already proposed and waiting for a `feat/` branch — except a rule
-change that binds the work below it, which goes above that work rather than
-after it, so the work is not written twice.
-
 - [ ] **`rulebook-doc-reach`** — proposed,
       `openspec/changes/rulebook-doc-reach/`. `agent-rulebook`'s rule that a
       mechanised prohibition loses its prose names `CLAUDE.md` as the place
