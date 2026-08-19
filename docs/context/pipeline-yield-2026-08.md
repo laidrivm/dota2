@@ -451,3 +451,40 @@ had no `/triage`. On past evidence that is where the misses live: triage's
 mandatory grep has twice caught stale numbers in `PLAN.md` that nothing else
 read, and this session shipped three `PLAN.md` entries that were stale within
 hours of being written — caught by re-reading them at wrap-up, not by a gate.
+
+## 2026-08-19 — chore/session-wrapup-2026-08-19 (and the three branches it follows)
+
+- zombies: PASS — 45 ideas, 45 acted on (all allocated to task groups; the
+  reviews later added 11 more, numbered 46–56)
+- warm: not run — no manifest changed
+- ponytail-review: not run — the pre-PR path for a documentation, rules or
+  config branch is `/triage` alone plus the grep, and all four branches took it
+- triage (spec/snapshot-build): PASS — 4 groups, 3 read, 6 defects fixed
+- triage (chore/rules-and-budget-gate): PASS — 1 group, 0 defects
+- coderabbit-local (spec/snapshot-build): PASS — 12 findings, 12 dispositioned
+  (11 applied, 1 Major dismissed with user approval)
+- coderabbit-local (chore/rules-and-budget-gate): PASS — 3 findings, 3
+  dispositioned (2 applied, 1 rejected: it read PLAN.md's open item as a
+  documented contract)
+- coderabbit (#129): PASS — 3 findings, 3 dispositioned (2 applied, 1 dismissed)
+- coderabbit (#130, four reviews): PASS — 17 findings, 17 dispositioned (11
+  applied, 2 already fixed, 1 skipped, 3 dismissed)
+- coderabbit (#132): PASS — 4 findings, 4 acted on
+- Not run: preflight, security-review, code-review, first-five, review-order
+
+**Triage earned its place twice, in the same way both times.** Its mandatory
+read found two criteria contradicting other criteria in the same file — the
+`n_eff = 0` case and the `created_at` case — and both had been *introduced* by
+applying an earlier review finding. Neither coderabbit pass caught the first.
+
+**The collapsed section is where a third of the findings lived.** Of #130's 17,
+four sat in `Outside diff range comments` and reached neither the inline API
+nor the count the user saw. Reading only `Actionable comments posted` would
+have silently dropped them; two were real defects.
+
+**What no gate measured until the push.** `diff-budget` was not in the pre-PR
+sequence, so a proposal branch reached 858 lines — past the 800 hard limit —
+before anything said so. It is now step 1 of that sequence. The same session
+also found the gate itself measuring against a stale local `main`, inflating
+every reading by 56 lines; `refs/remotes/origin/HEAD` was unset, and the gate
+line names no base, so a wrong measurement and a right one print identically.

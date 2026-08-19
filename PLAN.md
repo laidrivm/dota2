@@ -84,8 +84,20 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
 ### Open
 
 Product work first, then the improvements to the system that builds it, then
-the changes already proposed and waiting for a `feat/` branch.
+the changes already proposed and waiting for a `feat/` branch — except a rule
+change that binds the work below it, which goes above that work rather than
+after it, so the work is not written twice.
 
+- [ ] **`rulebook-doc-reach`** — proposed,
+      `openspec/changes/rulebook-doc-reach/`. `agent-rulebook`'s rule that a
+      mechanised prohibition loses its prose names `CLAUDE.md` as the place
+      that prose is deleted from, and the Git & PRs section it was written to
+      reach now stands in `docs/git-and-prs.md`. One task group, so it ships
+      whole on `chore/rulebook-doc-reach`. Ahead of Phase 3a because it binds
+      every branch after it, and because its second task — reading
+      `docs/git-and-prs.md` against the command guard and the hooks — may
+      delete prose that Phase 3a's eight pull requests would otherwise be
+      reviewed against.
 - [ ] **Phase 3a — `snapshot-build`** — proposed,
       `openspec/changes/snapshot-build/`. The schema, the blending, smoothing
       and sufficiency maths, and the export of a bundle to the served URL. It
