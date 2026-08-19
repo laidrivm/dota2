@@ -18,9 +18,11 @@ on `main` runs on the same event and can decide this one too.
 - The check engages only for a branch that exists on the remote. A branch with
   no remote counterpart was never pushed, so no pull request of it can have
   merged, and the commit passes untouched — which is most local work.
-- On a branch that is on the remote, a verdict computed against a stale
-  `origin/main` is refused as undecidable rather than passed, because that is
-  the case the incident consisted of.
+- The merged verdict runs for every branch and holds however old the base ref
+  is, because a stale base can only miss a merge, never invent one. Closing
+  that one direction is a separate refusal: on a branch that is on the remote,
+  a base ref not fetched recently is refused as undecidable rather than
+  passed, because that is the case the incident consisted of.
 - `docs/git-and-prs.md`'s prose rule is shortened to what the guard cannot
   see, per *A mechanised prohibition leaves its prose home*.
 
@@ -52,9 +54,11 @@ None.
 
 ## Impact
 
-- `scripts/command-guard.ts` and its tests (`scripts/command-guard.test.ts`,
-  `scripts/command-guard.fixture.ts`) — the fixture drives the guard through
-  a real repository, which is what a branch-state check needs.
+- `scripts/command-guard.ts`, a new `scripts/branch-state.ts` holding the ref
+  reads, and their tests in a new `scripts/command-guard-branch.test.ts`.
+  `scripts/command-guard.fixture.ts` gains a remote and a fetch time — it
+  drives the guard through a real repository, which is what a branch-state
+  check needs.
 - `docs/git-and-prs.md`: the pull-request-state rule is shortened to the part
   the guard cannot reach.
 - Every commit the agent makes on a pushed branch now depends on

@@ -93,26 +93,58 @@ and its cost to the user — apply only where a merge is possible.
 This is the decision that makes refusing on stale data affordable. Without
 it, every commit in the repository would depend on a recent fetch.
 
-### A stale `origin/main` is undecidable, and undecidable blocks
+### Staleness threatens the verdict in one direction only
 
-Measurement B is the incident: the ref was 17 hours old, the verdict it
-produced was wrong, and it was wrong in the passing direction. So on a pushed
-branch the guard reads the last fetch time from
-`git reflog show origin/main --date=unix` and refuses the commit when it is
-older than `FETCH_MAX_AGE`, naming the fetch as the fix. `git config
-core.logAllRefUpdates` is `true` here and defaults to true for a non-bare
-repository; where the reflog is absent `git reflog show` exits 128, which is
-read as unknown and therefore as a refusal, on the same terms.
+A stale base ref can fail to carry a merge that has happened. It cannot
+invent one: a `-` mark means the patch is in the ref the repository holds,
+and no amount of age makes that false. So the merged verdict is sound however
+old the base is, and is computed for every branch unconditionally; freshness
+is a separate rule closing the one direction — measurement B, where the
+17-hour-old ref reported the merged branch as unmerged.
 
-`FETCH_MAX_AGE` is 30 minutes. It bounds how long a merge can go unseen, and
-its cost is one `git fetch origin main` at most twice an hour while
-committing on a pushed branch. The number is a judgement, not a measurement,
-and it carries its reason on its line so that moving it moves the reason too.
+### Freshness is `FETCH_HEAD`'s mtime, not a reflog
+
+The first draft of this design read the last fetch from
+`git reflog show origin/main --date=unix`. A reflog records *ref updates*, and
+a fetch that brings no new commit updates nothing — so on a quiet `main` the
+guard would refuse a commit, name a fetch as the remedy, watch the fetch
+succeed, and refuse again, until somebody unrelated pushed. Measured on this
+repository: across a fetch that brought nothing, the reflog stayed at 139
+entries with its newest timestamp 57 minutes old, while `.git/FETCH_HEAD`'s
+mtime advanced to the current second. `FETCH_HEAD` is rewritten by every
+successful fetch, which is the event the bound is actually about.
+
+`FETCH_MAX_AGE` is 30 minutes, measured inclusively. It bounds how long a
+merge can go unseen, and its cost is one `git fetch` at most twice an hour
+while committing on a pushed branch. The number is a judgement, not a
+measurement, and it carries its reason where it is declared so that moving it
+moves the reason too. Its value and its inclusivity are fixed by the delta
+spec rather than here, since a requirement is what a test can cite.
 
 *Alternative considered*: the mtime of `.git/refs/remotes/origin/main`. It is
 one `stat` and no subprocess, but a packed ref has no such file and the
 mtime then belongs to `packed-refs`, which every other ref update also
-touches.
+touches — and it carries the reflog's defect too, since a no-op fetch leaves
+the ref alone.
+
+### What "never pushed" can and cannot be inferred from
+
+The absence of a ref under `refs/remotes/origin/` is the cheap test for a
+branch no pull request can have merged, and it is what keeps the freshness
+rule off ordinary local work. It is also weaker than it reads, and measuring
+it is what showed by how much: in a fabricated repository, deleting the
+branch on the remote and running `git fetch --prune` removed the
+remote-tracking ref, and a push made without `-u` had left no
+`branch.<name>.merge` configuration either — so a branch that was pushed and
+pruned is indistinguishable from one that was never pushed.
+
+That erasure does not reach the merged verdict, which never consults the
+branch's own remote ref; `git cherry` still marked the pruned branch's commit
+in the same probe. What it reaches is only the freshness refusal, so the
+residual gap is one branch shape: pruned, merged, and not yet fetched. The
+spec records that gap rather than implying a guarantee the check does not
+have. Closing it would mean keeping a local record of every branch ever
+pushed, which is a second source of truth for a window this narrow.
 
 ### The git interrogation is its own module
 
