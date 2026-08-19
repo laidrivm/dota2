@@ -29,13 +29,22 @@ the same session.
       slash resolves its full remote ref [13]; a repository with no `origin`
       remote allows the commit [2]. (Req: agent-permissions — A commit on a
       merged branch is refused)
-- [ ] 1.4 Write the freshness tests: exactly at the bound, fixing whether it
-      is inclusive [6]; one second either side of it [7]; a future timestamp
-      that must not compute a negative age [8]; an absent reflog, whose
-      command exits 128, blocking [11]. (Req: agent-permissions — A commit on
-      a merged branch is refused)
-- [ ] 1.5 Write `scripts/branch-state.ts` against those tests: the three ref
-      reads, the `FETCH_MAX_AGE` bound with its reason on its line, and a
+- [ ] 1.4 Write the freshness tests: exactly 30 minutes old is accepted and
+      older is refused [6, 7]; a future timestamp must not compute a negative
+      age [8]; an unreadable fetch time blocks [11]. (Req: agent-permissions —
+      A commit on a merged branch is refused, §*The base ref is stale*,
+      §*The fetch time cannot be read*)
+- [ ] 1.5 Write the two regression tests the review's probes earned: a
+      successful fetch that brings no new commit refreshes the bound, which a
+      reflog-based reading would not — measured, the reflog stayed at 139
+      entries while `FETCH_HEAD` advanced; and a branch whose remote-tracking
+      ref was removed by a remote deletion and `git fetch --prune` is still
+      refused by the merged verdict, which does not consult that ref. (Req:
+      agent-permissions — A commit on a merged branch is refused, §*A fetch
+      that brings nothing new*, §*The remote branch was deleted and pruned*)
+- [ ] 1.6 Write `scripts/branch-state.ts` against those tests: the remote-ref
+      test, the `git cherry` read, the `FETCH_HEAD` mtime, the
+      `FETCH_MAX_AGE` bound with its reason where it is declared, and a
       result that distinguishes merged, stale and unknown so the guard can
       word each refusal differently. It runs the reads in the repository a
       caller names, not in `cwd`, because `git commit -C <dir>` commits
