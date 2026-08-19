@@ -89,9 +89,17 @@ the prior it names still weighs on the blend.
 
 #### Scenario: The window has passed
 
-- **WHEN** the snapshot's patch is major and `created_at` is 4 whole days
-  after its `detected_at`
+- **WHEN** the snapshot's patch is major and `created_at` is `t_max` whole
+  UTC days after its `detected_at`
 - **THEN** the bundle's `stabilizing` SHALL be `false`
+
+#### Scenario: An offset that crosses the UTC day
+
+- **WHEN** a major patch's `detected_at` is `2026-07-14` and the snapshot's
+  `created_at` is `2026-07-18T00:30:00+05:00` — three whole days where the
+  offset is read as local, four where it is read as UTC, at a `t_max` of 4
+- **THEN** the bundle's `stabilizing` SHALL be `false`, the count being the
+  UTC one
 
 #### Scenario: A letter patch
 

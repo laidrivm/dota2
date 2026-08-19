@@ -171,8 +171,8 @@ service, its volume and its compose file remain Task 7's.
   integration job is the counterweight, and it is the only thing standing
   between a published bundle and nobody noticing it was never read.
 - **Retention could delete the prior a blend needs** → a count of 30 is only
-  safe while builds are at most daily: `prior(t)` reaches zero at 4 days for a
-  major patch and 7 for a letter one, and nothing in this change bounds how
+  safe while builds are at most daily: `prior(t)` reaches zero at the `t_max`
+  the blending requirement fixes for each patch kind, and nothing here bounds how
   often the job runs — Task 7 sets the schedule. So retention is not a count
   alone: the newest published snapshot of the patch a blend reads `wr_old`
   from is retained whatever its age, and the count applies to the rest.
