@@ -174,10 +174,12 @@ service, its volume and its compose file remain Task 7's.
 
   Both degrade the same way, and only while the zeros are uniform:
   `src/model.ts` weighs the delta without asking whether it was measured, so
-  zeroing every hero moves no candidate's rank, and zeroing some ranks the
-  measured above the missing. Which staging must therefore never do by
-  halves — *An unmeasured component is zero for every hero* is where that
-  stops being a note in a risk list and becomes a validation failure.
+  zeroing every hero adds the same 0 to every score and moves no candidate's
+  rank, while zeroing some reorders the zeroed against the rest — in whichever
+  direction the signs happen to fall, which is the point. Which staging must
+  therefore never do by halves — *An unmeasured component is zero for every
+  hero* is where that stops being a note in a risk list and becomes a
+  validation failure.
 - **The fallback is the path everything runs on** → development and both test
   suites never touch the database path, which is how it rots. The CI
   integration job is the counterweight, and it is the only thing standing

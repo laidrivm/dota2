@@ -56,8 +56,11 @@ keeps running on the committed fixture until group 8 rewires the route.
       snapshot publishes [58]; staging holding side rows for every hero but
       one fails validation [59]; a component measured for every hero, one of
       whose blended deltas is exactly 0, publishes — so the rule cannot be
-      passing by treating a measured neutral as unmeasured [60]. (Req:
-      snapshot-build — An unmeasured component is zero for every hero)
+      passing by treating a measured neutral as unmeasured [60]; staging
+      measuring side for every hero while holding no phase rows leaves the
+      side deltas standing and zeroes phase alone, so a verdict taken once
+      per snapshot rather than per component fails [61]. (Req: snapshot-build
+      — An unmeasured component is zero for every hero)
 - [ ] 2.6 Implement the per-component measured/unmeasured decision, taken
       once for the whole snapshot from whether staging holds any row for the
       component, and returning the zero to write for an unmeasured one. (Req:
@@ -161,8 +164,10 @@ keeps running on the committed fixture until group 8 rewires the route.
       missing `side`, `phase`, `contest` or `sufficient` fails the export
       although that validation would accept it [49]; a `contest` rendered as
       the string `"0.13"` fails it too [52]; so does any numeric leaf that is
-      `NaN`, an infinity or `null` [54]. (Req: snapshot-export — The exported
-      bundle is what the client accepts)
+      `NaN`, an infinity or `null` [54]; and a snapshot whose `side` and
+      `phase` are zero on every hero renders both fields and publishes, the
+      zeros surviving to the payload rather than being dropped as empty [62].
+      (Req: snapshot-export — The exported bundle is what the client accepts)
 - [ ] 6.3 Implement `stabilizing` from the snapshot's own `patch.is_major`,
       `patch.detected_at` and `created_at` — the build instant itself, so the
       window it measures and the decay a blend applied share one clock —

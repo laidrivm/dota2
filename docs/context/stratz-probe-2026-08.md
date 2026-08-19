@@ -42,7 +42,7 @@ genuine auth rejection.
 The successful response carries both ceilings and remainders, so these are the
 API's own numbers, not an inference from what was left:
 
-```
+```text
 x-ratelimit-limit-second:  8       x-ratelimit-limit-hour:  1500
 x-ratelimit-limit-minute:  150     x-ratelimit-limit-day:  15000
 ```

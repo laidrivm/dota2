@@ -116,18 +116,29 @@ already reads as no contribution, `draft-model` specifying that reading for
 an insufficient hero, so a component zeroed throughout moves no candidate's
 rank. Within a *measured* component, a hero staging holds no row for SHALL
 fail validation rather than take a silent 0: `src/model.ts` weighs the delta
-without asking whether it was measured, so a partial zero ranks the measured
-above the missing.
+without asking whether it was measured, so a partial zero changes the ordering
+between the heroes it zeroed and the heroes it did not. Which way it changes
+depends on the signs of the deltas involved and is not worth stating — that it
+changes at all is the defect. Zeroing every hero adds the same 0 to every
+score and so reorders nothing.
 
-#### Scenario: A component the source does not measure
+#### Scenario: Neither component measured
 
 - **WHEN** staging holds no side rows and no phase rows at all
 - **THEN** every hero row SHALL carry 0 for both, and the snapshot SHALL
   publish
 
+#### Scenario: One component measured while the other is not
+
+- **WHEN** staging holds a side row for every hero and no phase rows at all
+- **THEN** every hero row SHALL carry its blended side delta and 0 for phase,
+  and the snapshot SHALL publish — the verdict is per component, so one
+  unmeasured component SHALL NOT zero a measured one
+
 #### Scenario: A component measured for some heroes only
 
-- **IF** staging holds side rows for every hero but one
+- **IF** staging holds rows for a component on every hero but one, whichever
+  component it is
 - **THEN** the snapshot SHALL end at `status = 'failed'`
 
 #### Scenario: A measured component that happens to be neutral
