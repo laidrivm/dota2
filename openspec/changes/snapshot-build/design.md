@@ -109,7 +109,9 @@ an instant, and it ships that way: the fixture carries `"2026-07-14"`,
 `src/types.ts` declares it, and `snapshot-delivery` pins the header that reads
 it. Giving it an offset is a client contract change, which some later change
 may take on its own terms — this one carries `createdAt` with an offset and
-leaves the date a date.
+leaves the date a date. The calendar the comparison converts on is fixed by
+*Patch blending with a decaying prior*, and read from there rather than
+repeated here.
 
 The document's remaining API rules do not reach a single static JSON file:
 there is no error body to shape as RFC 9457, no list to paginate, and no

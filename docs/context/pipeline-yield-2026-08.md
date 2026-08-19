@@ -455,7 +455,7 @@ hours of being written — caught by re-reading them at wrap-up, not by a gate.
 ## 2026-08-19 — chore/session-wrapup-2026-08-19 (and the three branches it follows)
 
 - zombies: PASS — 45 ideas, 45 acted on (all allocated to task groups; the
-  reviews later added 11 more, numbered 46–56)
+  reviews later added 12 more, numbered 46–57)
 - warm: not run — no manifest changed
 - ponytail-review: not run — the pre-PR path for a documentation, rules or
   config branch is `/triage` alone plus the grep, and all four branches took it
