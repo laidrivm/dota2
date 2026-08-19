@@ -37,6 +37,9 @@ None.
 
 ## Impact
 
-- `openspec/specs/agent-rulebook/spec.md` on sync. No code, no tests, no
-  configuration: `rulebook.test.ts` parses the rules sublists, which this does
-  not touch.
+- `openspec/specs/agent-rulebook/spec.md` on sync.
+- `CLAUDE.md` and any doc indexed from it whose prose the widened requirement
+  now reaches — task 1.2 sweeps them against the command guard and the two
+  hooks, and how much it deletes is not known until it runs.
+- No code, no tests, no configuration: `rulebook.test.ts` parses the rules
+  sublists, which this does not touch.

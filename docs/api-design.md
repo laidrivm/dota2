@@ -10,7 +10,10 @@ The API is a product; its consumer is a TypeScript frontend. Contract rules
   or equivalent) — never a raw ORM/DB object. The TypeScript response type
   derives from that schema, not the other way round.
 - Honest types: booleans are `true`/`false` (never 0/1), enums are strings
-  (`"published"`, not magic numbers), dates are ISO 8601 with offset.
+  (`"published"`, not magic numbers), timestamps are ISO 8601 with offset. A
+  field that is a calendar day rather than an instant is `YYYY-MM-DD` and says
+  so where it is declared; anything comparing it against a timestamp states
+  the calendar it converts on.
 - Every contract key is always present; an absent value is `null`. No
   dynamic or conditional keys.
 - camelCase everywhere in JSON — including error bodies and pagination

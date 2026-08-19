@@ -38,10 +38,12 @@ applies and the window `stabilizing` measures are read from one clock.
 For each statistic the build SHALL blend the current patch's matches
 `n_new` and winrate `wr_new` with the previous patch's already-smoothed
 winrate `wr_old`, as `wr_blend = (n_new · wr_new + prior(t) · wr_old) /
-(n_new + prior(t))`, where `t` is whole UTC days from the current patch's
-`detected_at` to the build instant — the column is a date and the instant
-carries an offset, so without a stated basis the same pair counts four days or
-three — and `prior(t) = k0 · 2^(−t / h)`, taken as 0 once `t ≥ t_max`. The parameters SHALL be `k0 = 1000`, `h = 1`,
+(n_new + prior(t))`, where `t` counts whole days from the current patch's
+`detected_at` to the build instant, both taken as instants on the UTC
+timeline: the date anchors at `00:00:00Z`, and `t` is the elapsed time in
+whole 24-hour days, rounded down. The basis has to be stated because the
+column is a date while the instant carries an offset, and reading that offset
+as local rather than converting it shifts `t` by a day. The parameters SHALL be `k0 = 1000`, `h = 1`,
 `t_max = 4` for a major patch and `k0 = 3000`, `h = 2`, `t_max = 7` for a
 letter patch (data-model §4.1). WHERE `n_new + prior(t)` is 0 the statistic
 SHALL be absent from the snapshot rather than blended, because the quotient
