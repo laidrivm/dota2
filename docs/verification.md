@@ -29,8 +29,11 @@ What counts as evidence for a claim, and what a claim may rest on.
 - Record the cause a measurement establishes, not the one it merely permits —
   name the alternatives ruled out.
 - Re-run the failure probe that justified an assertion after rewriting it.
-- Verify a generated file against the file on disk, not its source of truth —
-  a git hook is what `.git/hooks/` holds, not what `package.json` declares.
+- Verify what a thing does against the thing, never against what governs it —
+  a git hook is what `.git/hooks/` holds, not what `package.json` declares,
+  and a module checks what its code checks, not what its specification
+  requires of it. Cite the file and line when an artefact states what existing
+  code does.
 - Read a command's exit status from the command, not from a pipeline or a
   loop that continued past its failure, and read a gating check's output
   before running what it gates rather than chaining the two with `&&`.
