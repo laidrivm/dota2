@@ -150,13 +150,27 @@ checkable rather than implicit.
   step still stands — but its source is not STRATZ. `shortName` is the handle
   a Valve CDN path would be built from; OpenDota's `heroStats` carries `img`
   and `icon` outright and is already known to work keylessly.
-- **STRATZ buckets by week, staging is keyed by patch.** Every `heroStats.stats`
-  response carried a single `week` (2954), and `groupByTime: true` splits by a
-  duration dimension rather than by calendar week — its row totals do not
-  reconcile with the ungrouped query, and why was not investigated.
-  `constants.gameVersions` gives patches with `asOfDateTime`, so a patch window
-  can be expressed, but nothing measured here shows a week-keyed aggregate
-  being retrievable per patch.
+- **STRATZ buckets by week, and history is retrievable, so staging can stay
+  keyed by patch.** `heroStats.stats` returns one week per call, and its `week`
+  argument is a **Unix timestamp in seconds**, not the bucket id the response
+  carries: `week: 2954` returns nothing at all, while a timestamp inside that
+  week returns its rows. Six distinct buckets were pulled this way, from week
+  2954 back to 2920 (2025-12-23), each with counts of its own. So an ingest
+  can sum the weeks inside a patch window rather than accumulating them from
+  first run onwards. `groupByTime: true` splits by a duration dimension rather
+  than by calendar week — its row totals do not reconcile with the ungrouped
+  query, and why was not investigated.
+- **A bucket covers Thursday to Wednesday and the current one is empty.**
+  Every timestamp from 2026-08-13 (Thu) to 2026-08-19 (Wed) returned week 2954
+  with an identical 12,852 matches for hero 1; 2026-08-12 returned 2953; and
+  2026-08-20, the Thursday the probe ran, returned nothing. The freshest
+  complete bucket is therefore the week that ended the previous Wednesday.
+  This bears on the nightly job `data-model.md` §7 assumes: run against
+  `heroStats.stats`, six nights in seven would rebuild an identical snapshot
+  and the seventh would jump. It also sits oddly beside a `prior(t)` that
+  decays in whole days over a `t_max` of 4 or 7. Whether a daily granularity
+  exists elsewhere was not tested — `winDay` takes `bracketIds: RankBracket`
+  and is the obvious place to look.
 - **`constants.gameVersions` newest entry is 7.40b, `asOfDateTime`
   2025-12-24** — about eight months before the probe date. Whether the list is
   stale, ordered unexpectedly, or correct was not established, and patch
@@ -164,10 +178,11 @@ checkable rather than implicit.
 
 ## Open, and where it stopped
 
-- **Per-patch aggregates.** The week/patch mismatch above is the one finding
-  that could still move staging's key. It needs a probe that asks for a
-  specific `week` value and checks whether historical weeks are retrievable at
-  all; only the default was ever returned here.
+- **The job's cadence against a weekly bucket.** History being retrievable
+  settles staging's key; what it opens instead is when the job should run at
+  all, and whether `winDay` offers a daily granularity `heroStats.stats` does
+  not. Both belong to the ingest and to whoever sets the schedule, not to the
+  build.
 - **Contest rate's denominator.** `banDay` gives bans with a bracket filter and
   a `day` dimension; picks come from `stats`. Nothing here checked that the two
   cover the same match population, which is what makes `(picks + bans) / matches`
