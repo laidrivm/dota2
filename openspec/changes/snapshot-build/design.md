@@ -103,6 +103,14 @@ is declared in `src/types.ts` and shipped, so arrays of explicit ids would be
 a client change this proposal excludes, and would inflate ~34k numbers the
 data model budgets at 300–500 KB gzipped. `positions` is the same shape.
 
+`patch.detectedAt` is a bare calendar date where the same document asks for
+ISO 8601 with an offset. It is the day a patch was first seen in the data, not
+an instant, and it ships that way: the fixture carries `"2026-07-14"`,
+`src/types.ts` declares it, and `snapshot-delivery` pins the header that reads
+it. Giving it an offset is a client contract change, which some later change
+may take on its own terms — this one carries `createdAt` with an offset and
+leaves the date a date.
+
 The document's remaining API rules do not reach a single static JSON file:
 there is no error body to shape as RFC 9457, no list to paginate, and no
 cross-origin consumer to configure CORS for.
