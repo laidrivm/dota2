@@ -196,6 +196,8 @@ Rules about how work is carried out here. They do not age with the code.
 - Split a file to the cap that will apply to it, not the one that applies today.
 - A suite that may skip locally fails the CI job that owns it when it skips
   there — supply what it needs, and assert it ran.
+- A value a specification fixes in one requirement is never restated in
+  another — cite the requirement that fixes it.
 
 #### Safety
 
