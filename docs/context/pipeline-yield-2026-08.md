@@ -488,3 +488,57 @@ before anything said so. It is now step 1 of that sequence. The same session
 also found the gate itself measuring against a stale local `main`, inflating
 every reading by 56 lines; `refs/remotes/origin/HEAD` was unset, and the gate
 line names no base, so a wrong measurement and a right one print identically.
+
+## 2026-08-19 — chore/rulebook-doc-reach, fix/snapshot-build-prior,
+## spec/merged-branch-guard, spec/pre-pr-sequence-gate (PRs #134–#137)
+
+- diff-budget: PASS ×4 — 376, 22, 79, 403/441 lines, 0 over budget
+- zombies (merged-branch-guard): OPEN — 15 gaps, 15 dispositioned
+- zombies (pre-pr-sequence-gate): OPEN — 23 gaps, 23 dispositioned (22 into
+  tasks, 1 became a spec correction rather than a test)
+- triage (chore/session-wrapup-2026-08-19): PASS — 5 groups, 3 Medium read,
+  4 defects found and fixed
+- triage (spec/pre-pr-sequence-gate): PASS — 3 groups, 2 Medium read,
+  1 defect found and fixed
+- coderabbit-local (chore/session-wrapup-2026-08-19): OPEN — 4 findings,
+  4 dispositioned (3 applied, 1 Major dismissed; the dismissal was settled by
+  the user merging #134, which carries the deletion it argued against)
+- coderabbit-local (spec/pre-pr-sequence-gate): PASS — 5 findings,
+  5 dispositioned (4 applied, 1 skipped)
+- coderabbit (#136): PASS — 8 findings over two rounds, 8 dispositioned
+  (7 applied, 1 skipped)
+- coderabbit (#137): PASS — 6 findings, 6 dispositioned (6 applied)
+- Not run: warm (no manifest changed), ponytail-review (shortened path for a
+  documentation, rules and specification branch — all four took it), preflight,
+  security-review, code-review, first-five, review-order
+
+**Both load-bearing findings were the bot's, and both were the same defect
+class.** A signal was measured for what moves it and never for what leaves it
+still. The reflog carries a fetch time, but a fetch bringing no commit writes
+no entry — measured, 139 entries before and after, newest timestamp 57 minutes
+old while `FETCH_HEAD` advanced to the current second; the guard would have
+refused a commit, named a fetch as the remedy, watched it succeed and refused
+again. Its replacement had the mirror defect: `FETCH_HEAD`'s mtime is rewritten
+by *any* fetch, so `git fetch origin <other>` refreshed it while the base ref
+stood still — measured, mtime +1s, file naming that branch alone. The same file
+carried the fix, since it lists which refs the fetch covered.
+
+**A design-document rationale substituted for a case analysis.** The
+`pre-pr-sequence-gate` push condition was argued in prose — the push is the
+point past which the sequence can no longer run first, so let it discharge the
+obligation — and the argument inverts when both events fall in one turn: commit
+and push before ending, and the gate passes silently. `/zombies` and `/triage`
+both read that design and neither asked about ordering.
+
+**Triage's grep found what no review read.** Two unmerged changes each
+scheduled a measurement written into the same figure — the guard's 16–22 ms —
+and neither knew about the other; one of them also scheduled a hand edit to a
+requirement in a spec it held no delta for.
+
+**The session's own process failures were both rules already written.** A turn
+ended asking whether to run the pre-PR sequence, against
+`docs/review-toolkit.md`'s "never ask whether to run it", in a session that had
+read that file whole hours earlier. Four commits landed on a branch whose pull
+request had merged seven hours before, against the rule requiring a PR-state
+check before every commit. Neither was an absent or unloaded rule; both are now
+proposed as mechanisms (`merged-branch-guard`, `pre-pr-sequence-gate`).
