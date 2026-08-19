@@ -35,9 +35,25 @@ the reflog of the base ref: a fetch that brings no new commit updates no ref
 and so writes no reflog entry, which would refuse the commit while naming a
 remedy that cannot change the answer — measured on this repository, where a
 fetch bringing nothing left the reflog at 139 entries and its newest timestamp
-57 minutes old while `FETCH_HEAD` advanced to the current second. An
-unreadable fetch time SHALL be treated as unknown and therefore as a refusal,
-on the terms this capability already applies to an undecidable event.
+57 minutes old while `FETCH_HEAD` advanced to the current second.
+
+That timestamp alone SHALL NOT satisfy the bound. `FETCH_HEAD` is written by
+every fetch whatever it fetched, so fetching one unrelated ref refreshes it
+while leaving the base ref untouched — measured, `git fetch origin <other>`
+advanced the mtime by a second and wrote a `FETCH_HEAD` naming only that
+branch. The bound SHALL therefore be satisfied only when `FETCH_HEAD` is
+within `FETCH_MAX_AGE` **and** its contents name the base branch, which is the
+evidence that the fetch it timestamps covered the base. An unreadable
+`FETCH_HEAD` SHALL be treated as unknown and therefore as a refusal, on the
+terms this capability already applies to an undecidable event.
+
+Where the base ref does not exist at all — no `origin` remote, or no `main`
+under it — no merged verdict can be computed, and the commit SHALL be allowed
+rather than refused. This is an exception to the undecidable-blocks rule and
+is stated as one: a repository with no upstream has nothing a pull request
+could have merged into, and refusing there would refuse every commit in every
+scratch repository the agent creates, this capability's own test fixture
+among them.
 
 The freshness refusal SHALL apply only to a branch that exists under
 `refs/remotes/origin/`. A branch with no counterpart there has, so far as the
@@ -96,6 +112,20 @@ unstated is a block the session works around.
   new commit, so no ref is updated
 - **THEN** the next commit is allowed, because the fetch time comes from
   `FETCH_HEAD` rather than from a ref's reflog
+
+#### Scenario: A fetch of an unrelated ref
+
+- **WHEN** the last fetch named one branch other than the base, so
+  `FETCH_HEAD` is recent but does not name the base branch
+- **THEN** the hook blocks the call on a pushed branch, because the recency
+  belongs to a fetch that did not cover the base
+
+#### Scenario: The repository has no base ref
+
+- **WHEN** the repository has no `origin` remote, or none with a `main`
+  branch, so no merged verdict can be computed at all
+- **THEN** the commit is allowed, because there is no upstream a pull request
+  could have merged into
 
 #### Scenario: The fetch time cannot be read
 

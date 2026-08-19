@@ -15,9 +15,13 @@ on `main` runs on the same event and can decide this one too.
 - `scripts/command-guard.ts` refuses a `git commit` on a branch whose commits
   are already upstream, which is what a merged pull request leaves behind
   whatever style closed it.
-- The check engages only for a branch that exists on the remote. A branch with
-  no remote counterpart was never pushed, so no pull request of it can have
-  merged, and the commit passes untouched — which is most local work.
+- The freshness half of the check — not the merged verdict — engages only
+  for a branch that exists on the remote. A branch with no counterpart has,
+  so far as the repository can tell, never been pushed, so no pull request of
+  it can have merged and it pays nothing, which is most local work.
+- A repository with no base ref at all is an explicit exception rather than an
+  undecidable: with no upstream there is nothing a merge could strand, and
+  refusing there would refuse every commit in every scratch repository.
 - The merged verdict runs for every branch and holds however old the base ref
   is, because a stale base can only miss a merge, never invent one. Closing
   that one direction is a separate refusal: on a branch that is on the remote,

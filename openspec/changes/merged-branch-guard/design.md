@@ -114,6 +114,32 @@ entries with its newest timestamp 57 minutes old, while `.git/FETCH_HEAD`'s
 mtime advanced to the current second. `FETCH_HEAD` is rewritten by every
 successful fetch, which is the event the bound is actually about.
 
+Its mtime alone is not enough, and the second review round is what showed why:
+`FETCH_HEAD` is rewritten by *any* fetch, so `git fetch origin <other-branch>`
+refreshes it while the base ref stands still — measured, the mtime advanced a
+second and the file it wrote named only that one branch. But the same file
+carries the fix, because what it lists is precisely which refs the last fetch
+covered: a plain `git fetch origin` in this repository wrote 130 lines with
+`main` among them, and the unrelated-ref fetch wrote one line without it. So
+the bound is the mtime *and* the base branch appearing in the contents — one
+file read, answering both halves.
+
+*Alternative considered*: running the freshness check as a fetch of the base
+alone. That is decision one again — a network call on a hook that runs on
+every Bash call — and it answers by doing the thing rather than by observing
+whether it was done.
+
+### A repository with no base ref is an exception, not an undecidable
+
+The guard's rule is that what it cannot decide, it blocks. This one case
+inverts it: with no `origin` remote, or none carrying `main`, there is no
+upstream for a pull request to have merged into, so there is nothing to
+strand. Blocking instead would refuse every commit in every scratch
+repository — including the one this capability's own fixture fabricates to
+test the guard, which would make the check untestable by itself. The
+exception is written into the spec as an exception, so that a reader who
+knows the fail-closed rule is not left thinking this is a hole in it.
+
 `FETCH_MAX_AGE` is 30 minutes, measured inclusively. It bounds how long a
 merge can go unseen, and its cost is one `git fetch` at most twice an hour
 while committing on a pushed branch. The number is a judgement, not a
