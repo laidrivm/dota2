@@ -120,9 +120,16 @@ is what `dist-routes.ts` keys its listing cache on and it would be cheaper
 here too, but it answers *was this file rewritten* where the client is asking
 *is this the payload I hold*: a byte-identical re-export would change the
 `mtime` and cost every returning client the whole bundle again. The hash is
-computed once when the file is read, and cached against the `mtime` — so the
-`stat` still does the per-request work, and the hash is paid once per
-publication.
+computed once when the file is read and cached, so the `stat` does the
+per-request work and the hash is paid once per publication.
+
+The cache key is the resolved source path together with `mtimeNs`, not
+`mtime` alone, and both halves earn their place. The path, because this route
+has two sources — the fixture until something is published, the published
+file after — and a key that forgets which one it read hands the previous
+source's ETag to the next. The nanoseconds, because two writes inside one
+millisecond share a millisecond timestamp, which is the same reason
+`dist-routes.ts` reads `mtimeNs` for its listing cache.
 
 ### `stabilizing` is computed at export, not stored
 

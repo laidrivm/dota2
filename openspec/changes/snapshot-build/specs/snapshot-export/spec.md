@@ -105,7 +105,9 @@ rejects as malformed. That validation reaches further than the four fields
 date and every hero to carry a numeric `id` and a string `name` — but it stops
 at the hero's identity. The export SHALL therefore assert the whole payload
 against `SnapshotBundle` at runtime: every declared key present at every
-depth, holding a value of the declared type. What that adds over the client's
+depth, holding a value of the declared type — and, where that type is
+`number`, a finite one, because `NaN` and the infinities are numbers to
+`typeof` and arithmetic on them is what a delta of `0/0` becomes. What that adds over the client's
 own check is the rest of each hero — `side`, `phase`, `positions`, `contest`,
 `sufficient` — and the two matrices, none of which the client inspects, and a
 missing one of which computes as `NaN` in the model rather than being
@@ -129,6 +131,12 @@ refused.
 
 - **IF** a rendered hero's `contest` is the string `"0.13"` rather than the
   number `0.13`
+- **THEN** the export SHALL fail rather than publish
+
+#### Scenario: A number that is not finite
+
+- **IF** any numeric leaf of a rendered bundle is `NaN`, `Infinity`,
+  `-Infinity` or `null`
 - **THEN** the export SHALL fail rather than publish
 
 ### Requirement: The served URL answers from the published bundle
