@@ -19,8 +19,8 @@ single-source rule this file inherits.
   does not carry. A package that is young, low-download, or name-adjacent to
   a popular one (0auth/oauth, extra -hf/-js suffixes) is presumed
   slopsquatting — stop and tell the user.
-- Never run `bunx`/`npx` with a package that hasn't passed the check
-  above — `bunx` bypasses the release-age gate.
+- Never run `bunx` with a package that hasn't passed the check above — it
+  bypasses the release-age gate.
 - Never pipe remote content into a shell (`curl … | bash`); show the user
   the URL and what it does instead.
 - Never add URL or git dependencies to manifests.
