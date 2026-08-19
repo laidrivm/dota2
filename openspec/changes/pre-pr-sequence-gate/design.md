@@ -1,0 +1,127 @@
+# pre-pr-sequence-gate — design
+
+## Context
+
+The rule this gate mechanises is one sentence in `docs/review-toolkit.md`:
+completing a task group starts the pre-PR sequence in the same turn, and the
+agent never asks whether to run it. The session that broke it had read the
+file in full earlier the same day. That rules out the two remedies reached for
+first — restating the rule more forcefully, or loading it earlier — and points
+at the moment of the failure instead, which is the end of a turn.
+
+What the documentation confirms about that moment, read rather than recalled:
+
+- A `Stop` hook fires when the model finishes responding, and exit **2**
+  prevents stopping and continues the conversation, with stderr as the
+  blocking message.
+- `last_assistant_message` carries the final assistant text of the turn, and
+  the documentation recommends it over reading the transcript, which "is
+  written asynchronously and may lag the in-memory conversation".
+- Stderr from a hook that exits 0 "goes to the debug log only, never the
+  transcript, and Claude never sees it". So a non-blocking reminder cannot
+  reach the model at all; blocking is the only channel that does.
+
+What it does **not** confirm, and what this design therefore refuses to rest
+on: a `stop_hook_active` field. An earlier reading of the same page reported
+one; reading the page again for it found nothing. It is treated here as
+non-existent, and loop safety is obtained by construction instead.
+
+## Goals / Non-Goals
+
+**Goals:**
+
+- Refuse the turn that would end the way 2026-08-19's ended, at that moment.
+- Fire on turns that committed and on no others, so an answer to an unrelated
+  question is never held up.
+- Be impossible to deadlock, without depending on a field the documentation
+  does not describe.
+
+**Non-Goals:**
+
+- Verifying the sequence rather than its report. The hook reads for a gate
+  line; it cannot know whether the gate ran.
+- Persisting anything past the session, or across branches.
+- Covering the sequence's other trigger — any pull request that changes code —
+  which has no event this cheap to hang off.
+
+## Decisions
+
+### The trigger is a turn that committed, not a turn
+
+A completed task group stays completed until the change is archived, so a
+condition reading only the task file would fire on every turn afterwards,
+including turns that answer a question. Keying on "this turn produced commits"
+matches what the rule is actually about: work landing on the branch without
+the sequence having reported.
+
+That question needs a mark taken when control arrives, which is
+`UserPromptSubmit`. It records `HEAD`; `Stop` compares. The pair is the whole
+state: one ref, rewritten on the next prompt, scoped to the session's
+directory. Nothing accumulates, so nothing needs pruning or reconciling — the
+failure mode of a durable ledger is that it disagrees with the repository, and
+a mark this short-lived cannot.
+
+*Alternative considered*: a ledger keyed by change and branch, recording that
+the sequence had reported. It is precise across sessions, and it is a second
+source of truth about work whose first source is the repository — the shape
+this project has twice been bitten by.
+
+*Alternative considered, and kept as a second condition*: firing while the
+branch has unpushed commits. On its own it holds the obligation open across
+every later turn, which is what the trigger above rejects; as an additional
+condition it is free and it discharges the obligation when the push happens,
+which is the point past which the sequence can no longer be run first.
+
+### Loop safety is structural, not a flag
+
+A blocked turn must be endable by something the very next message can carry.
+Both escapes are text: the sequence's gate line, or `BLOCKED` naming what only
+the user can settle — the second of which `docs/review-toolkit.md` already
+admits as a legitimate ending. So no repository state has to change for the
+turn to end, and there is no configuration in which the hook can refuse
+forever.
+
+This matters more than it would elsewhere, because the one field that would
+otherwise carry loop protection could not be found in the documentation. A
+design that cannot loop does not need to know whether that field exists.
+
+### The hook reads the task files, not the change's status
+
+`openspec status` would answer "is a task group complete" authoritatively, and
+it is a process launch on every turn end plus a dependency on the CLI being
+resolvable. The task files are markdown with a fixed checkbox syntax that the
+apply flow already parses, and reading them costs a glob. Changes under
+`openspec/changes/archive/` are excluded by the glob, which is also what stops
+an archived change from holding the gate open forever.
+
+### What the hook does not claim
+
+It reads `last_assistant_message` for a gate line. An agent that writes
+`TRIAGE gate: PASS` without running `/triage` passes it. That is not a hole to
+be closed here — closing it means running the gates from the hook, which is
+the sequence itself — and the specification says so rather than implying a
+guarantee the check does not have.
+
+## Risks / Trade-offs
+
+- **A second hook event, and a per-turn cost** → every turn end now launches a
+  process, as every Bash call already does. The proposal records the
+  measurement as owed rather than guessed; if it is not small, the trigger
+  narrows to repositories that hold an `openspec/changes/` directory.
+- **The mark is written by one hook and read by another** → if
+  `UserPromptSubmit` does not fire, `Stop` finds no mark. A missing mark SHALL
+  be read as "unknown whether this turn committed" and, unlike the guard's
+  convention, SHALL allow the turn to end: a hook that blocks whenever its
+  partner is absent turns a partial installation into an unusable session.
+  This is the one place this change chooses fail-open, and it is stated in the
+  spec as a choice.
+- **The project's tracked settings register `PreToolUse` only** → the ponytail
+  plugin supplies its own `SessionStart` and `UserPromptSubmit` hooks, which
+  fire in this session, so the events are live but the composition of a
+  project-level entry with a plugin's is a claim this design does not make.
+  Task 1.1 measures it before anything depends on it.
+
+## Open Questions
+
+None outstanding. The latch was settled with the user: the trigger is a turn
+in which commits were made, checked before control returns.
