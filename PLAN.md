@@ -83,15 +83,6 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
 
 ### Open
 
-- [ ] **`merged-branch-guard`** — proposed,
-      `openspec/changes/merged-branch-guard/`. The command guard gains a
-      second commit refusal: a branch whose work is already upstream, which is
-      what a merged pull request leaves behind. Two task groups, so
-      `feat/merged-branch-guard-1` and `-2`, in order — the first ships a
-      module nothing calls, so the two run in one session. Ahead of Phase 3a
-      because 3a is eight pull requests long and this is the failure that
-      stranded four commits on 2026-08-19; the proposal records what was
-      measured.
 - [x] **`rulebook-doc-reach`** — merged as PR #134, awaiting `/opsx:archive`;
       `openspec/changes/rulebook-doc-reach/`. `agent-rulebook`'s rule that a
       mechanised prohibition loses its prose now reaches the docs indexed from
@@ -183,6 +174,15 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       the same evidence, which is the confusion `.coderabbit.yaml` tells the
       bot not to make. With both, set `usage` back to `"disabled"`: a knowledge
       source that finds nothing is a widened trust boundary bought for nothing.
+- [ ] **`merged-branch-guard`** — proposed,
+      `openspec/changes/merged-branch-guard/`. The command guard gains a
+      second commit refusal: a branch whose work is already upstream, which is
+      what a merged pull request leaves behind. Two task groups, so
+      `feat/merged-branch-guard-1` and `-2`, in order — the first ships a
+      module nothing calls, so the two run in one session. Ahead of Phase 3a
+      because 3a is eight pull requests long and this is the failure that
+      stranded four commits on 2026-08-19; the proposal records what was
+      measured.
 - [ ] **The diff budget cannot say what it measured against.**
       `scripts/diff-budget.sh` falls back to the literal `main` when
       `refs/remotes/origin/HEAD` is unset, and its gate line names the total
