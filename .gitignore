@@ -4,6 +4,7 @@ node_modules/
 dist/
 .claude/settings.local.json
 .env
+.env.local
 
 # Playwright run output
 test-results/
