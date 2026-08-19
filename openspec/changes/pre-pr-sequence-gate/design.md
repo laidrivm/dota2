@@ -66,11 +66,15 @@ the sequence had reported. It is precise across sessions, and it is a second
 source of truth about work whose first source is the repository — the shape
 this project has twice been bitten by.
 
-*Alternative considered, and kept as a second condition*: firing while the
-branch has unpushed commits. On its own it holds the obligation open across
-every later turn, which is what the trigger above rejects; as an additional
-condition it is free and it discharges the obligation when the push happens,
-which is the point past which the sequence can no longer be run first.
+*Alternative considered, drafted in, and removed by review*: firing only while
+the branch has unpushed commits. On its own it holds the obligation open
+across every later turn, which is what the trigger above rejects. As an
+additional condition it looked free — the push is the point past which the
+sequence can no longer run first, so let the push discharge it. That reasoning
+inverts in the one case that matters: a turn that commits *and pushes* before
+it ends satisfies "pushed" and walks out silently, which is not the obligation
+being discharged but the sequence being skipped. The condition would have
+built the bypass into the gate. The report discharges it, and nothing else.
 
 ### Loop safety is structural, not a flag
 

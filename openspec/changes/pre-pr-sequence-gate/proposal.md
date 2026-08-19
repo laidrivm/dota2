@@ -15,7 +15,9 @@ past.
 
 - A `Stop` hook refuses to end a turn that made commits, while a task group in
   an active change is fully ticked, unless the turn's final message carries
-  the sequence's gate line or names what blocks it.
+  the sequence's gate line or `BLOCKED` with what only the user can settle.
+  The report is the only thing that discharges it; pushing the branch is not,
+  since a turn that commits and pushes is what the sequence exists to precede.
 - A `UserPromptSubmit` hook records `HEAD` when control arrives, so "this turn
   committed" is answerable at the end of it. Without that mark the hook would
   have to fire on every turn, including the ones that only answer a question.
