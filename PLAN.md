@@ -183,6 +183,16 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       because 3a is eight pull requests long and this is the failure that
       stranded four commits on 2026-08-19; the proposal records what was
       measured.
+- [ ] **`pre-pr-sequence-gate`** — proposed,
+      `openspec/changes/pre-pr-sequence-gate/`. A `Stop` hook refuses to end a
+      turn that committed while a task group stands complete and the message
+      carries no gate line; a `UserPromptSubmit` hook records `HEAD` so that
+      "this turn committed" is answerable. Three task groups, so
+      `feat/pre-pr-sequence-gate-1` … `-3`, in order. Group 1 is a measurement
+      that can cancel the other two: if a project-level `UserPromptSubmit`
+      entry replaces the ponytail plugin's rather than composing with it, the
+      design has no mark to read. Pairs with `merged-branch-guard` — both
+      mechanise a rule this session read and walked past.
 - [ ] **The diff budget cannot say what it measured against.**
       `scripts/diff-budget.sh` falls back to the literal `main` when
       `refs/remotes/origin/HEAD` is unset, and its gate line names the total
