@@ -477,8 +477,8 @@ read found two criteria contradicting other criteria in the same file — the
 `n_eff = 0` case and the `created_at` case — and both had been *introduced* by
 applying an earlier review finding. Neither coderabbit pass caught the first.
 
-**The collapsed section is where a third of the findings lived.** Of #130's 17,
-four sat in `Outside diff range comments` and reached neither the inline API
+**The collapsed section held four of #130's seventeen findings.** Four sat in
+`Outside diff range comments` and reached neither the inline API
 nor the count the user saw. Reading only `Actionable comments posted` would
 have silently dropped them; two were real defects.
 
