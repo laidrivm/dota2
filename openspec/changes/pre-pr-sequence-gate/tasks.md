@@ -38,8 +38,13 @@ decision module, group 3 wires it up and shortens the prose.
 - [ ] 1.3 Confirm by probe that a `Stop` hook exiting 2 prevents the turn
       ending and that its stderr reaches the model, and that exiting 1 does
       not — the documentation says so, and this capability's own rule is that
-      a hook's behaviour is what the hook does. Record what the probe showed,
-      including anything the documentation did not mention.
+      a hook's behaviour is what the hook does. Record the whole payload the
+      event carries, and settle two questions from it rather than from any
+      summary: whether a `stop_hook_active` field exists — two readings of the
+      documentation and the review bot disagree, and nothing in this design
+      depends on the answer — and which lifecycle events fire when a turn is
+      interrupted instead of ending, since a turn this hook never sees is one
+      the gate does not reach.
       (Req: commit-gates — A turn that commits reports its gates before it
       ends)
 
@@ -57,10 +62,15 @@ decision module, group 3 wires it up and shortens the prose.
       group belongs to an archived change*, §*A group that carries no boxes*)
 - [ ] 2.2 Write the turn-state tests: `HEAD` equal to the mark is a turn that
       did not commit [12]; `HEAD` moved by an amend is a turn that did [13];
-      four commits read the same as one [7]; an absent mark ends the turn
-      [21 mark half]; an unreadable mark ends the turn [18]. (Req:
-      commit-gates — A turn that commits reports its gates before it ends,
-      §*A turn that commits nothing*, §*The mark was never written*)
+      four commits read the same as one [7]; a turn that commits and then
+      returns `HEAD` to the mark ends, since nothing it committed survives to
+      be reported; a second refusal with the same mark does not happen; a
+      second session is decided against its own mark rather than the newest;
+      an absent mark ends the turn [21 mark half]; an unreadable mark ends the
+      turn [18]. (Req: commit-gates — A turn that commits reports its gates
+      before it ends, §*A turn that commits nothing*, §*The mark was never
+      written*, §*A turn whose commits are withdrawn before it ends*, §*A
+      refusal is not repeated*, §*Two sessions in one repository*)
 - [ ] 2.3 Write the test the removed push condition earned: a turn that
       commits the last task, pushes the branch, and ends with no gate line is
       still blocked. The condition it replaces would have passed exactly this
