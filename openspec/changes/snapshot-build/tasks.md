@@ -3,7 +3,7 @@
 Test tasks are derived from the proposal-stage `/zombies` run and are written
 before the module they cover (docs/testing.md — TDD for edge cases). The
 bracketed numbers are that run's idea numbers, so every one of its 45 ideas
-is traceable to the group that closes it. Numbers 46 to 52 are the reviews'
+is traceable to the group that closes it. Numbers 46 to 56 are the reviews'
 own, added where a finding named a case the run had missed.
 
 Eight groups, so eight pull requests on `feat/snapshot-build-1` … `-8`, in
@@ -36,14 +36,16 @@ keeps running on the committed fixture until group 8 rewires the route.
 
 - [ ] 2.1 Write the share tests: a hero picked on one position gets
       `pick_share` 1 and a single row [3]; a hero picked on three gets three
-      rows and none for the positions it never played [4]. (Req:
+      rows and none for the positions it never played [4]; a hero whose picks
+      total zero yields no rows and no division [53]. (Req:
       snapshot-build — Position shares are a distribution over a hero's
       positions)
 - [ ] 2.2 Write the sufficiency tests at both thresholds: a hero-position at
       `n_eff = 500` is sufficient and at 499 is not [10]; a hero summing to
       1000 is sufficient and to 999 is not [11]. (Req: snapshot-build —
       Sufficiency thresholds decide what may be suggested)
-- [ ] 2.3 Implement the position-share normalisation, emitting no row for a
+- [ ] 2.3 Implement the position-share normalisation, returning an empty map
+      before dividing when a hero's picks total zero, and emitting no row for a
       position with no picks. (Req: snapshot-build — Position shares are a
       distribution over a hero's positions)
 - [ ] 2.4 Implement the two sufficiency thresholds as one predicate per
@@ -67,8 +69,8 @@ keeps running on the committed fixture until group 8 rewires the route.
       green otherwise. (Req: none — infrastructure, as 3.1)
 - [ ] 3.4 Write the determinism tests: two builds over identical staging and
       the same build instant produce statistics rows equal field by field
-      [25]; a build completes with every network call but its database
-      connection stubbed to throw [26]; a blend reads `wr_old` from the
+      [25]; a build completes while its database answers and every *other*
+      network call is stubbed to throw [26]; a blend reads `wr_old` from the
       predecessor patch's newest published snapshot [51]. (Req: snapshot-build
       — The build reads its own database and nothing else)
 - [ ] 3.5 Write the symmetry tests: `(a,b)` and `(b,a)` matchup rows carry
@@ -142,8 +144,9 @@ keeps running on the committed fixture until group 8 rewires the route.
       `snapshot-delivery` specifies for a fetched payload [39]; a hero entry
       missing `side`, `phase`, `contest` or `sufficient` fails the export
       although that validation would accept it [49]; a `contest` rendered as
-      the string `"0.13"` fails it too [52]. (Req: snapshot-export — The
-      exported bundle is what the client accepts)
+      the string `"0.13"` fails it too [52]; so does any numeric leaf that is
+      `NaN`, an infinity or `null` [54]. (Req: snapshot-export — The exported
+      bundle is what the client accepts)
 - [ ] 6.3 Implement `stabilizing` from the snapshot's own `patch.is_major`,
       `patch.detected_at` and `created_at` — the build instant itself, so the
       window it measures and the decay a blend applied share one clock —
@@ -170,22 +173,23 @@ keeps running on the committed fixture until group 8 rewires the route.
 ## 8. Serving the published bundle
 
 - [ ] 8.1 Write the route tests: a published bundle is served in preference
-      to the fixture [29]; an absent publication directory serves the fixture
-      [28]; the published-bundle response carries `cache-control: no-cache`
+      to the fixture [29]; an absent publication directory serves the fixture,
+      and so does one that exists but holds no bundle [28] [55]; the published-bundle response carries `cache-control: no-cache`
       [42]. (Req: snapshot-export — The served URL answers from the published
       bundle)
 - [ ] 8.2 Write the revalidation tests: a matching `If-None-Match` is
       answered 304 with an empty body [40]; a republished bundle answers 200
       with a different ETag [41]; a byte-identical re-export still answers 304
-      [50]. (Req: snapshot-export — The served snapshot is revalidated by
-      ETag)
+      [50]; the first publication after the fixture was served answers 200 with
+      a new ETag, rather than reusing the fixture's [56]. (Req: snapshot-export
+      — The served snapshot is revalidated by ETag)
 - [ ] 8.3 Move `/snapshot.json` out of the prebuilt route map into a handler
       that resolves its source per request, leaving the font routes static.
       (Req: snapshot-export — The served URL answers from the published
       bundle)
 - [ ] 8.4 Implement the ETag as a hash of the served bytes, cached against the
-      file's `mtime` so it is paid once per publication rather than per
-      request, and the 304 answer to a matching `If-None-Match`. (Req:
+      resolved source path and `mtimeNs` so it is paid once per publication
+      rather than per request and cannot survive a change of source, and the 304 answer to a matching `If-None-Match`. (Req:
       snapshot-export — The served snapshot is revalidated by ETag)
 - [ ] 8.5 Write the end-to-end test: staging seeded from the fixture builds,
       exports, and the served bundle is accepted by the client's loader [45].
