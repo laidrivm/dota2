@@ -75,9 +75,11 @@ the build guaranteed.
 ### Requirement: The stabilizing flag marks a settling major patch
 
 The export SHALL set `stabilizing` to `true` while the snapshot's patch is
-major and fewer than 4 whole days have passed from its `detected_at` to the
-snapshot's `created_at`, and to `false` otherwise — the same window past
-which a major patch's prior reaches zero.
+major and fewer whole days have passed from its `detected_at` to the
+snapshot's `created_at` than the `t_max` *Patch blending with a decaying
+prior* fixes for a major patch, and to `false` otherwise. The window is that
+requirement's, not a second copy of it: `stabilizing` is true exactly while
+the prior it names still weighs on the blend.
 
 #### Scenario: The day a major patch lands
 
