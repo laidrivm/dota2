@@ -175,10 +175,13 @@ Rules about how work is carried out here. They do not age with the code.
   any count the source states itself.
 - Re-run the older probe before overwriting a recorded measurement your new
   one contradicts.
-- Execute a pre-written decision rule only on a sample that could have
-  produced the opposite outcome.
+- Exercise a pre-written decision rule, or a condition you have written, only
+  against a case that could have produced the opposite outcome — for a
+  condition, name that case before writing it.
 - A rules or docs edit that no artefact of the change under way asks for goes
   in its own commit.
+- Take the queue's next entry in its stated order, and name every entry
+  stepped over and why.
 - Before syncing a `MODIFIED` delta, check it carries every scenario the live
   requirement has — the replacement is whole-requirement.
 - Never silence a linter or type-checker finding by disabling its rule in
