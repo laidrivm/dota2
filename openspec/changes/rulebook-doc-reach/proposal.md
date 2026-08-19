@@ -41,5 +41,7 @@ None.
 - `CLAUDE.md` and any doc indexed from it whose prose the widened requirement
   now reaches — task 1.2 sweeps them against the command guard and the two
   hooks, and how much it deletes is not known until it runs.
-- No code, no tests, no configuration: `rulebook.test.ts` parses the rules
-  sublists, which this does not touch.
+- `scripts/spec-coverage.ts`: the two scenarios the widened requirement adds
+  are uncited, so the floor moves by two on a line carrying that reason.
+- No tests, no configuration: `rulebook.test.ts` parses the rules sublists,
+  which this does not touch.
