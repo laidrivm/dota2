@@ -163,11 +163,21 @@ service, its volume and its compose file remain Task 7's.
 
 - **Staging's shape is settled before the source that fills it exists** → the
   arithmetic takes staging as an argument shape, so a column STRATZ cannot
-  fill arrives as zeros without the maths changing. The one known case, pick
-  phase, degrades that way only while the zeros are uniform: `src/model.ts`
-  weighs the delta without asking whether it was measured, so zeroing every
-  hero moves no candidate's rank, and zeroing some ranks the measured above
-  the missing. Which staging must therefore never do by halves.
+  fill arrives as zeros without the maths changing. There are two such
+  columns, not one. Pick phase was expected: the granularity exists in
+  STRATZ's schema but only inside its replay-upload subsystem, which no
+  aggregate reaches. Side was not: `data-model.md` §2 lists winrate by
+  Radiant/Dire as a STRATZ input, and the schema offers a faction grouping
+  only under a single player, team or league — never over a rank bracket.
+  `docs/context/stratz-probe-2026-08.md` records both, measured against the
+  live schema rather than against which endpoint names happened to work.
+
+  Both degrade the same way, and only while the zeros are uniform:
+  `src/model.ts` weighs the delta without asking whether it was measured, so
+  zeroing every hero moves no candidate's rank, and zeroing some ranks the
+  measured above the missing. Which staging must therefore never do by
+  halves — *An unmeasured component is zero for every hero* is where that
+  stops being a note in a risk list and becomes a validation failure.
 - **The fallback is the path everything runs on** → development and both test
   suites never touch the database path, which is how it rots. The CI
   integration job is the counterweight, and it is the only thing standing
