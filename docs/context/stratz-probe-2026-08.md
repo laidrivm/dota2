@@ -161,6 +161,9 @@ checkable rather than implicit.
   than by calendar week — its row totals do not reconcile with the ungrouped
   query, and why was not investigated.
 - **A bucket covers Thursday to Wednesday and the current one is empty.**
+  Superseded for the meta component by the second probe below — this describes
+  `heroStats.stats`, which the ingest no longer reads. It still describes
+  `matchUp`, whose only time argument is the same week.
   Every timestamp from 2026-08-13 (Thu) to 2026-08-19 (Wed) returned week 2954
   with an identical 12,852 matches for hero 1; 2026-08-12 returned 2953; and
   2026-08-20, the Thursday the probe ran, returned nothing. The freshest
@@ -178,14 +181,112 @@ checkable rather than implicit.
 
 ## Open, and where it stopped
 
-- **The job's cadence against a weekly bucket.** History being retrievable
-  settles staging's key; what it opens instead is when the job should run at
-  all, and whether `winDay` offers a daily granularity `heroStats.stats` does
-  not. Both belong to the ingest and to whoever sets the schedule, not to the
-  build.
+- **The job's cadence against a weekly bucket.** Answered by the second probe
+  below: `winDay` does offer the daily granularity `heroStats.stats` does not,
+  and the meta component moves to it.
 - **Contest rate's denominator.** `banDay` gives bans with a bracket filter and
   a `day` dimension; picks come from `stats`. Nothing here checked that the two
   cover the same match population, which is what makes `(picks + bans) / matches`
   meaningful.
 - **The `x-steamid-ok: false` header** on every successful response was not
   explained. It did not prevent any query run here.
+
+# Second probe, 2026-08-21 — a daily, mode-filtered source
+
+Written while drafting `snapshot-ingest`. Same environment as above: `curl` on
+macOS, the same token, roughly fifteen requests. Three findings change what the
+ingest is; where they contradict the first probe, they are the newer
+measurement and the older one is named as superseded rather than deleted.
+
+## `winDay` is daily, current, and the only source that filters by game mode
+
+The first probe left `winDay` untested and read `heroStats.stats` as the meta
+component's source. `winDay` is strictly better for it, on three counts
+measured here:
+
+| | `heroStats.stats` | `heroStats.winDay` |
+|---|---|---|
+| Time dimension | week, Thu–Wed | day |
+| Freshest row | week ending the previous Wednesday | the previous day |
+| Bracket enum | `RankBracketBasicEnum` | `RankBracket` |
+| Game-mode filter | none | `gameModeIds` |
+| Cost for all heroes × all positions | 1 request per week | 5 requests, any window |
+
+One `winDay` request — no `heroIds`, `positionIds: [POSITION_1]`,
+`bracketIds: [DIVINE, IMMORTAL]`, `groupBy: HERO_ID`, `take: 30` — returned
+3,784 rows: 127 heroes × 30 days, 2026-07-22 to 2026-08-20. `take` counts days,
+so the window is an argument rather than a series of requests.
+
+The game-mode filter is the decisive one. The product models ranked All Pick,
+and `stats` cannot express that: it has no `gameModeIds` argument, so every
+number the first probe recorded from it pools Turbo and the rest. `winDay`
+takes `gameModeIds: [ALL_PICK_RANKED]`, and doing so cost hero 1 about 1% of
+its position-1 volume — the mode mix at Divine/Immortal is nearly all ranked
+All Pick, but the filter is stated rather than assumed.
+
+**The two endpoints do not reconcile, and this was not explained.** Hero 1,
+Divine/Immortal, position 1, the seven days of week 2954: `winDay` sums to
+25,510 matches where `stats` reports 11,989 for the same week — a ratio of
+2.1, and 2.4 with the position filter dropped on both. Both filters were
+controlled: `positionIds: [POSITION_5]` returns 38–51 a day against position
+1's 3,605, and dropping `bracketIds` raises the daily count from ~4,000 to
+~75,000, so neither argument is being ignored. The likeliest cause is that
+`RankBracketBasicEnum.DIVINE_IMMORTAL` and `RankBracket.[DIVINE, IMMORTAL]`
+are not the same population, but that was not established. It matters because
+`matchUp` takes only the *basic* enum, so the matchup matrices are drawn from
+a differently-scoped population than the meta.
+
+## Per-patch aggregates exist, and are eight months stale
+
+`heroStats.winGameVersion` returns `gameVersionId, heroId, durationMinute,
+winCount, matchCount`, filterable by `positionIds` and `bracketIds` — the
+patch-keyed aggregate `data-model.md` §3.3 assumes staging can be built from,
+in one request for all 127 heroes. It cannot be used:
+
+- `constants.gameVersions` holds 181 entries, newest id 182 = **7.40b**,
+  `asOfDateTime` 2025-12-24.
+- `winGameVersion` returns rows for ids 181, 180, 179 … and **none for 182**,
+  with or without a bracket or position filter. Its newest populated version is
+  7.40, released 2025-12-16.
+- OpenDota's `/api/constants/patch` lists **7.41, released 2026-03-24** —
+  a major patch STRATZ's version list does not know about at all.
+
+So STRATZ's patch attribution stopped roughly eight months before this probe
+while its match data did not: `winDay` returns rows through 2026-08-20. Patch
+detection cannot rest on `constants.gameVersions`, and the current patch's
+aggregates cannot come from `winGameVersion`. OpenDota's patch constant is the
+current source, and it lists majors only — 7.40b is in STRATZ's list and not in
+OpenDota's, so no single source gives a current letter-patch list.
+
+## The request budget, restated against `winDay`
+
+| Call | Requests | Yields |
+|---|---:|---|
+| `winDay` per position | 5 | 127 heroes × every day in the window |
+| `matchUp` per hero | 127 | 126 `vs` + 126 `with` rows, at `take: 200` |
+| `banDay` with `groupByDay: true` | 1 | every hero × `take` days |
+| `constants.heroes` | 1 | the hero reference |
+| OpenDota `/api/constants/patch` | 1 | the patch list |
+
+About 135 requests, unchanged from the first probe's estimate and still under a
+tenth of the hourly 1500 — but now with daily granularity for the meta rather
+than a bucket that moves once a week.
+
+Two argument defaults were measured rather than assumed. `matchUp` defaults to
+`take: 10`, which is why 200 is passed for the full 126 rows; and its `week`
+argument is a Unix timestamp exactly as `stats`'s is — `week: 2954` returns
+nothing, a timestamp inside that week returns the same rows as passing no week
+at all, so the default is the current week. `banDay` requires a `heroId` but
+ignores it under `groupByDay: true`, returning every hero.
+
+## What this settles for the ingest
+
+- The meta component and position shares come from `winDay`, filtered to
+  `ALL_PICK_RANKED`, over the days since the current patch's release. The
+  straddling-week problem the first probe raised does not arise for it.
+- Matchups and synergies stay weekly, from `matchUp`, and carry the population
+  mismatch above.
+- Contest rate needs no extra request: a match holds ten distinct heroes in
+  All Pick, so the total matches in a window is the sum of `matchCount` over
+  every hero divided by 10, and bans come from the single `banDay` call.
+- `constants.gameVersions` is not read at all.
