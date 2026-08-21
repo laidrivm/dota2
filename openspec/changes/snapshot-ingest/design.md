@@ -20,8 +20,12 @@ adds belongs there.
 
 - Staging filled from real matches, over windows derived from the current patch
   rather than from when the job happened to start.
-- A run that is safe to repeat: the same source data leaves the same rows, and
-  a failure leaves the database as it was.
+- A run that is safe to repeat: the same source data and the same run instant
+  leave the same staging rows, and a failure leaves staging as it was. The
+  reference rows and the mirrored files are outside that guarantee by
+  construction, and `hero-reference` states what each leaves behind instead —
+  both are operations a repeat performs identically, which is why they need no
+  rollback rather than why they have none.
 - A request budget that fits the published quota with room, so the schedule the
   deployment sets is unconstrained by it.
 - The transport testable without a network, so the part most likely to break at
@@ -111,6 +115,15 @@ staging rows and insert the run's, inside one transaction. A failure rolls
 back, and the previous rows — and with them the last snapshot that could be
 built — survive untouched.
 
+The run instant is an argument, not a clock reading, for the same reason
+`snapshot-build` takes its build instant as one: without it "the same inputs"
+is not a state anyone can arrange. The windows move with it — two runs either
+side of a UTC midnight cover different days, and either side of a Thursday
+cover different weeks — so a repeat is identical over the same instant and
+deliberately not over a later one. Stating that is what keeps *a re-run
+recomputes the window* from reading as a promise that a nightly job produces
+yesterday's rows.
+
 *Alternative considered*: a table recording each (patch, source, period)
 already fetched, so a re-run resumes. It buys a shorter re-run at the cost of a
 second consistency problem, and the re-run it shortens is about 135 requests
@@ -134,21 +147,29 @@ steps stay separately callable, so a failed export can be re-run without
 re-ingesting — which the export already supports, reading the newest published
 snapshot rather than the one just built.
 
-### The mirrored images are served like the fonts, and cached like them
+### The mirrored images are served like the fonts, and published like the bundle
 
-`/icons/<name>.png` answers `200` with `content-type: image/png` and
-`cache-control: public, max-age=31536000, immutable`, and `404` with an empty
-body for a name the mirror does not hold. The response shape
-`docs/api-design.md` asks to be fixed is a file's, not an envelope's: there is
-no error body to shape as RFC 9457, nothing to paginate, and no cross-origin
-consumer. Immutable is the fonts' reasoning applied unchanged — the filename
-encodes the hero, and the bytes under that name do not change.
+The route's exact response shape is fixed by `hero-reference` §*The mirrored
+images are served from the application's origin* and is not repeated here. What
+belongs here is why it takes that shape. Immutable caching is the fonts'
+reasoning applied unchanged — the filename encodes the hero, and the bytes
+under that name do not change. The route is built from the directory listing,
+as the font routes are, so a request can only ever name a file that is there
+and has no path to traverse out of. Unlike the fonts it cannot be a prebuilt
+map: the directory is written by the job while the server is running, so the
+listing is resolved per request.
 
-The route is built from the directory listing, exactly as the font routes are,
-so a request can only ever name a file that is there and has no path to
-traverse out of. Unlike the fonts it cannot be a prebuilt map: the directory is
-written by the job while the server is running, so the listing is resolved per
-request.
+That last property is what forces the write-then-rename. A prebuilt map would
+have made a half-written file unreachable until restart; a per-request listing
+makes it reachable the moment it is created, so a download that streams into
+its final name is a truncated PNG served to whoever asks during it. The bundle
+faces the same race and `snapshot-export` already answers it the same way, so
+this is the repository's existing idiom rather than a new one.
+
+*Alternative considered*: resolving the listing at startup after all, and
+restarting the server when the job finishes. It trades a race the rename
+already closes for a deployment coupling between the job and the web process,
+which Task 7 would then have to carry.
 
 *Alternative considered*: carrying the source's image URL into the bundle.
 `app-shell` forbids the running application any request off its own origin, so
