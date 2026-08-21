@@ -120,12 +120,24 @@ The window SHALL be measured on the UTC timeline and SHALL be end-exclusive: it
 holds every day that both begins at or after the current patch's `detected_at`
 and ends at or before the run instant, so a day still in progress is never
 half-counted. The basis has to be stated because a local reading of either
-instant shifts the window by a day, and the source's own day key is UTC. WHERE
-that window holds no day the window SHALL be the single most recent complete
-UTC day, so that a patch detected today yields a sample rather than none —
-those matches were played under the previous patch, and carrying them is a
-deliberate approximation that the next day's pull dilutes and the `stabilizing`
-flag `snapshot-export` renders already warns about.
+instant shifts the window by a day, and the source's own day key is UTC.
+
+The window SHALL be the **lesser of that span and the thirty most recent
+complete UTC days**, and the run SHALL record when the cap bound it. Thirty is
+the source's limit and not this change's choice: the endpoint returns thirty
+days whatever page size is asked for, and its skip argument returns nothing at
+all, so no thirty-first day is reachable through it. The cap is tolerable
+because thirty days at these brackets carry several million matches, orders
+above the sufficiency thresholds `snapshot-build` fixes, and because the days a
+cap discards are the oldest ones — the least representative of a current meta.
+It is stated here rather than left in the design so that an implementation
+cannot silently report a 150-day patch as fully covered.
+
+WHERE that window holds no day the window SHALL be the single most recent
+complete UTC day, so that a patch detected today yields a sample rather than
+none — those matches were played under the previous patch, and carrying them is
+a deliberate approximation that the next day's pull dilutes and the
+`stabilizing` flag `snapshot-export` renders already warns about.
 
 The game-mode filter is why this statistic is read by day rather than by week:
 the weekly endpoint offers no such argument, so every number it returns pools
@@ -142,6 +154,13 @@ the modes the product does not model.
 
 - **WHEN** the run instant falls midway through a UTC day
 - **THEN** that day SHALL NOT be part of the window
+
+#### Scenario: A patch older than the source will serve
+
+- **WHEN** the current patch's `detected_at` is 150 whole UTC days before the
+  run instant
+- **THEN** the request SHALL ask for thirty days, and the run SHALL record that
+  the window was bound by the source rather than by the patch
 
 #### Scenario: A patch detected today
 
@@ -210,14 +229,15 @@ the same days, and `matches` is the sum of every hero's match count over that
 window divided by ten. The divisor is exact: an All Pick match holds ten
 distinct heroes, so every match contributes exactly ten to that sum.
 
-The **ratio** is nonetheless an approximation, and SHALL be documented as one
-rather than as a measurement. Picks and the divisor come from one pull; bans
-come from another, which takes the coarse bracket enum and offers no game-mode
-filter at all. The two therefore cover different match populations — measured
-at a factor of about 2.1 between the two bracket enums over the same week and
-position — so the quotient is a contest rate in kind rather than in magnitude.
-It is used to rank heroes against each other, all of them carrying the same
-bias, and never as an absolute share.
+The **ratio** is nonetheless a heuristic, and SHALL be documented as one rather
+than as a measurement. Picks and the divisor come from one endpoint; bans come
+from another, which takes the coarse bracket enum and offers no game-mode
+filter at all. The two therefore describe different match populations. By how
+much is **not known**: the factor of about 2.1 the probe records was measured
+between two other endpoints, and nothing has compared this pair. Neither is it
+known whether the difference falls alike on every hero, which a ranking would
+need. So the quotient orders heroes by contest and is not an absolute share,
+and a later change that measures the pair may narrow that or widen it.
 
 IF the window's matches are 0, every hero's contest rate SHALL be 0 and no
 division SHALL be attempted.
@@ -290,10 +310,12 @@ SHALL exit non-zero WHEN any of the three fails, having reported which. A
 failed run SHALL leave the previously published bundle served, so the
 application never loses the snapshot it had.
 
-Each of the three SHALL also be invocable on its own. The export invoked alone
-SHALL render the newest published snapshot, whichever run built it, so that an
-export that failed can be repeated without paying for the ingest and the build
-again.
+The export SHALL also be invocable on its own, rendering the newest published
+snapshot whichever run built it, so that an export that failed can be repeated
+without paying for the ingest and the build again. That one is named because a
+failing export is the case where repeating the whole run buys nothing; the
+ingest and the build have no such standalone mode in this change, and one
+invented here would be an entry point no task tests and no criterion bounds.
 
 #### Scenario: A run that succeeds
 
