@@ -21,8 +21,9 @@ has never run on a real number. The API key that blocked this arrived, and
   granularity is what makes a nightly job worth running.
 - Matchups and synergies pulled per hero over a bounded number of complete
   weeks, that being the only time dimension their endpoint offers.
-- Contest rate computed from counts the same pulls already return, its
-  denominator stated rather than assumed.
+- Contest rate computed from counts the pulls already return, its denominator
+  exact and its ratio documented as the approximation it is — picks and bans
+  come from endpoints that do not share a population.
 - Patch detection moved off STRATZ. Its version list stopped eight months
   before the probe while its match data did not, so a patch released since is
   invisible to it and every blend would read the wrong `detected_at`.

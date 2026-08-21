@@ -12,6 +12,11 @@ response omits, and `snapshot-build` fails a snapshot whose hero count falls
 below the previous one, so a hero dropped for a single bad response would end
 the run at `failed` rather than merely narrowing the grid.
 
+These rows are written outside the staging transaction and are not undone by a
+later failure. That is safe precisely because the only operations here are an
+insert and a name update, both of which a repeat performs identically and
+neither of which any later step depends on having been rolled back.
+
 #### Scenario: A hero the response omits
 
 - **WHEN** a later response omits a hero the reference tables hold
@@ -28,6 +33,12 @@ the run at `failed` rather than merely narrowing the grid.
 
 - **WHEN** a response carries a hero the reference tables lack
 - **THEN** a row SHALL be inserted with `first_seen_at` set to the run instant
+
+#### Scenario: A run that fails after the upsert
+
+- **IF** the run fails after the hero upsert and before staging commits
+- **THEN** the upserted rows SHALL remain, and a repeat of the run SHALL leave
+  them unchanged
 
 ### Requirement: Patches are detected from a source that is current
 
@@ -46,6 +57,12 @@ The source lists majors only, so in practice every detected patch is major and
 a letter patch is folded into its base version — a coarser prior than
 `snapshot-build` provides for, and the reason this change's proposal names
 letter patches as a non-goal rather than leaving them unmentioned.
+
+The run SHALL fail rather than proceed on a patch list it could not read whole:
+a response that cannot be fetched, one that parses to no patch at all, and one
+whose newest entry lacks a name or a release instant are each a failure, and
+none SHALL leave the ingest running against the patch `patches` happens to hold.
+Proceeding would blend under a `detected_at` no source confirmed this run.
 
 #### Scenario: A patch the table lacks
 
@@ -70,6 +87,18 @@ letter patches as a non-goal rather than leaving them unmentioned.
 - **THEN** it SHALL be the held patch with the latest `detected_at` not after
   the run instant
 
+#### Scenario: The source cannot be reached
+
+- **IF** the patch list request fails after its retries
+- **THEN** the run SHALL fail, and no staging row SHALL be written
+
+#### Scenario: The source answers with nothing usable
+
+- **IF** the patch list parses to no patch, or its newest entry carries no name
+  or no release instant
+- **THEN** the run SHALL fail naming which, and SHALL NOT fall back to the
+  patch `patches` already holds
+
 ### Requirement: Hero images are mirrored to the application's own origin
 
 The ingest SHALL fetch each hero's image once and store it under a directory
@@ -77,6 +106,13 @@ the application serves, and the `icon` a hero carries SHALL be a path on the
 application's own origin. `app-shell` forbids the running application any
 request off its origin, so an image URL carried through from its source would
 be a bundle the client cannot render without breaking that requirement.
+
+Each image SHALL be written to a temporary name and moved to its final one only
+once the whole file is on disk. The serving route resolves the directory per
+request while the job is writing it, so a file appearing under its final name
+before it is complete would be served truncated; the move is what makes the
+appearance and the completeness the same event. The temporary name SHALL be one
+the route cannot serve.
 
 An image already mirrored SHALL NOT be fetched again — the files are immutable
 under their names, and refetching 127 of them nightly would be the run's
@@ -100,6 +136,13 @@ it, not a second download this one performs speculatively.
 - **WHEN** the ingest runs with every hero's file already present
 - **THEN** no image request SHALL be issued
 
+#### Scenario: A read taken while a file is being written
+
+- **WHEN** requests for a hero's image are taken repeatedly across the ingest
+  writing it
+- **THEN** each SHALL answer either the complete file or a `404`, and never
+  part of one
+
 #### Scenario: A new hero whose image cannot be fetched
 
 - **IF** a hero the reference tables lack has no mirrored file and its image
@@ -107,8 +150,40 @@ it, not a second download this one performs speculatively.
 - **THEN** the run SHALL fail, and no `icon` SHALL be stored naming an absent
   file
 
-#### Scenario: The mirrored image is served
+### Requirement: The mirrored images are served from the application's origin
+
+A request for a hero's `icon` path SHALL be answered `200` with
+`content-type: image/png` and `cache-control: public, max-age=31536000,
+immutable`. The filename carries the hero, and the bytes under a given name
+never change, which is the same reason the font routes are cached forever.
+
+A request naming a file the mirror does not hold SHALL be answered `404` with
+an empty body. There is no error envelope to shape: `docs/api-design.md`'s
+RFC 9457 rule reaches a response that carries a body, and this one carries
+none.
+
+The route SHALL resolve the directory's contents per request rather than at
+startup, because the job writes that directory while the server is running, and
+SHALL serve no path outside it.
+
+#### Scenario: A mirrored image
 
 - **WHEN** a request names the `icon` path a hero carries
-- **THEN** the response SHALL carry the mirrored bytes and an image
-  content type
+- **THEN** the response SHALL be `200` carrying the mirrored bytes,
+  `content-type: image/png` and the immutable cache header
+
+#### Scenario: A name the mirror does not hold
+
+- **WHEN** a request names an image file absent from the mirror
+- **THEN** the response SHALL be `404` with an empty body
+
+#### Scenario: A path that climbs out
+
+- **IF** a request names a path that resolves outside the mirror directory
+- **THEN** no file outside it SHALL be served
+
+#### Scenario: A file written after the server started
+
+- **WHEN** the ingest adds a hero's image while the server is running
+- **THEN** the next request for it SHALL be answered from that file, with no
+  restart
