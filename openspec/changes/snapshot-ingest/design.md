@@ -110,9 +110,17 @@ merely lagging: a run reading it would set `detected_at` to a release two
 patches old, `prior(t)` would be zero from the first run onwards, and the
 blending `snapshot-build` specifies would never engage.
 
-The patch list therefore comes from a second source, and `detected_at` is the
-release instant that source states rather than the instant this project first
-saw the patch. The data model glosses the column as first appearance in the
+The patch list therefore comes from OpenDota's `/api/constants/patch`, whose
+entries carry `name` and `date`: `name` becomes the patch name and the
+`base_version` derived from it, and `date` — an ISO 8601 instant — becomes
+`detected_at`. It was chosen for one measured reason: it lists 7.41, released
+2026-03-24, which the statistics API's version list does not know exists. The
+delta spec states the currency the source must have and does not name it, so
+that replacing the vendor is not a change to a requirement; this is where the
+vendor lives.
+
+`detected_at` is thus the release instant the source states rather than the
+instant this project first saw the patch. The data model glosses the column as first appearance in the
 data; the release instant is the better reading of the same intent, because the
 quantity `prior(t)` decays over is how long players have had the patch, not how
 long this repository has been running.
@@ -178,9 +186,18 @@ change that would exercise them.
 
 ### The mirrored images are served like the fonts, and published like the bundle
 
-The route's exact response shape is fixed by `hero-reference` §*The mirrored
-images are served from the application's origin* and is not repeated here. What
-belongs here is why it takes that shape. Immutable caching is the fonts'
+`GET /icons/<shortName>.png` answers `200` with the mirrored bytes,
+`content-type: image/png` and
+`cache-control: public, max-age=31536000, immutable`; a name the mirror does
+not hold answers `404` with an empty body; a path resolving outside the mirror
+directory is served nothing. There is no JSON envelope, so `docs/api-design.md`'s
+RFC 9457 rule has no body to shape, and nothing here paginates or is read
+cross-origin. `hero-reference` §*The mirrored images are served from the
+application's origin* carries the same shape as acceptance criteria and is the
+normative one; this paragraph exists because the design rule asks every endpoint's
+shape to be fixed here too, and the two are edited together.
+
+Immutable caching is the fonts'
 reasoning applied unchanged — the filename encodes the hero, and the bytes
 under that name do not change. The route is built from the directory listing,
 as the font routes are, so a request can only ever name a file that is there
@@ -210,6 +227,22 @@ The pacing the quota needs is "issue no request while eight are already inside
 the last second", which is a timestamp ring and an await. A rate-limiting
 package would be a runtime dependency where the repository has one, for a
 dozen lines whose failure mode is a `429` the retry policy already handles.
+
+### Every attempt is bounded by a timeout, because nothing else bounds it
+
+`fetch` waits indefinitely by default, and pacing and retries both assume a
+request eventually returns. A connection that stalls therefore does not fail the
+run — it suspends it, and the job's whole contract is that it reaches one
+outcome and reports it. Thirty seconds per attempt is generous against responses
+measured at 17 KB and a second at most, and an abandoned attempt retries on the
+same terms as a `5xx` because a stall and a bad gateway are the same thing to a
+caller.
+
+*Alternative considered*: one deadline for the whole run instead of one per
+attempt. It bounds the run as well, but it cannot distinguish a stalled request
+from a slow one, so the retry policy loses the signal it acts on — and the
+per-second pacing already makes the run's total duration predictable from its
+request count.
 
 ### Tests: the transport is pure, the database edge reuses the build's CI job
 
