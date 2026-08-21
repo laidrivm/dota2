@@ -55,7 +55,25 @@ Thursday to Wednesday, so the freshest complete one is up to eight days old and
 moves once a week; a nightly job over it would rebuild an identical snapshot
 six nights in seven. Days move nightly, which is what makes a nightly schedule
 worth setting. Cost falls too: one request per position covers every hero over
-any window, because the window is an argument rather than a series of requests.
+the whole window, because the window is an argument rather than a series of
+requests.
+
+The window is not unbounded, and the bound is the source's. The endpoint serves
+the thirty most recent days and no more: a larger page size returns the same
+thirty, and its skip argument returns nothing where skip zero returns thirty
+rows. The current patch is five times that age, so the meta rests on its last
+thirty days. That is tolerable on sample size — thirty days at these brackets
+is millions of matches against sufficiency thresholds in the hundreds — and the
+days a cap discards are the oldest, which a current meta wants least. The
+requirement states the cap and makes the run record when it bound, rather than
+leaving a 150-day patch to read as fully covered.
+
+*Alternative considered*: `winWeek`, which takes the same filters, the game
+mode included, and reached nineteen weeks when it was measured. It would lift
+the cap at the cost of the granularity this decision was made for, and of
+reconciling a weekly tail against a daily head without double-counting their
+overlap. Recorded rather than taken — it is the only measured way to widen the
+window, and the day it is wanted the measurement is already here.
 
 *Alternative considered*: keeping the weekly endpoint and summing its buckets
 into a patch window, which is what the first probe's finding suggested. It
@@ -126,8 +144,10 @@ yesterday's rows.
 
 *Alternative considered*: a table recording each (patch, source, period)
 already fetched, so a re-run resumes. It buys a shorter re-run at the cost of a
-second consistency problem, and the re-run it shortens is about 135 requests
-against a daily ceiling of 15,000.
+second consistency problem, and the re-run it shortens is about 516 requests
+against a daily ceiling of 15,000. Most of that is the pair pull: one request
+per hero per week, four weeks, so 508 of the 516. The meta costs five whatever
+the window.
 
 ### The pair pull is capped at four weeks, and says so
 
@@ -142,10 +162,14 @@ in the output reads afterwards as complete coverage.
 
 The job is a function that calls the ingest, the build and the export in order
 and returns which failed. It owns no schedule and no alert; the deployment
-change owns both, and both want an exit code rather than a log line. The three
-steps stay separately callable, so a failed export can be re-run without
-re-ingesting — which the export already supports, reading the newest published
-snapshot rather than the one just built.
+change owns both, and both want an exit code rather than a log line.
+
+The export alone is separately invocable, so a failed export can be repeated
+without re-ingesting — which it already supports, reading the newest published
+snapshot rather than the one just built. The ingest and the build get no such
+mode. A standalone entry point is an interface: it needs its inputs, its
+outputs and its failure semantics fixed, and neither has a caller in this
+change that would exercise them.
 
 ### The mirrored images are served like the fonts, and published like the bundle
 
