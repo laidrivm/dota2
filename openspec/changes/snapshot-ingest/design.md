@@ -82,12 +82,17 @@ measures.
 
 ### The two endpoints do not agree, and only one of them can be fixed
 
-The pair endpoint has no game-mode filter either, and takes a different bracket
-enum. Measured over the same week, bracket and position, the two disagree by a
-factor of about 2.1, and the cause was not established. Both filters were
-controlled, so neither is being ignored; the likeliest explanation is that the
-coarse bracket enum the pair endpoint takes is not the same population as the
-two fine-grained brackets the daily endpoint takes.
+The pair endpoint has no game-mode filter either, and takes the coarse bracket
+enum rather than the two fine-grained ones the daily endpoint takes.
+
+What was measured is one pair and not this one: over the same week, bracket
+family and position, the daily endpoint and the *weekly* one disagree by a
+factor of about 2.1, with both filters controlled so neither is being ignored,
+and the cause unestablished. The pair endpoint takes the same coarse enum as
+that weekly one and offers no mode filter either, so it sits on the same side
+of whatever produces the difference — but nothing has measured it, and the size
+of its own gap is unknown. Carrying the 2.1 across to it would be an assumption
+wearing a measurement's digits.
 
 This is accepted rather than resolved, because what the pair endpoint yields is
 an *advantage* — a difference between a pair's winrate and the neutral 50 —
