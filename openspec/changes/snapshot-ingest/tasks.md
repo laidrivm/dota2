@@ -3,7 +3,7 @@
 Test tasks are derived from the proposal-stage `/zombies` run and are written
 before the module they cover (docs/testing.md — TDD for edge cases). The
 bracketed numbers are that run's idea numbers, so every one of its 62 ideas is
-traceable to the group that closes it. Numbers 63 to 69 are the review's own,
+traceable to the group that closes it. Numbers 63 to 70 are the reviews' own,
 added where a finding named a case the run had missed.
 
 Six groups, so six pull requests on `feat/snapshot-ingest-1` … `-6`, in order.
@@ -127,7 +127,9 @@ one's.
       five position pulls produce one row per hero and position with none
       overwriting another [22]; the day boundary is counted in UTC, so a run
       instant whose local date is a day ahead does not add a day [26]; the day
-      the run instant falls inside is not part of the window [64]. (Req:
+      the run instant falls inside is not part of the window [64]; a patch 150
+      days old is pulled over thirty days and the run records that the source
+      bound the window, not the patch [70]. (Req:
       snapshot-ingest — The meta is pulled by day over the current patch's
       life)
 - [ ] 4.2 Write the meta-request tests: the request names the ranked All Pick
@@ -149,9 +151,10 @@ one's.
       [30]. (Req: snapshot-ingest — Pair statistics are pulled per hero over
       at most four weeks)
 - [ ] 4.5 Implement the meta pull: one request per position over the
-      UTC-normalised, end-exclusive window, the game mode and brackets named at
-      one site, summed into staging rows. (Req: snapshot-ingest — The meta is
-      pulled by day over the current patch's life)
+      UTC-normalised, end-exclusive window capped at the thirty days the source
+      serves, the game mode and brackets named at one site, summed into staging
+      rows, and the cap reported when it bound. (Req: snapshot-ingest — The
+      meta is pulled by day over the current patch's life)
 - [ ] 4.6 Implement the pair pull: one request per hero per week over the
       lesser of four and the weeks the patch has been live, asking for every
       opponent, summed across the weeks, and reporting the weeks covered.
@@ -195,10 +198,10 @@ one's.
       exits non-zero [60]; the export invoked alone renders the newest
       published snapshot and exits zero with no request to the statistics API
       [61]. (Req: snapshot-ingest — The job carries a run to one outcome)
-- [ ] 6.2 Implement the entry point: ingest, then build, then export, each
-      separately invocable, returning which step failed and exiting non-zero
-      when one did. (Req: snapshot-ingest — The job carries a run to one
-      outcome)
+- [ ] 6.2 Implement the entry point: ingest, then build, then export,
+      returning which step failed and exiting non-zero when one did, with the
+      export — and only the export — also invocable on its own. (Req:
+      snapshot-ingest — The job carries a run to one outcome)
 - [ ] 6.3 Write the end-to-end test: a seeded source runs ingest → build →
       export and the served bundle is accepted by the client's loader [62].
       (Req: snapshot-ingest — The job carries a run to one outcome)
