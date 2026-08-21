@@ -96,23 +96,21 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       `openspec/changes/snapshot-build/`. The schema, the blending, smoothing
       and sufficiency maths, and the export of a bundle to the served URL. It
       takes staging as given, so it needs no API key and can start now, and
-      the staging shape it settles is the contract 3b fills — revised on
-      `spec/snapshot-build` once the probe showed that contract could not
-      publish a bundle at all. Eight task groups, so `feat/snapshot-build-1`
-      through `-8`, in order. Owns no
+      the staging shape it settles is the contract 3b fills — revised once the
+      probe showed that contract could not publish a bundle at all. Eight task
+      groups, so `feat/snapshot-build-1` through `-8`, in order. Owns no
       *deployed* infrastructure — the production Postgres service, the
       schedule and the failure alert are Task 7's, and none of them gates it.
-- [ ] **Phase 3b — snapshot ingest** — the STRATZ client and its rate-limit
-      budget, the upserts into the reference tables, the icon mirroring, and
-      the nightly job that drives 3a to a published snapshot or a failed one.
-      No longer blocked; `docs/context/stratz-probe-2026-08.md` holds what
-      the key measured, including the quota the job fits inside. Neither pick
-      phase nor the side split is reachable from any STRATZ aggregate, so
-      both ship as zeros on every hero — `snapshot-build`'s *An unmeasured
-      component is zero for every hero* specifies that and refuses it by
-      halves. Still open: hero icons, absent from STRATZ's schema entirely;
-      whether per-patch aggregates are retrievable, staging being patch-keyed
-      where STRATZ buckets by week; and `.env.example`.
+- [ ] **Phase 3b — `snapshot-ingest`** — proposed,
+      `openspec/changes/snapshot-ingest/`. The rate-limited STRATZ client, the
+      reference upserts, the mirrored hero images, and the entry point that
+      drives 3a to a published snapshot or a failed one. Six task groups, so
+      `feat/snapshot-ingest-1` through `-6`, in order. A second probe moved
+      three assumptions, all in `docs/context/stratz-probe-2026-08.md`: the
+      meta comes from a daily endpoint that can filter the game mode, patch
+      detection leaves STRATZ whose version list stalled eight months back,
+      and hero images come from Valve's CDN by way of OpenDota's index. Owns
+      no schedule — Task 7 sets when the job runs and alerts when it stops.
 - [ ] **Task 7** — the whole deployment: Docker image, compose (`app` +
       `postgres`, bundle on a volume both mount), the snapshot job's entry in
       the VPS's existing crontab, the failure alert, and the deploy workflow.
