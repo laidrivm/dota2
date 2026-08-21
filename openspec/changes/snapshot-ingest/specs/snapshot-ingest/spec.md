@@ -85,13 +85,19 @@ from the one the service enforces.
 
 ### Requirement: A request is retried only where retrying can succeed
 
-A request answered `429` or any `5xx` SHALL be retried up to four attempts in
-total, the delay before each retry twice the one before it and the first one
-second. A request answered any other `4xx` SHALL NOT be retried, its status
-being a statement about the request rather than about the service. A request
-still failing on the fourth attempt SHALL end the run failed. *A run stays
-inside the quota the API states* removes from this rule the one `429` that
-carries no remaining quota.
+Every attempt SHALL be abandoned after 30 seconds without a complete response,
+and an abandoned attempt SHALL be retried on the same terms as a `5xx`. Nothing
+else in this change bounds how long a request may take, and an unbounded one is
+worse than a failing one: the job's single outcome is reached by the entry point
+returning, and a connection that never completes never lets it.
+
+A request answered `429` or any `5xx`, or abandoned at that timeout, SHALL be
+retried up to four attempts in total, the delay before each retry twice the one
+before it and the first one second. A request answered any other `4xx` SHALL NOT
+be retried, its status being a statement about the request rather than about the
+service. A request still failing on the fourth attempt SHALL end the run failed.
+*A run stays inside the quota the API states* removes from this rule the one
+`429` that carries no remaining quota.
 
 #### Scenario: A transient failure
 
@@ -103,6 +109,18 @@ carries no remaining quota.
 
 - **IF** a request is answered `400`
 - **THEN** exactly one attempt SHALL have been made
+
+#### Scenario: A request that never completes
+
+- **IF** a request has been open for 30 seconds with no complete response
+- **THEN** that attempt SHALL be abandoned and retried, and the run SHALL NOT
+  wait on it further
+
+#### Scenario: A stall that does not clear
+
+- **IF** all four attempts are abandoned at the timeout
+- **THEN** the run SHALL end failed, and the entry point SHALL still reach its
+  exit
 
 #### Scenario: A failure that does not clear
 
@@ -226,7 +244,14 @@ cross a patch release, and no argument the endpoint offers can split it.
 For each hero the ingest SHALL store `(picks + bans) / matches`, where `picks`
 is that hero's match count over the meta window, `bans` is its ban count over
 the same days, and `matches` is the sum of every hero's match count over that
-window divided by ten. The divisor is exact: an All Pick match holds ten
+window divided by ten.
+
+`bans` comes from a request of its own — the pick counts carry no ban dimension
+— and that request SHALL cover the same days as the meta window and SHALL
+return every hero rather than one. IF it fails, the run SHALL fail: a contest
+rate stored from picks alone is not the quantity this requirement defines, and
+it would be indistinguishable afterwards from one whose heroes were simply never
+banned. The divisor is exact: an All Pick match holds ten
 distinct heroes, so every match contributes exactly ten to that sum.
 
 The **ratio** is nonetheless a heuristic, and SHALL be documented as one rather
@@ -253,6 +278,18 @@ division SHALL be attempted.
 - **WHEN** two heroes have equal pick counts and one has bans and the other
   none
 - **THEN** the one with bans SHALL have the higher contest rate
+
+#### Scenario: The ban request's window
+
+- **WHEN** the ban counts are requested
+- **THEN** the days asked for SHALL be the days of the meta window, and the
+  response SHALL cover every hero
+
+#### Scenario: Bans cannot be read
+
+- **IF** the ban request fails after its retries
+- **THEN** the run SHALL fail, and no contest rate SHALL be stored from picks
+  alone
 
 #### Scenario: A window with no matches
 

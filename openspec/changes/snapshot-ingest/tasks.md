@@ -3,7 +3,7 @@
 Test tasks are derived from the proposal-stage `/zombies` run and are written
 before the module they cover (docs/testing.md — TDD for edge cases). The
 bracketed numbers are that run's idea numbers, so every one of its 62 ideas is
-traceable to the group that closes it. Numbers 63 to 70 are the reviews' own,
+traceable to the group that closes it. Numbers 63 to 74 are the reviews' own,
 added where a finding named a case the run had missed.
 
 Six groups, so six pull requests on `feat/snapshot-ingest-1` … `-6`, in order.
@@ -30,7 +30,10 @@ one's.
 - [ ] 1.3 Write the retry tests: the three delays between four attempts are
       1s, 2s and 4s [8]; the fourth failing attempt issues no fifth [9]; a
       `500` then a `200` returns the second body and continues [13]; a `400`
-      is attempted exactly once [14]; four consecutive `429`s **with quota
+      is attempted exactly once [14]; an attempt open for 30 seconds with no
+      complete response is abandoned and retried rather than waited on [71];
+      four attempts all abandoned at the timeout end the run failed, the entry
+      point still reaching its exit [72]; four consecutive `429`s **with quota
       remaining** end the run failed [15]; a `429` **reporting zero remaining**
       is attempted exactly once, the quota rule taking precedence over this one
       [63]. (Req: snapshot-ingest — A request is retried only where retrying
@@ -43,8 +46,9 @@ one's.
       status alone)
 - [ ] 1.5 Implement the client: the two headers, the key read once at
       construction, the queue that holds a request while eight sit inside the
-      last second, the retry policy with the quota rule ahead of it, and the
-      classification that reads the body before deciding what failed. (Req:
+      last second, the 30-second per-attempt timeout, the retry policy with the
+      quota rule ahead of it, and the classification that reads the body before
+      deciding what failed. (Req:
       snapshot-ingest — Every request carries both halves of the gate / A
       response is classified by its body, not its status alone / A run stays
       inside the quota the API states / A request is retried only where
@@ -78,10 +82,11 @@ one's.
       a run failing after the upsert leaves those rows, and a repeat leaves
       them unchanged [66]. (Req: hero-reference — A hero is upserted and never
       removed)
-- [ ] 2.4 Implement patch detection against the second source, including the
-      major/letter split, the insert-once rule and the three failure paths,
-      with a comment naming why the statistics API's own version list is not
-      read. (Req: hero-reference — Patches are detected from a source that is
+- [ ] 2.4 Implement patch detection against OpenDota's
+      `/api/constants/patch`, mapping `name` to the patch name and
+      `base_version` and `date` to `detected_at`, including the major/letter
+      split, the insert-once rule and the three failure paths, with a comment
+      naming why the statistics API's own version list is not read. (Req: hero-reference — Patches are detected from a source that is
       current)
 - [ ] 2.5 Implement the hero upsert with no delete path at all, so removal is
       absent rather than guarded. (Req: hero-reference — A hero is upserted
@@ -178,11 +183,19 @@ one's.
       [37]; a run writing a newer patch leaves the previous patch's rows and
       removes anything older [38]. (Req: snapshot-ingest — A run leaves
       staging whole or leaves it untouched)
-- [ ] 5.3 Implement the contest formula over the counts the meta and ban pulls
-      already return, with the divisor carrying the comment naming why it is
-      exact and the ratio carrying the one naming why it is not. (Req:
-      snapshot-ingest — Contest rate is a share of the window's matches)
-- [ ] 5.4 Implement the staging write as a delete-then-insert inside one
+- [ ] 5.3 Write the ban-pull tests: the days requested are the meta window's
+      and the response covers every hero [73]; a ban request failing after its
+      retries fails the run rather than storing a contest rate from picks alone
+      [74]. (Req: snapshot-ingest — Contest rate is a share of the window's
+      matches)
+- [ ] 5.4 Implement the ban pull as its own request over the meta window's
+      days, returning every hero, since the pick counts carry no ban dimension.
+      (Req: snapshot-ingest — Contest rate is a share of the window's matches)
+- [ ] 5.5 Implement the contest formula over the counts the meta and ban pulls
+      return, with the divisor carrying the comment naming why it is exact and
+      the ratio carrying the one naming why it is not. (Req: snapshot-ingest —
+      Contest rate is a share of the window's matches)
+- [ ] 5.6 Implement the staging write as a delete-then-insert inside one
       transaction, taking the run instant as an argument, with the retention
       that drops anything older than the previous patch. (Req: snapshot-ingest
       — A run leaves staging whole or leaves it untouched)
