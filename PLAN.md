@@ -80,18 +80,20 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
 - **`pre-push-parity`** — PRs #111 and #112,
   `archive/2026-08-16-pre-push-parity`; the hook's gate list is in
   `openspec/specs/commit-gates/`.
+- **`rulebook-doc-reach`** — PR #134,
+  `archive/2026-08-19-rulebook-doc-reach`; the widened reach is in
+  `openspec/specs/agent-rulebook/`.
 
 ### Open
 
-- [x] **`rulebook-doc-reach`** — merged as PR #134, awaiting `/opsx:archive`;
-      `openspec/changes/rulebook-doc-reach/`. `agent-rulebook`'s rule that a
-      mechanised prohibition loses its prose now reaches the docs indexed from
-      `CLAUDE.md` rather than `CLAUDE.md` alone, with `docs/context/` named as
-      out of reach. Its sweep against the command guard and the two hooks
-      found one sentence still in reach — the `npx` half of a dependency rule
-      that `.claude/settings.json:4` already denies — and left the rest, each
-      already narrowed to what its own mechanism cannot see. It ships whole on
-      `chore/rulebook-doc-reach`.
+- [ ] **`proposal-slicing`** — proposed,
+      `openspec/changes/proposal-slicing/`. A propose-stage branch at or over
+      the diff budget's failing threshold splits into `spec/<slug>` and
+      `spec/<slug>-plan` — the seam PRs #130 and #132 already cut — and the
+      `oversize:` override stops admitting an unsplit one. One task group, so
+      `chore/proposal-slicing`. Ahead of Phases 3a and 3b at the user's
+      request, stepping over both; PR #141 merges before its group lands, or
+      splits.
 - [ ] **Phase 3a — `snapshot-build`** — proposed,
       `openspec/changes/snapshot-build/`. The schema, the blending, smoothing
       and sufficiency maths, and the export of a bundle to the served URL. It
