@@ -41,5 +41,7 @@ rules:
     - Include a test task derived from /zombies output
     - Each task cites the requirement(s) or acceptance criteria it fulfils;
       every criterion is cited by at least one task
+    - Every behaviour a task names a test for has a criterion in a delta
+      spec — a task list is not a contract
     - Group the tasks into steps, one `## <n>. <group>` heading per step —
       the unit the proposal rule above scopes and /CLAUDE.md branches on
