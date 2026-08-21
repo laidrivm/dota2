@@ -15,7 +15,9 @@ Treat the numbers as a snapshot, not a contract.
 ## Conclusion
 
 The key works and the job fits inside the rate limit with room to spare — the
-whole nightly pull is about 130 requests against a ceiling of 1500 per hour.
+whole nightly pull is about 516 requests against a ceiling of 1500 per hour
+(the second probe's count; this line first carried 130, which undercounted
+`matchUp` by a factor of four).
 The cost is elsewhere: **two of the model's components cannot be sourced from
 STRATZ at all**, and only one of them was expected.
 
@@ -57,9 +59,10 @@ Against that, a full nightly pull costs roughly:
 | `heroStats.banDay` | a few | ban counts for contest rate |
 
 `data-model.md` §8.1 kept "растянуть джоб во времени" as the contingency for
-insufficient quota. It is not needed: ~130 requests is under a tenth of the
-hourly ceiling, and the per-second ceiling of 8 is the only one a naive loop
-could trip.
+insufficient quota. It is not needed: the per-second ceiling of 8 is the only
+one a naive loop could trip. The request count in the table above is
+superseded — see the second probe's budget, which reads `matchUp` as one
+request per hero **per week** and lands at about 516 rather than 130.
 
 ## Pick phase is not available — §8.2 answered
 
@@ -140,9 +143,11 @@ checkable rather than implicit.
   matches across the 635 position rows — far above the 500/1000 sufficiency
   thresholds, and unlike OpenDota's matchup endpoint, not at the level of its
   own noise.
-- **One `matchUp` request per hero returns both matrices.** `HeroDryadType`
-  carries `with` and `vs` side by side, each 126 rows, with `matchCount`,
-  `winCount`, `synergy` and `winRateHeroId1`. 17 KB per hero.
+- **One `matchUp` request per hero returns both matrices — for one week.**
+  `HeroDryadType` carries `with` and `vs` side by side, each 126 rows, with
+  `matchCount`, `winCount`, `synergy` and `winRateHeroId1`. 17 KB per hero.
+  Per hero *per week*: the week is the endpoint's only time dimension, which is
+  what the budget above got wrong.
 - **No hero icon anywhere in the schema.** `HeroType` carries `id`, `name`,
   `displayName`, `shortName`, `aliases`, and no image or URL field; a search
   across every `Hero*` type for `img`/`image`/`icon`/`url`/`portrait` returned
@@ -210,12 +215,27 @@ measured here:
 | Freshest row | week ending the previous Wednesday | the previous day |
 | Bracket enum | `RankBracketBasicEnum` | `RankBracket` |
 | Game-mode filter | none | `gameModeIds` |
-| Cost for all heroes × all positions | 1 request per week | 5 requests, any window |
+| Cost for all heroes × all positions | 1 request per week | 5 requests |
+| Reach | any week, back to 2920 | the 30 most recent days, no page past them |
 
 One `winDay` request — no `heroIds`, `positionIds: [POSITION_1]`,
 `bracketIds: [DIVINE, IMMORTAL]`, `groupBy: HERO_ID`, `take: 30` — returned
 3,784 rows: 127 heroes × 30 days, 2026-07-22 to 2026-08-20. `take` counts days,
 so the window is an argument rather than a series of requests.
+
+**Thirty days is the ceiling, and there is no page past it.** `take: 200`
+returns the same 30 days, and `skip: 30` and `skip: 120` each return nothing
+where `skip: 0` returns 30 rows — so the argument is being honoured and the
+data behind it is not there. The current patch is 150 days old, so an ingest
+reading only `winDay` covers the last fifth of it.
+
+`winWeek` takes the same filters, `gameModeIds` included, and reaches further:
+`take: 40` returned 19 weeks, 2026-04-09 to 2026-08-13. That is a longer window
+at coarser granularity, two weeks short of the patch. It is not used — thirty
+days at these brackets is already millions of matches, orders above the
+sufficiency thresholds, and the days a cap discards are the oldest — but it is
+recorded because the cap is now load-bearing and this is the only thing
+measured that would lift it.
 
 The game-mode filter is the decisive one. The product models ranked All Pick,
 and `stats` cannot express that: it has no `gameModeIds` argument, so every
@@ -262,15 +282,21 @@ OpenDota's, so no single source gives a current letter-patch list.
 
 | Call | Requests | Yields |
 |---|---:|---|
-| `winDay` per position | 5 | 127 heroes × every day in the window |
-| `matchUp` per hero | 127 | 126 `vs` + 126 `with` rows, at `take: 200` |
+| `winDay` per position | 5 | 127 heroes × up to 30 days, one request per position |
+| `matchUp` per hero per week | up to 508 | 126 `vs` + 126 `with` rows, at `take: 200` |
 | `banDay` with `groupByDay: true` | 1 | every hero × `take` days |
 | `constants.heroes` | 1 | the hero reference |
 | OpenDota `/api/constants/patch` | 1 | the patch list |
 
-About 135 requests, unchanged from the first probe's estimate and still under a
-tenth of the hourly 1500 — but now with daily granularity for the meta rather
-than a bucket that moves once a week.
+**About 516 requests, not the 135 the first probe estimated.** The difference
+is entirely `matchUp`: its only time dimension is a week, so the ingest's cap of
+four complete weeks costs 4 × 127 rather than 127. That is still about a third
+of the hourly 1500 and a thirtieth of the daily 15000, so the job fits — but
+the per-second ceiling of 8 now sets a floor on how long it takes, a little
+over a minute of pure pacing rather than seventeen seconds.
+
+The first probe's "about 130 requests" is superseded. It assumed one `matchUp`
+request per hero, which is one hero-week, not one hero.
 
 Two argument defaults were measured rather than assumed. `matchUp` defaults to
 `take: 10`, which is why 200 is passed for the full 126 rows; and its `week`
@@ -282,10 +308,11 @@ ignores it under `groupByDay: true`, returning every hero.
 ## What this settles for the ingest
 
 - The meta component and position shares come from `winDay`, filtered to
-  `ALL_PICK_RANKED`, over the days since the current patch's release. The
-  straddling-week problem the first probe raised does not arise for it.
-- Matchups and synergies stay weekly, from `matchUp`, and carry the population
-  mismatch above.
+  `ALL_PICK_RANKED`, over the lesser of the days since the current patch's
+  release and the thirty the endpoint will serve. The straddling-week problem
+  the first probe raised does not arise for it.
+- Matchups and synergies stay weekly, from `matchUp`, one request per hero per
+  week, and carry the population mismatch above.
 - Contest rate needs no extra request, but it is an approximation and not a
   measurement. The **divisor** is exact: a match holds ten distinct heroes in
   All Pick, so the total matches in a window is the sum of `matchCount` over
