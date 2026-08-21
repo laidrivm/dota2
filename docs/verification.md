@@ -28,6 +28,8 @@ What counts as evidence for a claim, and what a claim may rest on.
   the settings file per tool call and is observable at once.
 - Record the cause a measurement establishes, not the one it merely permits —
   name the alternatives ruled out.
+- Name what a measurement was taken over beside its number, and cite it for
+  nothing else.
 - Re-run the failure probe that justified an assertion after rewriting it.
 - Verify what a thing does against the thing, never against what governs it —
   a git hook is what `.git/hooks/` holds, not what `package.json` declares,
