@@ -318,9 +318,12 @@ ignores it under `groupByDay: true`, returning every hero.
   All Pick, so the total matches in a window is the sum of `matchCount` over
   every hero divided by 10. The **numerator** is not, because picks come from
   `winDay` and bans from `banDay`, and those two do not share a population —
-  `banDay` takes the basic bracket enum and offers no game-mode filter at all,
-  the same pairing that showed a factor of 2.1 above. So the first probe's open
-  question about the denominator is closed and a different one is opened in its
-  place: `(picks + bans) / matches` ranks heroes against each other, all of them
-  carrying the same bias, and is not an absolute share.
+  `banDay` takes the basic bracket enum and offers no game-mode filter at all.
+  How far apart they are was **not measured**: the 2.1 above is `winDay` against
+  `stats`, a different pair, and carrying it here would be an assumption wearing
+  a measurement's digits. Nor is it known whether the difference falls alike on
+  every hero, which a ranking needs. So the first probe's open question about
+  the denominator is closed and a different one is opened in its place:
+  `(picks + bans) / matches` orders heroes by contest and is not an absolute
+  share.
 - `constants.gameVersions` is not read at all.
