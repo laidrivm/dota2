@@ -286,7 +286,14 @@ ignores it under `groupByDay: true`, returning every hero.
   straddling-week problem the first probe raised does not arise for it.
 - Matchups and synergies stay weekly, from `matchUp`, and carry the population
   mismatch above.
-- Contest rate needs no extra request: a match holds ten distinct heroes in
+- Contest rate needs no extra request, but it is an approximation and not a
+  measurement. The **divisor** is exact: a match holds ten distinct heroes in
   All Pick, so the total matches in a window is the sum of `matchCount` over
-  every hero divided by 10, and bans come from the single `banDay` call.
+  every hero divided by 10. The **numerator** is not, because picks come from
+  `winDay` and bans from `banDay`, and those two do not share a population —
+  `banDay` takes the basic bracket enum and offers no game-mode filter at all,
+  the same pairing that showed a factor of 2.1 above. So the first probe's open
+  question about the denominator is closed and a different one is opened in its
+  place: `(picks + bans) / matches` ranks heroes against each other, all of them
+  carrying the same bias, and is not an absolute share.
 - `constants.gameVersions` is not read at all.
