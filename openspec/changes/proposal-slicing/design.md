@@ -85,9 +85,11 @@ the propose-stage remedy is the one that prints.
 
 ## Risks / Trade-offs
 
-- **PR #141 begins to fail the moment the check lands** → it merges before this
-  change's task group, or it splits. Named in the proposal's impact rather than
-  discovered by CI.
+- **A branch already over the threshold begins to fail the moment the check
+  lands** → nothing open is in that state; #141 was the one that would have
+  been, and it was split by hand into #141 and #142 along this seam before the
+  check existed. A future one merges before this change's task group, or it
+  splits.
 - **A proposal that genuinely wants all four artefacts in one pull request has
   no way out** → that is the point, and the escape is the seam rather than a
   marker. If a case appears where the seam is wrong, it is a case against the

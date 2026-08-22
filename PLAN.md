@@ -89,11 +89,10 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
 - [ ] **`proposal-slicing`** — proposed,
       `openspec/changes/proposal-slicing/`. A propose-stage branch at or over
       the diff budget's failing threshold splits into `spec/<slug>` and
-      `spec/<slug>-plan` — the seam PRs #130 and #132 already cut — and the
-      `oversize:` override stops admitting an unsplit one. One task group, so
-      `chore/proposal-slicing`. Ahead of Phases 3a and 3b at the user's
-      request, stepping over both; PR #141 merges before its group lands, or
-      splits.
+      `spec/<slug>-plan` — the seam #130/#132 and #141/#142 each cut by hand —
+      and the `oversize:` override stops admitting an unsplit one. One task
+      group, so `chore/proposal-slicing`. Ahead of Phases 3a and 3b in the
+      queue, stepping over both.
 - [ ] **Phase 3a — `snapshot-build`** — proposed,
       `openspec/changes/snapshot-build/`. The schema, the blending, smoothing
       and sufficiency maths, and the export of a bundle to the served URL. It
