@@ -86,24 +86,6 @@ export const stalls = (): Reply => (init) =>
 	});
 
 /**
- * An attempt whose headers arrive but whose body never finishes streaming.
- * A status alone is not a complete response, so this is the other half of the
- * stall `stalls` covers — and the one a client that stopped its clock at the
- * headers would sit on for ever.
- */
-export const stallsMidBody = (): Reply => async (init) =>
-	new Response(
-		new ReadableStream({
-			start(controller) {
-				init.signal?.addEventListener("abort", () =>
-					controller.error(new Error("the body was abandoned")),
-				);
-			},
-		}),
-		{ status: 200, headers: { "content-type": "application/json" } },
-	);
-
-/**
  * The error `work` raised, or `undefined` where it did not — so a test that is
  * about a failure asserts on the failure rather than on a rejection landing.
  *
