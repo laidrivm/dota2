@@ -145,6 +145,29 @@ guards a vendor's format rather than describing a branch this source is
 expected to take: were OpenDota to list `7.41b` tomorrow, the rule stores it
 under `base_version` `7.41` instead of inventing a major that does not exist.
 
+### The ban endpoint's three surprises
+
+`banDay` is one request for the whole reference, but three of its details are
+not what its signature suggests, all measured in
+`docs/context/stratz-probe-2026-08.md`.
+
+`heroId` is a required argument that does not filter. Omitting it is a
+`PROVIDED_NON_NULL_ARGUMENTS` error; supplying `1` and supplying `45` return
+the same 3641 rows over all 127 heroes. The client passes a constant and
+carries a comment saying why, because the obvious reading of this call is that
+it fetches one hero and the obvious fix — a loop over the reference — would
+multiply the request count by 127 for identical data.
+
+`day` is a day number counted from the epoch, not a Unix timestamp. `winDay`'s
+`day` argument *is* a Unix timestamp, measured in the first probe. The window
+arithmetic therefore cannot be shared between the two pulls, and each converts
+its own bound.
+
+There is no `banCount`. `HeroBanType` carries `matchCount`, and on this
+endpoint that is the ban count. The mapping is named where it is read, since a
+field called `matchCount` landing in a column called `bans` is exactly the line
+a later reader would "fix".
+
 ### Staging is replaced in one transaction; there is no ledger of what was pulled
 
 Every window this change defines is a function of the current patch and the run

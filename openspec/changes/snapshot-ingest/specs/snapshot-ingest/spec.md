@@ -251,11 +251,16 @@ window divided by ten.
 one request asking for every hero rather than one request per hero. IF it
 fails, the run SHALL fail: a contest rate stored from picks alone is not the
 quantity this requirement defines, and it would be indistinguishable afterwards
-from one whose heroes were simply never banned. A hero the response omits SHALL
-be read as zero bans: silence from a count endpoint is a zero, and whether this
-one omits never-banned heroes at all is unmeasured — so failing the run on a
-short response would fail it on any window in which some hero simply went
-unbanned. The divisor is exact: an All Pick match holds ten
+from one whose heroes were simply never banned.
+
+The response carries one row per hero and day banned, and SHALL be read as
+carrying no row where there were no bans: the probe measured 3641 rows over 127
+heroes and 30 days against a full grid of 3810, with no row carrying a count of
+zero and 51 heroes missing at least one day
+(`docs/context/stratz-probe-2026-08.md`). A missing pair SHALL therefore
+contribute zero bans and SHALL NOT fail the run — a run that required the full
+grid would fail on nearly every window. The divisor is exact: an All Pick match
+holds ten
 distinct heroes, so every match contributes exactly ten to that sum.
 
 The **ratio** is nonetheless a heuristic, and SHALL be documented as one rather
@@ -289,10 +294,12 @@ division SHALL be attempted.
 - **THEN** the days asked for SHALL be the days of the meta window, and one
   request SHALL ask for every hero
 
-#### Scenario: A hero absent from the ban response
+#### Scenario: A hero and day absent from the ban response
 
-- **IF** the ban response carries no row for a hero the meta window holds
-- **THEN** that hero's `bans` SHALL be 0 and the run SHALL continue
+- **IF** the ban response carries no row for a hero on a day the meta window
+  holds
+- **THEN** that pair SHALL contribute 0 to the hero's `bans` and the run SHALL
+  continue
 
 #### Scenario: Bans cannot be read
 

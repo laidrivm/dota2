@@ -186,13 +186,16 @@ one's.
 - [ ] 5.3 Write the ban-pull tests: the days requested are the meta window's
       and one request asks for every hero [73]; a ban request failing after its
       retries fails the run rather than storing a contest rate from picks alone
-      [74]; a hero the ban response carries no row for scores zero bans and
-      does not fail the run [75]. (Req: snapshot-ingest — Contest rate is a
-      share of the window's matches)
-- [ ] 5.4 Implement the ban pull as one request over the meta window's days
-      asking for every hero, since the pick counts carry no ban dimension,
-      reading an absent hero as zero bans. (Req: snapshot-ingest — Contest
+      [74]; a hero-and-day pair the ban response carries no row for contributes
+      zero bans and does not fail the run [75]. (Req: snapshot-ingest — Contest
       rate is a share of the window's matches)
+- [ ] 5.4 Implement the ban pull as one request over the meta window's days,
+      since the pick counts carry no ban dimension: pass the required `heroId`
+      as a constant with the comment saying it does not filter, convert the
+      window to `banDay`'s day numbers rather than reusing the meta pull's Unix
+      timestamps, read `matchCount` as the ban count, and sum an absent pair as
+      zero. (Req: snapshot-ingest — Contest rate is a share of the window's
+      matches)
 - [ ] 5.5 Implement the contest formula over the counts the meta and ban pulls
       return, with the divisor carrying the comment naming why it is exact and
       the ratio carrying the one naming why it is not. (Req: snapshot-ingest —

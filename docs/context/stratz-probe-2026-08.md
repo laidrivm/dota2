@@ -327,3 +327,36 @@ ignores it under `groupByDay: true`, returning every hero.
   `(picks + bans) / matches` orders heroes by contest and is not an absolute
   share.
 - `constants.gameVersions` is not read at all.
+
+# Third probe, 2026-08-22 — what `banDay` actually returns
+
+Written while `snapshot-ingest` sat proposed and its ban requirement rested on
+an unmeasured reading. Same environment and token, five requests: two
+introspections and three queries. Everything below is measured; where it
+contradicts what the delta spec assumed, the spec is what moves.
+
+- **`heroId` is required and does not filter.** `banDay(heroId: Short!, day,
+  bracketBasicIds, take, skip, groupByDay, groupByRank)` refuses a query
+  without `heroId` — `PROVIDED_NON_NULL_ARGUMENTS` — and then ignores it.
+  Control: `heroId: 1` and `heroId: 45`, identical otherwise, returned 3641
+  rows each and the same set of `(heroId, day, matchCount)` triples. So one
+  request does carry every hero, and the argument is a token the query must
+  present rather than a filter it may use. Pass any valid id.
+- **An absent row is a zero, and absence is the common case.** At
+  `DIVINE_IMMORTAL` with `groupByDay: true, take: 30`, the response held 3641
+  rows over 127 heroes and 30 days. The full grid is 3810, so 169 pairs are
+  missing — and **no row carried `matchCount: 0`**. 51 of the 127 heroes are
+  missing at least one day; hero 66 appears on 12 days of the 30. A run that
+  treated an incomplete response as a failure would therefore fail on almost
+  every window, and reading a missing pair as zero bans is the only reading the
+  data supports.
+- **`day` is a day number, not a Unix timestamp.** The rows run 20658 to 20687,
+  and 20658 is 2026-07-24 counted in days from the epoch. This is *not* how
+  `winDay` behaves: its `day` argument is a Unix timestamp in seconds, measured
+  in the first probe. Two endpoints, two encodings of the same word.
+- **There is no `banCount`.** `HeroBanType` carries `heroId`, `day`,
+  `bracketBasicIds`, `matchCount` and `winCount`. The ban count is
+  `matchCount`, which on this endpoint reads as bans rather than matches — a
+  top hero's day peaks at 330 where a match count would run to thousands. That
+  reading is an inference from magnitude and is the one thing here not measured
+  directly.
