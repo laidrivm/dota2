@@ -45,8 +45,9 @@ describe("the two things a 403 can mean", () => {
 		expect(raised?.message).toContain("User-Agent");
 	});
 
-	// The same status as the test above, differing only in the content type —
-	// so what tells them apart can only be the body's shape.
+	// The same status as the two above, and the only one of the three whose
+	// content type is JSON — so what tells a rejected key from an unmet
+	// challenge can only be that header.
 	// spec: snapshot-ingest/the-key-not-the-challenge
 	test("a 403 carrying JSON reports the key as rejected [12]", async () => {
 		const { fetch } = stub([json({ error: "unauthorized" }, { status: 403 })]);
