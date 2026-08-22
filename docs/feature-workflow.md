@@ -23,9 +23,8 @@ completes, name the next step and the exact command.
   For any endpoint, fix the exact response shape in design.md per the
   API design rules. Cheap to fix here, expensive after apply.
 - Before the proposal is finalised: run `/zombies "<feature description>"`
-  against the proposal text. Fold the resulting edge cases into the tasks
-  checklist as tests-first items. A proposal without its edge cases listed
-  is not ready to apply.
+  against the proposal text. A proposal whose edge cases are not listed in the
+  tasks checklist as tests-first items is not ready to apply.
 - A seam between steps carries a working stub: when a step depends on a
   capability a later step delivers, the earlier one ships a temporary
   substitute that works and the later one deletes it in the pull request
