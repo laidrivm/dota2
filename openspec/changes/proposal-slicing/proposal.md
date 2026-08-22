@@ -69,6 +69,6 @@ None.
   path; its test files gain the cases for both.
 - `docs/git-and-prs.md` and `docs/review-toolkit.md` each lose a line to the
   mechanism.
-- One open branch is affected the moment the check lands: `spec/snapshot-ingest`
-  (PR #141) carries an override on an unsplit proposal and would begin to fail.
-  It merges before this change's task group, or it splits.
+- No open branch is affected. The one that would have been, `spec/snapshot-ingest`
+  (PR #141), was split by hand into #141 and #142 along this very seam and both
+  are merged — which is the case for the requirement rather than against it.
