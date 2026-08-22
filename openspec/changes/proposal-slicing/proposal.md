@@ -31,10 +31,12 @@ stopped it, because nothing describes the seam and nothing checks for it.
 - The budget stops accepting an `oversize:` marker on a propose-stage branch
   that has not been split, because there the diff is one the project can make
   smaller, and the marker exists for one it cannot.
-- The prose that would otherwise state the same rule twice stays out of
-  `docs/git-and-prs.md` and `docs/review-toolkit.md`, each losing the line the
-  check now owns — `agent-rulebook`'s rule for a prohibition that becomes a
-  mechanism.
+- `docs/review-toolkit.md` loses the line the check now owns, by
+  `agent-rulebook`'s rule for a prohibition that becomes a mechanism: the
+  remedy it offers an over-budget branch names neither remedy a propose-stage
+  one has. `docs/git-and-prs.md` keeps its prose and gains to it, because the
+  check names the seam without enforcing either the second branch's name or
+  the base it opens from.
 
 The thresholds are untouched, and so is what the script counts. The measurable
 form of the new behaviour is in the delta spec, and stated there only.
