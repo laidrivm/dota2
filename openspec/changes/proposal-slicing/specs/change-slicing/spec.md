@@ -59,6 +59,15 @@ measured as any other diff, override included.
   reason
 - **THEN** the gate SHALL report `FAIL` and name the split as the remedy
 
+#### Scenario: An unsplit proposal whose marker names no reason
+
+- **IF** a branch adds `proposal.md` and `tasks.md` for one change, counts at
+  or above the failing threshold, and its body carries `oversize:` with no text
+  after it
+- **THEN** the gate SHALL name the split as the remedy rather than report that
+  the marker needs a reason, because the reason it would ask for is one this
+  requirement refuses to accept
+
 #### Scenario: A split half over budget
 
 - **WHEN** a branch adds `proposal.md` and the delta specs but no `tasks.md`,

@@ -74,8 +74,14 @@ carry.
 `scripts/diff-budget.fixture.ts` already builds throwaway repositories and runs
 the gate against them, and `diff-budget-gate.test.ts` already covers the
 override's own cases. The propose-stage cases join it: an unsplit proposal with
-a marker, a split half with a marker, an implementation branch with a marker,
-and an archive move.
+a marker, one whose marker names no reason, a split half with a marker, an
+implementation branch with a marker, and an archive move.
+
+The reasonless marker is the case where the two refusals meet. The override
+already refuses a marker with no reason and tells the author to name one; this
+change refuses an unsplit proposal whatever its marker says. Reporting the
+older message would send the author to write a reason that changes nothing, so
+the propose-stage remedy is the one that prints.
 
 ## Risks / Trade-offs
 

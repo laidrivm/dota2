@@ -52,6 +52,8 @@ arrives.
       and the line names the two pull requests to open. (Req: change-slicing —
       The override does not admit an unsplit propose-stage branch)
 - [ ] 1.8 Take the line the mechanism now owns out of `docs/git-and-prs.md` and
-      `docs/review-toolkit.md`, leaving in each only the pointer to the branch
-      pair, which the check does not carry. (Req: change-slicing — The propose
-      stage's reviewable unit is the artefact pair)
+      `docs/review-toolkit.md`, leaving in each only what the check cannot
+      carry: the branch pair, and the second pull request's base being the
+      default branch with the first already merged rather than the first
+      branch itself. (Req: change-slicing — The propose stage's reviewable
+      unit is the artefact pair)
