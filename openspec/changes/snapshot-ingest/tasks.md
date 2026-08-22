@@ -75,7 +75,7 @@ over it, which is `snapshot-build`'s route change and not this one's.
 
 ## 3. Retrying and abandoning
 
-- [ ] 3.1 Write the retry tests: the three delays between four attempts are
+- [x] 3.1 Write the retry tests: the three delays between four attempts are
       1s, 2s and 4s [8]; the fourth failing attempt issues no fifth [9]; a
       `500` then a `200` returns the second body and continues [13]; a `400`
       is attempted exactly once [14]; four consecutive `429`s **with quota
@@ -83,7 +83,7 @@ over it, which is `snapshot-build`'s route change and not this one's.
       is attempted exactly once, the quota rule taking precedence over this one
       [63]. (Req: snapshot-ingest — A request is retried only where retrying
       can succeed / A run stays inside the quota the API states)
-- [ ] 3.2 Write the timeout tests: an attempt open for 30 seconds with no
+- [x] 3.2 Write the timeout tests: an attempt open for 30 seconds with no
       complete response is abandoned and retried rather than waited on [71]; a
       response whose status arrives but whose body never finishes streaming is
       abandoned on the same bound, since what is bounded is a complete response
