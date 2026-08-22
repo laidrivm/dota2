@@ -37,7 +37,7 @@ describe("the two things a 403 can mean", () => {
 	// carrying no content type at all is the boundary of that wording.
 	// spec: snapshot-ingest/the-challenge-not-the-key
 	test("a 403 with no content-type reports the challenge [11]", async () => {
-		const { fetch } = stub([async () => new Response("", { status: 403 })]);
+		const { fetch } = stub([async () => new Response(null, { status: 403 })]);
 		const query = client(fetch);
 
 		const raised = await raisedBy(query(Q));

@@ -125,6 +125,26 @@ describe("the quota verdict", () => {
 		expect(body).toEqual({ data: {} });
 	});
 
+	/**
+	 * The verdict is terminal for the run, not for the request that met it. A
+	 * client that only failed that one request would let the next pull reach
+	 * the network — which is the refusal the requirement exists to avoid.
+	 */
+	// spec: snapshot-ingest/a-window-reports-nothing-remaining
+	test("no later request is issued once a window is spent [83]", async () => {
+		const { fetch, calls } = stub([
+			limited({ "x-ratelimit-remaining-minute": "0" }),
+			ok(),
+		]);
+		const query = client(fetch);
+		await raisedBy(query(Q));
+
+		const raised = await raisedBy(query(Q));
+
+		expect(raised?.message).toMatch(/quota|remaining/i);
+		expect(calls).toHaveLength(1);
+	});
+
 	// Below zero is still nothing left, so the verdict turns on `<= 0` rather
 	// than on equality with zero.
 	// spec: snapshot-ingest/a-window-reports-nothing-remaining

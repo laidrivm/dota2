@@ -51,9 +51,12 @@ type Attempt =
 	/** Retrying cannot help; the run ends here. */
 	| { kind: "fatal"; message: string }
 	/** The service might yet accept this request. */
+	/** Terminal for the whole run, not merely for this request. */
+	| { kind: "quota"; message: string }
 	| { kind: "retry"; message: string };
 
 const fatal = (message: string): Attempt => ({ kind: "fatal", message });
+const quota = (message: string): Attempt => ({ kind: "quota", message });
 const retry = (message: string): Attempt => ({ kind: "retry", message });
 
 /**
@@ -135,7 +138,7 @@ async function attempt(
 		// left is terminal even where the status is a success, and even where it
 		// is the `429` the retry policy would otherwise take.
 		if (exhausted(response.headers))
-			return fatal(
+			return quota(
 				"the API reports no quota remaining in one of its rate-limit windows",
 			);
 
@@ -204,13 +207,26 @@ export function createClient(
 	 */
 	const issued: number[] = [];
 
+	/**
+	 * Why the run stopped, once a window has reported nothing left. The verdict
+	 * is terminal for the run rather than for the request that met it, and the
+	 * client is the only thing that sees every request — so a later pull is
+	 * refused here, before it reaches the network.
+	 */
+	let spent = "";
+
 	return async function query(document, variables) {
+		if (spent !== "") throw new Error(spent);
 		const body = JSON.stringify({ query: document, variables });
 		let last = "";
 		for (let n = 1; n <= ATTEMPTS; n++) {
 			await reserve(issued);
 			const outcome = await attempt(doFetch, key, body);
 			if (outcome.kind === "body") return outcome.body;
+			if (outcome.kind === "quota") {
+				spent = outcome.message;
+				throw new Error(outcome.message);
+			}
 			if (outcome.kind === "fatal") throw new Error(outcome.message);
 			last = outcome.message;
 			if (n < ATTEMPTS) await sleep(FIRST_BACKOFF_MS * 2 ** (n - 1));
