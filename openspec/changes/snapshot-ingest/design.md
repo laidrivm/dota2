@@ -2,8 +2,11 @@
 
 ## Context
 
-`snapshot-build` settled the database and the arithmetic and left staging as an
-argument shape. This change fills it. The API key arrived between the two, and
+`snapshot-build` settled the arithmetic and left staging as an argument shape.
+This change creates the tables and fills them: the schema was that change's
+while it could run without an API key, and the key's arrival ended that, so it
+comes here with the code that writes through it. The API key arrived between
+the two, and
 two probe sessions against the live schema — recorded in
 `docs/context/stratz-probe-2026-08.md` — moved several assumptions the data
 model was written under. The relevant ones here: the statistics API's per-week
@@ -252,6 +255,18 @@ which Task 7 would then have to carry.
 `app-shell` forbids the running application any request off its own origin, so
 this is not a trade-off to weigh but a requirement to meet.
 
+### The schema is one idempotent file, not a migration ledger
+
+`schema.sql` with `CREATE TABLE IF NOT EXISTS`, applied on connect. There is
+one schema version and nothing to migrate from. The decision moved here with
+the file: `snapshot-build` made it while it owned the schema, and one topic
+does not live in two homes.
+
+*Alternative considered*: a numbered-migration table from the start. It is
+scaffolding for a second version that does not exist. The file carries a
+`ponytail:` comment naming the ceiling — the first `ALTER` is where the
+ledger arrives.
+
 ### No new dependency: `fetch`, `Bun.SQL`, and a limiter that is a queue
 
 The pacing the quota needs is "issue no request while eight are already inside
@@ -282,9 +297,10 @@ request count.
 
 The client, the pacing, the retry policy, the window arithmetic and the contest
 formula are all exercised against a stubbed `fetch` with no network. The
-staging writes join the database-backed suite `snapshot-build` adds, against
-the same `postgres` service container, and skip locally when no connection
-string is present — while the CI job fails if they skipped there.
+staging writes run against a `postgres` service container this change adds,
+and skip locally when no connection string is present — while the CI job fails
+if they skipped there. `snapshot-build`'s own database-backed suite then joins
+the job rather than introducing it.
 
 No suite calls the live API. A test that did would be a test of someone else's
 availability, and would need a key to run at all, which is the one thing a
