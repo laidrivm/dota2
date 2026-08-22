@@ -2,8 +2,9 @@
 schema: spec-driven
 context: |
   Conventions and contract rules live in /CLAUDE.md and the docs it
-  indexes — follow them. Do not restate them here. This file owns
-  architecture choices only.
+  indexes — follow them. Do not restate them here. This field owns
+  architecture choices only; the rules: field owns the form of the
+  change artefacts.
 
   Architecture defaults — apply when drafting proposals; a deviation must
   be argued in the design artifact:
