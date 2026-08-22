@@ -43,11 +43,12 @@ entry, a hook or a CI check leaves this file the way it would leave
 - Never wait on a result someone else produces — CI, a review bot, a queue:
   report where it will appear and end the turn.
 - This repo is public: before anything is staged or committed, read every new
-  file whole and `git diff HEAD` for the rest, looking for capability URLs,
-  internal identifiers and machine-local files — what the secret scan cannot
-  recognise. A diff against the index shows nothing of an untracked file and
-  nothing of an unstaged edit. Flag anything questionable instead of
-  committing it.
+  file whole, `git diff HEAD` for the rest, and the commit message about to be
+  written, looking for capability URLs, internal identifiers and machine-local
+  files — what the secret scan cannot recognise. A diff against the index shows
+  nothing of an untracked file and nothing of an unstaged edit, and no hook
+  reads the message at all. Flag anything questionable instead of committing
+  it.
 
 ## Git mechanics
 
