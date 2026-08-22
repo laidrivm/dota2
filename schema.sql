@@ -96,7 +96,7 @@ CREATE TABLE IF NOT EXISTS hero_stats (
 CREATE TABLE IF NOT EXISTS hero_matchups (
   snapshot_id   bigint NOT NULL REFERENCES snapshots ON DELETE CASCADE,
   hero_id       int NOT NULL REFERENCES heroes,
-  enemy_id      int NOT NULL REFERENCES heroes,
+  enemy_id      int NOT NULL REFERENCES heroes CHECK (enemy_id <> hero_id),
   matches       int NOT NULL,
   advantage_adj real NOT NULL,         -- antisymmetric: (a,b) and (b,a) sum to 0
   PRIMARY KEY (snapshot_id, hero_id, enemy_id)
@@ -105,7 +105,10 @@ CREATE TABLE IF NOT EXISTS hero_matchups (
 CREATE TABLE IF NOT EXISTS hero_synergies (
   snapshot_id bigint NOT NULL REFERENCES snapshots ON DELETE CASCADE,
   hero_id     int NOT NULL REFERENCES heroes,
-  ally_id     int NOT NULL REFERENCES heroes,
+  -- The symmetry is the constraint, not a convention the writer remembers: a
+  -- mirrored row would be a second copy of one statistic, and the model reads
+  -- whichever it found first.
+  ally_id     int NOT NULL REFERENCES heroes CHECK (ally_id > hero_id),
   matches     int NOT NULL,
   synergy_adj real NOT NULL,           -- symmetric, so stored once for hero_id < ally_id
   PRIMARY KEY (snapshot_id, hero_id, ally_id)
@@ -151,7 +154,7 @@ CREATE TABLE IF NOT EXISTS staging_hero_stats (
 CREATE TABLE IF NOT EXISTS staging_hero_matchups (
   patch_id text NOT NULL REFERENCES patches,
   hero_id  int NOT NULL REFERENCES heroes,
-  enemy_id int NOT NULL REFERENCES heroes,
+  enemy_id int NOT NULL REFERENCES heroes CHECK (enemy_id <> hero_id),
   matches  int NOT NULL,
   wins     int NOT NULL,
   PRIMARY KEY (patch_id, hero_id, enemy_id)
@@ -160,7 +163,7 @@ CREATE TABLE IF NOT EXISTS staging_hero_matchups (
 CREATE TABLE IF NOT EXISTS staging_hero_synergies (
   patch_id text NOT NULL REFERENCES patches,
   hero_id  int NOT NULL REFERENCES heroes,
-  ally_id  int NOT NULL REFERENCES heroes,
+  ally_id  int NOT NULL REFERENCES heroes CHECK (ally_id <> hero_id),
   matches  int NOT NULL,
   wins     int NOT NULL,
   PRIMARY KEY (patch_id, hero_id, ally_id)
