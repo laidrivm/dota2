@@ -542,3 +542,78 @@ read that file whole hours earlier. Four commits landed on a branch whose pull
 request had merged seven hours before, against the rule requiring a PR-state
 check before every commit. Neither was an absent or unloaded rule; both are now
 proposed as mechanisms (`merged-branch-guard`, `pre-pr-sequence-gate`).
+
+## 2026-08-20 — spec/snapshot-build-unmeasured (PR #140)
+
+Reconstructed from commits, not from the session: the conversation is not
+available to the wrap-up that recorded this. Runs other than the review that
+`6bf15d1` answers may have happened and left no trace in a commit message.
+
+- coderabbit: findings answered by `6bf15d1` — the env ignore naming four
+  files where the pattern names all, a sign claim that held only for positive
+  deltas, and a per-component verdict with no scenario telling it apart from a
+  per-snapshot one. Count not recoverable.
+- Not recoverable: triage, zombies, warm, ponytail-review, coderabbit-local.
+
+**The probe's own correction is the session's finding.** Every earlier attempt
+at a historical week returned nothing and read as an absence; the argument is a
+Unix timestamp, not the bucket id the response carries (`b9d97e7`). Six buckets
+back to 2025-12-23 came out once it was passed correctly.
+
+**A rule named a prohibition and no way to check it.** "A squash-merged branch
+is never freed" had no test attached: ancestry answers it wrongly, since a
+squash merge leaves the branch's commits out of the base — measured against
+`origin/spec/snapshot-build`, which `merge-base --is-ancestor` called unmerged
+while PR #130 had closed it on 2026-08-18 (`200df77`).
+
+## 2026-08-21 — snapshot-ingest proposed and cut in two (PRs #141, #142)
+
+- zombies: 62 ideas, 62 folded into the tasks checklist
+- diff-budget: FAIL — 955 lines on one propose-stage branch, the first of
+  thirteen `spec/` branches ever to fail it
+- coderabbit (#141): findings applied across two rounds
+- coderabbit (#142, round 1): 5 findings, 5 dispositioned
+
+**Six of thirteen findings in one round were a single defect class.** Tasks
+named tests for behaviours no delta spec carried a criterion for. The rule that
+closes it went into `openspec/config.yaml` the next session.
+
+**A measured factor travelled to three comparisons it was never taken over.**
+The 2.1 between two endpoints was cited in the delta spec against `banDay`, in
+the design against the pair endpoint, and in the probe record as "the same
+pairing". The bot caught one; a cross-check found the other two.
+
+**The budget failure was not a structural gap.** Splitting a propose stage into
+two pull requests was already the repository's practice — PRs #130 and #132 —
+and had never been written down. It became `proposal-slicing` rather than a
+script change.
+
+## 2026-08-22 — the review tail: rules, and a proposal made current (PRs #142ff, #143, #144)
+
+- coderabbit (#142, round 2): 13 findings counted, 13 dispositioned — 3
+  applied, 4 rejected, 6 skipped
+- diff-budget: PASS on all three branches (17, 371, 613 lines)
+- triage (chore/task-criterion-rule): PASS — 1 group, nothing above Low
+- coderabbit-local (chore/task-criterion-rule): 1 finding, 1 applied
+- triage (spec/proposal-slicing): PASS — 4 groups, 1 medium-risk group read
+- coderabbit-local (spec/proposal-slicing): 3 findings, 2 applied, 1 skipped
+- coderabbit (#144): 2 findings, 1 applied in half, 1 skipped
+- Not run: zombies, warm, ponytail-review, preflight, code-review
+
+**The grep step found what two reviews and a triage did not.** The prescribed
+grep for sites restating what a rules branch changes caught task 1.8 promising
+to remove a line from `docs/git-and-prs.md` that is not there; the file holds
+nothing about the budget at all. What it holds needs to grow instead. Both
+local and PR review read that task and neither opened the file.
+
+**A rule added one session does not bind the artefacts that earned it.** The
+measurement rule from 2026-08-21 did not catch `17 KB` and "a second at most"
+in the same change's design — 17 KB was measured over one `matchUp` hero-week,
+and no latency was ever measured at all.
+
+**A finding correct about grammar and wrong about the fix.** A review read a
+requirement citation — "the failing threshold *The budget warns at 500 lines
+and fails at 800* fixes" — as a malformed EARS condition and proposed writing
+800 into the clause. The relative pronoun was missing, which is the half worth
+fixing; the number stays cited rather than restated, since a second copy of a
+threshold is what the citation rule exists to prevent.
