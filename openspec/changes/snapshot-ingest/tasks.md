@@ -52,7 +52,7 @@ over it, which is `snapshot-build`'s route change and not this one's.
 
 ## 2. The quota and what a response means
 
-- [ ] 2.1 Write the pacing tests: eight requests issued back to back all go
+- [x] 2.1 Write the pacing tests: eight requests issued back to back all go
       out within one second [4]; the ninth of nine waits until a second has
       elapsed since the first [5]; requests already a second apart are not
       delayed further [6]; exactly eight inside one second leaves the eighth
@@ -61,7 +61,7 @@ over it, which is `snapshot-build`'s route change and not this one's.
       is blank or carries no number does not end the run [77]; a negative
       remaining count does [78]. (Req: snapshot-ingest
       — A run stays inside the quota the API states)
-- [ ] 2.2 Write the classification tests: a `403` carrying `text/html` reports
+- [x] 2.2 Write the classification tests: a `403` carrying `text/html` reports
       an unmet challenge naming the `User-Agent` [11]; a `403` carrying no
       content type at all reports the same [79]; a `403` carrying JSON reports
       the key as rejected [12]; a `200` whose body carries a non-empty
