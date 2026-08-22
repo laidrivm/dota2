@@ -67,8 +67,10 @@ None.
 
 - `scripts/diff-budget.sh` gains the propose-stage detection and one refusal
   path; its test files gain the cases for both.
-- `docs/git-and-prs.md` and `docs/review-toolkit.md` each lose a line to the
-  mechanism.
+- `docs/review-toolkit.md` loses to the mechanism the remedy it offers an
+  over-budget branch, which names neither remedy a propose-stage one has.
+  `docs/git-and-prs.md` gains instead: the line naming the proposal's branch
+  learns the second of the pair, which the check cannot dictate.
 - No open branch is affected. The one that would have been, `spec/snapshot-ingest`
   (PR #141), was split by hand into #141 and #142 along this very seam and both
   are merged — which is the case for the requirement rather than against it.

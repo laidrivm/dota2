@@ -61,13 +61,23 @@ A `FAIL` that only says "over 800" sends the reader to the capability. This one
 says which two pull requests to open, because the reader is holding the branch
 that needs splitting and the answer is three words long.
 
-### The docs lose a line each
+### One doc loses a line, the other gains one
 
-`docs/git-and-prs.md` states the reviewable unit and `docs/review-toolkit.md`
-states what to do when the budget is over. Both would now restate what the
-check enforces, and `agent-rulebook` requires the prose to go when a mechanism
-arrives. Each keeps its pointer to the branch pair, which the check does not
-carry.
+`docs/review-toolkit.md` tells an over-budget branch to cut the step or reach
+for the override. A propose-stage branch has no step to cut, and this change
+takes the override away from it, so the sentence would state a remedy the
+check refuses — `agent-rulebook` requires the prose to go when a mechanism
+arrives, and this is a mechanism arriving over it.
+
+`docs/git-and-prs.md` moves the other way. It says a proposal ships on
+`spec/<proposal-slug>`, which is now half a rule: the second branch and the
+base it opens from are what the check cannot dictate — the gate line can name
+the seam, but nothing enforces the name or the base — so that is prose the
+mechanism does not displace, and the line has to grow rather than shrink.
+
+The asymmetry is the point. A mechanism displaces prose only where it enforces
+the same thing; where it merely reports, the prose is still the only rule
+there is.
 
 ### Tests: the script's existing fixture, extended
 
