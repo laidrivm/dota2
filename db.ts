@@ -44,8 +44,10 @@ export async function connect(url: string | undefined): Promise<SQL> {
 		await sql.unsafe(await Bun.file(SCHEMA).text()).simple();
 	} catch (e) {
 		// Nothing else holds this client, so a throw from here would leave a
-		// pool nobody can close and an event loop nothing lets go of.
-		await sql.close();
+		// pool nobody can close and an event loop nothing lets go of. Its own
+		// failure is swallowed rather than raised: what the caller needs is why
+		// the schema would not apply, not why the tidying afterwards did not.
+		await sql.close().catch(() => {});
 		throw e;
 	}
 	return sql;
