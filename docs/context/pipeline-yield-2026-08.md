@@ -617,3 +617,52 @@ and fails at 800* fixes" — as a malformed EARS condition and proposed writing
 800 into the clause. The relative pronoun was missing, which is the half worth
 fixing; the number stays cited rather than restated, since a second copy of a
 threshold is what the citation rule exists to prevent.
+
+## 2026-08-22 — the STRATZ client, cut into four (PRs #145, #146, #147, #148)
+
+- diff-budget: FAIL first — 846 lines against the 800 threshold, which is what
+  re-cut one task group into four branches; after that 364, 591, 300, 204
+  (only the client branch in the warn band, and it cannot leave: the module
+  and its harness are 378 lines before a single test)
+- zombies: OPEN — 10 gaps on the client, 8 acted on (7 tests, 1 precondition
+  comment), 2 skipped with reasons; 0 new on the quota cut; 1 on the retry cut,
+  found and closed
+- warm: not run — no manifest changed on any of the four
+- ponytail-review: 3 findings, 2 acted on (net -3 lines), 1 declined — a
+  single-caller helper worth keeping named against a 55-line function
+- triage: PASS — 7 groups, 4 high/medium read
+- coderabbit-local: PASS — 4, 3, 1 findings over three branches, all
+  dispositioned; its Major on the client was real
+- coderabbit: #146 10 findings over two reviews, 10 dispositioned; #147 and
+  #148 posted 3 and 2 **after they were merged**, 5 dispositioned a session
+  later
+- Not run: preflight, security-review, code-review
+
+**The review count is not the count until the reviews are counted.** A first
+pass over #146 read nine inline comments and reported nine. The bot had posted
+two reviews; the second carried a tenth finding, and only re-fetching and
+reconciling against its own `Actionable comments posted` lines found it. The
+same shape then repeated in the other direction: #147 and #148 were merged
+before their reviews arrived, so five more findings existed in the API and in
+no report until this wrap-up went looking.
+
+**A test suite can be worth less than its green.** The key-leak assertion
+enumerated the seven failure paths the client had; leaking the key through an
+eighth would have passed. Moving it into the helper every failure passes
+through turned a leak on the retry-exhausted path from zero failing tests into
+four. The same shape twice more: the console spy named four levels of a
+28-member `console`, and the quota verdict was read on the first attempt only.
+Each was found by breaking the mechanism the test named and watching what did
+not fail.
+
+**The requirement said "the run", and the code stopped a request.** A window
+reporting nothing left made the client fail the request that met it and no
+more, so the next pull went to the network — two requests where the
+requirement allows one. Nothing in the wording was ambiguous; the layer that
+could enforce it simply was not the layer that read it.
+
+**Fake timers take the runner's own timeout with them.** Under
+`jest.useFakeTimers()` a promise that can never settle hangs the whole run
+rather than failing one test, and `bun test --timeout` does not cut it short —
+measured at 180 seconds before the harness was killed. The fixture's `settle`
+now raises when it runs out of timers with work still pending.
