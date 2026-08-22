@@ -247,11 +247,15 @@ the same days, and `matches` is the sum of every hero's match count over that
 window divided by ten.
 
 `bans` comes from a request of its own — the pick counts carry no ban dimension
-— and that request SHALL cover the same days as the meta window and SHALL
-return every hero rather than one. IF it fails, the run SHALL fail: a contest
-rate stored from picks alone is not the quantity this requirement defines, and
-it would be indistinguishable afterwards from one whose heroes were simply never
-banned. The divisor is exact: an All Pick match holds ten
+— and that request SHALL cover the same days as the meta window and SHALL be
+one request asking for every hero rather than one request per hero. IF it
+fails, the run SHALL fail: a contest rate stored from picks alone is not the
+quantity this requirement defines, and it would be indistinguishable afterwards
+from one whose heroes were simply never banned. A hero the response omits SHALL
+be read as zero bans: silence from a count endpoint is a zero, and whether this
+one omits never-banned heroes at all is unmeasured — so failing the run on a
+short response would fail it on any window in which some hero simply went
+unbanned. The divisor is exact: an All Pick match holds ten
 distinct heroes, so every match contributes exactly ten to that sum.
 
 The **ratio** is nonetheless a heuristic, and SHALL be documented as one rather
@@ -282,8 +286,13 @@ division SHALL be attempted.
 #### Scenario: The ban request's window
 
 - **WHEN** the ban counts are requested
-- **THEN** the days asked for SHALL be the days of the meta window, and the
-  response SHALL cover every hero
+- **THEN** the days asked for SHALL be the days of the meta window, and one
+  request SHALL ask for every hero
+
+#### Scenario: A hero absent from the ban response
+
+- **IF** the ban response carries no row for a hero the meta window holds
+- **THEN** that hero's `bans` SHALL be 0 and the run SHALL continue
 
 #### Scenario: Bans cannot be read
 

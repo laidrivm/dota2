@@ -137,6 +137,14 @@ machinery than the outcome earns — a letter patch folded into its base major
 takes the major's prior parameters, which decay more slowly over a shorter
 window than a letter patch's would. That is a coarser answer, not a wrong one.
 
+Folding is the entry's absence, not a merge step: with no `7.41b` listed, `7.41`
+stays the current patch and the blend takes its parameters — no code joins the
+two. The name rule that sets `is_major` still runs on whatever name the source
+states, and the delta spec's letter scenario fixes what it does. That rule
+guards a vendor's format rather than describing a branch this source is
+expected to take: were OpenDota to list `7.41b` tomorrow, the rule stores it
+under `base_version` `7.41` instead of inventing a major that does not exist.
+
 ### Staging is replaced in one transaction; there is no ledger of what was pulled
 
 Every window this change defines is a function of the current patch and the run
@@ -233,10 +241,13 @@ dozen lines whose failure mode is a `429` the retry policy already handles.
 `fetch` waits indefinitely by default, and pacing and retries both assume a
 request eventually returns. A connection that stalls therefore does not fail the
 run — it suspends it, and the job's whole contract is that it reaches one
-outcome and reports it. Thirty seconds per attempt is generous against responses
-measured at 17 KB and a second at most, and an abandoned attempt retries on the
-same terms as a `5xx` because a stall and a bad gateway are the same thing to a
-caller.
+outcome and reports it. Thirty seconds per attempt is generous against the
+largest response the probe measured — 17 KB, for one `matchUp` hero-week
+(`docs/context/stratz-probe-2026-08.md`). No latency was measured, so thirty
+seconds is picked to sit far above any plausible response rather than derived
+from one: it is the bound on a stall, not a performance budget. An abandoned
+attempt retries on the same terms as a `5xx` because a stall and a bad gateway
+are the same thing to a caller.
 
 *Alternative considered*: one deadline for the whole run instead of one per
 attempt. It bounds the run as well, but it cannot distinguish a stalled request

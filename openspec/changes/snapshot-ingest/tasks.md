@@ -3,7 +3,7 @@
 Test tasks are derived from the proposal-stage `/zombies` run and are written
 before the module they cover (docs/testing.md — TDD for edge cases). The
 bracketed numbers are that run's idea numbers, so every one of its 62 ideas is
-traceable to the group that closes it. Numbers 63 to 74 are the reviews' own,
+traceable to the group that closes it. Numbers 63 to 75 are the reviews' own,
 added where a finding named a case the run had missed.
 
 Six groups, so six pull requests on `feat/snapshot-ingest-1` … `-6`, in order.
@@ -184,13 +184,15 @@ one's.
       removes anything older [38]. (Req: snapshot-ingest — A run leaves
       staging whole or leaves it untouched)
 - [ ] 5.3 Write the ban-pull tests: the days requested are the meta window's
-      and the response covers every hero [73]; a ban request failing after its
+      and one request asks for every hero [73]; a ban request failing after its
       retries fails the run rather than storing a contest rate from picks alone
-      [74]. (Req: snapshot-ingest — Contest rate is a share of the window's
-      matches)
-- [ ] 5.4 Implement the ban pull as its own request over the meta window's
-      days, returning every hero, since the pick counts carry no ban dimension.
-      (Req: snapshot-ingest — Contest rate is a share of the window's matches)
+      [74]; a hero the ban response carries no row for scores zero bans and
+      does not fail the run [75]. (Req: snapshot-ingest — Contest rate is a
+      share of the window's matches)
+- [ ] 5.4 Implement the ban pull as one request over the meta window's days
+      asking for every hero, since the pick counts carry no ban dimension,
+      reading an absent hero as zero bans. (Req: snapshot-ingest — Contest
+      rate is a share of the window's matches)
 - [ ] 5.5 Implement the contest formula over the counts the meta and ban pulls
       return, with the divisor carrying the comment naming why it is exact and
       the ratio carrying the one naming why it is not. (Req: snapshot-ingest —
