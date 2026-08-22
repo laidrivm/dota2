@@ -121,10 +121,19 @@ describe("what carries the key", () => {
 		"no failure carries the key: %s [10]",
 		async (_, replies) => {
 			const said: unknown[] = [];
-			for (const level of ["log", "info", "warn", "error"] as const)
-				spyOn(console, level).mockImplementation((...args: unknown[]) => {
+			// Every callable member of `console` bar its constructor, rather than
+			// an enumeration of levels: a key written through `debug`, `trace`,
+			// `dir` or `table` passes a scan that names only four of them.
+			const sink = console as unknown as Record<
+				string,
+				(...a: unknown[]) => void
+			>;
+			for (const name of Object.keys(console)) {
+				if (name === "Console" || typeof sink[name] !== "function") continue;
+				spyOn(sink, name).mockImplementation((...args: unknown[]) => {
 					said.push(...args);
 				});
+			}
 			const { fetch } = stub(replies);
 			const query = client(fetch);
 
