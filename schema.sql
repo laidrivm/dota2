@@ -133,6 +133,10 @@ CREATE TABLE IF NOT EXISTS staging_hero_position_stats (
 CREATE TABLE IF NOT EXISTS staging_hero_stats (
   patch_id     text NOT NULL REFERENCES patches,
   hero_id      int NOT NULL REFERENCES heroes,
+  -- The sums over this hero's position rows, stored rather than derived
+  -- because the contest formula computes the pick count anyway and the side
+  -- and phase baselines are read against a hero total. Should the two ever
+  -- disagree, the position rows are what the source returned.
   matches      int NOT NULL,
   wins         int NOT NULL,
   -- Already a ratio where its neighbours are counts: the ingest computes
