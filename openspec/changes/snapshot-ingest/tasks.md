@@ -99,7 +99,7 @@ infrastructure closing no criterion. They come first among the database groups
 because every group below writes through them, and `snapshot-build` now takes
 them as given rather than adding them.
 
-- [ ] 4.1 Add `schema.sql` — reference, snapshot and staging tables per
+- [x] 4.1 Add `schema.sql` — reference, snapshot and staging tables per
       data-model §3 — applied idempotently on connect, with a `ponytail:`
       comment naming the missing migration ledger and the `ALTER` that would
       bring it, and the `snapshot_id` column carrying the reason it is exempt

@@ -188,6 +188,7 @@ describe("the extensions this repository carries", () => {
 		].sort();
 		// `.example` is ruled uncapped: an environment template is read by
 		// variable name rather than by line, as `.json` and `.toml` are.
+		// `.sql` is ruled uncapped on the same terms: a schema is read by table.
 		expect(extensions).toEqual([
 			".css",
 			".example",
@@ -198,6 +199,7 @@ describe("the extensions this repository carries", () => {
 			".md",
 			".py",
 			".sh",
+			".sql",
 			".toml",
 			".ts",
 			".tsx",
