@@ -14,8 +14,10 @@ the warn threshold, which is what keeps a reviewer's pass over any one of them
 short.
 
 This change owns the schema, the database edge and the CI job that exercises
-it — groups 4's three tasks, moved here from `snapshot-build`, which closed no
-criterion with them and can no longer run before this change. Groups 1 to 3 add
+it — group 4's three tasks, moved here from `snapshot-build`, which closed no
+criterion with them and can no longer run before this change. Group 11 is the
+exception in the other direction: the entry point calls `snapshot-build`'s
+build and export, so it lands after that change rather than before it. Groups 1 to 3 add
 a module the application does not yet call; group 11 is the entry point that
 calls all of them. The served snapshot stays the fixture until a run publishes
 over it, which is `snapshot-build`'s route change and not this one's.
@@ -264,6 +266,11 @@ them as given rather than adding them.
       — A run leaves staging whole or leaves it untouched)
 
 ## 11. The job
+
+This group alone runs **after** `snapshot-build`. The entry point calls the
+ingest, then that change's build, then its export, so it is the one place where
+the two changes' order reverses: groups 1 to 10 land first, `snapshot-build`
+follows them, and this group closes over both.
 
 - [ ] 11.1 Write the outcome tests: all three steps succeeding exits zero and
       the served bundle is the one just written [56]; the failure report names

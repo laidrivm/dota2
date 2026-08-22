@@ -23,15 +23,10 @@ settles the published artefact the deployment has to mount a volume for.
 - `/snapshot.json` served from what the export publishes, falling back to the
   committed fixture — which is what development, the test suite and the
   end-to-end suite run on.
-- A CI workflow job running the database-backed suite against a `postgres`
-  service container. Without it the only exercised path is the fixture
-  fallback, and every SQL line in this change would merge unrun.
-
-The measurable form of each — constants, thresholds, states, header values —
-is in the delta specs, and stated there only.
-
-## Non-goals
-
+- The database-backed suite this change's own build and export need, run by
+  the CI job `snapshot-ingest` adds against its `postgres` service container.
+  Without that job the only exercised path is the fixture one, and a build that
+  never touched a database would pass every gate.
 - The STRATZ client, its rate-limit budget, and anything that fills staging
   from a network source. Staging is taken as given here; the shape this
   change settles is the contract the ingest change fills.
