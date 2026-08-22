@@ -3,7 +3,8 @@
 Test tasks are derived from the proposal-stage `/zombies` run and are written
 before the code they cover (docs/testing.md — TDD for edge cases). The
 bracketed numbers are that run's idea numbers, so every one of its 16 ideas is
-traceable to the task that closes it.
+traceable to the task that closes it. Number 17 is a review's own, added where
+a finding named a case the run had missed.
 
 One task group, so one pull request on `chore/proposal-slicing`: the rule and
 the check that enforces it land together, because a rule written without its
@@ -38,7 +39,9 @@ arrives.
       reason on an unsplit proposal reports the propose-stage remedy rather
       than the reasonless-marker message [15]. (Req: change-slicing — The
       override does not admit an unsplit propose-stage branch)
-- [ ] 1.5 Write the split test: a proposal carried across `spec/<slug>` and
+- [ ] 1.5 Write the artefact-pair tests: a proposal carrying all four artefacts
+      on one branch under the threshold passes, the refusal reaching only what
+      the threshold reaches [17]; and one carried across `spec/<slug>` and
       `spec/<slug>-plan`, each under the threshold, passes on both [16]. (Req:
       change-slicing — The propose stage's reviewable unit is the artefact
       pair)
