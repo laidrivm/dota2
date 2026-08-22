@@ -3,7 +3,7 @@
 Test tasks are derived from the proposal-stage `/zombies` run and are written
 before the module they cover (docs/testing.md — TDD for edge cases). The
 bracketed numbers are that run's idea numbers, so every one of its 62 ideas is
-traceable to the group that closes it. Numbers 63 to 81 are the reviews' own,
+traceable to the group that closes it. Numbers 63 to 82 are the reviews' own,
 added where a finding named a case the run had missed — 76 to 81 during apply,
 by the diff-mode `/zombies` run and CodeRabbit.
 
@@ -215,8 +215,11 @@ them as given rather than adding them.
       so the response carries one opponent and one ally row per other hero
       rather than the endpoint's default page [29]; a response short of one
       row per other hero fails the run rather than writing a partial matrix
-      [30]. (Req: snapshot-ingest — Pair statistics are pulled per hero over
-      at most four weeks)
+      [30]; a response carrying a surplus row, a duplicated opponent or ally,
+      or a hero the reference tables do not hold fails on the same terms — the
+      criterion fixes *one* row per other hero, not at least one [82]. (Req:
+      snapshot-ingest — Pair statistics are pulled per hero over at most four
+      weeks)
 - [ ] 8.3 Implement the pair pull: one request per hero per week over the
       lesser of four and the weeks the patch has been live, asking for every
       opponent, summed across the weeks, and reporting the weeks covered.
