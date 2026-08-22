@@ -636,6 +636,9 @@ threshold is what the citation rule exists to prevent.
 - coderabbit: #146 10 findings over two reviews, 10 dispositioned; #147 and
   #148 posted 3 and 2 **after they were merged**, 5 dispositioned a session
   later
+- diff-budget / grep / coderabbit-local on the wrap-up branch itself
+  (`chore/session-wrapup-2026-08-22`, 73 lines): PASS — 0 findings, the docs
+  path's single pass
 - Not run: preflight, security-review, code-review
 
 **The review count is not the count until the reviews are counted.** A first
