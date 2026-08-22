@@ -55,7 +55,9 @@ design, because settling it is the user's.
   Minor read and then fixed or skipped with its reason, overriding the skill's
   "No fixes before approval". Invoking it is the approval for the fixes — the
   user is present by definition, and a wrong fix on an open PR costs one more
-  commit on a branch already under review.
+  commit on a branch already under review. A merged PR still collects reviews:
+  re-fetch it once after the merge, because a finding posted while it was being
+  merged exists in the API and in no report.
 
 ## The pre-PR sequence
 
