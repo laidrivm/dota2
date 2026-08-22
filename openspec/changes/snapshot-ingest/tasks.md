@@ -105,7 +105,7 @@ them as given rather than adding them.
       bring it, and the `snapshot_id` column carrying the reason it is exempt
       from the UUIDv7 rule. (Req: none — this group is the seam the later ones
       write through, and closes no criterion by itself)
-- [ ] 4.2 Add the `Bun.SQL` connection edge and make the integration suite
+- [x] 4.2 Add the `Bun.SQL` connection edge and make the integration suite
       skip when no connection string is present, so the pre-push run stays
       offline, and add the connection string to `.env.example`. (Req: none —
       infrastructure, as 4.1)
