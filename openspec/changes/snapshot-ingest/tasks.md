@@ -3,7 +3,7 @@
 Test tasks are derived from the proposal-stage `/zombies` run and are written
 before the module they cover (docs/testing.md — TDD for edge cases). The
 bracketed numbers are that run's idea numbers, so every one of its 62 ideas is
-traceable to the group that closes it. Numbers 63 to 83 are the reviews' own,
+traceable to the group that closes it. Numbers 63 to 84 are the reviews' own,
 added where a finding named a case the run had missed — 76 to 81 during apply,
 by the diff-mode `/zombies` run and CodeRabbit.
 
@@ -81,7 +81,8 @@ over it, which is `snapshot-build`'s route change and not this one's.
       is attempted exactly once [14]; four consecutive `429`s **with quota
       remaining** end the run failed [15]; a `429` **reporting zero remaining**
       is attempted exactly once, the quota rule taking precedence over this one
-      [63]. (Req: snapshot-ingest — A request is retried only where retrying
+      [63]; a window reported spent on a *later* attempt stops the run there,
+      the verdict being read on every attempt rather than the first [84]. (Req: snapshot-ingest — A request is retried only where retrying
       can succeed / A run stays inside the quota the API states)
 - [x] 3.2 Write the timeout tests: an attempt open for 30 seconds with no
       complete response is abandoned and retried rather than waited on [71]; a

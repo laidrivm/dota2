@@ -144,6 +144,26 @@ describe("where the quota verdict overrules the retry policy", () => {
 		expect(calls).toHaveLength(ATTEMPTS);
 	});
 
+	/**
+	 * The verdict has to be read on every attempt, not only the first. A client
+	 * that checked the quota once and then trusted the retry policy passes every
+	 * other test here, and would spend four attempts on a window it was told
+	 * after the first was empty.
+	 */
+	// spec: snapshot-ingest/a-rate-limited-response-with-nothing-remaining
+	test("a window spent mid-retry stops the run there [84]", async () => {
+		const { fetch, calls } = stub([
+			fails,
+			limited({ "x-ratelimit-remaining-minute": "0" }, 429),
+		]);
+		const query = client(fetch);
+
+		const raised = await raisedBy(query(Q));
+
+		expect(raised?.message).toMatch(/quota|remaining/i);
+		expect(calls).toHaveLength(2);
+	});
+
 	// The same status as the test above, differing only in what the window
 	// reports left — so what stops the retry can only be the remaining count.
 	// spec: snapshot-ingest/a-rate-limited-response-with-nothing-remaining
