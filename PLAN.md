@@ -98,19 +98,20 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       the rate-limited STRATZ client, the reference upserts, the mirrored hero
       images, and the entry point that drives 3a to a published snapshot or a
       failed one. Eleven task groups, so `feat/snapshot-ingest-1` through
-      `-11`, in order, each cut to land under the diff budget's warn line. It
-      runs **before** 3a: the schema was 3a's while 3a could start without an
-      API key, and the key's arrival ended that — ingest creates and fills the
-      tables the build reads. A second probe moved three assumptions, all in
-      `docs/context/stratz-probe-2026-08.md`: the meta comes from a daily
-      endpoint that can filter the game mode, patch detection leaves STRATZ
-      whose version list stalled eight months back, and hero images come from
-      Valve's CDN by way of OpenDota's index. Owns no schedule — Task 7 sets
-      when the job runs and alerts when it stops.
+      `-11`, in order, each under the diff budget's warn line. It interleaves
+      with 3a rather than simply preceding it: groups 1 to 10 first, since
+      ingest creates and fills the tables the build reads; then 3a; then group
+      11, the entry point that calls 3a's build and export. A second probe
+      moved three assumptions, all in `docs/context/stratz-probe-2026-08.md`:
+      the meta comes from a daily endpoint that can filter the game mode, patch
+      detection leaves STRATZ whose version list stalled eight months back, and
+      hero images come from Valve's CDN by way of OpenDota's index. Owns no
+      schedule — Task 7 sets when the job runs and alerts when it stops.
 - [ ] **Phase 3a — `snapshot-build`** — proposed,
       `openspec/changes/snapshot-build/`. The blending, smoothing and
       sufficiency maths, and the export of a bundle to the served URL. It
-      reads the schema and staging 3b creates and fills, so it follows 3b.
+      reads the schema and staging 3b creates and fills, so it sits between
+      3b's group 10 and its group 11.
       Eight task groups, so `feat/snapshot-build-1` through `-8`, in order.
       Owns no *deployed* infrastructure — the production Postgres service, the
       schedule and the failure alert are Task 7's, and none of them gates it.
