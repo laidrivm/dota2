@@ -4,14 +4,14 @@
 
 ### Requirement: The propose stage's reviewable unit is the artefact pair
 
-A propose-stage branch carries no step, so the remedy *The reviewable unit is
-the step, not the proposal* names has nothing to act on. Its reviewable unit is
+A propose-stage branch carries no step, so the remedy that *The reviewable unit
+is the step, not the proposal* names has nothing to act on. Its reviewable unit is
 one of the two questions a proposal answers: what the change must do, which
 `proposal.md` and the delta specs answer, and how it will be built and in what
 order, which `design.md` and `tasks.md` answer.
 
-WHEN a propose-stage branch's counted lines reach the failing threshold *The
-budget warns at 500 lines and fails at 800* fixes, the stage SHALL ship as two
+WHEN a propose-stage branch's counted lines reach the failing threshold that
+*The budget warns at 500 lines and fails at 800* fixes, the stage SHALL ship as two
 pull requests in that order, on `spec/<slug>` and `spec/<slug>-plan`. The
 second SHALL open from the updated base after the first merges, so that the
 design is read against requirements already on `main` rather than against a
