@@ -7,7 +7,8 @@ is traceable to the group that closes it. Numbers 46 to 57 are the reviews'
 own, added where a finding named a case the run had missed.
 
 Eight groups, so eight pull requests on `feat/snapshot-build-1` … `-8`, in
-order. Groups 1 and 2 add a pure module nothing calls yet; the application
+order. It runs after `snapshot-ingest`, which owns the schema both read.
+Groups 1 and 2 add a pure module nothing calls yet; the application
 keeps running on the committed fixture until group 8 rewires the route.
 
 ## 1. Blending and smoothing
@@ -66,32 +67,24 @@ keeps running on the committed fixture until group 8 rewires the route.
       component, and returning the zero to write for an unmeasured one. (Req:
       snapshot-build — An unmeasured component is zero for every hero)
 
-## 3. Schema and persistence
+## 3. Persistence
 
-- [ ] 3.1 Add `schema.sql` — reference, snapshot and staging tables per
-      data-model §3 — applied idempotently on connect, with a `ponytail:`
-      comment naming the missing migration ledger and the `ALTER` that would
-      bring it, and the `snapshot_id` column carrying the reason it is exempt
-      from the UUIDv7 rule. (Req: none — this group is the seam the later
-      ones write through, and closes no criterion by itself)
-- [ ] 3.2 Add the `Bun.SQL` connection edge and make the integration suite
-      skip when no connection string is present, so the pre-push run stays
-      offline. (Req: none — infrastructure, as 3.1)
-- [ ] 3.3 Add a CI job running the database-backed suite against a `postgres`
-      service container, supplying its connection string and failing when the
-      suite skips — a suite that skipped and one that passed report the same
-      green otherwise. (Req: none — infrastructure, as 3.1)
-- [ ] 3.4 Write the determinism tests: two builds over identical staging and
+The schema, the `Bun.SQL` edge and the CI job that exercises them were this
+group's first three tasks and are now `snapshot-ingest`'s group 4. They closed
+no criterion here, every group of that change writes through them, and it can
+no longer run before this one. This group takes all three as given.
+
+- [ ] 3.1 Write the determinism tests: two builds over identical staging and
       the same build instant produce statistics rows equal field by field
       [25]; a build completes while its database answers and every *other*
       network call is stubbed to throw [26]; a blend reads `wr_old` from the
       predecessor patch's newest published snapshot [51]. (Req: snapshot-build
       — The build reads its own database and nothing else)
-- [ ] 3.5 Write the symmetry tests: `(a,b)` and `(b,a)` matchup rows carry
+- [ ] 3.2 Write the symmetry tests: `(a,b)` and `(b,a)` matchup rows carry
       `advantage_adj` summing to 0 [21]; `hero_synergies` holds `(a,b)` for
       `a < b` and no mirrored row [22]. (Req: snapshot-build — Stored pair
       statistics carry their symmetry)
-- [ ] 3.6 Implement the staging read and the statistics write, taking the
+- [ ] 3.3 Implement the staging read and the statistics write, taking the
       build instant as an argument, writing it to `created_at`, reading
       `wr_old` from the predecessor snapshot retention holds for that purpose,
       and writing 0 for a component 2.6 reports unmeasured. (Req:

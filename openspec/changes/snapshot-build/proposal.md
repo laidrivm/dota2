@@ -5,15 +5,12 @@
 The client fetches one snapshot URL, validates what comes back and computes
 everything from it, but nothing in the repository produces that bundle: the
 only producer is a hand-authored Python generator whose 33 heroes exist to
-exercise the model's test cases. The half of the real producer that needs no
-API key — the schema, the maths and the export — can be built now, and
-building it first settles the database shape and the published artefact that
-the deployment has to mount a volume for.
+exercise the model's test cases. The half of the real producer that computes
+rather than fetches — the maths and the export — is this change, and it
+settles the published artefact the deployment has to mount a volume for.
 
 ## What Changes
 
-- A Postgres schema in three groups — reference, snapshot and staging tables —
-  reached through `Bun.SQL`, so no dependency is added.
 - The snapshot build: the arithmetic that turns raw per-patch aggregates into
   the deltas the client reads, the thresholds that decide which of them may be
   suggested at all, and the rule that a component the source never measured is
@@ -75,11 +72,13 @@ answer to a request it was going to make anyway.
 
 ## Impact
 
-- New server-side modules for the schema, the build and the export, outside
+- New server-side modules for the build and the export, outside
   `src/app/**` and importing `src/types.ts` for the bundle contract.
 - `static-routes.ts` stops naming the fixture directly and reads the export
   directory instead, with the fixture as its fallback; `static-routes.test.ts`
   gains the cases that distinguish the two.
+- The schema, the connection edge and the database-backed CI job are
+  `snapshot-ingest`'s, which this change now follows rather than precedes.
 - A Postgres connection string becomes a runtime input, absent in development
   and in both test suites, which run on the fallback.
 - No new dependency: `Bun.SQL` ships with the runtime already pinned.
