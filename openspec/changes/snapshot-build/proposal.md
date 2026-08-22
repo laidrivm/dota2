@@ -81,5 +81,7 @@ answer to a request it was going to make anyway.
   directory instead, with the fixture as its fallback; `static-routes.test.ts`
   gains the cases that distinguish the two.
 - A Postgres connection string becomes a runtime input, absent in development
-  and in both test suites, which run on the fallback.
+  and in the unit and end-to-end suites, which run on the fallback. The
+  database-backed tests skip without it and CI supplies it; `snapshot-ingest`
+  owns that job, and the rule that a skip there fails it.
 - No new dependency: `Bun.SQL` ships with the runtime already pinned.
