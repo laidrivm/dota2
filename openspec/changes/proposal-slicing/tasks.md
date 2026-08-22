@@ -51,9 +51,12 @@ arrives.
       branch at or above the failing threshold fails whatever its body carries
       and the line names the two pull requests to open. (Req: change-slicing —
       The override does not admit an unsplit propose-stage branch)
-- [ ] 1.8 Take the line the mechanism now owns out of `docs/git-and-prs.md` and
-      `docs/review-toolkit.md`, leaving in each only what the check cannot
-      carry: the branch pair, and the second pull request's base being the
-      default branch with the first already merged rather than the first
-      branch itself. (Req: change-slicing — The propose stage's reviewable
-      unit is the artefact pair)
+- [ ] 1.8 Reconcile the two docs with the mechanism, each in the direction it
+      needs. `docs/review-toolkit.md` loses the remedy the check now owns: its
+      "cut the step, or put `oversize:`" names neither remedy a propose-stage
+      branch has, having no step to cut and no override left to reach for.
+      `docs/git-and-prs.md`'s "A proposal ships on `spec/<proposal-slug>`"
+      gains the second branch of the pair and the base it opens from — the
+      default branch with the first already merged, not the first branch —
+      neither of which the check can carry. (Req: change-slicing — The propose
+      stage's reviewable unit is the artefact pair)
