@@ -109,7 +109,7 @@ them as given rather than adding them.
       skip when no connection string is present, so the pre-push run stays
       offline, and add the connection string to `.env.example`. (Req: none —
       infrastructure, as 4.1)
-- [ ] 4.3 Add a CI job running the database-backed suite against a `postgres`
+- [x] 4.3 Add a CI job running the database-backed suite against a `postgres`
       service container, supplying its connection string and failing when the
       suite skips — a suite that skipped and one that passed report the same
       green otherwise. (Req: none — infrastructure, as 4.1)
