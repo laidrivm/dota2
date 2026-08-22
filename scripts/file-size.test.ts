@@ -186,8 +186,11 @@ describe("the extensions this repository carries", () => {
 		const extensions = [
 			...new Set(tracked.map((path) => path.slice(path.lastIndexOf(".")))),
 		].sort();
+		// `.example` is ruled uncapped: an environment template is read by
+		// variable name rather than by line, as `.json` and `.toml` are.
 		expect(extensions).toEqual([
 			".css",
+			".example",
 			".gitignore",
 			".html",
 			".json",

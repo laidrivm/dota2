@@ -24,7 +24,7 @@ over it, which is `snapshot-build`'s route change and not this one's.
 
 ## 1. The client and the gate it clears
 
-- [ ] 1.1 Write the transport tests: a run with `STRATZ_API_KEY` unset fails
+- [x] 1.1 Write the transport tests: a run with `STRATZ_API_KEY` unset fails
       before any request and names the variable [1]; an empty value is treated
       as unset rather than sent as an empty Bearer [2]; a successful request
       carries both the `Authorization` and the `User-Agent` headers [3]; the
@@ -32,7 +32,7 @@ over it, which is `snapshot-build`'s route change and not this one's.
       body [76]; the key appears in no error message, log line or thrown stack
       [10]. (Req: snapshot-ingest — Every request carries both halves of the
       gate)
-- [ ] 1.2 Implement the client: the two headers, the key read once at
+- [x] 1.2 Implement the client: the two headers, the key read once at
       construction, the queue that holds a request while eight sit inside the
       last second, the 30-second per-attempt timeout, the retry policy with the
       quota rule ahead of it, and the classification that reads the body before
@@ -44,7 +44,7 @@ over it, which is `snapshot-build`'s route change and not this one's.
       response is classified by its body, not its status alone / A run stays
       inside the quota the API states / A request is retried only where
       retrying can succeed)
-- [ ] 1.3 Add `.env.example` naming every variable a run reads, with no value
+- [x] 1.3 Add `.env.example` naming every variable a run reads, with no value
       for any of them, confirm `.gitignore` still excepts it from the `.env*`
       wildcard, and rule its extension in `scripts/file-size.test.ts`, which
       fails until somebody decides whether a new type is capped. (Req: none —
