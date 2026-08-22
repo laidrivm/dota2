@@ -113,7 +113,7 @@ nobody recorded.
 
 | Skill | Verified against |
 |-------|------------------|
-| `coderabbit` | `387ba36` |
+| `coderabbit` | `9adc5c6` |
 | `coderabbit-local` | `759f15e` |
 | `playwright-cli` | `759f15e` |
 | `triage` | `759f15e` |
