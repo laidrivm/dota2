@@ -48,6 +48,14 @@ settles the published artefact the deployment has to mount a volume for.
 - Retiring the fixture generator. Its heroes are hand-chosen for named model
   and search test cases that real data would not reproduce.
 
+## Non-goals
+
+- The schema, the `Bun.SQL` connection edge and the database-backed CI job.
+  All three are `snapshot-ingest`'s: every group of that change writes through
+  them, so this change consumes them rather than adding them, and follows it.
+- Filling staging. This change reads the rows the ingest writes and computes
+  from them; nothing here reaches a source outside its own database.
+
 ## Capabilities
 
 ### New Capabilities
@@ -72,8 +80,6 @@ answer to a request it was going to make anyway.
 - `static-routes.ts` stops naming the fixture directly and reads the export
   directory instead, with the fixture as its fallback; `static-routes.test.ts`
   gains the cases that distinguish the two.
-- The schema, the connection edge and the database-backed CI job are
-  `snapshot-ingest`'s, which this change now follows rather than precedes.
 - A Postgres connection string becomes a runtime input, absent in development
   and in both test suites, which run on the fallback.
 - No new dependency: `Bun.SQL` ships with the runtime already pinned.

@@ -5,9 +5,8 @@
 `snapshot-build` settled the arithmetic and left staging as an argument shape.
 This change creates the tables and fills them: the schema was that change's
 while it could run without an API key, and the key's arrival ended that, so it
-comes here with the code that writes through it. The API key arrived between
-the two, and
-two probe sessions against the live schema — recorded in
+comes here with the code that writes through it. Two probe sessions against
+the live schema — recorded in
 `docs/context/stratz-probe-2026-08.md` — moved several assumptions the data
 model was written under. The relevant ones here: the statistics API's per-week
 endpoint cannot filter by game mode, its per-day endpoint can; and its own
