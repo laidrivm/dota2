@@ -40,6 +40,13 @@ export async function connect(url: string | undefined): Promise<SQL> {
 	// file, never anything a request carried in. `sql.file()` would read it in
 	// one call, but what it returns carries no `.simple()` at runtime however
 	// the types declare it (bun 1.3.14), so the read stays separate.
-	await sql.unsafe(await Bun.file(SCHEMA).text()).simple();
+	try {
+		await sql.unsafe(await Bun.file(SCHEMA).text()).simple();
+	} catch (e) {
+		// Nothing else holds this client, so a throw from here would leave a
+		// pool nobody can close and an event loop nothing lets go of.
+		await sql.close();
+		throw e;
+	}
 	return sql;
 }
