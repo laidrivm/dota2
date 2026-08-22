@@ -94,7 +94,8 @@ completes, name the next step and the exact command.
   and the docs it indexes; architecture defaults live in the `context:`
   field of `openspec/config.yaml`. Neither restates the other, and no
   other OpenSpec artefact or rule duplicates either — OpenSpec `rules:`
-  may only reference those files, not restate them.
+  owns the form of the change artefacts themselves and may not restate
+  what those files already say.
 
 ## Across the stages
 
