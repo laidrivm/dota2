@@ -3,7 +3,7 @@
 ## Why
 
 `snapshot-build` turns staging rows into a published bundle and takes staging
-as given; nothing fills it. Until something does, the only snapshot the
+as given; nothing fills it, and nothing creates the tables it reads. Until something does, the only snapshot the
 application can serve is the hand-authored fixture, and the whole pipeline
 downstream of the database — blending, smoothing, validation, publication —
 has never run on a real number. The API key that blocked this arrived, and
@@ -35,6 +35,10 @@ has never run on a real number. The API key that blocked this arrived, and
   any of the three fails.
 - `.env.example`, naming the variables a run reads without carrying a value for
   any of them.
+- The schema, the `Bun.SQL` connection edge and the CI job that exercises them.
+  `snapshot-build` proposed all three as infrastructure closing no criterion,
+  and every group here writes through them, so they move rather than being
+  waited on.
 
 The measurable form of each — headers, ceilings, window lengths, paths — is in
 the delta specs, and stated there only.

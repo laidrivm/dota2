@@ -91,27 +91,29 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       the diff budget's failing threshold splits into `spec/<slug>` and
       `spec/<slug>-plan` — the seam #130/#132 and #141/#142 each cut by hand —
       and the `oversize:` override stops admitting an unsplit one. One task
-      group, so `chore/proposal-slicing`. Ahead of Phases 3a and 3b in the
+      group, so `chore/proposal-slicing`. Ahead of Phases 3b and 3a in the
       queue, stepping over both.
-- [ ] **Phase 3a — `snapshot-build`** — proposed,
-      `openspec/changes/snapshot-build/`. The schema, the blending, smoothing
-      and sufficiency maths, and the export of a bundle to the served URL. It
-      takes staging as given, so it needs no API key and can start now, and
-      the staging shape it settles is the contract 3b fills — revised once the
-      probe showed that contract could not publish a bundle at all. Eight task
-      groups, so `feat/snapshot-build-1` through `-8`, in order. Owns no
-      *deployed* infrastructure — the production Postgres service, the
-      schedule and the failure alert are Task 7's, and none of them gates it.
 - [ ] **Phase 3b — `snapshot-ingest`** — proposed,
-      `openspec/changes/snapshot-ingest/`. The rate-limited STRATZ client, the
-      reference upserts, the mirrored hero images, and the entry point that
-      drives 3a to a published snapshot or a failed one. Six task groups, so
-      `feat/snapshot-ingest-1` through `-6`, in order. A second probe moved
-      three assumptions, all in `docs/context/stratz-probe-2026-08.md`: the
-      meta comes from a daily endpoint that can filter the game mode, patch
-      detection leaves STRATZ whose version list stalled eight months back,
-      and hero images come from Valve's CDN by way of OpenDota's index. Owns
-      no schedule — Task 7 sets when the job runs and alerts when it stops.
+      `openspec/changes/snapshot-ingest/`. The schema and the database edge,
+      the rate-limited STRATZ client, the reference upserts, the mirrored hero
+      images, and the entry point that drives 3a to a published snapshot or a
+      failed one. Eleven task groups, so `feat/snapshot-ingest-1` through
+      `-11`, in order, each cut to land under the diff budget's warn line. It
+      runs **before** 3a: the schema was 3a's while 3a could start without an
+      API key, and the key's arrival ended that — ingest creates and fills the
+      tables the build reads. A second probe moved three assumptions, all in
+      `docs/context/stratz-probe-2026-08.md`: the meta comes from a daily
+      endpoint that can filter the game mode, patch detection leaves STRATZ
+      whose version list stalled eight months back, and hero images come from
+      Valve's CDN by way of OpenDota's index. Owns no schedule — Task 7 sets
+      when the job runs and alerts when it stops.
+- [ ] **Phase 3a — `snapshot-build`** — proposed,
+      `openspec/changes/snapshot-build/`. The blending, smoothing and
+      sufficiency maths, and the export of a bundle to the served URL. It
+      reads the schema and staging 3b creates and fills, so it follows 3b.
+      Eight task groups, so `feat/snapshot-build-1` through `-8`, in order.
+      Owns no *deployed* infrastructure — the production Postgres service, the
+      schedule and the failure alert are Task 7's, and none of them gates it.
 - [ ] **Task 7** — the whole deployment: Docker image, compose (`app` +
       `postgres`, bundle on a volume both mount), the snapshot job's entry in
       the VPS's existing crontab, the failure alert, and the deploy workflow.
