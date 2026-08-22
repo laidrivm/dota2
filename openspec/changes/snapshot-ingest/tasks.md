@@ -3,7 +3,7 @@
 Test tasks are derived from the proposal-stage `/zombies` run and are written
 before the module they cover (docs/testing.md — TDD for edge cases). The
 bracketed numbers are that run's idea numbers, so every one of its 62 ideas is
-traceable to the group that closes it. Numbers 63 to 82 are the reviews' own,
+traceable to the group that closes it. Numbers 63 to 83 are the reviews' own,
 added where a finding named a case the run had missed — 76 to 81 during apply,
 by the diff-mode `/zombies` run and CodeRabbit.
 
@@ -59,7 +59,9 @@ over it, which is `snapshot-build`'s route change and not this one's.
       undelayed [7]; a response reporting zero remaining in any rate-limit
       window ends the run with no further request [16]; a remaining header that
       is blank or carries no number does not end the run [77]; a negative
-      remaining count does [78]. (Req: snapshot-ingest
+      remaining count does [78]; a later request on the same client is refused
+      without reaching the network, the verdict stopping the run rather than
+      the request that met it [83]. (Req: snapshot-ingest
       — A run stays inside the quota the API states)
 - [x] 2.2 Write the classification tests: a `403` carrying `text/html` reports
       an unmet challenge naming the `User-Agent` [11]; a `403` carrying no
