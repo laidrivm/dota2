@@ -18,8 +18,9 @@ already lives at the repository root (`server.ts`, `static-routes.ts`,
 
 **Goals:**
 
-- A schema, a build and an export that turn staging rows into the bundle the
-  client already accepts, reaching no source outside its own database.
+- A build and an export that turn staging rows into the bundle the client
+  already accepts, reaching no source outside its own database. The schema
+  those rows live in is `snapshot-ingest`'s, which this change follows.
 - Arithmetic testable without a database, so the part most likely to be wrong
   is the part cheapest to check.
 - A served URL that works with no database at all, because development, the
@@ -46,16 +47,6 @@ matchup matrix, and it would move the one part of this change with real
 failure modes into the one place the test suite cannot reach without a
 running database. Rejected on testability; ~34k numbers is not a volume that
 needs SQL to be fast.
-
-### The schema is one idempotent file, not a migration ledger
-
-`schema.sql` with `CREATE TABLE IF NOT EXISTS`, applied on connect. There is
-one schema version and nothing to migrate from.
-
-*Alternative considered*: a numbered-migration table from the start. It is
-scaffolding for a second version that does not exist. The file carries a
-`ponytail:` comment naming the ceiling — the first `ALTER` is where the
-ledger arrives.
 
 ### `snapshot_id` stays an incremental integer
 
