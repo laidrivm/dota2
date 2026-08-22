@@ -108,7 +108,7 @@ describe("an attempt that never completes", () => {
 	 * the requirement bounds is a *complete* response.
 	 */
 	// spec: snapshot-ingest/a-request-that-never-completes
-	test("a body that never completes is abandoned and retried [71]", async () => {
+	test("a body that never completes is abandoned and retried [81]", async () => {
 		const { fetch, calls } = stub([stallsMidBody(), ok()]);
 		const query = client(fetch);
 
