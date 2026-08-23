@@ -38,9 +38,6 @@ export type Window = {
 	cappedBySource: boolean;
 };
 
-/** UTC midnight at or before `at`. */
-const dayStart = (at: Date) => Math.floor(at.getTime() / DAY_MS) * DAY_MS;
-
 /**
  * The window a run at `at` covers for a patch released at `detectedAt`: every
  * whole UTC day of the patch's life, capped at what the source serves.
@@ -55,10 +52,11 @@ const dayStart = (at: Date) => Math.floor(at.getTime() / DAY_MS) * DAY_MS;
  * the alternative is a failed build every night until a day accumulates.
  */
 export function metaWindow(detectedAt: Date, at: Date): Window {
-	const end = dayStart(at);
-	// Ceiling, not floor: the window holds a day only where the whole of it
-	// falls after the release, so a patch released midway through a day starts
-	// the count at the next midnight.
+	// Floor for the end and ceiling for the start, so a part-day at either
+	// bound is left out rather than half-counted.
+	const end = Math.floor(at.getTime() / DAY_MS) * DAY_MS;
+	// A patch released midway through a day starts the count at the next
+	// midnight, that day being one it was not live for the whole of.
 	const first = Math.ceil(detectedAt.getTime() / DAY_MS) * DAY_MS;
 	const whole = Math.max(1, (end - first) / DAY_MS);
 	const days = Math.min(whole, SOURCE_DAYS);
