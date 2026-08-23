@@ -47,6 +47,11 @@ One fact lives in exactly one file; everything else links to it.
   a broken copy step or a bundler upgrade that starts inlining the fonts fails
   here rather than in the browser. `e2e/` is excluded (`pathIgnorePatterns` in
   `bunfig.toml`) — those specs belong to Playwright's runner.
+- `bun run test:db` — the same suite against a throwaway Postgres in Docker,
+  started from the image CI pins and taken away afterwards. Without it 46
+  cases skip: every patch detection, every reference upsert, every schema
+  constraint and the whole staging write. Arguments pass through, so
+  `bun run test:db ingest.test.ts` runs one file.
 - `bun run test:coverage` — the same suite with Bun's built-in coverage
   reporter. The number is visibility, not a gate: no threshold is configured
   and none should be added without a decision made against real numbers.
