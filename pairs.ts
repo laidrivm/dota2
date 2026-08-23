@@ -16,7 +16,7 @@
  * of them can be fixed*).
  */
 import { isHeroId } from "./heroes.ts";
-import { isCount } from "./meta.ts";
+import { isCount, MAX_COUNT } from "./meta.ts";
 import type { Query } from "./stratz.ts";
 
 /**
@@ -90,8 +90,20 @@ export type PairPull = { matchups: PairCount[]; synergies: PairCount[] };
 const anchor = (week: Date) =>
 	Math.floor((week.getTime() + WEEK_MS / 2) / 1000);
 
-const document = (heroId: number, week: Date) =>
-	`{ heroStats { matchUp(heroId: ${heroId}, week: ${anchor(week)}, take: ${TAKE}, bracketBasicIds: [DIVINE_IMMORTAL]) { with { heroId2 matchCount winCount } vs { heroId2 matchCount winCount } } } }`;
+const document = (heroId: number, week: Date) => {
+	const at = anchor(week);
+	// Checked where the request is built rather than where its arguments came
+	// from: `NaN` interpolates as readily as a number, and the run's quota is
+	// spent on a document naming `heroId: NaN` before anything notices.
+	if (!isHeroId(heroId) || !Number.isFinite(at))
+		throw new RangeError(
+			// `getTime()` rather than `toISOString()`, which throws on the very
+			// input this guard exists for and would replace the message with
+			// its own.
+			`no request can be built for hero ${heroId} in the week at ${week.getTime()}`,
+		);
+	return `{ heroStats { matchUp(heroId: ${heroId}, week: ${at}, take: ${TAKE}, bracketBasicIds: [DIVINE_IMMORTAL]) { with { heroId2 matchCount winCount } vs { heroId2 matchCount winCount } } } }`;
+};
 
 /**
  * The `HeroDryadType` one request answers with, carrying `with` and `vs` side
@@ -105,6 +117,13 @@ const document = (heroId: number, week: Date) =>
 function dryad(body: unknown, heroId: number) {
 	const answered = (body as { data?: { heroStats?: { matchUp?: unknown } } })
 		?.data?.heroStats?.matchUp;
+	// Exactly one, where it is a list: one hero was asked for, so a second
+	// entry is data this request did not ask for, and reading the first of two
+	// would discard it without saying so.
+	if (Array.isArray(answered) && answered.length !== 1)
+		throw new Error(
+			`the pair source returned ${answered.length} pairs for hero ${heroId}`,
+		);
 	const pair = Array.isArray(answered) ? answered[0] : answered;
 	if (typeof pair !== "object" || pair === null)
 		throw new Error(`the pair source returned nothing for hero ${heroId}`);
@@ -159,6 +178,13 @@ function absorb(
 		};
 		row.matches += matchCount;
 		row.wins += winCount;
+		// Each week fits the column and four of them need not. Refused here
+		// rather than at the insert, which reports a range error naming a
+		// column instead of a source.
+		if (row.matches > MAX_COUNT)
+			throw new Error(
+				`the ${kind} rows for hero ${heroId} sum past what the column holds`,
+			);
 		into.set(key, row);
 	}
 	if (seen.size !== expected.size)

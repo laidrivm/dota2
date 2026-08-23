@@ -92,15 +92,15 @@ export function metaWindow(detectedAt: Date, at: Date): MetaWindow {
  * reason: a number the column cannot hold reaches Postgres as an error rather
  * than a row.
  */
-const MAX_COUNT = 2_147_483_647;
+export const MAX_COUNT = 2_147_483_647;
 
 /**
  * Whether a value is a number of matches, rather than merely a number.
  *
- * Bounded above as well as below, which is what makes summing safe: thirty
- * days — or the pair pull's four weeks — of values this size stay four orders
- * inside `Number.MAX_SAFE_INTEGER`, so no total can lose precision on its way
- * to the constraint that judges it.
+ * Bounded above as well as below. That keeps every total inside
+ * `Number.MAX_SAFE_INTEGER`, so no sum loses precision — but a total of them
+ * can still pass what the column holds, which is why the running sum is
+ * checked against `MAX_COUNT` too rather than only each addend.
  *
  * Exported for the pair pull, which sums over weeks as this sums over days and
  * so hides the same inconsistency from the same constraint.
@@ -202,6 +202,14 @@ export async function pullMeta(
 			};
 			row.matches += matchCount;
 			row.wins += winCount;
+			// Each day fits the column and their sum need not: thirty of them
+			// reach thirty times its ceiling. Refused here rather than at the
+			// insert, which reports a range error naming a column instead of a
+			// source.
+			if (row.matches > MAX_COUNT)
+				throw new Error(
+					`the meta source summed hero ${heroId} at position ${position} past what the column holds`,
+				);
 			summed.set(heroId, row);
 		}
 		rows.push(...summed.values());

@@ -53,12 +53,63 @@ describe("a response the reference does not admit", () => {
 		expect(await refusing(undefined)).toContain("no opponent rows");
 	});
 
-	test("a body carrying no pair at all fails naming the hero", async () => {
-		const query: Query = async () => ({ data: { heroStats: { matchUp: [] } } });
+	test.each([
+		["none", []],
+		[
+			"two",
+			[
+				{ vs: [], with: [] },
+				{ vs: [], with: [] },
+			],
+		],
+	])("a list carrying %s pairs fails naming how many", async (_, matchUp) => {
+		// One hero was asked for, so a second entry is data the request did not
+		// ask for; reading the first of two would discard it silently.
+		const query: Query = async () => ({ data: { heroStats: { matchUp } } });
+
+		expect(await failure(pullPairs(query, HEROES, WEEKS))).toContain(
+			"pairs for hero 9001",
+		);
+	});
+
+	test("a pair that is not an object fails naming the hero", async () => {
+		const query: Query = async () => ({
+			data: { heroStats: { matchUp: [7] } },
+		});
 
 		expect(await failure(pullPairs(query, HEROES, WEEKS))).toContain(
 			"nothing for hero 9001",
 		);
+	});
+
+	test("weeks summing past what the column holds fail", async () => {
+		// Each week fits `int` and their sum does not, which is the total the
+		// staging insert would refuse under a column's name rather than a
+		// source's.
+		const { query } = asking(() => ({ vs: whole(9001, 2_000_000_000, 0) }));
+
+		expect(
+			await failure(pullPairs(query, HEROES, [...WEEKS, ...WEEKS])),
+		).toContain("sum past what the column holds");
+	});
+
+	test("a hero id that is not one is never asked for", async () => {
+		const { query, asked } = asking(() => ({}));
+
+		expect(await failure(pullPairs(query, [Number.NaN], WEEKS))).toContain(
+			"no request can be built",
+		);
+		// The quota is not spent on a document naming `heroId: NaN`.
+		expect(asked).toEqual([]);
+	});
+
+	test("a week that is not one is never asked for", async () => {
+		const { query, asked } = asking(() => ({}));
+
+		expect(
+			await failure(pullPairs(query, HEROES, [new Date("not a date")])),
+		).toContain("no request can be built");
+		expect(asked).toEqual([]);
 	});
 
 	// spec: snapshot-ingest/every-opponent-not-the-default-page
