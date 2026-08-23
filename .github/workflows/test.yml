@@ -70,4 +70,8 @@ jobs:
       - run: bun test
         env:
           DATABASE_URL: postgres://postgres:postgres@localhost:5432/postgres
+          # The suites delete rows, and this database is a service container
+          # that lives for the length of the job — which is the only kind they
+          # are allowed to run against.
+          DATABASE_DISPOSABLE: "1"
           DATABASE_REQUIRED: "1"
