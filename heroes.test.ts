@@ -46,6 +46,16 @@ describe.skipIf(url === undefined)("upserting the hero reference", () => {
 		await sql`SELECT hero_id, name, short_name, icon, first_seen_at
 			FROM heroes WHERE hero_id >= 9000 ORDER BY hero_id`;
 
+	test("a run carrying no hero writes nothing and does not fail", async () => {
+		// The reference is upserted from a response, and a response carrying no
+		// hero is the caller's failure to raise, not this module's to guess at.
+		const sql = await clean();
+
+		await upsertHeroes(sql, [], FIRST_RUN);
+
+		expect(await rows(sql)).toEqual([]);
+	});
+
 	// spec: hero-reference/a-hero-that-is-new
 	test("a hero the tables lack is inserted at the run instant [45]", async () => {
 		const sql = await clean();
@@ -91,6 +101,24 @@ describe.skipIf(url === undefined)("upserting the hero reference", () => {
 			"bone_fletcher",
 		]);
 		expect(row.first_seen_at.toISOString()).toBe(FIRST_RUN.toISOString());
+	});
+
+	// spec: hero-reference/a-run-that-fails-after-the-upsert
+	test("a failure after the upsert leaves the rows standing [66]", async () => {
+		const sql = await clean();
+		await upsertHeroes(sql, [CLINKZ], FIRST_RUN);
+
+		// A statement that cannot succeed, standing in for whichever later step
+		// of the run fails: these rows are written outside the staging
+		// transaction, so nothing rolls them back with it.
+		await sql`INSERT INTO heroes VALUES (${CLINKZ.heroId}, 'x', 'x', 'x', now())`.then(
+			() => null,
+			String,
+		);
+
+		expect((await rows(sql)).map((row: { name: string }) => row.name)).toEqual([
+			CLINKZ.name,
+		]);
 	});
 
 	// spec: hero-reference/a-run-that-fails-after-the-upsert
