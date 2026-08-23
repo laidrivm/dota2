@@ -14,7 +14,12 @@
  * having been rolled back.
  */
 import type { SQL } from "bun";
-import { iconPath, type MirroredHero, sourceImageUrl } from "./icons.ts";
+import {
+	iconPath,
+	isSlug,
+	type MirroredHero,
+	sourceImageUrl,
+} from "./icons.ts";
 import type { Query } from "./stratz.ts";
 
 /** A hero as `heroes` holds it, `first_seen_at` excepted. */
@@ -50,6 +55,9 @@ export async function readHeroes(query: Query): Promise<SourcedHero[]> {
 		// an entry missing either is not a hero this run can carry. Checked here
 		// rather than where it would first hurt: the mirror would write a file
 		// called `undefined.png`, and the upsert would key a row to `null`.
+		// The slug is checked against the rule the mirror writes files under, so
+		// a name that would be refused there is refused here instead — before
+		// two locations are derived from it and before any of it is upserted.
 		// The id is checked as a positive integer rather than as a number:
 		// Valve mints them, the column is `int`, and `NaN`, `1.5` and `-1` are
 		// each a number that reaches Postgres as an error rather than a row.
@@ -57,8 +65,7 @@ export async function readHeroes(query: Query): Promise<SourcedHero[]> {
 			typeof id !== "number" ||
 			!Number.isInteger(id) ||
 			id <= 0 ||
-			typeof shortName !== "string" ||
-			shortName === ""
+			!isSlug(shortName)
 		)
 			throw new Error(
 				`the hero source described entry ${index} without an id or a slug`,

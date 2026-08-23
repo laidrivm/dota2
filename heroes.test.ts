@@ -109,6 +109,8 @@ describe("reading the reference from the source", () => {
 		["a zero id", { ...LISTED, id: 0 }],
 		["no slug", { id: 9001, displayName: "Clinkz" }],
 		["a blank slug", { ...LISTED, shortName: "" }],
+		["a slug that climbs out", { ...LISTED, shortName: "../escaped" }],
+		["a slug carrying its own extension", { ...LISTED, shortName: "c.png" }],
 		["nothing at all", null],
 	])("an entry with %s fails the run naming it [88]", async (_, entry) => {
 		// Named by position, because an entry missing its slug has no name to
