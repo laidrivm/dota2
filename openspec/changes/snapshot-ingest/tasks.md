@@ -132,7 +132,7 @@ them as given rather than adding them.
       release instant, each fail the run naming which, without falling back to
       the patch `patches` already holds [68]. (Req: hero-reference — Patches
       are detected from a source that is current)
-- [ ] 5.3 Write the hero-upsert tests: a hero the tables lack is inserted with
+- [x] 5.3 Write the hero-upsert tests: a hero the tables lack is inserted with
       `first_seen_at` set to the run instant [45]; a hero a later response
       omits keeps its row and its original `first_seen_at` [51]; a hero whose
       display name changed takes the new name and keeps `first_seen_at` [52];
@@ -145,7 +145,7 @@ them as given rather than adding them.
       split, the insert-once rule and the three failure paths, with a comment
       naming why the statistics API's own version list is not read. (Req:
       hero-reference — Patches are detected from a source that is current)
-- [ ] 5.5 Implement the hero upsert with no delete path at all, so removal is
+- [x] 5.5 Implement the hero upsert with no delete path at all, so removal is
       absent rather than guarded. (Req: hero-reference — A hero is upserted
       and never removed)
 
