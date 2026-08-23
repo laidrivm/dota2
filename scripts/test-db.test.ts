@@ -34,8 +34,23 @@ test("a workflow naming no image yields nothing to run", () => {
 	expect(extract("      ports:\n        - 5432:5432\n")).toEqual([]);
 });
 
-test("the script fails rather than running an unpinned image", () => {
-	expect(script).toContain("no pinned postgres image");
+test("the script's own pattern refuses a mutable tag", () => {
+	// Read out of the script rather than restated, so weakening it there is
+	// what fails here.
+	const declared = /^PINNED='(.+)'$/m.exec(script)?.[1];
+	expect(declared).toBeDefined();
+	const pinned = new RegExp(declared as string);
+
+	// A tag names whatever it points at today, which is what a digest is for.
+	expect(pinned.test("postgres:18-alpine")).toBe(false);
+	expect(pinned.test("postgres:18-alpine@sha256:")).toBe(false);
+	expect(pinned.test(`postgres:18-alpine@sha256:${"d".repeat(63)}`)).toBe(
+		false,
+	);
+	expect(pinned.test(`postgres:18-alpine@sha256:${"d".repeat(64)}`)).toBe(true);
+	// And what the workflow actually carries clears it, so the two cannot
+	// drift into a script that refuses the image CI runs.
+	expect(pinned.test(extract(workflow)[0] as string)).toBe(true);
 });
 
 test("the service container's own probe goes over TCP too", () => {
