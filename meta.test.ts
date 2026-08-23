@@ -205,6 +205,7 @@ describe("an answer that is not a pull", () => {
 
 	test.each([
 		["a fractional match count", 10.5, 4],
+		["a count past what the column holds", 2_147_483_648, 0],
 		["a negative match count", -1, 0],
 		["a match count that is not a number", "10", 4],
 		["a missing win count", 10, undefined],

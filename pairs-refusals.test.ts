@@ -39,6 +39,10 @@ describe("a response the reference does not admit", () => {
 		["more wins than matches", [row(9002, 4, 10), row(9003, 10, 4)]],
 		["a fractional count", [row(9002, 10.5, 4), row(9003, 10, 4)]],
 		["a negative count", [row(9002, -1, 0), row(9003, 10, 4)]],
+		[
+			"a count past what the column holds",
+			[row(9002, 2_147_483_648, 0), row(9003, 10, 4)],
+		],
 	])("a row with %s fails rather than being summed [82]", async (_, rows) => {
 		// Read on the week, because the sum over four of them is what the
 		// staging table's own constraint sees.
@@ -90,7 +94,10 @@ describe("a response the reference does not admit", () => {
 		// The probe recorded `HeroDryadType`'s fields and not whether `matchUp`
 		// answers one of them or a list of one; both are read.
 		const query: Query = async (sent) => {
-			const heroId = Number(/heroId: (\d+)/.exec(sent)?.[1]);
+			const named = /heroId: (\d+)/.exec(sent);
+			if (named === null)
+				throw new Error(`the request named no hero id: ${sent}`);
+			const heroId = Number(named[1]);
 			return {
 				data: {
 					heroStats: {
