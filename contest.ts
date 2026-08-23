@@ -77,6 +77,10 @@ export async function pullBans(
 		throw new Error("the ban source returned no rows");
 
 	const bans = new Map<number, number>();
+	// The pairs a response has already named. Absence is this endpoint's
+	// normal state, so completeness cannot be checked — but a repeat can be,
+	// and a repeated pair inflates a hero's contest rate with no other trace.
+	const named = new Set<string>();
 	for (const [index, entry] of listed.entries()) {
 		const { heroId, day, matchCount } = (entry ?? {}) as {
 			heroId: unknown;
@@ -96,6 +100,12 @@ export async function pullBans(
 		// only bound the request carries, and the endpoint answering more days
 		// than it was asked for is not a reason to fail a run.
 		if (day < first || day > last) continue;
+		const pair = `${heroId}:${day}`;
+		if (named.has(pair))
+			throw new Error(
+				`the ban source named hero ${heroId} on day ${day} more than once`,
+			);
+		named.add(pair);
 		const total = (bans.get(heroId) ?? 0) + matchCount;
 		if (total > MAX_COUNT)
 			throw new Error(`the ban source summed hero ${heroId} past a ban count`);
