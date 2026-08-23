@@ -204,7 +204,7 @@ proposal run's.
 
 ## 8. The meta pull
 
-- [ ] 8.1 Write the meta-window tests: a patch seven whole UTC days old is
+- [x] 8.1 Write the meta-window tests: a patch seven whole UTC days old is
       pulled over exactly seven days and each staging row is the sum over them
       [20]; a patch with no complete day behind it is pulled over the single
       most recent complete day rather than none [18]; a hero the source returns
@@ -218,12 +218,12 @@ proposal run's.
       bound the window, not the patch [70]. (Req:
       snapshot-ingest — The meta is pulled by day over the current patch's
       life)
-- [ ] 8.2 Write the meta-request tests: the request names the ranked All Pick
+- [x] 8.2 Write the meta-request tests: the request names the ranked All Pick
       game mode and a response covering every mode is rejected rather than
       accepted in its place [27]; the request names the Divine and Immortal
       brackets [28]. (Req: snapshot-ingest — The meta is pulled by day over
       the current patch's life)
-- [ ] 8.3 Implement the meta pull: one request per position over the
+- [x] 8.3 Implement the meta pull: one request per position over the
       UTC-normalised, end-exclusive window capped at the thirty days the source
       serves, the game mode and brackets named at one site, summed into staging
       rows, and the cap reported when it bound. (Req: snapshot-ingest — The
