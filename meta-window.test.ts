@@ -60,6 +60,10 @@ describe("read from a zone nine hours ahead of UTC", () => {
 
 	// spec: snapshot-ingest/the-day-in-progress
 	test("a run instant whose local date is a day ahead adds no day [26]", () => {
+		// Asserted rather than assumed: a `TZ` assignment that did not take
+		// would leave this running in UTC, where a window measured by the
+		// machine's calendar passes exactly as one measured properly does.
+		expect(Intl.DateTimeFormat().resolvedOptions().timeZone).toBe("Asia/Tokyo");
 		// 23:00 UTC is the next morning in Tokyo, so a window measured by the
 		// machine's calendar would hold eight days here rather than seven.
 		expect(
@@ -101,6 +105,16 @@ test("a patch exactly thirty days old is covered whole [70]", () => {
 	// thirty-one is the source refusing to serve one.
 	expect(aged(30)).toMatchObject({ days: 30, cappedBySource: false });
 	expect(aged(31)).toMatchObject({ days: 30, cappedBySource: true });
+});
+
+test("a patch released after the run is refused, not floored to a day", () => {
+	// The one-day floor is for a patch detected today; a patch detected
+	// tomorrow would take a day it was never live for.
+	expect(() =>
+		metaWindow(new Date("2026-08-22T00:00:00.000Z"), RUN_AT),
+	).toThrow("has no window");
+	// The boundary the floor does still cover: released this very morning.
+	expect(metaWindow(new Date("2026-08-21T06:00:00.000Z"), RUN_AT).days).toBe(1);
 });
 
 test("an instant that is not one is refused rather than asked for", () => {
