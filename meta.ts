@@ -52,19 +52,32 @@ export type MetaWindow = {
  * the alternative is a failed build every night until a day accumulates.
  */
 export function metaWindow(detectedAt: Date, at: Date): MetaWindow {
+	const detected = detectedAt.getTime();
+	const run = at.getTime();
+	// An instant that is not one would leave every line below holding `NaN`,
+	// and `NaN` is what would then be asked for: `Math.max` and `Math.min` both
+	// propagate it rather than falling back on their other argument.
+	if (!Number.isFinite(detected) || !Number.isFinite(run))
+		throw new RangeError("a window cannot be measured from an invalid instant");
+	// The one-day floor below answers a patch detected *today*, and a patch
+	// released after the run is not that: it would take a day the patch was
+	// never live for. `detectPatch` selects on `detected_at <= at` and so never
+	// returns one, which makes this a precondition rather than a case any
+	// caller has — stated because a reader would otherwise read the floor as
+	// covering it.
+	if (detected > run)
+		throw new RangeError(
+			"a patch released after the run instant has no window",
+		);
+
 	// Floor for the end and ceiling for the start, so a part-day at either
 	// bound is left out rather than half-counted.
-	const end = Math.floor(at.getTime() / DAY_MS) * DAY_MS;
+	const end = Math.floor(run / DAY_MS) * DAY_MS;
 	// A patch released midway through a day starts the count at the next
 	// midnight, that day being one it was not live for the whole of.
-	const first = Math.ceil(detectedAt.getTime() / DAY_MS) * DAY_MS;
+	const first = Math.ceil(detected / DAY_MS) * DAY_MS;
 	const whole = Math.max(1, (end - first) / DAY_MS);
 	const days = Math.min(whole, SOURCE_DAYS);
-	// An instant that is not one leaves every line above holding `NaN`, and
-	// `NaN` is what would then be asked for: `Math.max` and `Math.min` both
-	// propagate it rather than falling back on their other argument.
-	if (!Number.isInteger(days))
-		throw new RangeError("a window cannot be measured from an invalid instant");
 	return {
 		start: new Date(end - days * DAY_MS),
 		end: new Date(end),
@@ -73,9 +86,13 @@ export function metaWindow(detectedAt: Date, at: Date): MetaWindow {
 	};
 }
 
-/** Whether a value is a number of matches, rather than merely a number. */
+/**
+ * Whether a value is a number of matches, rather than merely a number. Safe
+ * integers rather than integers: `Number.isInteger(1e300)` is true, and a count
+ * that cannot survive being added to is not one.
+ */
 const isCount = (n: unknown): n is number =>
-	typeof n === "number" && Number.isInteger(n) && n >= 0;
+	typeof n === "number" && Number.isSafeInteger(n) && n >= 0;
 
 /** One hero's counts at one position, summed over the window's days. */
 export type PositionCount = {

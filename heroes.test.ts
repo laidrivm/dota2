@@ -102,6 +102,19 @@ describe("reading the reference from the source", () => {
 	});
 
 	// spec: hero-reference/a-hero-the-source-describes-incompletely
+	test("the largest id the column holds is accepted [88]", async () => {
+		// The other side of the ceiling below: `<=` rather than `<`, so the
+		// rejection at 2_147_483_648 is a boundary and not an off-by-one.
+		const [hero] = await readHeroes(
+			answering({
+				data: { constants: { heroes: [{ ...LISTED, id: 2_147_483_647 }] } },
+			}).query,
+		);
+
+		expect(hero?.heroId).toBe(2_147_483_647);
+	});
+
+	// spec: hero-reference/a-hero-the-source-describes-incompletely
 	test.each([
 		["no id", { displayName: "Clinkz", shortName: "clinkz" }],
 		["an id that is not a number", { ...LISTED, id: "9001" }],
