@@ -1,22 +1,17 @@
 /**
- * The database-backed suite. It needs a Postgres to answer, so it skips where
- * no connection string is present — the pre-push run is offline and stays so.
+ * The connection edge: what counts as a connection string, and that a
+ * connection comes back with the schema already applied to it.
  *
- * A skipped suite and a passing one report the same green, so the CI job that
- * owns this file supplies a connection string *and* sets `DATABASE_REQUIRED`.
- * The first test below turns a skip under that flag into a failure, which is
- * what makes the job evidence that these cases ran rather than evidence that
- * bun found the file.
+ * The cases below the guard need a Postgres to answer, so they skip where no
+ * connection string is present — the pre-push run is offline and stays so, and
+ * `db.fixture.ts` holds what makes a skip in CI a failure.
  */
-import { afterAll, describe, expect, test } from "bun:test";
+import { describe, expect, test } from "bun:test";
 import type { SQL } from "bun";
+import { opener, requiresDatabase, url } from "./db.fixture.ts";
 import { connect, connectionString } from "./db.ts";
 
-const url = connectionString();
-
-test("the job that requires a database is given one", () => {
-	expect(Bun.env.DATABASE_REQUIRED === "1" && url === undefined).toBe(false);
-});
+requiresDatabase();
 
 test.each([
 	["an absent variable", {}],
@@ -48,16 +43,7 @@ test("a server that refuses the connection fails the connect itself", async () =
 });
 
 describe.skipIf(url === undefined)("connecting", () => {
-	const opened: SQL[] = [];
-	afterAll(async () => {
-		for (const sql of opened) await sql.close();
-	});
-
-	const open = async () => {
-		const sql = await connect(url);
-		opened.push(sql);
-		return sql;
-	};
+	const open = opener();
 
 	/** The name Postgres resolves the table to, or `null` where it has none. */
 	const table = async (sql: SQL, name: string) =>
