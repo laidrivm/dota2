@@ -255,27 +255,27 @@ proposal run's.
 
 ## 10. Contest rate and the ban pull
 
-- [ ] 10.1 Write the contest tests: a hero whose match count equals the
+- [x] 10.1 Write the contest tests: a hero whose match count equals the
       window's match total with no bans has a rate of 1 [32]; two heroes with
       equal picks rank by bans [33]; the denominator is the summed hero counts
       divided by ten, so counts summing to a non-multiple of ten still yield
       the stated ratio rather than a rounded one [34]; a window whose matches
       are 0 gives every hero 0 with no division attempted [35]. (Req:
       snapshot-ingest — Contest rate is a share of the window's matches)
-- [ ] 10.2 Write the ban-pull tests: the days requested are the meta window's
+- [x] 10.2 Write the ban-pull tests: the days requested are the meta window's
       and one request asks for every hero [73]; a ban request failing after its
       retries fails the run rather than storing a contest rate from picks alone
       [74]; a hero-and-day pair the ban response carries no row for contributes
       zero bans and does not fail the run [75]. (Req: snapshot-ingest — Contest
       rate is a share of the window's matches)
-- [ ] 10.3 Implement the ban pull as one request over the meta window's days,
+- [x] 10.3 Implement the ban pull as one request over the meta window's days,
       since the pick counts carry no ban dimension: pass the required `heroId`
       as a constant with the comment saying it does not filter, convert the
       window to `banDay`'s day numbers rather than reusing the meta pull's Unix
       timestamps, read `matchCount` as the ban count, and sum an absent pair as
       zero. (Req: snapshot-ingest — Contest rate is a share of the window's
       matches)
-- [ ] 10.4 Implement the contest formula over the counts the meta and ban pulls
+- [x] 10.4 Implement the contest formula over the counts the meta and ban pulls
       return, with the divisor carrying the comment naming why it is exact and
       the ratio carrying the one naming why it is not. (Req: snapshot-ingest —
       Contest rate is a share of the window's matches)
