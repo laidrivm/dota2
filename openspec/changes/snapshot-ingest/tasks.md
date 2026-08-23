@@ -186,7 +186,7 @@ a list, and this group is what supplies one. It was missing from this list
 rather than deferred by it, which is why its ideas are numbered past the
 proposal run's.
 
-- [ ] 7.1 Write the hero-source tests: a hero is carried as the id, the display
+- [x] 7.1 Write the hero-source tests: a hero is carried as the id, the display
       name, the slug, and the image location that slug names [85]; a response
       parsing to no hero fails the run naming that, rather than upserting
       nothing [86]; a response the transport gave up on fails the run before a
@@ -194,7 +194,7 @@ proposal run's.
       naming it, rather than upserting a hero the mirror cannot name a file for
       [88]. (Req: hero-reference — The hero reference is read whole or the run
       fails / A hero the source describes incompletely)
-- [ ] 7.2 Implement the hero source: one `constants.heroes` request through the
+- [x] 7.2 Implement the hero source: one `constants.heroes` request through the
       client group 1 ships, mapped to what the upsert and the mirror each take,
       with the content delivery network's path carrying the measurement behind
       it — every slug the source returns answers under that path, so no second

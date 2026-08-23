@@ -9,9 +9,118 @@
 import { describe, expect, test } from "bun:test";
 import type { SQL } from "bun";
 import { opener, requiresDatabase, url } from "./db.fixture.ts";
-import { type HeroReference, upsertHeroes } from "./heroes.ts";
+import { type HeroReference, readHeroes, upsertHeroes } from "./heroes.ts";
+import type { Query } from "./stratz.ts";
 
 requiresDatabase();
+
+/** A `query` answering one body, and the documents it was asked for. */
+function answering(body: unknown) {
+	const asked: string[] = [];
+	const query: Query = async (document) => {
+		asked.push(document);
+		return body;
+	};
+	return { query, asked };
+}
+
+/** The message `work` failed with, or `null` where it did not fail. */
+const failure = (work: Promise<unknown>) =>
+	work.then(
+		() => null,
+		(error: Error) => error.message,
+	);
+
+const LISTED = { id: 9001, displayName: "Clinkz", shortName: "clinkz" };
+
+describe("reading the reference from the source", () => {
+	// spec: hero-reference/a-derived-image-location
+	test("a hero carries its id, its names and where its image is [85]", async () => {
+		const { query, asked } = answering({
+			data: { constants: { heroes: [LISTED] } },
+		});
+
+		const [hero] = await readHeroes(query);
+
+		expect(hero).toEqual({
+			heroId: 9001,
+			name: "Clinkz",
+			shortName: "clinkz",
+			icon: "/icons/clinkz.png",
+			imageUrl:
+				"https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/clinkz.png",
+		});
+		// The read asks for exactly the three fields it maps; a vendor is asked
+		// nothing at all, which is what makes the location derived.
+		expect(asked).toEqual([
+			"{ constants { heroes { id displayName shortName } } }",
+		]);
+	});
+
+	// spec: hero-reference/a-derived-image-location
+	test.each([
+		["no display name", { id: 9001, shortName: "clinkz" }],
+		["a blank one", { ...LISTED, displayName: "" }],
+	])(
+		"a hero with %s is named by its slug rather than refused",
+		async (_, e) => {
+			// The column is NOT NULL and the name is what a tile shows: `clinkz` is
+			// worse than `Clinkz` and better than a night with no snapshot.
+			const [hero] = await readHeroes(
+				answering({ data: { constants: { heroes: [e] } } }).query,
+			);
+
+			expect(hero?.name).toBe("clinkz");
+		},
+	);
+
+	// spec: hero-reference/a-hero-source-that-lists-no-hero
+	test.each([
+		["an empty list", { data: { constants: { heroes: [] } } }],
+		["a body carrying no heroes at all", { data: { constants: {} } }],
+		["an envelope that is not the documented one", { heroes: [LISTED] }],
+	])("%s fails the run naming that [86]", async (_, body) => {
+		const failed = await failure(readHeroes(answering(body).query));
+
+		expect(failed).toBe("the hero source listed no hero");
+	});
+
+	// spec: hero-reference/a-hero-source-that-cannot-be-reached
+	test("a transport that gave up fails the run [87]", async () => {
+		// The client raises once its attempts are spent, and nothing here
+		// catches it: a read that failed reaches no upsert, which is the whole
+		// of what this module owes that criterion.
+		const spent: Query = async () => {
+			throw new Error("the API answered 500; 4 attempts made");
+		};
+
+		const failed = await failure(readHeroes(spent));
+
+		expect(failed).toMatch(/4 attempts made/);
+	});
+
+	// spec: hero-reference/a-hero-the-source-describes-incompletely
+	test.each([
+		["no id", { displayName: "Clinkz", shortName: "clinkz" }],
+		["an id that is not a number", { ...LISTED, id: "9001" }],
+		["no slug", { id: 9001, displayName: "Clinkz" }],
+		["a blank slug", { ...LISTED, shortName: "" }],
+		["nothing at all", null],
+	])("an entry with %s fails the run naming it [88]", async (_, entry) => {
+		// Named by position, because an entry missing its slug has no name to
+		// be reported under — which is the case that would otherwise be
+		// reported as `undefined`.
+		const failed = await failure(
+			readHeroes(
+				answering({ data: { constants: { heroes: [LISTED, entry] } } }).query,
+			),
+		);
+
+		expect(failed).toBe(
+			"the hero source described entry 1 without an id or a slug",
+		);
+	});
+});
 
 /** The run instant an insert is expected to write, and a later one. */
 const FIRST_RUN = new Date("2026-08-19T03:00:00.000Z");
