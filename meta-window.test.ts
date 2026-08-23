@@ -102,3 +102,14 @@ test("a patch exactly thirty days old is covered whole [70]", () => {
 	expect(aged(30)).toMatchObject({ days: 30, cappedBySource: false });
 	expect(aged(31)).toMatchObject({ days: 30, cappedBySource: true });
 });
+
+test("an instant that is not one is refused rather than asked for", () => {
+	// `Math.max(1, NaN)` is `NaN`, not 1, so nothing below it recovers: the
+	// request would go out asking for `take: NaN`.
+	expect(() => metaWindow(new Date("not a date"), RUN_AT)).toThrow(
+		"invalid instant",
+	);
+	expect(() => metaWindow(RELEASED, new Date("not a date"))).toThrow(
+		"invalid instant",
+	);
+});
