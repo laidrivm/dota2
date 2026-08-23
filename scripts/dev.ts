@@ -10,8 +10,12 @@
 
 import { watch } from "node:fs";
 import { rm } from "node:fs/promises";
+import { fileURLToPath } from "node:url";
 
-const root = new URL("..", import.meta.url).pathname;
+// Converted rather than read off `.pathname`, which stays percent-encoded: a
+// checkout under a directory with a space in its name would build, watch and
+// delete under a path with `%20` in it.
+const root = fileURLToPath(new URL("..", import.meta.url));
 const dist = `${root}dist`;
 
 // `bun run build`'s own first act, for the same reason: whatever is in there
