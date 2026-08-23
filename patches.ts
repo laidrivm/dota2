@@ -112,9 +112,9 @@ function newest(listed: unknown): Patch {
 export async function detectPatch(
 	sql: SQL,
 	at: Date,
-	deps: { fetch?: typeof globalThis.fetch } = {},
+	doFetch: typeof globalThis.fetch = globalThis.fetch,
 ): Promise<Patch> {
-	const listed = newest(await fetchList(deps.fetch ?? globalThis.fetch));
+	const listed = newest(await fetchList(doFetch));
 	await sql`INSERT INTO patches (patch_id, base_version, is_major, detected_at)
 		VALUES (${listed.patchId}, ${listed.baseVersion}, ${listed.isMajor},
 			${listed.detectedAt})

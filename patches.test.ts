@@ -59,9 +59,7 @@ describe("a patch list that cannot be read", () => {
 	test("a source unreachable after its retries fails the run [67]", async () => {
 		const { fetch, calls } = stub([unreachable]);
 
-		const failed = await failure(
-			settle(detectPatch(untouched, RUN_AT, { fetch })),
-		);
+		const failed = await failure(settle(detectPatch(untouched, RUN_AT, fetch)));
 
 		expect(failed).toMatch(/the patch list could not be read/);
 		expect(calls).toHaveLength(ATTEMPTS);
@@ -77,9 +75,7 @@ describe("a patch list that cannot be read", () => {
 			json([{ name: "7.41", date: RELEASED }]),
 		]);
 
-		const failed = await failure(
-			settle(detectPatch(untouched, RUN_AT, { fetch })),
-		);
+		const failed = await failure(settle(detectPatch(untouched, RUN_AT, fetch)));
 
 		expect(failed).toBe(REACHED);
 		expect((calls[1]?.at ?? 0) - (calls[0]?.at ?? 0)).toBe(
@@ -99,9 +95,7 @@ describe("a patch list that cannot be read", () => {
 				}),
 		]);
 
-		const failed = await failure(
-			settle(detectPatch(untouched, RUN_AT, { fetch })),
-		);
+		const failed = await failure(settle(detectPatch(untouched, RUN_AT, fetch)));
 
 		expect(failed).toMatch(/the patch list could not be read/);
 		expect(calls).toHaveLength(ATTEMPTS);
@@ -116,9 +110,7 @@ describe("a patch list that cannot be read", () => {
 			json([{ name: "7.41", date: RELEASED }]),
 		]);
 
-		const failed = await failure(
-			settle(detectPatch(untouched, RUN_AT, { fetch })),
-		);
+		const failed = await failure(settle(detectPatch(untouched, RUN_AT, fetch)));
 
 		expect(failed).toBe(REACHED);
 		expect((calls[1]?.at ?? 0) - (calls[0]?.at ?? 0)).toBe(FIRST_BACKOFF_MS);
@@ -151,7 +143,7 @@ describe("a patch list carrying nothing usable", () => {
 	])("%s fails the run naming which [68]", async (_, body, named) => {
 		const { fetch } = stub([json(body)]);
 
-		const failed = await failure(detectPatch(untouched, RUN_AT, { fetch }));
+		const failed = await failure(detectPatch(untouched, RUN_AT, fetch));
 
 		// The failure is the source's rather than the database's, which is what
 		// says the run did not fall back to the patch `patches` already holds:
@@ -179,7 +171,7 @@ describe.skipIf(url === undefined)("the patch a run is dated by", () => {
 
 	/** Detect against a list whose last member is the newest patch. */
 	const detect = (sql: SQL, entries: unknown[], at = RUN_AT) =>
-		detectPatch(sql, at, { fetch: listing(entries).fetch });
+		detectPatch(sql, at, listing(entries).fetch);
 
 	// spec: hero-reference/a-patch-the-table-lacks
 	test("a first run inserts the patch the source lists [39]", async () => {
