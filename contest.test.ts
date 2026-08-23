@@ -103,4 +103,17 @@ describe("the rate a hero's picks and bans come to", () => {
 	test("no hero at all yields no row and no division", () => {
 		expect(heroTotals([], new Map())).toEqual([]);
 	});
+
+	test("a hero banned but never picked in the window gets no row", () => {
+		const rows = [picked(9001, 1, 50), picked(9002, 1, 50)];
+
+		// The totals are built from the position rows, and the meta pull emits
+		// none for a hero the window has no sample of — so 9404's bans reach
+		// nothing. Pinned rather than chosen: whether such a hero should carry
+		// a row of pure contest is a reading of *Contest rate is a share of the
+		// window's matches* this group did not settle.
+		const totals = heroTotals(rows, new Map([[9404, 900]]));
+
+		expect(totals.map((total) => total.heroId)).toEqual([9001, 9002]);
+	});
 });

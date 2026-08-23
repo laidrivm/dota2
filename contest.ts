@@ -101,6 +101,14 @@ export async function pullBans(
 			throw new Error(`the ban source summed hero ${heroId} past a ban count`);
 		bans.set(heroId, total);
 	}
+	// A response leaving every hero with no bans is not a ban-free window —
+	// seven days at these brackets carry bans on nearly every hero — it is a
+	// request that did not land, and it is exactly what a wrong reading of
+	// `day` would look like: every row filtered out and the contest rate
+	// quietly stored from picks alone, which is what *Bans cannot be read*
+	// exists to prevent.
+	if (bans.size === 0)
+		throw new Error("the ban source named no hero inside the window");
 	return bans;
 }
 

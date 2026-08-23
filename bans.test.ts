@@ -46,7 +46,7 @@ const failure = (work: Promise<unknown>) =>
 	);
 
 describe("what the one request asks for", () => {
-	// spec: snapshot-ingest/the-ban-requests-window
+	// spec: snapshot-ingest/the-ban-request-s-window
 	test("the days are the meta window's and one request covers every hero [73]", async () => {
 		const { query, asked } = asking([banned(9001, LAST, 3)]);
 
@@ -63,7 +63,7 @@ describe("what the one request asks for", () => {
 		expect(sent).toMatch(/heroId: \d+/);
 	});
 
-	// spec: snapshot-ingest/the-ban-requests-window
+	// spec: snapshot-ingest/the-ban-request-s-window
 	test("a day outside the window is not counted [73]", async () => {
 		// `take` is the only bound the request carries, so the window is read
 		// back off the rows rather than trusted.
@@ -77,15 +77,49 @@ describe("what the one request asks for", () => {
 		expect(await pullBans(query, WEEK)).toEqual(new Map([[9001, 7]]));
 	});
 
-	// spec: snapshot-ingest/the-ban-requests-window
+	// spec: snapshot-ingest/the-ban-request-s-window
 	test("the days are day numbers, not the meta pull's timestamps [73]", async () => {
 		// Two encodings of the same word: a row keyed by a Unix timestamp falls
-		// outside every window this endpoint could describe.
+		// outside every window this endpoint could describe, so a run that read
+		// `day` the meta pull's way ends here rather than storing a contest
+		// rate from picks alone.
 		const { query } = asking([
 			banned(9001, Date.parse("2026-08-18T00:00:00.000Z") / 1000, 100),
 		]);
 
-		expect(await pullBans(query, WEEK)).toEqual(new Map());
+		expect(await failure(pullBans(query, WEEK))).toContain(
+			"named no hero inside the window",
+		);
+	});
+
+	// spec: snapshot-ingest/the-ban-request-s-window
+	test("a one-day window asks for one day and counts it [73]", async () => {
+		const day = metaWindow(
+			new Date("2026-08-21T06:00:00.000Z"),
+			new Date("2026-08-21T12:00:00.000Z"),
+		);
+		const { query, asked } = asking([banned(9001, LAST, 3)]);
+
+		// The meta pull's floor: the single most recent complete UTC day, which
+		// is 2026-08-20 — this suite's own window ends on the same day.
+		expect(await pullBans(query, day)).toEqual(new Map([[9001, 3]]));
+		expect(asked[0]).toContain("take: 1");
+	});
+
+	// spec: snapshot-ingest/a-hero-and-day-absent-from-the-ban-response
+	test("two heroes banned on the same days keep their counts apart [75]", async () => {
+		const { query } = asking([
+			banned(9001, FIRST, 3),
+			banned(9002, FIRST, 7),
+			banned(9001, LAST, 4),
+		]);
+
+		expect(await pullBans(query, WEEK)).toEqual(
+			new Map([
+				[9001, 7],
+				[9002, 7],
+			]),
+		);
 	});
 });
 
@@ -112,6 +146,29 @@ describe("what the response leaves out", () => {
 		};
 
 		expect(await failure(pullBans(query, WEEK))).toContain("4 attempts made");
+	});
+
+	// spec: snapshot-ingest/bans-cannot-be-read
+	test("a response naming no hero at all fails the run [74]", async () => {
+		// Seven days at these brackets carry bans on nearly every hero, so an
+		// empty list is a request that did not land rather than a ban-free
+		// window — and storing a rate from picks alone is indistinguishable
+		// afterwards from heroes nobody banned.
+		const { query } = asking([]);
+
+		expect(await failure(pullBans(query, WEEK))).toContain(
+			"named no hero inside the window",
+		);
+	});
+
+	// spec: snapshot-ingest/bans-cannot-be-read
+	test("days summing past what the column holds fail [74]", async () => {
+		const { query } = asking([
+			banned(9001, FIRST, 2_000_000_000),
+			banned(9001, LAST, 2_000_000_000),
+		]);
+
+		expect(await failure(pullBans(query, WEEK))).toContain("past a ban count");
 	});
 
 	// spec: snapshot-ingest/bans-cannot-be-read
