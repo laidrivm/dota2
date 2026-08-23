@@ -31,10 +31,10 @@ test("a patch seven whole UTC days old is covered over seven days [20]", () => {
 test("a patch released midway through a day leaves that day out [20]", () => {
 	// Released at noon on the 14th, so the 14th is not a day the window holds:
 	// six whole days remain, not seven.
-	const window = metaWindow(new Date("2026-08-14T12:00:00.000Z"), RUN_AT);
+	const span = metaWindow(new Date("2026-08-14T12:00:00.000Z"), RUN_AT);
 
-	expect(window.days).toBe(6);
-	expect(window.start).toEqual(new Date("2026-08-15T00:00:00.000Z"));
+	expect(span.days).toBe(6);
+	expect(span.start).toEqual(new Date("2026-08-15T00:00:00.000Z"));
 });
 
 // spec: snapshot-ingest/the-day-in-progress
