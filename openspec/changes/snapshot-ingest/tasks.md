@@ -231,14 +231,14 @@ proposal run's.
 
 ## 9. The pair pull
 
-- [ ] 9.1 Write the pair-window tests: a patch live for exactly four complete
+- [x] 9.1 Write the pair-window tests: a patch live for exactly four complete
       weeks pulls four [23]; one live for twelve pulls exactly four and the
       run records which four [24]; one live for two pulls two, and no week
       preceding the patch is requested [25]; a week whose span contains the
       current patch's `detected_at` is attributed to the current patch [31].
       (Req: snapshot-ingest — Pair statistics are pulled per hero over at most
       four weeks)
-- [ ] 9.2 Write the pair-response tests: the request asks for every other hero
+- [x] 9.2 Write the pair-response tests: the request asks for every other hero
       so the response carries one opponent and one ally row per other hero
       rather than the endpoint's default page [29]; a response short of one
       row per other hero fails the run rather than writing a partial matrix
@@ -247,7 +247,7 @@ proposal run's.
       criterion fixes *one* row per other hero, not at least one [82]. (Req:
       snapshot-ingest — Pair statistics are pulled per hero over at most four
       weeks)
-- [ ] 9.3 Implement the pair pull: one request per hero per week over the
+- [x] 9.3 Implement the pair pull: one request per hero per week over the
       lesser of four and the weeks the patch has been live, asking for every
       opponent, summed across the weeks, and reporting the weeks covered.
       (Req: snapshot-ingest — Pair statistics are pulled per hero over at most
