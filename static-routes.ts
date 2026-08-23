@@ -7,15 +7,6 @@
 
 import { fileURLToPath } from "node:url";
 
-/**
- * A directory URL as a path the filesystem takes. `URL.pathname` keeps its
- * percent-encoding, so a checkout under a directory with a space in its name
- * scans `%20` and finds nothing — the icons would all answer `404` and the
- * font scan, which has nothing to catch it, would take the server down at
- * startup.
- */
-const dirPath = (dir: URL) => fileURLToPath(dir);
-
 const fontDir = new URL("./src/app/styles/fonts/", import.meta.url);
 const snapshotFile = new URL("./src/fixtures/snapshot.json", import.meta.url);
 
@@ -47,7 +38,7 @@ type Route = Response | ((request: Request) => Response);
  */
 const held = (dir: URL): Set<string> => {
 	try {
-		return new Set(new Bun.Glob("*.png").scanSync(dirPath(dir)));
+		return new Set(new Bun.Glob("*.png").scanSync(fileURLToPath(dir)));
 	} catch {
 		return new Set();
 	}
@@ -87,7 +78,9 @@ export function staticRoutes(icons: URL = iconDir): Record<string, Route> {
 
 	// Built from the directory listing, so a request can only ever name a file
 	// that is actually there — there is no path for it to traverse out of.
-	for (const name of new Bun.Glob("*.{woff2,css}").scanSync(dirPath(fontDir))) {
+	for (const name of new Bun.Glob("*.{woff2,css}").scanSync(
+		fileURLToPath(fontDir),
+	)) {
 		const kind = FILE_KINDS[name.split(".").pop() ?? ""];
 		if (!kind) continue;
 		routes[`/fonts/${name}`] = new Response(Bun.file(new URL(name, fontDir)), {

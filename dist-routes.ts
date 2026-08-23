@@ -6,6 +6,7 @@
  */
 
 import { statSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import { staticRoutes } from "./static-routes.ts";
 
 /** Exported so a caller can say what is missing before asking for a file:
@@ -48,7 +49,7 @@ function listed(): Set<string> {
 		// Bun 1.3.14, so a link planted in `dist/` is not listed and `Bun.file`
 		// never receives one. That default is what the containment above rests
 		// on, and `build.test.ts` pins it.
-		listing = new Set(new Bun.Glob("*").scanSync(distDir.pathname));
+		listing = new Set(new Bun.Glob("*").scanSync(fileURLToPath(distDir)));
 		listedAt = at;
 	}
 	return listing;
