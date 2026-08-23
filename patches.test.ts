@@ -6,13 +6,15 @@ import { afterEach, beforeEach, describe, expect, jest, test } from "bun:test";
 import type { SQL } from "bun";
 import { opener, requiresDatabase, url } from "./db.fixture.ts";
 import { detectPatch } from "./patches.ts";
-import { json, settle, stub } from "./stratz.fixture.ts";
+import { json, settle, stalls, stub } from "./stratz.fixture.ts";
 
 requiresDatabase();
 
-/** Attempts one request gets, and the wait before the first retry. */
+/** Attempts one request gets, the wait before the first retry, and how long
+ * one attempt may stay open. */
 const ATTEMPTS = 4;
 const FIRST_BACKOFF_MS = 1000;
+const ATTEMPT_TIMEOUT_MS = 30_000;
 
 /** The instant a run is taken at, and a release well behind it. */
 const RUN_AT = new Date("2026-08-20T03:00:00.000Z");
@@ -56,6 +58,46 @@ describe("a patch list that cannot be read", () => {
 	// spec: hero-reference/the-source-cannot-be-reached
 	test("a source unreachable after its retries fails the run [67]", async () => {
 		const { fetch, calls } = stub([unreachable]);
+
+		const failed = await failure(
+			settle(detectPatch(untouched, RUN_AT, { fetch })),
+		);
+
+		expect(failed).toMatch(/the patch list could not be read/);
+		expect(calls).toHaveLength(ATTEMPTS);
+	});
+
+	// spec: hero-reference/the-source-cannot-be-reached
+	test("an attempt with no complete response is abandoned and retried", async () => {
+		// The bound is on a complete response rather than on a status, which is
+		// why the stall the fixture scripts never answers at all: a run that
+		// waited on one would never reach the single outcome the job promises.
+		const { fetch, calls } = stub([
+			stalls(),
+			json([{ name: "7.41", date: RELEASED }]),
+		]);
+
+		const failed = await failure(
+			settle(detectPatch(untouched, RUN_AT, { fetch })),
+		);
+
+		expect(failed).toBe(REACHED);
+		expect((calls[1]?.at ?? 0) - (calls[0]?.at ?? 0)).toBe(
+			ATTEMPT_TIMEOUT_MS + FIRST_BACKOFF_MS,
+		);
+	});
+
+	// spec: hero-reference/the-source-cannot-be-reached
+	test("a body that does not parse is retried, not read as no patch", async () => {
+		// A vendor's error page served under a `200` is the shape this catches.
+		// Read as a body it would be "the source listed no patch", which names
+		// the wrong thing and would send a reader to the source's contents.
+		const { fetch, calls } = stub([
+			async () =>
+				new Response("<html>upstream</html>", {
+					headers: { "content-type": "application/json" },
+				}),
+		]);
 
 		const failed = await failure(
 			settle(detectPatch(untouched, RUN_AT, { fetch })),
@@ -209,6 +251,19 @@ describe.skipIf(url === undefined)("the patch a run is dated by", () => {
 
 		expect(current.patchId).toBe("7.41");
 		expect(await held(sql)).toEqual(["7.41", "7.42"]);
+	});
+
+	// spec: hero-reference/the-current-patch
+	test("a patch released at the run instant itself is current [41]", async () => {
+		// The rule is "not after the run instant", so the instant itself is
+		// inside it — the one boundary a `<` rather than a `<=` would move.
+		const sql = await empty();
+
+		const current = await detect(sql, [
+			{ name: "7.41", date: RUN_AT.toISOString() },
+		]);
+
+		expect(current.patchId).toBe("7.41");
 	});
 
 	// spec: hero-reference/the-current-patch
