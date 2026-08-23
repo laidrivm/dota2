@@ -103,6 +103,10 @@ describe("reading the reference from the source", () => {
 	test.each([
 		["no id", { displayName: "Clinkz", shortName: "clinkz" }],
 		["an id that is not a number", { ...LISTED, id: "9001" }],
+		["a fractional id", { ...LISTED, id: 9001.5 }],
+		["an id that is not a number at all", { ...LISTED, id: Number.NaN }],
+		["a negative id", { ...LISTED, id: -1 }],
+		["a zero id", { ...LISTED, id: 0 }],
 		["no slug", { id: 9001, displayName: "Clinkz" }],
 		["a blank slug", { ...LISTED, shortName: "" }],
 		["nothing at all", null],
