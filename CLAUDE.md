@@ -223,3 +223,5 @@ not age with the code.
   `bun add -g @playwright/cli` — since its own are denied here.
 - Beside a pinned image, binary or digest that no dependency manifest tracks,
   write which tool updates the pin, or that nothing does.
+- Gate a suite that runs destructive SQL on a variable saying the database is
+  disposable, never on the connection string alone.
