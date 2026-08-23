@@ -722,3 +722,50 @@ Kubernetes manifests. Nothing raises a workflow service image. The rule that
 came out of it immediately reached eight `bun-version` pins nobody raises
 either — which no gate in the sequence would have found, because `/warm` looks
 in manifests and these are not in one.
+
+## 2026-08-23 — groups 5 to 7, the rulebook split, and a vendor dropped (PRs #152–#156)
+
+- diff-budget: PASS on four of five branches (129, 365→414, 154→176, 217).
+  Group 5 alone ran WARN — 603 rising to 705 against a warn line of 500 and a
+  failing line of 800. The group's own tasks.md said groups were sized under
+  the warn line; this one was not, and the gate that admits it says so rather
+  than the sizing note being right
+- zombies: OPEN → PASS three times — 5 gaps on group 5 (5 tests written), 2 on
+  group 6, 1 on group 7, all dispositioned. Two were real defects rather than
+  missing tests: a hero slug from a vendor's response that `join` followed out
+  of the mirror directory, and `typeof id === "number"` admitting NaN, 9001.5
+  and -1 into a Postgres `int`
+- warm: not run on any of the five — no dependency manifest changed all
+  session. Three network sources were added or moved (OpenDota's patch list,
+  Valve's CDN, STRATZ's hero constants) and none of them is a manifest entry,
+  so this gate had nothing to look at by construction
+- ponytail-review: 4 findings across three branches, 2 acted on. The two
+  skipped were named with their reasons — a `sleep` deliberately not shared
+  across two vendors' retry policies, and a five-line test helper whose second
+  copy is cheaper than a module
+- triage: PASS four times, and the reading found 5 defects the gates ahead of
+  it had passed over — a `null` list entry raising a type error instead of the
+  source's failure, a workflow comment claiming a twenty-second suite ran in
+  milliseconds, a requirement contradicting its own neighbour, a demonstrative
+  whose antecedent stayed behind in the file it was extracted from, and a slug
+  checked three steps after two locations had been derived from it
+- coderabbit-local: 2 runs — 2 findings on group 5 (both Trivial, 0 acted), 1
+  on group 7 (Minor, applied: `body.data` without an optional chain). Not run
+  on group 6 or the rulebook branch, where review went to CI instead
+- coderabbit (PR): 10 findings over three pull requests, 6 acted on. The one
+  that mattered: `URL.pathname` keeps its percent-encoding, so a checkout in a
+  directory with a space in its name scanned `%20` — every icon 404, and the
+  font scan, which has no catch, taking the server down at startup. It reached
+  two more files the review never saw
+- Not run: preflight, review-order, first-five, code-review, security-review,
+  playwright-cli
+
+**What the gates did not catch, and what did.** Two of the session's worst
+moments were found by neither a gate nor a bot. A symlink to
+`/Users/laidrivm/node_modules`, committed by a `git add -A` in a scaffolded
+worktree, was caught by `scripts/file-size.test.ts` reporting a new extension
+`s` — the last character of a path with no dot in it. A branch switch that
+removed the files a run was reading reported `ENOENT` on a test file rather
+than a failure, and cost a diagnosis. Both became rules in
+`docs/git-and-prs.md`; neither is a shape any review skill in the sequence
+looks for.
