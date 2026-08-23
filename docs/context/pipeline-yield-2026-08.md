@@ -669,3 +669,55 @@ could enforce it simply was not the layer that read it.
 rather than failing one test, and `bun test --timeout` does not cut it short —
 measured at 180 seconds before the harness was killed. The fixture's `settle`
 now raises when it runs out of timers with work still pending.
+
+## 2026-08-23 — the schema and the database edge (PR #150)
+
+- diff-budget: PASS throughout — 342, then 368, then 421 lines (303 source /
+  118 test), never near the warn line; the group was sized for it at propose
+  time and did not need re-cutting
+- zombies: OPEN — 6 gaps, 6 dispositioned (2 tests written, 1 real defect
+  fixed, 3 skipped with reasons). The defect: a `connect` that threw part-way
+  through the schema left a pool nobody held a reference to
+- warm: not run — no manifest changed. The pinned `postgres` service image is
+  a dependency it would not have found either, since it is in no manifest;
+  that gap became a rule the same night
+- ponytail-review: 2 findings, 2 acted on (net -5 lines), 2 dismissals stated
+  rather than silent
+- triage: PASS — 5 groups, 3 high/medium read, and the reading itself found 2
+  defects: a `close()` in the failure path that could replace the error that
+  sent it there, and a duplication no comment named
+- coderabbit-local: PASS — 3 findings, 3 dispositioned (1 applied and carried
+  to 2 sites the bot did not name, 1 Major rejected, 1 Trivial skipped)
+- coderabbit: PASS — 3 findings, 3 dispositioned (2 applied, 1 Major rejected
+  against a measurement). Its stated `Actionable comments posted: 3`
+  reconciled with the inline count on the first pass
+- diff-budget / grep / coderabbit-local on the wrap-up branch itself
+  (`chore/commit-trailers`, 52 lines): PASS — 0 findings, the docs path's
+  single pass
+- Not run: preflight, security-review, code-review, simplify
+
+**A type declaration is not evidence the method exists.** `sql.file(path)` is
+declared to return the same `Query` as `sql.unsafe`, `.simple()` included, and
+at runtime what it returns carries no `.simple()` at all (bun 1.3.14). The
+typecheck was green over the call. Only a run against a live Postgres said
+otherwise, and only because this group put one in CI rather than deferring the
+database edge to the change that reads it.
+
+**A hang is not a failure, and costs more than one.** `expect(query).rejects`
+never settles where `query` is a thenable rather than a Promise, so six tests
+each burned the 5-second per-test timeout instead of failing in milliseconds —
+and the first symptom was the whole `bun test` invocation appearing to stall,
+not a red test. Isolated with a two-test probe: the matcher timed out, the
+`then(ok, err)` form answered in 34 ms. Same family as the fake-timer entry
+above: the runner's own defence does not reach every way a promise can not
+settle.
+
+**A `🔵 Trivial` that a five-minute check turned into a rule.** "Track the
+PostgreSQL image as a CI dependency" reads as bookkeeping until the question
+"raised by what?" is actually put to the documentation: Dependabot's
+`github-actions` ecosystem updates only `owner/repo@ref` and states container
+registry URLs are unsupported, and its `docker` ecosystem reads Dockerfiles and
+Kubernetes manifests. Nothing raises a workflow service image. The rule that
+came out of it immediately reached eight `bun-version` pins nobody raises
+either — which no gate in the sequence would have found, because `/warm` looks
+in manifests and these are not in one.
