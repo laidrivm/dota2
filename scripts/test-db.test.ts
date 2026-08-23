@@ -43,16 +43,22 @@ test("the service container's own probe goes over TCP too", () => {
 	// workflow's own YAML parses either way, and CI would go on passing on the
 	// seconds its checkout and install happen to take.
 	const parsed = Bun.YAML.parse(workflow) as {
-		jobs: Record<string, { services?: { postgres: { options: string } } }>;
+		jobs: Record<string, { services?: { postgres?: { options?: string } } }>;
 	};
-	const [service] = Object.values(parsed.jobs).filter((job) => job.services);
+	// Every job carrying one, not the first: naming the job would tie this to
+	// a rename, and taking the first would pass while a second job kept the
+	// probe this exists to remove.
+	const probes = Object.values(parsed.jobs)
+		.map((job) => job.services?.postgres?.options)
+		.filter((options) => options !== undefined);
 
-	// Starting with the option, so a comment folded into the block scalar is
+	// Non-empty first, so a service deleted outright cannot pass by vacuity.
+	expect(probes).not.toEqual([]);
+	// Anchored at the start, so a comment folded into the block scalar is
 	// caught: `#` inside `>-` is text, not a comment, and `bun run lint:yaml`
 	// passes over the folded form exactly as it does over this one.
-	expect(service?.services?.postgres.options).toStartWith(
-		'--health-cmd "pg_isready -h 127.0.0.1"',
-	);
+	for (const options of probes)
+		expect(options).toStartWith('--health-cmd "pg_isready -h 127.0.0.1"');
 });
 
 test("the script waits on the server over TCP, not the socket", () => {
