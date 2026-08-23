@@ -130,6 +130,8 @@ describes is rewritten, the rule is a candidate for deletion.
   filesystem; never `.pathname`, which stays percent-encoded.
 - Compare prose across a line wrap by normalising whitespace, never by matching
   a raw substring.
+- Compare a `real` column read at two different times through `Math.fround`,
+  never by raw equality.
 
 #### Process
 
