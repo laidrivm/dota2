@@ -24,6 +24,19 @@ import { join } from "node:path";
  */
 const DOWNLOAD_TIMEOUT_MS = 30_000;
 
+/**
+ * Where a hero's image is served from before this application mirrors it.
+ *
+ * Derived from the slug rather than read from a vendor that republishes it:
+ * the statistics API carries no image field, but the slug it does carry is the
+ * name Valve's own network serves each image under — every hero the source
+ * returns answers here, the ones whose display and internal names diverge
+ * included (`design.md` §*The hero images need no second vendor*). A slug that
+ * stops answering is not silent: the run fails on the hero it belongs to.
+ */
+export const sourceImageUrl = (shortName: string) =>
+	`https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/${shortName}.png`;
+
 /** The file a hero's image lands on, and the name it lands on first. */
 const finalName = (shortName: string) => `${shortName}.png`;
 
