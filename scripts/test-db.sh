@@ -38,7 +38,13 @@ name="d2ass-test-db-$$"
 cleanup() {
 	docker stop "$name" >/dev/null 2>&1
 }
-trap cleanup EXIT INT TERM
+trap cleanup EXIT
+# Separately from EXIT, because a trap that does not exit resumes where it
+# interrupted: a Ctrl-C inside the readiness loop below would stop the
+# container and then go on waiting for it. 128 plus the signal number is what
+# a shell killed by one reports.
+trap 'cleanup; exit 130' INT
+trap 'cleanup; exit 143' TERM
 
 # Bound to the loopback and to a port the kernel picks: the password below is
 # a throwaway, and a throwaway password on 0.0.0.0 is an invitation. The port
