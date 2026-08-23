@@ -81,15 +81,16 @@ test("a hero already mirrored survives a refetch that would fail [54]", async ()
 	expect(refused.calls).toEqual([]);
 });
 
-test("a run carrying no hero issues no request and does not fail", () => {
+test("a run carrying no hero issues no request and does not fail", async () => {
 	// The reference is mirrored from a response, and a response carrying no
 	// hero is the caller's failure to raise, not this module's to guess at.
+	// Awaited rather than asserted through `resolves`: a rejection fails the
+	// test on its own, and an unawaited matcher can settle after it ends.
 	const dir = emptyDir();
 	const { fetch, calls } = serving();
 
-	const run = mirrorIcons([], dir, fetch);
+	await mirrorIcons([], dir, fetch);
 
-	expect(run).resolves.toBeUndefined();
 	expect(calls).toEqual([]);
 });
 

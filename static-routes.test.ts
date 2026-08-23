@@ -2,6 +2,7 @@ import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { pathToFileURL } from "node:url";
 import { staticRoutes } from "./static-routes.ts";
 
 let origin: string;
@@ -14,6 +15,9 @@ let server: ReturnType<typeof Bun.serve>;
  */
 const iconDir = mkdtempSync(join(tmpdir(), "d2ass-routes-"));
 
+/** Every directory this file made, removed when it finishes. */
+const made: string[] = [iconDir];
+
 /** Bytes standing in for an image; the route sets the type, not the file. */
 const IMAGE = new Uint8Array(64).fill(7);
 
@@ -21,13 +25,13 @@ beforeAll(async () => {
 	await Bun.write(join(iconDir, "clinkz.png"), IMAGE);
 	server = Bun.serve({
 		port: 0,
-		routes: staticRoutes(new URL(`file://${iconDir}/`)),
+		routes: staticRoutes(pathToFileURL(`${iconDir}/`)),
 	});
 	origin = server.url.origin;
 });
 
 afterAll(() => {
-	rmSync(iconDir, { recursive: true, force: true });
+	for (const dir of made) rmSync(dir, { recursive: true, force: true });
 	return server.stop(true);
 });
 
@@ -151,7 +155,7 @@ describe("icon routes", () => {
 		// scan of an absent directory raises, and a raise here is a 500.
 		const bare = Bun.serve({
 			port: 0,
-			routes: staticRoutes(new URL(`file://${iconDir}/never-written/`)),
+			routes: staticRoutes(pathToFileURL(`${iconDir}/never-written/`)),
 		});
 		try {
 			const response = await fetch(`${bare.url.origin}/icons/clinkz.png`);
@@ -160,6 +164,28 @@ describe("icon routes", () => {
 			expect(await response.text()).toBe("");
 		} finally {
 			bare.stop(true);
+		}
+	});
+
+	// spec: hero-reference/a-mirrored-image
+	test("serve from a directory whose path needs encoding [48]", async () => {
+		// `URL.pathname` keeps its percent-encoding, so a checkout under a
+		// directory with a space in its name scans `%20`, finds nothing, and
+		// answers 404 for every hero — the font scan, which has no catch, takes
+		// the server down instead. Both go through the same conversion now.
+		const spaced = mkdtempSync(join(tmpdir(), "d2ass routes "));
+		made.push(spaced);
+		await Bun.write(join(spaced, "clinkz.png"), IMAGE);
+		const server = Bun.serve({
+			port: 0,
+			routes: staticRoutes(pathToFileURL(`${spaced}/`)),
+		});
+		try {
+			expect(
+				(await fetch(`${server.url.origin}/icons/clinkz.png`)).status,
+			).toBe(200);
+		} finally {
+			server.stop(true);
 		}
 	});
 
