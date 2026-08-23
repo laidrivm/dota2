@@ -183,7 +183,10 @@ export async function pullPairs(
 	const reference = new Set(heroIds);
 	const matchups = new Map<string, PairCount>();
 	const synergies = new Map<string, PairCount>();
-	for (const heroId of heroIds) {
+	// Iterated over the set rather than the list it came from: a reference
+	// listing a hero twice would otherwise ask for it twice and sum its rows
+	// twice, which no validation here would notice.
+	for (const heroId of reference) {
 		const expected = new Set(reference);
 		expected.delete(heroId);
 		for (const week of weeks) {
