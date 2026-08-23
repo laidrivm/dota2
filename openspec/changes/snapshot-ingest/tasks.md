@@ -116,7 +116,7 @@ them as given rather than adding them.
 
 ## 5. Patch detection and the hero reference
 
-- [ ] 5.1 Write the patch tests: a first run against an empty `patches` table
+- [x] 5.1 Write the patch tests: a first run against an empty `patches` table
       inserts the current patch [39]; a patch the table lacks is inserted with
       the source's release instant rather than the run instant [40]; the
       current patch is the held one with the latest `detected_at` not after
@@ -126,7 +126,7 @@ them as given rather than adding them.
       [42]; a second run does not rewrite a held patch's `detected_at` [43].
       (Req: hero-reference — Patches are detected from a source that is
       current)
-- [ ] 5.2 Write the patch-source failure tests: a patch list unreachable after
+- [x] 5.2 Write the patch-source failure tests: a patch list unreachable after
       its retries fails the run before any staging row is written [67]; a list
       parsing to no patch, and one whose newest entry carries no name or no
       release instant, each fail the run naming which, without falling back to
@@ -139,7 +139,7 @@ them as given rather than adding them.
       a run failing after the upsert leaves those rows, and a repeat leaves
       them unchanged [66]. (Req: hero-reference — A hero is upserted and never
       removed)
-- [ ] 5.4 Implement patch detection against OpenDota's
+- [x] 5.4 Implement patch detection against OpenDota's
       `/api/constants/patch`, mapping `name` to the patch name and
       `base_version` and `date` to `detected_at`, including the major/letter
       split, the insert-once rule and the three failure paths, with a comment
