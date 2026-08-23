@@ -24,11 +24,15 @@ import { join } from "node:path";
  */
 const DOWNLOAD_TIMEOUT_MS = 30_000;
 
-/** What a hero's `icon` column holds: a path on this origin, never a URL. */
-export const iconPath = (shortName: string) => `/icons/${shortName}.png`;
-
 /** The file a hero's image lands on, and the name it lands on first. */
 const finalName = (shortName: string) => `${shortName}.png`;
+
+/**
+ * What a hero's `icon` column holds: a path on this origin, never a URL.
+ * Built from the filename rather than beside it, because the extension has to
+ * agree with what `static-routes.ts` lists — three sites, one fact.
+ */
+export const iconPath = (shortName: string) => `/icons/${finalName(shortName)}`;
 // Not `.png`, so the route's own listing cannot match it while it is being
 // written. The dot keeps it out of a shell glob as well, which is worth the
 // character the first time somebody clears the directory by hand.
