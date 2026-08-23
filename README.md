@@ -12,6 +12,7 @@
 | `docs/git-and-prs.md` | branch and commit shape, PR description, and the git mechanics that protect the history | before branching, committing or opening a PR |
 | `docs/review-toolkit.md` | which review skill to run, the pre-PR sequence, and the commit each shared-repo gate was verified against | before every PR |
 | `docs/verification.md` | what counts as evidence for a claim | before a claim or a decision rests on one |
+| `docs/rulebook-growth.md` | what a fired maintenance trigger asks for: how a rule leaves a sublist, how a section leaves an always-on file | when a rule or a section is added, promoted or deleted |
 | `PLAN.md` | the open queue, its sources, and the standing constraints | every session |
 | `tasks/*.md` | infra task specs — scope, steps, acceptance criteria | when a task starts |
 | `spec-inbox/` | raw product specs not yet in the repo — contents gitignored, its README tracked | when a task cites one |

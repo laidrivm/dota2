@@ -23,7 +23,7 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
   approach replaced — is deleted rather than left standing, on the terms
   `CLAUDE.md` already applies to a stale rule.
 - This file counts against the always-on budget stated in `CLAUDE.md`
-  §*Structure & growth of this file*.
+  §*Maintenance & growth*.
 
 ## Requirement sources
 

@@ -7,6 +7,11 @@ import { expect, test } from "bun:test";
  */
 const claude = await Bun.file(`${import.meta.dir}/CLAUDE.md`).text();
 
+/** The doc `CLAUDE.md` indexes for what a fired trigger asks for. */
+const growth = await Bun.file(
+	`${import.meta.dir}/docs/rulebook-growth.md`,
+).text();
+
 const SUBLISTS = ["Code", "Process", "Safety"];
 
 /**
@@ -70,11 +75,21 @@ test("the section stops at the next heading of its level", () => {
 	expect(bullets(slice("Rules", appended))).toEqual(bullets(rules));
 });
 
+/**
+ * Prose with its line wrapping taken out. A sentence these files state is one
+ * whether or not a reflow moved a word onto the next line, and an assertion
+ * that fails on the reflow is an assertion about the wrapping.
+ */
+const flat = (text: string) => text.replace(/\s+/g, " ");
+
 test("the maintenance trigger counts a sublist, not the list", () => {
-	const maintenance = slice("Maintenance");
-	expect(maintenance).toContain("When one sublist exceeds ~20 rules");
+	// The trigger fires from `CLAUDE.md` and what it asks for stands in the doc
+	// indexed there, so each half is asserted where that half lives.
+	expect(flat(slice("Maintenance & growth"))).toContain(
+		"one sublist below passes ~20 rules",
+	);
 	// The opening phrase alone passes on a rule that goes on to count them all.
-	expect(maintenance).toContain(
+	expect(flat(growth)).toContain(
 		"the other two sublists are not counted against it",
 	);
 });
