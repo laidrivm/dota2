@@ -211,7 +211,23 @@ describe("the pre-push gates", () => {
 		// so the two drift the moment one is edited without the other. Compared
 		// as the file's last line rather than with `toContain`: a gate dropped
 		// from the front of the chain leaves a string the file still contains.
-		const onDisk = readFileSync(`${root}/.git/hooks/pre-push`, "utf8")
+		//
+		// The path comes from git rather than from joining `.git/` by hand: in
+		// a linked worktree `.git` is a file naming the real directory, so the
+		// join resolves to nothing and this fails wherever `CLAUDE.md`'s own
+		// rule about cutting a branch in a worktree has been followed.
+		const hook = Bun.spawnSync(
+			[
+				"git",
+				"rev-parse",
+				"--path-format=absolute",
+				"--git-path",
+				"hooks/pre-push",
+			],
+			{ cwd: root },
+		);
+		expect(hook.exitCode).toBe(0);
+		const onDisk = readFileSync(hook.stdout.toString().trim(), "utf8")
 			.trimEnd()
 			.split("\n")
 			.at(-1);
