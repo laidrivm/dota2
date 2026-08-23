@@ -151,7 +151,7 @@ them as given rather than adding them.
 
 ## 6. Mirrored images and the route that serves them
 
-- [ ] 6.1 Write the mirroring tests: a first run against an empty directory
+- [x] 6.1 Write the mirroring tests: a first run against an empty directory
       leaves a file for every hero [44]; a run with every file present issues
       no image request [46]; every stored `icon` is a path beginning with `/`
       and never an absolute URL to another origin [47]; a new hero whose image
@@ -161,19 +161,19 @@ them as given rather than adding them.
       answer the complete file or a `404` and never part of one [69]. (Req:
       hero-reference — Hero images are mirrored to the application's own
       origin)
-- [ ] 6.2 Write the route tests: a mirrored image answers `200` with
+- [x] 6.2 Write the route tests: a mirrored image answers `200` with
       `content-type: image/png` and the immutable cache header [48]; an unheld
       name answers `404` with an empty body [49]; a request naming a segment
       outside the mirror directory cannot reach a file outside it [50]; a file
       written after the server started is served without a restart [55]. (Req:
       hero-reference — The mirrored images are served from the application's
       origin)
-- [ ] 6.3 Implement the mirror: fetch once per hero into a temporary name the
+- [x] 6.3 Implement the mirror: fetch once per hero into a temporary name the
       route cannot serve, move it to its final name only once the whole file is
       on disk, skip a name already present, and fail the run only where a hero
       has no file at all. (Req: hero-reference — Hero images are mirrored to
       the application's own origin)
-- [ ] 6.4 Add the `/icons/*` route to `static-routes.ts`, resolved from the
+- [x] 6.4 Add the `/icons/*` route to `static-routes.ts`, resolved from the
       directory listing per request rather than prebuilt, since the job writes
       that directory while the server is running. (Req: hero-reference — The
       mirrored images are served from the application's origin)

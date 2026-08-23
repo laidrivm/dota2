@@ -1,15 +1,35 @@
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
+import { mkdtempSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { staticRoutes } from "./static-routes.ts";
 
 let origin: string;
 let server: ReturnType<typeof Bun.serve>;
 
-beforeAll(() => {
-	server = Bun.serve({ port: 0, routes: staticRoutes() });
+/**
+ * The mirror the icon routes are served from. A directory of this suite's own,
+ * because the cases below add files to it while the server is running — which
+ * is the whole reason that route resolves its listing per request.
+ */
+const iconDir = mkdtempSync(join(tmpdir(), "d2ass-routes-"));
+
+/** Bytes standing in for an image; the route sets the type, not the file. */
+const IMAGE = new Uint8Array(64).fill(7);
+
+beforeAll(async () => {
+	await Bun.write(join(iconDir, "clinkz.png"), IMAGE);
+	server = Bun.serve({
+		port: 0,
+		routes: staticRoutes(new URL(`file://${iconDir}/`)),
+	});
 	origin = server.url.origin;
 });
 
-afterAll(() => server.stop(true));
+afterAll(() => {
+	rmSync(iconDir, { recursive: true, force: true });
+	return server.stop(true);
+});
 
 describe("snapshot route", () => {
 	test("serves the fixture as JSON", async () => {
@@ -69,5 +89,88 @@ describe("font routes", () => {
 	])("do not serve %s", async (path) => {
 		const response = await fetch(`${origin}${path}`);
 		expect(response.status).toBe(404);
+	});
+});
+
+describe("icon routes", () => {
+	// spec: hero-reference/a-mirrored-image
+	test("serve a mirrored image with its own content type [48]", async () => {
+		const response = await fetch(`${origin}/icons/clinkz.png`);
+
+		expect(response.status).toBe(200);
+		expect(response.headers.get("content-type")).toBe("image/png");
+		expect(new Uint8Array(await response.arrayBuffer())).toEqual(IMAGE);
+	});
+
+	// spec: hero-reference/a-mirrored-image
+	test("cache them forever, because their names pin their bytes [48]", async () => {
+		const response = await fetch(`${origin}/icons/clinkz.png`);
+		expect(response.headers.get("cache-control")).toBe(
+			"public, max-age=31536000, immutable",
+		);
+	});
+
+	// spec: hero-reference/a-name-the-mirror-does-not-hold
+	test("answer a name the mirror does not hold with an empty 404 [49]", async () => {
+		const response = await fetch(`${origin}/icons/no-such-hero.png`);
+
+		expect(response.status).toBe(404);
+		expect(await response.text()).toBe("");
+	});
+
+	// spec: hero-reference/a-read-taken-while-a-file-is-being-written
+	test("answer nothing for a download still in flight [69]", async () => {
+		// The state a download is in mid-write: its bytes are on disk under the
+		// name the mirror gives an incomplete file, and the name the route
+		// serves does not exist yet. What a reader may never get is those bytes.
+		await Bun.write(join(iconDir, ".lina.png.part"), IMAGE.slice(0, 32));
+
+		const response = await fetch(`${origin}/icons/lina.png`);
+
+		expect(response.status).toBe(404);
+		expect(await response.text()).toBe("");
+	});
+
+	// spec: hero-reference/a-path-that-climbs-out
+	test.each([
+		"/icons/../static-routes.ts",
+		"/icons/%2e%2e%2fstatic-routes.ts",
+		"/icons/.lina.png.part",
+	])("serve nothing for %s [50]", async (path) => {
+		// The listing is the whitelist, so a name outside it is answered the
+		// same way whether it climbed, was encoded, or is simply not a hero.
+		const response = await fetch(`${origin}${path}`);
+
+		expect(response.status).toBe(404);
+		expect(await response.text()).not.toContain("staticRoutes");
+	});
+
+	// spec: hero-reference/a-name-the-mirror-does-not-hold
+	test("answer 404 where the mirror directory is not there at all [49]", async () => {
+		// Every clone before its first ingest run, `bun run dev` included: a
+		// scan of an absent directory raises, and a raise here is a 500.
+		const bare = Bun.serve({
+			port: 0,
+			routes: staticRoutes(new URL(`file://${iconDir}/never-written/`)),
+		});
+		try {
+			const response = await fetch(`${bare.url.origin}/icons/clinkz.png`);
+
+			expect(response.status).toBe(404);
+			expect(await response.text()).toBe("");
+		} finally {
+			bare.stop(true);
+		}
+	});
+
+	// spec: hero-reference/a-file-written-after-the-server-started
+	test("serve a file written after the server started [55]", async () => {
+		// The ingest writes this directory while the server runs, which is why
+		// the route resolves the listing per request rather than at startup.
+		expect((await fetch(`${origin}/icons/enigma.png`)).status).toBe(404);
+
+		await Bun.write(join(iconDir, "enigma.png"), IMAGE);
+
+		expect((await fetch(`${origin}/icons/enigma.png`)).status).toBe(200);
 	});
 });
