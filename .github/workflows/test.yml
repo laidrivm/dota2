@@ -42,8 +42,14 @@ jobs:
         image: postgres:18-alpine@sha256:d3e1620b530c944afa6e887d22eb899824da68e19c52024bf98f5220c88a65b2
         env:
           POSTGRES_PASSWORD: postgres
+        # The probe goes over TCP rather than the socket: the entrypoint runs
+        # initdb against a temporary server bound to the socket alone, so a
+        # socket probe reports ready while connections opened on it are about
+        # to be closed. The steps below take long enough to hide that today,
+        # which is luck rather than design. A comment cannot live inside the
+        # block scalar under it — it would be folded into the option string.
         options: >-
-          --health-cmd pg_isready
+          --health-cmd "pg_isready -h 127.0.0.1"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
