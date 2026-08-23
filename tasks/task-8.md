@@ -8,7 +8,7 @@
 >
 > The ~250-line figure below is what the trigger said when this task ran. It
 > is now ~500 lines across the always-on set — `CLAUDE.md` plus `PLAN.md` —
-> stated in `CLAUDE.md` §*Structure & growth of this file*, which owns it. The
+> stated in `CLAUDE.md` §*Maintenance & growth*, which owns it. The
 > criteria below are left as they were met.
 
 ## Context

@@ -76,49 +76,17 @@ Rule quality bar — a rule must be:
 - **Non-duplicate**: before adding, re-read the list; if a similar rule
   exists, tighten that rule instead of appending a variant.
 
-### Maintenance
+### Maintenance & growth
 
-- When one sublist exceeds ~20 rules, propose merging or promoting stable
-  clusters out of **that** sublist into the "Code style" section above or the
-  docs indexed there — the other two sublists are not counted against it. A
-  Code rule also leaves by being deleted once the code it describes is
-  rewritten; a Process or Safety rule leaves by promotion, or by the bullet
-  below when it stops applying at all.
-- If a rule stops applying (dependency removed, approach changed), propose
-  deleting it — a stale rule costs trust in the whole list.
-
-### Structure & growth of this file
-
-This file must stay readable in one sitting. Keep it small; do not add to
-it beyond the fix & capture loop. When it outgrows itself, split by this
-protocol:
-
-- **Trigger**: the always-on set — this file plus `PLAN.md`, the two read at
-  the start of every session — exceeds ~500 lines together, or rules from this
-  file's middle are observably being ignored. The budget is the sum because
-  the cost is what a session must read before it starts, and neither file pays
-  it alone. A file indexed below under `docs/` is read when its topic comes up
-  and does not count: that exclusion is what makes extraction a real remedy
-  rather than the same lines under another name.
-- **Move whole sections only** (e.g. "API design", "E2E") to
-  `docs/<topic>.md`, leaving one line here: the section's scope + the
-  link. Never split one topic across two homes.
-- **This file is the only index**: every extracted doc is linked from
-  here, and docs do not link to each other — everything is one hop from
-  this file.
-- **Extracted docs inherit the constitution**: the rule quality bar, the
-  single-source rule, and fix & capture routing all follow a section to
-  its new home.
-- **Docs describe current state only** — no temporal language
-  ("recently", "we migrated from X"), no changelog narration of what was
-  done. History lives in git. This applies to this file too.
-- **Exception — `docs/context/`**: session save-points (debug findings,
-  library research, incident notes) live in `docs/context/<topic>-<yyyy-mm>.md`,
-  written for an LLM reader, narrative and dated by design. They are
-  committed but NOT indexed here and never loaded automatically — the
-  user passes one in explicitly when starting a session on the same
-  topic. A save-point is a snapshot, not a source of truth: it never
-  overrides this file, config.yaml, or the OpenSpec archive.
+The always-on set is this file plus `PLAN.md`, the two read at the start of
+every session; the trigger is read against their combined line count, because
+what a session pays is what it must read before it starts and neither file
+pays it alone. It fires when the set passes ~500 lines, when one sublist below
+passes ~20 rules, or when rules from this file's middle are observably being
+ignored — `openspec/specs/context-budget/` and `openspec/specs/agent-rulebook/`
+fix those two figures. What a fired trigger asks for — promotion, deletion, the
+protocol for extracting a section, and where a session save-point lives — is in
+[docs/rulebook-growth.md](docs/rulebook-growth.md).
 
 ### Rules
 

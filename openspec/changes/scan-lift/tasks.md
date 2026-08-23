@@ -69,7 +69,7 @@ acceptance criteria: `mutation-floor`'s *A directive below a regex literal* and
 - [ ] 1.9 Measure every capped file this change touched and record the numbers,
       whether or not any is over. The cap covers `.ts`, `.tsx` and `.css`, so
       `CLAUDE.md` is not in this list — the always-on budget in its own
-      §*Structure & growth of this file* is what governs it, and 1.10 is where
+      §*Maintenance & growth* is what governs it, and 1.10 is where
       that is checked. Capped: `scripts/scan.ts`,
       `scripts/scan.test.ts`, `scripts/mutation-floor.ts`,
       `scripts/mutation-floor.test.ts`, `scripts/spec-coverage.ts`,
