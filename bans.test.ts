@@ -161,6 +161,16 @@ describe("what the response leaves out", () => {
 		);
 	});
 
+	// spec: snapshot-ingest/a-hero-and-day-absent-from-the-ban-response
+	test("a hero and day named twice fails rather than doubling [75]", async () => {
+		// Absence is this endpoint's normal state so a short response cannot be
+		// told from a complete one, but a repeat can be — and it reaches the
+		// contest rate as a hero banned twice as often as it was.
+		const { query } = asking([banned(9001, FIRST, 3), banned(9001, FIRST, 3)]);
+
+		expect(await failure(pullBans(query, WEEK))).toContain("more than once");
+	});
+
 	// spec: snapshot-ingest/bans-cannot-be-read
 	test("days summing past what the column holds fail [74]", async () => {
 		const { query } = asking([
