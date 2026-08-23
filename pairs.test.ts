@@ -7,12 +7,12 @@
  * `pairs-weeks.test.ts`'s.
  */
 import { describe, expect, test } from "bun:test";
-import { pairWeeks, pullPairs, type Week } from "./pairs.ts";
+import { pairWeeks, pullPairs } from "./pairs.ts";
 import type { Query } from "./stratz.ts";
 
 /** The reference this suite pulls over, and one complete week to pull it in. */
 const HEROES = [9001, 9002, 9003];
-const WEEKS: Week[] = pairWeeks(
+const WEEKS = pairWeeks(
 	new Date("2026-08-13T00:00:00.000Z"),
 	new Date("2026-08-21T12:00:00.000Z"),
 );
@@ -153,9 +153,9 @@ describe("a response the reference admits", () => {
 		// records the same word meaning a day number on `banDay` and a Unix
 		// timestamp on `winDay`, so which one this is has to be pinned.
 		for (const [n, anchor] of anchors.entries()) {
-			const week = weeks[n] as Week;
-			expect(anchor * 1000).toBeGreaterThanOrEqual(week.start.getTime());
-			expect(anchor * 1000).toBeLessThan(week.end.getTime());
+			const opened = (weeks[n] as Date).getTime();
+			expect(anchor * 1000).toBeGreaterThanOrEqual(opened);
+			expect(anchor * 1000).toBeLessThan(opened + 604_800_000);
 		}
 	});
 
