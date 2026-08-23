@@ -79,6 +79,8 @@ describe("reading the reference from the source", () => {
 		["an empty list", { data: { constants: { heroes: [] } } }],
 		["a body carrying no heroes at all", { data: { constants: {} } }],
 		["an envelope that is not the documented one", { heroes: [LISTED] }],
+		["a body that is null", null],
+		["a body that is undefined", undefined],
 	])("%s fails the run naming that [86]", async (_, body) => {
 		const failed = await failure(readHeroes(answering(body).query));
 
