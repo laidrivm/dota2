@@ -5,7 +5,9 @@
  * The staging write's own cases — retention and the rollback of one bad
  * row — are `staging.test.ts`'s.
  */
+
 import { describe, expect, test } from "bun:test";
+import { join } from "node:path";
 import type { SQL } from "bun";
 import { opener, requiresDatabase, url } from "./db.fixture.ts";
 import {
@@ -29,6 +31,8 @@ const COUNTS = { matchCount: 10, winCount: 5 };
 describe.skipIf(url === undefined)("one run, and the next", () => {
 	const open = opener();
 	const dir = icons();
+	/** A second one, for the case that asserts what a run left in it. */
+	const ownDir = icons();
 
 	/** A connection holding none of this file's rows. */
 	const clean = async () => {
@@ -219,12 +223,30 @@ describe.skipIf(url === undefined)("one run, and the next", () => {
 	test("the reference and the images survive a failed run", async () => {
 		const sql = await clean();
 
-		await run(sql, RUN_AT, { pairsFail: true }).catch(() => {});
+		// A directory of its own, so what is found in it afterwards was written
+		// by this run rather than by whichever case ran before it.
+		const failed = await ingest(
+			{
+				sql,
+				query: sourceQuery(RUN_AT, { pairsFail: true }).query,
+				fetch: sourceFetch(),
+				iconsDir: ownDir,
+			},
+			RUN_AT,
+		).then(
+			() => null,
+			(error: Error) => error.message,
+		);
 
+		// Asserted rather than swallowed: without it a run that stopped failing
+		// would pass this case on the rows a previous one left.
+		expect(failed).toContain("4 attempts made");
 		// Outside the transaction by construction: both are operations a repeat
 		// performs identically, which is why they need no rollback.
 		const rows = await sql`SELECT hero_id FROM heroes WHERE hero_id >= 9000
 			ORDER BY hero_id`;
 		expect(rows.map((row: { hero_id: number }) => row.hero_id)).toEqual(HEROES);
+		for (const slug of ["hero0", "hero1"])
+			expect(await Bun.file(join(ownDir, `${slug}.png`)).exists()).toBe(true);
 	});
 });
