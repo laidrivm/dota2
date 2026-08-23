@@ -22,7 +22,7 @@ const released = (weeks: number) => new Date(THURSDAY - weeks * WEEK_MS);
 
 /** The `start` of every week the pull would cover, as ISO days. */
 const covered = (detectedAt: Date) =>
-	pairWeeks(detectedAt, RUN_AT).map((week) => week.start.toISOString());
+	pairWeeks(detectedAt, RUN_AT).map((week) => week.toISOString());
 
 // spec: snapshot-ingest/a-patch-younger-than-the-cap
 test("a patch live for exactly four complete weeks pulls four [23]", () => {
@@ -41,9 +41,7 @@ test("a patch live for twelve pulls exactly the four most recent [24]", () => {
 	// Which four, not merely how many: a cap invisible in the output reads
 	// afterwards as complete coverage.
 	expect(weeks).toHaveLength(4);
-	expect(weeks.map((week) => week.start.toISOString())).toEqual(
-		covered(released(4)),
-	);
+	expect(weeks.map((week) => week.toISOString())).toEqual(covered(released(4)));
 });
 
 // spec: snapshot-ingest/a-patch-older-than-the-cap
@@ -87,7 +85,9 @@ test("the week the run falls inside is not pulled [23]", () => {
 	// nothing at all; the freshest complete bucket ended the Wednesday before.
 	const [last] = pairWeeks(released(1), RUN_AT).slice(-1);
 
-	expect(last?.end.toISOString()).toBe("2026-08-20T00:00:00.000Z");
+	// The bucket that opened the Thursday before the run's own, so the one
+	// that closed the Wednesday before it.
+	expect(last?.toISOString()).toBe("2026-08-13T00:00:00.000Z");
 });
 
 test("an instant that is not one is refused rather than asked for", () => {

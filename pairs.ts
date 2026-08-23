@@ -32,13 +32,11 @@ const MAX_WEEKS = 4;
 /** Rows one request asks for; the endpoint's own default is 10. */
 const TAKE = 200;
 
-/** One of the source's buckets, `end` exclusive. */
-export type Week = { start: Date; end: Date };
-
 /**
  * The weeks a run at `at` covers for a patch released at `detectedAt`: the
  * complete ones the patch has been live for, newest first up to the cap, then
- * in the order they happened.
+ * in the order they happened. Each is the Thursday its bucket opens, the
+ * closing Wednesday being that plus a week and nothing here reading it.
  *
  * A week belongs to the patch in force on its **last** day, so a week whose
  * span contains the release is the new patch's. No argument the endpoint
@@ -50,7 +48,7 @@ export type Week = { start: Date; end: Date };
  * a one-day floor. `snapshot-build` decides a component by whether staging
  * holds any row for it, so absent is a state it already reads.
  */
-export function pairWeeks(detectedAt: Date, at: Date): Week[] {
+export function pairWeeks(detectedAt: Date, at: Date): Date[] {
 	const detected = detectedAt.getTime();
 	const run = at.getTime();
 	if (!Number.isFinite(detected) || !Number.isFinite(run))
@@ -59,11 +57,11 @@ export function pairWeeks(detectedAt: Date, at: Date): Week[] {
 	// The exclusive end of the most recent complete bucket: the week the run
 	// falls inside has not finished, and the source returns nothing for it.
 	let end = Math.floor(run / WEEK_MS) * WEEK_MS;
-	const weeks: Week[] = [];
+	const weeks: Date[] = [];
 	// `detected < end` is the attribution rule above: the patch was in force on
 	// the last day of every week that ends after it was released.
 	while (weeks.length < MAX_WEEKS && detected < end) {
-		weeks.push({ start: new Date(end - WEEK_MS), end: new Date(end) });
+		weeks.push(new Date(end - WEEK_MS));
 		end -= WEEK_MS;
 	}
 	return weeks.reverse();
@@ -89,10 +87,10 @@ export type PairPull = { matchups: PairCount[]; synergies: PairCount[] };
  * granularity of a day, so what hour they turn on is not known, and the middle
  * is the instant furthest from being wrong about it.
  */
-const anchor = (week: Week) =>
-	Math.floor((week.start.getTime() + WEEK_MS / 2) / 1000);
+const anchor = (week: Date) =>
+	Math.floor((week.getTime() + WEEK_MS / 2) / 1000);
 
-const document = (heroId: number, week: Week) =>
+const document = (heroId: number, week: Date) =>
 	`{ heroStats { matchUp(heroId: ${heroId}, week: ${anchor(week)}, take: ${TAKE}, bracketBasicIds: [DIVINE_IMMORTAL]) { with { heroId2 matchCount winCount } vs { heroId2 matchCount winCount } } } }`;
 
 /**
@@ -180,7 +178,7 @@ function absorb(
 export async function pullPairs(
 	query: Query,
 	heroIds: number[],
-	weeks: Week[],
+	weeks: Date[],
 ): Promise<PairPull> {
 	const reference = new Set(heroIds);
 	const matchups = new Map<string, PairCount>();
