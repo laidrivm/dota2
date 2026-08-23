@@ -81,6 +81,43 @@ test("a hero already mirrored survives a refetch that would fail [54]", async ()
 	expect(refused.calls).toEqual([]);
 });
 
+test("a run carrying no hero issues no request and does not fail", () => {
+	// The reference is mirrored from a response, and a response carrying no
+	// hero is the caller's failure to raise, not this module's to guess at.
+	const dir = emptyDir();
+	const { fetch, calls } = serving();
+
+	const run = mirrorIcons([], dir, fetch);
+
+	expect(run).resolves.toBeUndefined();
+	expect(calls).toEqual([]);
+});
+
+// spec: hero-reference/the-first-run
+test.each(["../escaped", "sub/hero", "", "clinkz.png"])(
+	"a hero named %p is refused before anything is written",
+	async (shortName) => {
+		// `icon` is a path this application serves, so what the mirror will
+		// write under is a slug and nothing else — a name that climbs, nests or
+		// carries its own extension is the source's error, not a file to make.
+		const dir = emptyDir();
+		const { fetch, calls } = serving();
+
+		const failed = await mirrorIcons(
+			[{ shortName, imageUrl: CLINKZ.imageUrl }],
+			dir,
+			fetch,
+		).then(
+			() => null,
+			(error: Error) => error.message,
+		);
+
+		expect(failed).toMatch(/not a name this mirror will write/);
+		expect(held(dir)).toEqual([]);
+		expect(calls).toEqual([]);
+	},
+);
+
 describe("a hero the tables lack whose image cannot be fetched", () => {
 	// spec: hero-reference/a-new-hero-whose-image-cannot-be-fetched
 	test.each([
