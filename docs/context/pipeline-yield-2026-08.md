@@ -769,3 +769,30 @@ removed the files a run was reading reported `ENOENT` on a test file rather
 than a failure, and cost a diagnosis. Both became rules in
 `docs/git-and-prs.md`; neither is a shape any review skill in the sequence
 looks for.
+
+## 2026-08-24 — snapshot-ingest groups 8 to 11, test:db, local verification
+
+(feat/snapshot-ingest-8 to -11b, chore/test-db, chore/local-verification)
+
+- zombies: PASS — 7 gaps, 7 acted on (group 9)
+- ponytail-review: PASS — 1 finding, 1 acted on (group 9)
+- triage: PASS — 1 finding, 1 acted on (group 9)
+- coderabbit-local: PASS — 4 findings, 4 acted on (group 9)
+- coderabbit: PASS — 5 findings, 4 acted on, 1 dismissed (PR #159)
+- zombies: PASS — 5 gaps, 5 acted on (group 10)
+- ponytail-review: PASS — 1 finding, 1 acted on (group 10)
+- triage: PASS — 2 findings, 2 acted on (group 10)
+- coderabbit-local: PASS — 2 findings, 1 acted on (group 10)
+- coderabbit: PASS — 2 findings, 1 acted on, 1 dismissed (PR #160)
+- zombies: PASS — 5 gaps, 5 acted on (group 11)
+- ponytail-review: PASS — 1 finding, 1 acted on (group 11)
+- triage: PASS — 1 finding, 1 acted on (group 11)
+- coderabbit-local: PASS — 4 findings, 4 acted on (group 11)
+- coderabbit: PASS — 1 finding, 1 acted on (PR #158 re-fetch, 11b)
+- triage: PASS — 1 finding, 1 acted on (chore/test-db)
+- coderabbit-local: PASS — 1 finding, 1 acted on (chore/test-db)
+- coderabbit: PASS — 4 findings, 4 acted on, 1 partial dismissal (PR #163)
+- triage: PASS — 2 findings, 2 acted on (chore/local-verification)
+- coderabbit-local: PASS — 0 findings (chore/local-verification)
+- Not run: warm (no manifest changed), preflight, code-review, review-order,
+  first-five
