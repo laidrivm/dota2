@@ -42,8 +42,16 @@ PINNED='^postgres:[A-Za-z0-9._-]+@sha256:[0-9a-f]{64}$'
 # a container that outlives a kill takes itself away.
 name="d2ass-test-db-$$"
 
+# Emptied until `docker run` hands back an id, and cleanup keyed on the id
+# rather than the name. Pids are reused, so a run whose predecessor was killed
+# outright can meet that predecessor's container under the name it wants — and
+# a cleanup keyed on the name would then stop a container this run never
+# started, on its way out of failing to start one.
+id=""
+
 cleanup() {
-	docker stop "$name" >/dev/null 2>&1
+	[ -n "$id" ] && docker stop "$id" >/dev/null 2>&1
+	return 0
 }
 trap cleanup EXIT
 # Separately from EXIT, because a trap that does not exit resumes where it
@@ -56,8 +64,8 @@ trap 'cleanup; exit 143' TERM
 # Bound to the loopback and to a port the kernel picks: the password below is
 # a throwaway, and a throwaway password on 0.0.0.0 is an invitation. The port
 # is read back rather than fixed, so a Postgres already on 5432 is no clash.
-docker run -d --rm --name "$name" \
-	-e POSTGRES_PASSWORD=postgres -p 127.0.0.1::5432 "$image" >/dev/null ||
+id=$(docker run -d --rm --name "$name" \
+	-e POSTGRES_PASSWORD=postgres -p 127.0.0.1::5432 "$image") ||
 	die "could not start ${image}"
 
 port=$(docker port "$name" 5432 | head -1 | sed 's/.*://')

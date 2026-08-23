@@ -80,5 +80,14 @@ test("the script waits on the server over TCP, not the socket", () => {
 	// The socket answers during initdb's temporary server, whose connections
 	// are closed when the real one takes over — measured as a run where every
 	// database suite failed with `Connection closed`.
-	expect(script).toContain("pg_isready -h 127.0.0.1");
+	//
+	// Matched against what the script runs rather than what it says: the
+	// invocation is what has to carry the flag, and a comment mentioning it
+	// would otherwise satisfy this on its own.
+	const runs = script
+		.split("\n")
+		.filter((line) => !line.trimStart().startsWith("#"))
+		.join("\n");
+
+	expect(runs).toContain('docker exec "$name" pg_isready -h 127.0.0.1');
 });
