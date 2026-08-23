@@ -99,6 +99,40 @@ Proceeding would blend under a `detected_at` no source confirmed this run.
 - **THEN** the run SHALL fail naming which, and SHALL NOT fall back to the
   patch `patches` already holds
 
+### Requirement: The hero reference is read whole or the run fails
+
+The ingest SHALL read every hero from the statistics API — the id Valve mints,
+the display name and the slug — and SHALL derive each hero's image location
+from that slug rather than from a second vendor. The statistics API publishes
+no image field at all, but the slug it publishes is the name Valve's own
+content delivery network serves each hero's image under, over every hero the
+source returns. A vendor republishing that location would be one more source to
+be unavailable, bought for a path this one already determines; and a derived
+location that is wrong is not silent, because a hero whose image cannot be
+fetched already fails the run.
+
+A partial reference SHALL NOT be upserted. A hero source unreadable after its
+retries, and one that parses to no hero, are each a failure of the run, and
+neither SHALL leave the ingest running against the heroes `heroes` happens to
+hold — the reference is what every staging row is keyed to.
+
+#### Scenario: A hero source that cannot be reached
+
+- **IF** the hero request fails after its retries
+- **THEN** the run SHALL fail, and no hero SHALL be upserted
+
+#### Scenario: A hero source that lists no hero
+
+- **IF** the response parses to no hero at all
+- **THEN** the run SHALL fail naming that, and SHALL NOT proceed on the heroes
+  the reference tables already hold
+
+#### Scenario: A derived image location
+
+- **WHEN** the source returns a hero
+- **THEN** its image SHALL be fetched from the location its slug names, and no
+  request SHALL be made to a vendor for that location
+
 ### Requirement: Hero images are mirrored to the application's own origin
 
 The ingest SHALL fetch each hero's image once and store it under a directory

@@ -97,15 +97,17 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       `openspec/changes/snapshot-ingest/`. The schema and the database edge,
       the rate-limited STRATZ client, the reference upserts, the mirrored hero
       images, and the entry point that drives 3a to a published snapshot or a
-      failed one. Eleven task groups, so `feat/snapshot-ingest-1` through
-      `-11`, in order, each under the diff budget's warn line. It interleaves
-      with 3a rather than simply preceding it: groups 1 to 10 first, since
+      failed one. Twelve task groups, so `feat/snapshot-ingest-1` through
+      `-12`, in order, each under the diff budget's warn line. It interleaves
+      with 3a rather than simply preceding it: groups 1 to 11 first, since
       ingest creates and fills the tables the build reads; then 3a; then group
-      11, the entry point that calls 3a's build and export. A second probe
+      12, the entry point that calls 3a's build and export. A second probe
       moved three assumptions, all in `docs/context/stratz-probe-2026-08.md`:
       the meta comes from a daily endpoint that can filter the game mode, patch
       detection leaves STRATZ whose version list stalled eight months back, and
-      hero images come from Valve's CDN by way of OpenDota's index. Owns no
+      hero images come from Valve's CDN under the slug STRATZ publishes — the
+      probe reached that CDN by way of OpenDota's index, which the change's
+      design.md replaces with a derivation measured over all 127 heroes. Owns no
       schedule — Task 7 sets when the job runs and alerts when it stops.
 - [ ] **Phase 3a — `snapshot-build`** — proposed,
       `openspec/changes/snapshot-build/`. The blending, smoothing and
