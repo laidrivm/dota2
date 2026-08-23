@@ -41,8 +41,10 @@ export async function readHeroes(query: Query): Promise<SourcedHero[]> {
 	// from the slug rather than from the response.
 	const body = (await query(
 		"{ constants { heroes { id displayName shortName } } }",
-	)) as { data?: { constants?: { heroes?: unknown } } };
-	const listed = body.data?.constants?.heroes;
+	)) as { data?: { constants?: { heroes?: unknown } } } | null;
+	// Optionally chained from `body` itself: a body of literal `null` parses to
+	// one, and this function takes any `Query` rather than only the client's.
+	const listed = body?.data?.constants?.heroes;
 	if (!Array.isArray(listed) || listed.length === 0)
 		throw new Error("the hero source listed no hero");
 	return listed.map((entry, index) => {
