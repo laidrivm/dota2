@@ -1,20 +1,21 @@
 /**
- * The meta pull: the window a patch and a run instant define, what a request
- * over it names, and what five of them sum into.
+ * The meta pull: what five requests name, what they sum into, and the answers
+ * that end the run rather than being staged.
  *
  * The rows here are shaped from the `winDay` response recorded in
  * `docs/context/stratz-probe-2026-08.md`. No suite calls the live API.
+ * The window arithmetic those requests are measured over is
+ * `meta-window.test.ts`'s.
  */
-import { afterAll, beforeAll, describe, expect, test } from "bun:test";
+import { describe, expect, test } from "bun:test";
 import { metaWindow, pullMeta } from "./meta.ts";
 import type { Query } from "./stratz.ts";
 
-/** A patch released at a UTC midnight, and a run a week into its life. */
-const RELEASED = new Date("2026-08-14T00:00:00.000Z");
-const RUN_AT = new Date("2026-08-21T12:00:00.000Z");
-
-/** The window that pair defines, which the pull tests all run over. */
-const WEEK = metaWindow(RELEASED, RUN_AT);
+/** A patch a week old at the run instant, and the window it defines. */
+const WEEK = metaWindow(
+	new Date("2026-08-14T00:00:00.000Z"),
+	new Date("2026-08-21T12:00:00.000Z"),
+);
 
 /**
  * A `query` answering `rows(call)` to each of the five position requests, and
@@ -39,75 +40,12 @@ const counted = (heroId: number, matches: number, wins: number) => ({
 	winCount: wins,
 });
 
-describe("the window a run covers", () => {
-	// spec: snapshot-ingest/a-patch-a-week-old
-	test("a patch seven whole UTC days old is covered over seven days [20]", () => {
-		expect(WEEK).toEqual({
-			start: new Date("2026-08-14T00:00:00.000Z"),
-			end: new Date("2026-08-21T00:00:00.000Z"),
-			days: 7,
-			cappedBySource: false,
-		});
-	});
-
-	// spec: snapshot-ingest/the-day-in-progress
-	test("the day the run instant falls inside is not part of it [64]", () => {
-		// The last instant of the eighth day and the first of the ninth: the
-		// window grows only once the day it would add has finished.
-		expect(
-			metaWindow(RELEASED, new Date("2026-08-21T23:59:59.999Z")).days,
-		).toBe(7);
-		expect(
-			metaWindow(RELEASED, new Date("2026-08-22T00:00:00.000Z")).days,
-		).toBe(8);
-	});
-
-	describe("read from a zone nine hours ahead of UTC", () => {
-		const zone = process.env.TZ;
-		beforeAll(() => {
-			process.env.TZ = "Asia/Tokyo";
-		});
-		afterAll(() => {
-			process.env.TZ = zone;
-		});
-
-		// spec: snapshot-ingest/the-day-in-progress
-		test("a run instant whose local date is a day ahead adds no day [26]", () => {
-			// 23:00 UTC is the next morning in Tokyo, so a window measured by the
-			// machine's calendar would hold eight days here rather than seven.
-			expect(
-				metaWindow(RELEASED, new Date("2026-08-21T23:00:00.000Z")).days,
-			).toBe(7);
-		});
-	});
-
-	// spec: snapshot-ingest/a-patch-detected-today
-	test("a patch with no complete day behind it covers the last complete one [18]", () => {
-		const today = metaWindow(
-			new Date("2026-08-21T06:00:00.000Z"),
-			new Date("2026-08-21T12:00:00.000Z"),
-		);
-
-		expect(today).toEqual({
-			start: new Date("2026-08-20T00:00:00.000Z"),
-			end: new Date("2026-08-21T00:00:00.000Z"),
-			days: 1,
-			cappedBySource: false,
-		});
-	});
-
-	// spec: snapshot-ingest/a-patch-older-than-the-source-will-serve
-	test("a patch 150 days old covers thirty days, and the cap is recorded [70]", () => {
-		const old = metaWindow(new Date("2026-03-24T00:00:00.000Z"), RUN_AT);
-
-		expect(old.days).toBe(30);
-		// Recorded rather than inferred from the length: a thirty-day patch and
-		// a 150-day one both ask for thirty days, and only one of them is
-		// covered whole.
-		expect(old.cappedBySource).toBe(true);
-		expect(old.start).toEqual(new Date("2026-07-22T00:00:00.000Z"));
-	});
-});
+/** The message `work` failed with, or `null` where it did not fail. */
+const failure = (work: Promise<unknown>) =>
+	work.then(
+		() => null,
+		(error: Error) => error.message,
+	);
 
 describe("what the five requests sum into", () => {
 	// spec: snapshot-ingest/a-patch-a-week-old
@@ -155,6 +93,20 @@ describe("what the five requests sum into", () => {
 	});
 
 	// spec: snapshot-ingest/a-patch-a-week-old
+	test("two heroes in one response keep their counts apart [19]", async () => {
+		const { query } = asking(
+			same([counted(9001, 10, 4), counted(9002, 20, 9)]),
+		);
+
+		const rows = await pullMeta(query, WEEK);
+
+		expect(rows.filter((row) => row.position === 1)).toEqual([
+			{ heroId: 9001, position: 1, matches: 10, wins: 4 },
+			{ heroId: 9002, position: 1, matches: 20, wins: 9 },
+		]);
+	});
+
+	// spec: snapshot-ingest/a-patch-a-week-old
 	test("five pulls leave one row per hero and position [22]", async () => {
 		const { query } = asking((call) => [counted(9001, 10 * (call + 1), call)]);
 
@@ -171,28 +123,91 @@ describe("what the five requests sum into", () => {
 });
 
 describe("what a request names", () => {
+	/** The five documents a pull over `WEEK` issues. */
+	const documents = async () => {
+		const { query, asked } = asking(same([counted(9001, 10, 4)]));
+		await pullMeta(query, WEEK);
+		expect(asked).toHaveLength(5);
+		return asked;
+	};
+
 	// spec: snapshot-ingest/the-modes-the-product-does-not-model
 	test("every request names the ranked All Pick game mode [27]", async () => {
-		const { query, asked } = asking(same([]));
-
-		await pullMeta(query, WEEK);
-
 		// The filter is the whole reason this endpoint is the source: a request
 		// without it is answered over every mode, and that answer is never what
 		// this pull asked for.
-		expect(asked).toHaveLength(5);
-		for (const document of asked)
+		for (const document of await documents())
 			expect(document).toContain("gameModeIds: [ALL_PICK_RANKED]");
 	});
 
 	// spec: snapshot-ingest/the-brackets-the-product-models
 	test("every request names the Divine and Immortal brackets [28]", async () => {
-		const { query, asked } = asking(same([]));
-
-		await pullMeta(query, WEEK);
-
-		expect(asked).toHaveLength(5);
-		for (const document of asked)
+		for (const document of await documents())
 			expect(document).toContain("bracketIds: [DIVINE, IMMORTAL]");
+	});
+
+	// spec: snapshot-ingest/a-patch-a-week-old
+	test("each request names a position of its own [22]", async () => {
+		// The rows above carry five distinct positions whether or not the
+		// requests did: a pull asking POSITION_1 five times would label the same
+		// statistic five ways, and only the documents show it.
+		expect(
+			(await documents()).map(
+				(document) => /positionIds: \[(\w+)\]/.exec(document)?.[1],
+			),
+		).toEqual([
+			"POSITION_1",
+			"POSITION_2",
+			"POSITION_3",
+			"POSITION_4",
+			"POSITION_5",
+		]);
+	});
+
+	// spec: snapshot-ingest/a-patch-a-week-old
+	test("every request groups by hero [20]", async () => {
+		// Any other grouping returns a different statistic under the same field
+		// names, which the sum above would stage as though it were this one.
+		for (const document of await documents())
+			expect(document).toContain("groupBy: HERO_ID");
+	});
+});
+
+describe("an answer that is not a pull", () => {
+	test("a response carrying no rows at all fails, naming the position", async () => {
+		const query: Query = async () => ({ data: { heroStats: {} } });
+
+		expect(await failure(pullMeta(query, WEEK))).toContain("position 1");
+	});
+
+	test("a body of literal null fails rather than raising a type error", async () => {
+		const query: Query = async () => null;
+
+		expect(await failure(pullMeta(query, WEEK))).toContain("position 1");
+	});
+
+	test("a row with no hero id fails rather than being staged", async () => {
+		const { query } = asking(same([{ matchCount: 10, winCount: 4 }]));
+
+		expect(await failure(pullMeta(query, WEEK))).toContain("no hero id");
+	});
+
+	test("five empty responses fail rather than emptying staging", async () => {
+		const { query } = asking(same([]));
+
+		// A window with no matches in it and a pull that did not happen are the
+		// same empty list; the staging write deletes before it inserts, so the
+		// second one would take the previous patch's rows with it.
+		expect(await failure(pullMeta(query, WEEK))).toContain(
+			"no rows at any position",
+		);
+	});
+
+	test("a query that has spent its attempts fails before any row", async () => {
+		const query: Query = async () => {
+			throw new Error("the API answered 500; 4 attempts made");
+		};
+
+		expect(await failure(pullMeta(query, WEEK))).toContain("4 attempts made");
 	});
 });
