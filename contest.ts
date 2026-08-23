@@ -38,14 +38,6 @@ const HEROES_PER_MATCH = 10;
  */
 const ANY_HERO = 1;
 
-/**
- * `take` counts days here as it does on the meta pull, and the rows carry the
- * day each belongs to, which is what lets the window be read back off the
- * response rather than trusted.
- */
-const document = (days: number) =>
-	`{ heroStats { banDay(heroId: ${ANY_HERO}, bracketBasicIds: [DIVINE_IMMORTAL], groupByDay: true, take: ${days}) { heroId day matchCount } } }`;
-
 /** The day number `banDay` counts `at` as, days from the epoch. */
 const dayNumber = (at: Date) => Math.floor(at.getTime() / DAY_MS);
 
@@ -69,7 +61,11 @@ export async function pullBans(
 	const first = dayNumber(span.start);
 	const last = dayNumber(span.end) - 1;
 
-	const body = (await query(document(span.days))) as {
+	// `take` counts days here as it does on the meta pull, and the rows carry
+	// the day each belongs to, which is what lets the window be read back off
+	// the response rather than trusted.
+	const asked = `{ heroStats { banDay(heroId: ${ANY_HERO}, bracketBasicIds: [DIVINE_IMMORTAL], groupByDay: true, take: ${span.days}) { heroId day matchCount } } }`;
+	const body = (await query(asked)) as {
 		data?: { heroStats?: { banDay?: unknown } };
 	} | null;
 	const listed = body?.data?.heroStats?.banDay;
