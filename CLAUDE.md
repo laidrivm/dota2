@@ -172,7 +172,8 @@ Rules about how work is carried out here. They do not age with the code.
 - Cite the requirement that fixes a value; never restate the value in another
   requirement.
 - Grep a claim's own wording when correcting it, never the files it was noticed
-  in — a claim repeats wherever its subject is discussed.
+  in — a claim repeats wherever its subject is discussed, and a renumbering
+  repeats at every number in its series.
 - Apply a rule the branch adds to the artefacts the branch already carries,
   before it is pushed.
 
