@@ -24,8 +24,8 @@ jobs:
       # Coverage is visibility, not a gate: the number is read from this log,
       # no threshold fails the build. `build.test.ts` spawns a real
       # `bun run build`, so this job needs the build to work.
-      # `db.test.ts` runs here too and skips: this job supplies no connection
-      # string, and the job below is the one that owns those cases.
+      # The database-backed files run here too and skip: this job supplies no
+      # connection string, and the job below is the one that owns those cases.
       - run: bun run test:coverage
 
   database:
@@ -60,7 +60,12 @@ jobs:
       # `DATABASE_REQUIRED` is what makes this job evidence: without it a suite
       # that skipped and one that passed both report green, and this job exists
       # for the cases that only run with a database behind them.
-      - run: bun test db.test.ts
+      #
+      # The whole suite rather than the database-backed files by name: a named
+      # list drifts silently, because a file added to it later would skip here
+      # and report the same green as one that ran. The rest of the suite is
+      # milliseconds and passes with or without a connection string.
+      - run: bun test
         env:
           DATABASE_URL: postgres://postgres:postgres@localhost:5432/postgres
           DATABASE_REQUIRED: "1"
