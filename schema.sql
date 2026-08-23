@@ -87,7 +87,7 @@ CREATE TABLE IF NOT EXISTS hero_stats (
   -- its picks from an endpoint pinned to ranked All Pick and its bans from
   -- one that cannot be, so the two count different populations and the
   -- quotient can pass 1. It orders heroes by contest rather than stating a
-  -- share (`snapshot-ingest/design.md` §*The two endpoints do not agree*).
+  -- share (`design.md` §*The two endpoints do not agree*).
   contest_rate     real NOT NULL,
   side_adj_radiant real NOT NULL,
   side_adj_dire    real NOT NULL,
