@@ -90,8 +90,11 @@ export function metaWindow(detectedAt: Date, at: Date): MetaWindow {
  * Whether a value is a number of matches, rather than merely a number. Safe
  * integers rather than integers: `Number.isInteger(1e300)` is true, and a count
  * that cannot survive being added to is not one.
+ *
+ * Exported for the pair pull, which sums over weeks as this sums over days and
+ * so hides the same inconsistency from the same constraint.
  */
-const isCount = (n: unknown): n is number =>
+export const isCount = (n: unknown): n is number =>
 	typeof n === "number" && Number.isSafeInteger(n) && n >= 0;
 
 /** One hero's counts at one position, summed over the window's days. */
