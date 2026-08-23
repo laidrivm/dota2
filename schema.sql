@@ -124,10 +124,12 @@ CREATE TABLE IF NOT EXISTS hero_synergies (
 -- The ingest's output and the build's input: raw counts per patch, mirroring
 -- the tables above but keyed by `patch_id` rather than `snapshot_id` and
 -- holding what the source returned rather than what the build derives from it.
--- The last two patches are kept; a run writing a newer one drops anything
--- older. Every row is written and replaced inside one transaction, so no
--- version column or partial-pull ledger is needed to tell a whole run from an
--- abandoned one.
+-- A run drops the rows of every patch released before the one preceding it,
+-- and nothing else — stated against the previous patch's release rather than
+-- as "the last two are kept", because a count would also drop what is newer
+-- and a run taken at an earlier instant would then destroy it. Every row is
+-- written and replaced inside one transaction, so no version column or
+-- partial-pull ledger is needed to tell a whole run from an abandoned one.
 --
 -- Every count is bounded where it is declared. A negative match count, or more
 -- wins than matches, is not a number the build refuses — it is one the build
