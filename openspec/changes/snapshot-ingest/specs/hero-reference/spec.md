@@ -111,10 +111,13 @@ be unavailable, bought for a path this one already determines; and a derived
 location that is wrong is not silent, because a hero whose image cannot be
 fetched already fails the run.
 
-A partial reference SHALL NOT be upserted. A hero source unreadable after its
-retries, and one that parses to no hero, are each a failure of the run, and
-neither SHALL leave the ingest running against the heroes `heroes` happens to
-hold — the reference is what every staging row is keyed to.
+The reference SHALL be read whole before any of it is upserted. A hero source
+unreadable after its retries, and one that parses to no hero, are each a
+failure of the run, and neither SHALL leave the ingest running against the
+heroes `heroes` happens to hold — the reference is what every staging row is
+keyed to. What the upsert then does with a run that fails part-way is
+*A hero is upserted and never removed*'s, which keeps those rows on purpose;
+this requirement fixes only that a failed read reaches no upsert at all.
 
 #### Scenario: A hero source that cannot be reached
 
