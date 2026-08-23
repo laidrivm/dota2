@@ -63,8 +63,10 @@ jobs:
       #
       # The whole suite rather than the database-backed files by name: a named
       # list drifts silently, because a file added to it later would skip here
-      # and report the same green as one that ran. The rest of the suite is
-      # milliseconds and passes with or without a connection string.
+      # and report the same green as one that ran. The cost is that this job
+      # now runs `build.test.ts` too, which spawns a real `bun run build` and
+      # is most of the suite's twenty seconds — paid to keep the set of
+      # database-backed files out of a list somebody has to maintain.
       - run: bun test
         env:
           DATABASE_URL: postgres://postgres:postgres@localhost:5432/postgres
