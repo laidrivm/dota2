@@ -83,7 +83,12 @@ CREATE TABLE IF NOT EXISTS hero_stats (
   snapshot_id      bigint NOT NULL REFERENCES snapshots ON DELETE CASCADE,
   hero_id          int NOT NULL REFERENCES heroes,
   matches          int NOT NULL CHECK (matches >= 0),
-  contest_rate     real NOT NULL,      -- 0..1
+  -- Nominally 0..1 and not bounded to it: `(picks + bans) / matches` takes
+  -- its picks from an endpoint pinned to ranked All Pick and its bans from
+  -- one that cannot be, so the two count different populations and the
+  -- quotient can pass 1. It orders heroes by contest rather than stating a
+  -- share (`snapshot-ingest/design.md` §*The two endpoints do not agree*).
+  contest_rate     real NOT NULL,
   side_adj_radiant real NOT NULL,
   side_adj_dire    real NOT NULL,
   phase_adj_1      real NOT NULL,
