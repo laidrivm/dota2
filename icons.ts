@@ -25,6 +25,19 @@ import { join } from "node:path";
 const DOWNLOAD_TIMEOUT_MS = 30_000;
 
 /**
+ * Whether a name is one this application will build a path out of.
+ *
+ * The names arrive in a vendor's response, and `join` follows a `../` out of
+ * the mirror directory as readily as it appends a filename. Anchored at both
+ * ends rather than searched for separators: what a path may be built from is a
+ * hero's slug, and anything else is refused whole. Exported because the source
+ * derives two locations from a slug and the mirror writes a third — one rule
+ * for what a slug may be, checked where the name first arrives.
+ */
+export const isSlug = (name: unknown): name is string =>
+	typeof name === "string" && /^[a-z0-9_-]+$/.test(name);
+
+/**
  * Where a hero's image is served from before this application mirrors it.
  *
  * Derived from the slug rather than read from a vendor that republishes it:
@@ -71,11 +84,7 @@ export async function mirrorIcons(
 	doFetch: typeof globalThis.fetch = globalThis.fetch,
 ): Promise<void> {
 	for (const hero of heroes) {
-		// The names arrive in a vendor's response, and `join` follows a `../`
-		// out of the directory as readily as it appends a filename. Anchored at
-		// both ends rather than searched for separators: what may be written
-		// here is a hero's slug, and anything else is refused whole.
-		if (!/^[a-z0-9_-]+$/.test(hero.shortName))
+		if (!isSlug(hero.shortName))
 			throw new Error(
 				`the source named a hero ${JSON.stringify(hero.shortName)}, which is not a name this mirror will write`,
 			);
