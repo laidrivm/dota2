@@ -23,8 +23,8 @@ const WEEK = metaWindow(
  */
 function asking(rows: (call: number) => unknown[]) {
 	const asked: string[] = [];
-	const query: Query = async (document) => {
-		asked.push(document);
+	const query: Query = async (sent) => {
+		asked.push(sent);
 		return { data: { heroStats: { winDay: rows(asked.length - 1) } } };
 	};
 	return { query, asked };
@@ -65,7 +65,7 @@ describe("what the five requests sum into", () => {
 		});
 		// The window is asked for by its length, one request per position.
 		expect(asked).toHaveLength(5);
-		for (const document of asked) expect(document).toContain("take: 7");
+		for (const sent of asked) expect(sent).toContain("take: 7");
 	});
 
 	// spec: snapshot-ingest/a-patch-a-week-old
@@ -136,14 +136,14 @@ describe("what a request names", () => {
 		// The filter is the whole reason this endpoint is the source: a request
 		// without it is answered over every mode, and that answer is never what
 		// this pull asked for.
-		for (const document of await documents())
-			expect(document).toContain("gameModeIds: [ALL_PICK_RANKED]");
+		for (const sent of await documents())
+			expect(sent).toContain("gameModeIds: [ALL_PICK_RANKED]");
 	});
 
 	// spec: snapshot-ingest/the-brackets-the-product-models
 	test("every request names the Divine and Immortal brackets [28]", async () => {
-		for (const document of await documents())
-			expect(document).toContain("bracketIds: [DIVINE, IMMORTAL]");
+		for (const sent of await documents())
+			expect(sent).toContain("bracketIds: [DIVINE, IMMORTAL]");
 	});
 
 	// spec: snapshot-ingest/a-patch-a-week-old
@@ -153,7 +153,7 @@ describe("what a request names", () => {
 		// statistic five ways, and only the documents show it.
 		expect(
 			(await documents()).map(
-				(document) => /positionIds: \[(\w+)\]/.exec(document)?.[1],
+				(sent) => /positionIds: \[(\w+)\]/.exec(sent)?.[1],
 			),
 		).toEqual([
 			"POSITION_1",
@@ -168,8 +168,8 @@ describe("what a request names", () => {
 	test("every request groups by hero [20]", async () => {
 		// Any other grouping returns a different statistic under the same field
 		// names, which the sum above would stage as though it were this one.
-		for (const document of await documents())
-			expect(document).toContain("groupBy: HERO_ID");
+		for (const sent of await documents())
+			expect(sent).toContain("groupBy: HERO_ID");
 	});
 });
 

@@ -28,7 +28,7 @@ const SOURCE_DAYS = 30;
 const POSITIONS = [1, 2, 3, 4, 5];
 
 /** The span the pulls are measured over, both bounds at UTC midnight. */
-export type Window = {
+export type MetaWindow = {
 	start: Date;
 	/** Exclusive: the day the run instant falls inside is never half-counted. */
 	end: Date;
@@ -51,7 +51,7 @@ export type Window = {
  * which is a deliberate approximation: the next day's pull dilutes them, and
  * the alternative is a failed build every night until a day accumulates.
  */
-export function metaWindow(detectedAt: Date, at: Date): Window {
+export function metaWindow(detectedAt: Date, at: Date): MetaWindow {
 	// Floor for the end and ceiling for the start, so a part-day at either
 	// bound is left out rather than half-counted.
 	const end = Math.floor(at.getTime() / DAY_MS) * DAY_MS;
@@ -96,11 +96,11 @@ const FILTER =
  * from changes nothing — and the ban pull, which does need the days, derives
  * them from the window rather than from this response.
  */
-const document = (position: number, days: number) =>
+const request = (position: number, days: number) =>
 	`{ heroStats { winDay(positionIds: [POSITION_${position}], ${FILTER}, take: ${days}) { heroId matchCount winCount } } }`;
 
 /**
- * One request per position over `window`, summed into one row per hero and
+ * One request per position over `span`, summed into one row per hero and
  * position. A hero the source returns no row for gets no row here either: an
  * absent hero is one this window has no sample for, which is not the same
  * statement as a sample of zero.
@@ -112,11 +112,11 @@ const document = (position: number, days: number) =>
  */
 export async function pullMeta(
 	query: Query,
-	window: Window,
+	span: MetaWindow,
 ): Promise<PositionCount[]> {
 	const rows: PositionCount[] = [];
 	for (const position of POSITIONS) {
-		const body = (await query(document(position, window.days))) as {
+		const body = (await query(request(position, span.days))) as {
 			data?: { heroStats?: { winDay?: unknown } };
 		} | null;
 		// Optionally chained from `body` itself: a body of literal `null` parses
