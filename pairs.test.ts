@@ -10,6 +10,10 @@ import { describe, expect, test } from "bun:test";
 import { pairWeeks, pullPairs } from "./pairs.ts";
 import type { Query } from "./stratz.ts";
 
+/** A week, restated rather than imported: a test that took the module's own
+ * constant would agree with it however wrong it is. */
+const WEEK_MS = 604_800_000;
+
 /** The reference this suite pulls over, and one complete week to pull it in. */
 const HEROES = [9001, 9002, 9003];
 const WEEKS = pairWeeks(
@@ -155,7 +159,7 @@ describe("a response the reference admits", () => {
 		for (const [n, anchor] of anchors.entries()) {
 			const opened = (weeks[n] as Date).getTime();
 			expect(anchor * 1000).toBeGreaterThanOrEqual(opened);
-			expect(anchor * 1000).toBeLessThan(opened + 604_800_000);
+			expect(anchor * 1000).toBeLessThan(opened + WEEK_MS);
 		}
 	});
 
@@ -172,6 +176,20 @@ describe("a response the reference admits", () => {
 
 		expect(matchups[0]).toMatchObject({ matches: 10, wins: 4 });
 		expect(synergies[0]).toMatchObject({ matches: 20, wins: 9 });
+	});
+
+	test("a hero listed twice is asked for once and summed once", async () => {
+		const { query, asked } = asking(() => ({}));
+
+		const { matchups } = await pullPairs(query, [...HEROES, 9001], WEEKS);
+
+		expect(asked).toHaveLength(3);
+		expect(matchups).toContainEqual({
+			heroId: 9001,
+			otherId: 9002,
+			matches: 10,
+			wins: 4,
+		});
 	});
 
 	// spec: snapshot-ingest/a-patch-younger-than-the-cap
