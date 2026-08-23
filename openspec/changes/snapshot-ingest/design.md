@@ -165,6 +165,12 @@ So the location is derived, not looked up. The delta spec states that a hero's
 image comes from where its slug names and that no vendor is asked; this is
 where the path itself lives, on the same terms as the patch list's vendor.
 
+The read is `constants.heroes`, answered under `data.constants.heroes` as one
+entry per hero carrying `id`, `displayName` and `shortName`. Those become the
+`hero_id`, `name` and `short_name` columns; `icon` comes from the slug through
+the path above and from no field of the response. What a response missing or
+malforming any of the three does is the delta spec's, stated there once.
+
 *Alternative considered*: OpenDota's hero index, which publishes `img` outright
 and needs no key. It is one more source to be unavailable, and one more failure
 path, bought for a location this project already determines. The probe recorded

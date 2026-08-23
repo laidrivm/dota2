@@ -113,7 +113,7 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       `openspec/changes/snapshot-build/`. The blending, smoothing and
       sufficiency maths, and the export of a bundle to the served URL. It
       reads the schema and staging 3b creates and fills, so it sits between
-      3b's group 10 and its group 11.
+      3b's group 11 and its group 12.
       Eight task groups, so `feat/snapshot-build-1` through `-8`, in order.
       Owns no *deployed* infrastructure — the production Postgres service, the
       schedule and the failure alert are Task 7's, and none of them gates it.
