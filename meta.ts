@@ -10,6 +10,7 @@
  * free — one request per position covers every hero over the whole window,
  * because the window is an argument rather than a series of requests.
  */
+import { isHeroId } from "./heroes.ts";
 import type { Query } from "./stratz.ts";
 
 /** A UTC day. The epoch is UTC-aligned, so day arithmetic is division. */
@@ -134,10 +135,18 @@ export async function pullMeta(
 			// otherwise raise a type error naming a property, where the counts
 			// themselves are the staging table's to refuse.
 			const { heroId, matchCount, winCount } = (entry ?? {}) as {
-				heroId: number;
+				heroId: unknown;
 				matchCount: number;
 				winCount: number;
 			};
+			// The id keys the row and references `heroes`, so an entry without
+			// one is not a count this run can attribute. Refused here rather
+			// than at the insert, where it arrives as a constraint violation
+			// naming a column instead of a source.
+			if (!isHeroId(heroId))
+				throw new Error(
+					`the meta source returned a row with no hero id at position ${position}`,
+				);
 			const row = summed.get(heroId) ?? {
 				heroId,
 				position,
@@ -150,5 +159,11 @@ export async function pullMeta(
 		}
 		rows.push(...summed.values());
 	}
+	// Five empty responses are not a window with no matches in it — they are a
+	// pull that did not happen. Refused here because the staging write is a
+	// delete followed by an insert: writing nothing would take the previous
+	// patch's rows with it, and with them the last snapshot that could be built.
+	if (rows.length === 0)
+		throw new Error("the meta source returned no rows at any position");
 	return rows;
 }

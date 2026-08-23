@@ -22,6 +22,17 @@ import {
 } from "./icons.ts";
 import type { Query } from "./stratz.ts";
 
+/**
+ * Whether `id` is one Valve could have minted. Checked as a positive integer
+ * rather than as a number: the column is `int`, and `NaN`, `1.5` and `-1` are
+ * each a number that reaches Postgres as an error rather than a row.
+ *
+ * Exported because every pull keys its rows on this id, and each reads it from
+ * a response it did not write.
+ */
+export const isHeroId = (id: unknown): id is number =>
+	typeof id === "number" && Number.isInteger(id) && id > 0;
+
 /** A hero as `heroes` holds it, `first_seen_at` excepted. */
 export type HeroReference = {
 	heroId: number;
@@ -60,15 +71,7 @@ export async function readHeroes(query: Query): Promise<SourcedHero[]> {
 		// The slug is checked against the rule the mirror writes files under, so
 		// a name that would be refused there is refused here instead — before
 		// two locations are derived from it and before any of it is upserted.
-		// The id is checked as a positive integer rather than as a number:
-		// Valve mints them, the column is `int`, and `NaN`, `1.5` and `-1` are
-		// each a number that reaches Postgres as an error rather than a row.
-		if (
-			typeof id !== "number" ||
-			!Number.isInteger(id) ||
-			id <= 0 ||
-			!isSlug(shortName)
-		)
+		if (!isHeroId(id) || !isSlug(shortName))
 			throw new Error(
 				`the hero source described entry ${index} without an id or a slug`,
 			);
