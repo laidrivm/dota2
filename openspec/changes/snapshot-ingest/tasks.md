@@ -8,11 +8,12 @@ added where a finding named a case the run had missed — 76 to 81 during apply,
 by the diff-mode `/zombies` run and CodeRabbit, and 85 to 88 with the group
 this list had left out.
 
-Twelve groups, so twelve pull requests on `feat/snapshot-ingest-1` …
-`-12`, in order. Each group is measured against `bun run diff-budget` when it
-is cut and splits again if it is over; the groups below are sized to land under
-the warn threshold, which is what keeps a reviewer's pass over any one of them
-short.
+Twelve groups on `feat/snapshot-ingest-1` … `-12`, in order, and at least that
+many pull requests. Each group is measured against `bun run diff-budget` when
+it is cut and splits again if it is over — group 11 did, on the seam between
+the write and the run that fills it, shipping as `-11a` and `-11b`. The groups
+below are sized to land under the warn threshold, which is what keeps a
+reviewer's pass over any one of them short.
 
 This change owns the schema, the database edge and the CI job that exercises
 it — group 4's three tasks, moved here from `snapshot-build`, which closed no
@@ -282,7 +283,7 @@ proposal run's.
 
 ## 11. The staging write
 
-- [ ] 11.1 Write the staging tests: two runs over identical responses **and the
+- [x] 11.1 Write the staging tests: two runs over identical responses **and the
       same run instant** leave identical rows rather than doubled counts [36];
       two runs whose instants fall either side of a UTC day boundary cover
       different days and leave different rows [65]; a run failing after the
@@ -290,7 +291,7 @@ proposal run's.
       [37]; a run writing a newer patch leaves the previous patch's rows and
       removes anything older [38]. (Req: snapshot-ingest — A run leaves
       staging whole or leaves it untouched)
-- [ ] 11.2 Implement the staging write as a delete-then-insert inside one
+- [x] 11.2 Implement the staging write as a delete-then-insert inside one
       transaction, taking the run instant as an argument, with the retention
       that drops anything older than the previous patch. (Req: snapshot-ingest
       — A run leaves staging whole or leaves it untouched)
