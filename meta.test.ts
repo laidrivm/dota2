@@ -68,6 +68,20 @@ describe("what the five requests sum into", () => {
 		for (const sent of asked) expect(sent).toContain("take: 7");
 	});
 
+	test("days summing past what the column holds fail", async () => {
+		// Each day fits `int` and thirty of them need not, which is the total
+		// the staging insert would refuse under a column's name.
+		const days = [
+			counted(9001, 2_000_000_000, 0),
+			counted(9001, 2_000_000_000, 0),
+		];
+		const { query } = asking(same(days));
+
+		expect(await failure(pullMeta(query, WEEK))).toContain(
+			"past what the column holds",
+		);
+	});
+
 	// spec: snapshot-ingest/a-patch-a-week-old
 	test("days returned out of order sum to the same row [21]", async () => {
 		const days = [counted(9001, 10, 4), counted(9001, 20, 9)];
