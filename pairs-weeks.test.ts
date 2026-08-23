@@ -46,6 +46,14 @@ test("a patch live for twelve pulls exactly the four most recent [24]", () => {
 	);
 });
 
+// spec: snapshot-ingest/a-patch-older-than-the-cap
+test("a patch live for five is already capped to four [24]", () => {
+	// The tight side of the cap: twelve weeks shows it holds, five shows where
+	// it starts to.
+	expect(covered(released(5))).toEqual(covered(released(4)));
+	expect(covered(released(5))).toHaveLength(4);
+});
+
 // spec: snapshot-ingest/a-patch-younger-than-the-cap
 test("a patch live for two pulls two, and no week before it [25]", () => {
 	expect(covered(released(2))).toEqual([

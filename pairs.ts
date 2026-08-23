@@ -142,14 +142,14 @@ function absorb(
 		};
 		if (!isHeroId(heroId2) || !expected.has(heroId2) || seen.has(heroId2))
 			throw new Error(
-				`the pair source returned hero ${heroId} a ${kind} row the reference does not admit once`,
+				`the ${kind} rows for hero ${heroId} carry one the reference does not admit once`,
 			);
 		// The same bound the staging tables declare, read on the week rather
 		// than on the sum, which is the only place the source's own
 		// inconsistency is still visible.
 		if (!isCount(matchCount) || !isCount(winCount) || winCount > matchCount)
 			throw new Error(
-				`the pair source returned hero ${heroId} a ${kind} row with counts a week cannot have`,
+				`the ${kind} rows for hero ${heroId} carry counts a week cannot have`,
 			);
 		seen.add(heroId2);
 		const key = `${heroId}:${heroId2}`;
