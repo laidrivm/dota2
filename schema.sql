@@ -72,7 +72,7 @@ CREATE TABLE IF NOT EXISTS hero_position_stats (
   snapshot_id bigint NOT NULL REFERENCES snapshots ON DELETE CASCADE,
   hero_id     int NOT NULL REFERENCES heroes,
   position    smallint NOT NULL CHECK (position BETWEEN 1 AND 5),
-  matches     int NOT NULL,            -- the current patch's, with no prior mixed in
+  matches     int NOT NULL CHECK (matches >= 0),  -- the patch's own, no prior mixed in
   pick_share  real NOT NULL,           -- the hero's share of its own picks, summing to 1
   meta_adj    real NOT NULL,
   sufficient  boolean NOT NULL,
@@ -82,7 +82,7 @@ CREATE TABLE IF NOT EXISTS hero_position_stats (
 CREATE TABLE IF NOT EXISTS hero_stats (
   snapshot_id      bigint NOT NULL REFERENCES snapshots ON DELETE CASCADE,
   hero_id          int NOT NULL REFERENCES heroes,
-  matches          int NOT NULL,
+  matches          int NOT NULL CHECK (matches >= 0),
   contest_rate     real NOT NULL,      -- 0..1
   side_adj_radiant real NOT NULL,
   side_adj_dire    real NOT NULL,
@@ -97,7 +97,7 @@ CREATE TABLE IF NOT EXISTS hero_matchups (
   snapshot_id   bigint NOT NULL REFERENCES snapshots ON DELETE CASCADE,
   hero_id       int NOT NULL REFERENCES heroes,
   enemy_id      int NOT NULL REFERENCES heroes CHECK (enemy_id <> hero_id),
-  matches       int NOT NULL,
+  matches       int NOT NULL CHECK (matches >= 0),
   advantage_adj real NOT NULL,         -- antisymmetric: (a,b) and (b,a) sum to 0
   PRIMARY KEY (snapshot_id, hero_id, enemy_id)
 );
@@ -109,7 +109,7 @@ CREATE TABLE IF NOT EXISTS hero_synergies (
   -- mirrored row would be a second copy of one statistic, and the model reads
   -- whichever it found first.
   ally_id     int NOT NULL REFERENCES heroes CHECK (ally_id > hero_id),
-  matches     int NOT NULL,
+  matches     int NOT NULL CHECK (matches >= 0),
   synergy_adj real NOT NULL,           -- symmetric, so stored once for hero_id < ally_id
   PRIMARY KEY (snapshot_id, hero_id, ally_id)
 );
@@ -123,6 +123,12 @@ CREATE TABLE IF NOT EXISTS hero_synergies (
 -- older. Every row is written and replaced inside one transaction, so no
 -- version column or partial-pull ledger is needed to tell a whole run from an
 -- abandoned one.
+--
+-- Every count is bounded where it is declared. A negative match count, or more
+-- wins than matches, is not a number the build refuses — it is one the build
+-- divides by, so it leaves as a winrate past 100 and reaches the client as a
+-- ranked suggestion. Nothing downstream re-checks it, so this is the edge that
+-- has to.
 
 CREATE TABLE IF NOT EXISTS staging_hero_position_stats (
   patch_id text NOT NULL REFERENCES patches,
@@ -130,6 +136,7 @@ CREATE TABLE IF NOT EXISTS staging_hero_position_stats (
   position smallint NOT NULL CHECK (position BETWEEN 1 AND 5),
   matches  int NOT NULL,
   wins     int NOT NULL,
+  CHECK (matches >= 0 AND wins BETWEEN 0 AND matches),
   PRIMARY KEY (patch_id, hero_id, position)
 );
 
@@ -142,6 +149,7 @@ CREATE TABLE IF NOT EXISTS staging_hero_stats (
   -- disagree, the position rows are what the source returned.
   matches      int NOT NULL,
   wins         int NOT NULL,
+  CHECK (matches >= 0 AND wins BETWEEN 0 AND matches),
   -- Already a ratio where its neighbours are counts: the ingest computes
   -- `(picks + bans) / matches` because `bans` comes from a request of its own
   -- and nothing downstream has a second use for the ban count on its own.
@@ -157,6 +165,7 @@ CREATE TABLE IF NOT EXISTS staging_hero_matchups (
   enemy_id int NOT NULL REFERENCES heroes CHECK (enemy_id <> hero_id),
   matches  int NOT NULL,
   wins     int NOT NULL,
+  CHECK (matches >= 0 AND wins BETWEEN 0 AND matches),
   PRIMARY KEY (patch_id, hero_id, enemy_id)
 );
 
@@ -166,6 +175,7 @@ CREATE TABLE IF NOT EXISTS staging_hero_synergies (
   ally_id  int NOT NULL REFERENCES heroes CHECK (ally_id <> hero_id),
   matches  int NOT NULL,
   wins     int NOT NULL,
+  CHECK (matches >= 0 AND wins BETWEEN 0 AND matches),
   PRIMARY KEY (patch_id, hero_id, ally_id)
 );
 
@@ -179,6 +189,7 @@ CREATE TABLE IF NOT EXISTS staging_hero_sides (
   side     text NOT NULL CHECK (side IN ('radiant', 'dire')),
   matches  int NOT NULL,
   wins     int NOT NULL,
+  CHECK (matches >= 0 AND wins BETWEEN 0 AND matches),
   PRIMARY KEY (patch_id, hero_id, side)
 );
 
@@ -188,5 +199,6 @@ CREATE TABLE IF NOT EXISTS staging_hero_phases (
   phase    text NOT NULL CHECK (phase IN ('1', '2', 'last')),
   matches  int NOT NULL,
   wins     int NOT NULL,
+  CHECK (matches >= 0 AND wins BETWEEN 0 AND matches),
   PRIMARY KEY (patch_id, hero_id, phase)
 );
