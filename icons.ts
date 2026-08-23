@@ -54,6 +54,14 @@ export async function mirrorIcons(
 	doFetch: typeof globalThis.fetch = globalThis.fetch,
 ): Promise<void> {
 	for (const hero of heroes) {
+		// The names arrive in a vendor's response, and `join` follows a `../`
+		// out of the directory as readily as it appends a filename. Anchored at
+		// both ends rather than searched for separators: what may be written
+		// here is a hero's slug, and anything else is refused whole.
+		if (!/^[a-z0-9_-]+$/.test(hero.shortName))
+			throw new Error(
+				`the source named a hero ${JSON.stringify(hero.shortName)}, which is not a name this mirror will write`,
+			);
 		const final = join(dir, finalName(hero.shortName));
 		if (await Bun.file(final).exists()) continue;
 		const part = join(dir, partName(hero.shortName));
