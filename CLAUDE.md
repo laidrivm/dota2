@@ -219,3 +219,5 @@ not age with the code.
 - Run each of the `playwright-cli` skill's three npm-family paths through bun
   instead — `bunx playwright cli`, `bunx --no-install playwright --version`,
   `bun add -g @playwright/cli` — since its own are denied here.
+- Beside a pinned image, binary or digest that no dependency manifest tracks,
+  write which tool updates the pin, or that nothing does.

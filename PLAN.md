@@ -235,6 +235,16 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       written three times and executed nowhere. Ships on
       `feat/focus-restore-idiom`; its `design.md` admits abandoning the lift if
       the helper turns out to be a bare `setTimeout` wrapper.
+- [ ] **Eight workflow pins nothing updates.** `bun-version: 1.3.14` stands in
+      eight jobs across five workflows, and Dependabot raises none of them: its
+      `github-actions` ecosystem updates `uses:` refs only, and its `bun`
+      ecosystem updates `@types/bun` in `package.json` — which carries that
+      same version, so a bump there leaves all eight behind with nothing
+      saying so. `CLAUDE.md`'s Safety rule about naming what updates a pin
+      applies to every one of them; the branch that added the rule commented
+      only the service image it was found on, because one comment among eight
+      tells a reader nothing. Closing it is either a comment per site or a
+      check that reconciles the workflows against the manifest.
 
 ## Standing constraints
 
