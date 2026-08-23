@@ -42,7 +42,12 @@ export function asking(
 ) {
 	const asked: string[] = [];
 	const query: Query = async (sent) => {
-		const heroId = Number(/heroId: (\d+)/.exec(sent)?.[1]);
+		// Checked rather than coerced: a document that stopped naming its hero
+		// would otherwise reach `matrices` as `NaN` and fail somewhere else.
+		const named = /heroId: (\d+)/.exec(sent);
+		if (named === null)
+			throw new Error(`the request named no hero id: ${sent}`);
+		const heroId = Number(named[1]);
 		const answered = matrices(heroId, asked.length);
 		asked.push(sent);
 		return {

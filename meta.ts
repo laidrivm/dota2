@@ -87,15 +87,26 @@ export function metaWindow(detectedAt: Date, at: Date): MetaWindow {
 }
 
 /**
- * Whether a value is a number of matches, rather than merely a number. Safe
- * integers rather than integers: `Number.isInteger(1e300)` is true, and a count
- * that cannot survive being added to is not one.
+ * The largest value a staging count column holds, every one of them being
+ * `int`. The same ceiling `heroes.ts` puts on a hero id and for the same
+ * reason: a number the column cannot hold reaches Postgres as an error rather
+ * than a row.
+ */
+const MAX_COUNT = 2_147_483_647;
+
+/**
+ * Whether a value is a number of matches, rather than merely a number.
+ *
+ * Bounded above as well as below, which is what makes summing safe: thirty
+ * days — or the pair pull's four weeks — of values this size stay four orders
+ * inside `Number.MAX_SAFE_INTEGER`, so no total can lose precision on its way
+ * to the constraint that judges it.
  *
  * Exported for the pair pull, which sums over weeks as this sums over days and
  * so hides the same inconsistency from the same constraint.
  */
 export const isCount = (n: unknown): n is number =>
-	typeof n === "number" && Number.isSafeInteger(n) && n >= 0;
+	typeof n === "number" && Number.isInteger(n) && n >= 0 && n <= MAX_COUNT;
 
 /** One hero's counts at one position, summed over the window's days. */
 export type PositionCount = {
