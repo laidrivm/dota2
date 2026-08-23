@@ -74,5 +74,7 @@ they route through `CLAUDE.md`'s fix & capture loop like every other rule.
   next branch in a worktree instead.
 - Stage explicit paths in a worktree you scaffolded; `git add -A` there commits
   the scaffolding.
+- Remove a worktree as soon as its branch is the one to push — a branch checked
+  out in one cannot be checked out anywhere else.
 - Never state another repository's mutable properties — visibility, default
   branch, owner — anywhere in this repo; link to it instead.
