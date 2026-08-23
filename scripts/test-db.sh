@@ -9,7 +9,9 @@
 # the push rather than after it.
 #
 # Arguments are handed to `bun test` unchanged, so a single file can be run:
-#   bun run test:db ingest.test.ts
+#   bun run test:db ./ingest.test.ts
+# The leading `./` is load-bearing: bun matches a bare argument as a substring
+# of every path, so `test-db` alone would also run `scripts/test-db.test.ts`.
 set -uo pipefail
 
 die() {
@@ -28,8 +30,13 @@ root=$(git rev-parse --show-toplevel) || die "not inside a git repository"
 # and its `docker` ecosystem reads Dockerfiles, which neither of these is.
 image=$(sed -n 's/.*image: \(postgres:[^ ]*\).*/\1/p' \
 	"${root}/.github/workflows/test.yml" | head -1)
-[ -n "$image" ] ||
-	die "no pinned postgres image in .github/workflows/test.yml"
+# Pinned by digest or not at all. A tag such as `postgres:18-alpine` names
+# whatever it points at today, which is the whole thing a digest prevents — and
+# the workflow losing its own is not a reason for this script to start pulling
+# a mutable one.
+PINNED='^postgres:[A-Za-z0-9._-]+@sha256:[0-9a-f]{64}$'
+[[ $image =~ $PINNED ]] ||
+	die "no digest-pinned postgres image in .github/workflows/test.yml: '${image}'"
 
 # Named by this shell's pid, so two runs at once do not collide, and `--rm` so
 # a container that outlives a kill takes itself away.
