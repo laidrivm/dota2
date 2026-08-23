@@ -127,19 +127,6 @@ const FILTER =
 	"gameModeIds: [ALL_PICK_RANKED], bracketIds: [DIVINE, IMMORTAL], groupBy: HERO_ID";
 
 /**
- * `take` counts days and the endpoint answers the most recent ones, so the
- * window is asked for by its length. No `day` argument is passed: the freshest
- * row the source holds is the previous complete UTC day, which is the window's
- * own last day.
- *
- * `day` itself is not read back. The rows are summed, so which day each came
- * from changes nothing — and the ban pull, which does need the days, derives
- * them from the window rather than from this response.
- */
-const request = (position: number, days: number) =>
-	`{ heroStats { winDay(positionIds: [POSITION_${position}], ${FILTER}, take: ${days}) { heroId matchCount winCount } } }`;
-
-/**
  * One request per position over `span`, summed into one row per hero and
  * position. A hero the source returns no row for gets no row here either: an
  * absent hero is one this window has no sample for, which is not the same
@@ -158,7 +145,14 @@ export async function pullMeta(
 ): Promise<PositionCount[]> {
 	const rows: PositionCount[] = [];
 	for (const position of POSITIONS) {
-		const body = (await query(request(position, span.days))) as {
+		// `take` counts days and the endpoint answers the most recent ones, so
+		// the window is asked for by its length. No `day` argument is passed:
+		// the freshest row the source holds is the previous complete UTC day,
+		// which is the window's own last day. `day` is not read back either —
+		// the rows are summed, so which day each came from changes nothing, and
+		// the ban pull derives the days it needs from the window instead.
+		const asked = `{ heroStats { winDay(positionIds: [POSITION_${position}], ${FILTER}, take: ${span.days}) { heroId matchCount winCount } } }`;
+		const body = (await query(asked)) as {
 			data?: { heroStats?: { winDay?: unknown } };
 		} | null;
 		// Optionally chained from `body` itself: a body of literal `null` parses
