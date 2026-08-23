@@ -38,6 +38,23 @@ test("the script fails rather than running an unpinned image", () => {
 	expect(script).toContain("no pinned postgres image");
 });
 
+test("the service container's own probe goes over TCP too", () => {
+	// Held here because nothing else would notice it being put back: the
+	// workflow's own YAML parses either way, and CI would go on passing on the
+	// seconds its checkout and install happen to take.
+	const parsed = Bun.YAML.parse(workflow) as {
+		jobs: Record<string, { services?: { postgres: { options: string } } }>;
+	};
+	const [service] = Object.values(parsed.jobs).filter((job) => job.services);
+
+	// Starting with the option, so a comment folded into the block scalar is
+	// caught: `#` inside `>-` is text, not a comment, and `bun run lint:yaml`
+	// passes over the folded form exactly as it does over this one.
+	expect(service?.services?.postgres.options).toStartWith(
+		'--health-cmd "pg_isready -h 127.0.0.1"',
+	);
+});
+
 test("the script waits on the server over TCP, not the socket", () => {
 	// The socket answers during initdb's temporary server, whose connections
 	// are closed when the real one takes over — measured as a run where every
