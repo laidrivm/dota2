@@ -6,6 +6,9 @@ dist/
 .env*
 !.env.example
 
+# Hero images the ingest mirrors; the job writes them, no build does
+icons/
+
 # Playwright run output
 test-results/
 playwright-report/
