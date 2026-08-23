@@ -681,8 +681,9 @@ now raises when it runs out of timers with work still pending.
 - warm: not run — no manifest changed. The pinned `postgres` service image is
   a dependency it would not have found either, since it is in no manifest;
   that gap became a rule the same night
-- ponytail-review: 2 findings, 2 acted on (net -5 lines), 2 dismissals stated
-  rather than silent
+- ponytail-review: 2 findings, 2 acted on (net -5 lines); two keeps were
+  named in the report and counted as neither, being things the pass declined
+  to raise rather than findings it dismissed
 - triage: PASS — 5 groups, 3 high/medium read, and the reading itself found 2
   defects: a `close()` in the failure path that could replace the error that
   sent it there, and a duplication no comment named

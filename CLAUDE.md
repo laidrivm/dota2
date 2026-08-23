@@ -156,7 +156,7 @@ describes is rewritten, the rule is a candidate for deletion.
   that position, never infer it from a nesting count.
 - Comment what a reader would otherwise "fix": a deliberate departure from the
   obvious implementation, or a precondition the code does not check.
-- Assert a rejection from a driver's query object through `then(ok, err)`,
+- Await a rejection from a driver's query object through `then(ok, err)`,
   never `expect().rejects`, which hangs on a thenable instead of failing.
 
 #### Process

@@ -12,9 +12,8 @@ What counts as evidence for a claim, and what a claim may rest on.
 - Name the environment a verification claim ran in — viewport, browser,
   data — not the one it targeted.
 - Verify an external contract against its machine-readable artefact —
-  schema, reference page, `--help` — never against a prose summary of it, and
-  never against a type declaration, which states a claim about the artefact
-  rather than being one: exercise the call.
+  schema, reference page, `--help` — never against a prose summary of it or a
+  type declaration of it: exercise the call.
 - Exercise a documented capability on every path the project runs it —
   documentation describes one implementation, and a bundler and a dev server
   are two.
