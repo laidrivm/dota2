@@ -70,5 +70,7 @@ they route through `CLAUDE.md`'s fix & capture loop like every other rule.
   <old base> <branch>`, never `git rebase <new base>`.
 - Commit the work before a probe whose undo is `git checkout <path>`,
   `git reset --hard`, or `git stash drop`.
+- Stage explicit paths in a worktree you scaffolded; `git add -A` there commits
+  the scaffolding.
 - Never state another repository's mutable properties — visibility, default
   branch, owner — anywhere in this repo; link to it instead.

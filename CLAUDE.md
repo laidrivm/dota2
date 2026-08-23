@@ -126,6 +126,8 @@ describes is rewritten, the rule is a candidate for deletion.
   obvious implementation, or a precondition the code does not check.
 - Await a rejection from a driver's query object through `then(ok, err)`,
   never `expect().rejects`, which hangs on a thenable instead of failing.
+- Convert a `file:` URL with `fileURLToPath` before handing it to the
+  filesystem; never `.pathname`, which stays percent-encoded.
 
 #### Process
 
