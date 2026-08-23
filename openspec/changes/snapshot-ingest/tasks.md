@@ -3,9 +3,9 @@
 Test tasks are derived from the proposal-stage `/zombies` run and are written
 before the module they cover (docs/testing.md — TDD for edge cases). The
 bracketed numbers are that run's idea numbers, so every one of its 62 ideas is
-traceable to the group that closes it. Numbers 63 to 87 are the reviews' own,
+traceable to the group that closes it. Numbers 63 to 88 are the reviews' own,
 added where a finding named a case the run had missed — 76 to 81 during apply,
-by the diff-mode `/zombies` run and CodeRabbit, and 85 to 87 with the group
+by the diff-mode `/zombies` run and CodeRabbit, and 85 to 88 with the group
 this list had left out.
 
 Twelve groups, so twelve pull requests on `feat/snapshot-ingest-1` …
@@ -190,14 +190,17 @@ proposal run's.
       name, the slug, and the image location that slug names [85]; a response
       parsing to no hero fails the run naming that, rather than upserting
       nothing [86]; a response the transport gave up on fails the run before a
-      hero is written [87]. (Req: hero-reference — The hero reference is read
-      whole or the run fails / A derived image location)
+      hero is written [87]; an entry carrying no id or no slug fails the run
+      naming it, rather than upserting a hero the mirror cannot name a file for
+      [88]. (Req: hero-reference — The hero reference is read whole or the run
+      fails / A hero the source describes incompletely)
 - [ ] 7.2 Implement the hero source: one `constants.heroes` request through the
       client group 1 ships, mapped to what the upsert and the mirror each take,
       with the content delivery network's path carrying the measurement behind
       it — every slug the source returns answers under that path, so no second
       vendor is asked where a hero's image lives. (Req: hero-reference — The
-      hero reference is read whole or the run fails)
+      hero reference is read whole or the run fails / A derived image
+      location)
 
 ## 8. The meta pull
 

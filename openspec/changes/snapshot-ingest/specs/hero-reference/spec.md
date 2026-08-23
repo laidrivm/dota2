@@ -130,6 +130,11 @@ this requirement fixes only that a failed read reaches no upsert at all.
 - **THEN** the run SHALL fail naming that, and SHALL NOT proceed on the heroes
   the reference tables already hold
 
+#### Scenario: A hero the source describes incompletely
+
+- **IF** an entry the source returns carries no id or no slug
+- **THEN** the run SHALL fail naming that entry, and no hero SHALL be upserted
+
 #### Scenario: A derived image location
 
 - **WHEN** the source returns a hero
