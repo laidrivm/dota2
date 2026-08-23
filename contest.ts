@@ -132,16 +132,19 @@ export function heroTotals(
 	rows: PositionCount[],
 	bans: Map<number, number>,
 ): HeroTotal[] {
-	const totals = new Map<number, HeroTotal>();
+	const totals = new Map<number, Omit<HeroTotal, "contestRate">>();
+	// Summed here rather than over the totals afterwards: every hero's matches
+	// added up is every row's matches added up, and one pass says so.
+	let picked = 0;
 	for (const row of rows) {
 		const total = totals.get(row.heroId) ?? {
 			heroId: row.heroId,
 			matches: 0,
 			wins: 0,
-			contestRate: 0,
 		};
 		total.matches += row.matches;
 		total.wins += row.wins;
+		picked += row.matches;
 		// Five positions each fitting the column can sum past it, as thirty days
 		// can. Refused here rather than at the insert, which reports a range
 		// error naming a column instead of a source.
@@ -152,8 +155,6 @@ export function heroTotals(
 		totals.set(row.heroId, total);
 	}
 
-	let picked = 0;
-	for (const total of totals.values()) picked += total.matches;
 	// Exact, not an estimate: an All Pick match holds ten distinct heroes, so
 	// every match in the window contributes exactly ten to this sum and no
 	// hero is counted twice in one match. The division is left fractional
@@ -161,18 +162,18 @@ export function heroTotals(
 	// requirement fixes, where rounding it would name a different one.
 	const matches = picked / HEROES_PER_MATCH;
 
-	// A heuristic ordering rather than a measured share, and knowingly so:
-	// the picks and the divisor come from `winDay`, pinned to ranked All
-	// Pick and the fine bracket enum; the bans come from `banDay`, which
-	// takes the coarse enum and offers no game-mode filter at all. The two
-	// describe different match populations, by how much is not known, and
-	// nor is whether the difference falls alike on every hero. So this
-	// orders heroes by contest and is not a share of anything.
-	for (const total of totals.values())
-		total.contestRate =
+	return [...totals.values()].map((total) => ({
+		...total,
+		// A heuristic ordering rather than a measured share, and knowingly so:
+		// the picks and the divisor come from `winDay`, pinned to ranked All
+		// Pick and the fine bracket enum; the bans come from `banDay`, which
+		// takes the coarse enum and offers no game-mode filter at all. The two
+		// describe different match populations, by how much is not known, and
+		// nor is whether the difference falls alike on every hero. So this
+		// orders heroes by contest and is not a share of anything.
+		contestRate:
 			matches === 0
 				? 0
-				: (total.matches + (bans.get(total.heroId) ?? 0)) / matches;
-
-	return [...totals.values()];
+				: (total.matches + (bans.get(total.heroId) ?? 0)) / matches,
+	}));
 }
