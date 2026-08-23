@@ -123,6 +123,7 @@ describe("a patch list carrying nothing usable", () => {
 		["an empty list", [], /listed no patch/],
 		["a body that is not a list", { patches: [] }, /listed no patch/],
 		["a newest entry with no name", [{ date: RELEASED }], /carries no name/],
+		["a newest entry that is null", [null], /carries no name/],
 		[
 			"a newest entry with a blank name",
 			[{ name: "  ", date: RELEASED }],

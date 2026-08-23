@@ -79,7 +79,13 @@ async function fetchList(doFetch: typeof globalThis.fetch): Promise<unknown> {
 function newest(listed: unknown): Patch {
 	if (!Array.isArray(listed) || listed.length === 0)
 		throw new Error("the patch source listed no patch");
-	const entry = listed[listed.length - 1] as { name?: unknown; date?: unknown };
+	// `?? {}` because the entry is a vendor's: a `null` in the list would
+	// otherwise raise a type error naming a property, where every other
+	// malformed shape here is reported as the source's failure.
+	const entry = (listed[listed.length - 1] ?? {}) as {
+		name?: unknown;
+		date?: unknown;
+	};
 	const name = typeof entry.name === "string" ? entry.name.trim() : "";
 	if (name === "")
 		throw new Error("the newest patch the source lists carries no name");
