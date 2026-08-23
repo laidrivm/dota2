@@ -147,6 +147,35 @@ guards a vendor's format rather than describing a branch this source is
 expected to take: were OpenDota to list `7.41b` tomorrow, the rule stores it
 under `base_version` `7.41` instead of inventing a major that does not exist.
 
+### The hero images need no second vendor
+
+The statistics API carries no image field anywhere in its schema: `HeroType`
+has `id`, `name`, `displayName`, `shortName` and `aliases`, and a search across
+every `Hero*` type for `img`, `image`, `icon`, `url` or `portrait` returns
+nothing (`docs/context/stratz-probe-2026-08.md`). What it does carry is the
+slug, and the slug is the name Valve's own content delivery network serves each
+hero's image under — measured over all 127 heroes the source returns, every one
+answering `200` at
+`https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/heroes/<shortName>.png`,
+the heroes whose display name and internal name diverge included: `furion`,
+`obsidian_destroyer`, `rattletrap`, `nevermore`, `zuus`, `shredder`,
+`skeleton_king`, `wisp`.
+
+So the location is derived, not looked up. The delta spec states that a hero's
+image comes from where its slug names and that no vendor is asked; this is
+where the path itself lives, on the same terms as the patch list's vendor.
+
+*Alternative considered*: OpenDota's hero index, which publishes `img` outright
+and needs no key. It is one more source to be unavailable, and one more failure
+path, bought for a location this project already determines. The probe recorded
+it as the known-working route because it had not measured the derivation; the
+derivation is now the measured one.
+
+The risk it carries is a slug the network stops serving, or a hero whose slug
+is not its filename. That risk is not silent: `hero-reference` fails the run on
+a hero whose image cannot be fetched, so a derivation that is wrong for one
+hero ends the first run that meets it, naming the hero.
+
 ### The ban endpoint's three surprises
 
 `banDay` is one request for the whole reference, but three of its details are

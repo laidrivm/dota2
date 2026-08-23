@@ -3,23 +3,24 @@
 Test tasks are derived from the proposal-stage `/zombies` run and are written
 before the module they cover (docs/testing.md — TDD for edge cases). The
 bracketed numbers are that run's idea numbers, so every one of its 62 ideas is
-traceable to the group that closes it. Numbers 63 to 84 are the reviews' own,
+traceable to the group that closes it. Numbers 63 to 87 are the reviews' own,
 added where a finding named a case the run had missed — 76 to 81 during apply,
-by the diff-mode `/zombies` run and CodeRabbit.
+by the diff-mode `/zombies` run and CodeRabbit, and 85 to 87 with the group
+this list had left out.
 
-Eleven groups, so eleven pull requests on `feat/snapshot-ingest-1` …
-`-11`, in order. Each group is measured against `bun run diff-budget` when it
+Twelve groups, so twelve pull requests on `feat/snapshot-ingest-1` …
+`-12`, in order. Each group is measured against `bun run diff-budget` when it
 is cut and splits again if it is over; the groups below are sized to land under
 the warn threshold, which is what keeps a reviewer's pass over any one of them
 short.
 
 This change owns the schema, the database edge and the CI job that exercises
 it — group 4's three tasks, moved here from `snapshot-build`, which closed no
-criterion with them and can no longer run before this change. Group 11 is the
+criterion with them and can no longer run before this change. Group 12 is the
 exception in the other direction: the entry point calls `snapshot-build`'s
-build and export, so it lands after that change rather than before it. Groups 1 to 3 add
-a module the application does not yet call; group 11 is the entry point that
-calls all of them. The served snapshot stays the fixture until a run publishes
+build and export, so it lands after that change rather than before it. Groups 1
+to 3 add a module the application does not yet call; group 12 is the entry
+point that calls all of them. The served snapshot stays the fixture until a run publishes
 over it, which is `snapshot-build`'s route change and not this one's.
 
 ## 1. The client and the gate it clears
@@ -178,9 +179,29 @@ them as given rather than adding them.
       that directory while the server is running. (Req: hero-reference — The
       mirrored images are served from the application's origin)
 
-## 7. The meta pull
+## 7. The hero reference source
 
-- [ ] 7.1 Write the meta-window tests: a patch seven whole UTC days old is
+Nothing above reads the heroes it upserts and mirrors: groups 5 and 6 each take
+a list, and this group is what supplies one. It was missing from this list
+rather than deferred by it, which is why its ideas are numbered past the
+proposal run's.
+
+- [ ] 7.1 Write the hero-source tests: a hero is carried as the id, the display
+      name, the slug, and the image location that slug names [85]; a response
+      parsing to no hero fails the run naming that, rather than upserting
+      nothing [86]; a response the transport gave up on fails the run before a
+      hero is written [87]. (Req: hero-reference — The hero reference is read
+      whole or the run fails / A derived image location)
+- [ ] 7.2 Implement the hero source: one `constants.heroes` request through the
+      client group 1 ships, mapped to what the upsert and the mirror each take,
+      with the content delivery network's path carrying the measurement behind
+      it — every slug the source returns answers under that path, so no second
+      vendor is asked where a hero's image lives. (Req: hero-reference — The
+      hero reference is read whole or the run fails)
+
+## 8. The meta pull
+
+- [ ] 8.1 Write the meta-window tests: a patch seven whole UTC days old is
       pulled over exactly seven days and each staging row is the sum over them
       [20]; a patch with no complete day behind it is pulled over the single
       most recent complete day rather than none [18]; a hero the source returns
@@ -194,27 +215,27 @@ them as given rather than adding them.
       bound the window, not the patch [70]. (Req:
       snapshot-ingest — The meta is pulled by day over the current patch's
       life)
-- [ ] 7.2 Write the meta-request tests: the request names the ranked All Pick
+- [ ] 8.2 Write the meta-request tests: the request names the ranked All Pick
       game mode and a response covering every mode is rejected rather than
       accepted in its place [27]; the request names the Divine and Immortal
       brackets [28]. (Req: snapshot-ingest — The meta is pulled by day over
       the current patch's life)
-- [ ] 7.3 Implement the meta pull: one request per position over the
+- [ ] 8.3 Implement the meta pull: one request per position over the
       UTC-normalised, end-exclusive window capped at the thirty days the source
       serves, the game mode and brackets named at one site, summed into staging
       rows, and the cap reported when it bound. (Req: snapshot-ingest — The
       meta is pulled by day over the current patch's life)
 
-## 8. The pair pull
+## 9. The pair pull
 
-- [ ] 8.1 Write the pair-window tests: a patch live for exactly four complete
+- [ ] 9.1 Write the pair-window tests: a patch live for exactly four complete
       weeks pulls four [23]; one live for twelve pulls exactly four and the
       run records which four [24]; one live for two pulls two, and no week
       preceding the patch is requested [25]; a week whose span contains the
       current patch's `detected_at` is attributed to the current patch [31].
       (Req: snapshot-ingest — Pair statistics are pulled per hero over at most
       four weeks)
-- [ ] 8.2 Write the pair-response tests: the request asks for every other hero
+- [ ] 9.2 Write the pair-response tests: the request asks for every other hero
       so the response carries one opponent and one ally row per other hero
       rather than the endpoint's default page [29]; a response short of one
       row per other hero fails the run rather than writing a partial matrix
@@ -223,42 +244,42 @@ them as given rather than adding them.
       criterion fixes *one* row per other hero, not at least one [82]. (Req:
       snapshot-ingest — Pair statistics are pulled per hero over at most four
       weeks)
-- [ ] 8.3 Implement the pair pull: one request per hero per week over the
+- [ ] 9.3 Implement the pair pull: one request per hero per week over the
       lesser of four and the weeks the patch has been live, asking for every
       opponent, summed across the weeks, and reporting the weeks covered.
       (Req: snapshot-ingest — Pair statistics are pulled per hero over at most
       four weeks)
 
-## 9. Contest rate and the ban pull
+## 10. Contest rate and the ban pull
 
-- [ ] 9.1 Write the contest tests: a hero whose match count equals the
+- [ ] 10.1 Write the contest tests: a hero whose match count equals the
       window's match total with no bans has a rate of 1 [32]; two heroes with
       equal picks rank by bans [33]; the denominator is the summed hero counts
       divided by ten, so counts summing to a non-multiple of ten still yield
       the stated ratio rather than a rounded one [34]; a window whose matches
       are 0 gives every hero 0 with no division attempted [35]. (Req:
       snapshot-ingest — Contest rate is a share of the window's matches)
-- [ ] 9.2 Write the ban-pull tests: the days requested are the meta window's
+- [ ] 10.2 Write the ban-pull tests: the days requested are the meta window's
       and one request asks for every hero [73]; a ban request failing after its
       retries fails the run rather than storing a contest rate from picks alone
       [74]; a hero-and-day pair the ban response carries no row for contributes
       zero bans and does not fail the run [75]. (Req: snapshot-ingest — Contest
       rate is a share of the window's matches)
-- [ ] 9.3 Implement the ban pull as one request over the meta window's days,
+- [ ] 10.3 Implement the ban pull as one request over the meta window's days,
       since the pick counts carry no ban dimension: pass the required `heroId`
       as a constant with the comment saying it does not filter, convert the
       window to `banDay`'s day numbers rather than reusing the meta pull's Unix
       timestamps, read `matchCount` as the ban count, and sum an absent pair as
       zero. (Req: snapshot-ingest — Contest rate is a share of the window's
       matches)
-- [ ] 9.4 Implement the contest formula over the counts the meta and ban pulls
+- [ ] 10.4 Implement the contest formula over the counts the meta and ban pulls
       return, with the divisor carrying the comment naming why it is exact and
       the ratio carrying the one naming why it is not. (Req: snapshot-ingest —
       Contest rate is a share of the window's matches)
 
-## 10. The staging write
+## 11. The staging write
 
-- [ ] 10.1 Write the staging tests: two runs over identical responses **and the
+- [ ] 11.1 Write the staging tests: two runs over identical responses **and the
       same run instant** leave identical rows rather than doubled counts [36];
       two runs whose instants fall either side of a UTC day boundary cover
       different days and leave different rows [65]; a run failing after the
@@ -266,19 +287,19 @@ them as given rather than adding them.
       [37]; a run writing a newer patch leaves the previous patch's rows and
       removes anything older [38]. (Req: snapshot-ingest — A run leaves
       staging whole or leaves it untouched)
-- [ ] 10.2 Implement the staging write as a delete-then-insert inside one
+- [ ] 11.2 Implement the staging write as a delete-then-insert inside one
       transaction, taking the run instant as an argument, with the retention
       that drops anything older than the previous patch. (Req: snapshot-ingest
       — A run leaves staging whole or leaves it untouched)
 
-## 11. The job
+## 12. The job
 
 This group alone runs **after** `snapshot-build`. The entry point calls the
 ingest, then that change's build, then its export, so it is the one place where
-the two changes' order reverses: groups 1 to 10 land first, `snapshot-build`
+the two changes' order reverses: groups 1 to 11 land first, `snapshot-build`
 follows them, and this group closes over both.
 
-- [ ] 11.1 Write the outcome tests: all three steps succeeding exits zero and
+- [ ] 12.1 Write the outcome tests: all three steps succeeding exits zero and
       the served bundle is the one just written [56]; the failure report names
       which of the three failed [57]; a failing ingest builds no snapshot,
       leaves the previous bundle served and exits non-zero [58]; a build
@@ -287,10 +308,10 @@ follows them, and this group closes over both.
       exits non-zero [60]; the export invoked alone renders the newest
       published snapshot and exits zero with no request to the statistics API
       [61]. (Req: snapshot-ingest — The job carries a run to one outcome)
-- [ ] 11.2 Implement the entry point: ingest, then build, then export,
+- [ ] 12.2 Implement the entry point: ingest, then build, then export,
       returning which step failed and exiting non-zero when one did, with the
       export — and only the export — also invocable on its own. (Req:
       snapshot-ingest — The job carries a run to one outcome)
-- [ ] 11.3 Write the end-to-end test: a seeded source runs ingest → build →
+- [ ] 12.3 Write the end-to-end test: a seeded source runs ingest → build →
       export and the served bundle is accepted by the client's loader [62].
       (Req: snapshot-ingest — The job carries a run to one outcome)
