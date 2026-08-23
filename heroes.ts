@@ -22,16 +22,20 @@ import {
 } from "./icons.ts";
 import type { Query } from "./stratz.ts";
 
+/** The largest value `heroes.hero_id` holds, `int` being signed 32-bit. */
+const MAX_HERO_ID = 2_147_483_647;
+
 /**
- * Whether `id` is one Valve could have minted. Checked as a positive integer
- * rather than as a number: the column is `int`, and `NaN`, `1.5` and `-1` are
- * each a number that reaches Postgres as an error rather than a row.
+ * Whether `id` is one Valve could have minted. Checked against what the column
+ * accepts rather than against `number`: `NaN`, `1.5`, `-1` and `2 ** 31` are
+ * each a number that reaches Postgres as an error rather than a row, and the
+ * ceiling belongs with the other three rather than being the one left out.
  *
  * Exported because every pull keys its rows on this id, and each reads it from
  * a response it did not write.
  */
 export const isHeroId = (id: unknown): id is number =>
-	typeof id === "number" && Number.isInteger(id) && id > 0;
+	typeof id === "number" && Number.isInteger(id) && id > 0 && id <= MAX_HERO_ID;
 
 /** A hero as `heroes` holds it, `first_seen_at` excepted. */
 export type HeroReference = {

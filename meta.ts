@@ -60,6 +60,11 @@ export function metaWindow(detectedAt: Date, at: Date): MetaWindow {
 	const first = Math.ceil(detectedAt.getTime() / DAY_MS) * DAY_MS;
 	const whole = Math.max(1, (end - first) / DAY_MS);
 	const days = Math.min(whole, SOURCE_DAYS);
+	// An instant that is not one leaves every line above holding `NaN`, and
+	// `NaN` is what would then be asked for: `Math.max` and `Math.min` both
+	// propagate it rather than falling back on their other argument.
+	if (!Number.isInteger(days))
+		throw new RangeError("a window cannot be measured from an invalid instant");
 	return {
 		start: new Date(end - days * DAY_MS),
 		end: new Date(end),
@@ -67,6 +72,10 @@ export function metaWindow(detectedAt: Date, at: Date): MetaWindow {
 		cappedBySource: whole > SOURCE_DAYS,
 	};
 }
+
+/** Whether a value is a number of matches, rather than merely a number. */
+const isCount = (n: unknown): n is number =>
+	typeof n === "number" && Number.isInteger(n) && n >= 0;
 
 /** One hero's counts at one position, summed over the window's days. */
 export type PositionCount = {
@@ -105,10 +114,12 @@ const request = (position: number, days: number) =>
  * absent hero is one this window has no sample for, which is not the same
  * statement as a sample of zero.
  *
- * The counts are not bounded here. `staging_hero_position_stats` declares
- * `matches >= 0 AND wins BETWEEN 0 AND matches` and `hero_id` references
- * `heroes`, and `schema.sql` states that edge as the one that has to check —
- * a second reading of it here would be a rule kept in two places.
+ * `staging_hero_position_stats` declares `matches >= 0 AND wins BETWEEN 0 AND
+ * matches`, and `schema.sql` states that edge as the one that has to check.
+ * The bound is read again here rather than only there because what reaches the
+ * table is the sum: a day reporting more wins than matches is hidden by the
+ * other days it is added to, so the value the constraint sees is not the value
+ * the source stated.
  */
 export async function pullMeta(
 	query: Query,
@@ -134,8 +145,8 @@ export async function pullMeta(
 			// themselves are the staging table's to refuse.
 			const { heroId, matchCount, winCount } = (entry ?? {}) as {
 				heroId: unknown;
-				matchCount: number;
-				winCount: number;
+				matchCount: unknown;
+				winCount: unknown;
 			};
 			// The id keys the row and references `heroes`, so an entry without
 			// one is not a count this run can attribute. Refused here rather
@@ -144,6 +155,13 @@ export async function pullMeta(
 			if (!isHeroId(heroId))
 				throw new Error(
 					`the meta source returned a row with no hero id at position ${position}`,
+				);
+			// The bound is read on the day rather than only on the sum: a day
+			// reporting more wins than matches is hidden by the days it is added
+			// to, so the staging table's own constraint never sees it.
+			if (!isCount(matchCount) || !isCount(winCount) || winCount > matchCount)
+				throw new Error(
+					`the meta source returned hero ${heroId} at position ${position} with counts a day cannot have`,
 				);
 			const row = summed.get(heroId) ?? {
 				heroId,

@@ -203,6 +203,31 @@ describe("an answer that is not a pull", () => {
 		);
 	});
 
+	test.each([
+		["a fractional match count", 10.5, 4],
+		["a negative match count", -1, 0],
+		["a match count that is not a number", "10", 4],
+		["a missing win count", 10, undefined],
+		["more wins than matches", 4, 10],
+	])(
+		"a day with %s fails rather than being summed",
+		async (_, matches, wins) => {
+			// The sum is what the staging table's own constraint sees, and a day
+			// like this one is hidden inside it — 4 wins of 10 matches added to
+			// 10 of 4 satisfies the constraint that neither day does.
+			const { query } = asking(
+				same([
+					counted(9001, 10, 4),
+					{ heroId: 9001, matchCount: matches, winCount: wins },
+				]),
+			);
+
+			expect(await failure(pullMeta(query, WEEK))).toContain(
+				"counts a day cannot have",
+			);
+		},
+	);
+
 	test("a query that has spent its attempts fails before any row", async () => {
 		const query: Query = async () => {
 			throw new Error("the API answered 500; 4 attempts made");

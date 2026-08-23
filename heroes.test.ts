@@ -109,6 +109,7 @@ describe("reading the reference from the source", () => {
 		["an id that is not a number at all", { ...LISTED, id: Number.NaN }],
 		["a negative id", { ...LISTED, id: -1 }],
 		["a zero id", { ...LISTED, id: 0 }],
+		["an id past what the column holds", { ...LISTED, id: 2_147_483_648 }],
 		["no slug", { id: 9001, displayName: "Clinkz" }],
 		["a blank slug", { ...LISTED, shortName: "" }],
 		["a slug that climbs out", { ...LISTED, shortName: "../escaped" }],
