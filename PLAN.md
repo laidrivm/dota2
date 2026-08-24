@@ -93,6 +93,19 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       and the `oversize:` override stops admitting an unsplit one. One task
       group, so `chore/proposal-slicing`. Ahead of Phases 3b and 3a in the
       queue, stepping over both.
+- [ ] **Two readings `snapshot-ingest` left open** — both settled in
+      discussion, neither applied, and both are delta-spec work before code.
+      *A hero with no picks in the window* gets no `staging_hero_stats` row at
+      all, because the meta pull emits none and `heroTotals` builds from those
+      rows — so its bans reach nothing and the hero count can fall, which
+      `snapshot-build` §*A snapshot is published only after it validates*
+      refuses. Decided: read "for each hero" as the reference, then emit the
+      zero-pick row. *The covered window is recorded nowhere* — `ingest`
+      returns `Covered` and nothing writes it, where the requirement asks the
+      run to record the weeks covered and the cap that bound the window.
+      Decided: columns on `snapshots` beside `prior_weight`, which answers the
+      same "what was this built from", filled by group 12, which calls ingest
+      and build in turn and holds `Covered`. Ahead of that group.
 - [ ] **Phase 3b — `snapshot-ingest`** — proposed,
       `openspec/changes/snapshot-ingest/`. The schema and the database edge,
       the rate-limited STRATZ client, the reference upserts, the mirrored hero
