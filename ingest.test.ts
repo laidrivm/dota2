@@ -186,6 +186,47 @@ describe.skipIf(url === undefined)("one run, and the next", () => {
 		expect((await staged(sql)).positions).toEqual([]);
 	});
 
+	// spec: snapshot-ingest/every-reference-hero-reaches-staging
+	test("a hero the window holds no picks for still reaches staging [91]", async () => {
+		const sql = await clean();
+		const { query } = sourceQuery(RUN_AT);
+		// The meta response drops the second hero, which is what a hero nobody
+		// played in the window looks like: the ban response still names it.
+		const quiet: typeof query = async (sent) => {
+			const answered = await query(sent);
+			if (!sent.includes("winDay")) return answered;
+			const body = answered as {
+				data: { heroStats: { winDay: { heroId: number }[] } };
+			};
+			body.data.heroStats.winDay = body.data.heroStats.winDay.filter(
+				(row) => row.heroId !== HEROES[1],
+			);
+			return body;
+		};
+
+		await ingest(
+			{ sql, query: quiet, fetch: sourceFetch(), iconsDir: dir },
+			RUN_AT,
+		);
+
+		const rows = await staged(sql);
+		// One row per reference hero, whether or not the window held a pick —
+		// the count `snapshot-build`'s validation reads.
+		expect(rows.heroes).toHaveLength(HEROES.length);
+		expect(rows.heroes[1]).toEqual({
+			patch_id: PATCH,
+			hero_id: HEROES[1],
+			matches: 0,
+			wins: 0,
+			// The remaining hero's 350 picks are 35 matches, and this hero's
+			// two bans are all it brings to them.
+			contest_rate: Math.fround(2 / 35),
+		});
+		// The position rows are the meta response's, so the silent hero has
+		// none of them.
+		expect(rows.positions).toHaveLength(5);
+	});
+
 	// spec: snapshot-ingest/two-runs-a-day-apart
 	test("two runs a UTC day apart leave different rows [65]", async () => {
 		const sql = await clean();
