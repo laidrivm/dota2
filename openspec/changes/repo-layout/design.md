@@ -114,7 +114,7 @@ avoid.
 
 All nine reach their artefacts through `import.meta.dir` and so assume they
 sit at the root. Under `checks/` they take `join(import.meta.dir, "..")` —
-already the idiom at six sites in `scripts/`, so nothing is invented.
+already the idiom at seven sites in `scripts/`, so nothing is invented.
 
 ### The check is scoped by exemption, and says why that differs from the cap
 
@@ -176,7 +176,9 @@ managed risk rather than an unmanaged one.
 Measured: the same call from `scripts/` returns 33 paths instead of 382, named
 relative to that directory. Correct today only because the file is at the
 root. The move breaks it loudly — every mapped path stops resolving — and the
-fix is the `rev-parse --show-toplevel` form five other sites already use. The
+fix is the `rev-parse --show-toplevel` form six other sites already use —
+four under `scripts/` and two under `src/app/`, this being the only count of
+them, which the proposal and the tasks cite rather than restate. The
 spec turns that into a requirement so the accident cannot recur.
 
 **The exemption list is friction for a legitimate new root file** → Accepted,

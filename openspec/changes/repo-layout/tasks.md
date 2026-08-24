@@ -75,7 +75,8 @@ builds, it just cannot load its fonts or its snapshot.
       not today — it lists the tree with `git ls-files` at its own directory
       and resolves no repository root, so from `scripts/` the same call
       returns 33 paths instead of 382. Then adopt the
-      `rev-parse --show-toplevel` form five other sites already use. (Req:
+      `rev-parse --show-toplevel` form the other listing sites already use,
+      which `design.md` counts. (Req:
       repo-layout — A check reads the tracked tree from the repository root)
 - [ ] 3.4 Cover the general form of that criterion: a check listing the
       tracked tree, run from a directory below the root, still reads the

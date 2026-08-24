@@ -35,8 +35,8 @@ underneath work in flight.
 - `readme-map.test.ts` lists the tracked tree with `git ls-files` run at its
   own directory and no repository root resolved. That is correct only while
   the file sits at the root; the move makes it wrong, so it adopts the
-  `rev-parse --show-toplevel` form five other sites in this repository
-  already use.
+  `rev-parse --show-toplevel` form the repository's other listing sites
+  already use — `design.md` counts them.
 - A new check refuses a *tracked* file added to the repository root — every
   one, whatever its extension and whether or not it starts with a dot —
   scoped by the files it exempts by name rather than by an enumeration of
