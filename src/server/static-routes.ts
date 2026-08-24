@@ -14,7 +14,7 @@ import { fileURLToPath } from "node:url";
  */
 const root = new URL("../../", import.meta.url);
 
-const fontDir = new URL("src/app/styles/fonts/", root);
+export const fontDir = new URL("src/app/styles/fonts/", root);
 const snapshotFile = new URL("src/fixtures/snapshot.json", root);
 
 /**

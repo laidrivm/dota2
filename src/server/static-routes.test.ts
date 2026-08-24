@@ -3,7 +3,21 @@ import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
-import { iconDir as defaultIcons, staticRoutes } from "./static-routes.ts";
+import {
+	iconDir as defaultIcons,
+	fontDir,
+	staticRoutes,
+} from "./static-routes.ts";
+
+/**
+ * The repository root, from git rather than from this file's own location —
+ * that location is what the anchors below are under test for, so deriving the
+ * expectation the same way the code does would let one wrong answer confirm
+ * the other.
+ */
+const TOP = Bun.spawnSync(["git", "rev-parse", "--show-toplevel"])
+	.stdout.toString()
+	.trim();
 
 let origin: string;
 let server: ReturnType<typeof Bun.serve>;
@@ -77,23 +91,8 @@ describe("font routes", () => {
 		expect(response.headers.get("cache-control")).toBe("no-cache");
 	});
 
-	test("serve the face out of the repository's own font directory", async () => {
-		// The anchor is what the move changed, and a status does not say which
-		// of the two went wrong: a route resolved under `src/server/` answers
-		// 404 exactly as a missing face does. The root is taken from git rather
-		// than from this file's location, that location being the thing under
-		// test — anchoring the assertion the same way as the code would let one
-		// wrong answer confirm the other.
-		const root = Bun.spawnSync(["git", "rev-parse", "--show-toplevel"])
-			.stdout.toString()
-			.trim();
-		const held = Bun.file(
-			`${root}/src/app/styles/fonts/IBMPlexSans-Regular-Latin1.woff2`,
-		);
-		const response = await fetch(`${origin}${woff2}`);
-
-		expect(await held.exists()).toBe(true);
-		expect((await response.arrayBuffer()).byteLength).toBe(held.size);
+	test("are read from the repository's own font directory", () => {
+		expect(fileURLToPath(fontDir)).toBe(`${TOP}/src/app/styles/fonts/`);
 	});
 
 	test("serve the whole file on a second request", async () => {
@@ -116,17 +115,12 @@ describe("font routes", () => {
 });
 
 describe("icon routes", () => {
-	test("read the mirror at the repository root by default", async () => {
+	test("read the mirror at the repository root by default", () => {
 		// The one anchor no request can report on: every case below passes a
 		// directory of its own, and the default turns a missing directory into
 		// an empty listing on purpose — so a wrong anchor 404s each hero exactly
-		// as a clone that never ran the ingest does. The root comes from git,
-		// this file's own location being what is under test.
-		const top = Bun.spawnSync(["git", "rev-parse", "--show-toplevel"])
-			.stdout.toString()
-			.trim();
-
-		expect(fileURLToPath(defaultIcons)).toBe(`${top}/icons/`);
+		// as a clone that never ran the ingest does.
+		expect(fileURLToPath(defaultIcons)).toBe(`${TOP}/icons/`);
 	});
 
 	// spec: hero-reference/a-mirrored-image
