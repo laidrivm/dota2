@@ -40,6 +40,9 @@ What counts as evidence for a claim, and what a claim may rest on.
 - Read a command's exit status from the command, not from a pipeline or a
   loop that continued past its failure, and read a gating check's output
   before running what it gates rather than chaining the two with `&&`.
+- Pass the directory to a search rather than changing into it — a shell's
+  working directory outlives the command that set it, and a scan run from the
+  wrong one answers with a plausible subset instead of an error.
 - Probe a signal with the event that must leave it unchanged, not only with
   the event that must move it.
 - Before editing an artefact to match an observed state, confirm the state is
