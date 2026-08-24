@@ -86,21 +86,12 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
 
 ### Open
 
-- [ ] **`repo-layout`** — proposed, `openspec/changes/repo-layout/`. More than
-      half the root's files are the nightly job and nothing in the tree says
-      so; they move to `src/job/`, the server to `src/server/`, and the
-      nine tests that assert things about the repository to a new `checks/`.
-      A scan then refuses a root file the exemption list does not name, and
-      the README states where each kind of file lives. Four task groups, so
-      `feat/repo-layout-1` … `-4`, in order — moves first, the scan last,
-      since it passes only over the tree the moves leave. First in the queue,
-      ahead of `proposal-slicing` and everything under it: `snapshot-build`
-      adds about twenty-five files and Task 7 a Dockerfile whose `COPY` steps
-      must name what the container needs, so every later moment moves files
-      under work in flight. A pure move measured 0 lines against
-      `diff-budget`, which is why each group commits its moves before its
-      fix-ups. `tracked-file-sweep`, further down, lifts the tracked-tree
-      listing this change repairs one copy of — that copy is touched twice.
+- [ ] **`repo-layout`** — applied, awaiting archive.
+      `openspec/changes/repo-layout/`; PRs #171, #172, #173 and this one. The
+      root went from sixty-one tracked files to fourteen, and
+      `scripts/repo-layout.ts` now refuses a fifteenth the exemption list does
+      not name. `tracked-file-sweep`, further down, lifts the tracked-tree
+      listing this change repaired one copy of — that copy is touched twice.
 - [ ] **`proposal-slicing`** — proposed,
       `openspec/changes/proposal-slicing/`. A propose-stage branch at or over
       the diff budget's failing threshold splits into `spec/<slug>` and

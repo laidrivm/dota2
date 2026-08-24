@@ -153,7 +153,7 @@ leave.
       [20] would examine `checks/` alone and pass every row by finding
       nothing. (Req: repo-layout — The README states where each kind of file
       lives / A check reads the tracked tree from the repository root)
-- [ ] 4.8 Write the README layout section: each directory that holds source,
+- [x] 4.8 Write the README layout section: each directory that holds source,
       what belongs in it, and why the tree is cut that way — with
       `src/job/build/` and `src/job/export/` marked reserved for
       `snapshot-build`. `src/job/main.ts` is `snapshot-ingest` group 12's
@@ -161,7 +161,7 @@ leave.
       assert a tracked file *under* a path, which cannot express a path that
       is itself the file. (Req: repo-layout — The README states where each
       kind of file lives)
-- [ ] 4.9 Update `PLAN.md`: collapse this change's queue entry to its name,
+- [x] 4.9 Update `PLAN.md`: collapse this change's queue entry to its name,
       pull requests, archive path and where its spec landed, per that file's
       growth protocol. (Req: none — bookkeeping the workflow requires,
       closing no criterion)
