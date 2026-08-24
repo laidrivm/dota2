@@ -1,11 +1,23 @@
 import { expect, test } from "bun:test";
 
 /**
+ * The repository root, from git rather than from this file's own location.
+ * Its neighbours in `checks/` take `join(import.meta.dir, "..")`, which is
+ * enough to read a file; this one also *lists* the tree, and `git ls-files`
+ * names what it finds relative to the directory it ran in — so the listing
+ * and the paths the map states have to be measured from the same place, and
+ * git is the only thing that knows where that is.
+ */
+const top = Bun.spawnSync(["git", "rev-parse", "--show-toplevel"]);
+if (top.exitCode !== 0) throw new Error(top.stderr.toString());
+const dir = top.stdout.toString().trim();
+
+/**
  * The mechanical half of the knowledge ownership map: every path it names
  * resolves. Whether the sentence beside the path is still true is a review
  * question, not a test one.
  */
-const readme = await Bun.file(`${import.meta.dir}/README.md`).text();
+const readme = await Bun.file(`${dir}/README.md`).text();
 
 const map =
 	readme.match(/^## Knowledge ownership map$([\s\S]*?)^## /m)?.[1] ?? "";
@@ -25,7 +37,7 @@ const paths = rows
 	.filter((path) => path !== undefined);
 
 const git = (...args: string[]) =>
-	Bun.spawnSync(["git", ...args], { cwd: import.meta.dir });
+	Bun.spawnSync(["git", ...args], { cwd: dir });
 
 /** Tracked, not merely present — a clone has only what git carries. */
 const tracked = git("ls-files").stdout.toString().split("\n").filter(Boolean);
@@ -35,6 +47,17 @@ const resolves = (path: string) => {
 	const glob = new Bun.Glob(path.endsWith("/") ? `${path}**` : path);
 	return tracked.some((file) => glob.match(file));
 };
+
+test("the listing is the repository's, not this file's own directory", () => {
+	// `git ls-files` run in a subdirectory lists only what is under it and
+	// names it relative to it, so a listing taken where the check happens to
+	// sit sees a fraction of the tree and resolves the rest to nothing. Two
+	// assertions, because either alone passes on half the mistake: the first
+	// says the listing reaches above `checks/`, the second that its paths are
+	// named from the root rather than from here.
+	expect(tracked).toContain("README.md");
+	expect(tracked).toContain("checks/readme-map.test.ts");
+});
 
 test("every row of the map yields a path", () => {
 	// A reshaped table yields fewer paths than rows — or none at all, which
@@ -49,11 +72,11 @@ test("a path present but untracked does not satisfy a row", async () => {
 	// The name is unique so a run can never delete a file someone else left
 	// at the repo root.
 	const probe = `untracked-probe-${crypto.randomUUID()}.md`;
-	await Bun.write(`${import.meta.dir}/${probe}`, "");
+	await Bun.write(`${dir}/${probe}`, "");
 	try {
 		expect(resolves(probe)).toBe(false);
 	} finally {
-		await Bun.file(`${import.meta.dir}/${probe}`).delete();
+		await Bun.file(`${dir}/${probe}`).delete();
 	}
 });
 
