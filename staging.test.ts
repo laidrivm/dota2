@@ -122,6 +122,25 @@ describe.skipIf(url === undefined)("what one write leaves behind", () => {
 		expect(row?.matches).toBe(5);
 	});
 
+	// spec: snapshot-ingest/a-hero-the-window-holds-no-picks-for
+	test("a zero-pick hero row meets the bounds the table declares [97]", async () => {
+		const sql = await clean();
+		const staged = rows(3);
+		// Reachable only since the totals came from the reference: a hero the
+		// window has no sample of meets `CHECK (wins BETWEEN 0 AND matches)`
+		// with both of its bounds at 0.
+		staged.heroes = [
+			...staged.heroes,
+			{ heroId: OTHER, matches: 0, wins: 0, contestRate: 0 },
+		];
+
+		await writeStaging(sql, "z9.40", staged);
+
+		const [row] = await sql`SELECT matches, wins FROM staging_hero_stats
+			WHERE patch_id = 'z9.40' AND hero_id = ${OTHER}`;
+		expect(row).toEqual({ matches: 0, wins: 0 });
+	});
+
 	test("the suite covers every staging table but the two nothing fills", async () => {
 		// Stated as an exemption rather than left implicit in the four tables
 		// the helpers above name: a staging table added later would otherwise

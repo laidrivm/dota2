@@ -321,7 +321,7 @@ tests that are meant to catch it.
       window whose matches are not 0 [90]; a run's `staging_hero_stats` rows
       number what the reference holds [91]. (Req: snapshot-ingest — Contest
       rate is a share of the window's matches)
-- [ ] 11c.2 Write the edge tests this run's `/zombies` named: an empty
+- [x] 11c.2 Write the edge tests this run's `/zombies` named: an empty
       reference yields no row and attempts no division [95]; a hero with bans
       and no picks over a window whose matches are 0 rates 0 rather than
       `Infinity`, which is newly reachable now that such a hero gets a row
@@ -331,7 +331,7 @@ tests that are meant to catch it.
       run, which building the row set from the reference could silently drop
       [98]. (Req: snapshot-ingest — Contest rate is a share of the window's
       matches)
-- [ ] 11c.3 Re-aim the two tests that pin the reading being reversed:
+- [x] 11c.3 Re-aim the two tests that pin the reading being reversed:
       `contest.test.ts`'s *a hero banned but never picked in the window gets no
       row* inverts, its comment saying the reading was unsettled deleted with
       it; *no hero at all yields no row and no division* moves off the empty

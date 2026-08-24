@@ -157,13 +157,15 @@ describe.skipIf(url === undefined)("one run, and the next", () => {
 		expect((await staged(sql)).positions).toEqual([]);
 	});
 
-	// spec: snapshot-ingest/a-run-that-fails-part-way
-	test("a hero the reference does not hold fails before the write [37]", async () => {
+	// spec: snapshot-ingest/a-hero-the-meta-response-names-and-the-reference-does-not
+	test("a hero the reference does not hold fails before the write [37] [98]", async () => {
 		const sql = await clean();
 		const { query } = sourceQuery(RUN_AT);
 		// The meta pull names a hero the reference call never did — two calls to
 		// one API disagreeing, which reaches the insert as a foreign key error
-		// naming a column rather than a source.
+		// naming a column rather than a source. Kept as a run failure rather
+		// than left to the totals, which now build from the reference and so
+		// would drop such a hero without a word.
 		const strayed: typeof query = async (sent) => {
 			const answered = await query(sent);
 			if (!sent.includes("winDay")) return answered;
