@@ -6,14 +6,19 @@ bracketed numbers are that run's idea numbers, so every one of its 62 ideas is
 traceable to the group that closes it. Numbers 63 to 88 are the reviews' own,
 added where a finding named a case the run had missed — 76 to 81 during apply,
 by the diff-mode `/zombies` run and CodeRabbit, and 85 to 88 with the group
-this list had left out.
+this list had left out. Numbers 89 to 94 came from neither: they are the two
+readings this change left open — which heroes a run stores a total for, and
+where the window it covered is written down — settled after groups 1 to 11 had
+merged.
 
-Twelve groups on `feat/snapshot-ingest-1` … `-12`, in order, and at least that
-many pull requests. Each group is measured against `bun run diff-budget` when
-it is cut and splits again if it is over — group 11 did, on the seam between
-the write and the run that fills it, shipping as `-11a` and `-11b`. The groups
-below are sized to land under the warn threshold, which is what keeps a
-reviewer's pass over any one of them short.
+Thirteen groups on `feat/snapshot-ingest-1` … `-11c` … `-12`, in order, and at
+least that many pull requests. Each group is measured against
+`bun run diff-budget` when it is cut and splits again if it is over — group 11
+did, on the seam between the write and the run that fills it, shipping as
+`-11a` and `-11b`, and group 11c is the later arrival that takes their suffix
+rather than a number, so that no merged group is renumbered. The groups below
+are sized to land under the warn threshold, which is what keeps a reviewer's
+pass over any one of them short.
 
 This change owns the schema, the database edge and the CI job that exercises
 it — group 4's three tasks, moved here from `snapshot-build`, which closed no
@@ -296,11 +301,31 @@ proposal run's.
       that drops anything older than the previous patch. (Req: snapshot-ingest
       — A run leaves staging whole or leaves it untouched)
 
+## 11c. Every reference hero gets a total
+
+A later arrival, and it runs **before** `snapshot-build` rather than after
+group 11: 3a's fixtures seed staging, so a build written against staging that
+holds 126 heroes where the reference holds 127 would encode the defect in the
+tests that are meant to catch it.
+
+- [ ] 11c.1 Write the zero-pick tests: a hero the meta response carries no row
+      for, but the ban response does, reaches staging with `matches` 0, `wins`
+      0, a contest rate from those bans alone, and no position row [89]; a hero
+      neither response carries reaches staging with contest rate 0 over a
+      window whose matches are not 0 [90]; a run's `staging_hero_stats` rows
+      number what the reference holds [91]. (Req: snapshot-ingest — Contest
+      rate is a share of the window's matches)
+- [ ] 11c.2 Implement the totals over the hero reference rather than over the
+      meta response: build the row set from the heroes the reference returned,
+      fill each from the meta rows it has, and leave the position rows built
+      from the meta response alone. (Req: snapshot-ingest — Contest rate is a
+      share of the window's matches)
+
 ## 12. The job
 
 This group alone runs **after** `snapshot-build`. The entry point calls the
 ingest, then that change's build, then its export, so it is the one place where
-the two changes' order reverses: groups 1 to 11 land first, `snapshot-build`
+the two changes' order reverses: groups 1 to 11c land first, `snapshot-build`
 follows them, and this group closes over both.
 
 - [ ] 12.1 Write the outcome tests: all three steps succeeding exits zero and
@@ -316,6 +341,23 @@ follows them, and this group closes over both.
       returning which step failed and exiting non-zero when one did, with the
       export — and only the export — also invocable on its own. (Req:
       snapshot-ingest — The job carries a run to one outcome)
-- [ ] 12.3 Write the end-to-end test: a seeded source runs ingest → build →
+- [ ] 12.3 Write the coverage tests: a run whose meta window was the patch's
+      own span records that window's first and last day, that the cap did not
+      bind it, and the weeks the pair pull covered [92]; a run over a patch
+      live for 150 complete UTC days records that the cap bound the window and
+      the thirty most recent complete days as the window [93]; a snapshot no
+      entry point completed carries null coverage and is not failed for it
+      [94]. (Req: snapshot-ingest — What a run covered is recorded on the
+      snapshot it built)
+- [ ] 12.4 Add the coverage columns to `snapshots` beside `prior_weight` —
+      the meta window's first and last UTC day, whether the source's cap bound
+      it, and the weeks the pair pull covered — all nullable, with the comment
+      naming why the build cannot fill them. (Req: snapshot-ingest — What a
+      run covered is recorded on the snapshot it built)
+- [ ] 12.5 Implement the write: the entry point records what the ingest
+      returned on the row the build produced, before the export runs. (Req:
+      snapshot-ingest — What a run covered is recorded on the snapshot it
+      built)
+- [ ] 12.6 Write the end-to-end test: a seeded source runs ingest → build →
       export and the served bundle is accepted by the client's loader [62].
       (Req: snapshot-ingest — The job carries a run to one outcome)

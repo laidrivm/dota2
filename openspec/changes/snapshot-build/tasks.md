@@ -7,9 +7,9 @@ is traceable to the group that closes it. Numbers 46 to 57 are the reviews'
 own, added where a finding named a case the run had missed.
 
 Eight groups, so eight pull requests on `feat/snapshot-build-1` … `-8`, in
-order. It runs after `snapshot-ingest`'s groups 1 to 10, which own the schema both
-read, and before its group 11, whose entry point calls this change's build and
-export.
+order. It runs after `snapshot-ingest`'s groups 1 to 11c, which own the schema
+both read and fill the staging the build reads, and before its group 12, whose
+entry point calls this change's build and export.
 Groups 1 and 2 add a pure module nothing calls yet; the application
 keeps running on the committed fixture until group 8 rewires the route.
 
