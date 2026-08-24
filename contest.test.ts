@@ -149,6 +149,23 @@ describe("the rate a hero's picks and bans come to", () => {
 		});
 	});
 
+	// spec: snapshot-ingest/a-hero-the-meta-response-names-and-the-reference-does-not
+	test("a meta row outside the reference gets no total and still counts [98]", () => {
+		const rows = [picked(9001, 1, 50), picked(9404, 1, 50)];
+
+		const totals = heroTotals([9001], rows, new Map());
+
+		// One total per hero given, and none for the hero only the rows named:
+		// `ingest` fails such a run before the write, so a row added here would
+		// be one the foreign key refuses anyway. Its matches nonetheless reach
+		// the divisor, which is every hero's pick count over the window and not
+		// every *staged* hero's — the hundred picks are ten matches, so 9001's
+		// fifty rate it 5 rather than the 10 a divisor over the totals gives.
+		expect(totals).toEqual([
+			{ heroId: 9001, matches: 50, wins: 0, contestRate: 5 },
+		]);
+	});
+
 	// spec: snapshot-ingest/a-hero-with-neither-picks-nor-bans
 	test("a hero neither response carries rates 0 over a window with matches [90]", () => {
 		const rows = [picked(9001, 1, 50), picked(9002, 1, 50)];

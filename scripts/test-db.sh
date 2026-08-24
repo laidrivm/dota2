@@ -2,7 +2,7 @@
 # Run the database-backed suites against a Postgres that exists to be thrown
 # away, and take it down again afterwards.
 #
-# Without this, `bun test` skips 52 cases — every patch detection, every
+# Without this, `bun test` skips 53 cases — every patch detection, every
 # reference upsert, every schema constraint and the whole staging write — and
 # reports the same green as a run that exercised them. CI catches that with a
 # service container and `DATABASE_REQUIRED`; this is the same evidence before
