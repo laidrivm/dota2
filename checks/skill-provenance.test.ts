@@ -14,11 +14,17 @@ const root = join(import.meta.dir, "..");
 const toolkit = await Bun.file(`${root}/docs/review-toolkit.md`).text();
 const claudeMd = await Bun.file(`${root}/CLAUDE.md`).text();
 
-/** Up to the next heading of the same level, or the end of the file. */
+/**
+ * Up to the next heading of its level *or above*, or the end of the file —
+ * the boundary `rulebook.test.ts`'s `slice` already takes, and the two now
+ * sit in one directory. Stopping only at the same level would let a `###`
+ * section run on into the `##` one after it, and here that would read the
+ * next section's slash commands as this one's.
+ */
 const section = (markdown: string, heading: string, level = "##") =>
 	markdown.match(
 		new RegExp(
-			`^${level} ${heading}$([\\s\\S]*?)(?=\\n${level} |$(?![\\s\\S]))`,
+			`^${level} ${heading}$([\\s\\S]*?)(?=\\n#{1,${level.length}} |$(?![\\s\\S]))`,
 			"m",
 		),
 	)?.[1] ?? "";

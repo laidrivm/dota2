@@ -53,6 +53,8 @@ test("its paths are named from the root, not from where it ran", () => {
 	expect(neighbour).toBeDefined();
 
 	expect(fromHere).toContain(`checks/${neighbour}`);
+	// The second assertion reads the bare name as a root-level path, so it
+	// says what it means only while the root tracks no file of that basename.
 	expect(fromHere).not.toContain(neighbour);
 });
 
