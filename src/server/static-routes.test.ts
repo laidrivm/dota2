@@ -163,8 +163,11 @@ describe("icon routes", () => {
 
 	// spec: hero-reference/a-path-that-climbs-out
 	test.each([
-		"/icons/../static-routes.ts",
-		"/icons/%2e%2e%2fstatic-routes.ts",
+		// `package.json` rather than this module: one climb out of `icons/` is
+		// the repository root now, and naming a file the climb cannot reach
+		// would pass by missing it rather than by refusing it.
+		"/icons/../package.json",
+		"/icons/%2e%2e%2fpackage.json",
 		"/icons/.lina.png.part",
 	])("serve nothing for %s [50]", async (path) => {
 		// The listing is the whitelist, so a name outside it is answered the
@@ -172,7 +175,7 @@ describe("icon routes", () => {
 		const response = await fetch(`${origin}${path}`);
 
 		expect(response.status).toBe(404);
-		expect(await response.text()).not.toContain("staticRoutes");
+		expect(await response.text()).not.toContain("devDependencies");
 	});
 
 	// spec: hero-reference/a-name-the-mirror-does-not-hold
