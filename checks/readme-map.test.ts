@@ -8,7 +8,12 @@ import { expect, test } from "bun:test";
  * and the paths the map states have to be measured from the same place, and
  * git is the only thing that knows where that is.
  */
-const top = Bun.spawnSync(["git", "rev-parse", "--show-toplevel"]);
+const top = Bun.spawnSync(["git", "rev-parse", "--show-toplevel"], {
+	// Asked from this file's own directory rather than from wherever bun was
+	// invoked: the two agree today and only one of them stays true if the
+	// suite is ever run from somewhere else.
+	cwd: import.meta.dir,
+});
 if (top.exitCode !== 0) throw new Error(top.stderr.toString());
 const dir = top.stdout.toString().trim();
 
