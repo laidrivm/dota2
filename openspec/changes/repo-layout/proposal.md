@@ -2,10 +2,11 @@
 
 ## Why
 
-Thirty-three of the sixty-one tracked files at the repository root are one
-thing — the nightly snapshot job — and nothing in the tree says so. They
-arrived over twelve pull requests because no directory existed to receive
-them, and the next three queue entries add roughly thirty more the same way:
+More than half the tracked files at the repository root are one thing — the
+nightly snapshot job — and nothing in the tree says so. `design.md` holds the
+census and the date it was taken; this is its consequence. They arrived over
+twelve pull requests because no directory existed to receive them, and the
+next three queue entries add roughly as many again:
 `snapshot-build`'s eight task groups, `snapshot-ingest`'s entry point, and
 Task 7's Dockerfile. The root reaches about ninety files, and Task 7 in
 particular needs the tree to answer a question it currently cannot — which
@@ -18,8 +19,8 @@ underneath work in flight.
 
 ## What Changes
 
-- The nightly job's thirty-three files move to `src/job/`: the database edge
-  and the schema at its top, the pulls and the staging write under
+- The nightly job's files move to `src/job/`: the database edge and the
+  schema at its top, the pulls and the staging write under
   `src/job/ingest/`. `build/` and `export/` are named for `snapshot-build` to
   fill; git tracks no empty directory, so they are a documented contract
   rather than directories this change creates.

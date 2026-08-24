@@ -86,9 +86,9 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
 
 ### Open
 
-- [ ] **`repo-layout`** — proposed, `openspec/changes/repo-layout/`. Thirty-three
-      of the sixty-one root files are the nightly job and nothing in the tree
-      says so; they move to `src/job/`, the server to `src/server/`, and the
+- [ ] **`repo-layout`** — proposed, `openspec/changes/repo-layout/`. More than
+      half the root's files are the nightly job and nothing in the tree says
+      so; they move to `src/job/`, the server to `src/server/`, and the
       nine tests that assert things about the repository to a new `checks/`.
       A scan then refuses a root file the exemption list does not name, and
       the README states where each kind of file lives. Four task groups, so

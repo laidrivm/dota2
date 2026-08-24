@@ -2,10 +2,16 @@
 
 ## Context
 
+The census, measured on 2026-08-24 and the only copy of these figures — the
+proposal and `PLAN.md` describe the shape and cite this section rather than
+restating a number that four pull requests stand between and today.
+
 Sixty-one tracked files sit at the repository root. Thirty-three are the
 nightly snapshot job, six are the HTTP server, nine are tests that assert
 things about the repository itself, ten are configuration and three are the
 always-on documents. Only the last thirteen belong there by any convention.
+The figures date, and none of the work below depends on them holding: the
+groups move named files, and the scan in group 4 reads the tree it finds.
 
 The job's files arrived over twelve pull requests of `snapshot-ingest`. No
 directory existed to receive them, so each landed beside the last. The same
@@ -84,9 +90,9 @@ directory. They are a contract this change writes down and `snapshot-build`
 fills, which is why the spec's README requirement admits a directory marked
 reserved without requiring a file under it.
 
-The alternative — `src/job/` flat — was rejected on arithmetic. Thirty-three
-files is tolerable; `snapshot-build` adds about twenty-five, and fifty-eight
-in one directory is the same swamp one storey down.
+The alternative — `src/job/` flat — was rejected on arithmetic. The job's
+current file count is tolerable in one directory; `snapshot-build` adds about
+twenty-five to it, and the sum is the same swamp one storey down.
 
 ### `checks/` is separate from `scripts/`
 
@@ -186,7 +192,7 @@ largest is one directory's worth of moves plus at most five fix-ups.
 
 Four groups, four pull requests, in order:
 
-1. **`src/job/`** — thirty-three files, the database edge above `ingest/`. No
+1. **`src/job/`** — the job's files, the database edge above `ingest/`. No
    fix-up: every import inside the group is relative and internal, and
    `db.ts` keeps `schema.sql` beside it. The free one.
 2. **`src/server/`** — six files, then the four `new URL` re-anchorings. The
