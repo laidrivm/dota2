@@ -105,13 +105,10 @@ describe.skipIf(url === undefined)("connecting", () => {
 
 	/**
 	 * Last in the file, so what it reads is what the cases above left behind.
-	 *
-	 * The suites share one database and empty it by convention rather than by
-	 * transaction: hero ids at or above 9000, patch ids under `z9.`, which is
-	 * everything `db.fixture.ts`'s cleaner deletes. A row outside those is
-	 * reclaimed by nothing and is read by whichever suite bun runs next — and
-	 * which suite that is changed once already, when these files moved into
-	 * `src/job/`.
+	 * The sentinels are what `db.fixture.ts`'s cleaner deletes — hero ids at or
+	 * above 9000, patch ids under `z9.` — and a row outside them is reclaimed by
+	 * nothing and read by whichever suite bun runs next, which is an order that
+	 * has already changed once.
 	 */
 	test("nothing outside the sentinels the cleaner reclaims is left standing", async () => {
 		const sql = await open();
@@ -119,6 +116,6 @@ describe.skipIf(url === undefined)("connecting", () => {
 			SELECT hero_id::text AS stray FROM heroes WHERE hero_id < 9000
 			UNION ALL
 			SELECT patch_id FROM patches WHERE patch_id NOT LIKE 'z9.%'`;
-		expect(strays.map((row: { stray: string }) => row.stray)).toEqual([]);
+		expect(strays).toEqual([]);
 	});
 });
