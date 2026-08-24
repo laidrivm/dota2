@@ -356,6 +356,14 @@ tests that are meant to catch it.
       cases with them so that neither file approaches the cap. (Req:
       snapshot-ingest — Contest rate is a share of the window's matches /
       hero-reference — A hero is upserted and never removed)
+- [x] 11c.6 Write the two gaps this group's `/zombies` named, both of them
+      reachable only since 11c.5: a meta row naming a hero outside the ids
+      given gets no total while its matches still reach the divisor [98],
+      which is the only case that enters `heroTotals`'s skip; and the held ids
+      are every hero the tables hold in ascending order, `heldHeroIds` having
+      until now been exercised through `ingest` alone. (Req: snapshot-ingest —
+      Contest rate is a share of the window's matches / hero-reference — A
+      hero is upserted and never removed)
 
 ## 12. The job
 

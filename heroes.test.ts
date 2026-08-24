@@ -2,14 +2,20 @@
  * The hero reference under repeated runs: what an insert writes once, what an
  * update is allowed to touch, and what survives a response that omits a hero.
  *
- * The heroes here are numbered from 9000 so that the rows the other suites
- * seed are neither read nor removed by these cases: this file deletes its own
- * range and nothing else, there being no delete path in the module itself.
+ * The heroes here are numbered from 9000, which is the range every suite's
+ * fixtures share and `db.fixture.ts`'s cleaner empties: these cases read only
+ * their own rows, and what the cleaner removes beside them belongs to suites
+ * that clean before they read. There is no delete path in the module itself.
  */
 import { describe, expect, test } from "bun:test";
 import type { SQL } from "bun";
 import { cleaner, opener, requiresDatabase, url } from "./db.fixture.ts";
-import { type HeroReference, readHeroes, upsertHeroes } from "./heroes.ts";
+import {
+	type HeroReference,
+	heldHeroIds,
+	readHeroes,
+	upsertHeroes,
+} from "./heroes.ts";
 import type { Query } from "./stratz.ts";
 
 requiresDatabase();
@@ -179,6 +185,27 @@ describe.skipIf(url === undefined)("upserting the hero reference", () => {
 		await upsertHeroes(sql, [], FIRST_RUN);
 
 		expect(await rows(sql)).toEqual([]);
+	});
+
+	test("the held ids are every hero the tables hold, in ascending order", async () => {
+		// What `ingest` reads "each hero" from, and the reason it is a query
+		// rather than the response: the run that omits a hero still stages it.
+		// Upserted highest first, so the order asserted is the query's and not
+		// the argument's.
+		const sql = await clean();
+		await upsertHeroes(sql, [LINA, CLINKZ], FIRST_RUN);
+
+		// Filtered to this file's range, which the read itself is not: the ids
+		// it returns beside these are whatever rows other suites left, and a
+		// caller wanting fewer heroes than the tables hold would have to say
+		// so. Asserted as a list rather than a set, so the `ORDER BY` is what
+		// the ascending pair reports and not the order they were written in.
+		const held = await heldHeroIds(sql);
+
+		expect(held.filter((id) => id >= 9000)).toEqual([
+			CLINKZ.heroId,
+			LINA.heroId,
+		]);
 	});
 
 	// spec: hero-reference/a-hero-that-is-new
