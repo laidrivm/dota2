@@ -102,4 +102,23 @@ describe.skipIf(url === undefined)("connecting", () => {
 			.then(() => null, String);
 		expect(failed).toMatch(/violates check constraint/);
 	});
+
+	/**
+	 * Last in the file, so what it reads is what the cases above left behind.
+	 *
+	 * The suites share one database and empty it by convention rather than by
+	 * transaction: hero ids at or above 9000, patch ids under `z9.`, which is
+	 * everything `db.fixture.ts`'s cleaner deletes. A row outside those is
+	 * reclaimed by nothing and is read by whichever suite bun runs next — and
+	 * which suite that is changed once already, when these files moved into
+	 * `src/job/`.
+	 */
+	test("nothing outside the sentinels the cleaner reclaims is left standing", async () => {
+		const sql = await open();
+		const strays = await sql`
+			SELECT hero_id::text AS stray FROM heroes WHERE hero_id < 9000
+			UNION ALL
+			SELECT patch_id FROM patches WHERE patch_id NOT LIKE 'z9.%'`;
+		expect(strays.map((row: { stray: string }) => row.stray)).toEqual([]);
+	});
 });
