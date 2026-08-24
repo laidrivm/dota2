@@ -9,8 +9,12 @@ by the diff-mode `/zombies` run and CodeRabbit, and 85 to 88 with the group
 this list had left out. Numbers 89 to 94 came from neither: they are the two
 readings this change left open — which heroes a run stores a total for, and
 where the window it covered is written down — settled after groups 1 to 11 had
-merged. Numbers 95 to 105 are the `/zombies` run over that settlement, 99 and
-100 having first been gaps in the requirement rather than in its tests.
+merged. Numbers 95 to 101 are the `/zombies` run over that settlement, 99 and
+100 having first been gaps in the requirement rather than in its tests. That
+run also named three cases that turned out to be existing criteria applied
+rather than behaviour of their own; they are written into the tasks under the
+criterion they belong to and carry no number, because a number here promises a
+criterion and `openspec/config.yaml` is what makes that a rule.
 
 Thirteen groups on `feat/snapshot-ingest-1` … `-11c` … `-12`, in order, and at
 least that many pull requests. Each group is measured against
@@ -311,7 +315,8 @@ tests that are meant to catch it.
 
 - [ ] 11c.1 Write the zero-pick tests: a hero the meta response carries no row
       for, but the ban response does, reaches staging with `matches` 0, `wins`
-      0, a contest rate from those bans alone, and no position row [89]; a hero
+      0, a contest rate from those bans alone, and no position row, the
+      window's matches not being 0 [89]; a hero
       neither response carries reaches staging with contest rate 0 over a
       window whose matches are not 0 [90]; a run's `staging_hero_stats` rows
       number what the reference holds [91]. (Req: snapshot-ingest — Contest
@@ -371,18 +376,21 @@ follows them, and this group closes over both.
       an export failing after the write leaves the coverage standing [100].
       (Req: snapshot-ingest — What a run covered is recorded on the snapshot
       it built)
-- [ ] 12.3a Write the window-boundary tests this run's `/zombies` named: a
-      patch live for exactly thirty complete UTC days records that the cap did
-      **not** bind it, [93] testing 150 days and never the seam [101]; a patch
-      detected today records a window whose first and last day are the same
-      [102]; a patch live for less than one complete week records an empty
-      weeks list beside a non-empty meta window [103]. (Req: snapshot-ingest —
-      What a run covered is recorded on the snapshot it built)
-- [ ] 12.3b Extend `ingest.test.ts`'s *a run reports the window and the weeks
-      it covered* [36], which asserts only what `ingest` returns, to assert
-      that the `snapshots` row carries it once the entry point has run [104];
-      and assert that the coverage columns reach no exported bundle, being
-      operational rather than part of what `snapshot-delivery` fixes [105].
+- [ ] 12.3a Write the cap-seam test: a patch live for exactly thirty complete
+      UTC days records that the cap did **not** bind it [101], which [93] does
+      not reach — it tests 150 days, where the two windows differ. (Req:
+      snapshot-ingest — What a run covered is recorded on the snapshot it
+      built)
+- [ ] 12.3b Cover two degenerate windows under [92], both of them that
+      criterion applied rather than behaviour of their own: a patch detected
+      today records a window whose first and last day are the same, and a
+      patch live for less than one complete week records an empty weeks list
+      beside a non-empty meta window. (Req: snapshot-ingest — What a run
+      covered is recorded on the snapshot it built)
+- [ ] 12.3c Extend `ingest.test.ts`'s *a run reports the window and the weeks
+      it covered* [36], which asserts only what `ingest` returns, so that it
+      also asserts the `snapshots` row carries it once the entry point has run
+      — [92] again, the criterion being about the record and not the return.
       (Req: snapshot-ingest — What a run covered is recorded on the snapshot
       it built)
 - [ ] 12.4 Add the coverage columns to `snapshots` beside `prior_weight` —
