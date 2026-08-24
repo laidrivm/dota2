@@ -168,7 +168,6 @@ describe("icon routes", () => {
 		// would pass by missing it rather than by refusing it.
 		"/icons/../package.json",
 		"/icons/%2e%2e%2fpackage.json",
-		"/icons/.lina.png.part",
 	])("serve nothing for %s [50]", async (path) => {
 		// The listing is the whitelist, so a name outside it is answered the
 		// same way whether it climbed, was encoded, or is simply not a hero.
@@ -176,6 +175,19 @@ describe("icon routes", () => {
 
 		expect(response.status).toBe(404);
 		expect(await response.text()).not.toContain("devDependencies");
+	});
+
+	// spec: hero-reference/a-path-that-climbs-out
+	test("serve nothing for a half-written file asked for by name [50]", async () => {
+		// Written here rather than left to the case above: taking it from a
+		// neighbour would make this pass by the file's absence whenever the two
+		// run in the other order, which is the one thing it must not do.
+		await Bun.write(join(iconDir, ".lina.png.part"), IMAGE.slice(0, 32));
+
+		const response = await fetch(`${origin}/icons/.lina.png.part`);
+
+		expect(response.status).toBe(404);
+		expect(await response.text()).toBe("");
 	});
 
 	// spec: hero-reference/a-name-the-mirror-does-not-hold
