@@ -14,9 +14,15 @@ edge it closes can be read against each other.
 
 ## 1. The nightly job
 
-The free group: every import inside it is relative and internal, and `db.ts`
-keeps `schema.sql` beside it, so the move needs no fix-up at all. Its evidence
-is the suite that already covers these files passing unchanged.
+Planned as the free group and it was not; both fix-ups are recorded here
+because groups 2 to 4 inherit the reasoning. Every import inside it is relative
+and internal, which does not mean unchanged: sectioning puts a boundary inside
+the group, and the five ingest suites reading `db.fixture.ts` take `../`.
+`db.ts` does keep `schema.sql` beside it, as planned. And the move reorders the
+files bun discovers, which is an input every suite sharing the database has —
+`db.test.ts` stopped running first, so the rows it left outside the cleaner's
+sentinel range reached the suites after it. Its evidence is `bun run test:db`;
+`bun test` is green either way.
 
 - [x] 1.1 Move the database edge to `src/job/`: `db.ts`, `db.test.ts`,
       `db.fixture.ts` and `schema.sql`, together and in one commit, because
@@ -39,6 +45,10 @@ The risky group, and the one whose own tests cover the risk: four path
 resolutions are anchored to the module rather than the repository, and
 `build.test.ts`'s header already says this failure is silent — the app still
 builds, it just cannot load its fonts or its snapshot.
+
+One import crosses out of the group as well, which the proposal's first count
+missed: `scripts/dev.ts` does `await import("../server.ts")`, and `scripts/`
+stays where it is.
 
 - [ ] 2.1 Move `server.ts`, `dist-routes.ts`, `static-routes.ts`,
       `static-routes.test.ts` and `build.test.ts` to `src/server/`, in a

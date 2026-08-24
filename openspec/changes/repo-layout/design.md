@@ -192,15 +192,26 @@ in place through a move that depends on it.
 **A pure move is invisible to the diff budget, so a group can be arbitrarily
 large without the gate objecting** → Real, and the gate is right: zero lines
 is what the reviewer reads. The groups are cut by concern anyway, so the
-largest is one directory's worth of moves plus at most five fix-ups.
+largest is one directory's worth of moves plus its fix-ups — ten sites in
+group 3, which is the most any group names.
+
+**A move changes the order the test runner discovers files in** → Measured on
+group 1: every file byte-identical, and thirty-four database cases red. The
+suites sharing one Postgres are the ones that order is an input to, and
+`bun test` reports the same green whichever order it picks — only
+`bun run test:db` runs them at all. So every group's evidence is that run, and
+group 3, which moves nine test files, reorders the run again.
 
 ## Migration Plan
 
 Four groups, four pull requests, in order:
 
-1. **`src/job/`** — the job's files, the database edge above `ingest/`. No
-   fix-up: every import inside the group is relative and internal, and
-   `db.ts` keeps `schema.sql` beside it. The free one.
+1. **`src/job/`** — the job's files, the database edge above `ingest/`. Two
+   fix-ups, neither foreseen: the five ingest suites reading `db.fixture.ts`
+   take `../`, the section boundary being inside the group rather than around
+   it, and `db.test.ts` moves its rows into the sentinel range the shared
+   cleaner reclaims, the move having changed which suite runs first. `db.ts`
+   keeps `schema.sql` beside it, as planned. Landed as #171.
 2. **`src/server/`** — five files, then the four `new URL` re-anchorings. The
    risky one, and the one its own tests cover.
 3. **`checks/`** — nine files, then `join(import.meta.dir, "..")` across them,
