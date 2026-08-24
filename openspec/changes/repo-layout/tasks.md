@@ -18,17 +18,17 @@ The free group: every import inside it is relative and internal, and `db.ts`
 keeps `schema.sql` beside it, so the move needs no fix-up at all. Its evidence
 is the suite that already covers these files passing unchanged.
 
-- [ ] 1.1 Move the database edge to `src/job/`: `db.ts`, `db.test.ts`,
+- [x] 1.1 Move the database edge to `src/job/`: `db.ts`, `db.test.ts`,
       `db.fixture.ts` and `schema.sql`, together and in one commit, because
       `db.ts` resolves its schema as `${import.meta.dir}/schema.sql` and the
       adjacency is what keeps that correct. (Req: repo-layout — The
       repository root holds only what is exempted by name)
-- [ ] 1.2 Move the pull, transport and staging files to
+- [x] 1.2 Move the pull, transport and staging files to
       `src/job/ingest/`: `stratz`, `patches`, `heroes`, `meta`, `contest`,
       `pairs`, `icons`, `staging` and `ingest`, with their tests and
       fixtures. (Req: repo-layout — The repository root holds only what is
       exempted by name)
-- [ ] 1.3 Run `bun run test:db` and confirm `db.ts` still applies
+- [x] 1.3 Run `bun run test:db` and confirm `db.ts` still applies
       `schema.sql` — a schema silently not applied fails every database
       suite on a missing table rather than on its cause [23]. (Req: none —
       evidence that 1.1 landed, closing no criterion of its own)
