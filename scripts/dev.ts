@@ -60,4 +60,4 @@ const rebuild = () => {
 watch(`${root}src`, { recursive: true }, rebuild);
 watch(`${root}index.html`, rebuild);
 
-await import("../server.ts");
+await import("../src/server/server.ts");
