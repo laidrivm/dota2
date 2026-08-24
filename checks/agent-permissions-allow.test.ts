@@ -1,9 +1,9 @@
 import { describe, expect, test } from "bun:test";
 import { resolve } from "node:path";
-import { allow } from "./agent-permissions.fixture.ts";
 // Imported rather than pattern-matched: bun parses TOML natively, and a
 // regex over the text would read a commented-out key as a live one.
-import bunfig from "./bunfig.toml";
+import bunfig from "../bunfig.toml";
+import { allow, root } from "./agent-permissions.fixture.ts";
 
 /**
  * What is pre-approved, and the configuration keys the gates above rest on:
@@ -64,7 +64,7 @@ describe("the tracked allow list holds only what a clone can use", () => {
 		for (const entry of allow) {
 			const path = entry.match(/^(?:Read|Edit)\((.+)\)$/)?.[1];
 			if (path === undefined) continue;
-			expect(resolve(import.meta.dir, path)).toStartWith(`${import.meta.dir}/`);
+			expect(resolve(root, path)).toStartWith(`${root}/`);
 		}
 	});
 });
@@ -99,7 +99,7 @@ describe("the keys the gate is for still hold their reserved value", () => {
 		const tracked = Bun.spawnSync(
 			["git", "ls-files", "--", "**/.npmrc", ".npmrc"],
 			{
-				cwd: import.meta.dir,
+				cwd: root,
 			},
 		);
 		// Empty stdout means nothing tracked only if git ran. A failed spawn

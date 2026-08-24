@@ -1,7 +1,9 @@
 import { expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
+import { join } from "node:path";
 
-const root = import.meta.dir;
+/** The repository root: this file reads an artefact of it, from `checks/`. */
+const root = join(import.meta.dir, "..");
 
 type Config = {
 	knowledge_base: { mcp: { usage: string } };

@@ -1,16 +1,18 @@
 import { expect, test } from "bun:test";
+import { join } from "node:path";
+
+/** The repository root: this file reads artefacts of it, from `checks/`. */
+const root = join(import.meta.dir, "..");
 
 /**
  * The rules list is partitioned into Code, Process and Safety, and the
  * maintenance trigger counts each sublist on its own. A rule that sits under
  * none of the three is counted by nothing, which is the failure this pins.
  */
-const claude = await Bun.file(`${import.meta.dir}/CLAUDE.md`).text();
+const claude = await Bun.file(`${root}/CLAUDE.md`).text();
 
 /** The doc `CLAUDE.md` indexes for what a fired trigger asks for. */
-const growth = await Bun.file(
-	`${import.meta.dir}/docs/rulebook-growth.md`,
-).text();
+const growth = await Bun.file(`${root}/docs/rulebook-growth.md`).text();
 
 const SUBLISTS = ["Code", "Process", "Safety"];
 
