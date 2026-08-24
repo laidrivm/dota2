@@ -9,9 +9,15 @@ import { statSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { staticRoutes } from "./static-routes.ts";
 
-/** Exported so a caller can say what is missing before asking for a file:
- * listing a directory that is not there throws rather than coming up empty. */
-export const distDir = new URL("./dist/", import.meta.url);
+/**
+ * Exported so a caller can say what is missing before asking for a file:
+ * listing a directory that is not there throws rather than coming up empty.
+ *
+ * `../../` is the repository root from `src/server/`, not a stray relative
+ * path: `dist/` is written there by `bun run build`, and this module's own
+ * directory is not where the bundle lands.
+ */
+export const distDir = new URL("../../dist/", import.meta.url);
 
 /**
  * The paths served from source, with headers of their own — the build copies

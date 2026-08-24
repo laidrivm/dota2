@@ -7,11 +7,18 @@
 
 import { fileURLToPath } from "node:url";
 
-const fontDir = new URL("./src/app/styles/fonts/", import.meta.url);
-const snapshotFile = new URL("./src/fixtures/snapshot.json", import.meta.url);
+/**
+ * The repository root, which is two levels above this module rather than the
+ * module's own directory. Every path below is written from there because that
+ * is where the files are: `src/server/` holds this file and nothing it serves.
+ */
+const root = new URL("../../", import.meta.url);
+
+const fontDir = new URL("src/app/styles/fonts/", root);
+const snapshotFile = new URL("src/fixtures/snapshot.json", root);
 
 /** Where the ingest mirrors hero images. Written by the job, never by a build. */
-const iconDir = new URL("./icons/", import.meta.url);
+const iconDir = new URL("icons/", root);
 
 // The woff2 filenames encode their own face, so their bytes never change and
 // they can be cached forever. fonts.css can gain a face under a stable name,
