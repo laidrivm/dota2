@@ -2,9 +2,18 @@
  * What the run dates itself by: the patch the source lists, the patch the
  * table already holds, and the ways the source can leave a run with neither.
  */
-import { afterEach, beforeEach, describe, expect, jest, test } from "bun:test";
+import {
+	afterAll,
+	afterEach,
+	beforeEach,
+	describe,
+	expect,
+	jest,
+	test,
+} from "bun:test";
 import type { SQL } from "bun";
 import { opener, requiresDatabase, url } from "../db.fixture.ts";
+import { connect } from "../db.ts";
 import { detectPatch } from "./patches.ts";
 import { json, settle, stalls, stub } from "./stratz.fixture.ts";
 
@@ -156,6 +165,19 @@ describe("a patch list carrying nothing usable", () => {
 
 describe.skipIf(url === undefined)("the patch a run is dated by", () => {
 	const open = opener();
+
+	/**
+	 * The version numbers below are real ones, because detection parses them —
+	 * so they fall outside the `z9.` range `db.fixture.ts`'s cleaner reclaims
+	 * and no later suite would remove them. This file empties what it wrote
+	 * instead. Its own connection, rather than `open`, so it does not depend on
+	 * running before the `afterAll` that closes the pool.
+	 */
+	afterAll(async () => {
+		const sql = await connect(url);
+		await sql`DELETE FROM patches`;
+		await sql.close();
+	});
 
 	/** A connection over a `patches` table holding nothing. */
 	const empty = async () => {
