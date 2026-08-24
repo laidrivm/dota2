@@ -111,6 +111,10 @@ describe("every manifest-mutating invocation prompts", () => {
 		// gets to decide about `trustedDependencies`.
 		for (const entry of bashAsk) {
 			const command = entry.match(/^Bash\((.+) \*\)$/)?.[1];
+			// An entry written in another form leaves this `undefined`, and
+			// nothing below starts with "undefined " — so the case would report
+			// the entry as safe on having failed to read it.
+			expect(command, `${entry} is not in the form this reads`).toBeDefined();
 			for (const invocation of [
 				"bun run build",
 				"bun init",
