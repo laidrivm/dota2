@@ -303,10 +303,19 @@ division SHALL be attempted.
 #### Scenario: A hero the window holds no picks for
 
 - **WHEN** the meta response carries no row for a hero the reference tables
-  hold, and the ban response carries bans for that hero
+  hold, the ban response carries bans for that hero, and the window's matches
+  are not 0
 - **THEN** staging SHALL hold a `staging_hero_stats` row for it with `matches`
   0, `wins` 0 and a contest rate computed from those bans, and SHALL hold no
   `staging_hero_position_stats` row for it
+
+#### Scenario: A hero the meta response names and the reference does not
+
+- **IF** the meta response carries a row for a hero the reference tables do not
+  hold
+- **THEN** the run SHALL fail before writing staging, naming the source rather
+  than the column — the two come from different calls to the same API, and a
+  foreign key would report the mismatch as a constraint violation instead
 
 #### Scenario: A hero with neither picks nor bans
 
@@ -445,6 +454,12 @@ window rather than the patch, and the weeks the pair pull covered. The columns
 SHALL sit on `snapshots` beside `prior_weight`, which answers the same question
 about the same row: what this snapshot was built from.
 
+"Bound" means the cap discarded a day the patch's span held. Where the two
+windows coincide — a patch exactly thirty complete days old — the cap SHALL be
+recorded as not having bound the run, since nothing was left out. The tie has
+to be settled here because *the lesser of* the two says nothing about which
+produced the answer when they are equal.
+
 The last day recorded SHALL be the last day the window **includes**, not the
 exclusive bound it ends at. The window is defined end-exclusive above, so the
 two differ by a day, and a record read as the wrong one of them claims a day of
@@ -496,6 +511,13 @@ after it validates* fixes what does, and this requirement does not extend it.
   UTC days
 - **THEN** the snapshot SHALL record that the cap bound the window, and the
   window recorded SHALL be the thirty most recent complete UTC days
+
+#### Scenario: A patch exactly as old as the cap
+
+- **WHEN** the entry point completes a run over a patch live for exactly thirty
+  complete UTC days, where the patch's span and the cap are the same window
+- **THEN** the snapshot SHALL record that the cap did **not** bind it, the run
+  having discarded no day of the patch
 
 #### Scenario: A snapshot the entry point did not complete
 
