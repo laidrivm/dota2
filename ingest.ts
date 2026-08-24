@@ -55,6 +55,12 @@ export async function ingest(deps: Deps, at: Date): Promise<Covered> {
 	const weeks = pairWeeks(patch.detectedAt, at);
 	const positions = await pullMeta(deps.query, span);
 	const bans = await pullBans(deps.query, span);
+	// The response's heroes, deliberately, where the totals below take the
+	// tables': this is one request per hero per week, and a hero the source has
+	// stopped returning is one it has no pair rows for either. Spending the
+	// quota to be told so, week after week, buys nothing — a hero the tables
+	// keep and the source has dropped simply carries no matchups, as it
+	// carries no picks.
 	const { matchups, synergies } = await pullPairs(
 		deps.query,
 		heroes.map((hero) => hero.heroId),
