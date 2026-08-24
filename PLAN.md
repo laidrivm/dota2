@@ -93,28 +93,23 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       and the `oversize:` override stops admitting an unsplit one. One task
       group, so `chore/proposal-slicing`. Ahead of Phases 3b and 3a in the
       queue, stepping over both.
-- [ ] **Two readings `snapshot-ingest` left open** — both settled in
-      discussion, neither applied, and both are delta-spec work before code.
-      *A hero with no picks in the window* gets no `staging_hero_stats` row at
-      all, because the meta pull emits none and `heroTotals` builds from those
-      rows — so its bans reach nothing and the hero count can fall, which
-      `snapshot-build` §*A snapshot is published only after it validates*
-      refuses. Decided: read "for each hero" as the reference, then emit the
-      zero-pick row. *The covered window is recorded nowhere* — `ingest`
-      returns `Covered` and nothing writes it, where the requirement asks the
-      run to record the weeks covered and the cap that bound the window.
-      Decided: columns on `snapshots` beside `prior_weight`, which answers the
-      same "what was this built from", filled by group 12, which calls ingest
-      and build in turn and holds `Covered`. Ahead of that group.
-- [ ] **Phase 3b — `snapshot-ingest`** — proposed,
+- [ ] **Phase 3b — `snapshot-ingest`** — applying,
       `openspec/changes/snapshot-ingest/`. The schema and the database edge,
       the rate-limited STRATZ client, the reference upserts, the mirrored hero
       images, and the entry point that drives 3a to a published snapshot or a
-      failed one. Twelve task groups, so `feat/snapshot-ingest-1` through
-      `-12`, in order, each under the diff budget's warn line. It interleaves
-      with 3a rather than simply preceding it: groups 1 to 11 first, since
-      ingest creates and fills the tables the build reads; then 3a; then group
-      12, the entry point that calls 3a's build and export. A second probe
+      failed one. Groups 1 to 11 are merged, PRs #146 to #162. What is left is
+      group 11c on `feat/snapshot-ingest-11c` and group 12 on
+      `feat/snapshot-ingest-12`, and 3a falls between them. 11c is the two
+      readings this change left open, whose delta spec is now written: every
+      hero the reference holds reaches `staging_hero_stats`, the zero-pick row
+      included, and the window a run covered is recorded on the `snapshots`
+      row. The second lands in group 12, which is where `Covered` and the
+      snapshot the build made from it are held together; the first is its own
+      group, ahead of 3a, because 3a's fixtures seed staging and would
+      otherwise encode 126 heroes where the reference holds 127. It interleaves
+      with 3a rather than simply preceding it: groups 1 to 11 and 11c first,
+      since ingest creates and fills the tables the build reads; then 3a; then
+      group 12, the entry point that calls 3a's build and export. A second probe
       moved three assumptions, all in `docs/context/stratz-probe-2026-08.md`:
       the meta comes from a daily endpoint that can filter the game mode, patch
       detection leaves STRATZ whose version list stalled eight months back, and
@@ -126,7 +121,7 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       `openspec/changes/snapshot-build/`. The blending, smoothing and
       sufficiency maths, and the export of a bundle to the served URL. It
       reads the schema and staging 3b creates and fills, so it sits between
-      3b's group 11 and its group 12.
+      3b's group 11c and its group 12.
       Eight task groups, so `feat/snapshot-build-1` through `-8`, in order.
       Owns no *deployed* infrastructure — the production Postgres service, the
       schedule and the failure alert are Task 7's, and none of them gates it.

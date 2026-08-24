@@ -32,7 +32,10 @@ has never run on a real number. The API key that blocked this arrived, and
   `app-shell` requires and no third-party URL in the bundle would satisfy.
 - One entry point that runs the ingest, the build and the export in order and
   reports a single outcome, leaving the previously published bundle served when
-  any of the three fails.
+  any of the three fails. It also records on the snapshot what the run covered
+  — the window's bounds, whether the source's cap bound it, and the weeks the
+  pair pull reached — which two requirements oblige a run to record and neither
+  gives a home.
 - `.env.example`, naming the variables a run reads without carrying a value for
   any of them.
 - The schema, the `Bun.SQL` connection edge and the CI job that exercises them.

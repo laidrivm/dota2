@@ -241,10 +241,22 @@ cross a patch release, and no argument the endpoint offers can split it.
 
 ### Requirement: Contest rate is a share of the window's matches
 
-For each hero the ingest SHALL store `(picks + bans) / matches`, where `picks`
-is that hero's match count over the meta window, `bans` is its ban count over
-the same days, and `matches` is the sum of every hero's match count over that
-window divided by ten.
+For each hero **the reference tables hold** the ingest SHALL store
+`(picks + bans) / matches`, where `picks` is that hero's match count over the
+meta window, `bans` is its ban count over the same days, and `matches` is the
+sum of every hero's match count over that window divided by ten.
+
+The reference is what "each hero" names, and not the meta response. That
+response carries no row for a hero nobody played, so totals built from it alone
+would hold fewer heroes than the reference, and the hero it dropped would
+contribute its bans to nothing. A hero the meta window holds no picks for SHALL
+therefore still get a `staging_hero_stats` row, its `matches` and `wins` 0 and
+its contest rate computed from its bans alone. Its **position** rows SHALL
+still be absent, that being a different question with a different answer:
+`snapshot-build` §*A hero nobody played* fixes it and this requirement does not
+restate it. The consequence of dropping the total row is `snapshot-build`
+§*A snapshot is published only after it validates*, whose hero count may then
+fall below the newest published snapshot's.
 
 `bans` comes from a request of its own — the pick counts carry no ban dimension
 — and that request SHALL cover the same days as the meta window and SHALL be
@@ -287,6 +299,27 @@ division SHALL be attempted.
 - **WHEN** two heroes have equal pick counts and one has bans and the other
   none
 - **THEN** the one with bans SHALL have the higher contest rate
+
+#### Scenario: A hero the window holds no picks for
+
+- **WHEN** the meta response carries no row for a hero the reference tables
+  hold, and the ban response carries bans for that hero
+- **THEN** staging SHALL hold a `staging_hero_stats` row for it with `matches`
+  0, `wins` 0 and a contest rate computed from those bans, and SHALL hold no
+  `staging_hero_position_stats` row for it
+
+#### Scenario: A hero with neither picks nor bans
+
+- **WHEN** the meta response and the ban response both carry no row for a hero
+  the reference tables hold, over a window whose matches are not 0
+- **THEN** staging SHALL hold a `staging_hero_stats` row for it with `matches`
+  0, `wins` 0 and contest rate 0
+
+#### Scenario: Every reference hero reaches staging
+
+- **WHEN** a run writes staging
+- **THEN** the count of `staging_hero_stats` rows for the run's patch SHALL
+  equal the count of heroes the reference tables hold
 
 #### Scenario: The ban request's window
 
@@ -398,3 +431,52 @@ invented here would be an entry point no task tests and no criterion bounds.
 - **WHEN** the export is invoked without the ingest or the build
 - **THEN** it SHALL render the newest published snapshot and exit zero, no
   request to the statistics API having been made
+
+### Requirement: What a run covered is recorded on the snapshot it built
+
+Two requirements above oblige a run to record what bound its window — *The meta
+is pulled by day over the current patch's life* when the source's cap bound it,
+*Pair statistics are pulled per hero over at most four weeks* for the weeks
+covered. This requirement fixes where that record lands, which neither states.
+
+The entry point SHALL write on the `snapshots` row the build produced, before
+the export runs, the meta window's first and last UTC day, whether the source's
+thirty-day cap bound that window rather than the patch, and the weeks the pair
+pull covered. The columns SHALL sit on `snapshots` beside `prior_weight`, which
+answers the same question about the same row: what this snapshot was built
+from.
+
+The window is recorded as its bounds rather than as a count of days and weeks,
+though the patch and `created_at` would appear to determine those. They
+determine them only under the window arithmetic in force when the row is read,
+which is not necessarily the arithmetic that produced it — a bound cannot be
+read wrong by a later change, and a count reconstructed through a changed
+formula can.
+
+The columns SHALL be nullable. The build creates the row and cannot fill them:
+what the ingest covered and which snapshot the build made from it are held
+together only by the entry point, which runs the two in turn. A row therefore
+exists unfilled between the build and the entry point's write, and a null there
+SHALL NOT fail validation — `snapshot-build` §*A snapshot is published only
+after it validates* fixes what does, and this requirement does not extend it.
+
+#### Scenario: A run the patch bound
+
+- **WHEN** the entry point completes a run whose meta window was the patch's
+  own span, shorter than thirty complete UTC days
+- **THEN** the snapshot it built SHALL carry that window's first and last day,
+  SHALL record that the cap did not bind it, and SHALL carry the weeks the pair
+  pull covered
+
+#### Scenario: A run the source's cap bound
+
+- **WHEN** the entry point completes a run over a patch live for 150 complete
+  UTC days
+- **THEN** the snapshot SHALL record that the cap bound the window, and the
+  window recorded SHALL be the thirty most recent complete UTC days
+
+#### Scenario: A snapshot the entry point did not complete
+
+- **WHEN** a build produces a snapshot and no entry point writes its coverage
+- **THEN** the snapshot's coverage columns SHALL be null and validation SHALL
+  NOT fail for that reason

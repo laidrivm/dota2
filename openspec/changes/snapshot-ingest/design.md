@@ -252,6 +252,30 @@ mode. A standalone entry point is an interface: it needs its inputs, its
 outputs and its failure semantics fixed, and neither has a caller in this
 change that would exercise them.
 
+### The coverage record is the entry point's write, not the build's argument
+
+What a run covered is a fact about the ingest, and it has to land on a row the
+build creates — so somebody has to hold both. The entry point already does: it
+calls the two in turn and is handed the ingest's return value. So it writes the
+columns after the build returns, and they are nullable because the row exists
+before that write.
+
+*Alternative considered*: the build takes the coverage as an argument and
+writes the columns itself, which would let them be `NOT NULL`. It buys that one
+constraint by widening `snapshot-build`'s entry signature — an already-proposed
+change whose task groups are cut against the signature it has — so a fact the
+ingest measured would reach its table through a parameter on a function that
+has no use for it. The nullable column is the smaller seam, and what it admits
+is a row between two writes rather than a snapshot that forgot.
+
+*Alternative considered*: storing a day count and a week count instead of the
+window's bounds, since the patch and `created_at` are both on the row. They
+determine the window only under the arithmetic in force when the row is read.
+That arithmetic is this change's own — the thirty-day cap, the end-exclusive
+UTC day, the four-week bound — and a later change is free to move any of it,
+at which point every historical count reconstructs to a window that was never
+pulled. Bounds cost two columns and cannot be read wrong.
+
 ### The mirrored images are served like the fonts, and published like the bundle
 
 `GET /icons/<shortName>.png` answers `200` with the mirrored bytes,
