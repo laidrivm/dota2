@@ -3,7 +3,7 @@
  * where the source's own reach cuts it short, and that neither bound is read
  * off the machine's calendar.
  */
-import { afterAll, beforeAll, describe, expect, test } from "bun:test";
+import { beforeAll, describe, expect, test } from "bun:test";
 import { metaWindow } from "./meta.ts";
 
 /** A patch released at a UTC midnight, and a run a week into its life. */
@@ -50,12 +50,13 @@ test("the day the run instant falls inside is not part of it [64]", () => {
 });
 
 describe("read from a zone nine hours ahead of UTC", () => {
-	const zone = process.env.TZ;
+	// Nothing restores the zone afterwards, because nothing can: measured
+	// against bun 1.3.14, only the first in-process write to `process.env.TZ`
+	// takes — a `delete`, and every later assignment, leaves the run on the zone
+	// this block set. So every file bun runs after this one runs in Asia/Tokyo,
+	// and a restoring `afterAll` would only read as though it did not.
 	beforeAll(() => {
 		process.env.TZ = "Asia/Tokyo";
-	});
-	afterAll(() => {
-		process.env.TZ = zone;
 	});
 
 	// spec: snapshot-ingest/the-day-in-progress

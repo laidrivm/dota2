@@ -50,9 +50,9 @@ type Attempt =
 	| { kind: "body"; body: unknown }
 	/** Retrying cannot help; the run ends here. */
 	| { kind: "fatal"; message: string }
-	/** The service might yet accept this request. */
 	/** Terminal for the whole run, not merely for this request. */
 	| { kind: "quota"; message: string }
+	/** The service might yet accept this request. */
 	| { kind: "retry"; message: string };
 
 const fatal = (message: string): Attempt => ({ kind: "fatal", message });
