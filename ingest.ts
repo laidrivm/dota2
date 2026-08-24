@@ -74,7 +74,9 @@ export async function ingest(deps: Deps, at: Date): Promise<Covered> {
 
 	await writeStaging(deps.sql, patch.patchId, {
 		positions,
-		heroes: heroTotals(positions, bans),
+		// `known` is the row set as well as the guard above: every reference
+		// hero gets a total, whether or not the window held a pick for it.
+		heroes: heroTotals(known, positions, bans),
 		matchups,
 		synergies,
 	});

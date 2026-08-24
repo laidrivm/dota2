@@ -133,24 +133,34 @@ export type HeroTotal = {
  * the pick count anyway, and `snapshot-build` reads side and phase baselines
  * against a hero total. Should the two ever disagree, the position rows are
  * what the source returned.
+ *
+ * The row set is `heroIds`, the reference, and not the heroes the meta
+ * response named: a hero nobody played over the window has no meta row, and
+ * building from those alone would drop it — with its bans, and with the hero
+ * count `snapshot-build` validates a snapshot against. Its **position** rows
+ * stay the meta response's, that being a different question.
  */
 export function heroTotals(
+	heroIds: Iterable<number>,
 	rows: PositionCount[],
 	bans: Map<number, number>,
 ): HeroTotal[] {
 	const totals = new Map<number, Omit<HeroTotal, "contestRate">>();
+	for (const heroId of heroIds)
+		totals.set(heroId, { heroId, matches: 0, wins: 0 });
 	// Summed here rather than over the totals afterwards: every hero's matches
 	// added up is every row's matches added up, and one pass says so.
 	let picked = 0;
 	for (const row of rows) {
-		const total = totals.get(row.heroId) ?? {
-			heroId: row.heroId,
-			matches: 0,
-			wins: 0,
-		};
+		picked += row.matches;
+		const total = totals.get(row.heroId);
+		// A hero the reference does not hold is skipped rather than added:
+		// `ingest` fails such a run before the write, so nothing this drops
+		// would have been staged — and adding it here would put a row in
+		// `staging_hero_stats` that the foreign key refuses anyway.
+		if (total === undefined) continue;
 		total.matches += row.matches;
 		total.wins += row.wins;
-		picked += row.matches;
 		// Five positions each fitting the column can sum past it, as thirty days
 		// can. Refused here rather than at the insert, which reports a range
 		// error naming a column instead of a source.
@@ -158,7 +168,6 @@ export function heroTotals(
 			throw new Error(
 				`hero ${row.heroId} sums past what the column holds across its positions`,
 			);
-		totals.set(row.heroId, total);
 	}
 
 	// Exact, not an estimate: an All Pick match holds ten distinct heroes, so
