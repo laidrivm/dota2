@@ -51,7 +51,7 @@ One fact lives in exactly one file; everything else links to it.
   started from the image CI pins and taken away afterwards. Without it 53
   cases skip: every patch detection, every reference upsert, every schema
   constraint and the whole staging write. Arguments pass through, so
-  `bun run test:db ./ingest.test.ts` runs one file — the `./` matters, since a
+  `bun run test:db ./src/job/ingest/ingest.test.ts` runs one file — the `./` matters, since a
   bare argument is matched as a substring of every path.
 - `bun run test:coverage` — the same suite with Bun's built-in coverage
   reporter. The number is visibility, not a gate: no threshold is configured

@@ -107,42 +107,42 @@ sites the count of four never reached.
 Last, because it is the ratchet: it passes only over the tree groups 1 to 3
 leave.
 
-- [ ] 4.1 Write the scan's tests over fabricated trees, tests first: a root
+- [x] 4.1 Write the scan's tests over fabricated trees, tests first: a root
       of exempted files only reports nothing [1]; one unexempted `.ts` is
       reported, naming the file and that the list does not name it [3]; two
       unexempted files are both reported [4]; a file one directory down is
       not [6]; a root dotfile is subject to the list like any other, a
       leading dot being no implicit pass [7]. (Req: repo-layout — The
       repository root holds only what is exempted by name)
-- [ ] 4.2 Write the could-not-measure tests: a scan that matched no root file
+- [x] 4.2 Write the could-not-measure tests: a scan that matched no root file
       at all fails rather than reporting a clean root [2], the shape
       `scripts/file-size.ts` already takes for a sweep that matched nothing;
       and `git` exiting non-zero fails with its own stderr rather than
       reporting one [13]. (Req: repo-layout — The repository root holds only
       what is exempted by name)
-- [ ] 4.3 Write the exemption list's own tests: an entry naming a path the
+- [x] 4.3 Write the exemption list's own tests: an entry naming a path the
       repository no longer tracks fails rather than lingering unnoticed [8],
       and an entry whose reason is empty is refused [9]. (Req: repo-layout —
       The repository root holds only what is exempted by name)
-- [ ] 4.4 Write the non-regular-entry tests: a tracked-but-deleted root entry
+- [x] 4.4 Write the non-regular-entry tests: a tracked-but-deleted root entry
       is skipped rather than crashing the scan [11], and a root symlink is
       skipped rather than read as a file [12] — `git` lists both, and neither
       is a file placed in the wrong directory. Then the subdirectory test:
       the scan run from below the root still reads the whole repository [10].
       (Req: repo-layout — The repository root holds only what is exempted by
       name / A check reads the tracked tree from the repository root)
-- [ ] 4.5 Implement `scripts/repo-layout.ts`: the tracked listing taken at the
+- [x] 4.5 Implement `scripts/repo-layout.ts`: the tracked listing taken at the
       repository root, scoped to root-level entries, each admitted only by a
       named exemption carrying its reason. Scoped by what it exempts and not
       by the extensions it covers — `scripts/file-size.ts` argues the opposite
       departure for the line cap, and `design.md` says why the two differ.
       (Req: repo-layout — The repository root holds only what is exempted by
       name)
-- [ ] 4.6 Add the repository sweep: the tree as it stands reports no file
+- [x] 4.6 Add the repository sweep: the tree as it stands reports no file
       [14], every remaining root file being named. This is the task that
       fails until groups 1 to 3 have landed. (Req: repo-layout — The
       repository root holds only what is exempted by name)
-- [ ] 4.7 Write `checks/readme-layout.test.ts`, tests first: a README with no
+- [x] 4.7 Write `checks/readme-layout.test.ts`, tests first: a README with no
       layout heading fails rather than passing over an absent section [15];
       a section parsing to zero directories fails [16]; a named directory the
       repository tracks a file under passes [17]; a directory marked reserved

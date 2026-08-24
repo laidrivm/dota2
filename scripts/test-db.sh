@@ -9,7 +9,7 @@
 # the push rather than after it.
 #
 # Arguments are handed to `bun test` unchanged, so a single file can be run:
-#   bun run test:db ./ingest.test.ts
+#   bun run test:db ./src/job/ingest/ingest.test.ts
 # The leading `./` is load-bearing: bun matches a bare argument as a substring
 # of every path, so `test-db` alone would also run `scripts/test-db.test.ts`.
 set -uo pipefail
