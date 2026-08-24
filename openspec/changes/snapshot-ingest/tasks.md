@@ -329,9 +329,11 @@ tests that are meant to catch it.
 - [ ] 11c.3 Re-aim the two tests that pin the reading being reversed:
       `contest.test.ts`'s *a hero banned but never picked in the window gets no
       row* inverts, its comment saying the reading was unsettled deleted with
-      it; *no hero at all yields no row and no division* is passed an empty
-      meta response over a non-empty reference, which is the case its name now
-      describes. (Req: snapshot-ingest — Contest rate is a share of the
+      it; *no hero at all yields no row and no division* moves off the empty
+      meta response and onto an empty **reference**, which is what "no hero at
+      all" now means and is [95] above — an empty meta response over a
+      non-empty reference yields a zero row per reference hero, not none, and
+      is [90] and [91]. (Req: snapshot-ingest — Contest rate is a share of the
       window's matches)
 - [ ] 11c.4 Implement the totals over the hero reference rather than over the
       meta response: build the row set from the heroes the reference returned,
