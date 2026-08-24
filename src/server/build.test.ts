@@ -1,6 +1,7 @@
 import { beforeAll, describe, expect, test } from "bun:test";
 import { symlinkSync, unlinkSync } from "node:fs";
-import { distFile } from "./dist-routes.ts";
+import { fileURLToPath } from "node:url";
+import { distDir, distFile } from "./dist-routes.ts";
 
 /**
  * The build is a bundler call plus two `cp` steps, and the font arrangement
@@ -11,11 +12,17 @@ import { distFile } from "./dist-routes.ts";
  * `dist/` already exists.
  */
 
-const dist = `${import.meta.dir}/dist`;
+/**
+ * The repository root, two levels above this module: `bun run build` writes
+ * `dist/` there and has to be spawned there, and neither is `src/server/`.
+ */
+const root = fileURLToPath(new URL("../..", import.meta.url));
+
+const dist = `${root}dist`;
 
 beforeAll(async () => {
 	const build = Bun.spawnSync(["bun", "run", "build"], {
-		cwd: import.meta.dir,
+		cwd: root,
 	});
 	if (build.exitCode !== 0) {
 		throw new Error(`build failed: ${build.stderr.toString()}`);
@@ -23,6 +30,19 @@ beforeAll(async () => {
 });
 
 describe("build output", () => {
+	test("is looked for at the repository root, not beside this module", () => {
+		// The anchor is what the move changed, and every case below reads the
+		// same wrong one if it is wrong: they would report an empty `dist/`,
+		// which is what a build that had not run looks like too. The root comes
+		// from git rather than from this file's location, that location being
+		// the thing under test.
+		const top = Bun.spawnSync(["git", "rev-parse", "--show-toplevel"])
+			.stdout.toString()
+			.trim();
+
+		expect(fileURLToPath(distDir)).toBe(`${top}/dist/`);
+	});
+
 	test("carries the snapshot the client fetches", async () => {
 		const snapshot = Bun.file(`${dist}/snapshot.json`);
 
@@ -89,7 +109,7 @@ describe("serving the build output", () => {
 	// `Bun.file` follows a symlink, so the listing has to resolve one.
 	test("refuses an entry that resolves outside dist/", async () => {
 		const planted = `${dist}/escape.js`;
-		symlinkSync(`${import.meta.dir}/package.json`, planted);
+		symlinkSync(`${root}package.json`, planted);
 
 		try {
 			expect(distFile("/escape.js")).toBeNull();
