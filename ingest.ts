@@ -12,7 +12,7 @@
  */
 import type { SQL } from "bun";
 import { heroTotals, pullBans } from "./contest.ts";
-import { readHeroes, upsertHeroes } from "./heroes.ts";
+import { heldHeroIds, readHeroes, upsertHeroes } from "./heroes.ts";
 import { mirrorIcons } from "./icons.ts";
 import { type MetaWindow, metaWindow, pullMeta } from "./meta.ts";
 import { pairWeeks, pullPairs } from "./pairs.ts";
@@ -65,7 +65,11 @@ export async function ingest(deps: Deps, at: Date): Promise<Covered> {
 	// rather than left to the foreign key: the two come from different calls to
 	// the same API, and a hero one names before the other reaches the insert as
 	// a constraint violation naming a column instead of a source.
-	const known = new Set(heroes.map((hero) => hero.heroId));
+	//
+	// Read from the tables rather than from `heroes`, the response just
+	// upserted: the tables are what the requirement names, and they hold every
+	// hero a response has ever carried where the response holds only today's.
+	const known = new Set(await heldHeroIds(deps.sql));
 	for (const row of positions)
 		if (!known.has(row.heroId))
 			throw new Error(

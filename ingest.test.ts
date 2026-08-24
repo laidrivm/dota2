@@ -2,94 +2,42 @@
  * A whole run against a real database: what a repeat leaves, what a day's
  * difference moves, and what a failure part-way leaves behind.
  *
- * The staging write's own cases — retention and the rollback of one bad
- * row — are `staging.test.ts`'s.
+ * Which heroes a run stages is `ingest-reference.test.ts`'s; the staging
+ * write's own cases — retention and the rollback of one bad row — are
+ * `staging.test.ts`'s.
  */
 
 import { describe, expect, test } from "bun:test";
 import { join } from "node:path";
-import type { SQL } from "bun";
-import { opener, requiresDatabase, url } from "./db.fixture.ts";
+import { cleaner, opener, requiresDatabase, url } from "./db.fixture.ts";
 import {
 	HEROES,
 	icons,
+	NEXT_DAY,
 	PATCH,
+	RUN_AT,
+	run,
 	sourceFetch,
 	sourceQuery,
+	staged,
 } from "./ingest.fixture.ts";
 import { ingest } from "./ingest.ts";
 
 requiresDatabase();
 
-/** A run a week into the patch's life, and one a day later. */
-const RUN_AT = new Date("2026-08-21T12:00:00.000Z");
-const NEXT_DAY = new Date("2026-08-22T12:00:00.000Z");
-
-/** What one meta row carries, whichever hero it names. */
-const COUNTS = { matchCount: 10, winCount: 5 };
-
 describe.skipIf(url === undefined)("one run, and the next", () => {
-	const open = opener();
+	const clean = cleaner(opener());
 	const dir = icons();
 	/** A second one, for the case that asserts what a run left in it. */
 	const ownDir = icons();
-
-	/** A connection holding none of this file's rows. */
-	const clean = async () => {
-		const sql = await open();
-		await sql`DELETE FROM staging_hero_position_stats WHERE hero_id >= 9000`;
-		await sql`DELETE FROM staging_hero_stats WHERE hero_id >= 9000`;
-		await sql`DELETE FROM staging_hero_matchups WHERE hero_id >= 9000`;
-		await sql`DELETE FROM staging_hero_synergies WHERE hero_id >= 9000`;
-		await sql`DELETE FROM heroes WHERE hero_id >= 9000`;
-		await sql`DELETE FROM patches WHERE patch_id LIKE 'z9.%'`;
-		return sql;
-	};
-
-	/** Every staging row this file's heroes have, in a comparable shape. */
-	const staged = async (sql: SQL) => ({
-		positions: await sql`SELECT patch_id, hero_id, position, matches, wins
-			FROM staging_hero_position_stats WHERE hero_id >= 9000
-			ORDER BY hero_id, position`,
-		heroes: (
-			await sql`SELECT patch_id, hero_id, matches, wins, contest_rate
-				FROM staging_hero_stats WHERE hero_id >= 9000 ORDER BY hero_id`
-		).map((row: { contest_rate: number }) => ({
-			...row,
-			// Compared as the `real` it is stored as. Measured on this driver
-			// (bun 1.3.14): the first read of a `real` column on a connection
-			// answers 5.0285716 and every read after it answers
-			// 5.028571605682373 — one float4 value, two JS renderings, so a raw
-			// comparison of two reads fails on representation alone.
-			contest_rate: Math.fround(row.contest_rate),
-		})),
-		matchups: await sql`SELECT patch_id, hero_id, enemy_id, matches, wins
-			FROM staging_hero_matchups WHERE hero_id >= 9000
-			ORDER BY hero_id, enemy_id`,
-		synergies: await sql`SELECT patch_id, hero_id, ally_id, matches, wins
-			FROM staging_hero_synergies WHERE hero_id >= 9000
-			ORDER BY hero_id, ally_id`,
-	});
-
-	/** A run over the source this file scripts, at `at`. */
-	const run = (sql: SQL, at: Date, options: { pairsFail?: boolean } = {}) =>
-		ingest(
-			{
-				sql,
-				query: sourceQuery(at, options).query,
-				fetch: sourceFetch(),
-				iconsDir: dir,
-			},
-			at,
-		);
 
 	// spec: snapshot-ingest/two-runs-over-unchanged-data
 	test("two runs over the same source and instant leave identical rows [36]", async () => {
 		const sql = await clean();
 
-		const first = await run(sql, RUN_AT);
+		const first = await run(sql, dir, RUN_AT);
 		const once = await staged(sql);
-		await run(sql, RUN_AT);
+		await run(sql, dir, RUN_AT);
 		const twice = await staged(sql);
 
 		expect(first.patchId).toBe(PATCH);
@@ -103,7 +51,7 @@ describe.skipIf(url === undefined)("one run, and the next", () => {
 	test("one run writes rows to every staging table it fills [36]", async () => {
 		const sql = await clean();
 
-		await run(sql, RUN_AT);
+		await run(sql, dir, RUN_AT);
 
 		// Asserted per table, because every other case here compares one run
 		// against another — and two runs that both wrote nothing to a table
@@ -121,7 +69,7 @@ describe.skipIf(url === undefined)("one run, and the next", () => {
 	test("a run reports the window and the weeks it covered [36]", async () => {
 		const sql = await clean();
 
-		const covered = await run(sql, RUN_AT);
+		const covered = await run(sql, dir, RUN_AT);
 
 		// What the requirement asks a run to record, and what group 12 has to
 		// have in hand to report it.
@@ -157,85 +105,13 @@ describe.skipIf(url === undefined)("one run, and the next", () => {
 		expect((await staged(sql)).positions).toEqual([]);
 	});
 
-	// spec: snapshot-ingest/a-hero-the-meta-response-names-and-the-reference-does-not
-	test("a hero the reference does not hold fails before the write [37] [98]", async () => {
-		const sql = await clean();
-		const { query } = sourceQuery(RUN_AT);
-		// The meta pull names a hero the reference call never did — two calls to
-		// one API disagreeing, which reaches the insert as a foreign key error
-		// naming a column rather than a source. Kept as a run failure rather
-		// than left to the totals, which now build from the reference and so
-		// would drop such a hero without a word.
-		const strayed: typeof query = async (sent) => {
-			const answered = await query(sent);
-			if (!sent.includes("winDay")) return answered;
-			const body = answered as {
-				data: { heroStats: { winDay: { heroId: number }[] } };
-			};
-			body.data.heroStats.winDay.push({ heroId: 9404, ...COUNTS });
-			return body;
-		};
-
-		const failed = await ingest(
-			{ sql, query: strayed, fetch: sourceFetch(), iconsDir: dir },
-			RUN_AT,
-		).then(
-			() => null,
-			(error: Error) => error.message,
-		);
-
-		expect(failed).toContain("the reference does not hold");
-		expect((await staged(sql)).positions).toEqual([]);
-	});
-
-	// spec: snapshot-ingest/every-reference-hero-reaches-staging
-	test("a hero the window holds no picks for still reaches staging [91]", async () => {
-		const sql = await clean();
-		const { query } = sourceQuery(RUN_AT);
-		// The meta response drops the second hero, which is what a hero nobody
-		// played in the window looks like: the ban response still names it.
-		const quiet: typeof query = async (sent) => {
-			const answered = await query(sent);
-			if (!sent.includes("winDay")) return answered;
-			const body = answered as {
-				data: { heroStats: { winDay: { heroId: number }[] } };
-			};
-			body.data.heroStats.winDay = body.data.heroStats.winDay.filter(
-				(row) => row.heroId !== HEROES[1],
-			);
-			return body;
-		};
-
-		await ingest(
-			{ sql, query: quiet, fetch: sourceFetch(), iconsDir: dir },
-			RUN_AT,
-		);
-
-		const rows = await staged(sql);
-		// One row per reference hero, whether or not the window held a pick —
-		// the count `snapshot-build`'s validation reads.
-		expect(rows.heroes).toHaveLength(HEROES.length);
-		expect(rows.heroes[1]).toEqual({
-			patch_id: PATCH,
-			hero_id: HEROES[1],
-			matches: 0,
-			wins: 0,
-			// The remaining hero's 350 picks are 35 matches, and this hero's
-			// two bans are all it brings to them.
-			contest_rate: Math.fround(2 / 35),
-		});
-		// The position rows are the meta response's, so the silent hero has
-		// none of them.
-		expect(rows.positions).toHaveLength(5);
-	});
-
 	// spec: snapshot-ingest/two-runs-a-day-apart
 	test("two runs a UTC day apart leave different rows [65]", async () => {
 		const sql = await clean();
 
-		await run(sql, RUN_AT);
+		await run(sql, dir, RUN_AT);
 		const before = await staged(sql);
-		await run(sql, NEXT_DAY);
+		await run(sql, dir, NEXT_DAY);
 		const after = await staged(sql);
 
 		// The window grew by a day, so the summed counts did. Stating this is
@@ -248,10 +124,10 @@ describe.skipIf(url === undefined)("one run, and the next", () => {
 	// spec: snapshot-ingest/a-run-that-fails-part-way
 	test("a run failing after the meta pull leaves staging untouched [37]", async () => {
 		const sql = await clean();
-		await run(sql, RUN_AT);
+		await run(sql, dir, RUN_AT);
 		const before = await staged(sql);
 
-		const failed = await run(sql, NEXT_DAY, { pairsFail: true }).then(
+		const failed = await run(sql, dir, NEXT_DAY, { pairsFail: true }).then(
 			() => null,
 			(error: Error) => error.message,
 		);
@@ -268,15 +144,7 @@ describe.skipIf(url === undefined)("one run, and the next", () => {
 
 		// A directory of its own, so what is found in it afterwards was written
 		// by this run rather than by whichever case ran before it.
-		const failed = await ingest(
-			{
-				sql,
-				query: sourceQuery(RUN_AT, { pairsFail: true }).query,
-				fetch: sourceFetch(),
-				iconsDir: ownDir,
-			},
-			RUN_AT,
-		).then(
+		const failed = await run(sql, ownDir, RUN_AT, { pairsFail: true }).then(
 			() => null,
 			(error: Error) => error.message,
 		);

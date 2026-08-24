@@ -39,6 +39,31 @@ export const requiresDatabase = () =>
  * the top level of a suite: it registers the `afterAll` that does the closing,
  * so a file that opens connections cannot forget to release them.
  */
+/**
+ * A connection a whole file shares, emptied of that file's rows before each
+ * case: the staging tables first, because a reference row a staging row names
+ * cannot be deleted under it — a suite that deleted heroes alone passed only
+ * while it happened to run before every suite that leaves staging rows.
+ *
+ * Opened on the first case that asks. `opener` pools per call, so a connection
+ * per case is a pool per case, and a file long enough exhausts the server's
+ * clients — every case then failing on the one that opened last.
+ */
+export function cleaner(open: () => Promise<SQL>): () => Promise<SQL> {
+	let held: Promise<SQL> | undefined;
+	return async () => {
+		if (held === undefined) held = open();
+		const sql = await held;
+		await sql`DELETE FROM staging_hero_position_stats WHERE hero_id >= 9000`;
+		await sql`DELETE FROM staging_hero_stats WHERE hero_id >= 9000`;
+		await sql`DELETE FROM staging_hero_matchups WHERE hero_id >= 9000`;
+		await sql`DELETE FROM staging_hero_synergies WHERE hero_id >= 9000`;
+		await sql`DELETE FROM heroes WHERE hero_id >= 9000`;
+		await sql`DELETE FROM patches WHERE patch_id LIKE 'z9.%'`;
+		return sql;
+	};
+}
+
 export function opener(): () => Promise<SQL> {
 	const opened: SQL[] = [];
 	afterAll(async () => {
