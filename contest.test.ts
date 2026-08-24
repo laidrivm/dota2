@@ -107,8 +107,28 @@ describe("the rate a hero's picks and bans come to", () => {
 		for (const total of totals) expect(total.contestRate).toBe(0);
 	});
 
-	test("no hero at all yields no row and no division", () => {
-		expect(heroTotals([], new Map())).toEqual([]);
+	test("no hero at all yields no row and no division [95]", () => {
+		// "No hero at all" is now the reference being empty rather than the
+		// meta response being: an empty response over a non-empty reference
+		// yields a zero row per hero, which is [90] below and not this.
+		expect(heroTotals([], [], new Map())).toEqual([]);
+	});
+
+	test("a hero with bans and no picks over a matchless window rates 0 [96]", () => {
+		// `Infinity` if the divisor guard were dropped, and reachable only now
+		// that such a hero has a row at all to rate.
+		const totals = heroTotals(
+			[9001, 9404],
+			[picked(9001, 1, 0)],
+			new Map([[9404, 3]]),
+		);
+
+		expect(totals).toContainEqual({
+			heroId: 9404,
+			matches: 0,
+			wins: 0,
+			contestRate: 0,
+		});
 	});
 
 	// spec: snapshot-ingest/a-hero-the-window-holds-no-picks-for
