@@ -439,12 +439,19 @@ is pulled by day over the current patch's life* when the source's cap bound it,
 *Pair statistics are pulled per hero over at most four weeks* for the weeks
 covered. This requirement fixes where that record lands, which neither states.
 
-The entry point SHALL write on the `snapshots` row the build produced, before
-the export runs, the meta window's first and last UTC day, whether the source's
-thirty-day cap bound that window rather than the patch, and the weeks the pair
-pull covered. The columns SHALL sit on `snapshots` beside `prior_weight`, which
-answers the same question about the same row: what this snapshot was built
-from.
+The entry point SHALL write on the `snapshots` row the build produced the meta
+window's first and last UTC day, whether the source's thirty-day cap bound that
+window rather than the patch, and the weeks the pair pull covered. The columns
+SHALL sit on `snapshots` beside `prior_weight`, which answers the same question
+about the same row: what this snapshot was built from.
+
+The write SHALL happen as soon as the build returns a row, whatever the build's
+outcome, and nothing later in the run SHALL undo it. Both halves are stated
+because the alternatives are what a reader would otherwise assume. A build that
+ends `failed` is the case where the window it read is *most* worth having, so
+the record is not conditional on publishing. And an export that fails afterwards
+falsifies nothing the record claims: it says what the run covered, not that a
+bundle shipped.
 
 The window is recorded as its bounds rather than as a count of days and weeks,
 though the patch and `created_at` would appear to determine those. They
@@ -480,3 +487,15 @@ after it validates* fixes what does, and this requirement does not extend it.
 - **WHEN** a build produces a snapshot and no entry point writes its coverage
 - **THEN** the snapshot's coverage columns SHALL be null and validation SHALL
   NOT fail for that reason
+
+#### Scenario: A build that ends failed
+
+- **IF** the build ends at `status = 'failed'` and the export therefore does
+  not run
+- **THEN** the snapshot SHALL still carry what the run covered
+
+#### Scenario: An export that fails after the record
+
+- **IF** the export fails after the coverage has been written
+- **THEN** the coverage SHALL remain on the snapshot, the record naming what
+  the run covered rather than what shipped
