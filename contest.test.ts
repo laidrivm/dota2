@@ -16,20 +16,21 @@ const picked = (
 	wins = 0,
 ): PositionCount => ({ heroId, position, matches, wins });
 
-/** The reference a case does not name: exactly the heroes its rows do. */
-const referenced = (rows: PositionCount[]) => [
-	...new Set(rows.map((row) => row.heroId)),
-];
-
-/** The contest rate `heroTotals` gives `heroId`, over `rows` and `bans`. */
+/**
+ * The contest rate `heroTotals` gives `heroId`, over `rows` and `bans`.
+ *
+ * The reference these cases do not name is exactly the heroes their rows do:
+ * a case whose point is a hero the reference holds and the rows do not calls
+ * `heroTotals` itself, that hero being the whole of what it asserts.
+ */
 const rateOf = (
 	heroId: number,
 	rows: PositionCount[],
 	bans: Map<number, number> = new Map(),
-	heroIds: number[] = referenced(rows),
 ) =>
-	heroTotals(heroIds, rows, bans).find((total) => total.heroId === heroId)
-		?.contestRate;
+	heroTotals([...new Set(rows.map((row) => row.heroId))], rows, bans).find(
+		(total) => total.heroId === heroId,
+	)?.contestRate;
 
 describe("the position rows a hero's total is made of", () => {
 	// spec: snapshot-ingest/a-hero-picked-in-every-match
