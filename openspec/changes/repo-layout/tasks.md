@@ -23,7 +23,7 @@ is the suite that already covers these files passing unchanged.
       `db.ts` resolves its schema as `${import.meta.dir}/schema.sql` and the
       adjacency is what keeps that correct. (Req: repo-layout — The
       repository root holds only what is exempted by name)
-- [ ] 1.2 Move the twenty-nine pull, transport and staging files to
+- [ ] 1.2 Move the pull, transport and staging files to
       `src/job/ingest/`: `stratz`, `patches`, `heroes`, `meta`, `contest`,
       `pairs`, `icons`, `staging` and `ingest`, with their tests and
       fixtures. (Req: repo-layout — The repository root holds only what is
