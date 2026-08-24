@@ -452,10 +452,13 @@ matches the run never pulled. This is the same reading the meta requirement
 takes care to fix for the window itself, and it has to be fixed again here
 because storing a window and computing one are different operations.
 
-Whatever identifies the row to its caller SHALL be available whatever the
-build's outcome, since a failed build's coverage is recorded too. That is a
-constraint on `snapshot-build`, which owns the build and its return, and it is
-stated here because this is the requirement that rests on it.
+The row is identified by its `snapshot_id`, and the build SHALL make that value
+available to its caller on **both** outcomes — the snapshot it published and
+the one it set to `failed` alike. Naming the column rather than "whatever
+identifies the row" is what makes this checkable, and `snapshot_id` is this
+change's own: group 4 declares it. What is `snapshot-build`'s is returning it,
+so that constraint is named here because this is the requirement that rests on
+it, and in that change's task list because that is where it is met.
 
 The write SHALL happen as soon as the build returns a row, whatever the build's
 outcome, and nothing later in the run SHALL undo it. Both halves are stated

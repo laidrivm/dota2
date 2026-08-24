@@ -11,7 +11,7 @@ order. It runs after `snapshot-ingest`'s groups 1 to 11c, which own the schema
 both read and fill the staging the build reads, and before its group 12, whose
 entry point calls this change's build and export. That entry point writes what
 the run covered onto the row the build created, including when the build ends
-`failed`, so the build identifies that row to its caller on both outcomes —
+`failed`, so the build returns that row's `snapshot_id` on both outcomes —
 `snapshot-ingest` §*What a run covered is recorded on the snapshot it built*
 rests on it.
 Groups 1 and 2 add a pure module nothing calls yet; the application
