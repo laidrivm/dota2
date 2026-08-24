@@ -105,17 +105,18 @@ describe.skipIf(url === undefined)("connecting", () => {
 
 	/**
 	 * Last in the file, so what it reads is what the cases above left behind.
-	 * The sentinels are what `db.fixture.ts`'s cleaner deletes — hero ids at or
-	 * above 9000, patch ids under `z9.` — and a row outside them is reclaimed by
-	 * nothing and read by whichever suite bun runs next, which is an order that
-	 * has already changed once.
+	 *
+	 * The hero is the sentinel the whole cascade hangs on: `db.fixture.ts`'s
+	 * cleaner reclaims ids at or above 9000, and a hero below that survives
+	 * every cleaner, so the next suite stages rows against it that no cleaner
+	 * can delete either — and the patch delete underneath them then fails on a
+	 * foreign key. Which suite runs next is an order that has already changed
+	 * once. The `patches` table carries no such rule: `patches.test.ts` empties
+	 * it whole and refills it with real version numbers.
 	 */
-	test("nothing outside the sentinels the cleaner reclaims is left standing", async () => {
+	test("no hero below the sentinel the cleaner reclaims is left standing", async () => {
 		const sql = await open();
-		const strays = await sql`
-			SELECT hero_id::text AS stray FROM heroes WHERE hero_id < 9000
-			UNION ALL
-			SELECT patch_id FROM patches WHERE patch_id NOT LIKE 'z9.%'`;
+		const strays = await sql`SELECT hero_id FROM heroes WHERE hero_id < 9000`;
 		expect(strays).toEqual([]);
 	});
 });
