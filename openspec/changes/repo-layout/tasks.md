@@ -79,17 +79,17 @@ sites the count of four never reached.
 
 ## 3. The repository's own checks
 
-- [ ] 3.1 Move the nine artefact tests to `checks/`: `rulebook.test.ts`,
+- [x] 3.1 Move the nine artefact tests to `checks/`: `rulebook.test.ts`,
       `readme-map.test.ts`, `skill-provenance.test.ts`,
       `coderabbit-config.test.ts`, `commit-gates.test.ts`, and the four
       `agent-permissions` files. Moves only. (Req: repo-layout — The
       repository root holds only what is exempted by name)
-- [ ] 3.2 Take `join(import.meta.dir, "..")` across the nine where they read
+- [x] 3.2 Take `join(import.meta.dir, "..")` across the nine where they read
       a repository artefact, and `../bunfig.toml` in
       `agent-permissions-allow.test.ts`, which is the one import crossing a
       new boundary. (Req: repo-layout — The repository root holds only what
       is exempted by name)
-- [ ] 3.3 Write the regression first, then fix it: `readme-map.test.ts`
+- [x] 3.3 Write the regression first, then fix it: `readme-map.test.ts`
       resolves every mapped path when run from `checks/` [24], which it does
       not today — it lists the tree with `git ls-files` at its own directory
       and resolves no repository root, so from `scripts/` the same call
@@ -97,7 +97,7 @@ sites the count of four never reached.
       `rev-parse --show-toplevel` form the other listing sites already use,
       which `design.md` counts. (Req:
       repo-layout — A check reads the tracked tree from the repository root)
-- [ ] 3.4 Cover the general form of that criterion: a check listing the
+- [x] 3.4 Cover the general form of that criterion: a check listing the
       tracked tree, run from a directory below the root, still reads the
       whole repository with paths named relative to the root [10]. (Req:
       repo-layout — A check reads the tracked tree from the repository root)
