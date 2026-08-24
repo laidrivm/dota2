@@ -313,7 +313,7 @@ group 11: 3a's fixtures seed staging, so a build written against staging that
 holds 126 heroes where the reference holds 127 would encode the defect in the
 tests that are meant to catch it.
 
-- [ ] 11c.1 Write the zero-pick tests: a hero the meta response carries no row
+- [x] 11c.1 Write the zero-pick tests: a hero the meta response carries no row
       for, but the ban response does, reaches staging with `matches` 0, `wins`
       0, a contest rate from those bans alone, and no position row, the
       window's matches not being 0 [89]; a hero

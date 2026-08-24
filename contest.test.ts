@@ -16,13 +16,20 @@ const picked = (
 	wins = 0,
 ): PositionCount => ({ heroId, position, matches, wins });
 
+/** The reference a case does not name: exactly the heroes its rows do. */
+const referenced = (rows: PositionCount[]) => [
+	...new Set(rows.map((row) => row.heroId)),
+];
+
 /** The contest rate `heroTotals` gives `heroId`, over `rows` and `bans`. */
 const rateOf = (
 	heroId: number,
 	rows: PositionCount[],
 	bans: Map<number, number> = new Map(),
+	heroIds: number[] = referenced(rows),
 ) =>
-	heroTotals(rows, bans).find((total) => total.heroId === heroId)?.contestRate;
+	heroTotals(heroIds, rows, bans).find((total) => total.heroId === heroId)
+		?.contestRate;
 
 describe("the position rows a hero's total is made of", () => {
 	// spec: snapshot-ingest/a-hero-picked-in-every-match
@@ -31,7 +38,7 @@ describe("the position rows a hero's total is made of", () => {
 			picked(9001, n + 1, 10 * (n + 1), n + 1),
 		);
 
-		expect(heroTotals(rows, new Map())).toEqual([
+		expect(heroTotals([9001], rows, new Map())).toEqual([
 			{ heroId: 9001, matches: 150, wins: 15, contestRate: 10 },
 		]);
 	});
@@ -44,7 +51,7 @@ describe("the position rows a hero's total is made of", () => {
 			picked(9001, 2, 2_000_000_000),
 		];
 
-		expect(() => heroTotals(rows, new Map())).toThrow(
+		expect(() => heroTotals([9001], rows, new Map())).toThrow(
 			"past what the column holds",
 		);
 	});
@@ -93,7 +100,7 @@ describe("the rate a hero's picks and bans come to", () => {
 	test("a window whose matches are 0 rates every hero 0 [35]", () => {
 		const rows = [picked(9001, 1, 0), picked(9002, 1, 0)];
 
-		const totals = heroTotals(rows, new Map([[9001, 3]]));
+		const totals = heroTotals([9001, 9002], rows, new Map([[9001, 3]]));
 
 		// Zero rather than the `NaN` a 0/0 would give, and rather than the
 		// `Infinity` a hero with bans and no picks would: no division happens.
@@ -104,16 +111,38 @@ describe("the rate a hero's picks and bans come to", () => {
 		expect(heroTotals([], new Map())).toEqual([]);
 	});
 
-	test("a hero banned but never picked in the window gets no row", () => {
+	// spec: snapshot-ingest/a-hero-the-window-holds-no-picks-for
+	test("a hero banned but never picked in the window rates on its bans [89]", () => {
 		const rows = [picked(9001, 1, 50), picked(9002, 1, 50)];
 
-		// The totals are built from the position rows, and the meta pull emits
-		// none for a hero the window has no sample of — so 9404's bans reach
-		// nothing. Pinned rather than chosen: whether such a hero should carry
-		// a row of pure contest is a reading of *Contest rate is a share of the
-		// window's matches* this group did not settle.
-		const totals = heroTotals(rows, new Map([[9404, 900]]));
+		// The row set is the reference's, not the meta response's, so a hero
+		// the window has no sample of still carries a total. Its position rows
+		// stay absent — a different question, and `snapshot-build`'s.
+		const totals = heroTotals([9001, 9002, 9404], rows, new Map([[9404, 3]]));
 
-		expect(totals.map((total) => total.heroId)).toEqual([9001, 9002]);
+		// The window held ten matches, so the three bans alone rate it.
+		expect(totals).toContainEqual({
+			heroId: 9404,
+			matches: 0,
+			wins: 0,
+			contestRate: 0.3,
+		});
+	});
+
+	// spec: snapshot-ingest/a-hero-with-neither-picks-nor-bans
+	test("a hero neither response carries rates 0 over a window with matches [90]", () => {
+		const rows = [picked(9001, 1, 50), picked(9002, 1, 50)];
+
+		const totals = heroTotals([9001, 9002, 9404], rows, new Map());
+
+		expect(totals).toContainEqual({
+			heroId: 9404,
+			matches: 0,
+			wins: 0,
+			contestRate: 0,
+		});
+		// Not the 0 a matchless window gives every hero: this one held ten, so
+		// the rate is 0 because the hero was neither picked nor banned.
+		expect(rateOf(9001, rows)).toBe(5);
 	});
 });
