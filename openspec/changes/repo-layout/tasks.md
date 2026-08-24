@@ -161,7 +161,11 @@ leave.
       assert a tracked file *under* a path, which cannot express a path that
       is itself the file. (Req: repo-layout — The README states where each
       kind of file lives)
-- [x] 4.9 Update `PLAN.md`: collapse this change's queue entry to its name,
+- [ ] 4.9 Update `PLAN.md`: collapse this change's queue entry to its name,
       pull requests, archive path and where its spec landed, per that file's
-      growth protocol. (Req: none — bookkeeping the workflow requires,
-      closing no criterion)
+      growth protocol. Half of it is done — the entry now reads as applied and
+      names the pull requests — and the box stays unticked because the
+      protocol evicts an entry on *its change reaching the archive*, which is
+      where the archive path and the spec's landing site come from. The
+      archive step finishes it. (Req: none — bookkeeping the workflow
+      requires, closing no criterion)

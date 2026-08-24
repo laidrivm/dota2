@@ -214,7 +214,9 @@ describe("the README as it stands", () => {
 
 		for (const dir of [
 			"src/app/",
+			"src/fixtures/",
 			"src/job/",
+			"src/job/ingest/",
 			"src/server/",
 			"checks/",
 			"scripts/",
