@@ -4,7 +4,7 @@
  */
 import { afterEach, beforeEach, describe, expect, jest, test } from "bun:test";
 import type { SQL } from "bun";
-import { opener, requiresDatabase, url } from "./db.fixture.ts";
+import { opener, requiresDatabase, url } from "../db.fixture.ts";
 import { detectPatch } from "./patches.ts";
 import { json, settle, stalls, stub } from "./stratz.fixture.ts";
 

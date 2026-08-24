@@ -9,7 +9,7 @@
  */
 import { describe, expect, test } from "bun:test";
 import type { SQL } from "bun";
-import { cleaner, requiresDatabase, url } from "./db.fixture.ts";
+import { cleaner, requiresDatabase, url } from "../db.fixture.ts";
 import {
 	type HeroReference,
 	heldHeroIds,

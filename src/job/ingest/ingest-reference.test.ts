@@ -8,7 +8,7 @@
  */
 
 import { describe, expect, test } from "bun:test";
-import { cleaner, requiresDatabase, url } from "./db.fixture.ts";
+import { cleaner, requiresDatabase, url } from "../db.fixture.ts";
 import {
 	COUNTS,
 	HEROES,
