@@ -9,7 +9,7 @@
 
 import { describe, expect, test } from "bun:test";
 import { join } from "node:path";
-import { cleaner, requiresDatabase, url } from "./db.fixture.ts";
+import { cleaner, requiresDatabase, url } from "../db.fixture.ts";
 import {
 	HEROES,
 	icons,

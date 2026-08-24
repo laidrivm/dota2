@@ -7,7 +7,7 @@
  */
 import { describe, expect, test } from "bun:test";
 import type { SQL } from "bun";
-import { opener, requiresDatabase, url } from "./db.fixture.ts";
+import { opener, requiresDatabase, url } from "../db.fixture.ts";
 import { type Staged, writeStaging } from "./staging.ts";
 
 requiresDatabase();
