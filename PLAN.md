@@ -83,15 +83,11 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
 - **`rulebook-doc-reach`** — PR #134,
   `archive/2026-08-19-rulebook-doc-reach`; the widened reach is in
   `openspec/specs/agent-rulebook/`.
+- **`repo-layout`** — PRs #171, #172, #173 and #174,
+  `archive/2026-08-25-repo-layout`; spec at `openspec/specs/repo-layout/`.
 
 ### Open
 
-- [ ] **`repo-layout`** — applied, awaiting archive.
-      `openspec/changes/repo-layout/`; PRs #171, #172, #173 and this one. The
-      root went from sixty-one tracked files to fourteen, and
-      `scripts/repo-layout.ts` now refuses a fifteenth the exemption list does
-      not name. `tracked-file-sweep`, further down, lifts the tracked-tree
-      listing this change repaired one copy of — that copy is touched twice.
 - [ ] **`proposal-slicing`** — proposed,
       `openspec/changes/proposal-slicing/`. A propose-stage branch at or over
       the diff budget's failing threshold splits into `spec/<slug>` and
@@ -243,7 +239,11 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
 - [ ] **`tracked-file-sweep`** — proposed,
       `openspec/changes/tracked-file-sweep/`. The listing every check reads the
       tree through stands in seven copies, two of them already drifted. Two
-      task groups, so `feat/tracked-file-sweep-1` then `-2`.
+      task groups, so `feat/tracked-file-sweep-1` then `-2`. Re-take the count
+      before starting: `repo-layout` repaired `readme-map.test.ts`'s copy and
+      left three more sites behind it — `scripts/repo-layout.ts`,
+      `checks/readme-layout.test.ts` and `checks/tracked-tree.test.ts`, the
+      last of which pins the shape the lift would extract.
 - [ ] **`focus-restore-idiom`** — proposed,
       `openspec/changes/focus-restore-idiom/`. Two controls restore focus after
       an unmount and the reason the wait cannot be an animation frame is

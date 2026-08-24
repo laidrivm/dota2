@@ -85,6 +85,7 @@ test("a path present but untracked does not satisfy a row", async () => {
 	}
 });
 
+// spec: repo-layout/the-ownership-map-s-paths-from-outside-the-root
 test.each(paths)("the map's `%s` is real and shipped", (path) => {
 	// A gitignored row is absent from a clone by design, so asserting it
 	// would pass here and fail there.
