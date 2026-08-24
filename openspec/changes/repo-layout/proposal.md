@@ -95,10 +95,14 @@ which this change neither touches nor duplicates.
   `package.json` and `bunfig.toml` name only paths that stay put. Confirmed
   by reading each; the check that this holds is that the suite passes after
   the move rather than a claim made here.
-- **Imports across the new boundaries: one.**
-  `agent-permissions-allow.test.ts` imports `./bunfig.toml`. The server trio
-  imports only itself and node/bun builtins; the job's modules import only
-  each other. Everything else is internal to a directory that moves whole.
+- **Imports across the new boundaries: seven.** Five inside `src/job/`, which
+  is the boundary the first count missed — the group is sectioned, so the
+  ingest suites reading `db.fixture.ts` cross it and take `../`. One is
+  `agent-permissions-allow.test.ts`'s `./bunfig.toml`. The seventh is
+  `scripts/dev.ts`'s `await import("../server.ts")`: `scripts/` stays put and
+  the server moves out from under it. The server trio imports nothing but
+  itself and node/bun builtins, which is what the first count read as the
+  whole answer.
 - **Path resolution across the new boundaries: five.** Four in the server —
   `dist/`, `src/app/styles/fonts/`, `src/fixtures/snapshot.json` and
   `icons/`, each built with `new URL("./…", import.meta.url)` — and one in
