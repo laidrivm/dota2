@@ -17,7 +17,9 @@ single-source rule this file inherits.
   Exceptions → unit or integration tests; Simple scenarios marked
   `(e2e candidate)` → the Playwright smoke suite.
 - Fold every `/zombies` idea into the tasks checklist in the same turn as the
-  run, each carrying its number, rather than pausing for a selection.
+  run, rather than pausing for a selection; give it a number only alongside the
+  criterion fixing the behaviour it names, and write it under an existing
+  criterion when it is that criterion applied to another case.
 - There is no DOM test environment and no `happy-dom` dependency: pure modules
   get `bun:test`, and anything that needs a document is an e2e test.
 - Scaffolding tests are welcome but mortal: you may write throwaway tests

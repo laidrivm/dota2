@@ -255,6 +255,16 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       only the service image it was found on, because one comment among eight
       tells a reader nothing. Closing it is either a comment per site or a
       check that reconciles the workflows against the manifest.
+- [ ] **A captured rule is sent to the costliest of its two homes.**
+      `openspec/specs/local-review-loop/spec.md` §*A justification survives
+      only when it is a convention* says a skipped Minor becomes a rule in
+      `CLAUDE.md`'s "Rules" list, *because* `.coderabbit.yaml` names that file
+      so the next review reads it. The reason does not separate the two homes:
+      `code_guidelines.filePatterns` names `docs/*.md` as well, which
+      `review-bot-config` states correctly. So being read back is true of the
+      indexed docs too, and the criterion routes every captured rule into the
+      one file that costs always-on budget. `CLAUDE.md` §*Lessons learned* is
+      corrected on this branch; the criterion needs a delta spec.
 
 ## Standing constraints
 
