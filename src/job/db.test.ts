@@ -76,8 +76,8 @@ describe.skipIf(url === undefined)("connecting", () => {
 	const OVER_ONE: [string, string, string][] = [
 		["staging_hero_position_stats", "position, matches, wins", "1, 1, 2"],
 		["staging_hero_stats", "matches, wins, contest_rate", "1, 2, 0"],
-		["staging_hero_matchups", "enemy_id, matches, wins", "2, 1, 2"],
-		["staging_hero_synergies", "ally_id, matches, wins", "2, 1, 2"],
+		["staging_hero_matchups", "enemy_id, matches, wins", "9002, 1, 2"],
+		["staging_hero_synergies", "ally_id, matches, wins", "9002, 1, 2"],
 		["staging_hero_sides", "side, matches, wins", "'radiant', 1, 2"],
 		["staging_hero_phases", "phase, matches, wins", "'1', 1, 2"],
 	];
@@ -85,17 +85,20 @@ describe.skipIf(url === undefined)("connecting", () => {
 	test.each(OVER_ONE)("%s refuses more wins than matches", async (t, c, v) => {
 		const sql = await open();
 		// The foreign keys are satisfied first, so what refuses the row is the
-		// bound on the counts and not a missing hero.
-		await sql`INSERT INTO heroes VALUES (1, 'A', 'a', '/icons/a.png', now()),
-			(2, 'B', 'b', '/icons/b.png', now()) ON CONFLICT DO NOTHING`;
-		await sql`INSERT INTO patches VALUES ('7.41', '7.41', true, now())
+		// bound on the counts and not a missing hero. The ids are the sentinels
+		// `db.fixture.ts`'s cleaner reclaims — hero ids at or above 9000, a patch
+		// under `z9.` — because this file opens without cleaning and whatever it
+		// leaves behind is read by whichever suite bun runs next.
+		await sql`INSERT INTO heroes VALUES (9001, 'A', 'a', '/icons/a.png', now()),
+			(9002, 'B', 'b', '/icons/b.png', now()) ON CONFLICT DO NOTHING`;
+		await sql`INSERT INTO patches VALUES ('z9.90', 'z9.90', true, now())
 			ON CONFLICT DO NOTHING`;
 		// `expect(…).rejects` hangs on what `sql.unsafe` returns — a thenable
 		// rather than a Promise, measured against bun 1.3.14 — so the rejection
 		// is taken through `then` and asserted as a value.
 		const failed = await sql
 			.unsafe(`INSERT INTO ${t} (patch_id, hero_id, ${c})
-				VALUES ('7.41', 1, ${v})`)
+				VALUES ('z9.90', 9001, ${v})`)
 			.then(() => null, String);
 		expect(failed).toMatch(/violates check constraint/);
 	});
