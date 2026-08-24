@@ -46,9 +46,10 @@ resolutions are anchored to the module rather than the repository, and
 `build.test.ts`'s header already says this failure is silent — the app still
 builds, it just cannot load its fonts or its snapshot.
 
-One import crosses out of the group as well, which the proposal's first count
-missed: `scripts/dev.ts` does `await import("../server.ts")`, and `scripts/`
-stays where it is.
+Two things the plan did not foresee, both owned by 2.2 and 2.4 below rather
+than left in this prose: `scripts/dev.ts` imports `../server.ts` and stays
+where it is, and `build.test.ts` anchors on `import.meta.dir` at three more
+sites the count of four never reached.
 
 - [x] 2.1 Move `server.ts`, `dist-routes.ts`, `static-routes.ts`,
       `static-routes.test.ts` and `build.test.ts` to `src/server/`, in a
@@ -57,16 +58,24 @@ stays where it is.
 - [x] 2.2 Re-anchor the four `new URL("./…", import.meta.url)` resolutions to
       the repository root: `dist/` in `dist-routes.ts`, and
       `src/app/styles/fonts/`, `src/fixtures/snapshot.json` and `icons/` in
-      `static-routes.ts`. (Req: repo-layout — The repository root holds only
-      what is exempted by name)
+      `static-routes.ts`. Then `scripts/dev.ts`'s `await import("../server.ts")`,
+      which crosses out of the group because `scripts/` stays where it is.
+      (Req: repo-layout — The repository root holds only what is exempted by
+      name)
 - [x] 2.3 Extend `static-routes.test.ts` so that serving a font asserts which
       directory was resolved, not only that the route answered — the anchor
       is what moved, and a route answering from
       `src/server/src/app/styles/fonts/` would answer nothing at all [21].
       (Req: repo-layout — The repository root holds only what is exempted by
       name)
-- [x] 2.4 Extend `build.test.ts` the same way for `dist/` [22]. (Req:
-      repo-layout — The repository root holds only what is exempted by name)
+- [x] 2.4 Extend `build.test.ts` the same way for `dist/` [22], re-anchoring
+      its own three `import.meta.dir` sites first — the dist path, the cwd
+      `bun run build` is spawned in, and the symlink target — none of which
+      the count of four in 2.2 reached. Then the icon mirror's default, which
+      is the one anchor no request can report on: the lookup turns a missing
+      directory into an empty listing, so a wrong one 404s every hero exactly
+      as a clone that never ran the ingest does. (Req: repo-layout — The
+      repository root holds only what is exempted by name)
 
 ## 3. The repository's own checks
 
