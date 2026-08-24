@@ -445,6 +445,18 @@ window rather than the patch, and the weeks the pair pull covered. The columns
 SHALL sit on `snapshots` beside `prior_weight`, which answers the same question
 about the same row: what this snapshot was built from.
 
+The last day recorded SHALL be the last day the window **includes**, not the
+exclusive bound it ends at. The window is defined end-exclusive above, so the
+two differ by a day, and a record read as the wrong one of them claims a day of
+matches the run never pulled. This is the same reading the meta requirement
+takes care to fix for the window itself, and it has to be fixed again here
+because storing a window and computing one are different operations.
+
+Whatever identifies the row to its caller SHALL be available whatever the
+build's outcome, since a failed build's coverage is recorded too. That is a
+constraint on `snapshot-build`, which owns the build and its return, and it is
+stated here because this is the requirement that rests on it.
+
 The write SHALL happen as soon as the build returns a row, whatever the build's
 outcome, and nothing later in the run SHALL undo it. Both halves are stated
 because the alternatives are what a reader would otherwise assume. A build that
