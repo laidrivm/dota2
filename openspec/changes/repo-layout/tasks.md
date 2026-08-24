@@ -50,22 +50,22 @@ One import crosses out of the group as well, which the proposal's first count
 missed: `scripts/dev.ts` does `await import("../server.ts")`, and `scripts/`
 stays where it is.
 
-- [ ] 2.1 Move `server.ts`, `dist-routes.ts`, `static-routes.ts`,
+- [x] 2.1 Move `server.ts`, `dist-routes.ts`, `static-routes.ts`,
       `static-routes.test.ts` and `build.test.ts` to `src/server/`, in a
       commit that only moves. (Req: repo-layout — The repository root holds
       only what is exempted by name)
-- [ ] 2.2 Re-anchor the four `new URL("./…", import.meta.url)` resolutions to
+- [x] 2.2 Re-anchor the four `new URL("./…", import.meta.url)` resolutions to
       the repository root: `dist/` in `dist-routes.ts`, and
       `src/app/styles/fonts/`, `src/fixtures/snapshot.json` and `icons/` in
       `static-routes.ts`. (Req: repo-layout — The repository root holds only
       what is exempted by name)
-- [ ] 2.3 Extend `static-routes.test.ts` so that serving a font asserts which
+- [x] 2.3 Extend `static-routes.test.ts` so that serving a font asserts which
       directory was resolved, not only that the route answered — the anchor
       is what moved, and a route answering from
       `src/server/src/app/styles/fonts/` would answer nothing at all [21].
       (Req: repo-layout — The repository root holds only what is exempted by
       name)
-- [ ] 2.4 Extend `build.test.ts` the same way for `dist/` [22]. (Req:
+- [x] 2.4 Extend `build.test.ts` the same way for `dist/` [22]. (Req:
       repo-layout — The repository root holds only what is exempted by name)
 
 ## 3. The repository's own checks
