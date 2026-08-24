@@ -32,11 +32,15 @@ const naive = (cwd: string): string[] => {
 };
 
 const here = import.meta.dir;
-const root = join(here, "..");
+
+/** The three listings, taken once: each helper call is two git processes. */
+const fromHere = anchored(here);
+const fromRoot = anchored(join(here, ".."));
+const short = naive(here);
 
 // spec: repo-layout/a-check-run-from-a-subdirectory
 test("a listing taken below the root is the whole repository", () => {
-	expect(anchored(here)).toEqual(anchored(root));
+	expect(fromHere).toEqual(fromRoot);
 });
 
 // spec: repo-layout/a-check-run-from-a-subdirectory
@@ -45,16 +49,16 @@ test("its paths are named from the root, not from where it ran", () => {
 	// relative to the caller. Taken off the unanchored listing rather than
 	// written out, so a rename in `checks/` cannot make this pass by naming a
 	// file that is simply absent from both.
-	const [neighbour] = naive(here);
+	const [neighbour] = short;
 	expect(neighbour).toBeDefined();
 
-	expect(anchored(here)).toContain(`checks/${neighbour}`);
-	expect(anchored(here)).not.toContain(neighbour);
+	expect(fromHere).toContain(`checks/${neighbour}`);
+	expect(fromHere).not.toContain(neighbour);
 });
 
 test("the unanchored listing is the mistake, not a second way of writing it", () => {
 	// Without this the two helpers above could agree and the anchoring would
 	// be cargo. What it pins is that `cwd` really does decide the answer, so a
 	// check that skips the resolve is measurably reading a different tree.
-	expect(naive(here).length).toBeLessThan(anchored(root).length);
+	expect(short.length).toBeLessThan(fromRoot.length);
 });
