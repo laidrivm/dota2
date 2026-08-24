@@ -17,8 +17,14 @@ const root = new URL("../../", import.meta.url);
 const fontDir = new URL("src/app/styles/fonts/", root);
 const snapshotFile = new URL("src/fixtures/snapshot.json", root);
 
-/** Where the ingest mirrors hero images. Written by the job, never by a build. */
-const iconDir = new URL("icons/", root);
+/**
+ * Where the ingest mirrors hero images. Written by the job, never by a build.
+ *
+ * Exported for the same reason `distDir` is: the lookup below turns a missing
+ * directory into an empty listing on purpose, so nothing a request can ask for
+ * distinguishes a wrong anchor from a clone that has never run the ingest.
+ */
+export const iconDir = new URL("icons/", root);
 
 // The woff2 filenames encode their own face, so their bytes never change and
 // they can be cached forever. fonts.css can gain a face under a stable name,
