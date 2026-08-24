@@ -89,6 +89,19 @@ describe("a file added to the repository root", () => {
 		const dir = fabricate({ ...KEEP, ".env.example": "" });
 		expect(stray(dir, KEEP).join("")).toContain(".env.example");
 	});
+
+	test("a file named after an inherited property is not exempted by it", () => {
+		// Every object answers to `toString`, `constructor` and `valueOf`, so a
+		// membership test written with `in` would pass these three on a list
+		// that never mentioned them.
+		const dir = fabricate({
+			...KEEP,
+			toString: "",
+			constructor: "",
+			valueOf: "",
+		});
+		expect(stray(dir, KEEP)).toHaveLength(3);
+	});
 });
 
 // spec: repo-layout/a-file-under-a-directory
@@ -107,7 +120,7 @@ describe("the exemption list itself", () => {
 
 		expect(found).toHaveLength(1);
 		expect(found[0]).toContain("server.ts");
-		expect(found[0]).toMatch(/no longer|not tracked|nothing tracks/i);
+		expect(found[0]).toMatch(/tracks no such file/i);
 	});
 
 	// spec: repo-layout/an-exemption-carrying-no-reason
