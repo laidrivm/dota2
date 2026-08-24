@@ -1,0 +1,142 @@
+# Tasks — repo-layout
+
+Four groups on `feat/repo-layout-1` … `-4`, in order, one pull request each.
+The moves come first and the check last, because the check passes only over
+the tree groups 1 to 3 leave — landing it first would ship a gate that fails.
+
+Every group commits its moves before its fix-ups. A commit that moves a file
+and edits it in the same step loses git's rename detection and is counted in
+full by `diff-budget`, where a pure move is counted as nothing
+(measured — see `design.md`).
+
+Numbers in brackets are this change's `/zombies` ideas, kept so a task and the
+edge it closes can be read against each other.
+
+## 1. The nightly job
+
+The free group: every import inside it is relative and internal, and `db.ts`
+keeps `schema.sql` beside it, so the move needs no fix-up at all. Its evidence
+is the suite that already covers these files passing unchanged.
+
+- [ ] 1.1 Move the database edge to `src/job/`: `db.ts`, `db.test.ts`,
+      `db.fixture.ts` and `schema.sql`, together and in one commit, because
+      `db.ts` resolves its schema as `${import.meta.dir}/schema.sql` and the
+      adjacency is what keeps that correct. (Req: repo-layout — The
+      repository root holds only what is exempted by name)
+- [ ] 1.2 Move the twenty-nine pull, transport and staging files to
+      `src/job/ingest/`: `stratz`, `patches`, `heroes`, `meta`, `contest`,
+      `pairs`, `icons`, `staging` and `ingest`, with their tests and
+      fixtures. (Req: repo-layout — The repository root holds only what is
+      exempted by name)
+- [ ] 1.3 Run `bun run test:db` and confirm `db.ts` still applies
+      `schema.sql` — a schema silently not applied fails every database
+      suite on a missing table rather than on its cause [23]. (Req: none —
+      evidence that 1.1 landed, closing no criterion of its own)
+
+## 2. The HTTP server
+
+The risky group, and the one whose own tests cover the risk: four path
+resolutions are anchored to the module rather than the repository, and
+`build.test.ts`'s header already says this failure is silent — the app still
+builds, it just cannot load its fonts or its snapshot.
+
+- [ ] 2.1 Move `server.ts`, `dist-routes.ts`, `static-routes.ts`,
+      `static-routes.test.ts` and `build.test.ts` to `src/server/`, in a
+      commit that only moves. (Req: repo-layout — The repository root holds
+      only what is exempted by name)
+- [ ] 2.2 Re-anchor the four `new URL("./…", import.meta.url)` resolutions to
+      the repository root: `dist/` in `dist-routes.ts`, and
+      `src/app/styles/fonts/`, `src/fixtures/snapshot.json` and `icons/` in
+      `static-routes.ts`. (Req: repo-layout — The repository root holds only
+      what is exempted by name)
+- [ ] 2.3 Extend `static-routes.test.ts` so that serving a font asserts which
+      directory was resolved, not only that the route answered — the anchor
+      is what moved, and a route answering from
+      `src/server/src/app/styles/fonts/` would answer nothing at all [21].
+      (Req: repo-layout — The repository root holds only what is exempted by
+      name)
+- [ ] 2.4 Extend `build.test.ts` the same way for `dist/` [22]. (Req:
+      repo-layout — The repository root holds only what is exempted by name)
+
+## 3. The repository's own checks
+
+- [ ] 3.1 Move the nine artefact tests to `checks/`: `rulebook.test.ts`,
+      `readme-map.test.ts`, `skill-provenance.test.ts`,
+      `coderabbit-config.test.ts`, `commit-gates.test.ts`, and the four
+      `agent-permissions` files. Moves only. (Req: repo-layout — The
+      repository root holds only what is exempted by name)
+- [ ] 3.2 Take `join(import.meta.dir, "..")` across the nine where they read
+      a repository artefact, and `../bunfig.toml` in
+      `agent-permissions-allow.test.ts`, which is the one import crossing a
+      new boundary. (Req: repo-layout — The repository root holds only what
+      is exempted by name)
+- [ ] 3.3 Write the regression first, then fix it: `readme-map.test.ts`
+      resolves every mapped path when run from `checks/` [24], which it does
+      not today — it lists the tree with `git ls-files` at its own directory
+      and resolves no repository root, so from `scripts/` the same call
+      returns 33 paths instead of 382. Then adopt the
+      `rev-parse --show-toplevel` form five other sites already use. (Req:
+      repo-layout — A check reads the tracked tree from the repository root)
+- [ ] 3.4 Cover the general form of that criterion: a check listing the
+      tracked tree, run from a directory below the root, still reads the
+      whole repository with paths named relative to the root [10]. (Req:
+      repo-layout — A check reads the tracked tree from the repository root)
+
+## 4. The check and the document
+
+Last, because it is the ratchet: it passes only over the tree groups 1 to 3
+leave.
+
+- [ ] 4.1 Write the scan's tests over fabricated trees, tests first: a root
+      of exempted files only reports nothing [1]; one unexempted `.ts` is
+      reported, naming the file and that the list does not name it [3]; two
+      unexempted files are both reported [4]; a file one directory down is
+      not [6]; a root dotfile is subject to the list like any other, a
+      leading dot being no implicit pass [7]. (Req: repo-layout — The
+      repository root holds only what is exempted by name)
+- [ ] 4.2 Write the vacuity and ordering tests: a scan that read no root file
+      at all throws rather than returning empty [2], the shape
+      `scripts/file-size.ts` already takes for a sweep that matched nothing;
+      and reported files come back in a stable order, so a failure message
+      does not reshuffle between runs [5]. (Req: repo-layout — The repository
+      root holds only what is exempted by name)
+- [ ] 4.3 Write the exemption list's own tests: an entry naming a file the
+      repository no longer tracks fails rather than lingering unnoticed [8],
+      and an entry whose reason is blank is refused, the reason being the
+      decision the list exists to record [9]. (Req: repo-layout — The
+      repository root holds only what is exempted by name)
+- [ ] 4.4 Write the failure-mode tests: a tracked-but-deleted root entry does
+      not crash the scan [11]; a root symlink is not read as a regular file
+      [12]; `git ls-files` failing throws with git's own stderr rather than
+      reporting a clean root [13]; and the scan run from a subdirectory still
+      reads the repository root [10 for this scan]. (Req: repo-layout — The
+      repository root holds only what is exempted by name / A check reads the
+      tracked tree from the repository root)
+- [ ] 4.5 Implement `scripts/repo-layout.ts`: the tracked listing taken at the
+      repository root, scoped to root-level entries, each admitted only by a
+      named exemption carrying its reason. Scoped by what it exempts and not
+      by the extensions it covers — `scripts/file-size.ts` argues the opposite
+      departure for the line cap, and `design.md` says why the two differ.
+      (Req: repo-layout — The repository root holds only what is exempted by
+      name)
+- [ ] 4.6 Add the repository sweep: the tree as it stands reports no file
+      [14], every remaining root file being named. This is the task that
+      fails until groups 1 to 3 have landed. (Req: repo-layout — The
+      repository root holds only what is exempted by name)
+- [ ] 4.7 Write `checks/readme-layout.test.ts`, tests first: a README with no
+      layout heading fails rather than passing over an absent section [15];
+      a section parsing to zero directories fails [16]; a named directory the
+      repository tracks a file under passes [17]; a directory marked reserved
+      is not required to exist [18]; one named without that mark and tracking
+      nothing fails [19]; a directory present on disk but tracked by nothing
+      does not satisfy a row [20]. (Req: repo-layout — The README states
+      where each kind of file lives)
+- [ ] 4.8 Write the README layout section: each directory that holds source,
+      what belongs in it, and why the tree is cut that way — with
+      `src/job/build/`, `src/job/export/` and `src/job/main.ts` marked
+      reserved for `snapshot-build` and `snapshot-ingest` group 12. (Req:
+      repo-layout — The README states where each kind of file lives)
+- [ ] 4.9 Update `PLAN.md`: collapse this change's queue entry to its name,
+      pull requests, archive path and where its spec landed, per that file's
+      growth protocol. (Req: none — bookkeeping the workflow requires,
+      closing no criterion)
