@@ -340,7 +340,7 @@ tests that are meant to catch it.
       non-empty reference yields a zero row per reference hero, not none, and
       is [90] and [91]. (Req: snapshot-ingest — Contest rate is a share of the
       window's matches)
-- [ ] 11c.4 Implement the totals over the hero reference rather than over the
+- [x] 11c.4 Implement the totals over the hero reference rather than over the
       meta response: build the row set from the heroes the reference returned,
       fill each from the meta rows it has, and leave the position rows built
       from the meta response alone. (Req: snapshot-ingest — Contest rate is a
