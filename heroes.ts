@@ -123,3 +123,16 @@ export async function upsertHeroes(
 				-- mirrored what it passes here.
 				icon = EXCLUDED.icon`;
 }
+
+/**
+ * Every hero id the reference tables hold, which is what "each hero" names
+ * throughout `snapshot-ingest` — and not the ids the last response carried.
+ * The two differ exactly when a response omits a hero the tables hold, which
+ * *A hero is upserted and never removed* keeps on purpose: staging built from
+ * the response would drop its row, and a hero count that falls is what
+ * `snapshot-build` ends a run `failed` over.
+ */
+export async function heldHeroIds(sql: SQL): Promise<number[]> {
+	const rows = await sql`SELECT hero_id FROM heroes ORDER BY hero_id`;
+	return rows.map((row: { hero_id: number }) => row.hero_id);
+}

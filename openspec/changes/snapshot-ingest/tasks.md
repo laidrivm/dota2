@@ -345,6 +345,17 @@ tests that are meant to catch it.
       fill each from the meta rows it has, and leave the position rows built
       from the meta response alone. (Req: snapshot-ingest — Contest rate is a
       share of the window's matches)
+- [x] 11c.5 Correct which reference 11c.4 reads, the criterion naming the
+      reference **tables** and not the response the run has just upserted: the
+      row set and the guard both read `heroes`, so that a response omitting a
+      hero the tables hold leaves that hero a zero row rather than no row —
+      which is the hero count *A snapshot is published only after it
+      validates* would fail the run over, and is what *A hero is upserted and
+      never removed* keeps those rows for. Its cases go in
+      `ingest-reference.test.ts`, taking `ingest.test.ts`'s two reference
+      cases with them so that neither file approaches the cap. (Req:
+      snapshot-ingest — Contest rate is a share of the window's matches /
+      hero-reference — A hero is upserted and never removed)
 
 ## 12. The job
 

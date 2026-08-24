@@ -8,7 +8,7 @@
  */
 import { describe, expect, test } from "bun:test";
 import type { SQL } from "bun";
-import { opener, requiresDatabase, url } from "./db.fixture.ts";
+import { cleaner, opener, requiresDatabase, url } from "./db.fixture.ts";
 import { type HeroReference, readHeroes, upsertHeroes } from "./heroes.ts";
 import type { Query } from "./stratz.ts";
 
@@ -163,14 +163,8 @@ const LINA: HeroReference = {
 };
 
 describe.skipIf(url === undefined)("upserting the hero reference", () => {
-	const open = opener();
-
 	/** A connection over which this file's heroes are absent. */
-	const clean = async () => {
-		const sql = await open();
-		await sql`DELETE FROM heroes WHERE hero_id >= 9000`;
-		return sql;
-	};
+	const clean = cleaner(opener());
 
 	/** The rows this file's heroes have, by id. */
 	const rows = async (sql: SQL) =>
