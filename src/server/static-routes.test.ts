@@ -77,6 +77,25 @@ describe("font routes", () => {
 		expect(response.headers.get("cache-control")).toBe("no-cache");
 	});
 
+	test("serve the face out of the repository's own font directory", async () => {
+		// The anchor is what the move changed, and a status does not say which
+		// of the two went wrong: a route resolved under `src/server/` answers
+		// 404 exactly as a missing face does. The root is taken from git rather
+		// than from this file's location, that location being the thing under
+		// test — anchoring the assertion the same way as the code would let one
+		// wrong answer confirm the other.
+		const root = Bun.spawnSync(["git", "rev-parse", "--show-toplevel"])
+			.stdout.toString()
+			.trim();
+		const held = Bun.file(
+			`${root}/src/app/styles/fonts/IBMPlexSans-Regular-Latin1.woff2`,
+		);
+		const response = await fetch(`${origin}${woff2}`);
+
+		expect(await held.exists()).toBe(true);
+		expect((await response.arrayBuffer()).byteLength).toBe(held.size);
+	});
+
 	test("serve the whole file on a second request", async () => {
 		const first = await fetch(`${origin}${woff2}`);
 		const firstSize = (await first.arrayBuffer()).byteLength;
