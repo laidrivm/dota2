@@ -9,7 +9,8 @@ by the diff-mode `/zombies` run and CodeRabbit, and 85 to 88 with the group
 this list had left out. Numbers 89 to 94 came from neither: they are the two
 readings this change left open — which heroes a run stores a total for, and
 where the window it covered is written down — settled after groups 1 to 11 had
-merged.
+merged. Numbers 95 to 105 are the `/zombies` run over that settlement, 99 and
+100 having first been gaps in the requirement rather than in its tests.
 
 Thirteen groups on `feat/snapshot-ingest-1` … `-11c` … `-12`, in order, and at
 least that many pull requests. Each group is measured against
@@ -315,7 +316,24 @@ tests that are meant to catch it.
       window whose matches are not 0 [90]; a run's `staging_hero_stats` rows
       number what the reference holds [91]. (Req: snapshot-ingest — Contest
       rate is a share of the window's matches)
-- [ ] 11c.2 Implement the totals over the hero reference rather than over the
+- [ ] 11c.2 Write the edge tests this run's `/zombies` named: an empty
+      reference yields no row and attempts no division [95]; a hero with bans
+      and no picks over a window whose matches are 0 rates 0 rather than
+      `Infinity`, which is newly reachable now that such a hero gets a row
+      [96]; a zero-pick row satisfies `staging_hero_stats`'s
+      `CHECK (wins BETWEEN 0 AND matches)` where both bounds are 0 [97]; a
+      hero the meta response names and the reference does not still fails the
+      run, which building the row set from the reference could silently drop
+      [98]. (Req: snapshot-ingest — Contest rate is a share of the window's
+      matches)
+- [ ] 11c.3 Re-aim the two tests that pin the reading being reversed:
+      `contest.test.ts`'s *a hero banned but never picked in the window gets no
+      row* inverts, its comment saying the reading was unsettled deleted with
+      it; *no hero at all yields no row and no division* is passed an empty
+      meta response over a non-empty reference, which is the case its name now
+      describes. (Req: snapshot-ingest — Contest rate is a share of the
+      window's matches)
+- [ ] 11c.4 Implement the totals over the hero reference rather than over the
       meta response: build the row set from the heroes the reference returned,
       fill each from the meta rows it has, and leave the position rows built
       from the meta response alone. (Req: snapshot-ingest — Contest rate is a
@@ -347,8 +365,24 @@ follows them, and this group closes over both.
       live for 150 complete UTC days records that the cap bound the window and
       the thirty most recent complete days as the window [93]; a snapshot no
       entry point completed carries null coverage and is not failed for it
-      [94]. (Req: snapshot-ingest — What a run covered is recorded on the
-      snapshot it built)
+      [94]; a build ending `failed` still carries what its run covered [99];
+      an export failing after the write leaves the coverage standing [100].
+      (Req: snapshot-ingest — What a run covered is recorded on the snapshot
+      it built)
+- [ ] 12.3a Write the window-boundary tests this run's `/zombies` named: a
+      patch live for exactly thirty complete UTC days records that the cap did
+      **not** bind it, [93] testing 150 days and never the seam [101]; a patch
+      detected today records a window whose first and last day are the same
+      [102]; a patch live for less than one complete week records an empty
+      weeks list beside a non-empty meta window [103]. (Req: snapshot-ingest —
+      What a run covered is recorded on the snapshot it built)
+- [ ] 12.3b Extend `ingest.test.ts`'s *a run reports the window and the weeks
+      it covered* [36], which asserts only what `ingest` returns, to assert
+      that the `snapshots` row carries it once the entry point has run [104];
+      and assert that the coverage columns reach no exported bundle, being
+      operational rather than part of what `snapshot-delivery` fixes [105].
+      (Req: snapshot-ingest — What a run covered is recorded on the snapshot
+      it built)
 - [ ] 12.4 Add the coverage columns to `snapshots` beside `prior_weight` —
       the meta window's first and last UTC day, whether the source's cap bound
       it, and the weeks the pair pull covered — all nullable, with the comment
