@@ -94,24 +94,23 @@ leave.
       not [6]; a root dotfile is subject to the list like any other, a
       leading dot being no implicit pass [7]. (Req: repo-layout — The
       repository root holds only what is exempted by name)
-- [ ] 4.2 Write the vacuity and ordering tests: a scan that read no root file
-      at all throws rather than returning empty [2], the shape
+- [ ] 4.2 Write the could-not-measure tests: a scan that matched no root file
+      at all fails rather than reporting a clean root [2], the shape
       `scripts/file-size.ts` already takes for a sweep that matched nothing;
-      and reported files come back in a stable order, so a failure message
-      does not reshuffle between runs [5]. (Req: repo-layout — The repository
-      root holds only what is exempted by name)
-- [ ] 4.3 Write the exemption list's own tests: an entry naming a file the
+      and `git` exiting non-zero fails with its own stderr rather than
+      reporting one [13]. (Req: repo-layout — The repository root holds only
+      what is exempted by name)
+- [ ] 4.3 Write the exemption list's own tests: an entry naming a path the
       repository no longer tracks fails rather than lingering unnoticed [8],
-      and an entry whose reason is blank is refused, the reason being the
-      decision the list exists to record [9]. (Req: repo-layout — The
-      repository root holds only what is exempted by name)
-- [ ] 4.4 Write the failure-mode tests: a tracked-but-deleted root entry does
-      not crash the scan [11]; a root symlink is not read as a regular file
-      [12]; `git ls-files` failing throws with git's own stderr rather than
-      reporting a clean root [13]; and the scan run from a subdirectory still
-      reads the repository root [10 for this scan]. (Req: repo-layout — The
-      repository root holds only what is exempted by name / A check reads the
-      tracked tree from the repository root)
+      and an entry whose reason is empty is refused [9]. (Req: repo-layout —
+      The repository root holds only what is exempted by name)
+- [ ] 4.4 Write the non-regular-entry tests: a tracked-but-deleted root entry
+      is skipped rather than crashing the scan [11], and a root symlink is
+      skipped rather than read as a file [12] — `git` lists both, and neither
+      is a file placed in the wrong directory. Then the subdirectory test:
+      the scan run from below the root still reads the whole repository [10].
+      (Req: repo-layout — The repository root holds only what is exempted by
+      name / A check reads the tracked tree from the repository root)
 - [ ] 4.5 Implement `scripts/repo-layout.ts`: the tracked listing taken at the
       repository root, scoped to root-level entries, each admitted only by a
       named exemption carrying its reason. Scoped by what it exempts and not
@@ -129,13 +128,19 @@ leave.
       repository tracks a file under passes [17]; a directory marked reserved
       is not required to exist [18]; one named without that mark and tracking
       nothing fails [19]; a directory present on disk but tracked by nothing
-      does not satisfy a row [20]. (Req: repo-layout — The README states
-      where each kind of file lives)
+      does not satisfy a row [20]. It resolves the repository root before
+      listing, like everything else in `checks/` — from its own directory
+      [20] would examine `checks/` alone and pass every row by finding
+      nothing. (Req: repo-layout — The README states where each kind of file
+      lives / A check reads the tracked tree from the repository root)
 - [ ] 4.8 Write the README layout section: each directory that holds source,
       what belongs in it, and why the tree is cut that way — with
-      `src/job/build/`, `src/job/export/` and `src/job/main.ts` marked
-      reserved for `snapshot-build` and `snapshot-ingest` group 12. (Req:
-      repo-layout — The README states where each kind of file lives)
+      `src/job/build/` and `src/job/export/` marked reserved for
+      `snapshot-build`. `src/job/main.ts` is `snapshot-ingest` group 12's
+      entry point and goes in the prose beside the table, not in it: the rows
+      assert a tracked file *under* a path, which cannot express a path that
+      is itself the file. (Req: repo-layout — The README states where each
+      kind of file lives)
 - [ ] 4.9 Update `PLAN.md`: collapse this change's queue entry to its name,
       pull requests, archive path and where its spec landed, per that file's
       growth protocol. (Req: none — bookkeeping the workflow requires,
