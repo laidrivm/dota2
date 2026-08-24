@@ -36,9 +36,13 @@ check: the first records no decision and the second records one about nothing.
 A check that could not read the tree SHALL fail rather than report a clean
 root. A scan that matched no root file at all, and a `git` invocation that
 exited non-zero, are each a failure to measure, and a failure to measure
-satisfies every assertion made over its result. A failing `git` invocation
-SHALL be reported with `git`'s own stderr: the check knows only that the
-command failed, where the command knows why.
+satisfies every assertion made over its result. "No root file at all" counts
+the regular files that survive the skipping below, so a `git` invocation that
+succeeded and listed nothing but symlinks and absent entries is a failure to
+measure as well: skipping an entry means not reporting it as misplaced, never
+counting it as one the check read. A failing `git` invocation SHALL be
+reported with `git`'s own stderr: the check knows only that the command
+failed, where the command knows why.
 
 #### Scenario: A source file added to the root
 
