@@ -8,7 +8,7 @@
  */
 
 import { describe, expect, test } from "bun:test";
-import { cleaner, opener, requiresDatabase, url } from "./db.fixture.ts";
+import { cleaner, requiresDatabase, url } from "./db.fixture.ts";
 import {
 	COUNTS,
 	HEROES,
@@ -28,7 +28,7 @@ requiresDatabase();
 const RETIRED = 9003;
 
 describe.skipIf(url === undefined)("which heroes a run stages", () => {
-	const clean = cleaner(opener());
+	const clean = cleaner();
 	const dir = icons();
 
 	/** `clean`, plus `RETIRED` held the way a previous run's upsert left it. */

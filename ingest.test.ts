@@ -9,7 +9,7 @@
 
 import { describe, expect, test } from "bun:test";
 import { join } from "node:path";
-import { cleaner, opener, requiresDatabase, url } from "./db.fixture.ts";
+import { cleaner, requiresDatabase, url } from "./db.fixture.ts";
 import {
 	HEROES,
 	icons,
@@ -26,7 +26,7 @@ import { ingest } from "./ingest.ts";
 requiresDatabase();
 
 describe.skipIf(url === undefined)("one run, and the next", () => {
-	const clean = cleaner(opener());
+	const clean = cleaner();
 	const dir = icons();
 	/** A second one, for the case that asserts what a run left in it. */
 	const ownDir = icons();

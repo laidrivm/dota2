@@ -9,7 +9,7 @@
  */
 import { describe, expect, test } from "bun:test";
 import type { SQL } from "bun";
-import { cleaner, opener, requiresDatabase, url } from "./db.fixture.ts";
+import { cleaner, requiresDatabase, url } from "./db.fixture.ts";
 import {
 	type HeroReference,
 	heldHeroIds,
@@ -170,7 +170,7 @@ const LINA: HeroReference = {
 
 describe.skipIf(url === undefined)("upserting the hero reference", () => {
 	/** A connection over which this file's heroes are absent. */
-	const clean = cleaner(opener());
+	const clean = cleaner();
 
 	/** The rows this file's heroes have, by id. */
 	const rows = async (sql: SQL) =>

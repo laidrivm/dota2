@@ -35,24 +35,22 @@ export const requiresDatabase = () =>
 	});
 
 /**
- * A way to open connections that are closed when the file finishes. Call it at
- * the top level of a suite: it registers the `afterAll` that does the closing,
- * so a file that opens connections cannot forget to release them.
- */
-/**
  * A connection a whole file shares, emptied of that file's rows before each
  * case: the staging tables first, because a reference row a staging row names
  * cannot be deleted under it — a suite that deleted heroes alone passed only
  * while it happened to run before every suite that leaves staging rows.
  *
- * Opened on the first case that asks. `opener` pools per call, so a connection
- * per case is a pool per case, and a file long enough exhausts the server's
- * clients — every case then failing on the one that opened last.
+ * Call it at the top level of a suite, as `opener` below requires, and it
+ * opens on the first case that asks. One connection for the file rather than
+ * one per case: `opener` pools per call, so a pool per case is what a file
+ * long enough exhausts the server's clients with — every case then failing on
+ * the one that opened last.
  */
-export function cleaner(open: () => Promise<SQL>): () => Promise<SQL> {
+export function cleaner(): () => Promise<SQL> {
+	const open = opener();
 	let held: Promise<SQL> | undefined;
 	return async () => {
-		if (held === undefined) held = open();
+		held ??= open();
 		const sql = await held;
 		await sql`DELETE FROM staging_hero_position_stats WHERE hero_id >= 9000`;
 		await sql`DELETE FROM staging_hero_stats WHERE hero_id >= 9000`;
@@ -64,6 +62,11 @@ export function cleaner(open: () => Promise<SQL>): () => Promise<SQL> {
 	};
 }
 
+/**
+ * A way to open connections that are closed when the file finishes. Call it at
+ * the top level of a suite: it registers the `afterAll` that does the closing,
+ * so a file that opens connections cannot forget to release them.
+ */
 export function opener(): () => Promise<SQL> {
 	const opened: SQL[] = [];
 	afterAll(async () => {
