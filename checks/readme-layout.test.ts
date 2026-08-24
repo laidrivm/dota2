@@ -22,7 +22,9 @@ const HEADING = "## Where each kind of file lives";
  * `readme-map.test.ts` already reads the ownership map with; the header and
  * separator rows carry none and drop out here.
  */
-export function rows(markdown: string): { path: string; reserved: boolean }[] {
+export function rows(
+	markdown: string,
+): { path: string | undefined; reserved: boolean }[] {
 	const section =
 		markdown.match(
 			new RegExp(`^${HEADING}$([\\s\\S]*?)(?=\\n#{1,2} |$(?![\\s\\S]))`, "m"),
@@ -31,12 +33,13 @@ export function rows(markdown: string): { path: string; reserved: boolean }[] {
 		.split("\n")
 		.filter((line) => line.startsWith("|"))
 		.slice(2)
-		.flatMap((line) => {
-			const path = line.split("|")[1]?.match(/`([^`]+)`/)?.[1];
-			return path === undefined
-				? []
-				: [{ path, reserved: /reserved/i.test(line) }];
-		});
+		.map((line) => ({
+			// `undefined` rather than dropped: a row that stops naming a
+			// directory is the table half-reshaped, and dropping it would leave
+			// the check reading the rows that still parse and reporting nothing.
+			path: line.split("|")[1]?.match(/`([^`]+)`/)?.[1],
+			reserved: /reserved/i.test(line),
+		}));
 }
 
 /**
@@ -57,15 +60,15 @@ export function problems(markdown: string, tracked: string[]): string[] {
 	if (named.length === 0)
 		return [`the "${HEADING}" section names no directory`];
 
-	return named
-		.filter(({ path, reserved }) => {
-			if (reserved) return false;
-			const prefix = path.endsWith("/") ? path : `${path}/`;
-			return !tracked.some((file) => file.startsWith(prefix));
-		})
-		.map(
-			({ path }) => `${path}: named in the layout section, tracking nothing`,
-		);
+	return named.flatMap(({ path, reserved }) => {
+		if (path === undefined)
+			return [`the "${HEADING}" section has a row naming no directory`];
+		if (reserved) return [];
+		const prefix = path.endsWith("/") ? path : `${path}/`;
+		return tracked.some((file) => file.startsWith(prefix))
+			? []
+			: [`${path}: named in the layout section, tracking nothing`];
+	});
 }
 
 const made: string[] = [];
@@ -149,6 +152,16 @@ describe("a directory the section names", () => {
 		expect(
 			problems(section("`src/job/` | the job"), listing(dir)),
 		).toHaveLength(1);
+	});
+
+	test("a row that stops naming a directory fails rather than dropping out", () => {
+		// The table half-reshaped: one row keeps its path and one loses it. A
+		// scan that dropped the second would report nothing and read as though
+		// the section were still whole.
+		const dir = fabricate({ "src/app/a.ts": "" });
+		const half = section("`src/app/` | the client", "src/job/ | the job");
+
+		expect(problems(half, listing(dir))).toHaveLength(1);
 	});
 
 	test("a prefix match is on the directory, not on the name [19]", () => {
