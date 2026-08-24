@@ -25,7 +25,9 @@ check: the first records no decision and the second records one about nothing.
 A check that could not read the tree SHALL fail rather than report a clean
 root. A scan that matched no root file at all, and a `git` invocation that
 exited non-zero, are each a failure to measure, and a failure to measure
-satisfies every assertion made over its result.
+satisfies every assertion made over its result. A failing `git` invocation
+SHALL be reported with `git`'s own stderr: the check knows only that the
+command failed, where the command knows why.
 
 #### Scenario: A source file added to the root
 
@@ -78,6 +80,8 @@ satisfies every assertion made over its result.
 - **THEN** the check SHALL fail, reporting that it could not measure —
   never report a clean root, which is what an unmeasured tree would
   otherwise be indistinguishable from
+- **AND** where `git` was what failed, the failure SHALL carry `git`'s own
+  stderr
 
 ### Requirement: A check reads the tracked tree from the repository root
 
@@ -143,3 +147,10 @@ nothing, because a row asserting a tracked file under a path cannot express
 - **THEN** the check SHALL fail rather than pass over an absent heading,
   which is the vacuous pass a section-scoped scan gives when its heading is
   renamed
+
+#### Scenario: The section names no directory
+
+- **IF** the layout section is present and parses to zero directories
+- **THEN** the check SHALL fail — a reshaped section satisfies every
+  assertion made over its rows by having none, which is the same vacuous pass
+  as an absent heading arriving by a different route
