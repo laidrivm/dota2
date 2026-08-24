@@ -22,13 +22,16 @@ const HEADING = "## Where each kind of file lives";
  * `readme-map.test.ts` already reads the ownership map with; the header and
  * separator rows carry none and drop out here.
  */
-export function rows(
+function rows(
 	markdown: string,
-): { path: string | undefined; reserved: boolean }[] {
-	const section =
-		markdown.match(
-			new RegExp(`^${HEADING}$([\\s\\S]*?)(?=\\n#{1,2} |$(?![\\s\\S]))`, "m"),
-		)?.[1] ?? "";
+): { path: string | undefined; reserved: boolean }[] | undefined {
+	// `undefined` where the heading is absent, distinct from a section that is
+	// present and holds no row: the two fail for different reasons and the
+	// heading is matched in one place rather than tested again by the caller.
+	const section = markdown.match(
+		new RegExp(`^${HEADING}$([\\s\\S]*?)(?=\\n#{1,2} |$(?![\\s\\S]))`, "m"),
+	)?.[1];
+	if (section === undefined) return undefined;
 	return section
 		.split("\n")
 		.filter((line) => line.startsWith("|"))
@@ -49,11 +52,11 @@ export function rows(
  * directory that exists only in a working tree is absent from every clone —
  * the same reason the ownership map is checked this way.
  */
-export function problems(markdown: string, tracked: string[]): string[] {
-	if (!markdown.includes(`${HEADING}\n`))
+function problems(markdown: string, tracked: string[]): string[] {
+	const named = rows(markdown);
+	if (named === undefined)
 		return [`the README carries no "${HEADING}" section`];
 
-	const named = rows(markdown);
 	// A reshaped table satisfies every assertion made over its rows by having
 	// none, which is the same vacuous pass as an absent heading by another
 	// route.
@@ -207,7 +210,7 @@ describe("the README as it stands", () => {
 		// and staying silent about the rest, which is the answer a reader came
 		// for.
 		const readme = await Bun.file(`${root}/README.md`).text();
-		const named = new Set(rows(readme).map((row) => row.path));
+		const named = new Set((rows(readme) ?? []).map((row) => row.path));
 
 		for (const dir of [
 			"src/app/",
