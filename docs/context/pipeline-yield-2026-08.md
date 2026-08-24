@@ -796,3 +796,26 @@ looks for.
 - coderabbit-local: PASS — 0 findings (chore/local-verification)
 - Not run: warm (no manifest changed), preflight, code-review, review-order,
   first-five
+
+## 2026-08-24 — snapshot-ingest group 11c, and the repo-layout proposal
+
+(feat/snapshot-ingest-11c, spec/repo-layout)
+
+- zombies: PASS — 7 gaps, 5 acted on, 2 skipped (11c)
+- ponytail-review: PASS — 2 findings, 2 acted on (11c)
+- triage: PASS — 1 finding, 1 acted on (11c)
+- coderabbit-local: PASS — 2 findings, 1 acted on, 1 rejected (11c)
+- zombies: PASS — 24 gaps, 24 routed into tasks.md (repo-layout, propose stage)
+- triage: PASS — 1 finding, 1 acted on (repo-layout)
+- coderabbit-local: PASS — 6 findings, 6 acted on (repo-layout)
+- coderabbit: PASS — 3 findings, 3 acted on (PR #169)
+- Not run: warm (no manifest changed on either branch), ponytail-review on
+  repo-layout (documentation branch, short sequence), preflight, code-review,
+  review-order, first-five, security-review
+
+Note for the ledger: on the propose branch the local pass found 6 and the PR
+bot found 3 more of the same family — artefact-consistency findings, the
+`.coderabbit.yaml` path instruction for `openspec/changes/**`. Both stages
+earned their place; the second was not the first one failing. The three the
+bot added were all "a task names a behaviour no criterion fixes", which is the
+one class where the local pass has now twice been the less complete of the two.
