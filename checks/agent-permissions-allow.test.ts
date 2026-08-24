@@ -106,5 +106,17 @@ describe("the keys the gate is for still hold their reserved value", () => {
 		// prints nothing either, and would pass this test on no evidence.
 		expect(tracked.exitCode).toBe(0);
 		expect(tracked.stdout.toString().trim()).toBe("");
+		// And only if it ran over the whole repository. A successful listing
+		// taken below the root prints nothing for a root `.npmrc` too, which
+		// this file could not tell from an absence until it moved into
+		// `checks/`. The same query for a root file that does exist is what
+		// says the emptiness above was measured rather than merely returned.
+		const reachable = Bun.spawnSync(
+			["git", "ls-files", "--", "**/package.json", "package.json"],
+			{ cwd: root },
+		);
+		expect(reachable.stdout.toString().split("\n").filter(Boolean)).toContain(
+			"package.json",
+		);
 	});
 });
