@@ -97,8 +97,8 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       `openspec/changes/snapshot-ingest/`. The schema and the database edge,
       the rate-limited STRATZ client, the reference upserts, the mirrored hero
       images, and the entry point that drives 3a to a published snapshot or a
-      failed one. Groups 1 to 11 are merged, PRs #146 to #162. What is left is
-      group 11c on `feat/snapshot-ingest-11c` and group 12 on
+      failed one. Groups 1 to 11 are merged, twelve PRs ending #162. What is
+      left is group 11c on `feat/snapshot-ingest-11c` and group 12 on
       `feat/snapshot-ingest-12`, and 3a falls between them. 11c is the two
       readings this change left open, whose delta spec is now written: every
       hero the reference holds reaches `staging_hero_stats`, the zero-pick row
