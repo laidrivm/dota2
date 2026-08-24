@@ -24,7 +24,7 @@ underneath work in flight.
   `src/job/ingest/`. `build/` and `export/` are named for `snapshot-build` to
   fill; git tracks no empty directory, so they are a documented contract
   rather than directories this change creates.
-- The HTTP server's six files move to `src/server/`. Four of its path
+- The HTTP server's five files move to `src/server/`. Four of its path
   resolutions are anchored to the module rather than the repository and are
   re-anchored as part of the move.
 - The nine tests that assert things about the repository itself — the

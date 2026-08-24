@@ -7,9 +7,13 @@ proposal and `PLAN.md` describe the shape and cite this section rather than
 restating a number that four pull requests stand between and today.
 
 Sixty-one tracked files sit at the repository root. Thirty-three are the
-nightly snapshot job, six are the HTTP server, nine are tests that assert
-things about the repository itself, ten are configuration and three are the
-always-on documents. Only the last thirteen belong there by any convention.
+nightly snapshot job, five are the HTTP server, nine are tests that assert
+things about the repository itself, eleven are configuration and three are
+the always-on documents. Only the last fourteen belong there by any
+convention. `index.html` is counted among them rather than with the server it
+is served by: the bundler entry point is a root citizen by convention, which
+the non-goals keep it as.
+
 The figures date, and none of the work below depends on them holding: the
 groups move named files, and the scan in group 4 reads the tree it finds.
 
@@ -195,7 +199,7 @@ Four groups, four pull requests, in order:
 1. **`src/job/`** — the job's files, the database edge above `ingest/`. No
    fix-up: every import inside the group is relative and internal, and
    `db.ts` keeps `schema.sql` beside it. The free one.
-2. **`src/server/`** — six files, then the four `new URL` re-anchorings. The
+2. **`src/server/`** — five files, then the four `new URL` re-anchorings. The
    risky one, and the one its own tests cover.
 3. **`checks/`** — nine files, then `join(import.meta.dir, "..")` across them,
    `./bunfig.toml` → `../bunfig.toml`, and the repository-root fix in
