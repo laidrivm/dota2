@@ -18,7 +18,14 @@ unmeasured, where an unplaced one is already in the wrong directory.
 The exemption list SHALL carry, for each entry, why that file is at the root
 rather than under a directory. A root file added later — a container manifest,
 a compose file — is admitted by adding its name and its reason, which is the
-decision being made rather than defaulted.
+decision being made rather than defaulted. An entry whose reason is empty, and
+an entry naming a file the repository no longer tracks, SHALL each fail the
+check: the first records no decision and the second records one about nothing.
+
+A check that could not read the tree SHALL fail rather than report a clean
+root. A scan that matched no root file at all, and a `git` invocation that
+exited non-zero, are each a failure to measure, and a failure to measure
+satisfies every assertion made over its result.
 
 #### Scenario: A source file added to the root
 
@@ -45,6 +52,32 @@ decision being made rather than defaulted.
   or `checks/`
 - **THEN** the check SHALL report nothing — it scopes the repository root and
   no directory below it
+
+#### Scenario: An exemption carrying no reason
+
+- **IF** an exemption entry's reason is empty
+- **THEN** the check SHALL fail, the reason being the decision the list
+  exists to record
+
+#### Scenario: An exemption naming a file that is gone
+
+- **IF** an exemption names a path the repository no longer tracks
+- **THEN** the check SHALL fail rather than carry the entry, which otherwise
+  outlives the file it was written for and is read by nobody
+
+#### Scenario: A root entry that is not a regular file
+
+- **WHEN** a tracked root entry is a symlink, or is tracked but absent from
+  the work tree
+- **THEN** the check SHALL skip it rather than fail on reading it — `git`
+  lists both, and neither is a file placed in the wrong directory
+
+#### Scenario: A tree the check could not read
+
+- **IF** the scan matched no root file at all, or `git` exited non-zero
+- **THEN** the check SHALL fail, reporting that it could not measure —
+  never report a clean root, which is what an unmeasured tree would
+  otherwise be indistinguishable from
 
 ### Requirement: A check reads the tracked tree from the repository root
 
@@ -87,6 +120,11 @@ reader cannot tell one from a description.
 
 A directory named as reserved for work not yet done SHALL be marked as such
 and SHALL NOT be required to exist, git tracking no empty directory.
+
+The section's checked rows are directories. A file the section names — an
+entry point a later change adds — is prose beside the table and is checked by
+nothing, because a row asserting a tracked file under a path cannot express
+"this one path is itself the file".
 
 #### Scenario: A directory the section names
 

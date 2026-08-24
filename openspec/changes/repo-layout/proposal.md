@@ -37,9 +37,11 @@ underneath work in flight.
   the file sits at the root; the move makes it wrong, so it adopts the
   `rev-parse --show-toplevel` form five other sites in this repository
   already use.
-- A new check refuses a source file added to the repository root, scoped by
-  the configuration files it exempts rather than by an enumeration of what it
-  covers. Without it the root refills the way it filled the first time.
+- A new check refuses a *tracked* file added to the repository root — every
+  one, whatever its extension and whether or not it starts with a dot —
+  scoped by the files it exempts by name rather than by an enumeration of
+  what it covers. Without it the root refills the way it filled the first
+  time.
 - The README gains a section stating where each kind of file lives and why,
   so a reader placing a new file does not have to read the check to learn the
   answer.

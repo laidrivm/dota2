@@ -66,10 +66,10 @@ Keeping one `src/` also leaves `biome.json`, `stryker.config.json`,
 
 ### `src/job/` is sectioned, with the database edge above the sections
 
-```
+```text
 src/job/
   db.ts  db.test.ts  db.fixture.ts  schema.sql     the shared edge
-  ingest/                                          29 files
+  ingest/
     stratz · patches · heroes · meta · contest
     pairs · icons · staging · ingest  + tests + fixtures
   build/     reserved — snapshot-build
@@ -143,7 +143,7 @@ than an exception to it.
 Measured on a throwaway branch: `contest.ts` and `contest.test.ts` moved to
 `src/job/` reported
 
-```
+```text
 DIFF gate: PASS — 0 lines (0 source / 0 test)
 contest.test.ts => src/job/contest.test.ts | 0
 contest.ts      => src/job/contest.ts      | 0
