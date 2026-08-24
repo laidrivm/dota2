@@ -3,8 +3,11 @@
  * where the source's own reach cuts it short, and that neither bound is read
  * off the machine's calendar.
  */
-import { beforeAll, describe, expect, test } from "bun:test";
+import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { metaWindow } from "./meta.ts";
+
+/** The zone this file was loaded under, which the block below must give back. */
+const AT_LOAD = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
 /** A patch released at a UTC midnight, and a run a week into its life. */
 const RELEASED = new Date("2026-08-14T00:00:00.000Z");
@@ -50,13 +53,19 @@ test("the day the run instant falls inside is not part of it [64]", () => {
 });
 
 describe("read from a zone nine hours ahead of UTC", () => {
-	// Nothing restores the zone afterwards, because nothing can: measured
-	// against bun 1.3.14, only the first in-process write to `process.env.TZ`
-	// takes — a `delete`, and every later assignment, leaves the run on the zone
-	// this block set. So every file bun runs after this one runs in Asia/Tokyo,
-	// and a restoring `afterAll` would only read as though it did not.
+	// `bun test` runs every file in one process, so the zone has to be given
+	// back or every file after this one runs in Tokyo. It is given back by
+	// *assignment*, `"UTC"` standing in where the run carried no `TZ`, because
+	// bun starts a test run in UTC whatever the machine's zone is. Measured
+	// against bun 1.3.14: a `delete` neither restores the zone nor lets any
+	// later assignment take, so it wedges the run on Tokyo rather than freeing
+	// it — which is the repair a reader would otherwise reach for here.
+	const zone = process.env.TZ;
 	beforeAll(() => {
 		process.env.TZ = "Asia/Tokyo";
+	});
+	afterAll(() => {
+		process.env.TZ = zone ?? "UTC";
 	});
 
 	// spec: snapshot-ingest/the-day-in-progress
@@ -71,6 +80,13 @@ describe("read from a zone nine hours ahead of UTC", () => {
 			metaWindow(RELEASED, new Date("2026-08-21T23:00:00.000Z")).days,
 		).toBe(7);
 	});
+});
+
+test("the zone the block above set is given back", () => {
+	// Nothing else here would notice: `metaWindow` reads no local calendar, so
+	// every case in this file passes under either zone, and the file that pays
+	// for a restore that did not take is some later one.
+	expect(Intl.DateTimeFormat().resolvedOptions().timeZone).toBe(AT_LOAD);
 });
 
 // spec: snapshot-ingest/a-patch-detected-today

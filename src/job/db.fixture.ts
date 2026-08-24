@@ -56,6 +56,12 @@ export function cleaner(): () => Promise<SQL> {
 		await sql`DELETE FROM staging_hero_stats WHERE hero_id >= 9000`;
 		await sql`DELETE FROM staging_hero_matchups WHERE hero_id >= 9000`;
 		await sql`DELETE FROM staging_hero_synergies WHERE hero_id >= 9000`;
+		// No pull fills these two, so nothing writes them today. They are here
+		// because the sentinel range is only as wide as this list: a table left
+		// out of it is one a suite cannot legally write to at all, since the
+		// `heroes` delete below would fail on its foreign key.
+		await sql`DELETE FROM staging_hero_sides WHERE hero_id >= 9000`;
+		await sql`DELETE FROM staging_hero_phases WHERE hero_id >= 9000`;
 		await sql`DELETE FROM heroes WHERE hero_id >= 9000`;
 		await sql`DELETE FROM patches WHERE patch_id LIKE 'z9.%'`;
 		return sql;
