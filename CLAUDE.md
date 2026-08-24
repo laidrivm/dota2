@@ -135,6 +135,8 @@ describes is rewritten, the rule is a candidate for deletion.
   a raw substring.
 - Compare a `real` column read at two different times through `Math.fround`,
   never by raw equality.
+- Write rows to a shared test database only inside the sentinel ranges its
+  cleaner reclaims.
 
 #### Process
 
