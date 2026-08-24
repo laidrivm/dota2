@@ -1,5 +1,10 @@
 import { describe, expect, test } from "bun:test";
-import { bashDeny, managers, settings } from "./agent-permissions.fixture.ts";
+import {
+	bashDeny,
+	managers,
+	root,
+	settings,
+} from "./agent-permissions.fixture.ts";
 
 /**
  * What the policy refuses outright, and the guard that catches what a
@@ -79,7 +84,7 @@ describe("the command guard is registered", () => {
 		const tracked = Bun.spawnSync(
 			["git", "ls-files", "--error-unmatch", path],
 			{
-				cwd: import.meta.dir,
+				cwd: root,
 			},
 		);
 		expect(tracked.exitCode).toBe(0);

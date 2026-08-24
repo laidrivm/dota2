@@ -9,13 +9,16 @@
  * rather than a permission list.
  */
 
+import { join } from "node:path";
+
+/** The repository root: this module reads an artefact of it, from `checks/`. */
+export const root = join(import.meta.dir, "..");
+
 /**
  * The tracked settings, never `.claude/settings.local.json` — that one is
  * gitignored, so it is present for the author and absent in a clone.
  */
-export const settings = await Bun.file(
-	`${import.meta.dir}/.claude/settings.json`,
-).json();
+export const settings = await Bun.file(`${root}/.claude/settings.json`).json();
 
 /** Every package manager this project does not use. */
 export const managers = ["npx", "npm", "pnpm", "yarn"];

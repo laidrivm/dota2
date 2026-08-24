@@ -10,7 +10,8 @@ import {
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-const root = import.meta.dir;
+/** The repository root: this file reads artefacts of it, from `checks/`. */
+const root = join(import.meta.dir, "..");
 
 const hooks: Record<string, string> = JSON.parse(
 	readFileSync(`${root}/package.json`, "utf8"),

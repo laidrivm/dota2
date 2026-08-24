@@ -1,4 +1,8 @@
 import { expect, test } from "bun:test";
+import { join } from "node:path";
+
+/** The repository root: this file reads artefacts of it, from `checks/`. */
+const root = join(import.meta.dir, "..");
 
 /**
  * The provenance table pins which shared skills the gates depend on and what
@@ -7,10 +11,8 @@ import { expect, test } from "bun:test";
  * the check is the table against the two tracked files that make a skill a
  * gate — this file's own pre-PR sequence, and `CLAUDE.md`'s rules.
  */
-const toolkit = await Bun.file(
-	`${import.meta.dir}/docs/review-toolkit.md`,
-).text();
-const claudeMd = await Bun.file(`${import.meta.dir}/CLAUDE.md`).text();
+const toolkit = await Bun.file(`${root}/docs/review-toolkit.md`).text();
+const claudeMd = await Bun.file(`${root}/CLAUDE.md`).text();
 
 /** Up to the next heading of the same level, or the end of the file. */
 const section = (markdown: string, heading: string, level = "##") =>
