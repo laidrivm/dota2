@@ -2,8 +2,8 @@ import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { pathToFileURL } from "node:url";
-import { staticRoutes } from "./static-routes.ts";
+import { fileURLToPath, pathToFileURL } from "node:url";
+import { iconDir as defaultIcons, staticRoutes } from "./static-routes.ts";
 
 let origin: string;
 let server: ReturnType<typeof Bun.serve>;
@@ -116,6 +116,19 @@ describe("font routes", () => {
 });
 
 describe("icon routes", () => {
+	test("read the mirror at the repository root by default", async () => {
+		// The one anchor no request can report on: every case below passes a
+		// directory of its own, and the default turns a missing directory into
+		// an empty listing on purpose — so a wrong anchor 404s each hero exactly
+		// as a clone that never ran the ingest does. The root comes from git,
+		// this file's own location being what is under test.
+		const top = Bun.spawnSync(["git", "rev-parse", "--show-toplevel"])
+			.stdout.toString()
+			.trim();
+
+		expect(fileURLToPath(defaultIcons)).toBe(`${top}/icons/`);
+	});
+
 	// spec: hero-reference/a-mirrored-image
 	test("serve a mirrored image with its own content type [48]", async () => {
 		const response = await fetch(`${origin}/icons/clinkz.png`);
