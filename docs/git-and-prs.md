@@ -60,6 +60,11 @@ they route through `CLAUDE.md`'s fix & capture loop like every other rule.
 
 - Never bypass a git hook with `--no-verify`, `SKIP_SIMPLE_GIT_HOOKS` or a
   `core.hooksPath` override; run it or ask.
+- Never chain a commit onto a check in one command — the check runs, prints,
+  and does not stop it; read its result first.
+- Treat an edit to `simple-git-hooks` in `package.json` as a gate change: it
+  enters the OpenSpec cycle, which `docs/feature-workflow.md` already requires
+  of one and this names the file it arrives as.
 - Fetch the base before branching from it or measuring against it, and run the
   typecheck and the suite on it before the branch — a commit made through a
   web UI never ran the pre-push hook, and a gate that names no base reports a
