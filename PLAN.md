@@ -238,12 +238,14 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       `reviewable-diff-gates` deferred and no artefact has carried since.
 - [ ] **`tracked-file-sweep`** — proposed,
       `openspec/changes/tracked-file-sweep/`. The listing every check reads the
-      tree through stands in seven copies, two of them already drifted. Two
-      task groups, so `feat/tracked-file-sweep-1` then `-2`. Re-take the count
-      before starting: `repo-layout` repaired `readme-map.test.ts`'s copy and
-      left three more sites behind it — `scripts/repo-layout.ts`,
-      `checks/readme-layout.test.ts` and `checks/tracked-tree.test.ts`, the
-      last of which pins the shape the lift would extract.
+      tree through — `git ls-files` over the whole tree, not a pathspec query —
+      stood in seven copies when this was proposed, two of them already
+      drifted. Eleven now, re-counted at the archive of `repo-layout`, which
+      repaired `readme-map.test.ts`'s copy and added four sites in three files:
+      `scripts/repo-layout.ts`, `checks/readme-layout.test.ts`, and both halves
+      of `checks/tracked-tree.test.ts`, whose second half is the unanchored
+      counter-example and is the one copy the lift must leave alone. Two task
+      groups, so `feat/tracked-file-sweep-1` then `-2`.
 - [ ] **`focus-restore-idiom`** — proposed,
       `openspec/changes/focus-restore-idiom/`. Two controls restore focus after
       an unmount and the reason the wait cannot be an animation frame is
