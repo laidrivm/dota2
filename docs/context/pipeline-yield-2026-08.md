@@ -805,7 +805,9 @@ looks for.
 - ponytail-review: PASS — 2 findings, 2 acted on (11c)
 - triage: PASS — 1 finding, 1 acted on (11c)
 - coderabbit-local: PASS — 2 findings, 1 acted on, 1 rejected (11c)
-- zombies: PASS — 24 gaps, 24 routed into tasks.md (repo-layout, propose stage)
+- zombies: PASS — 24 gaps, 23 routed into tasks.md, 1 dropped (repo-layout,
+  propose stage; the dropped one asked for stable output ordering, which the
+  local CodeRabbit pass then judged a nicety rather than a contract)
 - triage: PASS — 1 finding, 1 acted on (repo-layout)
 - coderabbit-local: PASS — 6 findings, 6 acted on (repo-layout)
 - coderabbit: PASS — 3 findings, 3 acted on (PR #169)
