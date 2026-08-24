@@ -41,7 +41,11 @@ function rows(
 			// directory is the table half-reshaped, and dropping it would leave
 			// the check reading the rows that still parse and reporting nothing.
 			path: line.split("|")[1]?.match(/`([^`]+)`/)?.[1],
-			reserved: /reserved/i.test(line),
+			// The marker is read from the "Holds" cell alone, and only where the
+			// cell opens with it: a directory whose path carries the word, or a
+			// description using it for something else, would otherwise exempt its
+			// own row from the tracking requirement with nobody deciding to.
+			reserved: /^\s*reserved\b/i.test(line.split("|")[2] ?? ""),
 		}));
 }
 
@@ -189,6 +193,30 @@ describe("a directory reserved for later work", () => {
 	});
 });
 
+/**
+ * Tracked paths the layout section does not place under a directory, and why.
+ *
+ * The list is what scopes the sweep below, rather than an enumeration of the
+ * directories it covers. Every entry ending in `/` exempts a whole subtree.
+ */
+const UNPLACED: Record<string, string> = {
+	"docs/": "prose, whose owner the knowledge ownership map above assigns",
+	"openspec/": "the workflow's own change artefacts and shipped specs",
+	"tasks/": "infra task specs, also assigned by the ownership map",
+	"spec-inbox/": "raw product specs — contents gitignored, its README tracked",
+	".github/": "CI workflows and Dependabot, read by GitHub from this path",
+	".claude/": "the agent's permission policy, its commands and skill symlinks",
+	"src/app/":
+		"the client's own internal layout — components, their styles and\n\t\ttheir tokens — is not this section's subject, the row above being the answer",
+	"src/model.ts": "the prediction model — prose beside the table, not a row",
+	"src/types.ts": "the bundle's shape, read by the client and the job alike",
+	"src/css.d.ts": "the CSS-module declaration the bundler resolves from `src/`",
+	"src/model.test.ts": "the model's own tests, which sit beside it",
+	"src/model-estimate.test.ts": "the model's own tests, which sit beside it",
+	"src/model-scoring.test.ts": "the model's own tests, which sit beside it",
+	"src/model.fixture.ts": "the model's own fixture, which sits beside it",
+};
+
 describe("the README as it stands", () => {
 	// Resolved before listing, like everything else in `checks/`: from this
 	// file's own directory the listing would be `checks/` alone, and every row
@@ -198,30 +226,55 @@ describe("the README as it stands", () => {
 		cwd: import.meta.dir,
 	});
 	if (top.exitCode !== 0) throw new Error(top.stderr.toString());
-	const root = top.stdout.toString().trim();
+	// Only the terminator git adds, not `trim()`: `scripts/repo-layout.ts`
+	// records why, and the two are halves of one capability.
+	const root = top.stdout.toString().replace(/\n$/, "");
 
 	test("its layout section names only directories the repository has", async () => {
 		const readme = await Bun.file(`${root}/README.md`).text();
 		expect(problems(readme, listing(root))).toEqual([]);
 	});
 
-	test("the section names every directory that holds source", async () => {
-		// Without this the section satisfies the check by naming one directory
-		// and staying silent about the rest, which is the answer a reader came
-		// for.
+	/** Every tracked path the section places, or `undefined` where the section is gone. */
+	const placed = async () => {
 		const readme = await Bun.file(`${root}/README.md`).text();
-		const named = new Set((rows(readme) ?? []).map((row) => row.path));
+		return (rows(readme) ?? []).flatMap(({ path }) => (path ? [path] : []));
+	};
 
-		for (const dir of [
-			"src/app/",
-			"src/fixtures/",
-			"src/job/",
-			"src/job/ingest/",
-			"src/server/",
-			"checks/",
-			"scripts/",
-			"e2e/",
-		])
-			expect(named).toContain(dir);
+	/** Whether `path` is covered by `key`, which is a prefix if it ends in `/`. */
+	const covers = (key: string, path: string) =>
+		key.endsWith("/") ? path.startsWith(key) : path === key;
+
+	test("every tracked file sits under a directory the section names", async () => {
+		// Scoped by what it exempts rather than by the directories it covers,
+		// which is `scripts/repo-layout.ts`'s departure and the same reasoning:
+		// an enumeration of what is covered passes in silence on the first
+		// directory nobody thought of, and `src/worker/` would never have to be
+		// documented at all.
+		const named = new Set(await placed());
+		const strays = listing(root).filter((path) => {
+			// A file at the root is `scripts/repo-layout.ts`'s business.
+			if (!path.includes("/")) return false;
+			const dir = path.slice(0, path.lastIndexOf("/") + 1);
+			// The file's own directory, matched exactly rather than by prefix:
+			// `src/app/` covering `src/job/ingest/db.ts` by prefix would let the
+			// ingest row be deleted with nothing noticing.
+			if (named.has(dir)) return false;
+			const keys = Object.keys(UNPLACED);
+			return !keys.some((key) => covers(key, path) || covers(key, dir));
+		});
+
+		expect(strays).toEqual([]);
+	});
+
+	test("every exemption names something, and says why", () => {
+		const tracked = listing(root);
+		const wrong = Object.entries(UNPLACED).flatMap(([key, reason]) => {
+			if (!tracked.some((path) => covers(key, path)))
+				return [`${key}: exempted, and the repository tracks nothing under it`];
+			return reason.trim() === "" ? [`${key}: exempted with no reason`] : [];
+		});
+
+		expect(wrong).toEqual([]);
 	});
 });

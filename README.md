@@ -62,10 +62,21 @@ point: a row asserts a tracked file *under* a path, which cannot express a
 path that is itself the file. And `icons/` is where the ingest mirrors hero
 images at runtime; it is gitignored, so no clone has it until a run fills it.
 
-Every tracked file left at the repository root is named in
-`scripts/repo-layout.ts`, with why it is there. A new one is admitted by
-adding its name and its reason, which is the decision being taken rather than
-defaulted.
+The table covers the directories that hold code, and leaves out four that
+hold something else: `docs/`, `openspec/` and `tasks/`, whose contents the
+knowledge ownership map above assigns, and `spec-inbox/`, whose contents are
+gitignored. `.github/` and `.claude/` are configuration read from where the
+tools expect it. The client's own internal layout — `src/app/board/`,
+`src/app/picker/`, the stylesheets and their tokens — is left out too: the
+`src/app/` row is the answer for all of it.
+
+Both of those lists are checked rather than merely written down.
+`checks/readme-layout.test.ts` refuses a tracked file whose directory neither
+appears in the table nor is exempted with a reason, so a new `src/worker/`
+fails until somebody decides which it is. Every tracked file left at the
+repository root is named in `scripts/repo-layout.ts` the same way. Both are
+scoped by what they exempt rather than by what they cover, because a list of
+what is covered passes in silence on the first thing nobody thought of.
 
 ## Running it
 
