@@ -32,6 +32,41 @@
 
 One fact lives in exactly one file; everything else links to it.
 
+## Where each kind of file lives
+
+| Directory | Holds |
+|-----------|-------|
+| `src/app/` | the client: components, their stylesheets, and the state they read |
+| `src/fixtures/` | the snapshot the client is served until the pipeline publishes one |
+| `src/job/` | the nightly job's shared edge — the database connection and the schema it applies |
+| `src/job/ingest/` | the pulls, the transport that paces them, and the staging write |
+| `src/job/build/` | reserved for `snapshot-build`: turning staging into a snapshot |
+| `src/job/export/` | reserved for `snapshot-build`: writing that snapshot out |
+| `src/server/` | the HTTP server, its two route modules, and what they serve |
+| `checks/` | assertions about this repository's own artefacts — the rules, the permission policy, the commit gates |
+| `scripts/` | executable gates and the dev entry point, each with its tests beside it |
+| `e2e/` | the Playwright specs, which Bun's runner is configured to skip |
+
+The tree is cut by what a file is *for*, not by what it is written in, because
+the questions that get asked of it are "what does the served container need"
+and "what does the cron job need" — and a tree sorted by language answers
+neither. One `src/` rather than three top-level directories, because the
+client, the model and the job already shared it and splitting them would
+rewrite the import rule `biome.json` enforces to buy nothing but a shorter
+`COPY` line.
+
+Three things the table cannot state. The prediction model — `src/model.ts` and
+`src/types.ts` with their tests — sits directly in `src/`, being neither
+client nor job but read by both. `src/job/main.ts` will be the job's entry
+point: a row asserts a tracked file *under* a path, which cannot express a
+path that is itself the file. And `icons/` is where the ingest mirrors hero
+images at runtime; it is gitignored, so no clone has it until a run fills it.
+
+Every tracked file left at the repository root is named in
+`scripts/repo-layout.ts`, with why it is there. A new one is admitted by
+adding its name and its reason, which is the decision being taken rather than
+defaulted.
+
 ## Running it
 
 - `bun run dev` — `scripts/dev.ts` on http://localhost:3000: it clears `dist/`
@@ -51,8 +86,8 @@ One fact lives in exactly one file; everything else links to it.
   started from the image CI pins and taken away afterwards. Without it 53
   cases skip: every patch detection, every reference upsert, every schema
   constraint and the whole staging write. Arguments pass through, so
-  `bun run test:db ./src/job/ingest/ingest.test.ts` runs one file — the `./` matters, since a
-  bare argument is matched as a substring of every path.
+  `bun run test:db ./src/job/ingest/ingest.test.ts` runs one file — the `./`
+  matters, since a bare argument is matched as a substring of every path.
 - `bun run test:coverage` — the same suite with Bun's built-in coverage
   reporter. The number is visibility, not a gate: no threshold is configured
   and none should be added without a decision made against real numbers.
