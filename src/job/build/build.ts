@@ -47,6 +47,10 @@ export async function buildSnapshot(
 				);
 	const priorPatchId = weight === 0 ? null : patch.previous;
 
+	// Outside the transaction below, and deliberately: a build that raises
+	// part way is specified to leave its snapshot at `failed`, never at
+	// `building`, and a row rolled back with the statistics is a row the next
+	// group has nothing to mark. What rolls back is the statistics alone.
 	const [created] = await sql`INSERT INTO snapshots
 		(created_at, patch_id, prior_patch_id, prior_weight, status)
 		VALUES (${at}, ${patchId}, ${priorPatchId}, ${weight}, 'building')
