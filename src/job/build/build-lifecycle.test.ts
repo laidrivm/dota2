@@ -101,8 +101,8 @@ describe.skipIf(url === undefined)("where a build's snapshot ends up", () => {
 	test("a snapshot measuring neither component publishes [58]", async () => {
 		const sql = await seeded(clean);
 		await stage(sql, NEW_PATCH);
-		for (const table of ["staging_hero_sides", "staging_hero_phases"])
-			await sql.unsafe(`DELETE FROM ${table} WHERE patch_id = $1`, [NEW_PATCH]);
+		await sql`DELETE FROM staging_hero_sides WHERE patch_id = ${NEW_PATCH}`;
+		await sql`DELETE FROM staging_hero_phases WHERE patch_id = ${NEW_PATCH}`;
 
 		const built = await buildSnapshot(sql, NEW_PATCH, BUILT_AT);
 
