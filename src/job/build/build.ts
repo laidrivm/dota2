@@ -103,6 +103,11 @@ export async function buildSnapshot(
 	// ponytail: the reason is decided and dropped. Nothing carries it because
 	// nothing reads it yet; a column on `snapshots`, or a line the entry point
 	// logs, arrives when group 12 has to report why a run produced no bundle.
+	// Unguarded, unlike the marking in the catch above, and for the opposite
+	// reason: there the swallow keeps the build's own error the one that
+	// propagates, while here the marking's failure *is* the only error there
+	// is. A snapshot left at `building` by a connection that died between the
+	// statistics and this line is what retention eventually collects.
 	const invalid = invalidReason(rows, await publishedHeroes(sql));
 	await sql`UPDATE snapshots SET status =
 			${invalid === undefined ? "published" : "failed"}

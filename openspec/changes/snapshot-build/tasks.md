@@ -189,12 +189,15 @@ retention, which is a requirement of its own with no validation in it.
 - [x] 4.1a Write the lifecycle tests: the first snapshot ever built publishes
       with no earlier one to compare hero counts against [15]; a build
       satisfying every check publishes and is newest [16]; a failed validation
-      leaves the previously published snapshot newest [24]. The hero count is
-      what refuses that last one: shares are normalised from a hero's own
-      picks, so no staging the schema admits produces a hero whose shares sum
-      to anything but 1, and the sum the criterion names is asserted on rows
-      handed to the check directly instead. (Req: snapshot-build — A snapshot
-      is published only after it validates)
+      leaves the previously published snapshot newest [24]; and the count that
+      refusal rests on comes from the newest *published* snapshot and from no
+      other, so neither a failed snapshot's rows nor a reversed ordering can
+      supply it [88]. The hero count is what refuses [24]: shares are
+      normalised from a hero's own picks, so no staging the schema admits
+      produces a hero whose shares sum to anything but 1, and the sum the
+      criterion names is asserted on rows handed to the check directly
+      instead. (Req: snapshot-build — A snapshot is published only after it
+      validates)
 - [ ] 4.1b Write the outcome tests each of [58], [60] and [61] names, group 2
       having asserted only the verdict behind them. (Req: snapshot-build — An
       unmeasured component is zero for every hero)

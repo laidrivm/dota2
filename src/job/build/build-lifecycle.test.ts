@@ -95,4 +95,55 @@ describe.skipIf(url === undefined)("where a build's snapshot ends up", () => {
 		expect(await statusOf(sql, refused)).toBe("failed");
 		expect(await newestPublished(sql)).toBe(published);
 	});
+
+	test("the count comes from the newest published snapshot alone [88]", async () => {
+		const sql = await seeded(clean);
+		// An older published snapshot holding one hero, a newer one holding
+		// two, and — newer than both — a `failed` one holding three. A failed
+		// snapshot keeps the statistics it wrote, so it really can hold more
+		// heroes than anything published: it is refused for what those rows
+		// say, not for how many there are.
+		await stage(sql, OLD_PATCH);
+		await sql`DELETE FROM staging_hero_stats
+			WHERE patch_id = ${OLD_PATCH} AND hero_id = ${OTHER}`;
+		await buildSnapshot(sql, OLD_PATCH, new Date("2026-07-02T00:00:00.000Z"));
+		await stage(sql, OLD_PATCH);
+		await buildSnapshot(sql, OLD_PATCH, new Date("2026-07-03T00:00:00.000Z"));
+		await failedHoldingMore(sql);
+
+		await stage(sql, NEW_PATCH);
+		const matching = await buildSnapshot(sql, NEW_PATCH, BUILT_AT);
+		await sql`DELETE FROM staging_hero_stats
+			WHERE patch_id = ${NEW_PATCH} AND hero_id = ${OTHER}`;
+		const short = await buildSnapshot(sql, NEW_PATCH, BUILT_AT);
+
+		// Two heroes clear the newest published snapshot's two — and would not
+		// clear the failed one's three, which is how a count that read past
+		// `status` shows up here.
+		expect(await statusOf(sql, matching)).toBe("published");
+		// One hero falls below those two, and would clear the *older*
+		// published snapshot's one, which is how a reversed ordering shows up.
+		expect(await statusOf(sql, short)).toBe("failed");
+	});
 });
+
+/**
+ * A `failed` snapshot holding a hero row for one hero more than staging has.
+ *
+ * Written directly rather than built: what this stands for is a snapshot
+ * refused for what its rows say, whose rows outlive the refusal — and no
+ * check 4a implements refuses a snapshot that is otherwise this large.
+ */
+async function failedHoldingMore(sql: SQL): Promise<void> {
+	await sql`INSERT INTO heroes (hero_id, name, short_name, icon, first_seen_at)
+		VALUES (9000, 'H9000', 'h9000', '/icons/h9000.png', now())
+		ON CONFLICT DO NOTHING`;
+	const [row] = await sql`INSERT INTO snapshots
+			(created_at, patch_id, prior_patch_id, prior_weight, status)
+		VALUES (now(), ${OLD_PATCH}, NULL, 0, 'failed') RETURNING snapshot_id`;
+	await sql`INSERT INTO hero_stats (snapshot_id, hero_id, matches, contest_rate,
+			side_adj_radiant, side_adj_dire, phase_adj_1, phase_adj_2,
+			phase_adj_last, sufficient)
+		SELECT ${row.snapshot_id}, hero_id, 0, 0, 0, 0, 0, 0, 0, false
+		FROM heroes WHERE hero_id >= 9000`;
+}
