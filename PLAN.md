@@ -272,6 +272,16 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       indexed docs too, and the criterion routes every captured rule into the
       one file that costs always-on budget. `CLAUDE.md` §*Lessons learned* is
       corrected on this branch; the criterion needs a delta spec.
+- [ ] **Both maintenance triggers have fired.** The always-on set is 527 lines
+      against the ~500 `CLAUDE.md` states, and its Process sublist holds 22
+      rules against the ~20. `docs/rulebook-growth.md` asks for a promotion
+      rather than a prune, and the cluster is already obvious: eight Process
+      rules are about what counts as evidence — how a gate is probed, when an
+      empty result is an absence, where a count comes from, which run a claim
+      may rest on — and `docs/verification.md` exists to own exactly that.
+      Moving them takes the sublist to fourteen and the always-on set under
+      its budget in one edit. The two rules this session added are in the
+      cluster, so they move with it.
 
 ## Standing constraints
 
