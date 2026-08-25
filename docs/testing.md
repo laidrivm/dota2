@@ -13,6 +13,9 @@ single-source rule this file inherits.
   a new test, break the code it guards and watch it fail. Break the mechanism
   the test names, not the feature it exercises: a second rule reaching the
   same result makes a passing test evidence about nothing.
+- Give a fixture for a symmetry or antisymmetry case inputs that disagree —
+  two sides carrying equal counts satisfy the criterion whichever way the code
+  derived them.
 - Route `/zombies` findings by layer: Zero/One/Many/Boundaries/Interface/
   Exceptions → unit or integration tests; Simple scenarios marked
   `(e2e candidate)` → the Playwright smoke suite.

@@ -7,6 +7,9 @@ single-source rule this file inherits.
   code, walk the ladder — does this need to exist → is it already in the
   codebase → does the stdlib do it → does Bun/the platform do it natively.
 - Prefer deleting code over abstracting it. No speculative flexibility (YAGNI).
+- Escape a literal `_` or `%` in a `LIKE` pattern with an explicit `ESCAPE`
+  clause, never a backslash inside a template literal, which removes it before
+  SQL is parsed.
 
 ## Dependency safety
 
