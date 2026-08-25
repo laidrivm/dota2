@@ -1,0 +1,42 @@
+/**
+ * A hero's positions: the share of its own picks each one took, and the two
+ * sample thresholds that decide whether it may be suggested at all.
+ */
+import { describe, expect, test } from "bun:test";
+import { pickShares } from "./positions.ts";
+
+describe("the share of a hero's picks each position took", () => {
+	test("a hero picked on one position gets that position alone [3]", () => {
+		expect(pickShares([{ position: 3, matches: 940 }])).toEqual(
+			new Map([[3, 1]]),
+		);
+	});
+
+	// spec: snapshot-build/shares-over-the-positions-played
+	test("a hero picked on three gets three rows and no others [4]", () => {
+		const shares = pickShares([
+			{ position: 1, matches: 500 },
+			{ position: 2, matches: 0 },
+			{ position: 3, matches: 300 },
+			{ position: 4, matches: 0 },
+			{ position: 5, matches: 200 },
+		]);
+
+		expect(shares).toEqual(
+			new Map([
+				[1, 0.5],
+				[3, 0.3],
+				[5, 0.2],
+			]),
+		);
+	});
+
+	test("a hero whose picks total zero yields no rows and no division [53]", () => {
+		expect(
+			pickShares([
+				{ position: 1, matches: 0 },
+				{ position: 4, matches: 0 },
+			]),
+		).toEqual(new Map());
+	});
+});

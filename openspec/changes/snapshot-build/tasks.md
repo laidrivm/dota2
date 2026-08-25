@@ -45,7 +45,7 @@ keeps running on the committed fixture until group 8 rewires the route.
 
 ## 2. Position shares and sufficiency
 
-- [ ] 2.1 Write the share tests: a hero picked on one position gets
+- [x] 2.1 Write the share tests: a hero picked on one position gets
       `pick_share` 1 and a single row [3]; a hero picked on three gets three
       rows and none for the positions it never played [4]; a hero whose picks
       total zero yields no rows and no division [53]. (Req:
