@@ -3,8 +3,9 @@
 Test tasks are derived from the proposal-stage `/zombies` run and are written
 before the module they cover (docs/testing.md — TDD for edge cases). The
 bracketed numbers are that run's idea numbers, so every one of its 45 ideas
-is traceable to the group that closes it. Numbers 46 to 57 are the reviews'
-own, added where a finding named a case the run had missed.
+is traceable to the group that closes it. Numbers from 46 up are later work's
+own, added where a review finding or an apply run named a case the run had
+missed.
 
 Eight groups, so eight pull requests on `feat/snapshot-build-1` … `-8`, in
 order. It runs after `snapshot-ingest`'s groups 1 to 11c, which own the schema
@@ -19,15 +20,17 @@ keeps running on the committed fixture until group 8 rewires the route.
 
 ## 1. Blending and smoothing
 
-- [ ] 1.1 Write the blending tests: `prior(0)` is `k0` for both patch kinds
+- [x] 1.1 Write the blending tests: `prior(0)` is `k0` for both patch kinds
       [5]; `prior(h)` is half of `k0` [6]; a major patch's prior is positive
       at `t = 3` and 0 at `t = 4` [7]; a letter patch's at `t = 6` and
       `t = 7` [8]; a statistic with no predecessor patch blends to `wr_new`
       [1]; `n_new = 0` against a zeroed prior does not divide by zero [13]; a
       hero absent from the previous patch blends without a prior rather than
       reading the missing value as 50 [14]; a statistic with neither matches
-      nor a surviving prior yields no row at all [46]. (Req: snapshot-build — Patch
-      blending with a decaying prior)
+      nor a surviving prior yields no row at all [46]; a statistic inside the
+      window is the weighted average of both patches, so a prior dropped
+      altogether and one applied undecayed each fail [63]. (Req:
+      snapshot-build — Patch blending with a decaying prior)
 - [ ] 1.2 Write the smoothing tests: `n_eff = k` halves the raw delta [9];
       `n_eff = k / 9` leaves a tenth of it [2]; each statistic uses its own
       `k`, so a single shared constant fails [12]. (Req: snapshot-build —
