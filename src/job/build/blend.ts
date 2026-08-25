@@ -122,13 +122,6 @@ export const adj = (statistic: Statistic, blend: Blended): number =>
 	(blend.nEff + SMOOTHING[statistic]);
 
 /**
- * The winrate a stored delta stands for: what a blend reads as `wr_old` from
- * the previous patch's snapshot, that snapshot holding the smoothed delta
- * rather than the winrate it came from.
- */
-export const wrOf = (storedAdj: number): number => storedAdj + NEUTRAL;
-
-/**
  * Whether staging measured a component — `side`, `phase` — at all: whether it
  * holds any row for it. An unmeasured component is stored as 0 on every hero
  * row, which the model reads as no contribution, so it moves no candidate's
