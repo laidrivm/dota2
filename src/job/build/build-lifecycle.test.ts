@@ -37,6 +37,27 @@ const statusOf = async (sql: SQL, id: number): Promise<string> => {
 	return row.status;
 };
 
+/**
+ * Every value on these rows whose column name carries `token`, and never none.
+ *
+ * The rows are read with `SELECT *` and filtered here rather than named in the
+ * query, so a delta column added to the table is checked by carrying the
+ * schema's own mark for one. The emptiness guard is what stops a token that
+ * matches nothing from passing as a row of zeros.
+ */
+const carrying = (
+	rows: Record<string, unknown>[],
+	token: string,
+): unknown[] => {
+	const found = rows.flatMap((row) =>
+		Object.entries(row)
+			.filter(([column]) => column.includes(token))
+			.map(([, value]) => value),
+	);
+	expect(found).not.toHaveLength(0);
+	return found;
+};
+
 describe.skipIf(url === undefined)("where a build's snapshot ends up", () => {
 	// spec: snapshot-build/the-first-snapshot
 	test("the first snapshot ever built publishes [15]", async () => {
@@ -109,15 +130,10 @@ describe.skipIf(url === undefined)("where a build's snapshot ends up", () => {
 		expect(await statusOf(sql, built)).toBe("published");
 		// Zeroed throughout rather than omitted: the same 0 on every hero adds
 		// the same nothing to every score, so no candidate moves against another.
-		const held = await sql`SELECT side_adj_radiant, side_adj_dire, phase_adj_1,
-				phase_adj_2, phase_adj_last
-			FROM hero_stats WHERE snapshot_id = ${built}`;
+		const held = await sql`SELECT * FROM hero_stats
+			WHERE snapshot_id = ${built}`;
 		expect(held).toHaveLength(2);
-		expect(
-			held.every((row: Record<string, number>) =>
-				Object.values(row).every((value) => value === 0),
-			),
-		).toBe(true);
+		expect(carrying(held, "_adj").every((value) => value === 0)).toBe(true);
 	});
 
 	// spec: snapshot-build/one-component-measured-while-the-other-is-not
@@ -129,24 +145,20 @@ describe.skipIf(url === undefined)("where a build's snapshot ends up", () => {
 		const built = await buildSnapshot(sql, NEW_PATCH, BUILT_AT);
 
 		expect(await statusOf(sql, built)).toBe("published");
-		const held = await sql`SELECT hero_id, side_adj_radiant, phase_adj_1,
-				phase_adj_2, phase_adj_last
-			FROM hero_stats WHERE snapshot_id = ${built} ORDER BY hero_id`;
+		const held = await sql`SELECT * FROM hero_stats
+			WHERE snapshot_id = ${built} ORDER BY hero_id`;
 		// Every hero and every phase column, as the criterion says: one column
 		// read on one hero would pass a build that zeroed `phase_adj_1` alone.
 		expect(held).toHaveLength(2);
-		expect(
-			held.every(
-				(row: Record<string, number>) =>
-					row.phase_adj_1 === 0 &&
-					row.phase_adj_2 === 0 &&
-					row.phase_adj_last === 0,
-			),
-		).toBe(true);
+		expect(carrying(held, "phase_adj").every((value) => value === 0)).toBe(
+			true,
+		);
 		// A verdict taken once for the snapshot rather than once per component
-		// would zero the side deltas staging did measure.
+		// would zero the side deltas staging did measure — both of them, the
+		// hero being staged above half on radiant and below it on dire.
 		expect(held[0].hero_id).toBe(HERO);
 		expect(held[0].side_adj_radiant).toBeGreaterThan(0);
+		expect(held[0].side_adj_dire).toBeLessThan(0);
 	});
 
 	// spec: snapshot-build/a-measured-component-that-happens-to-be-neutral
