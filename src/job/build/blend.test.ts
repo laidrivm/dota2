@@ -1,11 +1,16 @@
 /**
- * Patch blending: how fast a patch stops counting once the next one lands,
- * and what a statistic's winrate is while both still do.
- *
- * The smoothing the same module holds is `smoothing.test.ts`'s.
+ * The blend and the smoothing: how fast a patch stops counting once the next
+ * one lands, what a statistic's winrate is while both still do, and how much
+ * of its distance from neutral survives the sample behind it.
  */
 import { describe, expect, test } from "bun:test";
-import { type PatchKind, prior, wrBlend } from "./blend.ts";
+import {
+	adj,
+	type PatchKind,
+	prior,
+	type Statistic,
+	wrBlend,
+} from "./blend.ts";
 
 /** The parameter table the requirement fixes: kind, `k0`, half-life in days. */
 const KINDS: [PatchKind, number, number][] = [
@@ -95,4 +100,35 @@ describe("the blend", () => {
 		// Undefined rather than `NaN`: the quotient is never attempted.
 		expect(wrBlend(0, 50, prior("major", 4), 48)).toBeUndefined();
 	});
+});
+
+/**
+ * The `k` each statistic is stated to smooth by. Naming them here is what
+ * makes these two cases pin the table rather than a single shared constant:
+ * `n_eff = k` halves a delta only for the statistic's own `k`.
+ */
+const CONSTANTS: [Statistic, number][] = [
+	["position", 300],
+	["side", 500],
+	["phase", 500],
+	["matchup", 400],
+	["synergy", 400],
+];
+
+describe("smoothing towards neutral", () => {
+	// spec: snapshot-build/sample-equal-to-the-constant
+	test.each(CONSTANTS)(
+		"a %s sample equal to its own k halves the raw delta [9] [12]",
+		(statistic, k) => {
+			expect(adj(statistic, { wrBlend: 54, nEff: k })).toBe(2);
+		},
+	);
+
+	// spec: snapshot-build/a-sample-far-below-the-constant
+	test.each(CONSTANTS)(
+		"a %s sample a ninth of its own k leaves a tenth of it [2]",
+		(statistic, k) => {
+			expect(adj(statistic, { wrBlend: 60, nEff: k / 9 })).toBeCloseTo(1, 10);
+		},
+	);
 });
