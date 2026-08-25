@@ -91,7 +91,13 @@ group's first three tasks and are now `snapshot-ingest`'s group 4. They closed
 no criterion here, every group of that change writes through them, and it can
 no longer run before this one. This group takes all three as given.
 
-Two pull requests, `feat/snapshot-build-3a` then `-3b`: as one step it
+The suite splits three ways under the file cap — `build.test.ts` for what a
+build produces, `build-prior.test.ts` for the previous patch's contribution,
+`build-pairs.test.ts` for the symmetry, over a shared `build.fixture.ts`. The
+split was verified by the full describe path of every case, not by their
+count.
+
+Three pull requests, `feat/snapshot-build-3a`, `-3b`, `-3c`: as one step it
 measured 798 lines against a budget that fails at 800. The seam is the one
 `design.md` already draws — 3a is the row assembly, pure and exercised
 without a database, and 3b is the SQL edge around it with the
@@ -99,6 +105,22 @@ database-backed cases. It is the seam worth taking rather than the cheapest:
 unsplit, `rows.ts` was reached only by a suite a plain `bun test` skips,
 which is *Arithmetic testable without a database* read backwards. 3.3a
 accordingly ships before 3.1 and 3.2, which are 3b's.
+
+3c is a widening the group took mid-flight rather than a third slice of the
+plan: a review found that a stored delta of 0 cannot say whether a component
+was measured and neutral or never measured, and the fix needs two columns on
+`snapshots` — the schema this change otherwise consumes. It is its own pull
+request because it carries a schema change and a proposal amendment, which a
+reviewer reads on different terms from a staging read, and because 3b with it
+measured 801 lines against a budget that fails at 800.
+
+- [ ] 3.3c Record on each snapshot which components its staging measured, and
+      read `wr_old` for a component only where the predecessor measured it: a
+      component the predecessor never measured is no prior at all, where one
+      it measured at exactly neutral is [84]. Amend the proposal's schema
+      non-goal to state the exception, and the delta spec to carry the
+      criterion. (Req: snapshot-build — An unmeasured component is zero for
+      every hero)
 
 - [x] 3.3a Assemble the rows a snapshot stores from staging and the previous
       patch's deltas, with no database in front of it: a hero's shares,
@@ -132,9 +154,8 @@ accordingly ships before 3.1 and 3.2, which are 3b's.
       them [83]; a build that raises after creating its row leaves that row
       `failed` rather than `building` [23], reached through a stub because no
       staging row the schema admits can make the statistics write fail. (Req:
-      snapshot-build
-      — The build reads its own database and nothing else / Patch blending
-      with a decaying prior)
+      snapshot-build — The build reads its own database and nothing else /
+      Patch blending with a decaying prior)
 - [x] 3.2 Write the symmetry tests: `(a,b)` and `(b,a)` matchup rows carry
       `advantage_adj` summing to 0 [21]; `hero_synergies` holds `(a,b)` for
       `a < b` and no mirrored row [22]. (Req: snapshot-build — Stored pair
