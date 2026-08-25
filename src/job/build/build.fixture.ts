@@ -50,9 +50,14 @@ export async function stage(
 	// at a different winrate. The tables are discovered rather than named: one
 	// added to the schema and left out of a list here is one whose rows
 	// survive into the next call, and the build would read them.
+	//
+	// Scoped by what it exempts, never by a `staging_%` the next table might
+	// not be called — and where `_` is a wildcard anyway, so the prefix would
+	// admit names nobody meant. Two tables carry a `patch_id` without being
+	// staging: `patches`, which owns the id, and `snapshots`, which names one.
 	const staged = await sql`SELECT table_name FROM information_schema.columns
 		WHERE table_schema = 'public' AND column_name = 'patch_id'
-			AND table_name LIKE 'staging\_%'`;
+			AND table_name NOT IN ('patches', 'snapshots')`;
 	expect(staged.length).toBeGreaterThan(0);
 	for (const { table_name } of staged)
 		await sql.unsafe(`DELETE FROM ${table_name} WHERE patch_id = $1`, [
@@ -127,7 +132,9 @@ export const statsOf = async (sql: SQL, id: number) => ({
 			side_adj_dire, phase_adj_1, phase_adj_2, phase_adj_last, sufficient
 		FROM hero_stats WHERE snapshot_id = ${id} ORDER BY hero_id`,
 	matchups: await sql`SELECT hero_id, enemy_id, matches, advantage_adj
-		FROM hero_matchups WHERE snapshot_id = ${id} ORDER BY hero_id`,
+		FROM hero_matchups WHERE snapshot_id = ${id}
+		ORDER BY hero_id, enemy_id`,
 	synergies: await sql`SELECT hero_id, ally_id, matches, synergy_adj
-		FROM hero_synergies WHERE snapshot_id = ${id} ORDER BY hero_id`,
+		FROM hero_synergies WHERE snapshot_id = ${id}
+		ORDER BY hero_id, ally_id`,
 });
