@@ -43,8 +43,11 @@ export function invalidReason(
 	const shares = new Map<number, number>();
 	for (const row of rows.positions)
 		shares.set(row.hero_id, (shares.get(row.hero_id) ?? 0) + row.pick_share);
+	// Written as a refused pass rather than a detected failure, so that a sum
+	// that is not a number fails: every comparison against `NaN` is false, and
+	// `> SHARE_TOLERANCE` would read it as within tolerance.
 	for (const [heroId, sum] of shares)
-		if (Math.abs(sum - 1) > SHARE_TOLERANCE)
+		if (!(Math.abs(sum - 1) <= SHARE_TOLERANCE))
 			return `hero ${heroId}'s position shares sum to ${sum}`;
 
 	return undefined;

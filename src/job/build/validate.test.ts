@@ -60,6 +60,10 @@ describe("what refuses a snapshot", () => {
 		expect(invalidReason(off(2 ** -20), 0)).toBeUndefined();
 		expect(invalidReason(off(2 ** -19), 0)).toContain("position shares");
 		expect(invalidReason(off(0.2), 0)).toContain("sum to 0.8");
+		// Not a number is not within tolerance, which a check written as a
+		// detected failure rather than a refused pass would let through: every
+		// comparison against `NaN` is false, this one included.
+		expect(invalidReason(off(Number.NaN), 0)).toContain("sum to NaN");
 	});
 
 	test("a hero's shares are summed against its own rows alone [19]", () => {
