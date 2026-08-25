@@ -148,6 +148,18 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       mars, slark, spectre, storm-spirit, treant-protector all move light →
       dark. The fix is to reference the tokens; the shortened swatch labels are
       hand-authored, so the pages cannot simply be regenerated.
+- [ ] **Mutation testing's scope predates the job tree.**
+      `openspec/specs/mutation-floor/` scopes Stryker to `src/model.ts` alone
+      and rules that a second file means a second configuration and a second
+      floor rather than a widened glob — written when the model was the only
+      module here where a wrong sign or boundary yields a plausible number
+      instead of a crash. `src/job/` now holds eleven more of exactly that
+      kind, none of them mutated; `blend.ts`'s decay and smoothing tables were
+      checked by breaking them by hand instead, which no gate repeats. What
+      this asks is whether one configuration and one floor per file still
+      scales at eleven, and what replaces it if not — a floor per directory, a
+      floor per file generated from one list, or the rule kept and paid. Either
+      answer is a delta spec, not an edit to the spec.
 - [ ] **A scroll-strip criterion the board does not meet as written.**
       `openspec/specs/draft-board/spec.md` §*Scroll strips are operable without
       a pointer* admits two means only, "through scroll buttons or by being
@@ -276,7 +288,7 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       indexed docs too, and the criterion routes every captured rule into the
       one file that costs always-on budget. `CLAUDE.md` §*Lessons learned* is
       corrected on this branch; the criterion needs a delta spec.
-- [ ] **The always-on trigger has fired.** The set is 534 lines against the
+- [ ] **The always-on trigger has fired.** The set is 551 lines against the
       ~500 `CLAUDE.md` states. The Process sublist sits at 20, its own
       threshold, and stayed there only because this session's two captured
       rules went to `docs/verification.md` rather than into it.
