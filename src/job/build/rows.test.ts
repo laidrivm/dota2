@@ -101,6 +101,25 @@ describe("a component staging did not measure", () => {
 		expect(rows.heroes[0]?.side_adj_dire).toBeLessThan(0);
 	});
 
+	// spec: snapshot-build/a-part-the-component-never-measured
+	test("is 0 for a part no hero was measured on, the rest standing [89]", () => {
+		const rows = snapshotRows(
+			staging({
+				heroes: [hero(1), hero(2)],
+				sides: sides.filter((row) => row.part === "radiant"),
+				phases: [],
+			}),
+			alone,
+		);
+
+		// The half of the criterion that is a stored value: `dire` is 0 on
+		// every hero, which reorders nobody, while `radiant` keeps the delta
+		// its own rows produced. That the snapshot then publishes rather than
+		// failing is `validate.test.ts`'s half.
+		expect(rows.heroes.every((row) => row.side_adj_dire === 0)).toBe(true);
+		expect(rows.heroes[0]?.side_adj_radiant).toBeGreaterThan(0);
+	});
+
 	test("differs from a measured one this hero has no row for [74]", () => {
 		const rows = snapshotRows(
 			staging({ heroes: [hero(1), hero(2), hero(3)], sides, phases: [] }),

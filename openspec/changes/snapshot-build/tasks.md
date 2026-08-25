@@ -215,8 +215,9 @@ retention, which is a requirement of its own with no validation in it.
       hero but one fails validation, taken to the `failed` status the criterion
       names and driven through the phase component so the second of the two
       call sites moves [59]; and a part staging holds for no hero
-      at all publishes rather than failing [89], which is the reading the
-      delta spec gains here — the parts checked are the ones staging holds,
+      at all publishes rather than failing, and stands at 0 on every
+      hero row while the parts staging did measure keep their deltas [89],
+      which is the reading the delta spec gains here — the parts checked are the ones staging holds,
       never a list the check carries. (Req: snapshot-build — A snapshot is
       published only after it validates / An unmeasured component is zero for
       every hero)
