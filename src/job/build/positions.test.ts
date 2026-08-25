@@ -3,7 +3,7 @@
  * sample thresholds that decide whether it may be suggested at all.
  */
 import { describe, expect, test } from "bun:test";
-import { pickShares } from "./positions.ts";
+import { heroSufficient, pickShares, positionSufficient } from "./positions.ts";
 
 describe("the share of a hero's picks each position took", () => {
 	test("a hero picked on one position gets that position alone [3]", () => {
@@ -38,5 +38,25 @@ describe("the share of a hero's picks each position took", () => {
 				{ position: 4, matches: 0 },
 			]),
 		).toEqual(new Map());
+	});
+});
+
+describe("the sample a suggestion needs behind it", () => {
+	// spec: snapshot-build/at-the-position-threshold
+	// snapshot-build/below-the-position-threshold
+	test.each([
+		[500, true],
+		[499, false],
+	])("a hero-position at n_eff %i is sufficient: %s [10]", (nEff, expected) => {
+		expect(positionSufficient(nEff)).toBe(expected);
+	});
+
+	// spec: snapshot-build/at-the-hero-threshold
+	test("a hero whose positions sum to 1000 is sufficient [11]", () => {
+		expect(heroSufficient([400, 400, 200])).toBe(true);
+	});
+
+	test("a hero whose positions sum to 999 is not [11]", () => {
+		expect(heroSufficient([400, 400, 199])).toBe(false);
 	});
 });
