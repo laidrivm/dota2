@@ -141,6 +141,38 @@ describe.skipIf(url === undefined)("what a build produces", () => {
 		expect(held[0].status).toBe("failed");
 	});
 
+	test("a component the predecessor never measured is no prior at all [84]", async () => {
+		/** The radiant delta this patch's own even-handed side rows produce. */
+		const built = async (measuredBefore: boolean) => {
+			const sql = await seeded(clean);
+			await stage(sql, OLD_PATCH, 500);
+			// The predecessor either measured side at exactly neutral, or did
+			// not measure it. Both leave a stored delta of 0 on every hero, so
+			// the two snapshots differ in nothing a value can tell apart.
+			await (measuredBefore
+				? sql`UPDATE staging_hero_sides SET wins = 250
+						WHERE patch_id = ${OLD_PATCH}`
+				: sql`DELETE FROM staging_hero_sides WHERE patch_id = ${OLD_PATCH}`);
+			const published = await buildSnapshot(
+				sql,
+				OLD_PATCH,
+				new Date("2026-07-02T00:00:00.000Z"),
+			);
+			await sql`UPDATE snapshots SET status = 'published'
+				WHERE snapshot_id = ${published}`;
+			// This patch stages hero 1 at six of ten on radiant.
+			await stage(sql, NEW_PATCH, 500);
+			const id = await buildSnapshot(sql, NEW_PATCH, BUILT_AT);
+			const [row] = await sql`SELECT side_adj_radiant FROM hero_stats
+				WHERE snapshot_id = ${id} AND hero_id = ${HERO}`;
+			return row.side_adj_radiant as number;
+		};
+
+		// Unmeasured is no reading, so this patch's own sixty per cent stands
+		// undiluted; measured-at-neutral is a reading, and pulls it down.
+		expect(await built(false)).toBeGreaterThan(await built(true));
+	});
+
 	// spec: snapshot-build/the-predecessor-a-blend-reads
 	test("a blend reads the predecessor's newest published snapshot [51]", async () => {
 		const sql = await seeded(clean);
