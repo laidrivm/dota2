@@ -45,6 +45,8 @@ What counts as evidence for a claim, and what a claim may rest on.
   wrong one answers with a plausible subset instead of an error.
 - Probe a signal with the event that must leave it unchanged, not only with
   the event that must move it.
+- Exercise a compatibility statement against the state it was written for,
+  never only the state it is a no-op in.
 - Before editing an artefact to match an observed state, confirm the state is
   the intended one.
 - Probe one mutation of shared state per run, never a sequence of them.
