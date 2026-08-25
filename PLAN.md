@@ -125,8 +125,11 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       groups now do, so what remains is that it precedes 3b's group 12.
       Eight task groups, so `feat/snapshot-build-1` through `-8`, in order;
       groups 1 and 2 are PRs #177 and #178, and group 3 splits in two — #179
-      is its row assembly, `-3b` the SQL edge, the group having measured 798
-      lines against a budget that fails at 800. Four constants are stated in `src/job/build/` and nowhere else
+      is its row assembly, #180 the SQL edge, and `-3c` the two columns
+      recording which components a snapshot measured — a widening a review
+      forced, and this change's one stated exception to the schema being
+      `snapshot-ingest`'s. The group measured 798 lines as one step against a
+      budget that fails at 800, and 801 as two. Four constants are stated in `src/job/build/` and nowhere else
       in the repository, the data model that fixes them being gitignored: the
       decay table and the smoothing `k` values in `blend.ts`, and the two
       sufficiency thresholds in `positions.ts`.
