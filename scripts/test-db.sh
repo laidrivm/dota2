@@ -3,8 +3,9 @@
 # away, and take it down again afterwards.
 #
 # Without this, `bun test` skips every case that needs a database — every
-# patch detection, every reference upsert, every schema constraint and the
-# whole staging write — and reports the same green as a run that exercised
+# patch detection, every reference upsert, every schema constraint, the whole
+# staging write, and the snapshot build from its statistics rows to the status
+# it settles at — and reports the same green as a run that exercised
 # them. CI catches that with a service container and `DATABASE_REQUIRED`; this
 # is the same evidence before the push rather than after it.
 #
