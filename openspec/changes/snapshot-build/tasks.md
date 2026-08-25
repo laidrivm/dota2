@@ -207,13 +207,17 @@ retention, which is a requirement of its own with no validation in it.
       database, the boundaries being a count and a sum no staging fixture
       hits exactly. (Req: snapshot-build — A snapshot is published only after
       it validates)
-- [ ] 4.2b Write the boundary tests for the two checks 4b implements: an
-      `adj` of exactly ±25 pp passes and beyond fails [20]; a hero the
-      reference tables know but staging never picked has no position rows and
-      still passes [47]; staging holding side rows for every hero but one
-      fails validation [59]. (Req: snapshot-build — A snapshot is published
-      only after it validates / An unmeasured component is zero for every
-      hero)
+- [x] 4.2b Write the boundary tests for the two checks 4b implements: an
+      `adj` of exactly ±25 pp passes and beyond fails [20], read off a column
+      carrying the delta token in the middle of its name rather than at the
+      end; a hero the reference tables know but staging never picked has no
+      position rows and still passes [47]; staging holding side rows for every
+      hero but one fails validation [59]; and a part staging holds for no hero
+      at all publishes rather than failing [89], which is the reading the
+      delta spec gains here — the parts checked are the ones staging holds,
+      never a list the check carries. (Req: snapshot-build — A snapshot is
+      published only after it validates / An unmeasured component is zero for
+      every hero)
 - [ ] 4.3 Write the retention tests: a thirty-first snapshot leaves 30 rows,
       removes the oldest by `snapshot_id`, and leaves no orphan statistics
       row [17]; 30 snapshots built inside one day still leave the previous
@@ -225,8 +229,11 @@ retention, which is a requirement of its own with no validation in it.
       `failed` a *raise* reaches is 3b's, with [23] and the stub that produces
       it; what starts here is the `failed` a validation reaches. (Req:
       snapshot-build — A snapshot is published only after it validates)
-- [ ] 4.4b Implement the remaining two checks: every stored `adj` within its
-      bound, and a measured component staging holds no row for on some hero.
+- [x] 4.4b Implement the remaining two checks: every stored `adj` within its
+      bound, scoped by the schema's own mark for a stored delta rather than by
+      a list of columns, and a measured component staging holds no row for on
+      some hero, scoped by the parts staging holds rather than by a list of
+      parts.
       (Req: snapshot-build — A snapshot is published only after it validates /
       An unmeasured component is zero for every hero)
 - [ ] 4.5 Implement retention as a cascade from `snapshots`, so no statistics
