@@ -35,7 +35,7 @@ keeps running on the committed fixture until group 8 rewires the route.
       `n_eff = k / 9` leaves a tenth of it [2]; each statistic uses its own
       `k`, so a single shared constant fails [12]. (Req: snapshot-build —
       Smoothing towards neutral by sample size)
-- [ ] 1.3 Implement `prior(t)` and `wrBlend` over the parameter table, taking
+- [x] 1.3 Implement `prior(t)` and `wrBlend` over the parameter table, taking
       patch kind and whole days as arguments. (Req: snapshot-build — Patch
       blending with a decaying prior)
 - [ ] 1.4 Implement the smoothing that maps a blended winrate and `n_eff` to
