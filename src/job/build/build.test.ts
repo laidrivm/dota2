@@ -56,6 +56,8 @@ async function stage(sql: SQL, patchId: string, wins = 500): Promise<void> {
 		"staging_hero_stats",
 		"staging_hero_matchups",
 		"staging_hero_synergies",
+		"staging_hero_sides",
+		"staging_hero_phases",
 	])
 		await sql.unsafe(`DELETE FROM ${table} WHERE patch_id = $1`, [patchId]);
 	await sql`INSERT INTO staging_hero_position_stats
@@ -78,6 +80,24 @@ async function stage(sql: SQL, patchId: string, wins = 500): Promise<void> {
 			(patch_id, hero_id, ally_id, matches, wins)
 		VALUES (${patchId}, ${HERO}, ${OTHER}, 300, 180),
 			(${patchId}, ${OTHER}, ${HERO}, 300, 180)`;
+	// Side and phase are staged even though no pull fills them, because the
+	// build decides a component measured by whether staging holds any row —
+	// and with none, every component column is 0 whatever the build read, and
+	// half of what a snapshot carries goes unexercised.
+	await sql`INSERT INTO staging_hero_sides
+			(patch_id, hero_id, side, matches, wins)
+		VALUES (${patchId}, ${HERO}, 'radiant', 500, 300),
+			(${patchId}, ${HERO}, 'dire', 500, 200),
+			(${patchId}, ${OTHER}, 'radiant', 500, 250),
+			(${patchId}, ${OTHER}, 'dire', 500, 250)`;
+	await sql`INSERT INTO staging_hero_phases
+			(patch_id, hero_id, phase, matches, wins)
+		VALUES (${patchId}, ${HERO}, '1', 400, 220),
+			(${patchId}, ${HERO}, '2', 400, 200),
+			(${patchId}, ${HERO}, 'last', 200, 90),
+			(${patchId}, ${OTHER}, '1', 400, 200),
+			(${patchId}, ${OTHER}, '2', 400, 200),
+			(${patchId}, ${OTHER}, 'last', 200, 100)`;
 }
 
 /** Every statistics row of one snapshot, ordered, without its own id. */
@@ -163,6 +183,34 @@ describe.skipIf(url === undefined)("what a build produces", () => {
 		const [row] = await sql`SELECT advantage_adj FROM hero_matchups
 			WHERE snapshot_id = ${built} AND hero_id = ${HERO}`;
 		expect(row.advantage_adj).toBeGreaterThan(0);
+	});
+
+	test("a side's wr_old reaches the blend from the previous snapshot [83]", async () => {
+		const sql = await seeded(clean);
+		await stage(sql, OLD_PATCH, 500);
+		// The old patch staged hero 1 at six of ten on radiant, so its published
+		// snapshot carries a positive radiant delta.
+		const published = await buildSnapshot(
+			sql,
+			OLD_PATCH,
+			new Date("2026-07-02T00:00:00.000Z"),
+		);
+		await sql`UPDATE snapshots SET status = 'published' WHERE snapshot_id = ${published}`;
+		await stage(sql, NEW_PATCH, 500);
+		// The new patch's own side rows say exactly even on both, so anything
+		// the stored delta carries came from the side key `build.ts` wrote and
+		// `rows.ts` read.
+		await sql`UPDATE staging_hero_sides SET wins = 250
+			WHERE patch_id = ${NEW_PATCH}`;
+
+		const built = await buildSnapshot(sql, NEW_PATCH, BUILT_AT);
+
+		const [row] = await sql`SELECT side_adj_radiant, phase_adj_1 FROM hero_stats
+			WHERE snapshot_id = ${built} AND hero_id = ${HERO}`;
+		expect(row.side_adj_radiant).toBeGreaterThan(0);
+		// Phase is staged unchanged, so its own matches carry it — a component
+		// measured at all is not zeroed.
+		expect(row.phase_adj_1).toBeGreaterThan(0);
 	});
 
 	// spec: snapshot-build/the-predecessor-a-blend-reads

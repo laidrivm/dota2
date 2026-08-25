@@ -127,7 +127,9 @@ accordingly ships before 3.1 and 3.2, which are 3b's.
       a patch no row holds is refused by name [71]; a patch nothing was staged
       for writes no statistics rows and does not raise [81]; a matchup's
       `wr_old` reaches the blend from the previous snapshot, so a pair key the
-      writer and the reader spell differently fails [82]. (Req: snapshot-build
+      writer and the reader spell differently fails [82], and a side's does
+      too, staging holding side and phase rows here although no pull fills
+      them [83]. (Req: snapshot-build
       — The build reads its own database and nothing else / Patch blending
       with a decaying prior)
 - [x] 3.2 Write the symmetry tests: `(a,b)` and `(b,a)` matchup rows carry
