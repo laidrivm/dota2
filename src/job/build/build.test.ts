@@ -10,6 +10,13 @@ import { buildSnapshot } from "./build.ts";
 
 requiresDatabase();
 
+/**
+ * One connection for the whole file, emptied before each case that asks.
+ * `opener` pools per call, so a cleaner per describe is three pools for one
+ * suite.
+ */
+const clean = cleaner();
+
 const HERO = 9001;
 const OTHER = 9002;
 
@@ -89,8 +96,6 @@ const statsOf = async (sql: SQL, id: number) => ({
 });
 
 describe.skipIf(url === undefined)("what a build produces", () => {
-	const clean = cleaner();
-
 	// spec: snapshot-build/same-inputs-same-snapshot
 	test("two builds over one staging and one instant agree field by field [25]", async () => {
 		const sql = await seeded(clean);
@@ -132,7 +137,7 @@ describe.skipIf(url === undefined)("what a build produces", () => {
 		// built from an empty array, which is not SQL.
 		expect(
 			await sql`SELECT * FROM hero_position_stats WHERE snapshot_id = ${built}`,
-		).toEqual([]);
+		).toHaveLength(0);
 	});
 
 	test("a matchup's wr_old reaches the blend from the previous snapshot [82]", async () => {
@@ -193,8 +198,6 @@ describe.skipIf(url === undefined)("what a build produces", () => {
 });
 
 describe.skipIf(url === undefined)("the prior a snapshot records", () => {
-	const clean = cleaner();
-
 	/** The snapshot row `patchId` produced at `at`, prior columns only. */
 	const priorOf = async (sql: SQL, patchId: string, at: Date) => {
 		const id = await buildSnapshot(sql, patchId, at);
@@ -257,8 +260,6 @@ describe.skipIf(url === undefined)("the prior a snapshot records", () => {
 });
 
 describe.skipIf(url === undefined)("the symmetry a pair is stored with", () => {
-	const clean = cleaner();
-
 	/** One snapshot over the staging both cases below read. */
 	const built = async () => {
 		const sql = await seeded(clean);
