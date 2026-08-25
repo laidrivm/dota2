@@ -94,10 +94,10 @@ what is covered passes in silence on the first thing nobody thought of.
   here rather than in the browser. `e2e/` is excluded (`pathIgnorePatterns` in
   `bunfig.toml`) — those specs belong to Playwright's runner.
 - `bun run test:db` — the same suite against a throwaway Postgres in Docker,
-  started from the image CI pins and taken away afterwards. Without it 77
-  cases skip: every patch detection, every reference upsert, every schema
-  constraint and the whole staging write. Arguments pass through, so
-  `bun run test:db ./src/job/ingest/ingest.test.ts` runs one file — the `./`
+  started from the image CI pins and taken away afterwards. Without it the
+  database-backed cases skip: every patch detection, every reference upsert,
+  every schema constraint and the whole staging write. Arguments pass through,
+  so `bun run test:db ./src/job/ingest/ingest.test.ts` runs one file — the `./`
   matters, since a bare argument is matched as a substring of every path.
 - `bun run test:coverage` — the same suite with Bun's built-in coverage
   reporter. The number is visibility, not a gate: no threshold is configured
