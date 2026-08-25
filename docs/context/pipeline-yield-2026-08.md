@@ -821,3 +821,49 @@ bot found 3 more of the same family — artefact-consistency findings, the
 earned their place; the second was not the first one failing. The three the
 bot added were all "a task names a behaviour no criterion fixes", which is the
 one class where the local pass has now twice been the less complete of the two.
+
+## 2026-08-25 — repo-layout, all four groups and the archive
+
+(feat/repo-layout-1 … -4, chore/archive-repo-layout; PRs #171–#174)
+
+- zombies: OPEN→PASS — 3 gaps, 1 acted on, 2 skipped (group 1)
+- ponytail-review: 2 findings, 2 acted on (group 1)
+- triage: OPEN→PASS — 3 groups, 1 finding, 1 acted on (group 1)
+- coderabbit-local: PASS — 5 findings, 5 dispositioned (2 fixed, 1 rejected,
+  2 trivial skipped) (group 1)
+- coderabbit: PASS — 7 findings, 7 dispositioned (2 fixed, 3 skipped,
+  2 Major dismissals put to the user and approved) (PR #171)
+- zombies: OPEN→PASS — 1 gap, 1 acted on (group 2)
+- ponytail-review: 2 findings, 2 acted on (group 2)
+- triage: OPEN→PASS — 4 groups, 1 finding, 1 acted on (group 2)
+- coderabbit-local: PASS — 5 findings, 5 dispositioned (2 fixed, 2 skipped,
+  1 Major dismissal put to the user and approved) (group 2)
+- zombies: OPEN→PASS — 1 gap, 1 acted on (group 3)
+- ponytail-review: 1 finding, 1 acted on (group 3)
+- triage: OPEN→PASS — 5 groups, 1 finding, 1 acted on (group 3)
+- coderabbit-local: PASS — 6 findings, 6 dispositioned (3 fixed, 3 trivial
+  skipped) (group 3)
+- zombies: OPEN→PASS — 1 gap, 1 acted on (group 4)
+- ponytail-review: 2 findings, 2 acted on (group 4)
+- triage: OPEN→PASS — 4 groups, 0 findings (group 4)
+- coderabbit-local: PASS — 2 findings, 2 acted on (group 4)
+- coderabbit: PASS — 5 findings, 5 dispositioned (4 fixed, 1 skipped) (PR #174)
+- triage: OPEN→PASS — 4 groups, 0 findings (archive)
+- coderabbit-local: PASS — 2 findings, 2 acted on (archive)
+- Not run: warm (no dependency manifest changed on any of the five branches),
+  preflight, code-review, review-order, first-five, security-review
+
+Note for the ledger: `/triage` produced a real defect on three of the five
+branches, and on two of those the defect was in code written earlier in the
+same turn — a test asserting every patch sits under `z9.` when
+`patches.test.ts` deliberately empties that table, and a traversal probe
+aimed at a file the same move had just relocated. It returns no findings by
+design, so it costs a read rather than a report; this is the first month it
+has paid for that read three times out of five.
+
+The two `/coderabbit` runs both found things the local pass had not, and both
+were the same family as last time: consistency between an artefact and what
+the code around it does. On PR #174 the bot's two Majors were both this
+repository's own rule — scope a scan by what it exempts — applied to the check
+sitting beside the one that documents that rule. The local pass had read that
+file three times without raising it.
