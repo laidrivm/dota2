@@ -184,6 +184,45 @@ checkable rather than implicit.
   stale, ordered unexpectedly, or correct was not established, and patch
   detection rests on it.
 
+## A pair's two directions are one statistic, not two samples
+
+Measured 2026-08-25, on the same endpoint and headers, over the complete week
+opening at Unix 1786881600: five heroes (1, 8, 11, 14, 26), one `matchUp`
+request each, every one of the ten pairs read from both ends.
+
+`snapshot-build` folds a pair's two staged directions into one row and negates
+for the mirror. Whether that is right turns on one thing no document states:
+are `(a,b)` and `(b,a)` the same matches seen from opposite sides, or two
+samples that could be added? Two samples added would double `n_eff` and
+under-smooth every pair statistic; the same matches summed would be a
+straightforward double count.
+
+They are the same matches, reported inconsistently.
+
+| | `vs` | `with` |
+|---|---|---|
+| count disagreement, over ten pairs | −4.2% to +13.5% | −3.4% to +12.8% |
+| winrate disagreement, worst | 1.14 pp | 0.50 pp |
+| winrate disagreement, median | ~0.5 pp | ~0.1 pp |
+
+The counts never come close to doubling and never come out unrelated: they sit
+within about a tenth of each other while the **winrate** — the only thing the
+delta is computed from — agrees to a fraction of a percentage point. Two
+independent samples of one population would agree on the rate and on nothing
+else about their size only by accident; two reports of one set of matches,
+bucketed slightly differently, look exactly like this.
+
+So summing is ruled out, and which of the two rows is read barely reaches the
+stored delta: at worst 1.14 pp of raw winrate before smoothing pulls it
+towards neutral. `rows.ts` reads the lower id's row, which is arbitrary and
+deterministic rather than better.
+
+One thing measured and not acted on: the disagreement is not symmetric. The
+lower hero id reported the larger `vs` count in eight of the ten pairs. Over
+five heroes that is as likely to be an artefact of these five as a property of
+the endpoint, and it moves `n_eff` by at most a tenth against a `k` of 400 —
+noted so a later session does not rediscover it, not as a finding to fix.
+
 ## Open, and where it stopped
 
 - **The job's cadence against a weekly bucket.** Answered by the second probe
