@@ -22,10 +22,16 @@ import type { HeroRow, SnapshotRows, SplitRow, Staging } from "./rows.ts";
 const SHARE_TOLERANCE = 1e-6;
 
 /**
- * How far from neutral a stored delta may lie, in percentage points. A
- * blended, smoothed winrate cannot reach 25 points off 50 from any sample
- * the arithmetic accepts, so a delta beyond it is a defect upstream rather
- * than an extreme patch.
+ * How far from neutral a stored delta may lie, in percentage points, fixed by
+ * the criterion rather than chosen here.
+ *
+ * A sanity bound, not a ceiling the arithmetic cannot pass: a hero winning
+ * every one of 1000 games on a position blends to 100 and smooths to 38.46,
+ * and to 33.33 as a side, measured against `blend.ts`. So this refuses numbers
+ * the maths can produce, on the judgement that a hero at such a rate over such
+ * a sample is a defect in what was staged rather than an extreme patch — and
+ * the whole snapshot fails rather than the row being dropped, because a hero
+ * missing from a snapshot reorders the rest exactly as a wrong delta would.
  */
 const ADJ_BOUND = 25;
 
