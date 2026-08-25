@@ -1,7 +1,8 @@
 /**
- * The two arithmetic steps between a raw statistic and the delta a snapshot
- * stores: blending the current patch with the one it replaced, then pulling
- * the result towards neutral by how thin the sample behind it is.
+ * What value a statistic takes. Two arithmetic steps — blending the current
+ * patch with the one it replaced, then pulling the result towards neutral by
+ * how thin the sample behind it is — and, at the foot, the verdict that
+ * overrides both with 0 for a component staging never measured.
  *
  * Pure, and taking its inputs as arguments, because the SQL edge around it
  * cannot be reached without a database and this is the half most likely to be
