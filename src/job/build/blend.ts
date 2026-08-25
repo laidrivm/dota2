@@ -67,3 +67,31 @@ export function wrBlend(
 	const nEff = nNew + priorWeight;
 	return { wrBlend: (nNew * wrNew + priorWeight * wrOld) / nEff, nEff };
 }
+
+/** The statistics a snapshot stores a smoothed delta for. */
+export type Statistic = "position" | "side" | "phase" | "matchup" | "synergy";
+
+/**
+ * The sample size each statistic is pulled to neutral by (data-model §4.2).
+ * The one site that names them, so no two callers can disagree about a `k`
+ * — and provisional on the same terms the decay table is.
+ */
+const SMOOTHING: Record<Statistic, number> = {
+	position: 300,
+	side: 500,
+	phase: 500,
+	matchup: 400,
+	synergy: 400,
+};
+
+/** A winrate favouring neither side, in percentage points. */
+const NEUTRAL = 50;
+
+/**
+ * The delta a snapshot stores, in percentage points: how far the blend sits
+ * from neutral, discounted by how thin the sample behind it is. A sample equal
+ * to the statistic's own `k` keeps half of it.
+ */
+export const adj = (statistic: Statistic, blend: Blended): number =>
+	((blend.wrBlend - NEUTRAL) * blend.nEff) /
+	(blend.nEff + SMOOTHING[statistic]);
