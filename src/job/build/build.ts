@@ -91,7 +91,7 @@ async function read(sql: SQL, patchId: string): Promise<Staging> {
 		positions: await sql`SELECT hero_id AS "heroId", position, matches, wins
 			FROM staging_hero_position_stats WHERE patch_id = ${patchId}
 			ORDER BY hero_id, position`,
-		heroes: await sql`SELECT hero_id AS "heroId", matches, wins,
+		heroes: await sql`SELECT hero_id AS "heroId", matches,
 				contest_rate AS "contestRate"
 			FROM staging_hero_stats WHERE patch_id = ${patchId} ORDER BY hero_id`,
 		matchups: await sql`SELECT hero_id AS "heroId", enemy_id AS "otherId",
