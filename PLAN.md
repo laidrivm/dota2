@@ -118,12 +118,16 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       probe reached that CDN by way of OpenDota's index, which the change's
       design.md replaces with a derivation measured over all 127 heroes. Owns no
       schedule — Task 7 sets when the job runs and alerts when it stops.
-- [ ] **Phase 3a — `snapshot-build`** — proposed,
+- [ ] **Phase 3a — `snapshot-build`** — applying,
       `openspec/changes/snapshot-build/`. The blending, smoothing and
       sufficiency maths, and the export of a bundle to the served URL. It
       reads the schema and staging 3b creates and fills, which 3b's merged
       groups now do, so what remains is that it precedes 3b's group 12.
-      Eight task groups, so `feat/snapshot-build-1` through `-8`, in order.
+      Eight task groups, so `feat/snapshot-build-1` through `-8`, in order;
+      group 1, the pure arithmetic, is PR #177 and seven remain. Its two
+      constant tables — the decay and the smoothing `k` values — are stated
+      in `src/job/build/blend.ts` and nowhere else in the repository, the
+      data model that fixes them being gitignored.
       Owns no *deployed* infrastructure — the production Postgres service, the
       schedule and the failure alert are Task 7's, and none of them gates it.
 - [ ] **Task 7** — the whole deployment: Docker image, compose (`app` +
