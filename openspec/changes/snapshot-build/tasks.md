@@ -55,7 +55,7 @@ keeps running on the committed fixture until group 8 rewires the route.
       `n_eff = 500` is sufficient and at 499 is not [10]; a hero summing to
       1000 is sufficient and to 999 is not [11]. (Req: snapshot-build —
       Sufficiency thresholds decide what may be suggested)
-- [ ] 2.3 Implement the position-share normalisation, returning an empty map
+- [x] 2.3 Implement the position-share normalisation, returning an empty map
       before dividing when a hero's picks total zero, and emitting no row for a
       position with no picks. (Req: snapshot-build — Position shares are a
       distribution over a hero's positions)
