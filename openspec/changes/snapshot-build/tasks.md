@@ -107,8 +107,12 @@ accordingly ships before 3.1 and 3.2, which are 3b's.
       and [61], and a measured component this hero has no row for [74]; a
       pair's two staged directions as two stored rows that cancel [75], read
       from the lower id's side [76], as one synergy row [77], and as none
-      where there is nothing to blend [78]. The build instant is counted on
-      the UTC timeline and a `detected_at` anchors at midnight there [67].
+      where there is nothing to blend [78], and pulled towards the winrate the
+      previous patch published, so a `wr_old` key its writer and its reader
+      spell differently fails [80]. The build instant is counted on the UTC
+      timeline, a `detected_at` anchors at midnight there [67], and an instant
+      before the patch's own release counts no days rather than negative ones
+      [79].
       (Req: snapshot-build — Patch blending with a decaying prior / Stored
       pair statistics carry their symmetry / An unmeasured component is zero
       for every hero)
