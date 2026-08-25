@@ -91,23 +91,43 @@ group's first three tasks and are now `snapshot-ingest`'s group 4. They closed
 no criterion here, every group of that change writes through them, and it can
 no longer run before this one. This group takes all three as given.
 
-- [x] 3.1 Write the determinism tests: two builds over identical staging and
+Two pull requests, `feat/snapshot-build-3a` then `-3b`: as one step it
+measured 798 lines against a budget that fails at 800. The seam is the one
+`design.md` already draws — 3a is the row assembly, pure and exercised
+without a database, and 3b is the SQL edge around it with the
+database-backed cases. It is the seam worth taking rather than the cheapest:
+unsplit, `rows.ts` was reached only by a suite a plain `bun test` skips,
+which is *Arithmetic testable without a database* read backwards. 3.3a
+accordingly ships before 3.1 and 3.2, which are 3b's.
+
+- [x] 3.3a Assemble the rows a snapshot stores from staging and the previous
+      patch's deltas, with no database in front of it: a hero's shares,
+      deltas and thresholds [72] [73]; an unmeasured component 0 on every
+      hero while a measured one stands, which is the row-level half of [58]
+      and [61], and a measured component this hero has no row for [74]; a
+      pair's two staged directions as two stored rows that cancel [75], read
+      from the lower id's side [76], as one synergy row [77], and as none
+      where there is nothing to blend [78]. The build instant is counted on
+      the UTC timeline and a `detected_at` anchors at midnight there [67].
+      (Req: snapshot-build — Patch blending with a decaying prior / Stored
+      pair statistics carry their symmetry / An unmeasured component is zero
+      for every hero)
+- [ ] 3.1 Write the determinism tests: two builds over identical staging and
       the same build instant produce statistics rows equal field by field
       [25]; a build completes while its database answers and every *other*
       network call is stubbed to throw [26]; a blend reads `wr_old` from the
-      predecessor patch's newest published snapshot [51]; a build instant is
-      counted on the UTC timeline and a `detected_at` anchors at midnight
-      there [67]; the oldest patch records no prior patch and no weight [68];
+      predecessor patch's newest published snapshot [51]; the oldest patch
+      records no prior patch and no weight [68];
       a prior decayed to 0 records no prior patch either [69]; a predecessor
       that never published leaves the blend to the current patch alone [70];
       a patch no row holds is refused by name [71]. (Req: snapshot-build
       — The build reads its own database and nothing else / Patch blending
       with a decaying prior)
-- [x] 3.2 Write the symmetry tests: `(a,b)` and `(b,a)` matchup rows carry
+- [ ] 3.2 Write the symmetry tests: `(a,b)` and `(b,a)` matchup rows carry
       `advantage_adj` summing to 0 [21]; `hero_synergies` holds `(a,b)` for
       `a < b` and no mirrored row [22]. (Req: snapshot-build — Stored pair
       statistics carry their symmetry)
-- [x] 3.3 Implement the staging read and the statistics write, taking the
+- [ ] 3.3b Implement the staging read and the statistics write, taking the
       build instant as an argument, writing it to `created_at`, reading
       `wr_old` from the predecessor snapshot retention holds for that purpose,
       and writing 0 for a component 2.6 reports unmeasured. (Req:
