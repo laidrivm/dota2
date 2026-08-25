@@ -127,7 +127,7 @@ accordingly ships before 3.1 and 3.2, which are 3b's.
       a patch no row holds is refused by name [71]. (Req: snapshot-build
       — The build reads its own database and nothing else / Patch blending
       with a decaying prior)
-- [ ] 3.2 Write the symmetry tests: `(a,b)` and `(b,a)` matchup rows carry
+- [x] 3.2 Write the symmetry tests: `(a,b)` and `(b,a)` matchup rows carry
       `advantage_adj` summing to 0 [21]; `hero_synergies` holds `(a,b)` for
       `a < b` and no mirrored row [22]. (Req: snapshot-build — Stored pair
       statistics carry their symmetry)
