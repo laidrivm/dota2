@@ -235,6 +235,7 @@ describe.skipIf(url === undefined)("what a build produces", () => {
 	});
 
 	// spec: snapshot-build/the-predecessor-a-blend-reads
+	// snapshot-build/reading-wr-old-back-off-a-snapshot
 	test("a blend reads the predecessor's newest published snapshot [51]", async () => {
 		const sql = await seeded(clean);
 		// Three snapshots of the old patch, in this order: a published one at a

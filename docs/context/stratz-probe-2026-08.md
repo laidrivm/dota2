@@ -184,6 +184,49 @@ checkable rather than implicit.
   stale, ordered unexpectedly, or correct was not established, and patch
   detection rests on it.
 
+## A pair's two directions are one statistic, not two samples
+
+Measured 2026-08-25, on the same endpoint and headers, over the complete week
+opening at Unix 1786881600: five heroes (1, 8, 11, 14, 26), one `matchUp`
+request each, every one of the ten pairs read from both ends.
+
+`snapshot-build` folds a pair's two staged directions into one row and negates
+for the mirror. Two questions sit under that, and only one of them is a
+measurement.
+
+**That the two directions describe the same matches is definitional, not
+measured.** `matchUp(heroId: A).vs[B]` is the matches A played against B in
+that week and bracket; `matchUp(heroId: B).vs[A]` is the matches B played
+against A in the same week and bracket. That is one set asked for twice —
+there is no reading on which they are disjoint samples to add. So summing is
+ruled out by what the query means, and this probe establishes nothing about
+it.
+
+**What was measured is how far the two reports of that one set disagree**, and
+therefore how much the choice of which row to read costs.
+
+| | `vs` | `with` |
+|---|---|---|
+| count disagreement, over ten pairs | −4.2% to +13.5% | −3.4% to +12.8% |
+| winrate disagreement, worst | 1.14 pp | 0.50 pp |
+| winrate disagreement, median | ~0.5 pp | ~0.1 pp |
+
+The counts disagree by up to an eighth, which is STRATZ's own bucketing rather
+than anything about the matches; the **winrate** — the only thing the delta is
+computed from — agrees to a fraction of a percentage point throughout.
+
+So the row choice reaches the stored delta by at most 1.14 pp of raw winrate,
+before smoothing pulls it towards neutral. `rows.ts` reads the lower id's row,
+which is arbitrary and deterministic rather than better. What the measurement
+rules out is that the choice matters; what it does not establish, because
+nothing here could, is which of the two reports is nearer the truth.
+
+One thing measured and not acted on: the disagreement is not symmetric. The
+lower hero id reported the larger `vs` count in eight of the ten pairs. Over
+five heroes that is as likely to be an artefact of these five as a property of
+the endpoint, and it moves `n_eff` by at most a tenth against a `k` of 400 —
+noted so a later session does not rediscover it, not as a finding to fix.
+
 ## Open, and where it stopped
 
 - **The job's cadence against a weekly bucket.** Answered by the second probe

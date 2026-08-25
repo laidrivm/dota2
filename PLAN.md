@@ -292,7 +292,7 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       indexed docs too, and the criterion routes every captured rule into the
       one file that costs always-on budget. `CLAUDE.md` §*Lessons learned* is
       corrected on this branch; the criterion needs a delta spec.
-- [ ] **The always-on trigger has fired.** The set is 551 lines against the
+- [ ] **The always-on trigger has fired.** The set is 555 lines against the
       ~500 `CLAUDE.md` states. The Process sublist sits at 20, its own
       threshold, and stayed there only because this session's two captured
       rules went to `docs/verification.md` rather than into it.

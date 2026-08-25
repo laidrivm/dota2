@@ -54,6 +54,14 @@ this reaches only a statistic stored as a row of its own — a position, a
 matchup, a synergy. A statistic stored as a column of a hero's row cannot be
 absent; *An unmeasured component is zero for every hero* governs those.
 
+#### Scenario: Reading `wr_old` back off a snapshot
+
+- **WHEN** a blend reads `wr_old` from the previous patch's snapshot
+- **THEN** it SHALL take that statistic's stored delta and add 50, the
+  snapshot holding a delta from neutral where the blend wants the winrate it
+  came from — a snapshot stores no winrate, so this reconstruction is the
+  whole of what "already-smoothed winrate" names
+
 #### Scenario: A major patch on its first day
 
 - **WHEN** the current patch is major and `t = 0`
