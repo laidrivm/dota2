@@ -51,7 +51,7 @@ keeps running on the committed fixture until group 8 rewires the route.
       total zero yields no rows and no division [53]. (Req:
       snapshot-build — Position shares are a distribution over a hero's
       positions)
-- [ ] 2.2 Write the sufficiency tests at both thresholds: a hero-position at
+- [x] 2.2 Write the sufficiency tests at both thresholds: a hero-position at
       `n_eff = 500` is sufficient and at 499 is not [10]; a hero summing to
       1000 is sufficient and to 999 is not [11]. (Req: snapshot-build —
       Sufficiency thresholds decide what may be suggested)
