@@ -131,7 +131,9 @@ export const adj = (statistic: Statistic, blend: Blended): number =>
 /**
  * The winrate a stored delta stands for: what a blend reads as `wr_old` from
  * the previous patch's snapshot, that snapshot holding the smoothed delta
- * rather than the winrate it came from.
+ * rather than the winrate it came from. The requirement fixes the
+ * reconstruction — *Reading `wr_old` back off a snapshot* — because a
+ * snapshot stores no winrate and there is otherwise nothing to name.
  */
 export const wrOf = (storedAdj: number): number => storedAdj + NEUTRAL;
 
