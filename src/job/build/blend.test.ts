@@ -10,6 +10,7 @@ import {
 	type PatchKind,
 	prior,
 	type Statistic,
+	wholeDays,
 	wrBlend,
 } from "./blend.ts";
 
@@ -41,6 +42,31 @@ describe("the prior's decay", () => {
 
 	test("a letter patch's prior still counts on day 6 [8]", () => {
 		expect(prior("letter", 6)).toBeGreaterThan(0);
+	});
+});
+
+describe("the days a prior decays over", () => {
+	test("a build instant is counted on the UTC timeline, not a local one [67]", () => {
+		// 01:00 on the 2nd at +03:00 is 22:00 on the 1st in UTC, so the patch is
+		// nought days old. Read as a local date it would be one — a whole
+		// half-life for a major patch.
+		expect(
+			wholeDays(
+				new Date("2026-08-01T00:00:00.000Z"),
+				new Date("2026-08-02T01:00:00.000+03:00"),
+			),
+		).toBe(0);
+	});
+
+	test("a patch's detected_at anchors at midnight UTC [67]", () => {
+		// The column is an instant; what the decay counts from is the day it
+		// fell on, so an evening release is not most of a day old by morning.
+		expect(
+			wholeDays(
+				new Date("2026-08-01T23:00:00.000Z"),
+				new Date("2026-08-02T02:00:00.000Z"),
+			),
+		).toBe(1);
 	});
 });
 
