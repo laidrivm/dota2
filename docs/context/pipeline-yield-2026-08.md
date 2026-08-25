@@ -867,3 +867,52 @@ the code around it does. On PR #174 the bot's two Majors were both this
 repository's own rule — scope a scan by what it exempts — applied to the check
 sitting beside the one that documents that rule. The local pass had read that
 file three times without raising it.
+
+## 2026-08-25 — feat/snapshot-build-1 … -3b
+
+- diff-budget: PASS (group 1), PASS (group 2), WARN 798 → re-cut (group 3),
+  WARN 528 (group 3a), FAIL 801 → re-cut (group 3b), WARN 707 (group 3b)
+- zombies: OPEN→PASS — 1 gap, 1 acted on (group 1)
+- ponytail-review: 1 finding, 1 acted on (group 1)
+- triage: OPEN→PASS — 2 groups, 0 findings (group 1)
+- coderabbit-local: PASS — 1 finding, 1 dispositioned (0 fixed, 1 skipped)
+  (group 1)
+- zombies: OPEN→PASS — 2 gaps, 2 acted on (group 2)
+- ponytail-review: 1 finding, 1 acted on (group 2)
+- triage: OPEN→PASS — 3 groups, 0 findings (group 2)
+- coderabbit-local: PASS — 1 finding, 1 dispositioned (0 fixed, 1 skipped)
+  (group 2)
+- zombies: OPEN→PASS — 5 gaps, 5 acted on (group 3a)
+- ponytail-review: 3 findings, 3 acted on (group 3a)
+- triage: OPEN→PASS — 3 groups, 1 finding, 1 acted on (group 3a)
+- coderabbit-local: PASS — 3 findings, 3 acted on; second pass 0 findings
+  (group 3a)
+- zombies: OPEN→PASS — 2 gaps, 2 acted on (group 3b)
+- ponytail-review: 1 finding, 1 acted on (group 3b)
+- triage: OPEN→PASS — 4 groups, 1 finding, 1 acted on (group 3b)
+- coderabbit-local: PASS — 8 findings over three passes, 8 dispositioned
+  (6 fixed, 1 rejected, 1 Major dismissal put to the user and overruled)
+  (group 3b)
+- coderabbit: PASS — 5 findings, 5 dispositioned (3 fixed, 1 rejected,
+  1 skipped) (PR #180)
+- Not run: warm (no dependency manifest changed on any of the four branches),
+  preflight, code-review, review-order, first-five, security-review, checklist
+
+Note for the ledger: `diff-budget` was the step that changed the shape of the
+work, twice, and it is the only step that did. Group 3 measured 798 lines as
+one PR and 801 as two; both times the answer was to re-cut rather than squeeze,
+and the first re-cut was worth more than the arithmetic — unsplit, `rows.ts`
+was reached only by a suite a plain `bun test` skips, which is the change's own
+*Arithmetic testable without a database* read backwards. A gate that fires on a
+line count found a testing defect.
+
+`/coderabbit` again found what four local passes had not, and again it was a
+consistency question rather than a logic one: a `LIKE 'staging\_%'` whose
+escape JavaScript removes before Postgres parses it, so the scan was scoped by
+what it covers — this repository's own rule, in a line written to obey it.
+Three local passes had read that line.
+
+Two Major dismissals were put to the user this session and both were overruled,
+each toward the more thorough option. Both dismissals rested on the task list
+assigning the work to a later group, which is the cheapest reason to find and,
+on this evidence, the weakest to act on.

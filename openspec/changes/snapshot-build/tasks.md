@@ -114,7 +114,7 @@ request because it carries a schema change and a proposal amendment, which a
 reviewer reads on different terms from a staging read, and because 3b with it
 measured 801 lines against a budget that fails at 800.
 
-- [ ] 3.3c Record on each snapshot which components its staging measured, and
+- [x] 3.3c Record on each snapshot which components its staging measured, and
       read `wr_old` for a component only where the predecessor measured it: a
       component the predecessor never measured is no prior at all, where one
       it measured at exactly neutral is [84]. Amend the proposal's schema
