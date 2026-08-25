@@ -212,7 +212,9 @@ retention, which is a requirement of its own with no validation in it.
       carrying the delta token in the middle of its name rather than at the
       end; a hero the reference tables know but staging never picked has no
       position rows and still passes [47]; staging holding side rows for every
-      hero but one fails validation [59]; and a part staging holds for no hero
+      hero but one fails validation, taken to the `failed` status the criterion
+      names and driven through the phase component so the second of the two
+      call sites moves [59]; and a part staging holds for no hero
       at all publishes rather than failing [89], which is the reading the
       delta spec gains here — the parts checked are the ones staging holds,
       never a list the check carries. (Req: snapshot-build — A snapshot is

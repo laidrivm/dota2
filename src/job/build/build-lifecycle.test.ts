@@ -96,6 +96,24 @@ describe.skipIf(url === undefined)("where a build's snapshot ends up", () => {
 		expect(await newestPublished(sql)).toBe(published);
 	});
 
+	// spec: snapshot-build/a-component-measured-for-some-heroes-only
+	test("a hole in a measured component ends the snapshot failed [59]", async () => {
+		const sql = await seeded(clean);
+		await stage(sql, NEW_PATCH);
+		// Phase rather than side, and deliberately: the check is called once per
+		// component, so a second call naming the first component's rows, or the
+		// first component's name, is a mistake only a phase case moves.
+		await sql`DELETE FROM staging_hero_phases
+			WHERE patch_id = ${NEW_PATCH} AND hero_id = ${OTHER} AND phase = '2'`;
+
+		const built = await buildSnapshot(sql, NEW_PATCH, BUILT_AT);
+
+		// The stored `phase_adj_2` for that hero is 0, which is what a measured
+		// neutral looks like too — so the refusal cannot come from the row, and
+		// this is the whole reason the check reads staging instead.
+		expect(await statusOf(sql, built)).toBe("failed");
+	});
+
 	// spec: snapshot-build/a-hero-nobody-played
 	test("a hero staging never picked writes no rows and still publishes [47]", async () => {
 		const sql = await seeded(clean);
