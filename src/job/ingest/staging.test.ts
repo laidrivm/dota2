@@ -147,8 +147,12 @@ describe.skipIf(url === undefined)("what one write leaves behind", () => {
 		// be cleared by nothing and compared by nothing, and every case here
 		// would pass over it in silence.
 		const sql = await open();
+		// `ESCAPE`, because a backslash written here is removed by the template
+		// literal before Postgres parses the pattern, and the `_` it was meant
+		// to protect goes back to being a one-character wildcard.
 		const found = await sql`SELECT table_name FROM information_schema.tables
-			WHERE table_schema = 'public' AND table_name LIKE 'staging\_%'
+			WHERE table_schema = 'public'
+				AND table_name LIKE 'staging!_%' ESCAPE '!'
 			ORDER BY table_name`;
 
 		expect(
