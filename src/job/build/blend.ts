@@ -95,3 +95,21 @@ const NEUTRAL = 50;
 export const adj = (statistic: Statistic, blend: Blended): number =>
 	((blend.wrBlend - NEUTRAL) * blend.nEff) /
 	(blend.nEff + SMOOTHING[statistic]);
+
+/**
+ * Whether staging measured a component — `side`, `phase` — at all: whether it
+ * holds any row for it. An unmeasured component is stored as 0 on every hero
+ * row, which the model reads as no contribution, so it moves no candidate's
+ * rank.
+ *
+ * Three readings this refuses, each of which zeroes something that was
+ * measured. It is asked once per component, never once for the snapshot, so
+ * an unmeasured `phase` leaves a measured `side` standing. It reads whether a
+ * row exists, never what it holds, so a hero winning exactly half its games is
+ * measured and neutral rather than unmeasured. And it is asked of the whole
+ * component's rows, never of one hero's, so a measured component missing a
+ * hero stays measured — that hero is a validation failure, where zeroing it
+ * would reorder it against every hero the component did measure.
+ */
+export const isMeasured = (componentRows: readonly unknown[]): boolean =>
+	componentRows.length > 0;

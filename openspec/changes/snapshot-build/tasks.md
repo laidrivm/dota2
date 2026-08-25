@@ -62,7 +62,7 @@ keeps running on the committed fixture until group 8 rewires the route.
 - [x] 2.4 Implement the two sufficiency thresholds as one predicate per
       scope, so neither can drift from its stated value. (Req: snapshot-build
       — Sufficiency thresholds decide what may be suggested)
-- [ ] 2.5 Write the unmeasured-component tests: staging holding no side and
+- [x] 2.5 Write the unmeasured-component tests: staging holding no side and
       no phase rows leaves every hero row carrying 0 for both, and the
       snapshot publishes [58]; staging holding side rows for every hero but
       one fails validation [59]; a component measured for every hero, one of
@@ -70,11 +70,16 @@ keeps running on the committed fixture until group 8 rewires the route.
       passing by treating a measured neutral as unmeasured [60]; staging
       measuring side for every hero while holding no phase rows leaves the
       side deltas standing and zeroes phase alone, so a verdict taken once
-      per snapshot rather than per component fails [61]. (Req: snapshot-build
-      — An unmeasured component is zero for every hero)
-- [ ] 2.6 Implement the per-component measured/unmeasured decision, taken
+      per snapshot rather than per component fails [61]. The verdict is all
+      this group can assert: each of the four names a `published` or `failed`
+      outcome, which group 4 owns, so the four criteria stay uncited until 4.1
+      reaches them. (Req: snapshot-build — An unmeasured component is zero for
+      every hero)
+- [x] 2.6 Implement the per-component measured/unmeasured decision, taken
       once for the whole snapshot from whether staging holds any row for the
-      component, and returning the zero to write for an unmeasured one. (Req:
+      component. The zero to write is stated in that predicate's contract
+      rather than exported as a constant: 0 is the identity `src/model.ts`
+      already reads as no contribution, not a value anyone may retune. (Req:
       snapshot-build — An unmeasured component is zero for every hero)
 
 ## 3. Persistence
@@ -108,8 +113,11 @@ no longer run before this one. This group takes all three as given.
       `published` and newest [16]; the first snapshot ever built publishes
       with no earlier one to compare hero counts against [15]; a build
       raising before validation never leaves `published` [23]; a failed
-      validation leaves the previously published snapshot newest [24]. (Req:
-      snapshot-build — A snapshot is published only after it validates)
+      validation leaves the previously published snapshot newest [24]; and the
+      outcome each of [58], [59], [60] and [61] names, group 2 having asserted
+      only the verdict behind them. (Req: snapshot-build — A snapshot is
+      published only after it validates / An unmeasured component is zero for
+      every hero)
 - [ ] 4.2 Write the validation boundary tests: a hero count equal to the last
       published passes and one below fails [18]; shares within 1e-6 pass and
       0.8 fails [19]; an `adj` of exactly ±25 pp passes and beyond fails

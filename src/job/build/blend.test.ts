@@ -6,6 +6,7 @@
 import { describe, expect, test } from "bun:test";
 import {
 	adj,
+	isMeasured,
 	type PatchKind,
 	prior,
 	type Statistic,
@@ -131,4 +132,39 @@ describe("smoothing towards neutral", () => {
 			expect(adj(statistic, { wrBlend: 60, nEff: k / 9 })).toBeCloseTo(1, 10);
 		},
 	);
+});
+
+/** Staging rows for a component, as many as the case needs. */
+const sideRows = (heroIds: number[]) =>
+	heroIds.flatMap((heroId) => [
+		{ heroId, side: "radiant", matches: 400, wins: 210 },
+		{ heroId, side: "dire", matches: 400, wins: 190 },
+	]);
+
+describe("whether staging measured a component at all", () => {
+	test("neither side nor phase rows leaves both unmeasured [58]", () => {
+		expect(isMeasured([])).toBe(false);
+	});
+
+	test("side rows and no phase rows zeroes phase alone [61]", () => {
+		// A verdict taken once for the whole snapshot rather than once per
+		// component would drop the side deltas the source did measure.
+		expect(isMeasured(sideRows([1, 2, 3]))).toBe(true);
+		expect(isMeasured([])).toBe(false);
+	});
+
+	test("a component missing one hero's rows is still measured [59]", () => {
+		// Not zeroed: a measured component staging holds no row for on some
+		// hero fails validation, and reading it as unmeasured here would zero
+		// every other hero instead and publish.
+		expect(isMeasured(sideRows([1, 2]))).toBe(true);
+	});
+
+	test("a measured component whose delta is 0 is still measured [60]", () => {
+		// The verdict reads whether a row exists, never what it holds, so a
+		// hero winning exactly half its games does not look unmeasured.
+		expect(
+			isMeasured([{ heroId: 1, side: "radiant", matches: 400, wins: 200 }]),
+		).toBe(true);
+	});
 });
