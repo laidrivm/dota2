@@ -191,13 +191,19 @@ opening at Unix 1786881600: five heroes (1, 8, 11, 14, 26), one `matchUp`
 request each, every one of the ten pairs read from both ends.
 
 `snapshot-build` folds a pair's two staged directions into one row and negates
-for the mirror. Whether that is right turns on one thing no document states:
-are `(a,b)` and `(b,a)` the same matches seen from opposite sides, or two
-samples that could be added? Two samples added would double `n_eff` and
-under-smooth every pair statistic; the same matches summed would be a
-straightforward double count.
+for the mirror. Two questions sit under that, and only one of them is a
+measurement.
 
-They are the same matches, reported inconsistently.
+**That the two directions describe the same matches is definitional, not
+measured.** `matchUp(heroId: A).vs[B]` is the matches A played against B in
+that week and bracket; `matchUp(heroId: B).vs[A]` is the matches B played
+against A in the same week and bracket. That is one set asked for twice —
+there is no reading on which they are disjoint samples to add. So summing is
+ruled out by what the query means, and this probe establishes nothing about
+it.
+
+**What was measured is how far the two reports of that one set disagree**, and
+therefore how much the choice of which row to read costs.
 
 | | `vs` | `with` |
 |---|---|---|
@@ -205,17 +211,15 @@ They are the same matches, reported inconsistently.
 | winrate disagreement, worst | 1.14 pp | 0.50 pp |
 | winrate disagreement, median | ~0.5 pp | ~0.1 pp |
 
-The counts never come close to doubling and never come out unrelated: they sit
-within about a tenth of each other while the **winrate** — the only thing the
-delta is computed from — agrees to a fraction of a percentage point. Two
-independent samples of one population would agree on the rate and on nothing
-else about their size only by accident; two reports of one set of matches,
-bucketed slightly differently, look exactly like this.
+The counts disagree by up to an eighth, which is STRATZ's own bucketing rather
+than anything about the matches; the **winrate** — the only thing the delta is
+computed from — agrees to a fraction of a percentage point throughout.
 
-So summing is ruled out, and which of the two rows is read barely reaches the
-stored delta: at worst 1.14 pp of raw winrate before smoothing pulls it
-towards neutral. `rows.ts` reads the lower id's row, which is arbitrary and
-deterministic rather than better.
+So the row choice reaches the stored delta by at most 1.14 pp of raw winrate,
+before smoothing pulls it towards neutral. `rows.ts` reads the lower id's row,
+which is arbitrary and deterministic rather than better. What the measurement
+rules out is that the choice matters; what it does not establish, because
+nothing here could, is which of the two reports is nearer the truth.
 
 One thing measured and not acted on: the disagreement is not symmetric. The
 lower hero id reported the larger `vs` count in eight of the ten pairs. Over
