@@ -11,6 +11,7 @@ import type { SQL } from "bun";
 import { cleaner, requiresDatabase, url } from "../db.fixture.ts";
 import {
 	BUILT_AT,
+	HERO,
 	NEW_PATCH,
 	OLD_PATCH,
 	OTHER,
@@ -94,6 +95,67 @@ describe.skipIf(url === undefined)("where a build's snapshot ends up", () => {
 
 		expect(await statusOf(sql, refused)).toBe("failed");
 		expect(await newestPublished(sql)).toBe(published);
+	});
+
+	// spec: snapshot-build/neither-component-measured
+	test("a snapshot measuring neither component publishes [58]", async () => {
+		const sql = await seeded(clean);
+		await stage(sql, NEW_PATCH);
+		for (const table of ["staging_hero_sides", "staging_hero_phases"])
+			await sql.unsafe(`DELETE FROM ${table} WHERE patch_id = $1`, [NEW_PATCH]);
+
+		const built = await buildSnapshot(sql, NEW_PATCH, BUILT_AT);
+
+		expect(await statusOf(sql, built)).toBe("published");
+		// Zeroed throughout rather than omitted: the same 0 on every hero adds
+		// the same nothing to every score, so no candidate moves against another.
+		const held = await sql`SELECT side_adj_radiant, side_adj_dire, phase_adj_1,
+				phase_adj_2, phase_adj_last
+			FROM hero_stats WHERE snapshot_id = ${built}`;
+		expect(held).toHaveLength(2);
+		expect(
+			held.every((row: Record<string, number>) =>
+				Object.values(row).every((value) => value === 0),
+			),
+		).toBe(true);
+	});
+
+	// spec: snapshot-build/one-component-measured-while-the-other-is-not
+	test("one component measured and the other not publishes [61]", async () => {
+		const sql = await seeded(clean);
+		await stage(sql, NEW_PATCH);
+		await sql`DELETE FROM staging_hero_phases WHERE patch_id = ${NEW_PATCH}`;
+
+		const built = await buildSnapshot(sql, NEW_PATCH, BUILT_AT);
+
+		expect(await statusOf(sql, built)).toBe("published");
+		const [row] = await sql`SELECT side_adj_radiant, phase_adj_1 FROM hero_stats
+			WHERE snapshot_id = ${built} AND hero_id = ${HERO}`;
+		// A verdict taken once for the snapshot rather than once per component
+		// would zero the side deltas staging did measure.
+		expect(row.side_adj_radiant).toBeGreaterThan(0);
+		expect(row.phase_adj_1).toBe(0);
+	});
+
+	// spec: snapshot-build/a-measured-component-that-happens-to-be-neutral
+	test("a measured component neutral on a hero still publishes [60]", async () => {
+		const sql = await seeded(clean);
+		// `stage` puts the second hero at exactly half on both sides, so its
+		// blended side delta is 0 with nothing deleted.
+		await stage(sql, NEW_PATCH);
+
+		const built = await buildSnapshot(sql, NEW_PATCH, BUILT_AT);
+
+		expect(await statusOf(sql, built)).toBe("published");
+		const [moved, neutral] = await sql`SELECT hero_id, side_adj_radiant
+			FROM hero_stats WHERE snapshot_id = ${built} ORDER BY hero_id`;
+		expect([moved.hero_id, neutral.hero_id]).toEqual([HERO, OTHER]);
+		// Exactly the 0 an unmeasured component writes, and published all the
+		// same — which is why the verdict reads whether a row exists and never
+		// what it holds. The other hero's delta is what says side was measured
+		// at all; how large it is belongs to the smoothing, not to this case.
+		expect(neutral.side_adj_radiant).toBe(0);
+		expect(moved.side_adj_radiant).toBeGreaterThan(0);
 	});
 
 	// spec: snapshot-build/a-component-measured-for-some-heroes-only

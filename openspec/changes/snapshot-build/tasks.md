@@ -198,9 +198,15 @@ retention, which is a requirement of its own with no validation in it.
       criterion names is asserted on rows handed to the check directly
       instead. (Req: snapshot-build — A snapshot is published only after it
       validates)
-- [ ] 4.1b Write the outcome tests each of [58], [60] and [61] names, group 2
-      having asserted only the verdict behind them. (Req: snapshot-build — An
-      unmeasured component is zero for every hero)
+- [x] 4.1b Write the outcome tests each of [58], [60] and [61] names, group 2
+      having asserted only the verdict behind them and group 3 only the row it
+      writes: a snapshot measuring neither component publishes with both
+      zeroed throughout [58]; one measured and the other not publishes with
+      the measured deltas standing [61]; and a hero whose measured side delta
+      is exactly 0 publishes beside a hero whose is not [60] — the same number
+      an unmeasured component writes, which is the whole reason the verdict
+      reads whether a row exists rather than what it holds. (Req:
+      snapshot-build — An unmeasured component is zero for every hero)
 - [x] 4.2a Write the boundary tests for the two checks 4a implements: a hero
       count equal to the last published passes and one below fails [18];
       shares within 1e-6 pass and 0.8 fails [19]. Both are read without a
