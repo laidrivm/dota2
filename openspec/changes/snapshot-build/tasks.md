@@ -38,7 +38,7 @@ keeps running on the committed fixture until group 8 rewires the route.
 - [x] 1.3 Implement `prior(t)` and `wrBlend` over the parameter table, taking
       patch kind and whole days as arguments. (Req: snapshot-build — Patch
       blending with a decaying prior)
-- [ ] 1.4 Implement the smoothing that maps a blended winrate and `n_eff` to
+- [x] 1.4 Implement the smoothing that maps a blended winrate and `n_eff` to
       a stored delta, with the per-statistic `k` values named at one site.
       (Req: snapshot-build — Smoothing towards neutral by sample size)
 
