@@ -67,9 +67,10 @@ export async function stage(
 		VALUES (${patchId}, ${HERO}, 1000, ${wins}, 0.2),
 			(${patchId}, ${OTHER}, 1000, ${wins}, 0.1)`;
 	// The two directions disagree, as a source answering per hero over its own
-	// window does: 240 of 400 from one end, 230 of 380 from the other. A build
-	// that computed each row instead of negating one would store two magnitudes
-	// here, and the pair would stop summing to 0.
+	// window does: hero 1 wins 240 of 400, while hero 2's own row says it won
+	// 150 of 380 — which is 230 of 380 seen from hero 1. A build that computed
+	// each row instead of negating one would store two magnitudes here, and the
+	// pair would stop summing to 0.
 	await sql`INSERT INTO staging_hero_matchups
 			(patch_id, hero_id, enemy_id, matches, wins)
 		VALUES (${patchId}, ${HERO}, ${OTHER}, 400, 240),
