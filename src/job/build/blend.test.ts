@@ -58,6 +58,17 @@ describe("the days a prior decays over", () => {
 		).toBe(0);
 	});
 
+	test("a build instant before the patch's own release counts none [79]", () => {
+		// Not a negative count: `2^(-t/h)` above 1 would hand the previous
+		// patch more weight than the `k0` it starts from.
+		expect(
+			wholeDays(
+				new Date("2026-08-10T00:00:00.000Z"),
+				new Date("2026-08-01T00:00:00.000Z"),
+			),
+		).toBe(0);
+	});
+
 	test("a patch's detected_at anchors at midnight UTC [67]", () => {
 		// The column is an instant; what the decay counts from is the day it
 		// fell on, so an evening release is not most of a day old by morning.

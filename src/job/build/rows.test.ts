@@ -4,7 +4,13 @@
  * behind, and how a pair's two staged directions become its stored ones.
  */
 import { describe, expect, test } from "bun:test";
-import { type Prior, type Staging, snapshotRows } from "./rows.ts";
+import {
+	type Prior,
+	priorKey,
+	type SplitRow,
+	type Staging,
+	snapshotRows,
+} from "./rows.ts";
 
 /** Staging holding only what a case names. */
 const staging = (held: Partial<Staging> = {}): Staging => ({
@@ -68,7 +74,7 @@ describe("a hero's position rows", () => {
 });
 
 describe("a component staging did not measure", () => {
-	const sides = [
+	const sides: SplitRow[] = [
 		{ heroId: 1, part: "radiant", matches: 500, wins: 350 },
 		{ heroId: 1, part: "dire", matches: 500, wins: 150 },
 		{ heroId: 2, part: "radiant", matches: 500, wins: 300 },
@@ -157,6 +163,26 @@ describe("a pair's two staged directions", () => {
 		expect(rows.synergies).toHaveLength(1);
 		expect(rows.synergies[0]).toMatchObject({ hero_id: 1, ally_id: 2 });
 		expect(rows.synergies[0]?.synergy_adj).toBeGreaterThan(0);
+	});
+
+	test("are pulled towards the winrate the previous patch published [80]", () => {
+		const staged = staging({
+			matchups: [{ heroId: 1, otherId: 2, matches: 400, wins: 240 }],
+		});
+		const carried: Prior = {
+			weight: 500,
+			wrOld: new Map([[priorKey("matchup", 1, 2), 30]]),
+		};
+
+		const pulled =
+			snapshotRows(staged, carried).matchups[0]?.advantage_adj ?? 0;
+
+		// Sixty per cent staged against a thirty per cent prior: the stored
+		// delta lands below the staged figure's own. A key the reader spells
+		// differently from the writer would leave the two equal.
+		expect(pulled).toBeLessThan(
+			snapshotRows(staged, alone).matchups[0]?.advantage_adj ?? 0,
+		);
 	});
 
 	test("yield no row at all where there is nothing to blend [78]", () => {

@@ -31,10 +31,14 @@ export type PairRow = {
 	matches: number;
 	wins: number;
 };
-/** A side or a phase row, `part` being `radiant`/`dire` or `1`/`2`/`last`. */
+/** The parts each component is measured over, as staging's own CHECKs spell them. */
+export type Side = "radiant" | "dire";
+export type Phase = "1" | "2" | "last";
+
+/** A side or a phase row. */
 export type SplitRow = {
 	heroId: number;
-	part: string;
+	part: Side | Phase;
 	matches: number;
 	wins: number;
 };
@@ -190,19 +194,23 @@ export function snapshotRows(staging: Staging, prior: Prior): SnapshotRows {
 		nEffs.set(heroId, samples);
 	}
 
-	/** One component's rows, by hero and part, and whether it was measured. */
-	const component = (rows: SplitRow[]) => ({
+	/**
+	 * One component: its rows by hero and part, whether it was measured, and
+	 * which statistic it smooths as. Carried together so that no call site
+	 * below can pair a part with the wrong one of the three.
+	 */
+	const component = (statistic: "side" | "phase", rows: SplitRow[]) => ({
+		statistic,
 		measured: isMeasured(rows),
 		by: new Map(rows.map((row) => [`${row.heroId}:${row.part}`, row])),
 	});
-	const sides = component(staging.sides);
-	const phases = component(staging.phases);
+	const sides = component("side", staging.sides);
+	const phases = component("phase", staging.phases);
 
 	const heroes = staging.heroes.map((hero) => {
 		const split = (
-			of: { measured: boolean; by: Map<string, SplitRow> },
-			statistic: "side" | "phase",
-			part: string,
+			of: ReturnType<typeof component>,
+			part: Side | Phase,
 		): number => {
 			const row = of.by.get(`${hero.heroId}:${part}`);
 			// An unmeasured component is 0 on every hero row. A measured one this
@@ -210,7 +218,7 @@ export function snapshotRows(staging: Staging, prior: Prior): SnapshotRows {
 			// the two stop being the same answer: one publishes, the other fails.
 			if (!of.measured || row === undefined) return 0;
 			return (
-				delta(statistic, row.matches, row.wins, prior, hero.heroId, part)
+				delta(of.statistic, row.matches, row.wins, prior, hero.heroId, part)
 					?.adj ?? 0
 			);
 		};
@@ -218,11 +226,11 @@ export function snapshotRows(staging: Staging, prior: Prior): SnapshotRows {
 			hero_id: hero.heroId,
 			matches: hero.matches,
 			contest_rate: hero.contestRate,
-			side_adj_radiant: split(sides, "side", "radiant"),
-			side_adj_dire: split(sides, "side", "dire"),
-			phase_adj_1: split(phases, "phase", "1"),
-			phase_adj_2: split(phases, "phase", "2"),
-			phase_adj_last: split(phases, "phase", "last"),
+			side_adj_radiant: split(sides, "radiant"),
+			side_adj_dire: split(sides, "dire"),
+			phase_adj_1: split(phases, "1"),
+			phase_adj_2: split(phases, "2"),
+			phase_adj_last: split(phases, "last"),
 			sufficient: heroSufficient(nEffs.get(hero.heroId) ?? []),
 		};
 	});

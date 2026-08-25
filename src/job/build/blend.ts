@@ -54,14 +54,21 @@ const DAY_MS = 86_400_000;
  * day is a whole half-life for a major patch.
  */
 export const wholeDays = (detectedAt: Date, at: Date): number =>
-	Math.floor(
-		(at.getTime() -
-			Date.UTC(
-				detectedAt.getUTCFullYear(),
-				detectedAt.getUTCMonth(),
-				detectedAt.getUTCDate(),
-			)) /
-			DAY_MS,
+	// Never negative. A build instant before the patch's own release — a
+	// backfill, or a release instant the source stated ahead of itself — would
+	// otherwise raise `2^(-t/h)` above 1 and hand the previous patch more
+	// weight than the `k0` it starts from.
+	Math.max(
+		0,
+		Math.floor(
+			(at.getTime() -
+				Date.UTC(
+					detectedAt.getUTCFullYear(),
+					detectedAt.getUTCMonth(),
+					detectedAt.getUTCDate(),
+				)) /
+				DAY_MS,
+		),
 	);
 
 /** A blended winrate in percentage points, and the sample behind it. */
