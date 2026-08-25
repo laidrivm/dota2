@@ -131,7 +131,7 @@ accordingly ships before 3.1 and 3.2, which are 3b's.
       `advantage_adj` summing to 0 [21]; `hero_synergies` holds `(a,b)` for
       `a < b` and no mirrored row [22]. (Req: snapshot-build — Stored pair
       statistics carry their symmetry)
-- [ ] 3.3b Implement the staging read and the statistics write, taking the
+- [x] 3.3b Implement the staging read and the statistics write, taking the
       build instant as an argument, writing it to `created_at`, reading
       `wr_old` from the predecessor snapshot retention holds for that purpose,
       and writing 0 for a component 2.6 reports unmeasured. (Req:
