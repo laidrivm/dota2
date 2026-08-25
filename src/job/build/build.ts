@@ -1,0 +1,168 @@
+/**
+ * The build's database edge: read one patch's staging, compute, write the
+ * statistics rows of a new snapshot.
+ *
+ * It reaches nothing but this connection. Everything the arithmetic needs —
+ * the patch's kind and age, the previous patch's winrates — is already in the
+ * database the ingest filled, so a build runs with every other network call
+ * refusing.
+ *
+ * The snapshot is left at `status = 'building'`. Validation, the transition
+ * to `published` or `failed`, and retention are the next group's; this one
+ * returns the row's id so both outcomes have something to name.
+ */
+import type { SQL } from "bun";
+import { prior, wholeDays, wrOf } from "./blend.ts";
+import { type Prior, priorKey, type Staging, snapshotRows } from "./rows.ts";
+
+/**
+ * Build a snapshot of `patchId` as of `at`, and return its `snapshot_id`.
+ *
+ * `at` is an argument rather than a clock reading, so a build over unchanged
+ * staging is reproducible: it is written to `created_at`, it is what the decay
+ * is measured to, and it is the one clock `stabilizing` is later read off.
+ */
+export async function buildSnapshot(
+	sql: SQL,
+	patchId: string,
+	at: Date,
+): Promise<number> {
+	const [patch] = await sql`SELECT is_major, detected_at,
+			(SELECT patch_id FROM patches WHERE detected_at < p.detected_at
+				ORDER BY detected_at DESC LIMIT 1) AS previous
+		FROM patches p WHERE p.patch_id = ${patchId}`;
+	// Named here rather than left to the foreign key the insert carries, which
+	// would report a constraint instead of a missing patch.
+	if (patch === undefined)
+		throw new Error(`no patch row holds ${patchId}, so nothing builds from it`);
+
+	// No predecessor and a decayed one are the same weight and the same NULL:
+	// in both cases there is no winrate to pull the current patch towards.
+	const weight =
+		patch.previous === null
+			? 0
+			: prior(
+					patch.is_major ? "major" : "letter",
+					wholeDays(patch.detected_at, at),
+				);
+	const priorPatchId = weight === 0 ? null : patch.previous;
+
+	const [created] = await sql`INSERT INTO snapshots
+		(created_at, patch_id, prior_patch_id, prior_weight, status)
+		VALUES (${at}, ${patchId}, ${priorPatchId}, ${weight}, 'building')
+		RETURNING snapshot_id`;
+	const snapshotId = Number(created.snapshot_id);
+
+	const staging = await read(sql, patchId);
+	const rows = snapshotRows(staging, {
+		weight,
+		wrOld: await previousWinrates(sql, priorPatchId),
+	});
+
+	await sql.begin(async (tx) => {
+		// `snapshot_id` added here, being the one field `rows.ts` cannot know.
+		// Guarded as `staging.ts` guards its own: the bulk form builds its column
+		// list from the rows, and an empty array has none.
+		const of = (written: { [key: string]: unknown }[]) =>
+			written.map((row) => ({ snapshot_id: snapshotId, ...row }));
+		if (rows.positions.length > 0)
+			await tx`INSERT INTO hero_position_stats ${tx(of(rows.positions))}`;
+		if (rows.heroes.length > 0)
+			await tx`INSERT INTO hero_stats ${tx(of(rows.heroes))}`;
+		if (rows.matchups.length > 0)
+			await tx`INSERT INTO hero_matchups ${tx(of(rows.matchups))}`;
+		if (rows.synergies.length > 0)
+			await tx`INSERT INTO hero_synergies ${tx(of(rows.synergies))}`;
+	});
+
+	return snapshotId;
+}
+
+/**
+ * One patch's staging, aliased to the names the arithmetic uses so that the
+ * mapping between column and field lives in one statement each.
+ *
+ * Every read is ordered. Nothing downstream depends on the order of a sum,
+ * but two builds over identical staging are specified to produce identical
+ * rows, and an unordered read makes that true only by accident.
+ */
+async function read(sql: SQL, patchId: string): Promise<Staging> {
+	return {
+		positions: await sql`SELECT hero_id AS "heroId", position, matches, wins
+			FROM staging_hero_position_stats WHERE patch_id = ${patchId}
+			ORDER BY hero_id, position`,
+		heroes: await sql`SELECT hero_id AS "heroId", matches, wins,
+				contest_rate AS "contestRate"
+			FROM staging_hero_stats WHERE patch_id = ${patchId} ORDER BY hero_id`,
+		matchups: await sql`SELECT hero_id AS "heroId", enemy_id AS "otherId",
+				matches, wins
+			FROM staging_hero_matchups WHERE patch_id = ${patchId}
+			ORDER BY hero_id, enemy_id`,
+		synergies: await sql`SELECT hero_id AS "heroId", ally_id AS "otherId",
+				matches, wins
+			FROM staging_hero_synergies WHERE patch_id = ${patchId}
+			ORDER BY hero_id, ally_id`,
+		sides: await sql`SELECT hero_id AS "heroId", side AS part, matches, wins
+			FROM staging_hero_sides WHERE patch_id = ${patchId}
+			ORDER BY hero_id, side`,
+		phases: await sql`SELECT hero_id AS "heroId", phase AS part, matches, wins
+			FROM staging_hero_phases WHERE patch_id = ${patchId}
+			ORDER BY hero_id, phase`,
+	};
+}
+
+/**
+ * The winrate every statistic had in `priorPatchId`'s newest published
+ * snapshot, empty where there is no prior patch to read.
+ *
+ * Newest *published*: a `building` snapshot is one a run is part way through
+ * and a `failed` one is a snapshot that never validated, and reading either
+ * would blend against numbers nothing accepted. Retention keeps this snapshot
+ * whatever its age for exactly this read.
+ */
+async function previousWinrates(
+	sql: SQL,
+	priorPatchId: string | null,
+): Promise<Prior["wrOld"]> {
+	const wrOld = new Map<string, number>();
+	if (priorPatchId === null) return wrOld;
+	const [previous] = await sql`SELECT snapshot_id FROM snapshots
+		WHERE patch_id = ${priorPatchId} AND status = 'published'
+		ORDER BY snapshot_id DESC LIMIT 1`;
+	if (previous === undefined) return wrOld;
+	const id = previous.snapshot_id;
+
+	for (const row of await sql`SELECT hero_id, position, meta_adj
+		FROM hero_position_stats WHERE snapshot_id = ${id}`)
+		wrOld.set(
+			priorKey("position", row.hero_id, row.position),
+			wrOf(row.meta_adj),
+		);
+	for (const row of await sql`SELECT hero_id, side_adj_radiant, side_adj_dire,
+			phase_adj_1, phase_adj_2, phase_adj_last
+		FROM hero_stats WHERE snapshot_id = ${id}`) {
+		wrOld.set(
+			priorKey("side", row.hero_id, "radiant"),
+			wrOf(row.side_adj_radiant),
+		);
+		wrOld.set(priorKey("side", row.hero_id, "dire"), wrOf(row.side_adj_dire));
+		wrOld.set(priorKey("phase", row.hero_id, "1"), wrOf(row.phase_adj_1));
+		wrOld.set(priorKey("phase", row.hero_id, "2"), wrOf(row.phase_adj_2));
+		wrOld.set(priorKey("phase", row.hero_id, "last"), wrOf(row.phase_adj_last));
+	}
+	// The lower id's row alone, which is the direction `rows.ts` looks a pair
+	// up under; the mirrored row carries the same number negated.
+	for (const row of await sql`SELECT hero_id, enemy_id, advantage_adj
+		FROM hero_matchups WHERE snapshot_id = ${id} AND hero_id < enemy_id`)
+		wrOld.set(
+			priorKey("matchup", row.hero_id, row.enemy_id),
+			wrOf(row.advantage_adj),
+		);
+	for (const row of await sql`SELECT hero_id, ally_id, synergy_adj
+		FROM hero_synergies WHERE snapshot_id = ${id}`)
+		wrOld.set(
+			priorKey("synergy", row.hero_id, row.ally_id),
+			wrOf(row.synergy_adj),
+		);
+	return wrOld;
+}

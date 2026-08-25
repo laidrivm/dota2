@@ -62,6 +62,13 @@ export function cleaner(): () => Promise<SQL> {
 		// `heroes` delete below would fail on its foreign key.
 		await sql`DELETE FROM staging_hero_sides WHERE hero_id >= 9000`;
 		await sql`DELETE FROM staging_hero_phases WHERE hero_id >= 9000`;
+		// Snapshots before heroes, and the statistics rows with them: they
+		// cascade from `snapshots` and reference `heroes`, so the delete below
+		// would fail under a foreign key with them still standing. The sentinel
+		// here is the patch, `snapshot_id` being a sequence no range can be
+		// carved out of — a snapshot of a sentinel patch is a test's.
+		await sql`DELETE FROM snapshots
+			WHERE patch_id LIKE 'z9.%' OR prior_patch_id LIKE 'z9.%'`;
 		await sql`DELETE FROM heroes WHERE hero_id >= 9000`;
 		await sql`DELETE FROM patches WHERE patch_id LIKE 'z9.%'`;
 		return sql;
