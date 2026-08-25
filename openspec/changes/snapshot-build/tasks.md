@@ -117,10 +117,17 @@ measured 801 lines against a budget that fails at 800.
 - [x] 3.3c Record on each snapshot which components its staging measured, and
       read `wr_old` for a component only where the predecessor measured it: a
       component the predecessor never measured is no prior at all, where one
-      it measured at exactly neutral is [84]. Amend the proposal's schema
-      non-goal to state the exception, and the delta spec to carry the
-      criterion. (Req: snapshot-build — An unmeasured component is zero for
-      every hero)
+      it measured at exactly neutral is [84], taken over both components
+      because the read back guards each on its own; the verdict written is the
+      pair of components staging held rather than one answer for the snapshot
+      [85]; a run that cannot read the staging its verdict comes from leaves no
+      snapshot rather than one marked `failed` [86]; and a `snapshots` table
+      predating the two columns gains them with every existing row reading
+      unmeasured [87]. Amend the proposal's schema non-goal to state the
+      exception, and the delta spec to carry the criterion and what the read's
+      new position leaves behind. (Req: snapshot-build — An unmeasured
+      component is zero for every hero / A snapshot is published only after it
+      validates)
 
 - [x] 3.3a Assemble the rows a snapshot stores from staging and the previous
       patch's deltas, with no database in front of it: a hero's shares,

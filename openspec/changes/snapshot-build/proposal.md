@@ -50,9 +50,19 @@ settles the published artefact the deployment has to mount a volume for.
 
 ## Non-goals
 
-- The schema, the `Bun.SQL` connection edge and the database-backed CI job.
-  All three are `snapshot-ingest`'s: every group of that change writes through
-  them, so this change consumes them rather than adding them, and follows it.
+- The `Bun.SQL` connection edge and the database-backed CI job. Both are
+  `snapshot-ingest`'s: every group of that change writes through them, so this
+  change consumes them rather than adding them, and follows it.
+- The schema, with one exception this change makes and states. It is
+  `snapshot-ingest`'s and is consumed rather than added to — except for the two
+  columns recording which components a snapshot's staging measured. Those are
+  this change's because the reading that needs them is: a stored delta of 0
+  cannot say whether a component was measured and neutral or never measured,
+  so the next patch's blend has no way to tell an absent `wr_old` from a
+  neutral one, and would pull real deltas towards a 50 nobody measured. The
+  fact is produced here, read here, and derivable from nothing the schema
+  already carries. It is additive, so `ADD COLUMN IF NOT EXISTS` expresses it
+  beside its own `CREATE` and the no-migration-ledger ceiling stands.
 - Filling staging. This change reads the rows the ingest writes and computes
   from them; nothing here reaches a source outside its own database.
 
@@ -84,4 +94,7 @@ answer to a request it was going to make anyway.
   and in the unit and end-to-end suites, which run on the fallback. The
   database-backed tests skip without it and CI supplies it; `snapshot-ingest`
   owns that job, and the rule that a skip there fails it.
+- Two additive columns on `snapshots`, stated as this change's one exception
+  under *Non-goals* above, and the `ALTER TABLE … ADD COLUMN IF NOT EXISTS`
+  that lets a database already carrying the table converge on the same shape.
 - No new dependency: `Bun.SQL` ships with the runtime already pinned.

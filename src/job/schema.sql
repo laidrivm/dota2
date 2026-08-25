@@ -2,10 +2,12 @@
 -- throughout, so applying it to a database that already carries it is a no-op
 -- and the edge needs no "is it there yet" question of its own.
 --
--- ponytail: one schema version, no migration ledger. The ceiling is the first
--- `ALTER`: a column whose shape changes cannot be expressed by a `CREATE` that
--- skips itself, and that is where a numbered-migration table arrives. Before
--- then it would be scaffolding for a second version that does not exist.
+-- ponytail: one schema version, no migration ledger. The ceiling is a column
+-- whose *shape* changes, which cannot be expressed by a `CREATE` that skips
+-- itself; that is where a numbered-migration table arrives. An additive column
+-- is still below it — `ADD COLUMN IF NOT EXISTS` is idempotent, so it stands
+-- beside its own `CREATE` and both a fresh database and one already carrying
+-- the table converge on the same shape. `snapshots` is the first to need it.
 --
 -- Columns stay `snake_case` because an unquoted Postgres identifier folds to
 -- lowercase; the exporter renames at that boundary, which is the one exception
@@ -59,8 +61,20 @@ CREATE TABLE IF NOT EXISTS snapshots (
   prior_patch_id text REFERENCES patches,   -- NULL where the prior is zeroed
   prior_weight   real NOT NULL,
   status         text NOT NULL
-                 CHECK (status IN ('building', 'published', 'failed'))
+                 CHECK (status IN ('building', 'published', 'failed')),
+  -- Which components staging measured when this snapshot was built. A stored
+  -- delta of 0 cannot afterwards say whether the component was measured and
+  -- neutral or never measured at all, and the next patch's blend has to know:
+  -- reading an unmeasured component back as a neutral 50 would pull real
+  -- deltas towards a number nobody measured. `false` is right for every row
+  -- written before these columns existed — no pull fills either table yet.
+  side_measured  boolean NOT NULL DEFAULT false,
+  phase_measured boolean NOT NULL DEFAULT false
 );
+ALTER TABLE snapshots ADD COLUMN IF NOT EXISTS
+  side_measured boolean NOT NULL DEFAULT false;
+ALTER TABLE snapshots ADD COLUMN IF NOT EXISTS
+  phase_measured boolean NOT NULL DEFAULT false;
 -- The pointer the export follows: the greatest `snapshot_id` at 'published'.
 
 -- Every table below holds values the build has already processed: an `*_adj`

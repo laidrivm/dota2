@@ -149,6 +149,15 @@ score and so reorders nothing.
   component it is
 - **THEN** the snapshot SHALL end at `status = 'failed'`
 
+#### Scenario: The verdict outlives the build that took it
+
+- **WHEN** a snapshot is built
+- **THEN** which components its staging measured SHALL be recorded on that
+  snapshot, and a later patch's blend SHALL read `wr_old` for a component only
+  where that snapshot measured it — an unmeasured component's stored 0 is no
+  reading, and offering it as a winrate of 50 pulls the later patch's measured
+  deltas towards a number nobody measured
+
 #### Scenario: A measured component that happens to be neutral
 
 - **WHEN** staging measures side for every hero and one hero's blended side
@@ -220,7 +229,10 @@ every hero, which *An unmeasured component is zero for every hero* states and
 this requirement does not restate. A snapshot that fails any check SHALL be set to
 `status = 'failed'`, and so SHALL one whose build raises before validation is
 reached: `building` is a state a snapshot passes through, never one it is left
-in (data-model §7.3–7.4).
+in (data-model §7.3–7.4). A run that raises before its row exists SHALL leave
+no snapshot at all — the row records which components the run's staging
+measured, so it cannot be written before that staging is read, and a run that
+could not read its own inputs measured nothing there is a row to say so on.
 
 A hero the reference tables know but staging holds no picks for has no
 position rows at all, and SHALL NOT fail this check — it is a hero nobody
@@ -260,6 +272,12 @@ nothing to compare against forever.
 - **THEN** the snapshot SHALL be set to `status = 'failed'` before the error
   propagates, and the newest `published` snapshot SHALL be the one that was
   newest before the build
+
+#### Scenario: The staging read raises
+
+- **IF** the build cannot read the staging its verdict is taken from
+- **THEN** no snapshot row SHALL exist for that run, and the newest
+  `published` snapshot SHALL be the one that was newest before the build
 
 ### Requirement: Snapshot retention
 

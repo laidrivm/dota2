@@ -129,9 +129,9 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       recording which components a snapshot measured, a widening a review
       forced and this change's one stated exception to the schema being
       `snapshot-ingest`'s. The group measured 798 lines as one step against a
-      budget that fails at 800, and 801 as two. `-3c` is written and unpushed,
-      one commit on top of this branch: it owes the pre-PR sequence, from
-      `bun run diff-budget`, and that is where the next session starts.
+      budget that fails at 800, and 801 as two. `-3c` has run the whole pre-PR
+      sequence and is awaiting the push; group 4 is where the next session
+      starts.
       Owns no *deployed* infrastructure — the production Postgres service, the
       schedule and the failure alert are Task 7's, and none of them gates it.
 - [ ] **Task 7** — the whole deployment: Docker image, compose (`app` +

@@ -122,6 +122,30 @@ export const refusing = (sql: SQL): SQL =>
 		},
 	});
 
+/**
+ * The same connection with its staging read refusing.
+ *
+ * A stub for the reason `refusing` is one: every staging table the read names
+ * exists wherever the schema was applied, so no row this suite could write
+ * produces the raise. The trap is on the call rather than on a method, the
+ * read being a tagged template — and it matches the table prefix in the query
+ * text, which is what makes it the *staging* read that refuses and not the
+ * patch lookup above it.
+ */
+export const refusingStaging = (sql: SQL): SQL =>
+	new Proxy(sql, {
+		apply(target, thisArg, args) {
+			const [strings] = args as [TemplateStringsArray];
+			if (strings.some((part) => part.includes("staging_")))
+				return Promise.reject(new Error("the staging read refused"));
+			return Reflect.apply(
+				target as unknown as (...rest: unknown[]) => unknown,
+				thisArg,
+				args,
+			);
+		},
+	});
+
 /** Every statistics row of one snapshot, ordered, without its own id. */
 export const statsOf = async (sql: SQL, id: number) => ({
 	positions: await sql`SELECT hero_id, position, matches, pick_share, meta_adj,

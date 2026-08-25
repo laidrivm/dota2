@@ -12,7 +12,7 @@
  * returns the row's id so both outcomes have something to name.
  */
 import type { SQL } from "bun";
-import { prior, wholeDays, wrOf } from "./blend.ts";
+import { isMeasured, prior, wholeDays, wrOf } from "./blend.ts";
 import { type Prior, priorKey, type Staging, snapshotRows } from "./rows.ts";
 
 /**
@@ -51,14 +51,26 @@ export async function buildSnapshot(
 	// part way is specified to leave its snapshot at `failed`, never at
 	// `building`, and a row rolled back with the statistics is a row the next
 	// group has nothing to mark. What rolls back is the statistics alone.
+	// Read before the row is created, because the verdict below is written
+	// onto it. A staging read that raises therefore leaves no snapshot at all,
+	// which is what a run that could not read its own inputs should leave.
+	const staging = await read(sql, patchId);
+	// Taken once for the whole snapshot and recorded on it: a stored delta of 0
+	// cannot afterwards say whether the component was measured and neutral or
+	// never measured, and the next patch's blend reads these rows back.
+	const side = isMeasured(staging.sides);
+	const phase = isMeasured(staging.phases);
+
 	const [created] = await sql`INSERT INTO snapshots
-		(created_at, patch_id, prior_patch_id, prior_weight, status)
-		VALUES (${at}, ${patchId}, ${priorPatchId}, ${weight}, 'building')
+		(created_at, patch_id, prior_patch_id, prior_weight, status,
+			side_measured, phase_measured)
+		VALUES (${at}, ${patchId}, ${priorPatchId}, ${weight}, 'building',
+			${side}, ${phase})
 		RETURNING snapshot_id`;
 	const snapshotId = Number(created.snapshot_id);
 
 	try {
-		await write(sql, snapshotId, patchId, weight, priorPatchId);
+		await write(sql, snapshotId, staging, weight, priorPatchId);
 	} catch (error) {
 		// `building` is a state a snapshot passes through, never one it is left
 		// in, and the row above was written outside the transaction for exactly
@@ -81,11 +93,10 @@ export async function buildSnapshot(
 async function write(
 	sql: SQL,
 	snapshotId: number,
-	patchId: string,
+	staging: Staging,
 	weight: number,
 	priorPatchId: string | null,
 ): Promise<void> {
-	const staging = await read(sql, patchId);
 	const rows = snapshotRows(staging, {
 		weight,
 		wrOld: await previousWinrates(sql, priorPatchId),
@@ -156,7 +167,8 @@ async function previousWinrates(
 ): Promise<Prior["wrOld"]> {
 	const wrOld = new Map<string, number>();
 	if (priorPatchId === null) return wrOld;
-	const [previous] = await sql`SELECT snapshot_id FROM snapshots
+	const [previous] = await sql`SELECT snapshot_id, side_measured, phase_measured
+		FROM snapshots
 		WHERE patch_id = ${priorPatchId} AND status = 'published'
 		ORDER BY snapshot_id DESC LIMIT 1`;
 	if (previous === undefined) return wrOld;
@@ -171,14 +183,25 @@ async function previousWinrates(
 	for (const row of await sql`SELECT hero_id, side_adj_radiant, side_adj_dire,
 			phase_adj_1, phase_adj_2, phase_adj_last
 		FROM hero_stats WHERE snapshot_id = ${id}`) {
-		wrOld.set(
-			priorKey("side", row.hero_id, "radiant"),
-			wrOf(row.side_adj_radiant),
-		);
-		wrOld.set(priorKey("side", row.hero_id, "dire"), wrOf(row.side_adj_dire));
-		wrOld.set(priorKey("phase", row.hero_id, "1"), wrOf(row.phase_adj_1));
-		wrOld.set(priorKey("phase", row.hero_id, "2"), wrOf(row.phase_adj_2));
-		wrOld.set(priorKey("phase", row.hero_id, "last"), wrOf(row.phase_adj_last));
+		// Only what that snapshot measured. Its 0 for an unmeasured component
+		// is not a winrate of 50 — it is no reading at all, and offered as
+		// `wr_old` it would pull this patch's real deltas towards a number
+		// nobody measured, exactly as an absent `wr_old` must not.
+		if (previous.side_measured) {
+			wrOld.set(
+				priorKey("side", row.hero_id, "radiant"),
+				wrOf(row.side_adj_radiant),
+			);
+			wrOld.set(priorKey("side", row.hero_id, "dire"), wrOf(row.side_adj_dire));
+		}
+		if (previous.phase_measured) {
+			wrOld.set(priorKey("phase", row.hero_id, "1"), wrOf(row.phase_adj_1));
+			wrOld.set(priorKey("phase", row.hero_id, "2"), wrOf(row.phase_adj_2));
+			wrOld.set(
+				priorKey("phase", row.hero_id, "last"),
+				wrOf(row.phase_adj_last),
+			);
+		}
 	}
 	// The lower id's row alone, which is the direction `rows.ts` looks a pair
 	// up under; the mirrored row carries the same number negated.
