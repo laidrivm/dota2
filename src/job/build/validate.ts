@@ -70,40 +70,32 @@ export function invalidReason(
 		if (!(Math.abs(sum - 1) <= SHARE_TOLERANCE))
 			return `hero ${heroId}'s position shares sum to ${sum}`;
 
-	// Every table, because every one of them stores a delta, and the check is
-	// on the value rather than on which statistic produced it.
-	const written = [
-		...rows.positions,
-		...rows.heroes,
-		...rows.matchups,
-		...rows.synergies,
-	];
-	for (const row of written) {
-		const beyond = beyondBound(row);
-		if (beyond !== undefined) return `${beyond} on hero ${row.hero_id}`;
-	}
+	// Every table the snapshot writes, taken from the object rather than named
+	// one by one: a statistics table added to `SnapshotRows` and left out of a
+	// list here would store deltas nothing bounds, and nothing would say so.
+	// There are no exemptions — every table stores a delta, and the check is on
+	// the value rather than on which statistic produced it. A field that is not
+	// an array of rows raises here rather than being skipped.
+	for (const table of Object.values(rows))
+		for (const row of table)
+			for (const [column, value] of Object.entries(row)) {
+				// `includes`, not `endsWith`: five of the eight delta columns carry
+				// the token in the middle — `side_adj_radiant`, `phase_adj_1` — so a
+				// suffix test would check three of them and pass the rest without
+				// looking. The token is the schema's own mark for a stored delta
+				// (`schema.sql` §*Every table below*), so a column added under that
+				// convention is checked by being named as the convention requires.
+				if (!column.includes("_adj") || typeof value !== "number") continue;
+				// A refused pass rather than a detected failure, so a delta that is
+				// not a number fails here instead of comparing false and publishing.
+				if (!(Math.abs(value) <= ADJ_BOUND))
+					return `${column} of ${value} on hero ${row.hero_id} lies beyond ±${ADJ_BOUND}`;
+			}
 
 	return (
 		partial("side", staging.sides, staging.heroes) ??
 		partial("phase", staging.phases, staging.heroes)
 	);
-}
-
-/** The first delta on this row that lies outside the bound, named. */
-function beyondBound(row: { [column: string]: unknown }): string | undefined {
-	// `includes`, not `endsWith`: five of the eight delta columns carry the
-	// token in the middle — `side_adj_radiant`, `phase_adj_1` — so a suffix
-	// test would check three of them and pass the rest without looking. The
-	// token is the schema's own mark for a stored delta (`schema.sql`
-	// §*Every table below*), so a column added under that convention is
-	// checked by being named as the convention requires.
-	for (const [column, value] of Object.entries(row))
-		if (column.includes("_adj") && typeof value === "number")
-			if (!(Math.abs(value) <= ADJ_BOUND))
-				// A refused pass rather than a detected failure, so a delta that is
-				// not a number fails here instead of comparing false and publishing.
-				return `${column} of ${value} lies beyond ±${ADJ_BOUND}`;
-	return undefined;
 }
 
 /**
