@@ -129,14 +129,20 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       recording which components a snapshot measured, a widening a review
       forced and this change's one stated exception to the schema being
       `snapshot-ingest`'s. The group measured 798 lines as one step against a
-      budget that fails at 800, and 801 as two. `-3c` has run the whole pre-PR
-      sequence and is awaiting the push; group 4 is where the next session
-      starts.
+      budget that fails at 800, and 801 as two; `-3c` is PR #182. Group 4
+      splits in four for the other reason a step splits — it closes ten
+      acceptance criteria where `change-slicing` allows three — cut by what
+      refuses a snapshot: `-4a` the transition and the checks a count and a
+      sum decide, `-4b` the checks a bound and a missing row decide, `-4c` the
+      four outcomes the unmeasured-component requirement names, `-4d`
+      retention.
       Owns no *deployed* infrastructure — the production Postgres service, the
       schedule and the failure alert are Task 7's, and none of them gates it.
 - [ ] **Task 7** — the whole deployment: Docker image, compose (`app` +
       `postgres`, bundle on a volume both mount), the snapshot job's entry in
       the VPS's existing crontab, the failure alert, and the deploy workflow.
+      That crontab entry also has to refuse a second run while one is in
+      flight, which `tasks/task-7.md` states with the case behind it.
       Open decisions: registry GHCR or Docker Hub, same VPS or a new one, and
       who terminates TLS. Follows Phase 3, because a deploy sized to the static
       bundle alone is a container, a compose file and a workflow that the

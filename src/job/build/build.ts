@@ -7,13 +7,16 @@
  * database the ingest filled, so a build runs with every other network call
  * refusing.
  *
- * The snapshot is left at `status = 'building'`. Validation, the transition
- * to `published` or `failed`, and retention are the next group's; this one
- * returns the row's id so both outcomes have something to name.
+ * The snapshot ends at `published` or at `failed`, never at `building`: the
+ * row passes through that state while the statistics are written, and the
+ * validation below decides which of the two it settles at. Retention is the
+ * next group's. The row's id is returned so both outcomes have something to
+ * name.
  */
 import type { SQL } from "bun";
 import { isMeasured, prior, wholeDays, wrOf } from "./blend.ts";
 import { type Prior, priorKey, type Staging, snapshotRows } from "./rows.ts";
+import { invalidReason } from "./validate.ts";
 
 /**
  * Build a snapshot of `patchId` as of `at`, and return its `snapshot_id`.
@@ -74,9 +77,10 @@ export async function buildSnapshot(
 	} catch (error) {
 		// `building` is a state a snapshot passes through, never one it is left
 		// in, and the row above was written outside the transaction for exactly
-		// this: what rolls back is the statistics, and the row survives to be
-		// marked. Validation and the transition to `published` are the next
-		// group's; this is only the half that has to happen before it.
+		// this: what rolls back is the statistics *and the status the same
+		// transaction settles*, and the row survives to be marked. This is the
+		// `failed` a raise reaches; the one inside `write` is the `failed` a
+		// validation reaches, and they are not the same path.
 		try {
 			await sql`UPDATE snapshots SET status = 'failed'
 				WHERE snapshot_id = ${snapshotId}`;
@@ -89,7 +93,29 @@ export async function buildSnapshot(
 	return snapshotId;
 }
 
-/** Compute one snapshot's rows and insert them, or write nothing at all. */
+/**
+ * How many hero rows the newest published snapshot holds, and 0 where none
+ * has ever published.
+ *
+ * 0 rather than an absence, because the check it feeds is a floor: with no
+ * published snapshot there is no count to fall below, and a first snapshot
+ * that could never publish would leave every later one comparing against
+ * nothing forever.
+ */
+async function publishedHeroes(sql: SQL): Promise<number> {
+	const [row] = await sql`SELECT count(*)::int AS heroes FROM hero_stats
+		WHERE snapshot_id = (SELECT snapshot_id FROM snapshots
+			WHERE status = 'published' ORDER BY snapshot_id DESC LIMIT 1)`;
+	return row.heroes;
+}
+
+/**
+ * Compute one snapshot's rows, insert them, and settle its status — the
+ * insert and the settling in one transaction, so no snapshot is left at
+ * `building` with its statistics committed beside it. Validation reads the
+ * rows rather than the database they are about to go into, which is what lets
+ * the verdict be known before the transaction opens.
+ */
 async function write(
 	sql: SQL,
 	snapshotId: number,
@@ -101,6 +127,12 @@ async function write(
 		weight,
 		wrOld: await previousWinrates(sql, priorPatchId),
 	});
+	// Read while this snapshot is still `building`, so the count is what was
+	// newest before this build — and stays that way if the checks refuse.
+	// ponytail: the reason is decided and dropped. Nothing carries it because
+	// nothing reads it yet; a column on `snapshots`, or a line the entry point
+	// logs, arrives when group 12 has to report why a run produced no bundle.
+	const invalid = invalidReason(rows, await publishedHeroes(sql));
 
 	await sql.begin(async (tx) => {
 		// `snapshot_id` added here, being the one field `rows.ts` cannot know.
@@ -116,6 +148,12 @@ async function write(
 			await tx`INSERT INTO hero_matchups ${tx(of(rows.matchups))}`;
 		if (rows.synergies.length > 0)
 			await tx`INSERT INTO hero_synergies ${tx(of(rows.synergies))}`;
+		// Inside, so that the statistics and the verdict over them commit
+		// together: a connection lost between the two would otherwise leave a
+		// snapshot at `building` that nothing afterwards has cause to mark.
+		await tx`UPDATE snapshots SET status =
+				${invalid === undefined ? "published" : "failed"}
+			WHERE snapshot_id = ${snapshotId}`;
 	});
 }
 

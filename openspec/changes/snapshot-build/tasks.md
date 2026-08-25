@@ -74,9 +74,9 @@ keeps running on the committed fixture until group 8 rewires the route.
       side deltas standing and zeroes phase alone, so a verdict taken once
       per snapshot rather than per component fails [61]. The verdict is all
       this group can assert: each of the four names a `published` or `failed`
-      outcome, which group 4 owns, so the four criteria stay uncited until 4.1
-      reaches them. (Req: snapshot-build — An unmeasured component is zero for
-      every hero)
+      outcome, which group 4 owns, so the four criteria stay uncited until
+      4.1b and 4.2b reach them. (Req: snapshot-build — An unmeasured component
+      is zero for every hero)
 - [x] 2.6 Implement the per-component measured/unmeasured decision, taken
       once for the whole snapshot from whether staging holds any row for the
       component. The zero to write is stated in that predicate's contract
@@ -177,32 +177,58 @@ measured 801 lines against a budget that fails at 800.
 
 ## 4. Lifecycle, validation and retention
 
-- [ ] 4.1 Write the lifecycle tests: a build satisfying every check ends
-      `published` and newest [16]; the first snapshot ever built publishes
-      with no earlier one to compare hero counts against [15]; a failed
-      validation leaves the previously published snapshot newest [24]; and the
-      outcome each of [58], [59], [60] and [61] names, group 2 having asserted
-      only the verdict behind them. (Req: snapshot-build — A snapshot is
-      published only after it validates / An unmeasured component is zero for
-      every hero)
-- [ ] 4.2 Write the validation boundary tests: a hero count equal to the last
-      published passes and one below fails [18]; shares within 1e-6 pass and
-      0.8 fails [19]; an `adj` of exactly ±25 pp passes and beyond fails
-      [20]; a hero the reference tables know but staging never picked has no
-      position rows and still passes [47]. (Req: snapshot-build — A snapshot
-      is published only after it validates)
+Four pull requests, `feat/snapshot-build-4a` through `-4d`: as one step the
+group closes ten acceptance criteria, and `change-slicing` splits a step that
+would close four or more. The cut is by what refuses a snapshot, each check
+being reached by its own staging and read by its own cases. 4a is the
+transition and the two checks a count and a sum decide, 4b the two a bound and
+a missing row decide, 4c the four outcomes *An unmeasured component is zero
+for every hero* names — assertions over what 4a and 4b already do — and 4d
+retention, which is a requirement of its own with no validation in it.
+
+- [x] 4.1a Write the lifecycle tests: the first snapshot ever built publishes
+      with no earlier one to compare hero counts against [15]; a build
+      satisfying every check publishes and is newest [16]; a failed validation
+      leaves the previously published snapshot newest [24]; and the count that
+      refusal rests on comes from the newest *published* snapshot and from no
+      other, so neither a failed snapshot's rows nor a reversed ordering can
+      supply it [88]. The hero count is what refuses [24]: shares are
+      normalised from a hero's own picks, so no staging the schema admits
+      produces a hero whose shares sum to anything but 1, and the sum the
+      criterion names is asserted on rows handed to the check directly
+      instead. (Req: snapshot-build — A snapshot is published only after it
+      validates)
+- [ ] 4.1b Write the outcome tests each of [58], [60] and [61] names, group 2
+      having asserted only the verdict behind them. (Req: snapshot-build — An
+      unmeasured component is zero for every hero)
+- [x] 4.2a Write the boundary tests for the two checks 4a implements: a hero
+      count equal to the last published passes and one below fails [18];
+      shares within 1e-6 pass and 0.8 fails [19]. Both are read without a
+      database, the boundaries being a count and a sum no staging fixture
+      hits exactly. (Req: snapshot-build — A snapshot is published only after
+      it validates)
+- [ ] 4.2b Write the boundary tests for the two checks 4b implements: an
+      `adj` of exactly ±25 pp passes and beyond fails [20]; a hero the
+      reference tables know but staging never picked has no position rows and
+      still passes [47]; staging holding side rows for every hero but one
+      fails validation [59]. (Req: snapshot-build — A snapshot is published
+      only after it validates / An unmeasured component is zero for every
+      hero)
 - [ ] 4.3 Write the retention tests: a thirty-first snapshot leaves 30 rows,
       removes the oldest by `snapshot_id`, and leaves no orphan statistics
       row [17]; 30 snapshots built inside one day still leave the previous
       patch's newest published one, whose `wr_old` the prior still weighs
       [48]. (Req: snapshot-build — Snapshot retention)
-- [ ] 4.4 Implement the `published` transition and the three validation
-      checks before it, plus the fourth that fails a measured component
-      staging holds no row for on some hero. The `failed` a *raise* reaches is
-      3b's, with [23] and the stub that produces it; what remains here is the
-      `failed` a validation reaches. (Req:
-      snapshot-build — A snapshot is published only after it validates / An
-      unmeasured component is zero for every hero)
+- [x] 4.4a Implement the `published` transition and the two checks a count
+      and a sum decide before it: the hero count against the newest published
+      snapshot, and each hero's position shares against its own rows. The
+      `failed` a *raise* reaches is 3b's, with [23] and the stub that produces
+      it; what starts here is the `failed` a validation reaches. (Req:
+      snapshot-build — A snapshot is published only after it validates)
+- [ ] 4.4b Implement the remaining two checks: every stored `adj` within its
+      bound, and a measured component staging holds no row for on some hero.
+      (Req: snapshot-build — A snapshot is published only after it validates /
+      An unmeasured component is zero for every hero)
 - [ ] 4.5 Implement retention as a cascade from `snapshots`, so no statistics
       row can outlive its snapshot, exempting from the count the newest
       published snapshot of any patch a blend may still read `wr_old` from.
