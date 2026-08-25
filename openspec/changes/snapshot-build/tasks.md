@@ -129,7 +129,10 @@ accordingly ships before 3.1 and 3.2, which are 3b's.
       `wr_old` reaches the blend from the previous snapshot, so a pair key the
       writer and the reader spell differently fails [82], and a side's does
       too, staging holding side and phase rows here although no pull fills
-      them [83]. (Req: snapshot-build
+      them [83]; a build that raises after creating its row leaves that row
+      `failed` rather than `building` [23], reached through a stub because no
+      staging row the schema admits can make the statistics write fail. (Req:
+      snapshot-build
       — The build reads its own database and nothing else / Patch blending
       with a decaying prior)
 - [x] 3.2 Write the symmetry tests: `(a,b)` and `(b,a)` matchup rows carry
@@ -148,8 +151,7 @@ accordingly ships before 3.1 and 3.2, which are 3b's.
 
 - [ ] 4.1 Write the lifecycle tests: a build satisfying every check ends
       `published` and newest [16]; the first snapshot ever built publishes
-      with no earlier one to compare hero counts against [15]; a build
-      raising before validation never leaves `published` [23]; a failed
+      with no earlier one to compare hero counts against [15]; a failed
       validation leaves the previously published snapshot newest [24]; and the
       outcome each of [58], [59], [60] and [61] names, group 2 having asserted
       only the verdict behind them. (Req: snapshot-build — A snapshot is
@@ -166,9 +168,11 @@ accordingly ships before 3.1 and 3.2, which are 3b's.
       row [17]; 30 snapshots built inside one day still leave the previous
       patch's newest published one, whose `wr_old` the prior still weighs
       [48]. (Req: snapshot-build — Snapshot retention)
-- [ ] 4.4 Implement the `building` → `published` | `failed` transitions and
-      the three validation checks between the last two, plus the fourth that
-      fails a measured component staging holds no row for on some hero. (Req:
+- [ ] 4.4 Implement the `published` transition and the three validation
+      checks before it, plus the fourth that fails a measured component
+      staging holds no row for on some hero. The `failed` a *raise* reaches is
+      3b's, with [23] and the stub that produces it; what remains here is the
+      `failed` a validation reaches. (Req:
       snapshot-build — A snapshot is published only after it validates / An
       unmeasured component is zero for every hero)
 - [ ] 4.5 Implement retention as a cascade from `snapshots`, so no statistics

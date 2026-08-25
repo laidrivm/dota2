@@ -57,6 +57,34 @@ export async function buildSnapshot(
 		RETURNING snapshot_id`;
 	const snapshotId = Number(created.snapshot_id);
 
+	try {
+		await write(sql, snapshotId, patchId, weight, priorPatchId);
+	} catch (error) {
+		// `building` is a state a snapshot passes through, never one it is left
+		// in, and the row above was written outside the transaction for exactly
+		// this: what rolls back is the statistics, and the row survives to be
+		// marked. Validation and the transition to `published` are the next
+		// group's; this is only the half that has to happen before it.
+		try {
+			await sql`UPDATE snapshots SET status = 'failed'
+				WHERE snapshot_id = ${snapshotId}`;
+		} catch {
+			// Swallowed as `db.ts` swallows its own close: what the caller needs
+			// is why the build raised, not why the marking afterwards did not.
+		}
+		throw error;
+	}
+	return snapshotId;
+}
+
+/** Compute one snapshot's rows and insert them, or write nothing at all. */
+async function write(
+	sql: SQL,
+	snapshotId: number,
+	patchId: string,
+	weight: number,
+	priorPatchId: string | null,
+): Promise<void> {
 	const staging = await read(sql, patchId);
 	const rows = snapshotRows(staging, {
 		weight,
@@ -78,8 +106,6 @@ export async function buildSnapshot(
 		if (rows.synergies.length > 0)
 			await tx`INSERT INTO hero_synergies ${tx(of(rows.synergies))}`;
 	});
-
-	return snapshotId;
 }
 
 /**

@@ -100,6 +100,24 @@ async function stage(sql: SQL, patchId: string, wins = 500): Promise<void> {
 			(${patchId}, ${OTHER}, 'last', 200, 100)`;
 }
 
+/**
+ * The same connection with its statistics write refusing.
+ *
+ * A stub, because no staging row the schema admits can make that write fail:
+ * every CHECK and foreign key on the four output tables is mirrored on the
+ * staging table it is read from, so the raise this case is about has no data
+ * that produces it.
+ */
+const refusing = (sql: SQL): SQL =>
+	new Proxy(sql, {
+		get(target, key) {
+			if (key === "begin")
+				return () => Promise.reject(new Error("the statistics write refused"));
+			const held = Reflect.get(target, key);
+			return typeof held === "function" ? held.bind(target) : held;
+		},
+	});
+
 /** Every statistics row of one snapshot, ordered, without its own id. */
 const statsOf = async (sql: SQL, id: number) => ({
 	positions: await sql`SELECT hero_id, position, matches, pick_share, meta_adj,
@@ -211,6 +229,22 @@ describe.skipIf(url === undefined)("what a build produces", () => {
 		// Phase is staged unchanged, so its own matches carry it — a component
 		// measured at all is not zeroed.
 		expect(row.phase_adj_1).toBeGreaterThan(0);
+	});
+
+	// spec: snapshot-build/the-build-throws-part-way
+	test("a build that raises leaves its snapshot failed, never building [23]", async () => {
+		const sql = await seeded(clean);
+		await stage(sql, NEW_PATCH);
+
+		await buildSnapshot(refusing(sql), NEW_PATCH, BUILT_AT).then(
+			() => expect.unreachable(),
+			(error: Error) => expect(error.message).toContain("refused"),
+		);
+
+		const held = await sql`SELECT status FROM snapshots
+			WHERE patch_id = ${NEW_PATCH}`;
+		expect(held).toHaveLength(1);
+		expect(held[0].status).toBe("failed");
 	});
 
 	// spec: snapshot-build/the-predecessor-a-blend-reads
