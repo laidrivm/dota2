@@ -132,7 +132,7 @@ async function write(
 	// ponytail: the reason is decided and dropped. Nothing carries it because
 	// nothing reads it yet; a column on `snapshots`, or a line the entry point
 	// logs, arrives when group 12 has to report why a run produced no bundle.
-	const invalid = invalidReason(rows, await publishedHeroes(sql));
+	const invalid = invalidReason(rows, staging, await publishedHeroes(sql));
 
 	await sql.begin(async (tx) => {
 		// `snapshot_id` added here, being the one field `rows.ts` cannot know.

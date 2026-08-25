@@ -96,6 +96,24 @@ describe.skipIf(url === undefined)("where a build's snapshot ends up", () => {
 		expect(await newestPublished(sql)).toBe(published);
 	});
 
+	// spec: snapshot-build/a-hero-nobody-played
+	test("a hero staging never picked writes no rows and still publishes [47]", async () => {
+		const sql = await seeded(clean);
+		// A third hero in the reference tables that `stage` leaves out, which is
+		// a hero the window never saw rather than a distribution with a hole:
+		// it has no shares to sum, so the check has nothing to refuse.
+		await sql`INSERT INTO heroes (hero_id, name, short_name, icon, first_seen_at)
+			VALUES (9000, 'H9000', 'h9000', '/icons/h9000.png', now())`;
+		await stage(sql, NEW_PATCH);
+
+		const built = await buildSnapshot(sql, NEW_PATCH, BUILT_AT);
+
+		expect(await statusOf(sql, built)).toBe("published");
+		const unplayed = await sql`SELECT hero_id FROM hero_position_stats
+			WHERE snapshot_id = ${built} AND hero_id = 9000`;
+		expect(unplayed).toHaveLength(0);
+	});
+
 	test("the count comes from the newest published snapshot alone [88]", async () => {
 		const sql = await seeded(clean);
 		// An older published snapshot holding one hero, a newer one holding

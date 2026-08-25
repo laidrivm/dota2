@@ -11,7 +11,7 @@
  * carries no record of which check refused it, and the string is what a test
  * asserts instead of re-deriving the arithmetic.
  */
-import type { SnapshotRows } from "./rows.ts";
+import type { HeroRow, SnapshotRows, SplitRow, Staging } from "./rows.ts";
 
 /**
  * How far a hero's position shares may sum from 1 and still be a
@@ -22,15 +22,29 @@ import type { SnapshotRows } from "./rows.ts";
 const SHARE_TOLERANCE = 1e-6;
 
 /**
+ * How far from neutral a stored delta may lie, in percentage points. A
+ * blended, smoothed winrate cannot reach 25 points off 50 from any sample
+ * the arithmetic accepts, so a delta beyond it is a defect upstream rather
+ * than an extreme patch.
+ */
+const ADJ_BOUND = 25;
+
+/**
  * Why this snapshot may not publish, or `undefined` where every check passes.
  *
  * `publishedHeroes` is the hero count of the newest published snapshot, and 0
  * where none has ever published — which is why the first snapshot ever built
  * passes a check it has nothing to compare against, rather than being held
  * back forever by a comparison that can never be satisfied.
+ *
+ * `staging` is here for the last check alone: whether a component measured
+ * some heroes and not others is a fact about the rows that were read, and the
+ * rows that were written record it as a 0 indistinguishable from a measured
+ * neutral one.
  */
 export function invalidReason(
 	rows: SnapshotRows,
+	staging: Staging,
 	publishedHeroes: number,
 ): string | undefined {
 	if (rows.heroes.length < publishedHeroes)
@@ -50,5 +64,65 @@ export function invalidReason(
 		if (!(Math.abs(sum - 1) <= SHARE_TOLERANCE))
 			return `hero ${heroId}'s position shares sum to ${sum}`;
 
+	// Every table, because every one of them stores a delta, and the check is
+	// on the value rather than on which statistic produced it.
+	const written = [
+		...rows.positions,
+		...rows.heroes,
+		...rows.matchups,
+		...rows.synergies,
+	];
+	for (const row of written) {
+		const beyond = beyondBound(row);
+		if (beyond !== undefined) return `${beyond} on hero ${row.hero_id}`;
+	}
+
+	return (
+		partial("side", staging.sides, staging.heroes) ??
+		partial("phase", staging.phases, staging.heroes)
+	);
+}
+
+/** The first delta on this row that lies outside the bound, named. */
+function beyondBound(row: { [column: string]: unknown }): string | undefined {
+	// `includes`, not `endsWith`: five of the eight delta columns carry the
+	// token in the middle — `side_adj_radiant`, `phase_adj_1` — so a suffix
+	// test would check three of them and pass the rest without looking. The
+	// token is the schema's own mark for a stored delta (`schema.sql`
+	// §*Every table below*), so a column added under that convention is
+	// checked by being named as the convention requires.
+	for (const [column, value] of Object.entries(row))
+		if (column.includes("_adj") && typeof value === "number")
+			if (!(Math.abs(value) <= ADJ_BOUND))
+				// A refused pass rather than a detected failure, so a delta that is
+				// not a number fails here instead of comparing false and publishing.
+				return `${column} of ${value} lies beyond ±${ADJ_BOUND}`;
+	return undefined;
+}
+
+/**
+ * Whether a component measured some heroes and not others, named.
+ *
+ * The parts checked are the ones staging holds rows for, never a list written
+ * here — and that is the check rather than a shortcut. A part absent for every
+ * hero is stored as 0 on every hero, which reorders nothing, exactly as an
+ * unmeasured component does; what reorders is a part present for some heroes
+ * and missing for one, whose 0 is then weighed against measured deltas. So the
+ * defect is a hole in what staging *did* measure, and an unmeasured component
+ * has no hole because it measured nothing.
+ */
+function partial(
+	component: "side" | "phase",
+	rows: readonly SplitRow[],
+	heroes: readonly HeroRow[],
+): string | undefined {
+	// An unmeasured component needs no case of its own: it holds no rows, so
+	// it names no parts, so the loop below has nothing to look for.
+	const parts = new Set(rows.map((row) => row.part));
+	const held = new Set(rows.map((row) => `${row.heroId}:${row.part}`));
+	for (const hero of heroes)
+		for (const part of parts)
+			if (!held.has(`${hero.heroId}:${part}`))
+				return `${component} is measured but hero ${hero.heroId} has no ${part} row`;
 	return undefined;
 }

@@ -130,6 +130,15 @@ depends on the signs of the deltas involved and is not worth stating — that it
 changes at all is the defect. Zeroing every hero adds the same 0 to every
 score and so reorders nothing.
 
+The same reading applies one level down, to the parts a component is measured
+over — `radiant` and `dire`, the three phases. A part staging holds for no
+hero at all is stored as 0 on every hero row, which reorders nothing and SHALL
+publish; a part staging holds for some heroes and not others SHALL fail, for
+the reason a component held for some heroes and not others does. So the parts
+a snapshot is checked over SHALL be the parts staging holds rows for, never a
+list the check carries: a list would refuse the first case as though it were
+the second.
+
 #### Scenario: Neither component measured
 
 - **WHEN** staging holds no side rows and no phase rows at all
@@ -148,6 +157,14 @@ score and so reorders nothing.
 - **IF** staging holds rows for a component on every hero but one, whichever
   component it is
 - **THEN** the snapshot SHALL end at `status = 'failed'`
+
+#### Scenario: A part the component never measured
+
+- **WHEN** staging holds a `radiant` side row for every hero and no `dire` row
+  for any
+- **THEN** the snapshot SHALL publish, `side_adj_dire` standing at 0 on every
+  hero row — a part missing throughout is the unmeasured case at part
+  granularity, and only a part missing for some heroes reorders them
 
 #### Scenario: The verdict outlives the build that took it
 
