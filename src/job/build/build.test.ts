@@ -32,7 +32,7 @@ const NEW_PATCH = "z9.41";
 const BUILT_AT = new Date("2026-08-02T03:00:00.000Z");
 
 /** A connection holding both patches and both heroes, and nothing else. */
-async function seeded(clean: () => Promise<SQL>): Promise<SQL> {
+async function seeded(): Promise<SQL> {
 	const sql = await clean();
 	for (const heroId of [HERO, OTHER])
 		await sql`INSERT INTO heroes (hero_id, name, short_name, icon, first_seen_at)
@@ -136,7 +136,7 @@ const statsOf = async (sql: SQL, id: number) => ({
 describe.skipIf(url === undefined)("what a build produces", () => {
 	// spec: snapshot-build/same-inputs-same-snapshot
 	test("two builds over one staging and one instant agree field by field [25]", async () => {
-		const sql = await seeded(clean);
+		const sql = await seeded();
 		await stage(sql, NEW_PATCH);
 		const first = await buildSnapshot(sql, NEW_PATCH, BUILT_AT);
 
@@ -152,7 +152,7 @@ describe.skipIf(url === undefined)("what a build produces", () => {
 
 	// spec: snapshot-build/the-build-reaches-for-the-network
 	test("a build completes with every call but its database refusing [26]", async () => {
-		const sql = await seeded(clean);
+		const sql = await seeded();
 		await stage(sql, NEW_PATCH);
 		const fetched = globalThis.fetch;
 		globalThis.fetch = (() => {
@@ -167,19 +167,22 @@ describe.skipIf(url === undefined)("what a build produces", () => {
 	});
 
 	test("a patch nothing was staged for writes no statistics rows [81]", async () => {
-		const sql = await seeded(clean);
+		const sql = await seeded();
 
 		const built = await buildSnapshot(sql, NEW_PATCH, BUILT_AT);
 
 		// Four guards stand between here and an insert whose column list is
-		// built from an empty array, which is not SQL.
-		expect(
-			await sql`SELECT * FROM hero_position_stats WHERE snapshot_id = ${built}`,
-		).toHaveLength(0);
+		// built from an empty array, which is not SQL — so all four tables are
+		// read, not the one the first guard covers.
+		const written = await statsOf(sql, built);
+		expect(written.positions).toHaveLength(0);
+		expect(written.heroes).toHaveLength(0);
+		expect(written.matchups).toHaveLength(0);
+		expect(written.synergies).toHaveLength(0);
 	});
 
 	test("a matchup's wr_old reaches the blend from the previous snapshot [82]", async () => {
-		const sql = await seeded(clean);
+		const sql = await seeded();
 		await stage(sql, OLD_PATCH, 500);
 		// The old patch's own pair rows say hero 1 wins six of ten, so its
 		// published snapshot carries a positive advantage for the pair.
@@ -204,7 +207,7 @@ describe.skipIf(url === undefined)("what a build produces", () => {
 	});
 
 	test("a side's wr_old reaches the blend from the previous snapshot [83]", async () => {
-		const sql = await seeded(clean);
+		const sql = await seeded();
 		await stage(sql, OLD_PATCH, 500);
 		// The old patch staged hero 1 at six of ten on radiant, so its published
 		// snapshot carries a positive radiant delta.
@@ -233,7 +236,7 @@ describe.skipIf(url === undefined)("what a build produces", () => {
 
 	// spec: snapshot-build/the-build-throws-part-way
 	test("a build that raises leaves its snapshot failed, never building [23]", async () => {
-		const sql = await seeded(clean);
+		const sql = await seeded();
 		await stage(sql, NEW_PATCH);
 
 		await buildSnapshot(refusing(sql), NEW_PATCH, BUILT_AT).then(
@@ -249,7 +252,7 @@ describe.skipIf(url === undefined)("what a build produces", () => {
 
 	// spec: snapshot-build/the-predecessor-a-blend-reads
 	test("a blend reads the predecessor's newest published snapshot [51]", async () => {
-		const sql = await seeded(clean);
+		const sql = await seeded();
 		// Three snapshots of the old patch, in this order: a published one at a
 		// losing winrate, a published one at a winning winrate, and a `building`
 		// one back at the losing rate. Only the middle one may be read, so the
@@ -290,7 +293,7 @@ describe.skipIf(url === undefined)("the prior a snapshot records", () => {
 
 	// spec: snapshot-build/no-previous-patch-to-blend
 	test("the oldest patch records no prior and no weight [68]", async () => {
-		const sql = await seeded(clean);
+		const sql = await seeded();
 		await stage(sql, OLD_PATCH);
 
 		expect(
@@ -299,7 +302,7 @@ describe.skipIf(url === undefined)("the prior a snapshot records", () => {
 	});
 
 	test("a prior decayed to 0 records no prior patch either [69]", async () => {
-		const sql = await seeded(clean);
+		const sql = await seeded();
 		await stage(sql, NEW_PATCH);
 
 		// Four days into a major patch is where the previous one stops
@@ -311,7 +314,7 @@ describe.skipIf(url === undefined)("the prior a snapshot records", () => {
 	});
 
 	test("a predecessor that never published leaves the blend alone [70]", async () => {
-		const sql = await seeded(clean);
+		const sql = await seeded();
 		await stage(sql, OLD_PATCH, 900);
 		const failed = await buildSnapshot(
 			sql,
@@ -332,7 +335,7 @@ describe.skipIf(url === undefined)("the prior a snapshot records", () => {
 	});
 
 	test("a patch no row holds is refused by name [71]", async () => {
-		const sql = await seeded(clean);
+		const sql = await seeded();
 
 		await buildSnapshot(sql, "z9.99", BUILT_AT).then(
 			() => expect.unreachable(),
@@ -344,7 +347,7 @@ describe.skipIf(url === undefined)("the prior a snapshot records", () => {
 describe.skipIf(url === undefined)("the symmetry a pair is stored with", () => {
 	/** One snapshot over the staging both cases below read. */
 	const built = async () => {
-		const sql = await seeded(clean);
+		const sql = await seeded();
 		await stage(sql, NEW_PATCH);
 		return [sql, await buildSnapshot(sql, NEW_PATCH, BUILT_AT)] as const;
 	};
