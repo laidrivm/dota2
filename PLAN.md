@@ -124,8 +124,9 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       reads the schema and staging 3b creates and fills, which 3b's merged
       groups now do, so what remains is that it precedes 3b's group 12.
       Eight task groups, so `feat/snapshot-build-1` through `-8`, in order;
-      groups 1 and 2, the pure arithmetic, are PRs #177 and #178 and six
-      remain. Four constants are stated in `src/job/build/` and nowhere else
+      groups 1 and 2 are PRs #177 and #178, and group 3 splits in two — #179
+      is its row assembly, `-3b` the SQL edge, the group having measured 798
+      lines against a budget that fails at 800. Four constants are stated in `src/job/build/` and nowhere else
       in the repository, the data model that fixes them being gitignored: the
       decay table and the smoothing `k` values in `blend.ts`, and the two
       sufficiency thresholds in `positions.ts`.
