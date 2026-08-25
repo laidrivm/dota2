@@ -7,7 +7,7 @@
   suggestions and a win-probability estimate.
 - Stack: TypeScript on Bun, Preact, no build tool beyond Bun's bundler.
 - Run locally: `bun run dev` (see README for what it serves).
-- Run tests: `bun test`, and `bun run test:db` for the 53 that need a
+- Run tests: `bun test`, and `bun run test:db` for the 73 that need a
   database and otherwise skip.
 
 ## Code style
