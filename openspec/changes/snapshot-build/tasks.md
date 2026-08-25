@@ -59,7 +59,7 @@ keeps running on the committed fixture until group 8 rewires the route.
       before dividing when a hero's picks total zero, and emitting no row for a
       position with no picks. (Req: snapshot-build — Position shares are a
       distribution over a hero's positions)
-- [ ] 2.4 Implement the two sufficiency thresholds as one predicate per
+- [x] 2.4 Implement the two sufficiency thresholds as one predicate per
       scope, so neither can drift from its stated value. (Req: snapshot-build
       — Sufficiency thresholds decide what may be suggested)
 - [ ] 2.5 Write the unmeasured-component tests: staging holding no side and

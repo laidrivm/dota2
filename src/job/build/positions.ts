@@ -29,3 +29,18 @@ export function pickShares(rows: PositionPicks[]): Map<number, number> {
 			.map((row) => [row.position, row.matches / total]),
 	);
 }
+
+/**
+ * Whether a hero-position's sample clears the threshold a suggestion needs
+ * (data-model §4.5). The threshold lives in this predicate and nowhere else,
+ * so no second reading of it can drift from this one.
+ */
+export const positionSufficient = (nEff: number): boolean => nEff >= 500;
+
+/**
+ * Whether a hero's whole sample clears its own, higher threshold — summed
+ * over the positions it was picked on, so a hero spread thinly over five
+ * roles can qualify where no single role does.
+ */
+export const heroSufficient = (positionNEffs: number[]): boolean =>
+	positionNEffs.reduce((sum, nEff) => sum + nEff, 0) >= 1000;
