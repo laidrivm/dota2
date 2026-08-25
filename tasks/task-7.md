@@ -26,6 +26,24 @@ Facts you must respect:
   non-root `bun` user (mellon pattern).
 - Secrets (registry creds, SSH key) live in a GitHub environment, never in
   the repo; `.env.example` documents runtime variables without values.
+- **The snapshot job must not be allowed to overlap itself.** `buildSnapshot`
+  reads the newest published snapshot's hero count *before* the transaction
+  that settles its own status, so two runs in flight together can both
+  validate against the same older count: the larger publishes first, and the
+  smaller then publishes against a count nothing holds any more, leaving the
+  newest published snapshot below one already published. Every reader — the
+  export, and the next patch's blend — takes the newest published snapshot,
+  so what they read afterwards is the smaller one.
+  The build cannot close this by itself. Postgres runs READ COMMITTED here,
+  so moving the count read inside that transaction narrows the window without
+  closing it; closing it needs `pg_advisory_xact_lock` or `SERIALIZABLE` with
+  a retry, which is a concurrency model no criterion of `snapshot-build`
+  states and which the build would then own instead of the schedule. It lands
+  here because this task is where the schedule is: whatever runs the job — the
+  crontab entry, a compose service, a systemd timer — has to refuse a second
+  run while one is in flight, and the refusal has to be exercised rather than
+  assumed. Raised by CodeRabbit on PR #183 and dismissed there on exactly this
+  reasoning, so it exists in no other artefact.
 
 ## Decisions the user makes in this task (ask, don't default)
 
@@ -88,4 +106,8 @@ VPS), how to roll back (previous SHA tag), where secrets live.
 - [ ] deploy.yml: SHA-pinned actions, gha cache, sha+latest tags,
       environment-gated deploy, ssh-action vetted and pinned.
 - [ ] Registry and host decisions made explicitly by the user.
+- [ ] The snapshot job refuses to start while one of its own runs is in
+      flight, and the refusal is proven by a second run attempted against a
+      first that is still going — not by reading the schedule and concluding
+      the two cannot meet.
 - [ ] README documents deploy + rollback.

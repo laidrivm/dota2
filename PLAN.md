@@ -141,6 +141,8 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
 - [ ] **Task 7** — the whole deployment: Docker image, compose (`app` +
       `postgres`, bundle on a volume both mount), the snapshot job's entry in
       the VPS's existing crontab, the failure alert, and the deploy workflow.
+      That crontab entry also has to refuse a second run while one is in
+      flight, which `tasks/task-7.md` states with the case behind it.
       Open decisions: registry GHCR or Docker Hub, same VPS or a new one, and
       who terminates TLS. Follows Phase 3, because a deploy sized to the static
       bundle alone is a container, a compose file and a workflow that the
