@@ -171,14 +171,16 @@ describe.skipIf(url === undefined)("where a build's snapshot ends up", () => {
 		const built = await buildSnapshot(sql, NEW_PATCH, BUILT_AT);
 
 		expect(await statusOf(sql, built)).toBe("published");
-		const [moved, neutral] = await sql`SELECT hero_id, side_adj_radiant
-			FROM hero_stats WHERE snapshot_id = ${built} ORDER BY hero_id`;
+		const [moved, neutral] = await sql`SELECT * FROM hero_stats
+			WHERE snapshot_id = ${built} ORDER BY hero_id`;
 		expect([moved.hero_id, neutral.hero_id]).toEqual([HERO, OTHER]);
-		// Exactly the 0 an unmeasured component writes, and published all the
-		// same — which is why the verdict reads whether a row exists and never
-		// what it holds. The other hero's delta is what says side was measured
-		// at all; how large it is belongs to the smoothing, not to this case.
-		expect(neutral.side_adj_radiant).toBe(0);
+		// Exactly the 0 an unmeasured component writes, on both sides the
+		// fixture stages it neutral on, and published all the same — which is
+		// why the verdict reads whether a row exists and never what it holds.
+		// The other hero's delta is what says side was measured at all; how
+		// large it is belongs to the smoothing, not to this case.
+		expect(carrying([neutral], "side_adj").every((value) => value === 0)) //
+			.toBe(true);
 		expect(moved.side_adj_radiant).toBeGreaterThan(0);
 	});
 
