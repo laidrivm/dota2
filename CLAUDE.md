@@ -187,9 +187,6 @@ Rules about how work is carried out here. They do not age with the code.
   repeats at every number in its series.
 - Apply a rule the branch adds to the artefacts the branch already carries,
   before it is pushed.
-- Probe one mutation of shared state per run, never a sequence of them.
-- Take a move's evidence from the suite that needs its service, never from the
-  offline run alone.
 
 #### Safety
 

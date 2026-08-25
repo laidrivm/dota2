@@ -47,3 +47,6 @@ What counts as evidence for a claim, and what a claim may rest on.
   the event that must move it.
 - Before editing an artefact to match an observed state, confirm the state is
   the intended one.
+- Probe one mutation of shared state per run, never a sequence of them.
+- Take a move's evidence from the suite that needs its service, never from the
+  offline run alone.
