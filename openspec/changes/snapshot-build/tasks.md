@@ -48,13 +48,15 @@ keeps running on the committed fixture until group 8 rewires the route.
 - [x] 2.1 Write the share tests: a hero picked on one position gets
       `pick_share` 1 and a single row [3]; a hero picked on three gets three
       rows and none for the positions it never played [4]; a hero whose picks
-      total zero yields no rows and no division [53]. (Req:
-      snapshot-build — Position shares are a distribution over a hero's
-      positions)
+      total zero yields no rows and no division [53]; three positions whose
+      picks do not divide exactly still sum to 1 within the tolerance the
+      criterion is written to [65]. (Req: snapshot-build — Position shares are
+      a distribution over a hero's positions)
 - [x] 2.2 Write the sufficiency tests at both thresholds: a hero-position at
       `n_eff = 500` is sufficient and at 499 is not [10]; a hero summing to
-      1000 is sufficient and to 999 is not [11]. (Req: snapshot-build —
-      Sufficiency thresholds decide what may be suggested)
+      1000 is sufficient and to 999 is not [11]; a hero the window never
+      picked has no positions to sum and is not sufficient [66]. (Req:
+      snapshot-build — Sufficiency thresholds decide what may be suggested)
 - [x] 2.3 Implement the position-share normalisation, returning an empty map
       before dividing when a hero's picks total zero, and emitting no row for a
       position with no picks. (Req: snapshot-build — Position shares are a

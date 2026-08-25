@@ -31,6 +31,21 @@ describe("the share of a hero's picks each position took", () => {
 		);
 	});
 
+	test("shares over an inexact division still sum to 1 [65]", () => {
+		// Every other case here divides exactly. The criterion is written to a
+		// 1e-6 tolerance because this one cannot be.
+		const shares = pickShares([
+			{ position: 1, matches: 1 },
+			{ position: 2, matches: 1 },
+			{ position: 3, matches: 1 },
+		]);
+
+		expect(shares.size).toBe(3);
+		expect(
+			[...shares.values()].reduce((sum, share) => sum + share, 0),
+		).toBeCloseTo(1, 6);
+	});
+
 	test("a hero whose picks total zero yields no rows and no division [53]", () => {
 		expect(
 			pickShares([
@@ -58,5 +73,11 @@ describe("the sample a suggestion needs behind it", () => {
 
 	test("a hero whose positions sum to 999 is not [11]", () => {
 		expect(heroSufficient([400, 400, 199])).toBe(false);
+	});
+
+	test("a hero the window never picked has no positions to sum [66]", () => {
+		// The reference holds every hero, so this one still gets a `hero_stats`
+		// row and still has to answer.
+		expect(heroSufficient([])).toBe(false);
 	});
 });
