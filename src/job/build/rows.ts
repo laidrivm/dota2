@@ -121,10 +121,16 @@ type Pairing = { a: number; b: number; row: PairRow };
 /**
  * One row per unordered pair, read from the lower id's side.
  *
- * Both directions of a pair count the same matches — the source answers per
- * hero, so every pair comes back once from each end — which makes them one
- * statistic rather than two samples to add. The lower id's row is the one
- * read, and the mirror stands in only where it is the only row there is.
+ * Both directions of a pair count the same matches, so they are one statistic
+ * rather than two samples to add — measured over ten pairs, both matrices, in
+ * `docs/context/stratz-probe-2026-08.md` §*A pair's two directions are one
+ * statistic*: the two counts sit within about a tenth of each other while the
+ * winrates agree to a fraction of a point. Adding them would double `n_eff`
+ * and under-smooth every pair.
+ *
+ * The lower id's row is the one read — arbitrary and deterministic rather than
+ * better, the two disagreeing by at most 1.14 pp of raw winrate before
+ * smoothing. The mirror stands in only where it is the only row there is.
  */
 function pairings(rows: PairRow[]): Pairing[] {
 	const found = new Map<string, Pairing>();
