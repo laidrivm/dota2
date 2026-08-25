@@ -15,13 +15,7 @@
  */
 import type { SQL } from "bun";
 import { isMeasured, prior, wholeDays, wrOf } from "./blend.ts";
-import {
-	type Prior,
-	priorKey,
-	type SnapshotRows,
-	type Staging,
-	snapshotRows,
-} from "./rows.ts";
+import { type Prior, priorKey, type Staging, snapshotRows } from "./rows.ts";
 import { invalidReason } from "./validate.ts";
 
 /**
@@ -78,15 +72,15 @@ export async function buildSnapshot(
 		RETURNING snapshot_id`;
 	const snapshotId = Number(created.snapshot_id);
 
-	let rows: SnapshotRows;
 	try {
-		rows = await write(sql, snapshotId, staging, weight, priorPatchId);
+		await write(sql, snapshotId, staging, weight, priorPatchId);
 	} catch (error) {
 		// `building` is a state a snapshot passes through, never one it is left
 		// in, and the row above was written outside the transaction for exactly
-		// this: what rolls back is the statistics, and the row survives to be
-		// marked. This is the `failed` a raise reaches; the one below is the
-		// `failed` a validation reaches, and they are not the same path.
+		// this: what rolls back is the statistics *and the status the same
+		// transaction settles*, and the row survives to be marked. This is the
+		// `failed` a raise reaches; the one inside `write` is the `failed` a
+		// validation reaches, and they are not the same path.
 		try {
 			await sql`UPDATE snapshots SET status = 'failed'
 				WHERE snapshot_id = ${snapshotId}`;
@@ -96,22 +90,6 @@ export async function buildSnapshot(
 		}
 		throw error;
 	}
-
-	// This snapshot is still `building`, so it is not the one the count below
-	// finds — the comparison is against what was newest before this build, and
-	// stays that way if the checks refuse.
-	// ponytail: the reason is decided and dropped. Nothing carries it because
-	// nothing reads it yet; a column on `snapshots`, or a line the entry point
-	// logs, arrives when group 12 has to report why a run produced no bundle.
-	// Unguarded, unlike the marking in the catch above, and for the opposite
-	// reason: there the swallow keeps the build's own error the one that
-	// propagates, while here the marking's failure *is* the only error there
-	// is. A snapshot left at `building` by a connection that died between the
-	// statistics and this line is what retention eventually collects.
-	const invalid = invalidReason(rows, await publishedHeroes(sql));
-	await sql`UPDATE snapshots SET status =
-			${invalid === undefined ? "published" : "failed"}
-		WHERE snapshot_id = ${snapshotId}`;
 	return snapshotId;
 }
 
@@ -132,9 +110,11 @@ async function publishedHeroes(sql: SQL): Promise<number> {
 }
 
 /**
- * Compute one snapshot's rows and insert them, or write nothing at all, and
- * return what was written so validation reads the rows rather than the
- * database it just put them in.
+ * Compute one snapshot's rows, insert them, and settle its status — the
+ * insert and the settling in one transaction, so no snapshot is left at
+ * `building` with its statistics committed beside it. Validation reads the
+ * rows rather than the database they are about to go into, which is what lets
+ * the verdict be known before the transaction opens.
  */
 async function write(
 	sql: SQL,
@@ -142,11 +122,17 @@ async function write(
 	staging: Staging,
 	weight: number,
 	priorPatchId: string | null,
-): Promise<SnapshotRows> {
+): Promise<void> {
 	const rows = snapshotRows(staging, {
 		weight,
 		wrOld: await previousWinrates(sql, priorPatchId),
 	});
+	// Read while this snapshot is still `building`, so the count is what was
+	// newest before this build — and stays that way if the checks refuse.
+	// ponytail: the reason is decided and dropped. Nothing carries it because
+	// nothing reads it yet; a column on `snapshots`, or a line the entry point
+	// logs, arrives when group 12 has to report why a run produced no bundle.
+	const invalid = invalidReason(rows, await publishedHeroes(sql));
 
 	await sql.begin(async (tx) => {
 		// `snapshot_id` added here, being the one field `rows.ts` cannot know.
@@ -162,8 +148,13 @@ async function write(
 			await tx`INSERT INTO hero_matchups ${tx(of(rows.matchups))}`;
 		if (rows.synergies.length > 0)
 			await tx`INSERT INTO hero_synergies ${tx(of(rows.synergies))}`;
+		// Inside, so that the statistics and the verdict over them commit
+		// together: a connection lost between the two would otherwise leave a
+		// snapshot at `building` that nothing afterwards has cause to mark.
+		await tx`UPDATE snapshots SET status =
+				${invalid === undefined ? "published" : "failed"}
+			WHERE snapshot_id = ${snapshotId}`;
 	});
-	return rows;
 }
 
 /**
