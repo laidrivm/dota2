@@ -67,6 +67,42 @@ describe.skipIf(url === undefined)("connecting", () => {
 		expect(await table(await open(), "heroes")).toBe("heroes");
 	});
 
+	test("a snapshots table predating the verdict columns gains them [87]", async () => {
+		// Connections of this case's own, each closed before the next is taken:
+		// `opener` holds every pool it opens until the file ends, and this file
+		// already stands at what the server will hand out.
+		const before = await connect(url);
+		try {
+			// Applying the schema to a fresh database never reaches the `ALTER`s
+			// that carry these two: the same file's `CREATE` has already given
+			// the table both columns, so the statement the compatibility claim
+			// rests on is a no-op in every other case here. The table is put
+			// back into the shape it was written for.
+			await before`ALTER TABLE snapshots DROP COLUMN side_measured,
+				DROP COLUMN phase_measured`;
+			await before`INSERT INTO patches VALUES ('z9.91', 'z9.91', true, now())
+				ON CONFLICT DO NOTHING`;
+			await before`INSERT INTO snapshots
+					(created_at, patch_id, prior_patch_id, prior_weight, status)
+				VALUES (now(), 'z9.91', NULL, 0, 'published')`;
+		} finally {
+			await before.close();
+		}
+
+		const after = await connect(url);
+		try {
+			// A row written before the columns existed measured neither
+			// component, which is what the `DEFAULT false` has to say on its
+			// behalf — a backfill of `true` would offer the next build a prior
+			// nobody took.
+			const held = await after`SELECT side_measured, phase_measured
+				FROM snapshots WHERE patch_id = 'z9.91'`;
+			expect(held).toEqual([{ side_measured: false, phase_measured: false }]);
+		} finally {
+			await after.close();
+		}
+	});
+
 	/**
 	 * One row per staging table that carries both counts, each naming more wins
 	 * than matches. Written out per table rather than generated, because what

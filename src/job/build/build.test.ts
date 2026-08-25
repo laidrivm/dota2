@@ -14,6 +14,7 @@ import {
 	NEW_PATCH,
 	OLD_PATCH,
 	refusing,
+	refusingStaging,
 	seeded,
 	stage,
 	statsOf,
@@ -141,36 +142,96 @@ describe.skipIf(url === undefined)("what a build produces", () => {
 		expect(held[0].status).toBe("failed");
 	});
 
-	test("a component the predecessor never measured is no prior at all [84]", async () => {
-		/** The radiant delta this patch's own even-handed side rows produce. */
-		const built = async (measuredBefore: boolean) => {
-			const sql = await seeded(clean);
-			await stage(sql, OLD_PATCH, 500);
-			// The predecessor either measured side at exactly neutral, or did
-			// not measure it. Both leave a stored delta of 0 on every hero, so
-			// the two snapshots differ in nothing a value can tell apart.
-			await (measuredBefore
-				? sql`UPDATE staging_hero_sides SET wins = 250
-						WHERE patch_id = ${OLD_PATCH}`
-				: sql`DELETE FROM staging_hero_sides WHERE patch_id = ${OLD_PATCH}`);
-			const published = await buildSnapshot(
-				sql,
-				OLD_PATCH,
-				new Date("2026-07-02T00:00:00.000Z"),
-			);
-			await sql`UPDATE snapshots SET status = 'published'
-				WHERE snapshot_id = ${published}`;
-			// This patch stages hero 1 at six of ten on radiant.
-			await stage(sql, NEW_PATCH, 500);
-			const id = await buildSnapshot(sql, NEW_PATCH, BUILT_AT);
-			const [row] = await sql`SELECT side_adj_radiant FROM hero_stats
-				WHERE snapshot_id = ${id} AND hero_id = ${HERO}`;
-			return row.side_adj_radiant as number;
-		};
+	/**
+	 * Both components, because the verdict is read back per component: one
+	 * `if` in `previousWinrates` guards side and a second guards phase, so a
+	 * case over side alone leaves the phase branch never taken either way.
+	 * Each pair is the staging table it is decided from and a column this
+	 * patch's own rows make positive.
+	 */
+	const COMPONENTS = [
+		["sides", "side_adj_radiant"],
+		["phases", "phase_adj_1"],
+	] as const;
 
-		// Unmeasured is no reading, so this patch's own sixty per cent stands
-		// undiluted; measured-at-neutral is a reading, and pulls it down.
-		expect(await built(false)).toBeGreaterThan(await built(true));
+	// spec: snapshot-build/the-verdict-outlives-the-build-that-took-it
+	test.each(COMPONENTS)(
+		"a %s component the predecessor never measured is no prior at all [84]",
+		async (component, column) => {
+			/** The delta this patch's own rows produce for `column`. */
+			const built = async (measuredBefore: boolean) => {
+				const sql = await seeded(clean);
+				await stage(sql, OLD_PATCH, 500);
+				// The predecessor either measured the component at exactly
+				// neutral, or did not measure it. Both leave a stored delta of 0
+				// on every hero, so the two snapshots differ in nothing a value
+				// can tell apart. Neutral is written as half of each row's own
+				// matches, the two tables not being staged at one count.
+				const table = `staging_hero_${component}`;
+				await sql.unsafe(
+					measuredBefore
+						? `UPDATE ${table} SET wins = matches / 2 WHERE patch_id = $1`
+						: `DELETE FROM ${table} WHERE patch_id = $1`,
+					[OLD_PATCH],
+				);
+				const published = await buildSnapshot(
+					sql,
+					OLD_PATCH,
+					new Date("2026-07-02T00:00:00.000Z"),
+				);
+				await sql`UPDATE snapshots SET status = 'published'
+					WHERE snapshot_id = ${published}`;
+				// This patch stages hero 1 above half on both components.
+				await stage(sql, NEW_PATCH, 500);
+				const id = await buildSnapshot(sql, NEW_PATCH, BUILT_AT);
+				const [row] = await sql`SELECT side_adj_radiant, phase_adj_1
+					FROM hero_stats
+					WHERE snapshot_id = ${id} AND hero_id = ${HERO}`;
+				return row[column] as number;
+			};
+
+			// Unmeasured is no reading, so this patch's own winning rate stands
+			// undiluted; measured-at-neutral is a reading, and pulls it down.
+			expect(await built(false)).toBeGreaterThan(await built(true));
+		},
+	);
+
+	test("the verdict recorded is the components staging held [85]", async () => {
+		const sql = await seeded(clean);
+		await stage(sql, NEW_PATCH);
+		await sql`DELETE FROM staging_hero_phases WHERE patch_id = ${NEW_PATCH}`;
+
+		const half = await buildSnapshot(sql, NEW_PATCH, BUILT_AT);
+		// Nothing was staged for the old patch at all, so neither component was
+		// measured — and a build that recorded the pair the other way round, or
+		// recorded one verdict for the snapshot, disagrees with one of these.
+		const none = await buildSnapshot(sql, OLD_PATCH, BUILT_AT);
+
+		const verdicts = await sql`SELECT side_measured, phase_measured
+			FROM snapshots WHERE snapshot_id IN (${half}, ${none})
+			ORDER BY snapshot_id`;
+		expect(verdicts).toEqual([
+			{ side_measured: true, phase_measured: false },
+			{ side_measured: false, phase_measured: false },
+		]);
+	});
+
+	// spec: snapshot-build/the-staging-read-raises
+	test("a build that cannot read its staging leaves no snapshot [86]", async () => {
+		const sql = await seeded(clean);
+		await stage(sql, NEW_PATCH);
+
+		await buildSnapshot(refusingStaging(sql), NEW_PATCH, BUILT_AT).then(
+			() => expect.unreachable(),
+			(error: Error) => expect(error.message).toContain("staging read refused"),
+		);
+
+		// The verdict is written onto the row, so the staging read now comes
+		// before the insert: a run that could not read its own inputs creates no
+		// snapshot rather than one there is nothing to mark `failed` about.
+		expect(
+			await sql`SELECT snapshot_id FROM snapshots WHERE patch_id = ${NEW_PATCH}`,
+		).toHaveLength(0);
 	});
 
 	// spec: snapshot-build/the-predecessor-a-blend-reads
