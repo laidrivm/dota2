@@ -124,10 +124,11 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       reads the schema and staging 3b creates and fills, which 3b's merged
       groups now do, so what remains is that it precedes 3b's group 12.
       Eight task groups, so `feat/snapshot-build-1` through `-8`, in order;
-      group 1, the pure arithmetic, is PR #177 and seven remain. Its two
-      constant tables — the decay and the smoothing `k` values — are stated
-      in `src/job/build/blend.ts` and nowhere else in the repository, the
-      data model that fixes them being gitignored.
+      groups 1 and 2, the pure arithmetic, are PRs #177 and #178 and six
+      remain. Four constants are stated in `src/job/build/` and nowhere else
+      in the repository, the data model that fixes them being gitignored: the
+      decay table and the smoothing `k` values in `blend.ts`, and the two
+      sufficiency thresholds in `positions.ts`.
       Owns no *deployed* infrastructure — the production Postgres service, the
       schedule and the failure alert are Task 7's, and none of them gates it.
 - [ ] **Task 7** — the whole deployment: Docker image, compose (`app` +
