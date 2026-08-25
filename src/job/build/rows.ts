@@ -18,10 +18,11 @@ export type PositionRow = {
 	matches: number;
 	wins: number;
 };
+/** No winrate: `hero_stats` stores contest and the component deltas, and a
+ * hero's overall winrate is not among them. */
 export type HeroRow = {
 	heroId: number;
 	matches: number;
-	wins: number;
 	contestRate: number;
 };
 export type PairRow = {
@@ -164,6 +165,7 @@ export function snapshotRows(staging: Staging, prior: Prior): SnapshotRows {
 		(row) => row.heroId,
 	)) {
 		const shares = pickShares(rows);
+		const samples: number[] = [];
 		for (const row of rows) {
 			const pickShare = shares.get(row.position);
 			const blended = delta(
@@ -183,29 +185,30 @@ export function snapshotRows(staging: Staging, prior: Prior): SnapshotRows {
 				meta_adj: blended.adj,
 				sufficient: positionSufficient(blended.nEff),
 			});
-			nEffs.set(heroId, [...(nEffs.get(heroId) ?? []), blended.nEff]);
+			samples.push(blended.nEff);
 		}
+		nEffs.set(heroId, samples);
 	}
 
-	const byPart = (rows: SplitRow[]) =>
-		new Map(rows.map((row) => [`${row.heroId}:${row.part}`, row]));
-	const sides = byPart(staging.sides);
-	const phases = byPart(staging.phases);
-	const sideMeasured = isMeasured(staging.sides);
-	const phaseMeasured = isMeasured(staging.phases);
+	/** One component's rows, by hero and part, and whether it was measured. */
+	const component = (rows: SplitRow[]) => ({
+		measured: isMeasured(rows),
+		by: new Map(rows.map((row) => [`${row.heroId}:${row.part}`, row])),
+	});
+	const sides = component(staging.sides);
+	const phases = component(staging.phases);
 
 	const heroes = staging.heroes.map((hero) => {
 		const split = (
-			measured: boolean,
-			rows: Map<string, SplitRow>,
+			of: { measured: boolean; by: Map<string, SplitRow> },
 			statistic: "side" | "phase",
 			part: string,
 		): number => {
-			const row = rows.get(`${hero.heroId}:${part}`);
+			const row = of.by.get(`${hero.heroId}:${part}`);
 			// An unmeasured component is 0 on every hero row. A measured one this
 			// hero has no row for is written 0 as well, and validation is where
 			// the two stop being the same answer: one publishes, the other fails.
-			if (!measured || row === undefined) return 0;
+			if (!of.measured || row === undefined) return 0;
 			return (
 				delta(statistic, row.matches, row.wins, prior, hero.heroId, part)
 					?.adj ?? 0
@@ -215,11 +218,11 @@ export function snapshotRows(staging: Staging, prior: Prior): SnapshotRows {
 			hero_id: hero.heroId,
 			matches: hero.matches,
 			contest_rate: hero.contestRate,
-			side_adj_radiant: split(sideMeasured, sides, "side", "radiant"),
-			side_adj_dire: split(sideMeasured, sides, "side", "dire"),
-			phase_adj_1: split(phaseMeasured, phases, "phase", "1"),
-			phase_adj_2: split(phaseMeasured, phases, "phase", "2"),
-			phase_adj_last: split(phaseMeasured, phases, "phase", "last"),
+			side_adj_radiant: split(sides, "side", "radiant"),
+			side_adj_dire: split(sides, "side", "dire"),
+			phase_adj_1: split(phases, "phase", "1"),
+			phase_adj_2: split(phases, "phase", "2"),
+			phase_adj_last: split(phases, "phase", "last"),
 			sufficient: heroSufficient(nEffs.get(hero.heroId) ?? []),
 		};
 	});

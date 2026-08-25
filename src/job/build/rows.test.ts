@@ -20,10 +20,9 @@ const staging = (held: Partial<Staging> = {}): Staging => ({
 /** No previous patch, so every delta below is the current patch's own. */
 const alone: Prior = { weight: 0, wrOld: new Map() };
 
-const hero = (heroId: number, matches = 1000, wins = 500) => ({
+const hero = (heroId: number, matches = 1000) => ({
 	heroId,
 	matches,
-	wins,
 	contestRate: 0.2,
 });
 
