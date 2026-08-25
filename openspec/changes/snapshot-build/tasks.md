@@ -124,7 +124,10 @@ accordingly ships before 3.1 and 3.2, which are 3b's.
       records no prior patch and no weight [68];
       a prior decayed to 0 records no prior patch either [69]; a predecessor
       that never published leaves the blend to the current patch alone [70];
-      a patch no row holds is refused by name [71]. (Req: snapshot-build
+      a patch no row holds is refused by name [71]; a patch nothing was staged
+      for writes no statistics rows and does not raise [81]; a matchup's
+      `wr_old` reaches the blend from the previous snapshot, so a pair key the
+      writer and the reader spell differently fails [82]. (Req: snapshot-build
       — The build reads its own database and nothing else / Patch blending
       with a decaying prior)
 - [x] 3.2 Write the symmetry tests: `(a,b)` and `(b,a)` matchup rows carry

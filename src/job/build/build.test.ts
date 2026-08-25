@@ -123,6 +123,43 @@ describe.skipIf(url === undefined)("what a build produces", () => {
 		}
 	});
 
+	test("a patch nothing was staged for writes no statistics rows [81]", async () => {
+		const sql = await seeded(clean);
+
+		const built = await buildSnapshot(sql, NEW_PATCH, BUILT_AT);
+
+		// Four guards stand between here and an insert whose column list is
+		// built from an empty array, which is not SQL.
+		expect(
+			await sql`SELECT * FROM hero_position_stats WHERE snapshot_id = ${built}`,
+		).toEqual([]);
+	});
+
+	test("a matchup's wr_old reaches the blend from the previous snapshot [82]", async () => {
+		const sql = await seeded(clean);
+		await stage(sql, OLD_PATCH, 500);
+		// The old patch's own pair rows say hero 1 wins six of ten, so its
+		// published snapshot carries a positive advantage for the pair.
+		const published = await buildSnapshot(
+			sql,
+			OLD_PATCH,
+			new Date("2026-07-02T00:00:00.000Z"),
+		);
+		await sql`UPDATE snapshots SET status = 'published' WHERE snapshot_id = ${published}`;
+		await stage(sql, NEW_PATCH, 500);
+		// The new patch's own pair rows say exactly even, so anything the stored
+		// delta carries came from the pair key `build.ts` wrote and `rows.ts`
+		// read — a key the two spell differently leaves it at 0.
+		await sql`UPDATE staging_hero_matchups SET wins = 200, matches = 400
+			WHERE patch_id = ${NEW_PATCH}`;
+
+		const built = await buildSnapshot(sql, NEW_PATCH, BUILT_AT);
+
+		const [row] = await sql`SELECT advantage_adj FROM hero_matchups
+			WHERE snapshot_id = ${built} AND hero_id = ${HERO}`;
+		expect(row.advantage_adj).toBeGreaterThan(0);
+	});
+
 	// spec: snapshot-build/the-predecessor-a-blend-reads
 	test("a blend reads the predecessor's newest published snapshot [51]", async () => {
 		const sql = await seeded(clean);
