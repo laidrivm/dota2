@@ -31,7 +31,7 @@ keeps running on the committed fixture until group 8 rewires the route.
       window is the weighted average of both patches, so a prior dropped
       altogether and one applied undecayed each fail [63]. (Req:
       snapshot-build — Patch blending with a decaying prior)
-- [ ] 1.2 Write the smoothing tests: `n_eff = k` halves the raw delta [9];
+- [x] 1.2 Write the smoothing tests: `n_eff = k` halves the raw delta [9];
       `n_eff = k / 9` leaves a tenth of it [2]; each statistic uses its own
       `k`, so a single shared constant fails [12]. (Req: snapshot-build —
       Smoothing towards neutral by sample size)
