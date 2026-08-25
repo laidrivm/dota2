@@ -40,7 +40,7 @@ One fact lives in exactly one file; everything else links to it.
 | `src/fixtures/` | the snapshot the client is served until the pipeline publishes one |
 | `src/job/` | the nightly job's shared edge — the database connection and the schema it applies |
 | `src/job/ingest/` | the pulls, the transport that paces them, and the staging write |
-| `src/job/build/` | reserved for `snapshot-build`: turning staging into a snapshot |
+| `src/job/build/` | turning staging into a snapshot: the arithmetic, and the lifecycle around it |
 | `src/job/export/` | reserved for `snapshot-build`: writing that snapshot out |
 | `src/server/` | the HTTP server, its two route modules, and what they serve |
 | `checks/` | assertions about this repository's own artefacts — the rules, the permission policy, the commit gates |
