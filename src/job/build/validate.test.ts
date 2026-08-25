@@ -9,11 +9,8 @@ import { describe, expect, test } from "bun:test";
 import type { SnapshotRows, SplitRow, Staging } from "./rows.ts";
 import { invalidReason } from "./validate.ts";
 
-/** A hero row carrying its id and whatever the case overrides. */
-const hero = (
-	heroId: number,
-	over: Partial<SnapshotRows["heroes"][number]> = {},
-): SnapshotRows["heroes"][number] => ({
+/** A hero row carrying its id and no delta; a case spreads over what it needs. */
+const hero = (heroId: number): SnapshotRows["heroes"][number] => ({
 	hero_id: heroId,
 	matches: 0,
 	contest_rate: 0,
@@ -23,7 +20,6 @@ const hero = (
 	phase_adj_2: 0,
 	phase_adj_last: 0,
 	sufficient: false,
-	...over,
 });
 
 /** One hero's position rows, at the shares given and one position each. */
@@ -112,7 +108,7 @@ describe("what refuses a snapshot", () => {
 
 	test("a delta of exactly ±25 passes and beyond it fails [20]", () => {
 		const at = (side_adj_radiant: number) =>
-			rowsOf([hero(1, { side_adj_radiant })]);
+			rowsOf([{ ...hero(1), side_adj_radiant }]);
 		expect(reason(at(25))).toBeUndefined();
 		expect(reason(at(-25))).toBeUndefined();
 		// `side_adj_radiant` deliberately: the token sits in the middle of five
