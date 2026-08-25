@@ -129,7 +129,9 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       recording which components a snapshot measured, a widening a review
       forced and this change's one stated exception to the schema being
       `snapshot-ingest`'s. The group measured 798 lines as one step against a
-      budget that fails at 800, and 801 as two.
+      budget that fails at 800, and 801 as two. `-3c` is written and unpushed,
+      one commit on top of this branch: it owes the pre-PR sequence, from
+      `bun run diff-budget`, and that is where the next session starts.
       Owns no *deployed* infrastructure — the production Postgres service, the
       schedule and the failure alert are Task 7's, and none of them gates it.
 - [ ] **Task 7** — the whole deployment: Docker image, compose (`app` +
@@ -290,7 +292,7 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       indexed docs too, and the criterion routes every captured rule into the
       one file that costs always-on budget. `CLAUDE.md` §*Lessons learned* is
       corrected on this branch; the criterion needs a delta spec.
-- [ ] **The always-on trigger has fired.** The set is 551 lines against the
+- [ ] **The always-on trigger has fired.** The set is 555 lines against the
       ~500 `CLAUDE.md` states. The Process sublist sits at 20, its own
       threshold, and stayed there only because this session's two captured
       rules went to `docs/verification.md` rather than into it.
