@@ -23,11 +23,11 @@ requiresDatabase();
 
 const clean = cleaner();
 
-/** The snapshot the export would take, or `undefined` where none published. */
-const newestPublished = async (sql: SQL): Promise<number | undefined> => {
+/** The snapshot the export would take. Every case here has published one. */
+const newestPublished = async (sql: SQL): Promise<number> => {
 	const [row] = await sql`SELECT snapshot_id FROM snapshots
 		WHERE status = 'published' ORDER BY snapshot_id DESC LIMIT 1`;
-	return row === undefined ? undefined : Number(row.snapshot_id);
+	return Number(row.snapshot_id);
 };
 
 const statusOf = async (sql: SQL, id: number): Promise<string> => {
