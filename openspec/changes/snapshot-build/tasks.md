@@ -29,7 +29,8 @@ keeps running on the committed fixture until group 8 rewires the route.
       reading the missing value as 50 [14]; a statistic with neither matches
       nor a surviving prior yields no row at all [46]; a statistic inside the
       window is the weighted average of both patches, so a prior dropped
-      altogether and one applied undecayed each fail [63]. (Req:
+      altogether and one applied undecayed each fail [63]; `n_new = 0` against
+      a *live* prior blends to `wr_old` rather than yielding no row [64]. (Req:
       snapshot-build — Patch blending with a decaying prior)
 - [x] 1.2 Write the smoothing tests: `n_eff = k` halves the raw delta [9];
       `n_eff = k / 9` leaves a tenth of it [2]; each statistic uses its own

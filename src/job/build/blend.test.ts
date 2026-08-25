@@ -81,6 +81,15 @@ describe("the blend", () => {
 		});
 	});
 
+	test("no matches against a live prior is the previous winrate [64]", () => {
+		// The other side of the absence rule: a hero nobody has picked yet keeps
+		// the previous patch's winrate rather than losing its row.
+		expect(wrBlend(0, 50, prior("major", 0), 48)).toEqual({
+			wrBlend: 48,
+			nEff: 1000,
+		});
+	});
+
 	// spec: snapshot-build/neither-matches-nor-prior
 	test("neither matches nor a surviving prior yields no row [13] [46]", () => {
 		// Undefined rather than `NaN`: the quotient is never attempted.
