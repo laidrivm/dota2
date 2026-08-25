@@ -116,7 +116,7 @@ accordingly ships before 3.1 and 3.2, which are 3b's.
       (Req: snapshot-build — Patch blending with a decaying prior / Stored
       pair statistics carry their symmetry / An unmeasured component is zero
       for every hero)
-- [ ] 3.1 Write the determinism tests: two builds over identical staging and
+- [x] 3.1 Write the determinism tests: two builds over identical staging and
       the same build instant produce statistics rows equal field by field
       [25]; a build completes while its database answers and every *other*
       network call is stubbed to throw [26]; a blend reads `wr_old` from the
