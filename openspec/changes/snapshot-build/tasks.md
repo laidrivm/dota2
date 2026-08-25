@@ -91,17 +91,23 @@ group's first three tasks and are now `snapshot-ingest`'s group 4. They closed
 no criterion here, every group of that change writes through them, and it can
 no longer run before this one. This group takes all three as given.
 
-- [ ] 3.1 Write the determinism tests: two builds over identical staging and
+- [x] 3.1 Write the determinism tests: two builds over identical staging and
       the same build instant produce statistics rows equal field by field
       [25]; a build completes while its database answers and every *other*
       network call is stubbed to throw [26]; a blend reads `wr_old` from the
-      predecessor patch's newest published snapshot [51]. (Req: snapshot-build
-      — The build reads its own database and nothing else)
-- [ ] 3.2 Write the symmetry tests: `(a,b)` and `(b,a)` matchup rows carry
+      predecessor patch's newest published snapshot [51]; a build instant is
+      counted on the UTC timeline and a `detected_at` anchors at midnight
+      there [67]; the oldest patch records no prior patch and no weight [68];
+      a prior decayed to 0 records no prior patch either [69]; a predecessor
+      that never published leaves the blend to the current patch alone [70];
+      a patch no row holds is refused by name [71]. (Req: snapshot-build
+      — The build reads its own database and nothing else / Patch blending
+      with a decaying prior)
+- [x] 3.2 Write the symmetry tests: `(a,b)` and `(b,a)` matchup rows carry
       `advantage_adj` summing to 0 [21]; `hero_synergies` holds `(a,b)` for
       `a < b` and no mirrored row [22]. (Req: snapshot-build — Stored pair
       statistics carry their symmetry)
-- [ ] 3.3 Implement the staging read and the statistics write, taking the
+- [x] 3.3 Implement the staging read and the statistics write, taking the
       build instant as an argument, writing it to `created_at`, reading
       `wr_old` from the predecessor snapshot retention holds for that purpose,
       and writing 0 for a component 2.6 reports unmeasured. (Req:

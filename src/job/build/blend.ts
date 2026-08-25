@@ -40,6 +40,30 @@ export function prior(kind: PatchKind, t: number): number {
 	return t >= tMax ? 0 : k0 * 2 ** (-t / h);
 }
 
+/** A day on the UTC timeline, the unit `t` counts in. */
+const DAY_MS = 86_400_000;
+
+/**
+ * The whole days `prior` decays over: from the patch's `detected_at` to the
+ * build instant, both read on the UTC timeline.
+ *
+ * The column is an instant and the build instant carries an offset, so the
+ * basis has to be chosen rather than inherited. The date anchors at
+ * `00:00:00Z` and the elapsed time is counted in whole 24-hour days, rounded
+ * down; reading either end as a local date instead shifts `t` by a day, and a
+ * day is a whole half-life for a major patch.
+ */
+export const wholeDays = (detectedAt: Date, at: Date): number =>
+	Math.floor(
+		(at.getTime() -
+			Date.UTC(
+				detectedAt.getUTCFullYear(),
+				detectedAt.getUTCMonth(),
+				detectedAt.getUTCDate(),
+			)) /
+			DAY_MS,
+	);
+
 /** A blended winrate in percentage points, and the sample behind it. */
 export type Blended = { wrBlend: number; nEff: number };
 
@@ -96,6 +120,13 @@ const NEUTRAL = 50;
 export const adj = (statistic: Statistic, blend: Blended): number =>
 	((blend.wrBlend - NEUTRAL) * blend.nEff) /
 	(blend.nEff + SMOOTHING[statistic]);
+
+/**
+ * The winrate a stored delta stands for: what a blend reads as `wr_old` from
+ * the previous patch's snapshot, that snapshot holding the smoothed delta
+ * rather than the winrate it came from.
+ */
+export const wrOf = (storedAdj: number): number => storedAdj + NEUTRAL;
 
 /**
  * Whether staging measured a component — `side`, `phase` — at all: whether it
