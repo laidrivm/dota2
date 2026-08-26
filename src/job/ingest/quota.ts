@@ -41,9 +41,11 @@ export type Ceiling = { limit: number; span: number };
  * beside each is what a spent window is read from, and pacing needs only how
  * many a window admits.
  *
- * A ceiling that is not a positive number states no window — an unparseable
- * one bounds nothing, and a zero one would hold every request for ever rather
- * than pace any. `span` is `Infinity` for a name `WINDOW_MS` does not know,
+ * A ceiling that is not a positive whole number states no window. An
+ * unparseable one bounds nothing and a zero one would hold every request for
+ * ever; a fractional one is worse than either, since the count it is compared
+ * against is a length — `readyAt` would index between two instants, get
+ * `undefined`, and pace that window by nothing at all. `span` is `Infinity` for a name `WINDOW_MS` does not know,
  * which is what makes `readyAt` pass over it.
  */
 export function stated(headers: Headers): Map<string, Ceiling> {
@@ -53,7 +55,7 @@ export function stated(headers: Headers): Map<string, Ceiling> {
 		if (named?.[1] === undefined) continue;
 		const name = named[1].toLowerCase();
 		const limit = Number(value);
-		if (!Number.isFinite(limit) || limit <= 0) continue;
+		if (!Number.isInteger(limit) || limit <= 0) continue;
 		found.set(name, {
 			limit,
 			span: WINDOW_MS[name] ?? Number.POSITIVE_INFINITY,
@@ -100,7 +102,8 @@ export function readyAt(
  *
  * In place because the caller holds the list across requests: an instant
  * inside no window bounds nothing, and a list nobody pruned grows for as long
- * as the run does.
+ * as the run does. With no window of a length this client knows, the list is
+ * emptied — nothing is paced by it, so nothing is lost by dropping it.
  */
 export function prune(
 	issued: number[],
