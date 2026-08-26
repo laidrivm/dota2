@@ -171,6 +171,12 @@ async function write(
 		// build read `wr_old` from is exempt from it whatever its age.
 		// `priorPatchId` is exactly that patch, and it is NULL exactly when the
 		// prior has decayed to nothing, which is when the exemption should stop.
+		//
+		// The newest published snapshot is exempt on the same terms, and for a
+		// reason the count hides: it is taken over snapshots at any status, so
+		// a run of failing builds — whose rows stay — walks the last published
+		// one out of it, and that is the snapshot the export renders from. Two
+		// exemptions of one row each, and often the same row.
 		await tx`DELETE FROM snapshots
 			WHERE snapshot_id NOT IN (
 					SELECT snapshot_id FROM snapshots
@@ -180,6 +186,10 @@ async function write(
 					SELECT snapshot_id FROM snapshots
 					WHERE patch_id = ${priorPatchId} AND status = 'published'
 					ORDER BY snapshot_id DESC LIMIT 1
+				)
+				AND snapshot_id IS DISTINCT FROM (
+					SELECT snapshot_id FROM snapshots
+					WHERE status = 'published' ORDER BY snapshot_id DESC LIMIT 1
 				)`;
 	});
 }
