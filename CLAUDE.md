@@ -101,8 +101,9 @@ observability, causal claims — see [docs/verification.md](docs/verification.md
 Rules about this application's code. They age with it: when the code a rule
 describes is rewritten, the rule is a candidate for deletion.
 
-- Before inlining a single-caller helper, grep for the logic it duplicates
-  elsewhere.
+- Inline a single-caller helper only after grepping for the logic it duplicates
+  elsewhere, and keep one whose comment documents a decision its call site would
+  bury.
 - `src/model.ts` and `src/types.ts` never import from `src/app/**`, type-only
   imports included.
 - Gate a side effect on the reducer's result, not on the action that asked
