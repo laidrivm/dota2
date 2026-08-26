@@ -80,7 +80,9 @@ ALTER TABLE snapshots ADD COLUMN IF NOT EXISTS
 -- Every table below holds values the build has already processed: an `*_adj`
 -- field is a winrate delta in percentage points against 50, and `sufficient`
 -- is whether the sample cleared data-model §4.5's threshold. They cascade from
--- `snapshots` because retention drops all but the last thirty.
+-- `snapshots` because retention drops old snapshots and no statistics row may
+-- outlive the one it belongs to. How many are kept is `build.ts`'s, which is
+-- what enforces it; a count written again here would drift from it in silence.
 
 CREATE TABLE IF NOT EXISTS hero_position_stats (
   snapshot_id bigint NOT NULL REFERENCES snapshots ON DELETE CASCADE,

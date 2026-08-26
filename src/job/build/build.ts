@@ -19,8 +19,9 @@ import { type Prior, priorKey, type Staging, snapshotRows } from "./rows.ts";
 import { invalidReason } from "./validate.ts";
 
 /**
- * How many snapshots retention keeps, beyond the one the current blend still
- * reads `wr_old` from (data-model §3.2).
+ * How many snapshots retention keeps, beyond the two exemptions below, fixed
+ * by the criterion rather than chosen here — *Snapshot retention*, which
+ * takes it from data-model §3.2. This is the only place the number stands.
  */
 const RETAINED = 30;
 
