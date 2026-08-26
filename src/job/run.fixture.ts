@@ -26,8 +26,6 @@ export type Source = {
 	released?: string;
 	/** The whole patch list, for the cases that want none at all. */
 	patches?: unknown[];
-	/** The pair pull refusing every attempt. */
-	pairsFail?: boolean;
 	/** A meta pull the build cannot publish, `ingest.fixture.ts` §`unbeaten`. */
 	unbeaten?: boolean;
 };
