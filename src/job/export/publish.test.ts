@@ -63,7 +63,13 @@ describe("how a bundle reaches the served name", () => {
 		// neither bundle. Measured: rewriting a path leaves its inode
 		// untouched, so this is the assertion a direct write fails.
 		expect(statSync(join(dir, PUBLISHED)).ino).not.toBe(before);
-		expect((await served(dir)).snapshotId).toBe(2);
+		// The whole bundle rather than its id: what the route serves is these
+		// bytes, and a write that dropped or reshaped the rest of them would
+		// leave the id alone. Compared against the bundle *as JSON carries
+		// it*, because that is what a reader gets — JSON has no negative zero
+		// and the fixture holds several, so the object itself is not what
+		// comes back and never could be.
+		expect(await served(dir)).toEqual(JSON.parse(JSON.stringify(numbered(2))));
 	});
 
 	test("a publication that fails before its rename leaves the last one [44]", async () => {
