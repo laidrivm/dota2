@@ -916,3 +916,46 @@ Two Major dismissals were put to the user this session and both were overruled,
 each toward the more thorough option. Both dismissals rested on the task list
 assigning the work to a later group, which is the cheapest reason to find and,
 on this evidence, the weakest to act on.
+
+## 2026-08-26 — feat/snapshot-build-3c … -5c (PRs #182–#189)
+
+Eight branches through the full pre-PR sequence in one session; the lines below
+aggregate across all eight.
+
+- diff-budget: PASS on all eight — 72 to 456 lines; never over budget, and
+  never the step that changed the shape of the work this time
+- zombies: OPEN 8/8 — 16 gaps, 15 acted on (1 assigned forward to 4b)
+- warm: not run — no dependency manifest changed on any of the eight
+- ponytail-review: 8 findings, 7 acted on; 3 of the eight branches returned
+  `Lean already. Ship.`
+- triage: 5 findings, 5 acted on, over 8 runs — 3 of them defects rather than
+  maps (a NaN slipping a guard, a constant's justification that was false, a
+  restated count)
+- coderabbit-local: 26 findings over 18 passes, 26 dispositioned (17 applied,
+  8 skipped, 1 dismissal still open)
+- coderabbit: 6 findings over 4 PRs, 6 dispositioned (4 applied, 2 rejected)
+- Not run: preflight, code-review, review-order, first-five, security-review,
+  checklist
+
+Note for the ledger: `/ponytail-review` returned nothing on three branches and
+never found a defect on any — its eight findings were all shape. Two sessions
+of that and the step is a candidate for evidence-based shortening.
+
+`/triage` earned its place differently from its description: it produces no
+findings by design, yet three of its five came from the grep step over what the
+diff changes — a `NaN` that passed `Math.abs(x) > 25`, a comment claiming the
+arithmetic could not exceed a bound it can reach (38.46, measured through
+`blend.ts`), and a count restated in a file that had no business holding it.
+
+The bot found the same class of defect twice that no local step did: an
+enumeration where `CLAUDE.md:118` requires an exemption, both times in a diff
+whose adjacent comment quoted that rule. `/ponytail-review` read the second one
+and accepted it. That is three sessions running where `/coderabbit` has caught
+a scoping rule this repository states and this pipeline's local steps do not
+check.
+
+Two tests were decorative until a break exposed them: one asserting that a key
+was refused, where a second rule refused it anyway and the pattern under test
+could be weakened to anything; one asserting a UTC date, which discriminates
+only under a negative offset and never under the UTC that `bun test` starts in.
+Both were found by breaking the code rather than by reading the case.

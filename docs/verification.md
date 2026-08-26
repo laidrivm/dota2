@@ -52,3 +52,8 @@ What counts as evidence for a claim, and what a claim may rest on.
 - Probe one mutation of shared state per run, never a sequence of them.
 - Take a move's evidence from the suite that needs its service, never from the
   offline run alone.
+- Assert which rule refused, not that one did, wherever more than one rule can
+  refuse the same input.
+- Pin the environment a case needs in order to discriminate, and assert the pin
+  took — a case that fails only under some clocks or locales passes under the
+  one CI runs.
