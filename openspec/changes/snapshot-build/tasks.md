@@ -390,8 +390,15 @@ their criteria over what 5a already renders, as 4c was over 4a and 4b.
       done from outside, so a loop passes against the implementation the
       criterion refuses — which is the measurement `icons.ts` already records.
       The half of [27] group 5 left open lands here too, there being a write
-      now for a failed render not to make. (Req: snapshot-export — Publication
-      is atomic / The bundle is rendered from the newest published snapshot)
+      now for a failed render not to make. What lands is read as the whole
+      bundle rather than as its id, and against the bundle *as JSON carries
+      it*: the shipped fixture holds negative zeros, which JSON has no
+      spelling for, so the object itself never comes back. A publication into
+      a directory that does not exist creates it and reports success —
+      measured, and left alone: a volume mounted empty is the first run's
+      normal case, and the route already answers an absent directory with the
+      fixture. (Req: snapshot-export — Publication is atomic / The bundle is
+      rendered from the newest published snapshot)
 - [x] 7.2 Implement the write-then-rename publication, naming the temporary
       file so the serving route cannot mistake it for the bundle. (Req:
       snapshot-export — Publication is atomic)
