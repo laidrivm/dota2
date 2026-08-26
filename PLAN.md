@@ -204,9 +204,10 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       what a merged pull request leaves behind. Two task groups, so
       `feat/merged-branch-guard-1` and `-2`, in order — the first ships a
       module nothing calls, so the two run in one session. Proposed ahead of
-      Phase 3a, which has since archived, because that phase was eight pull
-      requests long and this is the failure that stranded four commits on
-      2026-08-19; the proposal records what was measured.
+      Phase 3a, which has since archived at the size the Done entry records,
+      because a phase that long is where this failure costs most — it is what
+      stranded four commits on 2026-08-19; the proposal records what was
+      measured.
 - [ ] **`pre-pr-sequence-gate`** — proposed,
       `openspec/changes/pre-pr-sequence-gate/`. A `Stop` hook refuses to end a
       turn that committed while a task group stands complete and the message
