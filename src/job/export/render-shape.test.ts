@@ -36,7 +36,7 @@ describe.skipIf(url === undefined)("what a rendered bundle looks like", () => {
 
 		const bundle = JSON.parse(JSON.stringify(await renderBundle(sql)));
 
-		// Walked here rather than through `checkKeys`, which the render has
+		// Walked here rather than through `checkBundle`, which the render has
 		// already run: a node that check forgets to visit is invisible to it
 		// and visible to this. Both kinds, since an id key is not camelCase.
 		const wrong = keysOf(bundle).filter(

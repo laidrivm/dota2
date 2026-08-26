@@ -366,7 +366,7 @@ their criteria over what 5a already renders, as 4c was over 4a and 4b.
       window it measures and the decay a blend applied share one clock —
       storing no column for it. (Req: snapshot-export — The stabilizing flag
       marks a settling major patch)
-- [ ] 6.4 Reach the client's validator from the export's test without
+- [x] 6.4 Reach the client's validator from the export's test without
       duplicating it, so a second copy cannot drift from the one the client
       runs, and add the runtime assertion over `SnapshotBundle`'s keys and
       value types that the validator's four fields do not reach — by hand,
