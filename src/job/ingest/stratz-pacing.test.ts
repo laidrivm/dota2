@@ -202,7 +202,10 @@ describe("the ceilings the client paces under", () => {
 	 * than by it succeeding — otherwise a run whose first request is refused
 	 * hangs every other caller for as long as the process lives.
 	 */
-	// spec: snapshot-ingest/a-window-at-its-stated-ceiling
+	// Uncited: the cold start is not a criterion but the consequence of one —
+	// a client told to pace by what the response states has nothing to pace by
+	// before the first. No scenario fixes it, and citing the ceiling scenario
+	// would claim this case closes something it does not.
 	test("a first request that fails releases the burst waiting on it", async () => {
 		const { fetch, calls } = stub([
 			json({ errors: [{ message: "no" }] }),
@@ -223,7 +226,8 @@ describe("the ceilings the client paces under", () => {
 	 * request goes out unpaced. Stated because it is the one request a client
 	 * cannot pace and a reader would otherwise call a gap.
 	 */
-	// spec: snapshot-ingest/a-window-at-its-stated-ceiling
+	// Uncited for the reason above: a response naming no window states no
+	// ceiling, and the criterion is about holding one that is stated.
 	test("a response stating no window paces nothing [103]", async () => {
 		const { fetch, calls } = stub([ok()]);
 		const query = client(fetch);

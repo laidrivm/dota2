@@ -50,6 +50,7 @@ describe("the quota verdict", () => {
 	 * wakes into a client that already knows the quota is spent, and a check
 	 * made only on the way in would let it reach the network anyway.
 	 */
+	// spec: snapshot-ingest/a-window-reports-nothing-remaining
 	test("a request already waiting is refused once a window is spent [83]", async () => {
 		const { fetch, calls } = stub([
 			limited({ "x-ratelimit-remaining-minute": "0" }),
