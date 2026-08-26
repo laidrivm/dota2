@@ -7,7 +7,7 @@
  * about what arrives.
  *
  * Which snapshot is rendered is `render.test.ts`'s; the key check itself is
- * `keys.test.ts`'s, over the shipped fixture.
+ * `contract.test.ts`'s, over the shipped fixture.
  */
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { BUILT_AT, NEW_PATCH, seeded, stage } from "../build/build.fixture.ts";
