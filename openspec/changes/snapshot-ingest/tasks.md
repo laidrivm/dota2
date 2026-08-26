@@ -16,14 +16,18 @@ rather than behaviour of their own; they are written into the tasks under the
 criterion they belong to and carry no number, because a number here promises a
 criterion and `openspec/config.yaml` is what makes that a rule.
 
-Thirteen groups on `feat/snapshot-ingest-1` … `-11c` … `-12`, in order, and at
-least that many pull requests. Each group is measured against
+Thirteen groups on `feat/snapshot-ingest-1` … `-11c` … `-12a`, `-12b`, in
+order, and at least that many pull requests. Each group is measured against
 `bun run diff-budget` when it is cut and splits again if it is over — group 11
 did, on the seam between the write and the run that fills it, shipping as
 `-11a` and `-11b`, and group 11c is the later arrival that takes their suffix
-rather than a number, so that no merged group is renumbered. The groups below
-are sized to land under the warn threshold, which is what keeps a reviewer's
-pass over any one of them short.
+rather than a number, so that no merged group is renumbered. Group 12 split on
+the seam between its two requirements, measured at 840 lines whole against a
+gate that fails at 800, and at 584 and 299 apart. The groups below
+were sized to land under the warn threshold, which is what keeps a reviewer's
+pass over any one of them short. Group 12a is the one that is not, at 584: what
+is over the threshold is its outcome suite, and cutting a suite from the code
+it covers buys a shorter pass over neither.
 
 This change owns the schema, the database edge and the CI job that exercises
 it — group 4's three tasks, moved here from `snapshot-build`, which closed no
@@ -372,7 +376,12 @@ ingest, then that change's build, then its export, so it is the one place where
 the two changes' order reverses: groups 1 to 11c land first, `snapshot-build`
 follows them, and this group closes over both.
 
-- [ ] 12.1 Write the outcome tests: all three steps succeeding exits zero and
+It ships as two pull requests, one per requirement it closes: `-12a` carries
+the entry point and its outcomes (12.1, 12.2, 12.6), `-12b` the coverage record
+the entry point writes (12.3 to 12.5). The tasks keep their numbers — the seam
+is a branch, not a renumbering, on the terms group 11's split took.
+
+- [x] 12.1 Write the outcome tests: all three steps succeeding exits zero and
       the served bundle is the one just written [56]; the failure report names
       which of the three failed [57]; a failing ingest builds no snapshot,
       leaves the previous bundle served and exits non-zero [58]; a build
@@ -381,7 +390,7 @@ follows them, and this group closes over both.
       exits non-zero [60]; the export invoked alone renders the newest
       published snapshot and exits zero with no request to the statistics API
       [61]. (Req: snapshot-ingest — The job carries a run to one outcome)
-- [ ] 12.2 Implement the entry point: ingest, then build, then export,
+- [x] 12.2 Implement the entry point: ingest, then build, then export,
       returning which step failed and exiting non-zero when one did, with the
       export — and only the export — also invocable on its own. (Req:
       snapshot-ingest — The job carries a run to one outcome)
@@ -421,6 +430,6 @@ follows them, and this group closes over both.
       returned on the row the build produced, before the export runs. (Req:
       snapshot-ingest — What a run covered is recorded on the snapshot it
       built)
-- [ ] 12.6 Write the end-to-end test: a seeded source runs ingest → build →
+- [x] 12.6 Write the end-to-end test: a seeded source runs ingest → build →
       export and the served bundle is accepted by the client's loader [62].
       (Req: snapshot-ingest — The job carries a run to one outcome)
