@@ -78,25 +78,51 @@ describe("the bundle's keys", () => {
 	});
 
 	test("an id key that is not a decimal integer string fails [34]", () => {
-		for (const [where, edit] of [
+		// Every place an id key is read, not the two easiest: the matrices are
+		// checked at both levels, and dropping either level or either matrix
+		// leaves a bundle whose keys the client looks heroes up by.
+		const places: [string, (bundle: SnapshotBundle) => void][] = [
 			[
 				"matchups",
-				(bundle: SnapshotBundle) => {
+				(bundle) => {
 					bundle.matchups.all = {};
 				},
 			],
 			[
+				"a matchup's row",
+				(bundle) => {
+					const [first] = Object.values(bundle.matchups);
+					if (first !== undefined) first.all = 0;
+				},
+			],
+			[
+				"synergies",
+				(bundle) => {
+					bundle.synergies.all = {};
+				},
+			],
+			[
+				"a synergy's row",
+				(bundle) => {
+					const [first] = Object.values(bundle.synergies);
+					if (first !== undefined) first.all = 0;
+				},
+			],
+			[
 				"a hero's positions",
-				(bundle: SnapshotBundle) => {
+				(bundle) => {
 					(bundle.heroes[0] as unknown as Record<string, unknown>).positions = {
 						mid: { share: 1, meta: 0, sufficient: true },
 					};
 				},
 			],
-		] as const)
-			expect([where, refusal(edited(edit)) !== undefined]).toEqual([
+		];
+		for (const [where, edit] of places) {
+			const said = refusal(edited(edit)) ?? "";
+			expect([
 				where,
-				true,
-			]);
+				/key (all|mid) is not a decimal integer string/.test(said),
+			]).toEqual([where, true]);
+		}
 	});
 });
