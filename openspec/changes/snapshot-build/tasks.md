@@ -281,7 +281,9 @@ their criteria over what 5a already renders, as 4c was over 4a and 4b.
 
 - [x] 5.1 Write the selection tests: with no `published` snapshot the export
       raises rather than rendering [27]; a newer `building` snapshot is not the
-      one exported [30]. Half of [27] is closed here and half is not: nothing
+      one exported [30]; and the newer of two *published* snapshots is, which
+      [30] cannot say — leaving one at `building` makes the ordering
+      unobservable [93]. Half of [27] is closed here and half is not: nothing
       in group 5 writes a file, so "writes no file" is true of it by having no
       write at all, and the non-zero exit is the entry point's answer to the
       raise — both arrive with 7.2's publication. (Req: snapshot-export — The
