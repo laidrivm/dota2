@@ -19,6 +19,7 @@ import type {
 	SnapshotBundle,
 	SynergyMatrix,
 } from "../../types.ts";
+import { prior, wholeDays } from "../build/blend.ts";
 import { checkKeys } from "./contract.ts";
 
 type HeroRow = {
@@ -104,11 +105,11 @@ export async function renderBundle(sql: SQL): Promise<SnapshotBundle> {
 			isMajor: snapshot.is_major,
 			detectedAt: utcDate(snapshot.detected_at),
 		},
-		// A working stub at the seam: the window this marks is *Patch blending
-		// with a decaying prior*'s, and group 6 computes it from the snapshot's
-		// own patch and `created_at`. `false` publishes a bundle the client
-		// accepts meanwhile, where an absent key would not.
-		stabilizing: false,
+		stabilizing: stabilizing(
+			snapshot.is_major,
+			snapshot.detected_at,
+			snapshot.created_at,
+		),
 		heroes: heroes.map((hero) => entry(hero, aliasesOf, positionsOf)),
 		// Both directions are already stored, the build having written the
 		// mirror negated, so grouping them is the whole of it.
@@ -134,6 +135,28 @@ export async function renderBundle(sql: SQL): Promise<SnapshotBundle> {
 	checkKeys(bundle);
 	return bundle;
 }
+
+/**
+ * Whether the bundle marks its patch as still settling: major, and inside the
+ * window over which the blend's prior still weighs.
+ *
+ * The window is not restated here. It is *Patch blending with a decaying
+ * prior*'s own, read through `prior`, so the flag is true exactly while the
+ * prior it stands for is still counting — a `t_max` refitted there moves this
+ * with it, where a copied 4 would quietly disagree.
+ *
+ * The kind gates the window rather than choosing a row of the decay table: a
+ * letter patch carries a prior too, and is never settling however recent.
+ *
+ * No column stores it. All three arguments are frozen when the snapshot is
+ * built, so computing it at export answers the same forever, with one fewer
+ * column that could disagree with what it derives from.
+ */
+export const stabilizing = (
+	isMajor: boolean,
+	detectedAt: Date,
+	at: Date,
+): boolean => isMajor && prior("major", wholeDays(detectedAt, at)) > 0;
 
 /**
  * The calendar date of an instant, on the UTC timeline.

@@ -361,7 +361,7 @@ their criteria over what 5a already renders, as 4c was over 4a and 4b.
       `phase` are zero on every hero renders both fields and publishes, the
       zeros surviving to the payload rather than being dropped as empty [62].
       (Req: snapshot-export — The exported bundle is what the client accepts)
-- [ ] 6.3 Implement `stabilizing` from the snapshot's own `patch.is_major`,
+- [x] 6.3 Implement `stabilizing` from the snapshot's own `patch.is_major`,
       `patch.detected_at` and `created_at` — the build instant itself, so the
       window it measures and the decay a blend applied share one clock —
       storing no column for it. (Req: snapshot-export — The stabilizing flag
