@@ -236,8 +236,10 @@ retention, which is a requirement of its own with no validation in it.
       reading the delta spec gains here — without it an exemption covering
       every patch's newest published snapshot passes both other cases; and
       thirty *failing* builds do not carry off the last published snapshot
-      [91], the count being taken over snapshots at any status. (Req:
-      snapshot-build — Snapshot retention)
+      [91], the count being taken over snapshots at any status; and two
+      patches whose priors are both still weighing each keep the snapshot
+      theirs would read, though only one of them is the patch being built
+      [92]. (Req: snapshot-build — Snapshot retention)
 - [x] 4.4a Implement the `published` transition and the two checks a count
       and a sum decide before it: the hero count against the newest published
       snapshot, and each hero's position shares against its own rows. The
@@ -254,12 +256,15 @@ retention, which is a requirement of its own with no validation in it.
 - [x] 4.5 Implement retention as a cascade from `snapshots`, so no statistics
       row can outlive its snapshot, exempting from the count the newest
       published snapshot of any patch a blend may still read `wr_old` from —
-      which is the `prior_patch_id` this build resolved, NULL exactly when the
-      prior has decayed and the exemption should stop — and the newest
-      published snapshot itself, which `snapshot-export` renders from and a run
-      of failing builds would otherwise walk out of the count. In the
-      transaction that settles the status, so a build leaves the database whole
-      or untouched.
+      which the requirement states in the plural and which is computed from the
+      decay rather than from the patch this build happens to be for — a build
+      of one patch must not carry off what a build of another would read. And
+      the newest published snapshot itself, which `snapshot-export` renders
+      from and a run of failing builds would otherwise walk out of the count.
+      In the transaction that settles the status, so a build leaves the
+      database whole or untouched; in `retention.ts`, which is where the
+      per-file cap cut it and where the count and its exemptions are one
+      decision.
       (Req: snapshot-build — Snapshot retention)
 
 ## 5. Rendering the bundle
