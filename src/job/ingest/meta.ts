@@ -13,8 +13,13 @@
 import { isHeroId } from "./heroes.ts";
 import type { Query } from "./stratz.ts";
 
-/** A UTC day. The epoch is UTC-aligned, so day arithmetic is division. */
-const DAY_MS = 86_400_000;
+/**
+ * A UTC day. The epoch is UTC-aligned, so day arithmetic is division.
+ *
+ * Exported for the entry point, which records the last day a window includes
+ * and so has to step back from the exclusive bound `MetaWindow` ends at.
+ */
+export const DAY_MS = 86_400_000;
 
 /**
  * The most days the source serves. Not a choice this module makes: `take: 200`

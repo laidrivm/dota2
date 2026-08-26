@@ -396,7 +396,7 @@ is a branch, not a renumbering, on the terms group 11's split took.
       returning which step failed and exiting non-zero when one did, with the
       export — and only the export — also invocable on its own. (Req:
       snapshot-ingest — The job carries a run to one outcome)
-- [ ] 12.3 Write the coverage tests: a run whose meta window was the patch's
+- [x] 12.3 Write the coverage tests: a run whose meta window was the patch's
       own span records that window's first and last day, that the cap did not
       bind it, and the weeks the pair pull covered [92]; a run over a patch
       live for 150 complete UTC days records that the cap bound the window and
@@ -406,29 +406,29 @@ is a branch, not a renumbering, on the terms group 11's split took.
       an export failing after the write leaves the coverage standing [100].
       (Req: snapshot-ingest — What a run covered is recorded on the snapshot
       it built)
-- [ ] 12.3a Write the cap-seam test: a patch live for exactly thirty complete
+- [x] 12.3a Write the cap-seam test: a patch live for exactly thirty complete
       UTC days records that the cap did **not** bind it [101], which [93] does
       not reach — it tests 150 days, where the two windows differ. (Req:
       snapshot-ingest — What a run covered is recorded on the snapshot it
       built)
-- [ ] 12.3b Cover two degenerate windows under [92], both of them that
+- [x] 12.3b Cover two degenerate windows under [92], both of them that
       criterion applied rather than behaviour of their own: a patch detected
       today records a window whose first and last day are the same, and a
       patch live for less than one complete week records an empty weeks list
       beside a non-empty meta window. (Req: snapshot-ingest — What a run
       covered is recorded on the snapshot it built)
-- [ ] 12.3c Extend `ingest.test.ts`'s *a run reports the window and the weeks
+- [x] 12.3c Extend `ingest.test.ts`'s *a run reports the window and the weeks
       it covered* [36], which asserts only what `ingest` returns, so that it
       also asserts the `snapshots` row carries it once the entry point has run
       — [92] again, the criterion being about the record and not the return.
       (Req: snapshot-ingest — What a run covered is recorded on the snapshot
       it built)
-- [ ] 12.4 Add the coverage columns to `snapshots` beside `prior_weight` —
+- [x] 12.4 Add the coverage columns to `snapshots` beside `prior_weight` —
       the meta window's first and last UTC day, whether the source's cap bound
       it, and the weeks the pair pull covered — all nullable, with the comment
       naming why the build cannot fill them. (Req: snapshot-ingest — What a
       run covered is recorded on the snapshot it built)
-- [ ] 12.5 Implement the write: the entry point records what the ingest
+- [x] 12.5 Implement the write: the entry point records what the ingest
       returned on the row the build produced, before the export runs. (Req:
       snapshot-ingest — What a run covered is recorded on the snapshot it
       built)

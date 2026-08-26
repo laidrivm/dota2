@@ -69,12 +69,44 @@ CREATE TABLE IF NOT EXISTS snapshots (
   -- deltas towards a number nobody measured. `false` is right for every row
   -- written before these columns existed — no pull fills either table yet.
   side_measured  boolean NOT NULL DEFAULT false,
-  phase_measured boolean NOT NULL DEFAULT false
+  phase_measured boolean NOT NULL DEFAULT false,
+  -- What the run that fed this snapshot covered, beside `prior_weight` because
+  -- it answers the same question about the same row: what this snapshot was
+  -- built from. Nullable, and every one of them: the build creates the row and
+  -- cannot fill them — what the ingest covered and which snapshot was made from
+  -- it are held together only by the entry point, which runs the two in turn.
+  -- A row therefore exists unfilled between the build and that write, and a
+  -- snapshot no entry point completed keeps the nulls without being failed for
+  -- them.
+  --
+  -- Bounds rather than a count of days and weeks, though `patch_id` and
+  -- `created_at` would appear to determine those: they determine them only
+  -- under the window arithmetic in force when the row is read, which is not
+  -- necessarily the arithmetic that produced it. `meta_last_day` is the last
+  -- day the window *includes*, not the exclusive bound it ends at.
+  --
+  -- `timestamptz` rather than `date` for all three instants, each at UTC
+  -- midnight: the driver sends a `Date` as its own `toString()`, which a `date`
+  -- column rejects as malformed (bun 1.3.14) and a `timestamptz` takes.
+  meta_first_day        timestamptz,
+  meta_last_day         timestamptz,
+  meta_capped_by_source boolean,
+  -- Every week the pair pull covered, first to last, and an empty array where
+  -- it covered none — which a patch younger than one complete week produces.
+  pair_weeks            timestamptz[]
 );
 ALTER TABLE snapshots ADD COLUMN IF NOT EXISTS
   side_measured boolean NOT NULL DEFAULT false;
 ALTER TABLE snapshots ADD COLUMN IF NOT EXISTS
   phase_measured boolean NOT NULL DEFAULT false;
+ALTER TABLE snapshots ADD COLUMN IF NOT EXISTS
+  meta_first_day timestamptz;
+ALTER TABLE snapshots ADD COLUMN IF NOT EXISTS
+  meta_last_day timestamptz;
+ALTER TABLE snapshots ADD COLUMN IF NOT EXISTS
+  meta_capped_by_source boolean;
+ALTER TABLE snapshots ADD COLUMN IF NOT EXISTS
+  pair_weeks timestamptz[];
 -- The pointer the export follows: the greatest `snapshot_id` at 'published'.
 
 -- Every table below holds values the build has already processed: an `*_adj`

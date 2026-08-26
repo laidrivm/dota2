@@ -11,10 +11,16 @@
  * previously published bundle serving: the export is the only step that
  * touches the served file, and it runs last.
  */
+import type { SQL } from "bun";
 import { buildSnapshot } from "./build/build.ts";
 import { connect, connectionString } from "./db.ts";
 import { exportSnapshot } from "./export/publish.ts";
-import { type Deps as IngestDeps, ingest } from "./ingest/ingest.ts";
+import {
+	type Covered,
+	type Deps as IngestDeps,
+	ingest,
+} from "./ingest/ingest.ts";
+import { DAY_MS } from "./ingest/meta.ts";
 import { createClient } from "./ingest/stratz.ts";
 
 /** What a run needs: what the ingest needs, and where the bundle is published. */
@@ -32,9 +38,9 @@ const failed = (step: string, error: unknown) =>
  * run over the same instant and the same source covers the same days.
  */
 export async function runJob(deps: Deps, at: Date): Promise<string | null> {
-	let patchId: string;
+	let covered: Covered;
 	try {
-		patchId = (await ingest(deps, at)).patchId;
+		covered = await ingest(deps, at);
 	} catch (error) {
 		return failed("ingest", error);
 	}
@@ -42,12 +48,24 @@ export async function runJob(deps: Deps, at: Date): Promise<string | null> {
 	let snapshotId: number;
 	let status: string;
 	try {
-		snapshotId = await buildSnapshot(deps.sql, patchId, at);
+		snapshotId = await buildSnapshot(deps.sql, covered.patchId, at);
+		// As soon as the build returns a row and whatever outcome it settled at:
+		// a build that ends `failed` is the case where the window it read is
+		// most worth having, and an export that fails after this falsifies
+		// nothing the record claims — it says what the run covered, not that a
+		// bundle shipped.
+		//
+		// Inside the build's own `try` deliberately, though the write is not
+		// the build's: a run has three steps to report and this is on the row
+		// the build just made, so a write that refuses is reported against the
+		// step that produced what it was writing about.
+		await record(deps.sql, snapshotId, covered);
 		// A build that refuses its own statistics settles the row at `failed`
 		// and returns it rather than raising, so the outcome is read off the
-		// row — inside this block, so that a read the connection refuses is
-		// reported as the step it was about rather than rejecting out of a
-		// function whose whole contract is to return a report.
+		// row — inside this block for the same reason the write is, so that a
+		// read the connection refuses is reported as the step it was about
+		// rather than rejecting out of a function whose whole contract is to
+		// return a report.
 		const [row] = await deps.sql`SELECT status FROM snapshots
 			WHERE snapshot_id = ${snapshotId}`;
 		status = row.status;
@@ -66,6 +84,32 @@ export async function runJob(deps: Deps, at: Date): Promise<string | null> {
 		return failed("export", error);
 	}
 	return null;
+}
+
+/**
+ * Record on the row the build produced what the run covered.
+ *
+ * The day recorded as last is the last day the window **includes**, where
+ * `MetaWindow` ends at the exclusive bound after it: a record read as the
+ * wrong one of the two claims a day of matches the run never pulled.
+ *
+ * The weeks are written as an array literal rather than handed over as an
+ * array, which the driver sends as its own `toString()` and Postgres rejects
+ * as malformed (bun 1.3.14). An empty list is `{}`, which is an empty array
+ * and not a null: a run that covered no week is not a run nobody recorded.
+ */
+async function record(
+	sql: SQL,
+	snapshotId: number,
+	covered: Covered,
+): Promise<void> {
+	const weeks = covered.weeks.map((week) => week.toISOString()).join(",");
+	await sql`UPDATE snapshots SET
+			meta_first_day = ${covered.window.start},
+			meta_last_day = ${new Date(covered.window.end.getTime() - DAY_MS)},
+			meta_capped_by_source = ${covered.window.cappedBySource},
+			pair_weeks = ${`{${weeks}}`}
+		WHERE snapshot_id = ${snapshotId}`;
 }
 
 /** A directory or a key a run cannot start without, or a throw naming it. */
