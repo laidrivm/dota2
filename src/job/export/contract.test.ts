@@ -1,34 +1,19 @@
 /**
- * What the key check accepts and what it refuses, read without a database.
+ * What the check accepts and what it refuses about the bundle's keys, read
+ * without a database.
  *
  * The first case is the one that keeps the rest honest: the check holds the
  * contract in a second form, and the shipped fixture is the first form made
  * concrete, so a key added to `src/types.ts` and to the fixture without a
- * line in `keys.ts` fails here rather than riding along unchecked.
+ * line in `contract.ts` fails here rather than riding along unchecked.
+ *
+ * What it refuses about the values those keys hold is `accept.test.ts`'s,
+ * where the client's own validation is the thing each refusal is read
+ * against.
  */
 import { describe, expect, test } from "bun:test";
-import rawFixture from "../../fixtures/snapshot.json" with { type: "json" };
 import type { SnapshotBundle } from "../../types.ts";
-import { checkKeys } from "./keys.ts";
-
-const fixture = rawFixture as unknown as SnapshotBundle;
-
-/** The fixture with one edit, which every refusal below is one of. */
-const edited = (edit: (bundle: SnapshotBundle) => void): SnapshotBundle => {
-	const copy = structuredClone(fixture);
-	edit(copy);
-	return copy;
-};
-
-/** What `checkKeys` said, or `undefined` where it accepted the bundle. */
-const refusal = (bundle: SnapshotBundle): string | undefined => {
-	try {
-		checkKeys(bundle);
-		return undefined;
-	} catch (error) {
-		return (error as Error).message;
-	}
-};
+import { edited, fixture, refusal } from "./contract.fixture.ts";
 
 describe("the bundle's keys", () => {
 	test("the shipped fixture passes, contract and check agreeing", () => {

@@ -8,7 +8,7 @@
  * a spelling test and mean nothing to anyone.
  *
  * This is the contract in a second form, and unavoidably so: the interfaces
- * are erased before the bundle exists. `keys.test.ts` walks the shipped
+ * are erased before the bundle exists. `contract.test.ts` walks the shipped
  * fixture through it, so a key added to the contract without a line here
  * fails rather than passing unchecked. Value types are group 6's; this is
  * keys alone.

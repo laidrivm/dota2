@@ -19,7 +19,7 @@ import type {
 	SnapshotBundle,
 	SynergyMatrix,
 } from "../../types.ts";
-import { checkKeys } from "./keys.ts";
+import { checkKeys } from "./contract.ts";
 
 type HeroRow = {
 	hero_id: number;

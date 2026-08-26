@@ -352,7 +352,7 @@ their criteria over what 5a already renders, as 4c was over 4a and 4b.
       letter patch however recent [33]; a `created_at` whose offset puts it in
       a later local date than its UTC one counts by UTC [57]. (Req:
       snapshot-export — The stabilizing flag marks a settling major patch)
-- [ ] 6.2 Write the acceptance tests: an exported bundle passes the validation
+- [x] 6.2 Write the acceptance tests: an exported bundle passes the validation
       `snapshot-delivery` specifies for a fetched payload [39]; a hero entry
       missing `side`, `phase`, `contest` or `sufficient` fails the export
       although that validation would accept it [49]; a `contest` rendered as
