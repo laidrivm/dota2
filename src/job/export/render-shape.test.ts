@@ -79,6 +79,12 @@ describe("the calendar date the bundle carries", () => {
 		process.env.TZ = "America/New_York";
 	});
 	afterAll(() => {
+		// `UTC` rather than deleting the variable where it arrived unset, and
+		// measured rather than assumed on both halves: `bun test` starts in UTC
+		// whatever the machine's zone is, so UTC is the zone to give back — and
+		// deleting `TZ` in bun 1.3.14 leaves the last value that was assigned
+		// rather than restoring the system one, so a delete here would hand the
+		// next file New York.
 		process.env.TZ = zone ?? "UTC";
 	});
 
