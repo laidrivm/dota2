@@ -45,6 +45,25 @@ describe("the quota verdict", () => {
 	});
 
 	/**
+	 * The one a sequential caller cannot reach: a second query held on the cold
+	 * start, or on a window's ceiling, while the first meets the verdict. It
+	 * wakes into a client that already knows the quota is spent, and a check
+	 * made only on the way in would let it reach the network anyway.
+	 */
+	test("a request already waiting is refused once a window is spent [83]", async () => {
+		const { fetch, calls } = stub([
+			limited({ "x-ratelimit-remaining-minute": "0" }),
+			ok(),
+		]);
+		const query = client(fetch);
+
+		const outcomes = await settle(Promise.allSettled([query(Q), query(Q)]));
+
+		expect(outcomes.every((o) => o.status === "rejected")).toBe(true);
+		expect(calls).toHaveLength(1);
+	});
+
+	/**
 	 * A header that carries no number is not a report of zero. Reading one as
 	 * zero would end a healthy run on a header the service sent empty or
 	 * unparseable — which is what a bare coercion does, since `Number("")` is 0
