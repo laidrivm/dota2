@@ -20,7 +20,7 @@ import type {
 	SynergyMatrix,
 } from "../../types.ts";
 import { prior, wholeDays } from "../build/blend.ts";
-import { checkKeys } from "./contract.ts";
+import { checkBundle } from "./contract.ts";
 
 type HeroRow = {
 	hero_id: number;
@@ -132,7 +132,7 @@ export async function renderBundle(sql: SQL): Promise<SnapshotBundle> {
 	// never reaches the caller that would publish it. The types above cannot
 	// stand in for this: they are gone by the time these objects exist, and
 	// two of them are built by `Object.fromEntries` from database rows.
-	checkKeys(bundle);
+	checkBundle(bundle);
 	return bundle;
 }
 

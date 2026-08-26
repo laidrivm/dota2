@@ -10,7 +10,7 @@
 
 import rawFixture from "../../fixtures/snapshot.json" with { type: "json" };
 import type { SnapshotBundle } from "../../types.ts";
-import { checkKeys } from "./contract.ts";
+import { checkBundle } from "./contract.ts";
 
 export const fixture = rawFixture as unknown as SnapshotBundle;
 
@@ -26,7 +26,7 @@ export const edited = (
 /** What the check said, or `undefined` where it accepted the bundle. */
 export const refusal = (bundle: SnapshotBundle): string | undefined => {
 	try {
-		checkKeys(bundle);
+		checkBundle(bundle);
 		return undefined;
 	} catch (error) {
 		return (error as Error).message;
