@@ -42,6 +42,11 @@ export const PART = `.${PUBLISHED}.part`;
  * resolves, and the next publication writes over it. What a crash leaves and
  * what a caught failure leaves are then the same thing, which is one state to
  * reason about rather than two.
+ *
+ * One publisher at a time, which nothing here checks: two runs overlapping
+ * would write the same temporary name and the second would move the first's
+ * bytes into place. The schedule is what holds that — it refuses a second run
+ * while one is in flight — and it belongs to the deployment, not here.
  */
 export async function publishBundle(
 	dir: string,
