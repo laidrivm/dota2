@@ -168,7 +168,7 @@ describe("a window with nothing left", () => {
 	 * left" for ever would suspend a run whose whole contract is to reach an
 	 * outcome and report it.
 	 */
-	// spec: snapshot-ingest/a-refillable-window-reports-nothing-remaining
+	// spec: snapshot-ingest/a-window-that-never-turns
 	test("a window that never refills ends the run rather than hanging [105]", async () => {
 		const { fetch, calls } = stub([
 			paced({

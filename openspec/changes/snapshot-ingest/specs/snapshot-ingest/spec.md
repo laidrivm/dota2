@@ -77,6 +77,19 @@ precedence over *A request is retried only where retrying can succeed*: a `429`
 reporting nothing left in the longest window SHALL NOT be retried, because the
 retry answers a request the service might yet accept and this one it will not.
 
+A window the response does not let the client measure SHALL count as the
+longest — one whose name carries no length, or one reported spent in a response
+that states no ceiling to compare it against. Neither can be shown to turn
+inside a run, and waiting out a window whose end nobody can name is waiting for
+an instant that may never come.
+
+The waiting SHALL be bounded as the retrying is, and a run whose window has not
+turned inside that bound SHALL end failed naming it. A wait is not a failed
+attempt — the request was never refused — but a source answering that nothing
+is left for as long as it is asked would otherwise suspend a run whose whole
+contract is to reach one outcome and report it, which is the same hazard *A
+request is retried only where retrying can succeed* bounds an attempt against.
+
 #### Scenario: A window at its stated ceiling
 
 - **WHEN** a window's stated limit has been issued inside that window and a
@@ -88,6 +101,12 @@ retry answers a request the service might yet accept and this one it will not.
 - **IF** a response reports zero remaining in any window but the longest
 - **THEN** the run SHALL wait for that window to turn and then continue, rather
   than end
+
+#### Scenario: A window that never turns
+
+- **IF** every response to a request reports the same refillable window spent
+- **THEN** the run SHALL end failed once the waits are spent, rather than wait
+  on
 
 #### Scenario: The longest window reports nothing remaining
 
