@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
+import { fileURLToPath } from "node:url";
 import rawFixture from "../fixtures/snapshot.json" with { type: "json" };
 import type { SnapshotBundle } from "../types.ts";
 import {
@@ -9,6 +10,13 @@ import {
 } from "./snapshot.ts";
 
 const fixture = rawFixture as unknown as SnapshotBundle;
+
+/**
+ * The repository root, for the one case that reads this module from a second
+ * process. Converted rather than taken as `.pathname`, which stays
+ * percent-encoded and names no directory a shell can enter.
+ */
+const ROOT = fileURLToPath(new URL("../../", import.meta.url));
 
 const realFetch = globalThis.fetch;
 let store: Map<string, string>;
@@ -206,9 +214,34 @@ describe("provenance line", () => {
 
 	test("uses the date the field carries, not the viewer's day", () => {
 		// 23:30 UTC is already the next day east of UTC and the previous day
-		// west of it; the line must read the same everywhere.
+		// west of it; the line must read the same everywhere. Read here in the
+		// zone the run carries, which is UTC — so what separates the two
+		// readings is the case below, not this one.
 		const bundle = { ...fixture, createdAt: "2026-07-19T23:30:00Z" };
 		expect(formatProvenance(bundle)).toBe("patch 7.41d · snapshot Jul 19");
+	});
+
+	test("reads the same day in a zone nine hours ahead of UTC", () => {
+		// Spawned rather than pinned with a `beforeAll`: the formatter is built
+		// when the module loads and keeps the zone it was constructed under, so
+		// a `TZ` assigned after that reaches nothing and this case would pass
+		// against a formatter that had lost its `timeZone: "UTC"`. Measured
+		// against bun 1.3.14 — the same instant reads `Jul 20` without it.
+		const ran = Bun.spawnSync(
+			[
+				"bun",
+				"-e",
+				'const { formatProvenance } = await import("./src/app/snapshot.ts");' +
+					' console.log(formatProvenance({ patch: { id: "7.41d" },' +
+					' createdAt: "2026-07-19T23:30:00Z" }));',
+			],
+			{ cwd: ROOT, env: { ...process.env, TZ: "Asia/Tokyo" } },
+		);
+
+		expect([ran.exitCode, ran.stdout.toString().trim()]).toEqual([
+			0,
+			"patch 7.41d · snapshot Jul 19",
+		]);
 	});
 
 	test("normalises a non-UTC offset to UTC", () => {
