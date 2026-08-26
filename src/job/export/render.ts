@@ -207,6 +207,11 @@ function matrix<T extends { hero_id: number }>(
 /**
  * The same matrix with `[b][a]` filled from `[a][b]`, which synergy is.
  *
+ * The caller's object, filled and handed back — not a copy. Every caller here
+ * passes one built a line earlier, so nothing is aliased in the doing, but a
+ * caller holding the argument afterwards holds the mirrored matrix. The case
+ * for this clones before calling, for that reason.
+ *
  * It writes into the object it is walking, and that is safe rather than
  * overlooked: `Object.entries` takes the keys as they are when it is called,
  * so a row added under a new id is not walked again, and one added under an

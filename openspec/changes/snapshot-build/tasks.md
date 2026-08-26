@@ -325,9 +325,11 @@ their criteria over what 5a already renders, as 4c was over 4a and 4b.
       only case that would see a spurious key — a hero against itself
       included, which the schema refuses to store and nothing otherwise stops
       the export deriving; and a hero's `positions` omits every position
-      it was never picked on [38]. Each case carries a second assertion that
-      the value is not 0, without which a matrix of zeros — or of absent keys
-      read as `undefined` on both sides — satisfies the symmetry. Mirroring is
+      it was never picked on [38]. The two directional cases each carry a
+      second assertion that the value is not 0, without which a matrix of
+      zeros — or of absent keys read as `undefined` on both sides — satisfies
+      the symmetry; the other two read key sets, where no value is in
+      question. Mirroring is
       also read at three heroes, which is the smallest case where the loop
       meets a key its own pass created; at two the only id it creates is one
       the entry snapshot never held, so that half went unexercised. (Req:
