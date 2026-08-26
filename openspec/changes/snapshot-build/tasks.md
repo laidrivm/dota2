@@ -300,9 +300,14 @@ their criteria over what 5a already renders, as 4c was over 4a and 4b.
       spelling case against what the refusal *says*, the declared set having
       refused those keys anyway and hidden the pattern. A key the contract
       declares and the render dropped fails too: a check over what is present
-      cannot see what is absent. The id keys are read at five places and the
-      cases reach all five — dropping the level that walks a matrix row, or
-      one of the two matrices, left every case passing until they did. The declared sets are the contract in a
+      cannot see what is absent. The id keys are read at every bundle root the
+      named checks do not descend into, scoped by that exemption rather than
+      by naming the two matrices — a matrix the contract grows is scanned by
+      being there, and a root added to the declared set and left out of the
+      exemption reaches the id check and fails, its keys being names and not
+      integers. The cases reach both levels of both matrices; dropping the
+      level that walks a matrix row left every one of them passing until they
+      did. The declared sets are the contract in a
       second form, unavoidably — the interfaces are erased before the bundle
       exists — so the shipped fixture is walked through the check, and a key
       added to `src/types.ts` and the fixture without a line here fails.
