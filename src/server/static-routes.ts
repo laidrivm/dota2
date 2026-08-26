@@ -6,6 +6,7 @@
  */
 
 import { fileURLToPath } from "node:url";
+import { PUBLISHED } from "../job/export/publish.ts";
 
 /**
  * The repository root, which is two levels above this module rather than the
@@ -16,6 +17,17 @@ const root = new URL("../../", import.meta.url);
 
 export const fontDir = new URL("src/app/styles/fonts/", root);
 const snapshotFile = new URL("src/fixtures/snapshot.json", root);
+
+/**
+ * Where the export publishes the bundle. Written by the job, never by a build,
+ * and gitignored for the reason `icons/` is — a clone has neither until a run
+ * fills it.
+ *
+ * Exported for the same reason `iconDir` is: the lookup below answers an
+ * absent directory with the fixture on purpose, so nothing a request can ask
+ * for distinguishes a wrong anchor from a clone that has never exported.
+ */
+export const snapshotDir = new URL("snapshot/", root);
 
 /**
  * Where the ingest mirrors hero images. Written by the job, never by a build.
@@ -38,7 +50,10 @@ const FILE_KINDS: Record<string, { type: string; cache: string }> = {
 };
 
 /** What a route answers with: a fixed file, or a per-request lookup. */
-type Route = Response | ((request: Request) => Response);
+type Route =
+	| Response
+	| ((request: Request) => Response)
+	| (() => Promise<Response>);
 
 /**
  * The image names the mirror holds, or none where it holds nothing yet — a
@@ -84,10 +99,36 @@ const iconRoute =
 		});
 	};
 
-export function staticRoutes(icons: URL = iconDir): Record<string, Route> {
+/**
+ * The bundle if one has been published, and the committed fixture otherwise.
+ *
+ * A per-request lookup rather than a prebuilt `Response` because this route's
+ * *source* switches: the fixture until an export publishes, the published file
+ * afterwards. A map built at startup would serve the fixture until a restart,
+ * which is the same reason the icon route resolves its listing per request.
+ *
+ * Both answers are revalidated: the URL is republished under one name, so
+ * what a client holds is never fresh on its own account.
+ */
+const snapshotRoute = (dir: URL) => async (): Promise<Response> => {
+	const bundle = new URL(PUBLISHED, dir);
+	const file = (await Bun.file(bundle).exists()) ? bundle : snapshotFile;
+	return new Response(Bun.file(file), {
+		headers: {
+			"content-type": "application/json; charset=utf-8",
+			"cache-control": "no-cache",
+		},
+	});
+};
+
+export function staticRoutes(
+	icons: URL = iconDir,
+	snapshots: URL = snapshotDir,
+): Record<string, Route> {
 	const routes: Record<string, Route> = {};
 
 	routes["/icons/*"] = iconRoute(icons);
+	routes[`/${PUBLISHED}`] = snapshotRoute(snapshots);
 
 	// Built from the directory listing, so a request can only ever name a file
 	// that is actually there — there is no path for it to traverse out of.
@@ -100,16 +141,6 @@ export function staticRoutes(icons: URL = iconDir): Record<string, Route> {
 			headers: { "content-type": kind.type, "cache-control": kind.cache },
 		});
 	}
-
-	// Until Phase 3 publishes a real bundle, the fixture is the snapshot. It is
-	// revalidated rather than cached, because the pipeline will republish this
-	// same URL.
-	routes["/snapshot.json"] = new Response(Bun.file(snapshotFile), {
-		headers: {
-			"content-type": "application/json; charset=utf-8",
-			"cache-control": "no-cache",
-		},
-	});
 
 	return routes;
 }

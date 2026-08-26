@@ -9,6 +9,9 @@ dist/
 # Hero images the ingest mirrors; the job writes them, no build does
 icons/
 
+# The bundle the export publishes; the job writes it, no build does
+snapshot/
+
 # Playwright run output
 test-results/
 playwright-report/
