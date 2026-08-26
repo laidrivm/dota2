@@ -146,6 +146,47 @@ describe("a window with nothing left", () => {
 	});
 
 	/**
+	 * A response that states no ceiling gives nothing to compare against, so
+	 * the client cannot tell whether a window longer than the spent one exists.
+	 * It ends the run rather than waiting one out and finding the quota gone
+	 * anyway — which is also what it did before this group, for a source that
+	 * names no ceilings at all.
+	 */
+	// spec: snapshot-ingest/the-longest-window-reports-nothing-remaining
+	test("a spent window beside no stated ceiling ends the run [106]", async () => {
+		const { fetch } = stub([limited({ "x-ratelimit-remaining-minute": "0" })]);
+		const query = client(fetch);
+
+		const raised = await raisedBy(query(Q));
+
+		expect(raised?.message).toContain("minute");
+	});
+
+	/**
+	 * The bound on waiting, which is the bound on attempts and for the same
+	 * reason: a wait is not a failed attempt, but a source answering "nothing
+	 * left" for ever would suspend a run whose whole contract is to reach an
+	 * outcome and report it.
+	 */
+	// spec: snapshot-ingest/a-refillable-window-reports-nothing-remaining
+	test("a window that never refills ends the run rather than hanging [105]", async () => {
+		const { fetch, calls } = stub([
+			paced({
+				minute: { limit: 150, remaining: 0 },
+				day: { limit: 15_000, remaining: 14_000 },
+			}),
+		]);
+		const query = client(fetch);
+
+		const raised = await raisedBy(query(Q));
+
+		expect(raised?.message).toContain("waits made");
+		// Four waits, each after an attempt that met the same spent window, and
+		// the fifth attempt is where the bound is reached.
+		expect(calls).toHaveLength(5);
+	});
+
+	/**
 	 * A header that carries no number is not a report of zero. Reading one as
 	 * zero would end a healthy run on a header the service sent empty or
 	 * unparseable — which is what a bare coercion does, since `Number("")` is 0
