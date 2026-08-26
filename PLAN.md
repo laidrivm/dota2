@@ -302,6 +302,14 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       indexed docs too, and the criterion routes every captured rule into the
       one file that costs always-on budget. `CLAUDE.md` §*Lessons learned* is
       corrected on this branch; the criterion needs a delta spec.
+- [ ] **A live spec's reason names a step that no longer runs on every diff.**
+      `openspec/specs/context-budget/spec.md` §*A fence stands where it is
+      stepped on* justifies the comment rule with "`/ponytail-review` runs over
+      every diff looking for what to cut". It no longer does — it left the
+      pre-PR sequence on 2026-08-26 for finding nothing in eight branches. The
+      requirement stands on its own second reason, that no reader runs `git log
+      -S` before editing, so this is an overstated clause rather than a broken
+      criterion; correcting it is a delta spec, not an edit here.
 - [ ] **The always-on trigger has fired.** The set is 555 lines against the
       ~500 `CLAUDE.md` states. The Process sublist sits at 20, its own
       threshold, and stayed there only because this session's two captured

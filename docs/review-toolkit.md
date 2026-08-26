@@ -22,8 +22,14 @@ design, because settling it is the user's.
   cross-referenced against existing tests.
 - `/warm [base]` — WARM check of dependencies the branch pulls in. The change
   is not done until its dependencies are vetted.
-- `/ponytail-review` — over-engineering pass over the diff. Invoke it
-  yourself and apply the cuts that survive.
+- `/ponytail-review` — over-engineering pass over the diff, available and not
+  a gate. It stood in the sequence below until 2026-08-26 and was removed on
+  its own record: across the eight branches of that session it returned eight
+  findings, every one about shape and none a defect, and three branches it
+  read returned nothing at all. Worse, it read an enumeration the `CLAUDE.md`
+  scan rule forbids and accepted it, which `/coderabbit` then caught — so the
+  step was not merely quiet but agreeing. `docs/context/pipeline-yield-*.md`
+  holds the counts. Run it when a diff feels overbuilt; nothing waits on it.
 - `/triage [base]` — risk-ordered map of the branch diff. Invoke it yourself.
   It returns no findings by design, so acting on it means reading the files it
   ranks High and Medium, reporting the defects they hold, and grepping every
@@ -79,10 +85,9 @@ starts the sequence in the same turn; never ask whether to run it.
    decisions create. Fix what it finds.
 3. `/warm`, only when a dependency manifest changed, having walked the
    ponytail ladder before ever reaching for a dependency.
-4. `/ponytail-review`, applying the cuts that survive.
-5. `/triage`, over the final diff, so it maps the diff the reviewer
+4. `/triage`, over the final diff, so it maps the diff the reviewer
    will actually see.
-6. `/coderabbit-local` last, then push.
+5. `/coderabbit-local` last, then push.
 
 CI measures the budget on every pull request and the pre-push hook measures it
 last of all, once every gate that can refuse the push has passed. Neither is
