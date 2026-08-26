@@ -109,6 +109,27 @@ describe.skipIf(url === undefined)("a run's one outcome", () => {
 	});
 
 	// spec: snapshot-ingest/an-ingest-that-fails
+	test("a thrown value that is not an Error still says what it was", async () => {
+		const sql = await clean();
+		const deps = jobDeps(sql, { icons: iconsDir, bundle: bundle() }, RUN_AT);
+		// What the database driver rejects with: a plain object carrying `code`,
+		// `hint` and `message`. `String` renders it `[object Object]`, which is
+		// a report naming which step failed and nothing about why.
+		const thrown = { code: "ERR_POSTGRES_TOO_MANY_PARAMETERS", hint: "batch" };
+
+		// Rejected from the query rather than the fetch: the patch source retries
+		// a fetch with a backoff, and what this case is about is the report, not
+		// five seconds of waiting for one.
+		const report = await runJob(
+			{ ...deps, query: () => Promise.reject(thrown) },
+			RUN_AT,
+		);
+
+		expect(report).toContain("ingest");
+		expect(report).toContain("ERR_POSTGRES_TOO_MANY_PARAMETERS");
+	});
+
+	// spec: snapshot-ingest/an-ingest-that-fails
 	test("a failing ingest builds nothing and leaves the bundle served [58]", async () => {
 		const sql = await clean();
 		const dir = bundle();
