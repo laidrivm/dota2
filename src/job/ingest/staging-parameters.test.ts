@@ -10,7 +10,7 @@
  */
 import { describe, expect, test } from "bun:test";
 import type { SQL } from "bun";
-import { opener, requiresDatabase, url } from "../db.fixture.ts";
+import { cleaner, requiresDatabase, url } from "../db.fixture.ts";
 import { writeStaging } from "./staging.ts";
 
 requiresDatabase();
@@ -30,8 +30,7 @@ const PATCH = "z9.40";
 describe.skipIf(url === undefined)(
 	"a staging write wider than one statement",
 	() => {
-		const open = opener();
-		let shared: Promise<SQL> | undefined;
+		const empty = cleaner();
 		const ids = Array.from({ length: CROSSING }, (_, n) => 9001 + n);
 
 		/** Both matrices whole, and every row a row the schema admits. */
@@ -43,21 +42,17 @@ describe.skipIf(url === undefined)(
 			);
 
 		/**
-		 * The reference and the patch, and no staging row of this file's.
+		 * The reference and the patch, on a connection `cleaner` has emptied of
+		 * this file's rows.
 		 *
-		 * Emptied at the start of a case rather than at the end of the file,
-		 * which is `cleaner`'s shape and the one that survives a rollback: the
-		 * write below clears the patch inside its own transaction, so a case
-		 * that rolls back restores what the case before it left. One connection
-		 * for the file, as `db.fixture.ts` asks.
+		 * Emptied at the start of a case rather than at the end of the file, and
+		 * through the shared cleaner rather than by hand: it clears every
+		 * staging table before it deletes a hero, which is the order the foreign
+		 * keys need and the one a file emptying only the tables it writes gets
+		 * away with until it runs after a suite that wrote another.
 		 */
 		const clean = async (): Promise<SQL> => {
-			shared ??= open();
-			const sql = await shared;
-			await sql`DELETE FROM staging_hero_matchups WHERE hero_id >= 9000`;
-			await sql`DELETE FROM staging_hero_synergies WHERE hero_id >= 9000`;
-			await sql`DELETE FROM heroes WHERE hero_id >= 9000`;
-			await sql`DELETE FROM patches WHERE patch_id LIKE 'z9.%'`;
+			const sql = await empty();
 			await sql`INSERT INTO patches (patch_id, base_version, is_major, detected_at)
 				VALUES (${PATCH}, ${PATCH}, true,
 					${new Date("2026-07-01T00:00:00.000Z")})`;
