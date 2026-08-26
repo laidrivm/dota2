@@ -52,3 +52,40 @@ export async function connect(url: string | undefined): Promise<SQL> {
 	}
 	return sql;
 }
+
+/**
+ * The most bind parameters one statement may carry. Not a tuning choice: the
+ * PostgreSQL wire protocol counts them in a 16-bit field, so this is the
+ * protocol's own ceiling, and bun reports crossing it as
+ * `ERR_POSTGRES_TOO_MANY_PARAMETERS` — as a plain object, not an `Error`.
+ */
+const MAX_PARAMETERS = 65_535;
+
+/**
+ * `rows` in batches no single bulk `INSERT` can overflow.
+ *
+ * Every caller here writes one statement per table, and a statement carries
+ * one parameter per column per row — so a table whose row count is a function
+ * of the hero reference crosses the ceiling above on its own. At 127 heroes an
+ * ordered pair matrix is 16 002 rows of 5 columns, which is 80 010 parameters
+ * against a limit of 65 535, and no run can write it whole.
+ *
+ * `columns` defaults to the keys of the first row because that is what the
+ * bulk form itself does when a caller names none — the default mirrors the
+ * statement rather than guessing at it. Yields nothing for an empty list,
+ * which is also the guard a caller would otherwise write: the statement an
+ * empty array produces is not SQL.
+ */
+export function* batches<T extends object>(
+	rows: readonly T[],
+	columns?: readonly string[],
+): Generator<readonly T[]> {
+	if (rows.length === 0) return;
+	const width = (columns ?? Object.keys(rows[0] as object)).length;
+	// `max(1, …)` so a row wider than the ceiling yields batches of one and
+	// fails at the driver naming its own limit, rather than looping forever on
+	// a step of zero here.
+	const size = Math.max(1, Math.floor(MAX_PARAMETERS / width));
+	for (let at = 0; at < rows.length; at += size)
+		yield rows.slice(at, at + size);
+}

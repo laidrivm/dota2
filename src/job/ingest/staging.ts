@@ -11,9 +11,43 @@
  * What produces the rows is `ingest.ts`; this file knows only how they land.
  */
 import type { SQL } from "bun";
+import { batches } from "../db.ts";
 import type { HeroTotal } from "./contest.ts";
 import type { PositionCount } from "./meta.ts";
 import type { PairCount } from "./pairs.ts";
+
+/**
+ * The columns each statement names, written once so that what the batching
+ * counts and what the statement carries cannot drift apart.
+ */
+const POSITIONS = [
+	"patch_id",
+	"hero_id",
+	"position",
+	"matches",
+	"wins",
+] as const;
+const HEROES = [
+	"patch_id",
+	"hero_id",
+	"matches",
+	"wins",
+	"contest_rate",
+] as const;
+const MATCHUPS = [
+	"patch_id",
+	"hero_id",
+	"enemy_id",
+	"matches",
+	"wins",
+] as const;
+const SYNERGIES = [
+	"patch_id",
+	"hero_id",
+	"ally_id",
+	"matches",
+	"wins",
+] as const;
 
 /** Everything one run writes, keyed by nothing until the write keys it. */
 export type Staged = {
@@ -105,15 +139,17 @@ export async function writeStaging(
 		await tx`DELETE FROM staging_hero_synergies
 			WHERE patch_id = ${patchId} OR patch_id IN (${aged})`;
 
-		// Guarded because the bulk form builds its column list from the rows: an
-		// empty array has none, and the statement it would produce is not SQL.
-		if (positions.length > 0)
-			await tx`INSERT INTO staging_hero_position_stats ${tx(positions, "patch_id", "hero_id", "position", "matches", "wins")}`;
-		if (heroes.length > 0)
-			await tx`INSERT INTO staging_hero_stats ${tx(heroes, "patch_id", "hero_id", "matches", "wins", "contest_rate")}`;
-		if (matchups.length > 0)
-			await tx`INSERT INTO staging_hero_matchups ${tx(matchups, "patch_id", "hero_id", "enemy_id", "matches", "wins")}`;
-		if (synergies.length > 0)
-			await tx`INSERT INTO staging_hero_synergies ${tx(synergies, "patch_id", "hero_id", "ally_id", "matches", "wins")}`;
+		// Batched rather than written whole: a pair matrix over the real
+		// reference carries more parameters than one statement may. `batches`
+		// also absorbs the empty case — the bulk form builds its column list
+		// from the rows, and the statement an empty array produces is not SQL.
+		for (const batch of batches(positions, POSITIONS))
+			await tx`INSERT INTO staging_hero_position_stats ${tx(batch, ...POSITIONS)}`;
+		for (const batch of batches(heroes, HEROES))
+			await tx`INSERT INTO staging_hero_stats ${tx(batch, ...HEROES)}`;
+		for (const batch of batches(matchups, MATCHUPS))
+			await tx`INSERT INTO staging_hero_matchups ${tx(batch, ...MATCHUPS)}`;
+		for (const batch of batches(synergies, SYNERGIES))
+			await tx`INSERT INTO staging_hero_synergies ${tx(batch, ...SYNERGIES)}`;
 	});
 }
