@@ -6,7 +6,7 @@
  * else. Every instant below is written against one `detected_at` at midnight
  * UTC, because what separates the cases is the day count and not the anchor.
  */
-import { describe, expect, test } from "bun:test";
+import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { stabilizing } from "./render.ts";
 
 /** The patch every case counts from, detected at midnight UTC. */
@@ -44,14 +44,44 @@ describe("whether the bundle calls the patch settling", () => {
 			stabilizing(false, DETECTED, new Date("2026-07-14T09:00:00.000Z")),
 		).toBe(false);
 	});
+});
+
+/** The zone this file found, which the block below must give back. */
+const AT_LOAD = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+describe("the day count the window is measured in", () => {
+	const zone = process.env.TZ;
+	beforeAll(() => {
+		// East of UTC by enough that the instant below falls on the next local
+		// day: run in UTC, where `bun test` starts whatever the machine's zone
+		// is, a count taken off the local calendar and one taken off the UTC
+		// timeline agree, and the case cannot tell them apart.
+		process.env.TZ = "Asia/Tokyo";
+	});
+	afterAll(() => {
+		// `UTC` rather than a delete where it arrived unset, for the reason
+		// `render-shape.test.ts` records: deleting `TZ` in bun 1.3.14 leaves
+		// the last value assigned rather than restoring the system one.
+		process.env.TZ = zone ?? "UTC";
+	});
 
 	// spec: snapshot-export/an-offset-that-crosses-the-utc-day
 	test("an offset that crosses the UTC day is counted by UTC [57]", () => {
+		// Asserted rather than assumed: an assignment that did not take leaves
+		// this in UTC, where the reading this case exists to refuse passes.
+		expect(Intl.DateTimeFormat().resolvedOptions().timeZone).toBe("Asia/Tokyo");
 		// `2026-07-18T00:30:00+05:00` is `2026-07-17T19:30:00Z`: three whole
-		// days past the anchor, where reading the offset's own calendar date
-		// gives four and calls the window closed.
+		// days past the anchor, and 04:30 on the 18th in Tokyo — so a count
+		// read off either local calendar gives four and calls the window
+		// closed a day early.
 		expect(
 			stabilizing(true, DETECTED, new Date("2026-07-18T00:30:00+05:00")),
 		).toBe(true);
 	});
+});
+
+test("the zone the block above set is given back", () => {
+	// Nothing else in this file would notice — every case above reads UTC — so
+	// the file that pays for a restore that did not take is some later one.
+	expect(Intl.DateTimeFormat().resolvedOptions().timeZone).toBe(AT_LOAD);
 });
