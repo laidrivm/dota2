@@ -70,6 +70,10 @@ export async function covered(sql: SQL, patchId = PATCH) {
 			meta_capped_by_source, pair_weeks
 		FROM snapshots WHERE patch_id = ${patchId}
 		ORDER BY snapshot_id DESC LIMIT 1`;
+	// Named here rather than left to the cast below, which would hand a case an
+	// `undefined` typed as a row and fail at whichever column it read first.
+	if (row === undefined)
+		throw new Error(`no snapshot of ${patchId}, so nothing covered it`);
 	return row as {
 		status: string;
 		meta_first_day: Date | null;

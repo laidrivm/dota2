@@ -145,9 +145,9 @@ Rules about how work is carried out here. They do not age with the code.
 
 - Confirm a path is tracked before a check or a claim depends on it — a
   gitignored file is present for the author and absent in a clone.
-- Give a spawned command that reads an environment variable one built for the
-  case, in a working directory holding no `.env` — bun fills a variable the
-  case left out from the `.env` where the process starts.
+- Build the environment a spawned command runs under from what the case needs,
+  and start it in a directory holding no `.env` — bun fills a variable the case
+  left out from the `.env` where the process starts.
 - Probe a gate by refusing it, with an input the session has not already
   cleared — an approval and an absent prompt reach you as the same successful
   result, and an approval outlives the mode that granted it.
