@@ -227,11 +227,15 @@ retention, which is a requirement of its own with no validation in it.
       never a list the check carries. (Req: snapshot-build — A snapshot is
       published only after it validates / An unmeasured component is zero for
       every hero)
-- [ ] 4.3 Write the retention tests: a thirty-first snapshot leaves 30 rows,
-      removes the oldest by `snapshot_id`, and leaves no orphan statistics
-      row [17]; 30 snapshots built inside one day still leave the previous
-      patch's newest published one, whose `wr_old` the prior still weighs
-      [48]. (Req: snapshot-build — Snapshot retention)
+- [x] 4.3 Write the retention tests: a thirty-first snapshot leaves 30 rows,
+      removes the oldest by `snapshot_id`, and leaves no statistics row behind
+      it in any table carrying `snapshot_id` [17]; 30 snapshots built inside
+      one day still leave the previous patch's newest published one, whose
+      `wr_old` the prior still weighs [48]; and the same 30 built past the
+      window that prior decays over drop it with the rest [90], which is the
+      reading the delta spec gains here — without it an exemption covering
+      every patch's newest published snapshot passes both other cases. (Req:
+      snapshot-build — Snapshot retention)
 - [x] 4.4a Implement the `published` transition and the two checks a count
       and a sum decide before it: the hero count against the newest published
       snapshot, and each hero's position shares against its own rows. The
@@ -245,9 +249,12 @@ retention, which is a requirement of its own with no validation in it.
       parts.
       (Req: snapshot-build — A snapshot is published only after it validates /
       An unmeasured component is zero for every hero)
-- [ ] 4.5 Implement retention as a cascade from `snapshots`, so no statistics
+- [x] 4.5 Implement retention as a cascade from `snapshots`, so no statistics
       row can outlive its snapshot, exempting from the count the newest
-      published snapshot of any patch a blend may still read `wr_old` from.
+      published snapshot of any patch a blend may still read `wr_old` from —
+      which is the `prior_patch_id` this build resolved, NULL exactly when the
+      prior has decayed and the exemption should stop. In the transaction that
+      settles the status, so a build leaves the database whole or untouched.
       (Req: snapshot-build — Snapshot retention)
 
 ## 5. Rendering the bundle

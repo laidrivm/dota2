@@ -19,6 +19,12 @@ import { type Prior, priorKey, type Staging, snapshotRows } from "./rows.ts";
 import { invalidReason } from "./validate.ts";
 
 /**
+ * How many snapshots retention keeps, beyond the one the current blend still
+ * reads `wr_old` from (data-model §3.2).
+ */
+const RETAINED = 30;
+
+/**
  * Build a snapshot of `patchId` as of `at`, and return its `snapshot_id`.
  *
  * `at` is an argument rather than a clock reading, so a build over unchanged
@@ -154,6 +160,27 @@ async function write(
 		await tx`UPDATE snapshots SET status =
 				${invalid === undefined ? "published" : "failed"}
 			WHERE snapshot_id = ${snapshotId}`;
+		// Retention, here rather than after the transaction, so a build either
+		// leaves the database whole or leaves it untouched. The statistics rows
+		// go with the snapshot through the schema's cascade, so this is the
+		// whole of it: no table is named, and one added under that cascade is
+		// collected by carrying it.
+		//
+		// The count alone would be safe only while builds are at most daily,
+		// and nothing here bounds how often the job runs — so the snapshot this
+		// build read `wr_old` from is exempt from it whatever its age.
+		// `priorPatchId` is exactly that patch, and it is NULL exactly when the
+		// prior has decayed to nothing, which is when the exemption should stop.
+		await tx`DELETE FROM snapshots
+			WHERE snapshot_id NOT IN (
+					SELECT snapshot_id FROM snapshots
+					ORDER BY snapshot_id DESC LIMIT ${RETAINED}
+				)
+				AND snapshot_id IS DISTINCT FROM (
+					SELECT snapshot_id FROM snapshots
+					WHERE patch_id = ${priorPatchId} AND status = 'published'
+					ORDER BY snapshot_id DESC LIMIT 1
+				)`;
 	});
 }
 
