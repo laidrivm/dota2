@@ -417,10 +417,13 @@ is a branch, not a renumbering, on the terms group 11's split took.
       patch live for less than one complete week records an empty weeks list
       beside a non-empty meta window. (Req: snapshot-ingest — What a run
       covered is recorded on the snapshot it built)
-- [x] 12.3c Extend `ingest.test.ts`'s *a run reports the window and the weeks
-      it covered* [36], which asserts only what `ingest` returns, so that it
-      also asserts the `snapshots` row carries it once the entry point has run
-      — [92] again, the criterion being about the record and not the return.
+- [x] 12.3c Stop `ingest.test.ts`'s *a run reports the window and the weeks it
+      covered* [36] claiming more than it proves. The criterion is about the
+      record and the case asserts a return, so the case is renamed to *returns*
+      and carries a line naming `coverage.test.ts`, where that same window and
+      those same weeks are asserted on the `snapshots` row. [92] is closed
+      there, once: extending this case instead would have driven the entry
+      point from the ingest's own suite and written 12.3's first case twice.
       (Req: snapshot-ingest — What a run covered is recorded on the snapshot
       it built)
 - [x] 12.4 Add the coverage columns to `snapshots` beside `prior_weight` —
