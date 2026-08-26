@@ -21,6 +21,13 @@ import { snapshotDir, staticRoutes } from "./static-routes.ts";
 
 const fixture = rawFixture as unknown as SnapshotBundle;
 
+/**
+ * The URL the client fetches, written out rather than built from `PUBLISHED`:
+ * the two spell the same thing today, and the route is under test for keeping
+ * them apart — the URL is the client's contract, the filename is the job's.
+ */
+const SNAPSHOT_URL = "/snapshot.json";
+
 /** A snapshot id the fixture does not carry, so the two sources differ. */
 const PUBLISHED_ID = 999;
 
@@ -66,7 +73,7 @@ test("a publication directory holding no bundle serves the fixture [55]", async 
 	// resolves a name, and this is not that name.
 	await Bun.write(join(shared, PART), '{"half": ');
 
-	const response = await fetch(`${origin}/${PUBLISHED}`);
+	const response = await fetch(`${origin}${SNAPSHOT_URL}`);
 
 	expect(response.status).toBe(200);
 	expect(response.headers.get("content-type")).toStartWith("application/json");
@@ -81,7 +88,7 @@ test("a publication directory that is not there serves the fixture [28]", async 
 	// Every clone before the first export, `bun run dev` included — and the
 	// deployment between mounting the volume and filling it.
 	const absent = await fetch(
-		`${serving(join(shared, "never-written"))}/${PUBLISHED}`,
+		`${serving(join(shared, "never-written"))}${SNAPSHOT_URL}`,
 	);
 
 	expect(absent.status).toBe(200);
@@ -95,7 +102,7 @@ test("a published bundle is served in preference to the fixture [29]", async () 
 	// Before and after, over one running server: the export writes this
 	// directory while the server runs, so a source resolved once at startup
 	// would serve the fixture forever.
-	expect((await (await fetch(`${at}/${PUBLISHED}`)).json()).snapshotId).toBe(
+	expect((await (await fetch(`${at}${SNAPSHOT_URL}`)).json()).snapshotId).toBe(
 		fixture.snapshotId,
 	);
 
@@ -104,7 +111,7 @@ test("a published bundle is served in preference to the fixture [29]", async () 
 		JSON.stringify({ ...fixture, snapshotId: PUBLISHED_ID }),
 	);
 
-	const response = await fetch(`${at}/${PUBLISHED}`);
+	const response = await fetch(`${at}${SNAPSHOT_URL}`);
 	expect(response.status).toBe(200);
 	expect((await response.json()).snapshotId).toBe(PUBLISHED_ID);
 });
@@ -136,7 +143,7 @@ test("a publication directory whose path needs encoding is read [97]", async () 
 		JSON.stringify({ ...fixture, snapshotId: PUBLISHED_ID }),
 	);
 
-	expect((await (await fetch(`${at}/${PUBLISHED}`)).json()).snapshotId).toBe(
+	expect((await (await fetch(`${at}${SNAPSHOT_URL}`)).json()).snapshotId).toBe(
 		PUBLISHED_ID,
 	);
 });
@@ -149,7 +156,7 @@ test("the published bundle is revalidated, as the fixture is [42]", async () => 
 		JSON.stringify({ ...fixture, snapshotId: PUBLISHED_ID }),
 	);
 
-	const response = await fetch(`${at}/${PUBLISHED}`);
+	const response = await fetch(`${at}${SNAPSHOT_URL}`);
 
 	// The URL is republished under the same name, so what the client holds is
 	// never fresh on its own account — it asks, and the answer is cheap.
