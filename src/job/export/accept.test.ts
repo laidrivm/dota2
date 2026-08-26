@@ -23,7 +23,13 @@ requiresDatabase();
 
 const clean = cleaner();
 
-/** The first hero of a copy, at the types every edit below reaches through. */
+/**
+ * The first hero of a copy, at the types every edit below reaches through.
+ *
+ * Unguarded on purpose: the fixture holds heroes — `contract.test.ts` asserts
+ * the shipped file passes the check whole, and the check refuses an empty
+ * list — so a guard here would be a branch no case can take.
+ */
 const hero = (bundle: SnapshotBundle) =>
 	bundle.heroes[0] as unknown as Record<string, unknown> & {
 		side: Record<string, unknown>;
@@ -31,7 +37,15 @@ const hero = (bundle: SnapshotBundle) =>
 		positions: Record<string, Record<string, unknown>>;
 	};
 
-/** The first row of a matrix, or an empty one where the fixture holds none. */
+/**
+ * The first row of a matrix, or a loose object where the fixture holds none.
+ *
+ * The fallback is deliberately *not* attached to the matrix. Writing an edit
+ * into a row nothing holds leaves the copy unedited, the check then accepts
+ * it, and the case fails on a refusal it never got — which is the answer a
+ * fixture that stopped carrying matrices deserves. Attaching it instead would
+ * manufacture the structure the case exists to read, and pass.
+ */
 const row = (matrix: Record<string, Record<string, number>>) =>
 	Object.values(matrix)[0] ?? {};
 
