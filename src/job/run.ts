@@ -26,9 +26,18 @@ import { createClient } from "./ingest/stratz.ts";
 /** What a run needs: what the ingest needs, and where the bundle is published. */
 export type Deps = IngestDeps & { bundleDir: string };
 
-/** The step's name and the reason, in the words the command prints unchanged. */
+/**
+ * The step's name and the reason, in the words the command prints unchanged.
+ *
+ * A thrown value that is not an `Error` is inspected rather than coerced: the
+ * database driver rejects with a plain object carrying `code`, `hint` and
+ * `message` (bun 1.3.14), and `String` renders that `[object Object]` — a
+ * report naming which step failed and nothing about why.
+ */
 const failed = (step: string, error: unknown) =>
-	`the ${step} failed: ${error instanceof Error ? error.message : String(error)}`;
+	`the ${step} failed: ${
+		error instanceof Error ? error.message : Bun.inspect(error)
+	}`;
 
 /**
  * Carry one run through its three steps, and return the report of the one that
