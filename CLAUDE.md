@@ -160,6 +160,8 @@ Rules about how work is carried out here. They do not age with the code.
 - Exercise a pre-written decision rule, or a condition you have written, only
   against a case that could have produced the opposite outcome — for a
   condition, name that case before writing it.
+- Run a case about a UTC reading in a non-UTC zone, set before the code under
+  test reads one — in UTC a local calendar and the UTC timeline answer alike.
 - A rules or docs edit that no artefact of the change under way asks for goes
   in its own commit.
 - Take the queue's next entry in its stated order, and name every entry
