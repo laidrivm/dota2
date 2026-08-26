@@ -67,6 +67,44 @@ describe.skipIf(url === undefined)("what one write leaves behind", () => {
 			WHERE hero_id >= 9000 ORDER BY patch_id`,
 	});
 
+	/**
+	 * The fewest heroes whose ordered pair matrix carries more bind parameters
+	 * than one statement may: 115 × 114 is 13 110 rows of five columns, which
+	 * is 65 550 against the protocol's ceiling of 65 535. At 114 heroes the
+	 * matrix falls 570 parameters short and the write that fails in production
+	 * passes here.
+	 */
+	const CROSSING = 115;
+
+	// Uncited: no criterion states the protocol's parameter ceiling, and this
+	// case is *A run leaves staging whole* exercised at the one size where
+	// "whole" cannot be a single statement. The real reference holds 127
+	// heroes, so every run in production is past this line.
+	test("a pair matrix too wide for one statement still lands whole", async () => {
+		const sql = await clean();
+		const ids = Array.from({ length: CROSSING }, (_, n) => 9001 + n);
+		for (const heroId of ids.slice(2))
+			await sql`INSERT INTO heroes (hero_id, name, short_name, icon, first_seen_at)
+				VALUES (${heroId}, ${`H${heroId}`}, ${`h${heroId}`},
+					${`/icons/h${heroId}.png`}, now())`;
+		const pairs = ids.flatMap((heroId) =>
+			ids
+				.filter((otherId) => otherId !== heroId)
+				.map((otherId) => ({ heroId, otherId, matches: 1, wins: 0 })),
+		);
+
+		await writeStaging(sql, "z9.40", {
+			positions: [],
+			heroes: [],
+			matchups: pairs,
+			synergies: pairs,
+		});
+
+		const [written] = await sql`SELECT count(*)::int AS n
+			FROM staging_hero_matchups WHERE hero_id >= 9000`;
+		expect(written.n).toBe(pairs.length);
+	});
+
 	// spec: snapshot-ingest/rows-from-an-older-patch
 	test("a newer patch keeps the previous one and drops what is older [38]", async () => {
 		const sql = await clean();

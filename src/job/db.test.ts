@@ -9,9 +9,52 @@
 import { describe, expect, test } from "bun:test";
 import type { SQL } from "bun";
 import { opener, requiresDatabase, url } from "./db.fixture.ts";
-import { connect, connectionString } from "./db.ts";
+import { batches, connect, connectionString } from "./db.ts";
 
 requiresDatabase();
+
+/**
+ * The batching arithmetic, without a database: what it must never do is hand a
+ * statement more parameters than the protocol counts, and the sizes below sit
+ * either side of the row count where a five-column table crosses 65 535.
+ */
+describe("rows batched under the parameter ceiling", () => {
+	const widths = (rows: number, columns: number) =>
+		[
+			...batches(
+				Array.from({ length: rows }, (_, n) => ({ n })),
+				Array(columns).fill("c"),
+			),
+		].map((batch) => batch.length);
+
+	test("a list that fits is one batch and an empty one is none", () => {
+		expect(widths(13_107, 5)).toEqual([13_107]);
+		expect(widths(0, 5)).toEqual([]);
+	});
+
+	test("one row past the ceiling splits, and no batch is over it", () => {
+		const split = widths(13_108, 5);
+		expect(split).toEqual([13_107, 1]);
+		// The property the call sites depend on, stated rather than implied by
+		// the sizes above: a batch times its columns is what one statement carries.
+		for (const size of widths(40_000, 5))
+			expect(size * 5).toBeLessThanOrEqual(65_535);
+	});
+
+	test("the columns counted are the row's own where none are named", () => {
+		// Five keys, so the same split as the case above without saying so.
+		const rows = Array.from({ length: 13_108 }, () => ({
+			a: 1,
+			b: 2,
+			c: 3,
+			d: 4,
+			e: 5,
+		}));
+		expect([...batches(rows)].map((batch) => batch.length)).toEqual([
+			13_107, 1,
+		]);
+	});
+});
 
 test.each([
 	["an absent variable", {}],

@@ -14,6 +14,7 @@
  * name.
  */
 import type { SQL } from "bun";
+import { batches } from "../db.ts";
 import { isMeasured, prior, wholeDays, wrOf } from "./blend.ts";
 import { retain } from "./retention.ts";
 import { type Prior, priorKey, type Staging, snapshotRows } from "./rows.ts";
@@ -142,14 +143,18 @@ async function write(
 		// list from the rows, and an empty array has none.
 		const of = (written: { [key: string]: unknown }[]) =>
 			written.map((row) => ({ snapshot_id: snapshotId, ...row }));
-		if (rows.positions.length > 0)
-			await tx`INSERT INTO hero_position_stats ${tx(of(rows.positions))}`;
-		if (rows.heroes.length > 0)
-			await tx`INSERT INTO hero_stats ${tx(of(rows.heroes))}`;
-		if (rows.matchups.length > 0)
-			await tx`INSERT INTO hero_matchups ${tx(of(rows.matchups))}`;
-		if (rows.synergies.length > 0)
-			await tx`INSERT INTO hero_synergies ${tx(of(rows.synergies))}`;
+		// Batched for the reason `staging.ts`'s writes are: the matchup matrix
+		// is a function of the hero reference, and over the real one it carries
+		// more parameters than a statement may. `batches` absorbs the empty
+		// case too — the bulk form builds its column list from the rows.
+		for (const batch of batches(of(rows.positions)))
+			await tx`INSERT INTO hero_position_stats ${tx(batch)}`;
+		for (const batch of batches(of(rows.heroes)))
+			await tx`INSERT INTO hero_stats ${tx(batch)}`;
+		for (const batch of batches(of(rows.matchups)))
+			await tx`INSERT INTO hero_matchups ${tx(batch)}`;
+		for (const batch of batches(of(rows.synergies)))
+			await tx`INSERT INTO hero_synergies ${tx(batch)}`;
 		// Inside, so that the statistics and the verdict over them commit
 		// together: a connection lost between the two would otherwise leave a
 		// snapshot at `building` that nothing afterwards has cause to mark.
