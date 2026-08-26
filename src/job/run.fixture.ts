@@ -1,7 +1,6 @@
 /**
  * What a suite driving the entry point needs: a whole run's dependencies over
- * the source `ingest.fixture.ts` scripts, a bundle directory per case, and a
- * connection whose build refuses.
+ * the source `ingest.fixture.ts` scripts and a bundle directory per case.
  *
  * Its own file rather than the suite's, because the outcome cases and the
  * end-to-end case in `export/pipeline.test.ts` both drive a whole run and
@@ -61,29 +60,4 @@ export function bundles(): () => string {
 		made.push(dir);
 		return dir;
 	};
-}
-
-/**
- * The same connection with the build's own transaction refusing.
- *
- * A whole run opens exactly two: the ingest's staging write and, after it, the
- * build's statistics write. So the second is the build's, and counting them is
- * how a raise is put inside the build without the ingest that feeds it failing
- * first. A stub for the reason `build.fixture.ts`'s own is — every constraint
- * on the tables the build writes is mirrored on the staging table it reads
- * from, so no row the schema admits produces this raise.
- */
-export function refusingTheBuild(sql: SQL): SQL {
-	let opened = 0;
-	return new Proxy(sql, {
-		get(target, key) {
-			const held = Reflect.get(target, key);
-			if (key !== "begin")
-				return typeof held === "function" ? held.bind(target) : held;
-			return (...args: unknown[]) =>
-				++opened > 1
-					? Promise.reject(new Error("the statistics write refused"))
-					: (held as (...a: unknown[]) => Promise<unknown>).apply(target, args);
-		},
-	});
 }

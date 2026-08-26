@@ -22,12 +22,14 @@ order, and at least that many pull requests. Each group is measured against
 did, on the seam between the write and the run that fills it, shipping as
 `-11a` and `-11b`, and group 11c is the later arrival that takes their suffix
 rather than a number, so that no merged group is renumbered. Group 12 split on
-the seam between its two requirements, measured at 840 lines whole against a
-gate that fails at 800, and at 584 and 299 apart. The groups below
+the seam between its two requirements, having measured 840 lines whole against
+a gate that fails at 800. What each half measures is the gate line on its own
+pull request and is not restated here — the two do not sum in any case, since
+12b is measured against 12a rather than against `main`. The groups below
 were sized to land under the warn threshold, which is what keeps a reviewer's
-pass over any one of them short. Group 12a is the one that is not, at 584: what
-is over the threshold is its outcome suite, and cutting a suite from the code
-it covers buys a shorter pass over neither.
+pass over any one of them short. Group 12a is the one that is not: what is over
+the threshold is its outcome suite, and cutting a suite from the code it covers
+buys a shorter pass over neither.
 
 This change owns the schema, the database edge and the CI job that exercises
 it — group 4's three tasks, moved here from `snapshot-build`, which closed no

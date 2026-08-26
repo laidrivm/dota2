@@ -10,10 +10,11 @@
 import { describe, expect, test } from "bun:test";
 import { mkdirSync } from "node:fs";
 import { join } from "node:path";
+import type { SQL } from "bun";
 import { cleaner, requiresDatabase, url } from "./db.fixture.ts";
 import { PART, PUBLISHED } from "./export/publish.ts";
 import { icons, PATCH, RUN_AT } from "./ingest/ingest.fixture.ts";
-import { bundles, jobDeps, refusingTheBuild } from "./run.fixture.ts";
+import { bundles, jobDeps } from "./run.fixture.ts";
 import { runJob } from "./run.ts";
 
 requiresDatabase();
@@ -21,6 +22,31 @@ requiresDatabase();
 const clean = cleaner();
 const iconsDir = icons();
 const bundle = bundles();
+
+/**
+ * The same connection with the build's own transaction refusing.
+ *
+ * A whole run opens exactly two: the ingest's staging write and, after it, the
+ * build's statistics write. So the second is the build's, and counting them is
+ * how a raise is put inside the build without the ingest that feeds it failing
+ * first. A stub for the reason `build.fixture.ts`'s own is — every constraint
+ * on the tables the build writes is mirrored on the staging table it reads
+ * from, so no row the schema admits produces this raise.
+ */
+function refusingTheBuild(sql: SQL): SQL {
+	let opened = 0;
+	return new Proxy(sql, {
+		get(target, key) {
+			const held = Reflect.get(target, key);
+			if (key !== "begin")
+				return typeof held === "function" ? held.bind(target) : held;
+			return (...args: unknown[]) =>
+				++opened > 1
+					? Promise.reject(new Error("the statistics write refused"))
+					: (held as (...a: unknown[]) => Promise<unknown>).apply(target, args);
+		},
+	});
+}
 
 /** What a run that failed was meant to have left untouched. */
 const PREVIOUS = '{"snapshotId":0}';
@@ -221,8 +247,10 @@ describe.skipIf(url === undefined)("a run's one outcome", () => {
 
 		// Before the connection: a run with nowhere to publish to has no reason
 		// to open one, and the variable rather than a stack is what a deployment
-		// reads off a failed run.
+		// reads off a failed run — which is the one line asserted below, an
+		// uncaught throw being how the same exit code arrives with a dump.
 		expect(run.exitCode).not.toBe(0);
+		expect(run.stderr.toString().trim().split("\n")).toHaveLength(1);
 		expect(run.stderr.toString()).toContain("BUNDLE_DIR");
 	});
 });
