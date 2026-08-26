@@ -14,6 +14,7 @@
 import { afterEach, beforeEach, describe, expect, jest, test } from "bun:test";
 import {
 	client,
+	json,
 	limited,
 	ok,
 	paced,
@@ -173,6 +174,58 @@ describe("the ceilings the client paces under", () => {
 			SECOND,
 			SECOND,
 		]);
+	});
+
+	/**
+	 * The ceilings are followed rather than remembered: the one that binds is
+	 * the one the last response stated. Issued in turn, as the pulls issue
+	 * them — a burst is released on the ceiling known when it starts, so it
+	 * cannot tell a client that reads every response from one that read the
+	 * first.
+	 */
+	// spec: snapshot-ingest/a-window-at-its-stated-ceiling
+	test("the ceiling that binds is the last one stated [103]", async () => {
+		const { fetch, calls } = stub([
+			paced({ second: { limit: 8, remaining: 7 } }),
+			paced({ second: { limit: 2, remaining: 1 } }),
+		]);
+		const query = client(fetch);
+
+		await settle(
+			(async () => {
+				await query(Q);
+				await query(Q);
+				await query(Q);
+			})(),
+		);
+
+		const first = calls[0]?.at ?? 0;
+		// The second goes out under the eight the first response stated. The
+		// third is held by the two the second stated: a client still holding
+		// eight would issue it at once.
+		expect(calls.map((call) => call.at - first)).toEqual([0, 0, SECOND]);
+	});
+
+	/**
+	 * A first request that fails still has to release the burst held on it.
+	 * The gate the cold start closes is opened by the attempt completing rather
+	 * than by it succeeding — otherwise a run whose first request is refused
+	 * hangs every other caller for as long as the process lives.
+	 */
+	// spec: snapshot-ingest/a-window-at-its-stated-ceiling
+	test("a first request that fails releases the burst waiting on it", async () => {
+		const { fetch, calls } = stub([
+			json({ errors: [{ message: "no" }] }),
+			paced({ second: { limit: 8, remaining: 7 } }),
+		]);
+		const query = client(fetch);
+
+		const outcomes = await settle(
+			Promise.allSettled(Array.from({ length: 3 }, () => query(Q))),
+		);
+
+		expect(outcomes[0]?.status).toBe("rejected");
+		expect(calls).toHaveLength(3);
 	});
 
 	/**
