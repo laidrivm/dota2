@@ -174,9 +174,10 @@ neither. Clone that repo and run, from its root:
 ./link.sh all <path-to-d2ass>
 ```
 
-That supplies every command the pre-PR sequence names — `/zombies`, `/warm`,
-`/triage`, `/coderabbit-local`. `/ponytail-review` comes from the ponytail
-plugin instead, and is available rather than a gate.
+That supplies every slash command the pre-PR sequence names — `/zombies`,
+`/warm`, `/triage`, `/coderabbit-local`; its first step is `bun run
+diff-budget`, a script in this repository. `/ponytail-review` comes from the
+ponytail plugin instead, and is available rather than a gate.
 
 ## Dependency hygiene
 

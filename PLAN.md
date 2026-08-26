@@ -306,7 +306,8 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       `openspec/specs/context-budget/spec.md` §*A fence stands where it is
       stepped on* justifies the comment rule with "`/ponytail-review` runs over
       every diff looking for what to cut". It no longer does — it left the
-      pre-PR sequence on 2026-08-26 for finding nothing in eight branches. The
+      pre-PR sequence on 2026-08-26, having returned eight findings across
+      eight branches with no defect among them. The
       requirement stands on its own second reason, that no reader runs `git log
       -S` before editing, so this is an overstated clause rather than a broken
       criterion; correcting it is a delta spec, not an edit here.
