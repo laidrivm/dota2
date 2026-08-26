@@ -347,7 +347,7 @@ their criteria over what 5a already renders, as 4c was over 4a and 4b.
 
 ## 6. The stabilizing flag and the client's acceptance
 
-- [ ] 6.1 Write the stabilizing tests: true one day short of `t_max` after a
+- [x] 6.1 Write the stabilizing tests: true one day short of `t_max` after a
       major patch's `detected_at`, false at exactly `t_max` [32]; false for a
       letter patch however recent [33]; a `created_at` whose offset puts it in
       a later local date than its UTC one counts by UTC [57]. (Req:
