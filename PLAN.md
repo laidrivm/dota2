@@ -135,8 +135,11 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       refuses a snapshot: `-4a` the transition and the checks a count and a
       sum decide, `-4b` the checks a bound and a missing row decide, `-4c` the
       four outcomes the unmeasured-component requirement names, `-4d`
-      retention — PRs #183, #184 and two more. Group 5 is where the next
-      session starts.
+      retention — PRs #183, #184 and two more. Group 5 splits in three for the
+      same reason, one requirement each: `-5a` the selection and the render
+      whole, `-5b` the camelCase boundary, `-5c` the pair matrices. The render
+      is whole in 5a because half a bundle is not one, and `stabilizing` ships
+      from it as `false` — the stub at group 6's seam.
       Owns no *deployed* infrastructure — the production Postgres service, the
       schedule and the failure alert are Task 7's, and none of them gates it.
 - [ ] **Task 7** — the whole deployment: Docker image, compose (`app` +
