@@ -61,7 +61,10 @@ describe("how a bundle reaches the served name", () => {
 		// A rename points the name at a different file; a write to the name in
 		// place keeps the file and passes through a state where its bytes are
 		// neither bundle. Measured: rewriting a path leaves its inode
-		// untouched, so this is the assertion a direct write fails.
+		// untouched, so this is the assertion a direct write fails. Not a
+		// number the filesystem might reuse, either — the second publication's
+		// file exists alongside the first's before the move, so the two cannot
+		// be handed the same inode.
 		expect(statSync(join(dir, PUBLISHED)).ino).not.toBe(before);
 		// The whole bundle rather than its id: what the route serves is these
 		// bytes, and a write that dropped or reshaped the rest of them would
