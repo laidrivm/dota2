@@ -139,8 +139,6 @@ async function write(
 
 	await sql.begin(async (tx) => {
 		// `snapshot_id` added here, being the one field `rows.ts` cannot know.
-		// Guarded as `staging.ts` guards its own: the bulk form builds its column
-		// list from the rows, and an empty array has none.
 		const of = (written: { [key: string]: unknown }[]) =>
 			written.map((row) => ({ snapshot_id: snapshotId, ...row }));
 		// Batched for the reason `staging.ts`'s writes are: the matchup matrix
