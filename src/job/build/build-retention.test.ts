@@ -1,12 +1,16 @@
 /**
  * What retention keeps and what it drops.
  *
- * The count is the easy half. The other is that a count alone would be safe
- * only while builds are at most daily — so the snapshot the current blend
- * still reads `wr_old` from is kept whatever its age, and stops being kept
- * the moment the prior it feeds has decayed to nothing. Both directions are
- * here, because an implementation exempting every patch's newest published
- * snapshot passes the first two cases and fails the third.
+ * The count is the easy half. The rest is what the count would carry off: the
+ * snapshot the current blend still reads `wr_old` from, kept whatever its age
+ * and kept no longer once that prior has decayed to nothing; and the newest
+ * published snapshot, which a run of failing builds walks out of a count taken
+ * over snapshots at any status.
+ *
+ * Each exemption is here in both directions, because the wrong shape of it
+ * still passes half the cases: exempting every patch's newest published
+ * snapshot passes [48] and fails [90], and exempting none passes [90] and
+ * fails [48] and [91].
  */
 import { describe, expect, test } from "bun:test";
 import { cleaner, requiresDatabase, url } from "../db.fixture.ts";
@@ -14,6 +18,7 @@ import {
 	BUILT_AT,
 	NEW_PATCH,
 	OLD_PATCH,
+	OTHER,
 	seeded,
 	stage,
 } from "./build.fixture.ts";
@@ -98,6 +103,22 @@ describe.skipIf(url === undefined)("what retention keeps", () => {
 		// Thirty snapshots of this patch fill the count by themselves, so the
 		// prior's is the thirty-first by age and survives only by being exempt.
 		expect(await survives(sql, prior)).toBe(true);
+	});
+
+	test("thirty failing builds do not carry off the published one [91]", async () => {
+		const sql = await seeded(clean);
+		await stage(sql, NEW_PATCH);
+		const published = await buildSnapshot(sql, NEW_PATCH, BUILT_AT);
+		// Every build after this one has a hero fewer than the published
+		// snapshot holds, so the count refuses it — and a refused build leaves
+		// its row behind, which is what walks the published one out of a count
+		// taken over snapshots at any status.
+		await sql`DELETE FROM staging_hero_stats
+			WHERE patch_id = ${NEW_PATCH} AND hero_id = ${OTHER}`;
+
+		await repeatedly(sql, NEW_PATCH, BUILT_AT, 30);
+
+		expect(await survives(sql, published)).toBe(true);
 	});
 
 	// spec: snapshot-build/a-prior-that-has-decayed

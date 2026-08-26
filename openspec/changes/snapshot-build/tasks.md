@@ -234,7 +234,9 @@ retention, which is a requirement of its own with no validation in it.
       `wr_old` the prior still weighs [48]; and the same 30 built past the
       window that prior decays over drop it with the rest [90], which is the
       reading the delta spec gains here — without it an exemption covering
-      every patch's newest published snapshot passes both other cases. (Req:
+      every patch's newest published snapshot passes both other cases; and
+      thirty *failing* builds do not carry off the last published snapshot
+      [91], the count being taken over snapshots at any status. (Req:
       snapshot-build — Snapshot retention)
 - [x] 4.4a Implement the `published` transition and the two checks a count
       and a sum decide before it: the hero count against the newest published
@@ -253,8 +255,11 @@ retention, which is a requirement of its own with no validation in it.
       row can outlive its snapshot, exempting from the count the newest
       published snapshot of any patch a blend may still read `wr_old` from —
       which is the `prior_patch_id` this build resolved, NULL exactly when the
-      prior has decayed and the exemption should stop. In the transaction that
-      settles the status, so a build leaves the database whole or untouched.
+      prior has decayed and the exemption should stop — and the newest
+      published snapshot itself, which `snapshot-export` renders from and a run
+      of failing builds would otherwise walk out of the count. In the
+      transaction that settles the status, so a build leaves the database whole
+      or untouched.
       (Req: snapshot-build — Snapshot retention)
 
 ## 5. Rendering the bundle

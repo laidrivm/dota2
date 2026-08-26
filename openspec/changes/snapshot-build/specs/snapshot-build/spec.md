@@ -305,6 +305,12 @@ patch a blend may still read `wr_old` from — a count alone would be safe only
 while builds are at most daily, and nothing in this change bounds how often
 the job runs.
 
+It SHALL retain the newest published snapshot itself on the same terms, for
+the same reason one patch back: the count is over snapshots at any status, so
+a run of builds that fail — which leave their rows behind — pushes the last
+published one out of it, and `snapshot-export` renders from exactly that
+snapshot. The two exemptions are one row each and often the same row.
+
 #### Scenario: The thirty-first snapshot
 
 - **WHEN** a build completes while 30 snapshots already exist
