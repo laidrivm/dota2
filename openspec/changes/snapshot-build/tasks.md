@@ -436,9 +436,15 @@ build between them.
       that resolves its source per request, leaving the font routes static.
       (Req: snapshot-export — The served URL answers from the published
       bundle)
-- [ ] 8.4 Implement the ETag as a hash of the served bytes, cached against the
+- [x] 8.4 Implement the ETag as a hash of the served bytes, cached against the
       resolved source path and `mtimeNs` so it is paid once per publication
-      rather than per request and cannot survive a change of source, and the 304 answer to a matching `If-None-Match`. (Req:
+      rather than per request and cannot survive a change of source, and the 304 answer to a matching `If-None-Match`.
+      The key's `mtimeNs` half is what [50] reaches — a validator taken from
+      the timestamp fails there. Its path half is reached by no case and can
+      be by none: it separates the two sources only where their timestamps
+      agree to the nanosecond, and `utimesSync` takes milliseconds, so the
+      collision cannot be arranged. It stays for what it prevents — a client
+      told stale bytes are the ones it holds — at the cost of a string. (Req:
       snapshot-export — The served snapshot is revalidated by ETag)
 - [ ] 8.5 Write the end-to-end test: staging seeded from the fixture builds,
       exports, and the served bundle is accepted by the client's loader [45].

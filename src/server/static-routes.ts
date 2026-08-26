@@ -5,6 +5,7 @@
  * the HTML entry point (which would pull in the whole bundler).
  */
 
+import { statSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { PUBLISHED } from "../job/export/publish.ts";
 
@@ -65,7 +66,7 @@ const FILE_KINDS: Record<string, { type: string; cache: string }> = {
 type Route =
 	| Response
 	| ((request: Request) => Response)
-	| (() => Promise<Response>);
+	| ((request: Request) => Promise<Response>);
 
 /**
  * The image names the mirror holds, or none where it holds nothing yet — a
@@ -112,6 +113,54 @@ const iconRoute =
 	};
 
 /**
+ * The validator last computed, and the file state it was computed from.
+ *
+ * The key is the resolved path *and* `mtimeNs`, and both halves earn their
+ * place. The path, because this route has two sources and a key that forgets
+ * which one it read hands the previous source's validator to the next. The
+ * nanoseconds, because two writes inside one millisecond share a millisecond
+ * timestamp — which is why `dist-routes.ts` reads `mtimeNs` for its listing
+ * cache as well.
+ *
+ * One slot, because one process serves one publication directory. A second
+ * server in the same process — which is what this route's own suite runs —
+ * finds a key that does not match and hashes again, so the cache costs
+ * accuracy nothing and buys nothing there either.
+ *
+ * No case reaches the path's half, and none can: it separates the two sources
+ * only where their timestamps coincide to the nanosecond, and `utimesSync`
+ * takes milliseconds — so a collision cannot be arranged from here, and
+ * waiting for one means waiting for two files written years apart to agree.
+ * It stays because what it prevents is a client being told stale bytes are
+ * the ones it holds, and it costs a string.
+ */
+let taggedFor = "";
+let tag = "";
+
+/**
+ * A validator for the bytes at `file`, computed once per publication.
+ *
+ * A hash of the bytes, not of `mtime` and size: those answer *was this file
+ * rewritten*, where the client is asking *is this the payload I hold*, and a
+ * re-export writing identical content would cost every returning client the
+ * whole bundle again. The `stat` is what each request pays; the hash is paid
+ * when the file behind the name changes.
+ */
+async function validator(file: string): Promise<string> {
+	const key = `${file}:${statSync(file, { bigint: true }).mtimeNs}`;
+	if (key !== taggedFor) {
+		// SHA-256 over a wyhash: both are one line, and only one of them makes
+		// a collision — a changed bundle a returning client is told it already
+		// holds — something nobody has to reason about.
+		tag = `"${new Bun.CryptoHasher("sha256")
+			.update(await Bun.file(file).bytes())
+			.digest("hex")}"`;
+		taggedFor = key;
+	}
+	return tag;
+}
+
+/**
  * The bundle if one has been published, and the committed fixture otherwise.
  *
  * A per-request lookup rather than a prebuilt `Response` because this route's
@@ -119,19 +168,39 @@ const iconRoute =
  * afterwards. A map built at startup would serve the fixture until a restart,
  * which is the same reason the icon route resolves its listing per request.
  *
- * Both answers are revalidated: the URL is republished under one name, so
- * what a client holds is never fresh on its own account.
+ * Both answers are revalidated: the URL is republished under one name, so what
+ * a client holds is never fresh on its own account — it asks, and a client
+ * holding the current bytes is told so in a header rather than sent them
+ * again.
  */
-const snapshotRoute = (dir: URL) => async (): Promise<Response> => {
-	const bundle = fileURLToPath(new URL(PUBLISHED, dir));
-	const file = (await Bun.file(bundle).exists()) ? bundle : snapshotFile;
-	return new Response(Bun.file(file), {
-		headers: {
-			"content-type": "application/json; charset=utf-8",
-			"cache-control": "no-cache",
-		},
-	});
-};
+const snapshotRoute =
+	(dir: URL) =>
+	async (request: Request): Promise<Response> => {
+		const bundle = fileURLToPath(new URL(PUBLISHED, dir));
+		const file = (await Bun.file(bundle).exists()) ? bundle : snapshotFile;
+		const etag = await validator(file);
+		// Compared whole against the one validator this URL ever offers.
+		// ponytail: no list, no `*`, no weak comparison — the only sender is
+		// the client this repository ships, which echoes back what it was
+		// given; a proxy that rewrites the header gets the bundle instead of a
+		// 304, which is correct and merely not cheap.
+		if (request.headers.get("if-none-match") === etag)
+			// The validator and the freshness rule, and no `content-type`: a
+			// 304 describes what the client already holds, and repeating the
+			// representation's own headers over a body that is not there is
+			// what RFC 9110 tells a server not to do.
+			return new Response(null, {
+				status: 304,
+				headers: { "cache-control": "no-cache", etag },
+			});
+		return new Response(Bun.file(file), {
+			headers: {
+				"content-type": "application/json; charset=utf-8",
+				"cache-control": "no-cache",
+				etag,
+			},
+		});
+	};
 
 export function staticRoutes(
 	icons: URL = iconDir,
