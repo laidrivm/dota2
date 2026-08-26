@@ -13,6 +13,7 @@
  * fails [48] and [91].
  */
 import { describe, expect, test } from "bun:test";
+import type { SQL } from "bun";
 import { cleaner, requiresDatabase, url } from "../db.fixture.ts";
 import {
 	BUILT_AT,
@@ -30,7 +31,7 @@ const clean = cleaner();
 
 /** `n` builds of one patch at one instant, returning every id in order. */
 const repeatedly = async (
-	sql: Awaited<ReturnType<typeof seeded>>,
+	sql: SQL,
 	patchId: string,
 	at: Date,
 	n: number,
@@ -42,10 +43,7 @@ const repeatedly = async (
 };
 
 /** Whether the snapshot is still there at all. */
-const survives = async (
-	sql: Awaited<ReturnType<typeof seeded>>,
-	id: number,
-): Promise<boolean> =>
+const survives = async (sql: SQL, id: number): Promise<boolean> =>
 	(await sql`SELECT snapshot_id FROM snapshots WHERE snapshot_id = ${id}`)
 		.length === 1;
 
