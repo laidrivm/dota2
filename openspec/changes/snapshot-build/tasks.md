@@ -288,13 +288,24 @@ their criteria over what 5a already renders, as 4c was over 4a and 4b.
       write at all, and the non-zero exit is the entry point's answer to the
       raise — both arrive with 7.2's publication. (Req: snapshot-export — The
       bundle is rendered from the newest published snapshot)
-- [ ] 5.2 Write the shape tests: every key at every depth is a camelCase name
-      or a decimal integer string, so `patch-id` and `PatchId` fail as
-      `patch_id` does, and an undeclared key fails too [34];
+- [x] 5.2 Implement the key check and write the shape tests. The criterion
+      says the export *fails* on a key of neither kind, so this is a check the
+      render runs before returning, not cases alone: every key at every depth
+      is a camelCase name or a decimal integer string, so `patch-id` and
+      `PatchId` fail as `patch_id` does, and an undeclared key fails too [34];
       `patch.isMajor` is a JSON boolean and `createdAt` an ISO 8601 timestamp
       carrying an offset, while `patch.detectedAt` stays the bare calendar
-      date the shipped contract already holds [35]. (Req: snapshot-export —
-      The bundle's keys are camelCase)
+      date the shipped contract already holds [35]. Three rules, each with a
+      case that fails when it alone is removed — which took writing the
+      spelling case against what the refusal *says*, the declared set having
+      refused those keys anyway and hidden the pattern. A key the contract
+      declares and the render dropped fails too: a check over what is present
+      cannot see what is absent. The declared sets are the contract in a
+      second form, unavoidably — the interfaces are erased before the bundle
+      exists — so the shipped fixture is walked through the check, and a key
+      added to `src/types.ts` and the fixture without a line here fails.
+      Value types are 6.4's. (Req: snapshot-export — The bundle's keys are
+      camelCase)
 - [ ] 5.3 Write the matrix tests: a synergy stored once appears under both
       hero ids with the same value [36]; `matchups[b][a]` negates
       `matchups[a][b]` [37]; a hero's `positions` omits every position it was

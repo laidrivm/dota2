@@ -19,6 +19,7 @@ import type {
 	SnapshotBundle,
 	SynergyMatrix,
 } from "../../types.ts";
+import { checkKeys } from "./keys.ts";
 
 type HeroRow = {
 	hero_id: number;
@@ -95,7 +96,7 @@ export async function renderBundle(sql: SQL): Promise<SnapshotBundle> {
 	const aliasesOf = byHero(aliases);
 	const positionsOf = byHero(positions);
 
-	return {
+	const bundle: SnapshotBundle = {
 		snapshotId: Number(id),
 		createdAt: snapshot.created_at.toISOString(),
 		patch: {
@@ -129,6 +130,12 @@ export async function renderBundle(sql: SQL): Promise<SnapshotBundle> {
 			),
 		),
 	};
+	// Before it is returned, so a bundle whose keys the client cannot read
+	// never reaches the caller that would publish it. The types above cannot
+	// stand in for this: they are gone by the time these objects exist, and
+	// two of them are built by `Object.fromEntries` from database rows.
+	checkKeys(bundle);
+	return bundle;
 }
 
 /** Rows of one table by `hero_id`, in the order they were read. */
