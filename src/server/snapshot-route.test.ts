@@ -10,12 +10,12 @@
  * one route whose source moves.
  */
 import { afterAll, beforeAll, expect, test } from "bun:test";
-import { mkdtempSync, rmSync } from "node:fs";
+import { mkdtempSync, rmSync, statSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import rawFixture from "../fixtures/snapshot.json" with { type: "json" };
-import { PART, PUBLISHED } from "../job/export/publish.ts";
+import { PART, PUBLISHED, publishBundle } from "../job/export/publish.ts";
 import type { SnapshotBundle } from "../types.ts";
 import { snapshotDir, staticRoutes } from "./static-routes.ts";
 
@@ -35,6 +35,13 @@ const made: string[] = [];
 afterAll(() => {
 	for (const dir of made) rmSync(dir, { recursive: true, force: true });
 });
+
+/** Publish a bundle carrying `snapshotId` into `dir`, as the export does. */
+const publish = (dir: string, snapshotId: number) =>
+	publishBundle(dir, { ...fixture, snapshotId });
+
+/** What a response offers as its validator, or the empty string for none. */
+const etagOf = (response: Response) => response.headers.get("etag") ?? "";
 
 /** A publication directory of its own, removed when the file finishes. */
 const emptyDir = () => {
@@ -106,10 +113,7 @@ test("a published bundle is served in preference to the fixture [29]", async () 
 		fixture.snapshotId,
 	);
 
-	await Bun.write(
-		join(dir, PUBLISHED),
-		JSON.stringify({ ...fixture, snapshotId: PUBLISHED_ID }),
-	);
+	await publish(dir, PUBLISHED_ID);
 
 	const response = await fetch(`${at}${SNAPSHOT_URL}`);
 	expect(response.status).toBe(200);
@@ -138,10 +142,7 @@ test("a publication directory whose path needs encoding is read [97]", async () 
 	const spaced = mkdtempSync(join(tmpdir(), "d2ass served "));
 	made.push(spaced);
 	const at = serving(spaced);
-	await Bun.write(
-		join(spaced, PUBLISHED),
-		JSON.stringify({ ...fixture, snapshotId: PUBLISHED_ID }),
-	);
+	await publish(spaced, PUBLISHED_ID);
 
 	expect((await (await fetch(`${at}${SNAPSHOT_URL}`)).json()).snapshotId).toBe(
 		PUBLISHED_ID,
@@ -151,10 +152,7 @@ test("a publication directory whose path needs encoding is read [97]", async () 
 test("the published bundle is revalidated, as the fixture is [42]", async () => {
 	const dir = emptyDir();
 	const at = serving(dir);
-	await Bun.write(
-		join(dir, PUBLISHED),
-		JSON.stringify({ ...fixture, snapshotId: PUBLISHED_ID }),
-	);
+	await publish(dir, PUBLISHED_ID);
 
 	const response = await fetch(`${at}${SNAPSHOT_URL}`);
 
@@ -162,4 +160,82 @@ test("the published bundle is revalidated, as the fixture is [42]", async () => 
 	// never fresh on its own account — it asks, and the answer is cheap.
 	expect(response.headers.get("cache-control")).toBe("no-cache");
 	expect(response.headers.get("content-type")).toStartWith("application/json");
+});
+
+// spec: snapshot-export/a-returning-client
+test("a request carrying the ETag it was given is answered 304 [40]", async () => {
+	const dir = emptyDir();
+	const at = serving(dir);
+	await publish(dir, PUBLISHED_ID);
+	const first = await fetch(`${at}${SNAPSHOT_URL}`);
+
+	const second = await fetch(`${at}${SNAPSHOT_URL}`, {
+		headers: { "if-none-match": etagOf(first) },
+	});
+
+	// Not vacuous on an absent header: an empty `If-None-Match` matching an
+	// empty `ETag` is exactly how a route that offers no validator would pass.
+	expect(etagOf(first)).not.toBe("");
+	expect(second.status).toBe(304);
+	expect(await second.text()).toBe("");
+});
+
+// spec: snapshot-export/a-new-bundle-has-been-published
+test("a request carrying a stale ETag is answered with the new bundle [41]", async () => {
+	const dir = emptyDir();
+	const at = serving(dir);
+	await publish(dir, PUBLISHED_ID);
+	const first = await fetch(`${at}${SNAPSHOT_URL}`);
+
+	await publish(dir, PUBLISHED_ID + 1);
+	const second = await fetch(`${at}${SNAPSHOT_URL}`, {
+		headers: { "if-none-match": etagOf(first) },
+	});
+
+	expect(second.status).toBe(200);
+	expect(etagOf(second)).not.toBe(etagOf(first));
+	expect((await second.json()).snapshotId).toBe(PUBLISHED_ID + 1);
+});
+
+// spec: snapshot-export/a-byte-identical-re-export
+test("a re-export of identical bytes is still answered 304 [50]", async () => {
+	const dir = emptyDir();
+	const at = serving(dir);
+	await publish(dir, PUBLISHED_ID);
+	const first = await fetch(`${at}${SNAPSHOT_URL}`);
+	const before = statSync(join(dir, PUBLISHED), { bigint: true }).mtimeNs;
+
+	// The same bundle published again: a rename puts a different file at the
+	// name, so the timestamp moves and the bytes do not.
+	await publish(dir, PUBLISHED_ID);
+	const second = await fetch(`${at}${SNAPSHOT_URL}`, {
+		headers: { "if-none-match": etagOf(first) },
+	});
+
+	// Asserted, because the case rests on it: had the file not been rewritten,
+	// a validator derived from the timestamp would pass here too.
+	expect(statSync(join(dir, PUBLISHED), { bigint: true }).mtimeNs).not.toBe(
+		before,
+	);
+	expect(second.status).toBe(304);
+});
+
+// spec: snapshot-export/a-new-bundle-has-been-published
+test("the first publication is not served under the fixture's ETag [56]", async () => {
+	const dir = emptyDir();
+	const at = serving(dir);
+	// The fixture, which is what this URL answers until an export runs.
+	const fixtureTag = etagOf(await fetch(`${at}${SNAPSHOT_URL}`));
+
+	await publish(dir, PUBLISHED_ID);
+	const response = await fetch(`${at}${SNAPSHOT_URL}`, {
+		headers: { "if-none-match": fixtureTag },
+	});
+
+	// The source changed, not just the file: a validator that forgot which of
+	// the two it had read would hand the fixture's answer to the bundle.
+	expect(fixtureTag).not.toBe("");
+	expect(response.status).toBe(200);
+	expect(etagOf(response)).not.toBe(fixtureTag);
+	expect((await response.json()).snapshotId).toBe(PUBLISHED_ID);
 });
