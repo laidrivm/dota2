@@ -138,8 +138,11 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       retention — PRs #183, #184 and two more. Group 5 splits in three for the
       same reason, one requirement each: `-5a` the selection and the render
       whole, `-5b` the camelCase boundary, `-5c` the pair matrices. The render
-      is whole in 5a because half a bundle is not one, and `stabilizing` ships
-      from it as `false` — the stub at group 6's seam.
+      is whole in 5a because half a bundle is not one, and `stabilizing`
+      shipped from it as `false` — the stub group 6 has since replaced with the
+      window *Patch blending with a decaying prior* already fixes, alongside
+      the runtime assertion over the whole payload that the key check grew
+      into.
       Owns no *deployed* infrastructure — the production Postgres service, the
       schedule and the failure alert are Task 7's, and none of them gates it.
 - [ ] **Task 7** — the whole deployment: Docker image, compose (`app` +

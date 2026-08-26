@@ -128,10 +128,11 @@ export async function renderBundle(sql: SQL): Promise<SnapshotBundle> {
 			),
 		),
 	};
-	// Before it is returned, so a bundle whose keys the client cannot read
-	// never reaches the caller that would publish it. The types above cannot
-	// stand in for this: they are gone by the time these objects exist, and
-	// two of them are built by `Object.fromEntries` from database rows.
+	// Before it is returned, so a bundle the client cannot read — a key it
+	// does not know, or one holding a value of the wrong type — never reaches
+	// the caller that would publish it. The types above cannot stand in for
+	// this: they are gone by the time these objects exist, and two of them are
+	// built by `Object.fromEntries` from database rows.
 	checkBundle(bundle);
 	return bundle;
 }
