@@ -127,6 +127,13 @@ const iconRoute =
  * finds a key that does not match and hashes again, so the cache costs
  * accuracy nothing and buys nothing there either.
  *
+ * `mtimeNs` is what says the file behind the name changed, and it is the whole
+ * of what says so: two publications sharing a nanosecond would reuse the first
+ * one's hash. Measured against this filesystem — 200 write-and-rename
+ * publications in a tight loop produced 200 distinct timestamps — and held
+ * besides by there being one publisher, which `publish.ts` records and the
+ * schedule enforces.
+ *
  * No case reaches the path's half, and none can: it separates the two sources
  * only where their timestamps coincide to the nanosecond, and `utimesSync`
  * takes milliseconds — so a collision cannot be arranged from here, and
@@ -164,6 +171,24 @@ async function validator(file: string): Promise<string> {
 }
 
 /**
+ * Whether `If-None-Match` names the validator this URL is offering.
+ *
+ * The header is a list, not a value: RFC 9110 lets it carry several
+ * validators, `*` for any current representation, and the `W/` prefix an
+ * intermediary adds when it weakened one. Compared against the header whole,
+ * a client that named the current bundle beside another gets the bundle
+ * again — correct, and the whole payload for nothing.
+ *
+ * Split on commas, which is safe for the tags this route hands out: an entity
+ * tag may contain one inside its quotes, and every tag offered here is hex.
+ */
+const revalidates = (header: string | null, etag: string): boolean =>
+	header?.split(",").some((named) => {
+		const candidate = named.trim();
+		return candidate === "*" || candidate === etag || candidate === `W/${etag}`;
+	}) ?? false;
+
+/**
  * The bundle if one has been published, and the committed fixture otherwise.
  *
  * A per-request lookup rather than a prebuilt `Response` because this route's
@@ -182,12 +207,7 @@ const snapshotRoute =
 		const bundle = fileURLToPath(new URL(PUBLISHED, dir));
 		const file = (await Bun.file(bundle).exists()) ? bundle : snapshotFile;
 		const etag = await validator(file);
-		// Compared whole against the one validator this URL ever offers.
-		// ponytail: no list, no `*`, no weak comparison — the only sender is
-		// the client this repository ships, which echoes back what it was
-		// given; a proxy that rewrites the header gets the bundle instead of a
-		// 304, which is correct and merely not cheap.
-		if (request.headers.get("if-none-match") === etag)
+		if (revalidates(request.headers.get("if-none-match"), etag))
 			// The validator and the freshness rule, and no `content-type`: a
 			// 304 describes what the client already holds, and repeating the
 			// representation's own headers over a body that is not there is

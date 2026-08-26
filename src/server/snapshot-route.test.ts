@@ -244,3 +244,19 @@ test("the first publication is not served under the fixture's ETag [56]", async 
 	expect(etagOf(response)).not.toBe(fixtureTag);
 	expect((await response.json()).snapshotId).toBe(PUBLISHED_ID);
 });
+
+// spec: snapshot-export/a-returning-client
+test("an If-None-Match naming the current ETag among others is 304 [99]", async () => {
+	const dir = emptyDir();
+	const at = serving(dir);
+	await publish(dir, PUBLISHED_ID);
+	const first = await fetch(`${at}${SNAPSHOT_URL}`);
+
+	// What an intermediary sends: a list, and the current validator weakened.
+	const second = await fetch(`${at}${SNAPSHOT_URL}`, {
+		headers: { "if-none-match": `"a1b2", W/${etagOf(first)}` },
+	});
+
+	expect(second.status).toBe(304);
+	expect(await second.text()).toBe("");
+});
