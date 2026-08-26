@@ -47,10 +47,14 @@ describe("the windows a response states", () => {
 	// A ceiling that is not a number bounds nothing, and a zero one would hold
 	// every request for ever rather than pacing any.
 	// spec: snapshot-ingest/a-window-at-its-stated-ceiling
+	// A fractional one is here for the reason the others are not obvious: the
+	// ceiling is compared against a count, so half a request would have
+	// `readyAt` index between two instants and pace the window by nothing.
 	test.each([
 		["unparseable", "abc"],
 		["zero", "0"],
 		["blank", ""],
+		["fractional", "2.5"],
 	])("a %s ceiling states no window", (_, value) => {
 		expect(stated(headers({ "x-ratelimit-limit-day": value })).size).toBe(0);
 	});
