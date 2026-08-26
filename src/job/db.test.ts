@@ -41,6 +41,22 @@ describe("rows batched under the parameter ceiling", () => {
 			expect(size * 5).toBeLessThanOrEqual(65_535);
 	});
 
+	test("a column list naming none falls back to the row's own keys", () => {
+		// Not a division by zero and one batch of everything, which is the
+		// silent wrong answer: a step of `Infinity` overflows the statement
+		// this exists to keep under the ceiling.
+		const rows = Array.from({ length: 13_108 }, () => ({
+			a: 1,
+			b: 2,
+			c: 3,
+			d: 4,
+			e: 5,
+		}));
+		expect([...batches(rows, [])].map((batch) => batch.length)).toEqual([
+			13_107, 1,
+		]);
+	});
+
 	test("the columns counted are the row's own where none are named", () => {
 		// Five keys, so the same split as the case above without saying so.
 		const rows = Array.from({ length: 13_108 }, () => ({

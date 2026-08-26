@@ -72,16 +72,22 @@ const MAX_PARAMETERS = 65_535;
  *
  * `columns` defaults to the keys of the first row because that is what the
  * bulk form itself does when a caller names none — the default mirrors the
- * statement rather than guessing at it. Yields nothing for an empty list,
- * which is also the guard a caller would otherwise write: the statement an
- * empty array produces is not SQL.
+ * statement rather than guessing at it, and a list naming none falls back the
+ * same way rather than dividing by zero. Yields nothing for an empty list of
+ * rows, which is also the guard a caller would otherwise write: the statement
+ * an empty array produces is not SQL.
+ *
+ * Every row is taken to carry the columns the first one does, which is the
+ * precondition the bulk form itself has and neither checks: a later row with a
+ * key the first lacks reaches the statement as a value with no column.
  */
 export function* batches<T extends object>(
 	rows: readonly T[],
 	columns?: readonly string[],
 ): Generator<readonly T[]> {
 	if (rows.length === 0) return;
-	const width = (columns ?? Object.keys(rows[0] as object)).length;
+	const width = (columns?.length ? columns : Object.keys(rows[0] as object))
+		.length;
 	// `max(1, …)` so a row wider than the ceiling yields batches of one and
 	// fails at the driver naming its own limit, rather than looping forever on
 	// a step of zero here.
