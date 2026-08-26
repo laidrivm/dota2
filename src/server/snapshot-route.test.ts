@@ -178,6 +178,11 @@ test("a request carrying the ETag it was given is answered 304 [40]", async () =
 	expect(etagOf(first)).not.toBe("");
 	expect(second.status).toBe(304);
 	expect(await second.text()).toBe("");
+	// The validator it matched, carried back: a 304 says "what you hold is
+	// current", and a client given no tag to hold has nothing to ask with
+	// next time.
+	expect(etagOf(second)).toBe(etagOf(first));
+	expect(second.headers.get("cache-control")).toBe("no-cache");
 });
 
 // spec: snapshot-export/a-new-bundle-has-been-published

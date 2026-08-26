@@ -427,7 +427,8 @@ build between them.
       both for the same reason. (Req: snapshot-export — The served URL answers
       from the published bundle)
 - [x] 8.2 Write the revalidation tests: a matching `If-None-Match` is
-      answered 304 with an empty body [40]; a republished bundle answers 200
+      answered 304 carrying back the validator it matched, with an empty body
+      [40]; a republished bundle answers 200
       with a different ETag [41]; a byte-identical re-export still answers 304
       [50]; the first publication after the fixture was served answers 200 with
       a new ETag, rather than reusing the fixture's [56]. (Req: snapshot-export
