@@ -115,7 +115,8 @@ describes is rewritten, the rule is a candidate for deletion.
   re-subscribing the listener when that state changes.
 - A guard against malformed input must cover the whole value, not a prefix —
   anchor both ends or parse it.
-- Scope a scan by what it exempts, never by an enumeration of what it covers.
+- Scope a scan by what it exempts, never by an enumeration of what it covers —
+  the collections the scan itself walks included.
 - State a scan's exemptions in the scan; never inherit them from another tool's
   configuration.
 - Scan source left to right carrying string, comment, template-expression and
