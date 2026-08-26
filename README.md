@@ -174,9 +174,9 @@ neither. Clone that repo and run, from its root:
 ./link.sh all <path-to-d2ass>
 ```
 
-That supplies four of the five commands — `/zombies`, `/warm`, `/triage`,
-`/coderabbit-local`. The fifth, `/ponytail-review`, comes from the ponytail
-plugin instead.
+That supplies every command the pre-PR sequence names — `/zombies`, `/warm`,
+`/triage`, `/coderabbit-local`. `/ponytail-review` comes from the ponytail
+plugin instead, and is available rather than a gate.
 
 ## Dependency hygiene
 
