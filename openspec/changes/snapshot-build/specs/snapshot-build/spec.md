@@ -317,3 +317,12 @@ the job runs.
   letter patch detected 2 days ago
 - **THEN** the newest published snapshot of the previous patch SHALL still be
   present, so the blend has the `wr_old` its prior still weighs
+
+#### Scenario: A prior that has decayed
+
+- **WHEN** the same 30 snapshots are built past the window the current patch's
+  prior decays over
+- **THEN** the previous patch's newest published snapshot SHALL go with the
+  rest: no blend reads `wr_old` from it any longer, and what the exemption
+  holds back is the snapshot a blend still weighs rather than every patch's
+  last one
