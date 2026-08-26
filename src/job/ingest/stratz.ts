@@ -74,11 +74,16 @@ const retry = (message: string): Attempt => ({ kind: "retry", message });
 async function reserve(
 	issued: number[],
 	ceilings: Map<string, Ceiling>,
+	blockedUntil: () => number,
 ): Promise<void> {
 	for (;;) {
 		const now = Date.now();
 		prune(issued, ceilings, now);
-		const ready = readyAt(issued, ceilings, now);
+		// The later of what the ceilings allow and what a window reported spent
+		// forbids. The second is the client's rather than one caller's: a window
+		// with nothing left in it has nothing left for whoever asks next either,
+		// and the requirement is that no request is issued in the meantime.
+		const ready = Math.max(readyAt(issued, ceilings, now), blockedUntil());
 		if (ready <= now) break;
 		await sleep(ready - now);
 	}
@@ -241,6 +246,17 @@ export function createClient(
 	 */
 	let spent = "";
 
+	/**
+	 * The instant a window reported spent turns, or 0 where none has been.
+	 *
+	 * Held per client for the reason `spent` is: the client is the only thing
+	 * that sees every request, and a window empty for the caller that met it is
+	 * empty for the one that asks next. Without this a second caller paces by
+	 * counters that still show room — the key having been spent elsewhere — and
+	 * issues into the window this one is waiting out.
+	 */
+	let blocked = 0;
+
 	return async function query(document, variables) {
 		if (spent !== "") throw new Error(spent);
 		const body = JSON.stringify({ query: document, variables });
@@ -252,7 +268,7 @@ export function createClient(
 		let waits = 0;
 		for (let n = 1; n <= ATTEMPTS; ) {
 			if (answered !== undefined && issued.length > 0) await seen;
-			await reserve(issued, ceilings);
+			await reserve(issued, ceilings, () => blocked);
 			// Read again after the waits above and not only on the way in: both
 			// can hold a caller for a whole window, and another caller meeting a
 			// spent one meanwhile is exactly the case the verdict is terminal
@@ -270,6 +286,7 @@ export function createClient(
 			if (outcome.kind === "wait") {
 				if (++waits > ATTEMPTS)
 					throw new Error(`${outcome.message}; ${waits - 1} waits made`);
+				blocked = Math.max(blocked, Date.now() + outcome.span);
 				await sleep(outcome.span);
 				continue;
 			}

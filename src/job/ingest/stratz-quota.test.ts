@@ -57,6 +57,35 @@ describe("a window with nothing left", () => {
 		expect(calls[1]?.at).toBe((calls[0]?.at ?? 0) + MINUTE);
 	});
 
+	/**
+	 * "Issuing no request in the meantime" is the client's, not one caller's: a
+	 * window with nothing left in it has nothing left for whoever asks next.
+	 * A second caller paces by counters that still show room — the key having
+	 * been spent elsewhere — and would issue straight into the window the first
+	 * is waiting out.
+	 */
+	// spec: snapshot-ingest/a-refillable-window-reports-nothing-remaining
+	test("a spent window holds every caller, not the one that met it [105]", async () => {
+		const { fetch, calls } = stub([
+			paced({
+				minute: { limit: 150, remaining: 0 },
+				day: { limit: 15_000, remaining: 14_000 },
+			}),
+			ok(),
+		]);
+		const query = client(fetch);
+
+		await settle(Promise.all([query(Q), query(Q)]));
+
+		expect(calls).toHaveLength(3);
+		// Neither the first's retry nor the second caller's request goes out
+		// before the minute has turned.
+		const first = calls[0]?.at ?? 0;
+		expect(calls.slice(1).every((call) => call.at >= first + MINUTE)).toBe(
+			true,
+		);
+	});
+
 	// spec: snapshot-ingest/the-longest-window-reports-nothing-remaining
 	test("the longest window at zero ends the run naming it [106]", async () => {
 		const { fetch, calls } = stub([
