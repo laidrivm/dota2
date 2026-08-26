@@ -66,13 +66,16 @@ describe.skipIf(url === undefined)("one run, and the next", () => {
 	});
 
 	// spec: snapshot-ingest/two-runs-over-unchanged-data
-	test("a run reports the window and the weeks it covered [36]", async () => {
+	test("a run returns the window and the weeks it covered [36]", async () => {
 		const sql = await clean();
 
 		const covered = await run(sql, dir, RUN_AT);
 
-		// What the requirement asks a run to record, and what group 12 has to
-		// have in hand to report it.
+		// What the ingest hands its caller, which is not yet what the criterion
+		// asks for: *What a run covered is recorded on the snapshot it built* is
+		// about the record, and the entry point is what makes one. This same
+		// window and these same weeks are asserted on the `snapshots` row in
+		// `src/job/coverage.test.ts`, which is where that criterion is closed.
 		expect(covered.window.days).toBe(7);
 		expect(covered.window.cappedBySource).toBe(false);
 		expect(covered.weeks.map((week) => week.toISOString())).toEqual([

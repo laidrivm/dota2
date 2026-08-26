@@ -14,10 +14,11 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type { SQL } from "bun";
 import { ingest } from "./ingest.ts";
+import { DAY_MS } from "./meta.ts";
 import type { Query } from "./stratz.ts";
 
-/** A UTC day, as both windows count one. */
-export const DAY_MS = 86_400_000;
+/** A UTC day, as both windows count one, from the module that counts them. */
+export { DAY_MS } from "./meta.ts";
 
 /** Matches one hero played on one day of the window. */
 const PER_DAY = 10;
