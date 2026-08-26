@@ -9,7 +9,7 @@
  * `short`, `contest_rate` is `contest`, `phase_adj_1` is `p1`.
  *
  * Rendering only. Writing the bundle where it is served, and doing so without
- * a reader ever seeing half of it, is group 7's.
+ * a reader ever seeing half of it, is `publish.ts`'s.
  */
 import type { SQL } from "bun";
 import type {
