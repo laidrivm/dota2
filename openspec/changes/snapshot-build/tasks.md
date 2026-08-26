@@ -317,11 +317,16 @@ their criteria over what 5a already renders, as 4c was over 4a and 4b.
       case of its own with the zone pinned, since a runner in UTC cannot tell
       a date read off the machine's calendar from one read off the UTC
       timeline. (Req: snapshot-export — The bundle's keys are camelCase)
-- [ ] 5.3 Write the matrix tests: a synergy stored once appears under both
+- [x] 5.3 Write the matrix tests: a synergy stored once appears under both
       hero ids with the same value [36]; `matchups[b][a]` negates
-      `matchups[a][b]` [37]; a hero's `positions` omits every position it was
-      never picked on [38]. (Req: snapshot-export — Pair statistics are
-      expanded into full matrices)
+      `matchups[a][b]` exactly, the build having negated one number rather
+      than computing the pair twice [37]; both matrices are keyed by every
+      hero of the pair, which is what "full" means and what tells a derived
+      order from a stored one; and a hero's `positions` omits every position
+      it was never picked on [38]. Each case carries a second assertion that
+      the value is not 0, without which a matrix of zeros — or of absent keys
+      read as `undefined` on both sides — satisfies the symmetry. (Req:
+      snapshot-export — Pair statistics are expanded into full matrices)
 - [x] 5.4 Implement the render: select the newest published snapshot, rename
       keys to camelCase at that boundary, and expand the stored pairs into
       full matrices. Written out field by field rather than derived from the
