@@ -36,6 +36,17 @@ describe.skipIf(url === undefined)("which snapshot is rendered", () => {
 		expect(bundle.heroes).toHaveLength(2);
 	});
 
+	test("the newest of several published snapshots is the one rendered [93]", async () => {
+		const sql = await seeded(clean);
+		await stage(sql, NEW_PATCH);
+		await buildSnapshot(sql, NEW_PATCH, BUILT_AT);
+		const newest = await buildSnapshot(sql, NEW_PATCH, BUILT_AT);
+
+		// Both published, so `status` cannot separate them and only the order
+		// can — which the case above cannot say, having left one `building`.
+		expect((await renderBundle(sql)).snapshotId).toBe(newest);
+	});
+
 	// spec: snapshot-export/nothing-has-ever-been-published
 	test("nothing published leaves nothing to render [27]", async () => {
 		const sql = await seeded(clean);
