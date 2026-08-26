@@ -47,6 +47,19 @@ const SIDE = ["radiant", "dire"];
 const PHASE = ["p1", "p2", "last"];
 const POSITION = ["share", "meta", "sufficient"];
 
+/**
+ * The bundle roots the walk below has already accounted for: two scalars, the
+ * flag, and the two the named checks above descend into. Everything else is a
+ * matrix of matrices keyed by hero id.
+ */
+const CHECKED_ABOVE = [
+	"snapshotId",
+	"createdAt",
+	"stabilizing",
+	"patch",
+	"heroes",
+];
+
 /** Raise unless every key of `bundle` is one the client reads. */
 export function checkKeys(bundle: SnapshotBundle): void {
 	named("", bundle, BUNDLE);
@@ -60,10 +73,18 @@ export function checkKeys(bundle: SnapshotBundle): void {
 		for (const [position, stats] of Object.entries(hero.positions))
 			named(`${at}.positions.${position}`, stats, POSITION);
 	});
-	for (const matrix of ["matchups", "synergies"] as const) {
-		ids(matrix, bundle[matrix]);
-		for (const [hero, against] of Object.entries(bundle[matrix]))
-			ids(`${matrix}.${hero}`, against);
+	// Driven by the bundle's own roots, and scoped by what it exempts: every
+	// root not checked above is a matrix keyed by hero id, so a matrix the
+	// contract grows is scanned by being there. Named as a list of what is
+	// *not* one, because that list refuses loudly — a root added to `BUNDLE`
+	// and left out of it reaches `ids`, whose keys are camelCase names and not
+	// integers, so it fails rather than going unscanned.
+	for (const [root, held] of Object.entries(bundle)) {
+		if (CHECKED_ABOVE.includes(root)) continue;
+		const matrix = held as Record<string, object>;
+		ids(root, matrix);
+		for (const [hero, against] of Object.entries(matrix))
+			ids(`${root}.${hero}`, against);
 	}
 }
 
