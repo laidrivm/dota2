@@ -31,10 +31,12 @@ entry, a hook or a CI check leaves this file the way it would leave
   reviewer must check by hand. Never write a walkthrough, a file-by-file
   summary, or the text of an acceptance criterion — CodeRabbit generates
   those on every run.
-- Re-check a pushed branch's PR state before every commit to it, as a call
-  whose output you read before the write — a check chained into the same
-  command as the commit runs but cannot stop it. A merged PR strands anything
-  added afterwards, whichever merge style closed it.
+- Re-check a pushed branch's PR state before every commit to it *and before
+  starting a review pass over it*, as a call whose output you read before the
+  work — a check chained into the same command as the commit runs but cannot
+  stop it. A merged PR strands anything added afterwards, whichever merge
+  style closed it, and a branch that moved under the pass makes the pass's
+  fixes duplicates of what is already there.
 - Commit a session's wrap-up artefacts — the pipeline-yield ledger, a save
   point — to the branch in hand, never a branch of their own.
 - Never reply, comment or review under the user's name anywhere the `gh` deny
