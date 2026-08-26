@@ -959,3 +959,46 @@ was refused, where a second rule refused it anyway and the pattern under test
 could be weakened to anything; one asserting a UTC date, which discriminates
 only under a negative offset and never under the UTC that `bun test` starts in.
 Both were found by breaking the code rather than by reading the case.
+
+## 2026-08-26 — feat/snapshot-build-6 … -8b, and the archive (PRs #191–#196)
+
+- diff-budget: PASS on every branch but group 6, which was WARN at 759 of the
+  800 that fails; no step was re-cut
+- zombies: OPEN → PASS four times — 12 gaps over groups 6, 7, 8a and 8b, 10
+  written as cases, 2 dispositioned without one
+- warm: not run, four times over — no dependency manifest changed all session
+- triage: PASS four times — 3 defects and 4 clarifications, none of which the
+  skill reported itself: every one came from reading the High group or from
+  the grep over what the diff changes
+- coderabbit-local: PASS five times — 3 findings, 3 dispositioned (0 applied,
+  3 skipped or answered in a comment); three of the five branches returned
+  nothing
+- coderabbit: PASS three times — 15 findings over PRs #194, #195 and #196, 15
+  dispositioned (3 applied, 5 rejected with a measurement, 5 skipped, 2 queued
+  as work of their own)
+- Not run: preflight, code-review, review-order, first-five, security-review,
+  checklist, ponytail-review
+
+`/ponytail-review` did not run at all this session — the first since it left
+the sequence on its own record. Nothing was missed that the other steps did
+not catch, which is one session of evidence for the removal rather than
+against it.
+
+The bot's yield inverted this session. `/coderabbit` produced 15 findings to
+`/coderabbit-local`'s 3, and five of those 15 were rejected only because a
+measurement refuted them: two forms of Bun's own route type that fail the
+typecheck at every call here, an `mtimeNs` collision that 200 back-to-back
+publications could not produce, and two claims about spec text that the
+paragraph after the flagged line already answers. A Major that survives
+reading and dies to a probe is the shape to expect from it.
+
+Two of the bot's findings were valid and belonged to neither the branch nor
+the PR: criteria the build satisfies and the spec never stated, in text the
+sync had copied rather than authored. They went to `PLAN.md` as work of their
+own rather than into an archive commit.
+
+`/zombies` twice found the same kind of gap: a predicate table whose entries
+no case reached. Weakening each entry in turn showed five of six unexercised
+in group 6's contract check, and the same probe over group 8b's validator
+showed the 304 carried no `ETag` that any case would notice. Both were
+measured before being written, not guessed.
