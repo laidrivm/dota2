@@ -41,7 +41,7 @@ One fact lives in exactly one file; everything else links to it.
 | `src/job/` | the nightly job's shared edge — the database connection and the schema it applies |
 | `src/job/ingest/` | the pulls, the transport that paces them, and the staging write |
 | `src/job/build/` | turning staging into a snapshot: the arithmetic, and the lifecycle around it |
-| `src/job/export/` | reserved for `snapshot-build`: writing that snapshot out |
+| `src/job/export/` | rendering that snapshot as the bundle the client fetches, and publishing it |
 | `src/server/` | the HTTP server, its two route modules, and what they serve |
 | `checks/` | assertions about this repository's own artefacts — the rules, the permission policy, the commit gates |
 | `scripts/` | executable gates and the dev entry point, each with its tests beside it |
@@ -59,8 +59,9 @@ Three things the table cannot state. The prediction model — `src/model.ts` and
 `src/types.ts` with their tests — sits directly in `src/`, being neither
 client nor job but read by both. `src/job/main.ts` will be the job's entry
 point: a row asserts a tracked file *under* a path, which cannot express a
-path that is itself the file. And `icons/` is where the ingest mirrors hero
-images at runtime; it is gitignored, so no clone has it until a run fills it.
+path that is itself the file. And `icons/` and `snapshot/` are where the job
+writes at runtime — the mirrored hero images, and the bundle the export
+publishes; both are gitignored, so no clone has either until a run fills it.
 
 The table covers the directories that hold code, and leaves out four that
 hold something else: `docs/`, `openspec/` and `tasks/`, whose contents the

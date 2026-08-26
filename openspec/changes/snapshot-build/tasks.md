@@ -425,7 +425,7 @@ build between them.
       [50]; the first publication after the fixture was served answers 200 with
       a new ETag, rather than reusing the fixture's [56]. (Req: snapshot-export
       — The served snapshot is revalidated by ETag)
-- [ ] 8.3 Move `/snapshot.json` out of the prebuilt route map into a handler
+- [x] 8.3 Move `/snapshot.json` out of the prebuilt route map into a handler
       that resolves its source per request, leaving the font routes static.
       (Req: snapshot-export — The served URL answers from the published
       bundle)
