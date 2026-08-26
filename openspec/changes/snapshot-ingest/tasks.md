@@ -24,8 +24,9 @@ did, on the seam between the write and the run that fills it, shipping as
 rather than a number, so that no merged group is renumbered. Group 12 split on
 the seam between its two requirements, having measured 840 lines whole against
 a gate that fails at 800. What each half measures is the gate line on its own
-pull request and is not restated here — the two do not sum in any case, since
-12b is measured against 12a rather than against `main`. The groups below
+pull request and is not restated here — the two do not sum to 840 in any case,
+the split having added the paragraph you are reading and each half having taken
+its own review's fixes afterwards. The groups below
 were sized to land under the warn threshold, which is what keeps a reviewer's
 pass over any one of them short. Group 12a is the one that is not: what is over
 the threshold is its outcome suite, and cutting a suite from the code it covers

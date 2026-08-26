@@ -102,11 +102,11 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       `openspec/changes/snapshot-ingest/`. The schema and the database edge,
       the rate-limited STRATZ client, the reference upserts, the mirrored hero
       images, and the entry point that drives 3a to a published snapshot or a
-      failed one. Groups 1 to 11c are merged, thirteen PRs; group 12, the last,
-      is built and unpushed, split on the seam between its two requirements
-      into `feat/snapshot-ingest-12a` (the entry point) and `-12b` (the
-      coverage record) because whole it measured 840 lines against a gate that
-      fails at 800. 11c
+      failed one. Group 12, the last, split on the seam between its two
+      requirements because whole it measured 840 lines against a gate that
+      fails at 800: `-12a` carried the entry point and is merged as PR #198,
+      leaving `-12b` and the coverage record it writes. Everything before them
+      is merged, thirteen PRs. 11c
       closed the first of the two readings this change left open — every hero
       the reference holds reaches `staging_hero_stats`, the zero-pick row
       included, and the reference is the tables rather than the response that
