@@ -327,10 +327,21 @@ ledger arrives.
 
 ### No new dependency: `fetch`, `Bun.SQL`, and a limiter that is a queue
 
-The pacing the quota needs is "issue no request while eight are already inside
-the last second", which is a timestamp ring and an await. A rate-limiting
-package would be a runtime dependency where the repository has one, for a
-dozen lines whose failure mode is a `429` the retry policy already handles.
+The pacing the quota needs is "issue no request while a window's stated limit
+is already inside that window", which is a timestamp ring and an await — the
+same dozen lines whichever window they hold, instantiated once per window the
+response names. A rate-limiting package would be a runtime dependency where the
+repository has one, for logic whose every input arrives on each response
+anyway.
+
+One ring per window rather than one for the shortest, which is what the first
+implementation held. *Measured 2026-08-26*, against a key stating 8 a second,
+150 a minute, 1500 an hour and 15 000 a day: a run paced on the second window
+alone issued about 226 requests a minute, emptied the minute window forty
+seconds in, and ended with 14 160 daily calls unspent. The windows are not
+nested — holding the shortest says nothing about the longest, and the shortest
+is the one a sequential pull never reaches anyway, its rate being bounded by
+latency rather than by the limiter.
 
 ### Every attempt is bounded by a timeout, because nothing else bounds it
 

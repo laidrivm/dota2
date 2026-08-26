@@ -14,10 +14,13 @@ merged. Numbers 95 to 101 are the `/zombies` run over that settlement, 99 and
 run also named three cases that turned out to be existing criteria applied
 rather than behaviour of their own; they are written into the tasks under the
 criterion they belong to and carry no number, because a number here promises a
-criterion and `openspec/config.yaml` is what makes that a rule.
+criterion and `openspec/config.yaml` is what makes that a rule. Numbers 102 to
+107 came from no review at all: they are the first run against the real API,
+which found the quota requirement pacing one window of the four the service
+states.
 
-Thirteen groups on `feat/snapshot-ingest-1` … `-11c` … `-12a`, `-12b`, in
-order, and at least that many pull requests. Each group is measured against
+Fourteen groups on `feat/snapshot-ingest-1` … `-11c` … `-12a`, `-12b`, `-13a`,
+`-13b`, in order, and at least that many pull requests. Each group is measured against
 `bun run diff-budget` when it is cut and splits again if it is over — group 11
 did, on the seam between the write and the run that fills it, shipping as
 `-11a` and `-11b`, and group 11c is the later arrival that takes their suffix
@@ -439,3 +442,46 @@ is a branch, not a renumbering, on the terms group 11's split took.
 - [x] 12.6 Write the end-to-end test: a seeded source runs ingest → build →
       export and the served bundle is accepted by the client's loader [62].
       (Req: snapshot-ingest — The job carries a run to one outcome)
+
+## 13. Pacing every window the API states
+
+Group 2 paced the second window alone and read any window at zero as the end of
+the run. Both are wrong against the API as measured on 2026-08-26: a run issued
+about 226 requests a minute against a stated 150, emptied the minute window
+forty seconds in, and ended with 14 160 of 15 000 daily calls unspent — while
+the second window it did hold was never the binding one, a sequential pull
+being paced by latency rather than by the limiter.
+
+This group lands after 12b because that is when a run could first reach the
+pair pull at all: until the parameter ceiling was lifted from the staging
+write, every run failed after the pulls rather than during them.
+
+It ships as two pull requests, one per half of the defect, the whole measuring
+977 lines against a gate that fails at 800: `-13a` paces against every window
+(13.1, 13.3) and `-13b` narrows what a spent one means (13.2, 13.4). 13a is the
+half that unblocks a run — with the minute window held, it never empties — and
+13b is the half that stops a window a run outlasts from ending it.
+
+- [x] 13.1 Write the pacing tests: a request is held back when any window's
+      stated limit is already inside that window, not the shortest window's
+      alone [102]; the windows, their ceilings and their lengths are read off
+      the response headers, so a ceiling the service changes is followed with
+      no edit here [103]; a run against a stated minute ceiling issues no more
+      than that many inside any sixty seconds [104]. (Req: snapshot-ingest — A
+      run stays inside the quota the API states)
+- [ ] 13.2 Write the exhaustion tests: a refillable window reporting nothing
+      remaining suspends the run until that window turns and the run then
+      continues [105]; the longest window reporting nothing remaining ends the
+      run failed and the report names that window [106]; a `429` carrying
+      nothing left in the longest window is attempted exactly once, where one
+      carrying nothing left in a shorter window is waited out [107]. (Req:
+      snapshot-ingest — A run stays inside the quota the API states)
+- [x] 13.3 Implement the pacing: one list of issue instants read as a count
+      over the tail of it per window, the ceilings and lengths taken off each
+      response rather than declared, and the arithmetic in a module of its own
+      so it can be read against a case with no timer in front of it. (Req:
+      snapshot-ingest — A run stays inside the quota the API states)
+- [ ] 13.4 Implement the verdict: a window that refills waited out rather than
+      ending the run, the terminal reading narrowed from any window to the
+      longest the response states, and the report naming which one. (Req:
+      snapshot-ingest — A run stays inside the quota the API states)

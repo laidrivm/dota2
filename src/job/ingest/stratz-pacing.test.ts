@@ -1,21 +1,31 @@
 /**
- * The per-second ceiling the API publishes, and the quota verdict that ends a
- * run rather than pacing it.
+ * The ceilings the client paces under — every window the response states, not
+ * the shortest of them.
+ *
+ * A run measured against the real API issued about 226 requests a minute
+ * against a stated 150 because it held the second window alone, so the cases
+ * below state more than one window and check the client against each. The
+ * ceilings are the response's; nothing here restates a number the service
+ * enforces except as the response that carries it.
+ *
+ * What a spent window means is unchanged here and still ends the run on any of
+ * them; narrowing that to the longest is `-13b`'s.
  */
 import { afterEach, beforeEach, describe, expect, jest, test } from "bun:test";
 import {
 	client,
 	limited,
 	ok,
+	paced,
 	Q,
 	raisedBy,
 	settle,
 	stub,
 } from "./stratz.fixture.ts";
 
-/** The API's own per-second ceiling and the span it is counted over. */
-const PER_SECOND = 8;
-const WINDOW_MS = 1000;
+/** The spans the API's window names stand for, which is what pacing waits out. */
+const SECOND = 1_000;
+const MINUTE = 60_000;
 
 beforeEach(() => {
 	jest.useFakeTimers();
@@ -25,62 +35,160 @@ afterEach(() => {
 	jest.useRealTimers();
 });
 
-describe("the ceiling the client paces under", () => {
-	// spec: snapshot-ingest/the-ninth-request-in-a-second
-	test("eight back-to-back requests all go out inside one second [4]", async () => {
-		const { fetch, calls } = stub([ok()]);
+/** `n` queries issued together, run forward until every one has settled. */
+const burst = (query: (q: string) => Promise<unknown>, n: number) =>
+	settle(Promise.all(Array.from({ length: n }, () => query(Q))));
+
+describe("the ceilings the client paces under", () => {
+	// spec: snapshot-ingest/a-window-at-its-stated-ceiling
+	test("a window's stated limit goes out inside that window [102]", async () => {
+		const { fetch, calls } = stub([
+			paced({ second: { limit: 8, remaining: 7 } }),
+		]);
 		const query = client(fetch);
 
-		await settle(
-			Promise.all(Array.from({ length: PER_SECOND }, () => query(Q))),
-		);
+		await burst(query, 8);
 
-		expect(calls).toHaveLength(PER_SECOND);
+		expect(calls).toHaveLength(8);
 		const first = calls[0]?.at ?? 0;
-		expect(calls.every((call) => call.at - first < WINDOW_MS)).toBe(true);
+		expect(calls.every((call) => call.at - first < SECOND)).toBe(true);
 	});
 
-	// The boundary from below: the ceiling is eight, so the eighth is the last
-	// one that owes no wait. A client pacing at seven would fail here and pass
-	// every test above.
-	// spec: snapshot-ingest/the-ninth-request-in-a-second
-	test("the eighth inside one second is not delayed [7]", async () => {
-		const { fetch, calls } = stub([ok()]);
+	// The boundary from below: the ceiling is what the response states, so the
+	// eighth is the last that owes no wait. A client pacing at seven would fail
+	// here and pass every case above.
+	// spec: snapshot-ingest/a-window-at-its-stated-ceiling
+	test("the last request inside the ceiling is not delayed [102]", async () => {
+		const { fetch, calls } = stub([
+			paced({ second: { limit: 8, remaining: 7 } }),
+		]);
 		const query = client(fetch);
 
-		await settle(
-			Promise.all(Array.from({ length: PER_SECOND }, () => query(Q))),
-		);
+		await burst(query, 8);
 
-		expect(calls[PER_SECOND - 1]?.at).toBe(calls[0]?.at);
+		expect(calls[7]?.at).toBe(calls[0]?.at);
 	});
 
-	// spec: snapshot-ingest/the-ninth-request-in-a-second
-	test("the ninth waits a second from the first of the eight [5]", async () => {
-		const { fetch, calls } = stub([ok()]);
+	// spec: snapshot-ingest/a-window-at-its-stated-ceiling
+	test("the request past the ceiling waits the window out [102]", async () => {
+		const { fetch, calls } = stub([
+			paced({ second: { limit: 8, remaining: 7 } }),
+		]);
 		const query = client(fetch);
 
-		await settle(
-			Promise.all(Array.from({ length: PER_SECOND + 1 }, () => query(Q))),
-		);
+		await burst(query, 9);
 
-		expect(calls).toHaveLength(PER_SECOND + 1);
-		expect(calls[PER_SECOND]?.at).toBe((calls[0]?.at ?? 0) + WINDOW_MS);
+		expect(calls).toHaveLength(9);
+		expect(calls[8]?.at).toBe((calls[0]?.at ?? 0) + SECOND);
 	});
 
-	// spec: snapshot-ingest/the-ninth-request-in-a-second
+	// spec: snapshot-ingest/a-window-at-its-stated-ceiling
 	test("a request past the window is not delayed further [6]", async () => {
-		const { fetch, calls } = stub([ok()]);
+		const { fetch, calls } = stub([
+			paced({ second: { limit: 8, remaining: 7 } }),
+		]);
 		const query = client(fetch);
-		await settle(
-			Promise.all(Array.from({ length: PER_SECOND }, () => query(Q))),
-		);
-		const eighth = calls[PER_SECOND - 1]?.at ?? 0;
-		jest.advanceTimersByTime(WINDOW_MS);
+		await burst(query, 8);
+		const eighth = calls[7]?.at ?? 0;
+		jest.advanceTimersByTime(SECOND);
 
 		await settle(query(Q));
 
-		expect(calls[PER_SECOND]?.at).toBe(eighth + WINDOW_MS);
+		expect(calls[8]?.at).toBe(eighth + SECOND);
+	});
+
+	/**
+	 * The defect this group exists for. Ten a minute beside a hundred a second
+	 * is the same shape as 150 a minute beside 8 a second and a hundredth of
+	 * the requests: a client holding the second window alone issues all eleven
+	 * at once, where one holding both waits the minute out for the eleventh.
+	 */
+	// spec: snapshot-ingest/a-window-at-its-stated-ceiling
+	test("a longer window binds where the shorter one does not [104]", async () => {
+		const { fetch, calls } = stub([
+			paced({
+				second: { limit: 100, remaining: 99 },
+				minute: { limit: 10, remaining: 9 },
+			}),
+		]);
+		const query = client(fetch);
+
+		await burst(query, 11);
+
+		expect(calls).toHaveLength(11);
+		// The first ten owe nothing: the minute holds them and the second is
+		// nowhere near its own hundred.
+		expect(calls[9]?.at).toBe(calls[0]?.at);
+		expect(calls[10]?.at).toBe((calls[0]?.at ?? 0) + MINUTE);
+	});
+
+	/**
+	 * Neither window is the one to pace by on its own: the second binds inside
+	 * the first two seconds and the minute binds after them, so a client
+	 * holding either alone lands a request at the wrong instant.
+	 */
+	// spec: snapshot-ingest/a-window-at-its-stated-ceiling
+	test("both windows bind, each where it is the tighter [104]", async () => {
+		const { fetch, calls } = stub([
+			paced({
+				second: { limit: 2, remaining: 1 },
+				minute: { limit: 5, remaining: 4 },
+			}),
+		]);
+		const query = client(fetch);
+
+		await burst(query, 6);
+
+		const first = calls[0]?.at ?? 0;
+		// Two a second: the third and fifth each wait a second on the second
+		// window, and the sixth waits the minute out on the minute window.
+		expect(calls.map((call) => call.at - first)).toEqual([
+			0,
+			0,
+			SECOND,
+			SECOND,
+			2 * SECOND,
+			MINUTE,
+		]);
+	});
+
+	/**
+	 * The ceilings are read rather than declared, so a service that moved one
+	 * is followed with no edit here. Asserted by moving it: the first response
+	 * states two a second, and from then on the client holds two.
+	 */
+	// spec: snapshot-ingest/a-window-at-its-stated-ceiling
+	test("the ceiling paced is the one the response stated [103]", async () => {
+		const { fetch, calls } = stub([
+			paced({ second: { limit: 2, remaining: 1 } }),
+		]);
+		const query = client(fetch);
+
+		await burst(query, 4);
+
+		const first = calls[0]?.at ?? 0;
+		expect(calls.map((call) => call.at - first)).toEqual([
+			0,
+			0,
+			SECOND,
+			SECOND,
+		]);
+	});
+
+	/**
+	 * Before the first response there is no ceiling to hold, so the first
+	 * request goes out unpaced. Stated because it is the one request a client
+	 * cannot pace and a reader would otherwise call a gap.
+	 */
+	// spec: snapshot-ingest/a-window-at-its-stated-ceiling
+	test("a response stating no window paces nothing [103]", async () => {
+		const { fetch, calls } = stub([ok()]);
+		const query = client(fetch);
+
+		await burst(query, 20);
+
+		expect(calls).toHaveLength(20);
+		expect(calls.every((call) => call.at === calls[0]?.at)).toBe(true);
 	});
 });
 
