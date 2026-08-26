@@ -1,3 +1,10 @@
+/**
+ * The routes whose source never moves: the fonts and the icon mirror.
+ *
+ * `/snapshot.json` is `snapshot-route.test.ts`'s — it resolves between a
+ * published bundle and the committed fixture on every request, which is a
+ * different question from these.
+ */
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -47,23 +54,6 @@ beforeAll(async () => {
 afterAll(() => {
 	for (const dir of made) rmSync(dir, { recursive: true, force: true });
 	return server.stop(true);
-});
-
-describe("snapshot route", () => {
-	test("serves the fixture as JSON", async () => {
-		const response = await fetch(`${origin}/snapshot.json`);
-
-		expect(response.status).toBe(200);
-		expect(response.headers.get("content-type")).toStartWith(
-			"application/json",
-		);
-		expect((await response.json()).patch.id).toBe("7.41d");
-	});
-
-	test("is revalidated, since the pipeline republishes this URL", async () => {
-		const response = await fetch(`${origin}/snapshot.json`);
-		expect(response.headers.get("cache-control")).toBe("no-cache");
-	});
 });
 
 describe("font routes", () => {

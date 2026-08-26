@@ -405,7 +405,16 @@ their criteria over what 5a already renders, as 4c was over 4a and 4b.
 
 ## 8. Serving the published bundle
 
-- [ ] 8.1 Write the route tests: a published bundle is served in preference
+Two pull requests, `feat/snapshot-build-8a` and `-8b`: as one step the group
+closes five acceptance criteria where `change-slicing` allows three. The cut
+is by requirement — 8a the served URL and its two sources, 8b the ETag and the
+end-to-end run over both. 8a is shippable on its own: a route that serves the
+published bundle without a validator answers every request in full, which is
+what the URL does today, and 8b makes it cheap. 8.3 therefore ships before
+8.2, which is 8b's, and 8.5 last of all — it exercises the route the pair
+build between them.
+
+- [x] 8.1 Write the route tests: a published bundle is served in preference
       to the fixture [29]; an absent publication directory serves the fixture,
       and so does one that exists but holds no bundle [28] [55]; the published-bundle response carries `cache-control: no-cache`
       [42]. (Req: snapshot-export — The served URL answers from the published
