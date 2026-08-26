@@ -77,6 +77,55 @@ describe("the bundle's keys", () => {
 		expect(said).toContain("contest");
 	});
 
+	test("an undeclared key fails wherever a named object sits [34]", () => {
+		// Every place `named` is called, not the two the cases above reach:
+		// removing the call that walks a hero's side, or its phase, or one
+		// position's statistics, leaves those cases passing.
+		// Cast once: the fixture holds heroes, and every edit below reaches
+		// into the first of them to plant a key the contract does not declare.
+		const hero = (bundle: SnapshotBundle) =>
+			bundle.heroes[0] as unknown as {
+				side: Record<string, unknown>;
+				phase: Record<string, unknown>;
+				positions: Record<string, Record<string, unknown>>;
+			};
+		const places: [string, (bundle: SnapshotBundle) => void][] = [
+			[
+				"the bundle",
+				(bundle) => {
+					(bundle as unknown as Record<string, unknown>).extra = 1;
+				},
+			],
+			[
+				"a hero's side",
+				(bundle) => {
+					hero(bundle).side.mid = 0;
+				},
+			],
+			[
+				"a hero's phase",
+				(bundle) => {
+					hero(bundle).phase.p3 = 0;
+				},
+			],
+			[
+				"a position's statistics",
+				(bundle) => {
+					const [first] = Object.values(hero(bundle).positions);
+					if (first !== undefined)
+						(first as unknown as Record<string, unknown>).rank = 1;
+				},
+			],
+		];
+		for (const [where, edit] of places) {
+			const said = refusal(edited(edit)) ?? "";
+			expect([
+				where,
+				/key (extra|mid|p3|rank) is not one of/.test(said),
+			]).toEqual([where, true]);
+		}
+	});
+
 	test("an id key that is not a decimal integer string fails [34]", () => {
 		// Every place an id key is read, not the two easiest: the matrices are
 		// checked at both levels, and dropping either level or either matrix

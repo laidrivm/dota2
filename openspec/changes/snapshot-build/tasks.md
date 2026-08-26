@@ -306,8 +306,12 @@ their criteria over what 5a already renders, as 4c was over 4a and 4b.
       second form, unavoidably — the interfaces are erased before the bundle
       exists — so the shipped fixture is walked through the check, and a key
       added to `src/types.ts` and the fixture without a line here fails.
-      Value types are 6.4's. (Req: snapshot-export — The bundle's keys are
-      camelCase)
+      Value types are 6.4's. The two timestamp keys are asserted as the
+      instants they are rather than as patterns they fit — a pattern passes
+      for `9999-99-99` — and the UTC slice behind `patch.detectedAt` has a
+      case of its own with the zone pinned, since a runner in UTC cannot tell
+      a date read off the machine's calendar from one read off the UTC
+      timeline. (Req: snapshot-export — The bundle's keys are camelCase)
 - [ ] 5.3 Write the matrix tests: a synergy stored once appears under both
       hero ids with the same value [36]; `matchups[b][a]` negates
       `matchups[a][b]` [37]; a hero's `positions` omits every position it was
