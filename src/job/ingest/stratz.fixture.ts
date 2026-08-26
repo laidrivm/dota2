@@ -74,6 +74,31 @@ export const challenge = (): Reply => async () =>
 export const limited = (headers: Record<string, string>, status = 200): Reply =>
 	json({ data: {} }, { status, headers });
 
+/** What one window of a response states: its ceiling and what is left of it. */
+export type Stated = { limit: number; remaining: number };
+
+/**
+ * The rate-limit headers a response carries, one pair per window named.
+ *
+ * Written as the API writes them — `x-ratelimit-limit-<window>` beside
+ * `x-ratelimit-remaining-<window>` — so a suite states a window by naming it
+ * rather than by spelling two headers
+ * (`docs/context/stratz-probe-2026-08.md`).
+ */
+export const states = (
+	windows: Record<string, Stated>,
+): Record<string, string> =>
+	Object.fromEntries(
+		Object.entries(windows).flatMap(([name, { limit, remaining }]) => [
+			[`x-ratelimit-limit-${name}`, String(limit)],
+			[`x-ratelimit-remaining-${name}`, String(remaining)],
+		]),
+	);
+
+/** A success stating those windows, which is what every paced reply is. */
+export const paced = (windows: Record<string, Stated>): Reply =>
+	limited(states(windows));
+
 /**
  * An attempt that never completes, failing only when its own timeout aborts
  * it — which is what a stalled connection looks like from the client's side.

@@ -10,6 +10,8 @@
  * transport without a network.
  */
 
+import { type Ceiling, prune, readyAt, stated } from "./quota.ts";
+
 /** Where the statistics API answers. */
 const ENDPOINT = "https://api.stratz.com/graphql";
 
@@ -20,12 +22,6 @@ const ENDPOINT = "https://api.stratz.com/graphql";
  * (`docs/context/stratz-probe-2026-08.md`).
  */
 const USER_AGENT = "STRATZ_API";
-
-/** Requests the API admits per second — its own published ceiling. */
-const PER_SECOND = 8;
-
-/** The span that ceiling is counted over. */
-const WINDOW_MS = 1000;
 
 /** Attempts one request gets in total, the first included. */
 const ATTEMPTS = 4;
@@ -81,22 +77,24 @@ function exhausted(headers: Headers): boolean {
 }
 
 /**
- * Hold the caller until fewer than `PER_SECOND` requests sit inside the last
- * window, then record this one. `issued` holds the timestamps still inside
- * that window, oldest first, and so never grows past `PER_SECOND`.
+ * Hold the caller until every window the API stated has room, then record this
+ * request against all of them.
  *
  * The path that does not wait reaches the `push` without an `await`, which is
  * what makes this correct for concurrent callers with no lock: a caller that
  * finds room claims it in the same microtask turn it checked in, so two
  * callers cannot both read the same free slot.
  */
-async function reserve(issued: number[]): Promise<void> {
+async function reserve(
+	issued: number[],
+	ceilings: Map<string, Ceiling>,
+): Promise<void> {
 	for (;;) {
 		const now = Date.now();
-		while (issued.length > 0 && now - (issued[0] as number) >= WINDOW_MS)
-			issued.shift();
-		if (issued.length < PER_SECOND) break;
-		await sleep(WINDOW_MS - (now - (issued[0] as number)));
+		prune(issued, ceilings, now);
+		const ready = readyAt(issued, ceilings, now);
+		if (ready <= now) break;
+		await sleep(ready - now);
 	}
 	issued.push(Date.now());
 }
@@ -114,11 +112,18 @@ function forbidden(headers: Headers): Attempt {
 	);
 }
 
-/** One attempt at one request, bounded by `ATTEMPT_TIMEOUT_MS`. */
+/**
+ * One attempt at one request, bounded by `ATTEMPT_TIMEOUT_MS`.
+ *
+ * `learn` is handed every response's windows before anything else is read off
+ * it, so the pacing that holds the *next* request is the ceiling this one was
+ * answered under rather than the one before it.
+ */
 async function attempt(
 	doFetch: typeof globalThis.fetch,
 	key: string,
 	body: string,
+	learn: (headers: Headers) => void,
 ): Promise<Attempt> {
 	const controller = new AbortController();
 	const timer = setTimeout(() => controller.abort(), ATTEMPT_TIMEOUT_MS);
@@ -134,9 +139,10 @@ async function attempt(
 			signal: controller.signal,
 		});
 
-		// Ahead of every other reading of this response: a window with nothing
-		// left is terminal even where the status is a success, and even where it
-		// is the `429` the retry policy would otherwise take.
+		// Ahead of every other reading of this response: a spent window decides
+		// what happens next even where the status is a success, and even where
+		// it is the `429` the retry policy would otherwise take.
+		learn(response.headers);
 		if (exhausted(response.headers))
 			return quota(
 				"the API reports no quota remaining in one of its rate-limit windows",
@@ -197,15 +203,43 @@ export function createClient(
 		throw new Error("STRATZ_API_KEY is unset or empty; no request was issued");
 
 	/**
-	 * Timestamps of the requests still inside the last window, oldest first.
+	 * The instant of every request still inside the longest window, oldest
+	 * first, and the ceilings the last response stated.
 	 *
-	 * Held per client, and a run is expected to build exactly one. The ceiling
-	 * belongs to the key rather than to the object, so two clients over one key
-	 * would pace to eight each and issue sixteen — a precondition this module
-	 * does not check, because the alternative is module-level state that leaks
-	 * between tests.
+	 * Held per client, and a run is expected to build exactly one. The ceilings
+	 * belong to the key rather than to the object, so two clients over one key
+	 * would each pace to the whole of it and issue twice it — a precondition
+	 * this module does not check, because the alternative is module-level state
+	 * that leaks between tests.
+	 *
+	 * Empty until the first response: a client has nothing to pace by before
+	 * one, so the first request goes out unheld and every one after it is held
+	 * by what the service last said.
 	 */
 	const issued: number[] = [];
+	const ceilings = new Map<string, Ceiling>();
+	const learn = (headers: Headers) => {
+		for (const [name, ceiling] of stated(headers)) ceilings.set(name, ceiling);
+	};
+
+	/**
+	 * Settles once any response has been seen, whatever it stated.
+	 *
+	 * Until then there is nothing to pace by, and a caller issuing several
+	 * requests at once would breach every ceiling before learning one. So
+	 * exactly one request goes out from cold — the one that learns them — and
+	 * any other waits for it. Settled on the attempt rather than on a success,
+	 * because a first request that fails still leaves the client no wiser and
+	 * would otherwise hold every other caller for ever.
+	 */
+	let answered: (() => void) | undefined;
+	const seen = new Promise<void>((resolve) => {
+		answered = resolve;
+	});
+	const sawOne = () => {
+		answered?.();
+		answered = undefined;
+	};
 
 	/**
 	 * Why the run stopped, once a window has reported nothing left. The verdict
@@ -220,8 +254,10 @@ export function createClient(
 		const body = JSON.stringify({ query: document, variables });
 		let last = "";
 		for (let n = 1; n <= ATTEMPTS; n++) {
-			await reserve(issued);
-			const outcome = await attempt(doFetch, key, body);
+			if (answered !== undefined && issued.length > 0) await seen;
+			await reserve(issued, ceilings);
+			const outcome = await attempt(doFetch, key, body, learn);
+			sawOne();
 			if (outcome.kind === "body") return outcome.body;
 			if (outcome.kind === "quota") {
 				spent = outcome.message;

@@ -51,25 +51,31 @@ would write empty staging rows and call the run a success.
 
 ### Requirement: A run stays inside the quota the API states
 
-The client SHALL issue no request while eight have already been issued in the
-preceding second. WHEN a response reports zero remaining in any of its
-rate-limit windows the run SHALL stop without issuing a further request and end
-failed, rather than continuing into a refusal. That verdict is terminal and
-SHALL take precedence over *A request is retried only where retrying can
-succeed*: a `429` reporting zero remaining SHALL NOT be retried, because the
-retry answers a request the service might yet accept and this one it will not
-until the window turns.
+The API states a ceiling for each of several windows, and carries every
+window's limit and what remains of it on every response. The client SHALL hold
+a request back while a window's stated limit has already been issued inside
+that window, and SHALL do so for **every** window the response names rather
+than for the shortest of them.
 
-The ceilings are the API's own, carried on every response, and are read from
-there rather than configured — a number this specification restated would drift
-from the one the service enforces.
+The windows and their ceilings SHALL be read from the response rather than
+configured, each window's length taken from the name the header carries it
+under. A ceiling this specification restated would drift from the one the
+service enforces, and a client pacing only the window it was written against
+empties the ones it was not: the windows are not nested, and holding the
+shortest says nothing about the longest.
 
-#### Scenario: The ninth request in a second
+WHEN a response reports zero remaining in any of its rate-limit windows the run
+SHALL stop without issuing a further request and end failed, rather than
+continuing into a refusal. That verdict is terminal and SHALL take precedence
+over *A request is retried only where retrying can succeed*: a `429` reporting
+zero remaining SHALL NOT be retried, because the retry answers a request the
+service might yet accept and this one it will not until the window turns.
 
-- **WHEN** eight requests have been issued within the preceding second and a
-  ninth is due
-- **THEN** the ninth SHALL NOT be issued until a second has elapsed since the
-  first of those eight
+#### Scenario: A window at its stated ceiling
+
+- **WHEN** a window's stated limit has been issued inside that window and a
+  further request is due
+- **THEN** that request SHALL NOT be issued until the window has turned
 
 #### Scenario: A window reports nothing remaining
 
