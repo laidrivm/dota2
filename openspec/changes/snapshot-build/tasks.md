@@ -325,7 +325,10 @@ their criteria over what 5a already renders, as 4c was over 4a and 4b.
       order from a stored one; and a hero's `positions` omits every position
       it was never picked on [38]. Each case carries a second assertion that
       the value is not 0, without which a matrix of zeros — or of absent keys
-      read as `undefined` on both sides — satisfies the symmetry. (Req:
+      read as `undefined` on both sides — satisfies the symmetry. Mirroring is
+      also read at three heroes, which is the smallest case where the loop
+      meets a key its own pass created; at two the only id it creates is one
+      the entry snapshot never held, so that half went unexercised. (Req:
       snapshot-export — Pair statistics are expanded into full matrices)
 - [x] 5.4 Implement the render: select the newest published snapshot, rename
       keys to camelCase at that boundary, and expand the stored pairs into
