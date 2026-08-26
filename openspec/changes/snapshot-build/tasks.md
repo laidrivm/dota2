@@ -261,8 +261,10 @@ retention, which is a requirement of its own with no validation in it.
       of one patch must not carry off what a build of another would read. And
       the newest published snapshot itself, which `snapshot-export` renders
       from and a run of failing builds would otherwise walk out of the count.
-      In the transaction that settles the status, so a build leaves the
-      database whole or untouched; in `retention.ts`, which is where the
+      In the transaction that settles the status, so the statistics, the
+      status and the deletion commit or roll back together — the `snapshots`
+      row being outside it, which is what a rolled-back build leaves to be
+      marked `failed`. In `retention.ts`, which is where the
       per-file cap cut it and where the count and its exemptions are one
       decision.
       (Req: snapshot-build — Snapshot retention)

@@ -1,8 +1,10 @@
 /**
  * Retention: what a build keeps and what it drops.
  *
- * Called inside the transaction that settles a snapshot's status, so a build
- * either leaves the database whole or leaves it untouched. Lifted out of
+ * Called inside the transaction that settles a snapshot's status, so the
+ * statistics, the status and this commit together or roll back together. The
+ * `snapshots` row itself is outside that transaction and survives a rollback,
+ * which is what leaves the caller something to mark `failed`. Lifted out of
  * `build.ts` when that file reached the per-file cap, which is the seam the
  * cap found: the count and its exemptions are one decision, and nothing else
  * in the build reads them.
@@ -22,8 +24,9 @@ const SEPARATOR = ",";
 
 /** Drop every snapshot the count and the exemptions below leave out. */
 export async function retain(tx: SQL, at: Date): Promise<void> {
-	// Retention, here rather than after the transaction, so a build either
-	// leaves the database whole or leaves it untouched. The statistics rows
+	// Retention runs inside the caller's transaction rather than after it, so
+	// a build never publishes a snapshot it then failed to make room for, and
+	// never drops one for a snapshot that rolled back. The statistics rows
 	// go with the snapshot through the schema's cascade, so this is the
 	// whole of it: no table is named, and one added under that cascade is
 	// collected by carrying it.
