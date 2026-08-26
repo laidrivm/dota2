@@ -149,6 +149,9 @@ let tag = "";
 async function validator(file: string): Promise<string> {
 	const key = `${file}:${statSync(file, { bigint: true }).mtimeNs}`;
 	if (key !== taggedFor) {
+		// The pair is written and read with no `await` between, so two requests
+		// resolving different files cannot hand each other the other's answer:
+		// whichever assigns last returns what it assigned.
 		// SHA-256 over a wyhash: both are one line, and only one of them makes
 		// a collision — a changed bundle a returning client is told it already
 		// holds — something nobody has to reason about.

@@ -34,12 +34,15 @@ const made: string[] = [];
 const servers: ReturnType<typeof Bun.serve>[] = [];
 const realFetch = globalThis.fetch;
 afterAll(async () => {
-	globalThis.fetch = realFetch;
 	for (const server of servers) await server.stop(true);
 	for (const dir of made) rmSync(dir, { recursive: true, force: true });
 });
 
 describe.skipIf(url === undefined)("staging to the client's loader", () => {
+	afterAll(() => {
+		globalThis.fetch = realFetch;
+	});
+
 	// spec: snapshot-export/a-bundle-has-been-published
 	test("a built snapshot is exported, served, and accepted [45]", async () => {
 		const sql = await seeded(clean);
@@ -72,4 +75,12 @@ describe.skipIf(url === undefined)("staging to the client's loader", () => {
 		expect(bundle?.snapshotId).toBe(built);
 		expect(bundle?.heroes).toHaveLength(2);
 	});
+});
+
+test("the fetch the case above replaced is given back", () => {
+	// `bun test` runs every file in one process, and three suites here stub
+	// `fetch` for themselves — so the file that pays for a restore that did
+	// not take is some later one, which is why this is asserted rather than
+	// assumed.
+	expect(globalThis.fetch).toBe(realFetch);
 });
