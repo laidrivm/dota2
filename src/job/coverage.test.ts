@@ -15,7 +15,13 @@ import { BUILT_AT, NEW_PATCH, seeded, stage } from "./build/build.fixture.ts";
 import { buildSnapshot } from "./build/build.ts";
 import { cleaner, requiresDatabase, url } from "./db.fixture.ts";
 import { PART } from "./export/publish.ts";
-import { DAY_MS, icons, RUN_AT } from "./ingest/ingest.fixture.ts";
+import {
+	DAY_MS,
+	icons,
+	NEXT_DAY,
+	PATCH,
+	RUN_AT,
+} from "./ingest/ingest.fixture.ts";
 import { bundles, covered, day, jobDeps } from "./run.fixture.ts";
 import { runJob } from "./run.ts";
 
@@ -105,6 +111,33 @@ describe.skipIf(url === undefined)("what a run covered", () => {
 		expect(day(row.meta_last_day)).toBe("2026-08-23T00:00:00.000Z");
 	});
 
+	// spec: snapshot-ingest/a-run-the-patch-bound
+	test("a second run records its own window, leaving the first's", async () => {
+		const sql = await clean();
+		await runJob(
+			jobDeps(sql, { icons: iconsDir, bundle: bundle() }, RUN_AT),
+			RUN_AT,
+		);
+
+		await runJob(
+			jobDeps(sql, { icons: iconsDir, bundle: bundle() }, NEXT_DAY),
+			NEXT_DAY,
+		);
+
+		// The write is keyed to the row the build just returned, so the second
+		// run's wider window lands on the second snapshot and the first keeps
+		// the window it was actually built from.
+		const rows = await sql`SELECT meta_first_day, meta_last_day
+			FROM snapshots WHERE patch_id = ${PATCH} ORDER BY snapshot_id`;
+		expect(
+			rows.map((row: { meta_last_day: Date }) => day(row.meta_last_day)),
+		).toEqual(["2026-08-20T00:00:00.000Z", "2026-08-21T00:00:00.000Z"]);
+		// Both start where the patch does: what a day's difference moves is the
+		// end, the window being every complete day of the patch's life.
+		for (const row of rows as { meta_first_day: Date }[])
+			expect(day(row.meta_first_day)).toBe("2026-08-14T00:00:00.000Z");
+	});
+
 	// spec: snapshot-ingest/a-snapshot-the-entry-point-did-not-complete
 	test("a snapshot no entry point completed carries null coverage [94]", async () => {
 		const sql = await seeded(clean);
@@ -136,7 +169,12 @@ describe.skipIf(url === undefined)("what a run covered", () => {
 		expect(report).toContain("build");
 		const row = await covered(sql);
 		expect(row.status).toBe("failed");
+		// All four, as the published path asserts them: the criterion is that
+		// the snapshot still carries what the run covered, and half a record
+		// carried is a record a reader cannot use.
 		expect(day(row.meta_first_day)).toBe("2026-08-14T00:00:00.000Z");
+		expect(day(row.meta_last_day)).toBe("2026-08-20T00:00:00.000Z");
+		expect(row.meta_capped_by_source).toBe(false);
 		expect(row.pair_weeks?.map(day)).toEqual(["2026-08-13T00:00:00.000Z"]);
 	});
 
