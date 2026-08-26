@@ -33,15 +33,16 @@ describe("the windows a response states", () => {
 	});
 
 	/**
-	 * A window this repository has no length for cannot be paced: there is no
-	 * span to count requests over. `readyAt` skips it rather than guessing one,
-	 * which is what the infinite length below is read as.
+	 * A window this repository has no length for cannot be paced — there is no
+	 * span to count requests over — so it is left out rather than kept and
+	 * skipped. A ceiling this answered with and `readyAt` then passed over
+	 * would read as paced while the client issued past it.
 	 */
 	// spec: snapshot-ingest/a-window-at-its-stated-ceiling
-	test("a window of an unknown name has no finite length", () => {
+	test("a window of an unknown name states nothing", () => {
 		const found = stated(headers({ "x-ratelimit-limit-fortnight": "100" }));
 
-		expect(found.get("fortnight")?.span).toBe(Number.POSITIVE_INFINITY);
+		expect([...found]).toEqual([]);
 	});
 
 	// A ceiling that is not a number bounds nothing, and a zero one would hold

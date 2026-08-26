@@ -19,8 +19,11 @@
  * The one thing a response does not carry: it states a ceiling and a remainder
  * per window and names the window, but never says how long the window is. So
  * the length comes from the name, and a name absent here is a window this
- * client cannot pace at all: there is no span to count requests over, so
- * `readyAt` passes over it rather than guessing one.
+ * client cannot pace at all — there is no span to count requests over. Such a
+ * window is left out of `stated` rather than kept and skipped: a ceiling held
+ * and then ignored reads as paced, and a service naming a window this
+ * repository has never seen is better answered by the run ending when that
+ * window reports nothing left than by a guessed length.
  */
 export const WINDOW_MS: Record<string, number> = {
 	second: 1_000,
@@ -45,8 +48,9 @@ export type Ceiling = { limit: number; span: number };
  * unparseable one bounds nothing and a zero one would hold every request for
  * ever; a fractional one is worse than either, since the count it is compared
  * against is a length — `readyAt` would index between two instants, get
- * `undefined`, and pace that window by nothing at all. `span` is `Infinity` for a name `WINDOW_MS` does not know,
- * which is what makes `readyAt` pass over it.
+ * `undefined`, and pace that window by nothing at all. Neither does a window
+ * whose name carries no length, for the reason `WINDOW_MS` gives: every
+ * ceiling this answers with is one the client can hold.
  */
 export function stated(headers: Headers): Map<string, Ceiling> {
 	const found = new Map<string, Ceiling>();
@@ -56,10 +60,9 @@ export function stated(headers: Headers): Map<string, Ceiling> {
 		const name = named[1].toLowerCase();
 		const limit = Number(value);
 		if (!Number.isInteger(limit) || limit <= 0) continue;
-		found.set(name, {
-			limit,
-			span: WINDOW_MS[name] ?? Number.POSITIVE_INFINITY,
-		});
+		const span = WINDOW_MS[name];
+		if (span === undefined) continue;
+		found.set(name, { limit, span });
 	}
 	return found;
 }
@@ -84,7 +87,6 @@ export function readyAt(
 ): number {
 	let ready = now;
 	for (const { limit, span } of ceilings.values()) {
-		if (!Number.isFinite(span)) continue;
 		// The requests still inside this window, and the one that has to leave
 		// it before there is room: with `limit` inside, that is the `limit`th
 		// from the end.
@@ -112,9 +114,7 @@ export function prune(
 ): void {
 	const longest = Math.max(
 		0,
-		...[...ceilings.values()]
-			.map(({ span }) => span)
-			.filter((span) => Number.isFinite(span)),
+		...[...ceilings.values()].map(({ span }) => span),
 	);
 	while (issued.length > 0 && now - (issued[0] as number) >= longest)
 		issued.shift();
