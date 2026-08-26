@@ -93,22 +93,22 @@ export async function runJob(deps: Deps, at: Date): Promise<string | null> {
  * `MetaWindow` ends at the exclusive bound after it: a record read as the
  * wrong one of the two claims a day of matches the run never pulled.
  *
- * The weeks are written as an array literal rather than handed over as an
- * array, which the driver sends as its own `toString()` and Postgres rejects
- * as malformed (bun 1.3.14). An empty list is `{}`, which is an empty array
- * and not a null: a run that covered no week is not a run nobody recorded.
+ * The weeks are bound through `sql.array` with the column's own type rather
+ * than handed over bare, which the driver sends as the array's `toString()`
+ * and Postgres refuses as a malformed array literal (bun 1.3.14). An empty
+ * list arrives as an empty array and not a null: a run that covered no week is
+ * not a run nobody recorded.
  */
 async function record(
 	sql: SQL,
 	snapshotId: number,
 	covered: Covered,
 ): Promise<void> {
-	const weeks = covered.weeks.map((week) => week.toISOString()).join(",");
 	await sql`UPDATE snapshots SET
 			meta_first_day = ${covered.window.start},
 			meta_last_day = ${new Date(covered.window.end.getTime() - DAY_MS)},
 			meta_capped_by_source = ${covered.window.cappedBySource},
-			pair_weeks = ${`{${weeks}}`}
+			pair_weeks = ${sql.array(covered.weeks, "TIMESTAMPTZ")}
 		WHERE snapshot_id = ${snapshotId}`;
 }
 
