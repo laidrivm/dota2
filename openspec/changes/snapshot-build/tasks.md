@@ -271,10 +271,21 @@ retention, which is a requirement of its own with no validation in it.
 
 ## 5. Rendering the bundle
 
-- [ ] 5.1 Write the selection tests: with no `published` snapshot the export
-      writes no file and exits non-zero [27]; a newer `building` snapshot is
-      not the one exported [30]. (Req: snapshot-export — The bundle is
-      rendered from the newest published snapshot)
+Three pull requests, `feat/snapshot-build-5a`, `-5b`, `-5c`: as one step the
+group closes six acceptance criteria where `change-slicing` allows three. The
+cut is by requirement, each step taking one — selection, the camelCase
+boundary, the pair matrices. The render itself is whole in 5a, because half a
+bundle is not a bundle the client accepts and a step shipping one would be the
+horizontal slice that requirement rejects; 5b and 5c are the cases that close
+their criteria over what 5a already renders, as 4c was over 4a and 4b.
+
+- [x] 5.1 Write the selection tests: with no `published` snapshot the export
+      raises rather than rendering [27]; a newer `building` snapshot is not the
+      one exported [30]. Half of [27] is closed here and half is not: nothing
+      in group 5 writes a file, so "writes no file" is true of it by having no
+      write at all, and the non-zero exit is the entry point's answer to the
+      raise — both arrive with 7.2's publication. (Req: snapshot-export — The
+      bundle is rendered from the newest published snapshot)
 - [ ] 5.2 Write the shape tests: every key at every depth is a camelCase name
       or a decimal integer string, so `patch-id` and `PatchId` fail as
       `patch_id` does, and an undeclared key fails too [34];
@@ -287,11 +298,16 @@ retention, which is a requirement of its own with no validation in it.
       `matchups[a][b]` [37]; a hero's `positions` omits every position it was
       never picked on [38]. (Req: snapshot-export — Pair statistics are
       expanded into full matrices)
-- [ ] 5.4 Implement the render: select the newest published snapshot, rename
+- [x] 5.4 Implement the render: select the newest published snapshot, rename
       keys to camelCase at that boundary, and expand the stored pairs into
-      full matrices. (Req: snapshot-export — The bundle is rendered from the
-      newest published snapshot / The bundle's keys are camelCase / Pair
-      statistics are expanded into full matrices)
+      full matrices. Written out field by field rather than derived from the
+      column names, the two spellings agreeing on nothing — `short_name` is
+      `short`, `phase_adj_1` is `p1`. `stabilizing` ships as `false`, the
+      working stub at group 6's seam: an absent key would fail the bundle the
+      client accepts, where a wrong one publishes and is replaced. (Req:
+      snapshot-export — The bundle is rendered from the newest published
+      snapshot / The bundle's keys are camelCase / Pair statistics are
+      expanded into full matrices)
 
 ## 6. The stabilizing flag and the client's acceptance
 
