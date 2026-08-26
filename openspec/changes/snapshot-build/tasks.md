@@ -417,8 +417,15 @@ build between them.
 - [x] 8.1 Write the route tests: a published bundle is served in preference
       to the fixture [29]; an absent publication directory serves the fixture,
       and so does one that exists but holds no bundle [28] [55]; the published-bundle response carries `cache-control: no-cache`
-      [42]. (Req: snapshot-export — The served URL answers from the published
-      bundle)
+      [42]. The directory holding no bundle holds the wreck of a crashed
+      export instead, which closes group 7's [43] at the route as well. Two
+      more the pre-PR `/zombies` run found, both of them faults no request
+      could report — the route answers them with the fixture, which is what a
+      clone that has never exported gets: the default anchor is the
+      repository's own `snapshot/` [96], and a directory whose path needs
+      percent-encoding is read rather than missed [97]. The icon route carries
+      both for the same reason. (Req: snapshot-export — The served URL answers
+      from the published bundle)
 - [ ] 8.2 Write the revalidation tests: a matching `If-None-Match` is
       answered 304 with an empty body [40]; a republished bundle answers 200
       with a different ETag [41]; a byte-identical re-export still answers 304

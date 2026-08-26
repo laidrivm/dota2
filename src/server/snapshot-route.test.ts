@@ -13,11 +13,11 @@ import { afterAll, beforeAll, expect, test } from "bun:test";
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { pathToFileURL } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import rawFixture from "../fixtures/snapshot.json" with { type: "json" };
 import { PART, PUBLISHED } from "../job/export/publish.ts";
 import type { SnapshotBundle } from "../types.ts";
-import { staticRoutes } from "./static-routes.ts";
+import { snapshotDir, staticRoutes } from "./static-routes.ts";
 
 const fixture = rawFixture as unknown as SnapshotBundle;
 
@@ -107,6 +107,38 @@ test("a published bundle is served in preference to the fixture [29]", async () 
 	const response = await fetch(`${at}/${PUBLISHED}`);
 	expect(response.status).toBe(200);
 	expect((await response.json()).snapshotId).toBe(PUBLISHED_ID);
+});
+
+test("the publication directory is the repository's own [96]", () => {
+	// The one anchor no request can report on: a wrong one holds no bundle,
+	// and the route answers that with the fixture — which is exactly what a
+	// clone that has never exported gets. Derived from git rather than from
+	// this file's location, because that location is what the anchor is under
+	// test for.
+	const top = Bun.spawnSync(["git", "rev-parse", "--show-toplevel"])
+		.stdout.toString()
+		.trim();
+
+	expect(fileURLToPath(snapshotDir)).toBe(`${top}/snapshot/`);
+});
+
+// spec: snapshot-export/a-bundle-has-been-published
+test("a publication directory whose path needs encoding is read [97]", async () => {
+	// `URL.pathname` keeps its percent-encoding, so a checkout under a
+	// directory with a space in its name would look to this route like one
+	// holding no bundle — and be answered with the fixture, silently and
+	// forever. The icon route carries this case for the same reason.
+	const spaced = mkdtempSync(join(tmpdir(), "d2ass served "));
+	made.push(spaced);
+	const at = serving(spaced);
+	await Bun.write(
+		join(spaced, PUBLISHED),
+		JSON.stringify({ ...fixture, snapshotId: PUBLISHED_ID }),
+	);
+
+	expect((await (await fetch(`${at}/${PUBLISHED}`)).json()).snapshotId).toBe(
+		PUBLISHED_ID,
+	);
 });
 
 test("the published bundle is revalidated, as the fixture is [42]", async () => {
