@@ -446,7 +446,13 @@ build between them.
       collision cannot be arranged. It stays for what it prevents — a client
       told stale bytes are the ones it holds — at the cost of a string. (Req:
       snapshot-export — The served snapshot is revalidated by ETag)
-- [ ] 8.5 Write the end-to-end test: staging seeded from the fixture builds,
+- [x] 8.5 Write the end-to-end test: staging seeded from the fixture builds,
       exports, and the served bundle is accepted by the client's loader [45].
-      (Req: snapshot-export — The served URL answers from the published
-      bundle / The exported bundle is what the client accepts)
+      Staged through `build.fixture.ts` rather than from the fixture file
+      itself: its hero ids are Valve's, and the cleaner reclaims the sentinel
+      range alone, so seeding them would leave rows no suite can remove. What
+      the case is for is the joins — the rows the build wrote are the ones the
+      render reads, what the publication left is what the route resolves, and
+      the payload arriving is one the loader takes — and two heroes reach every
+      one of them. (Req: snapshot-export — The served URL answers from the
+      published bundle / The exported bundle is what the client accepts)
