@@ -360,7 +360,13 @@ their criteria over what 5a already renders, as 4c was over 4a and 4b.
       `NaN`, an infinity or `null` [54]; and a snapshot whose `side` and
       `phase` are zero on every hero renders both fields and publishes, the
       zeros surviving to the payload rather than being dropped as empty [62].
-      (Req: snapshot-export — The exported bundle is what the client accepts)
+      The wrong type is read at every kind the contract declares and not at
+      the number alone [95], and a bundle carrying no heroes at all fails —
+      the one refusal here the client also makes [94]. Both came from the
+      pre-PR `/zombies` run and both were measured rather than guessed: each
+      predicate was weakened in turn, and every one but the number's left the
+      whole suite passing. (Req: snapshot-export — The exported bundle is what
+      the client accepts)
 - [x] 6.3 Implement `stabilizing` from the snapshot's own `patch.is_major`,
       `patch.detected_at` and `created_at` — the build instant itself, so the
       window it measures and the decay a blend applied share one clock —

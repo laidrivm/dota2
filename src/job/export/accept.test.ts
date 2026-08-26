@@ -72,6 +72,68 @@ describe("what the export refuses and the client would not", () => {
 		expect(isBundle(bundle)).toBe(true);
 	});
 
+	// spec: snapshot-export/a-field-of-the-wrong-type
+	test("a value of the wrong type fails at each kind the contract declares [95]", () => {
+		// One case per declared kind, because the case above reaches only the
+		// number: measured by weakening each predicate in turn, every one of
+		// these but that first left the whole suite passing.
+		const places: [string, (bundle: SnapshotBundle) => void][] = [
+			[
+				"a declared string",
+				(bundle) => {
+					(bundle as unknown as Record<string, unknown>).createdAt = 20260714;
+				},
+			],
+			[
+				"a declared boolean",
+				(bundle) => {
+					(bundle as unknown as Record<string, unknown>).stabilizing = "false";
+				},
+			],
+			[
+				"a declared list of strings",
+				(bundle) => {
+					hero(bundle).aliases = [7];
+				},
+			],
+			[
+				"a declared object rendered as a list",
+				(bundle) => {
+					hero(bundle).side = [] as unknown as Record<string, unknown>;
+				},
+			],
+			[
+				"a matrix row rendered as a number",
+				(bundle) => {
+					const [first] = Object.keys(bundle.matchups);
+					if (first !== undefined)
+						bundle.matchups[first] = 5 as unknown as Record<string, number>;
+				},
+			],
+		];
+		for (const [where, edit] of places) {
+			const said = refusal(edited(edit)) ?? "";
+			expect([where, said.includes("does not hold the declared type")]).toEqual(
+				[where, true],
+			);
+		}
+	});
+
+	// spec: snapshot-export/the-client-s-own-check
+	test("a bundle carrying no heroes at all fails [94]", () => {
+		const bundle = edited((copy) => {
+			copy.heroes = [];
+		});
+
+		// The one refusal here the client also makes: a hero list with nothing
+		// in it is a bundle nothing can be suggested from, and the export fails
+		// on it rather than publishing a payload the client would reject.
+		expect(refusal(bundle)).toBe(
+			"the bundle's key heroes does not hold the declared type",
+		);
+		expect(isBundle(bundle)).toBe(false);
+	});
+
 	// spec: snapshot-export/a-number-that-is-not-finite
 	test("a numeric leaf that is not a finite number fails [54]", () => {
 		// Every place a number is read, and all four values spread between
