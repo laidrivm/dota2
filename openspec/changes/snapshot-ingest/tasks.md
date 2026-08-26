@@ -462,6 +462,12 @@ It ships as two pull requests, one per half of the defect, the whole measuring
 half that unblocks a run — with the minute window held, it never empties — and
 13b is the half that stops a window a run outlasts from ending it.
 
+The requirement is therefore rewritten in two goes, and 13a leaves the half it
+does not touch as it stands: through 13a the spec still says any window at zero
+ends the run, which is what the client still does. Tasks 13.2 and 13.4 describe
+what 13b replaces it with, and disagree with the spec until it does — that
+disagreement is the work remaining, not a contradiction in the plan.
+
 - [x] 13.1 Write the pacing tests: a request is held back when any window's
       stated limit is already inside that window, not the shortest window's
       alone [102]; the windows, their ceilings and their lengths are read off

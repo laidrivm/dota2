@@ -256,6 +256,12 @@ export function createClient(
 		for (let n = 1; n <= ATTEMPTS; n++) {
 			if (answered !== undefined && issued.length > 0) await seen;
 			await reserve(issued, ceilings);
+			// Read again after the waits above and not only on the way in: both
+			// can hold a caller for a whole window, and another caller meeting a
+			// spent one meanwhile is exactly the case the verdict is terminal
+			// for. Checking once at the top refuses the run's later pulls and
+			// still lets whatever was already asleep reach the network.
+			if (spent !== "") throw new Error(spent);
 			const outcome = await attempt(doFetch, key, body, learn);
 			sawOne();
 			if (outcome.kind === "body") return outcome.body;
