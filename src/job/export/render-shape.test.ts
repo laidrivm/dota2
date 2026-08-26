@@ -9,11 +9,11 @@
  * Which snapshot is rendered is `render.test.ts`'s; the key check itself is
  * `keys.test.ts`'s, over the shipped fixture.
  */
-import { describe, expect, test } from "bun:test";
+import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { BUILT_AT, NEW_PATCH, seeded, stage } from "../build/build.fixture.ts";
 import { buildSnapshot } from "../build/build.ts";
 import { cleaner, requiresDatabase, url } from "../db.fixture.ts";
-import { renderBundle } from "./render.ts";
+import { renderBundle, utcDate } from "./render.ts";
 
 requiresDatabase();
 
@@ -57,14 +57,47 @@ describe.skipIf(url === undefined)("what a rendered bundle looks like", () => {
 
 		expect(bundle.snapshotId).toBe(built);
 		expect(bundle.patch.isMajor).toBe(true);
-		// Anchored at both ends. `docs/api-design.md` says a timestamp carries
-		// an offset, and one without is a different instant on every machine
-		// that reads it.
-		expect(bundle.createdAt).toMatch(
-			/^\d{4}-\d{2}-\d{2}T[\d:.]+(Z|[+-]\d{2}:\d{2})$/,
-		);
-		// The bare calendar date, which is what the shipped contract holds:
-		// `src/fixtures/snapshot.json` carries "2026-07-14" for this key.
-		expect(bundle.patch.detectedAt).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+		// The instant itself, not a pattern it fits: a shape test passes for
+		// `9999-99-99` and for a timestamp an hour out, and what has to be true
+		// is that this is the build instant, carrying an offset as
+		// `docs/api-design.md` says a timestamp does.
+		expect(bundle.createdAt).toBe(BUILT_AT.toISOString());
+		// The bare calendar date, which is what the shipped contract holds, and
+		// the date on the UTC timeline: `build.fixture.ts` seeds this patch at
+		// midnight UTC, so a slice taken in local time reads the day before
+		// wherever the offset is negative — which a pattern cannot see.
+		expect(bundle.patch.detectedAt).toBe("2026-08-01");
 	});
+});
+
+/** The zone this file found, which the block below must give back. */
+const AT_LOAD = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+describe("the calendar date the bundle carries", () => {
+	const zone = process.env.TZ;
+	beforeAll(() => {
+		process.env.TZ = "America/New_York";
+	});
+	afterAll(() => {
+		process.env.TZ = zone ?? "UTC";
+	});
+
+	test("is the UTC one, not the running machine's [35]", () => {
+		// Asserted rather than assumed: a `TZ` assignment that did not take
+		// would leave this in UTC, where a date read off the machine's calendar
+		// passes exactly as one read off the UTC timeline does.
+		expect(Intl.DateTimeFormat().resolvedOptions().timeZone).toBe(
+			"America/New_York",
+		);
+		// Midnight UTC is the previous evening in New York, so a date taken
+		// from the local calendar reads 2026-07-31 here.
+		expect(utcDate(new Date("2026-08-01T00:00:00.000Z"))).toBe("2026-08-01");
+	});
+});
+
+test("the zone the block above set is given back", () => {
+	// Nothing else in this file would notice — every case above reads UTC — so
+	// the file that pays for a restore that did not take is some later one,
+	// which is why this is asserted here rather than assumed.
+	expect(Intl.DateTimeFormat().resolvedOptions().timeZone).toBe(AT_LOAD);
 });

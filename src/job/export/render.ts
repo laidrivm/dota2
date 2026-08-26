@@ -102,10 +102,7 @@ export async function renderBundle(sql: SQL): Promise<SnapshotBundle> {
 		patch: {
 			id: snapshot.patch_id,
 			isMajor: snapshot.is_major,
-			// The calendar date alone, which is what the shipped contract holds
-			// and what `src/fixtures/snapshot.json` carries. Taken on the UTC
-			// timeline, as every other reading of this column is.
-			detectedAt: snapshot.detected_at.toISOString().slice(0, 10),
+			detectedAt: utcDate(snapshot.detected_at),
 		},
 		// A working stub at the seam: the window this marks is *Patch blending
 		// with a decaying prior*'s, and group 6 computes it from the snapshot's
@@ -137,6 +134,17 @@ export async function renderBundle(sql: SQL): Promise<SnapshotBundle> {
 	checkKeys(bundle);
 	return bundle;
 }
+
+/**
+ * The calendar date of an instant, on the UTC timeline.
+ *
+ * The bare date is what the shipped contract holds for `patch.detectedAt` and
+ * what `src/fixtures/snapshot.json` carries. Exported for the case that pins
+ * the timeline: read through the machine's own calendar instead, a midnight
+ * instant is the day before wherever the offset is negative, and a runner in
+ * UTC cannot tell the two apart.
+ */
+export const utcDate = (at: Date): string => at.toISOString().slice(0, 10);
 
 /** Rows of one table by `hero_id`, in the order they were read. */
 function byHero<T extends { hero_id: number }>(rows: T[]): Map<number, T[]> {
