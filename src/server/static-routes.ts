@@ -128,7 +128,12 @@ export function staticRoutes(
 	const routes: Record<string, Route> = {};
 
 	routes["/icons/*"] = iconRoute(icons);
-	routes[`/${PUBLISHED}`] = snapshotRoute(snapshots);
+	// Written out rather than built from `PUBLISHED`, though the two spell the
+	// same thing today. The URL is the client's contract — `snapshot-delivery`
+	// pins it and `src/app/snapshot.ts` fetches it — where the filename is the
+	// job's, and deriving one from the other would move the URL out from under
+	// the client the day the export renamed its file.
+	routes["/snapshot.json"] = snapshotRoute(snapshots);
 
 	// Built from the directory listing, so a request can only ever name a file
 	// that is actually there — there is no path for it to traverse out of.
