@@ -85,6 +85,9 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
   `openspec/specs/agent-rulebook/`.
 - **`repo-layout`** — PRs #171, #172, #173 and #174,
   `archive/2026-08-25-repo-layout`; spec at `openspec/specs/repo-layout/`.
+- **Phase 3a — `snapshot-build`** — sixteen PRs, #177 to #195,
+  `archive/2026-08-26-snapshot-build`; specs at
+  `openspec/specs/snapshot-build/` and `openspec/specs/snapshot-export/`.
 
 ### Open
 
@@ -93,14 +96,14 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       the diff budget's failing threshold splits into `spec/<slug>` and
       `spec/<slug>-plan` — the seam #130/#132 and #141/#142 each cut by hand —
       and the `oversize:` override stops admitting an unsplit one. One task
-      group, so `chore/proposal-slicing`. Ahead of Phases 3b and 3a in the
-      queue, stepping over both.
+      group, so `chore/proposal-slicing`. Ahead of Phase 3b in the queue,
+      stepping over it.
 - [ ] **Phase 3b — `snapshot-ingest`** — applying,
       `openspec/changes/snapshot-ingest/`. The schema and the database edge,
       the rate-limited STRATZ client, the reference upserts, the mirrored hero
       images, and the entry point that drives 3a to a published snapshot or a
       failed one. Groups 1 to 11c are merged, thirteen PRs. What is left is
-      group 12 on `feat/snapshot-ingest-12`, and 3a comes before it. 11c
+      group 12 on `feat/snapshot-ingest-12`, which 3a no longer blocks. 11c
       closed the first of the two readings this change left open — every hero
       the reference holds reaches `staging_hero_stats`, the zero-pick row
       included, and the reference is the tables rather than the response that
@@ -108,9 +111,7 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       `snapshots` row, lands in group 12, which is where `Covered` and the
       snapshot the build made from it are held together. 11c ran ahead of 3a
       because 3a's fixtures seed staging and would otherwise have encoded 126
-      heroes where the reference holds 127. What remains interleaves rather
-      than simply preceding: 3a first, since group 12 is the entry point that
-      calls 3a's build and export. A second probe
+      heroes where the reference holds 127. A second probe
       moved three assumptions, all in `docs/context/stratz-probe-2026-08.md`:
       the meta comes from a daily endpoint that can filter the game mode, patch
       detection leaves STRATZ whose version list stalled eight months back, and
@@ -118,33 +119,6 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       probe reached that CDN by way of OpenDota's index, which the change's
       design.md replaces with a derivation measured over all 127 heroes. Owns no
       schedule — Task 7 sets when the job runs and alerts when it stops.
-- [ ] **Phase 3a — `snapshot-build`** — applying,
-      `openspec/changes/snapshot-build/`. The blending, smoothing and
-      sufficiency maths, and the export of a bundle to the served URL. It
-      reads the schema and staging 3b creates and fills, which 3b's merged
-      groups now do, so what remains is that it precedes 3b's group 12.
-      Eight task groups, so `feat/snapshot-build-1` through `-8`, in order;
-      groups 1 and 2 are PRs #177 and #178, and group 3 splits in three —
-      #179 its row assembly, #180 the SQL edge, and `-3c` the two columns
-      recording which components a snapshot measured, a widening a review
-      forced and this change's one stated exception to the schema being
-      `snapshot-ingest`'s. The group measured 798 lines as one step against a
-      budget that fails at 800, and 801 as two; `-3c` is PR #182. Group 4
-      splits in four for the other reason a step splits — it closes ten
-      acceptance criteria where `change-slicing` allows three — cut by what
-      refuses a snapshot: `-4a` the transition and the checks a count and a
-      sum decide, `-4b` the checks a bound and a missing row decide, `-4c` the
-      four outcomes the unmeasured-component requirement names, `-4d`
-      retention — PRs #183, #184 and two more. Group 5 splits in three for the
-      same reason, one requirement each: `-5a` the selection and the render
-      whole, `-5b` the camelCase boundary, `-5c` the pair matrices. The render
-      is whole in 5a because half a bundle is not one, and `stabilizing`
-      shipped from it as `false` — the stub group 6 has since replaced with the
-      window *Patch blending with a decaying prior* already fixes, alongside
-      the runtime assertion over the whole payload that the key check grew
-      into.
-      Owns no *deployed* infrastructure — the production Postgres service, the
-      schedule and the failure alert are Task 7's, and none of them gates it.
 - [ ] **Task 7** — the whole deployment: Docker image, compose (`app` +
       `postgres`, bundle on a volume both mount), the snapshot job's entry in
       the VPS's existing crontab, the failure alert, and the deploy workflow.
@@ -229,10 +203,10 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       second commit refusal: a branch whose work is already upstream, which is
       what a merged pull request leaves behind. Two task groups, so
       `feat/merged-branch-guard-1` and `-2`, in order — the first ships a
-      module nothing calls, so the two run in one session. Ahead of Phase 3a
-      because 3a is eight pull requests long and this is the failure that
-      stranded four commits on 2026-08-19; the proposal records what was
-      measured.
+      module nothing calls, so the two run in one session. Proposed ahead of
+      Phase 3a, which has since archived, because that phase was eight pull
+      requests long and this is the failure that stranded four commits on
+      2026-08-19; the proposal records what was measured.
 - [ ] **`pre-pr-sequence-gate`** — proposed,
       `openspec/changes/pre-pr-sequence-gate/`. A `Stop` hook refuses to end a
       turn that committed while a task group stands complete and the message
