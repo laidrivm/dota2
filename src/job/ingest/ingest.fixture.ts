@@ -120,7 +120,10 @@ export const sourceFetch = (
  * apart. The ban rows sit on the window's last day, which is always the day
  * before the run instant's own whatever the patch's age.
  */
-export function sourceQuery(at: Date, options: { pairsFail?: boolean } = {}) {
+export function sourceQuery(
+	at: Date,
+	options: { pairsFail?: boolean; unbeaten?: boolean } = {},
+) {
 	const query: Query = async (sent) => {
 		if (sent.includes("constants { heroes"))
 			return {
@@ -139,14 +142,19 @@ export function sourceQuery(at: Date, options: { pairsFail?: boolean } = {}) {
 			// window would otherwise answer an empty list, which reads as a
 			// source with no rows rather than as a fixture that missed.
 			const take = Number(named(sent, /take: (\d+)/));
+			// `unbeaten`: every match won, over a sample large enough that the
+			// smoothing cannot pull the delta back inside the bound the build
+			// validates against. It is the one lever here that ends a build at
+			// `failed` without failing the ingest that fed it.
+			const matchCount = options.unbeaten ? 1000 : PER_DAY;
 			return {
 				data: {
 					heroStats: {
 						winDay: HEROES.flatMap((heroId) =>
 							Array.from({ length: take }, () => ({
 								heroId,
-								matchCount: PER_DAY,
-								winCount: PER_DAY / 2,
+								matchCount,
+								winCount: options.unbeaten ? matchCount : PER_DAY / 2,
 							})),
 						),
 					},
