@@ -135,7 +135,8 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       refuses a snapshot: `-4a` the transition and the checks a count and a
       sum decide, `-4b` the checks a bound and a missing row decide, `-4c` the
       four outcomes the unmeasured-component requirement names, `-4d`
-      retention.
+      retention — PRs #183, #184 and two more. Group 5 is where the next
+      session starts.
       Owns no *deployed* infrastructure — the production Postgres service, the
       schedule and the failure alert are Task 7's, and none of them gates it.
 - [ ] **Task 7** — the whole deployment: Docker image, compose (`app` +
