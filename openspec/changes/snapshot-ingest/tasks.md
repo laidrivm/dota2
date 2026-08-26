@@ -489,5 +489,9 @@ disagreement is the work remaining, not a contradiction in the plan.
       snapshot-ingest — A run stays inside the quota the API states)
 - [x] 13.4 Implement the verdict: a window that refills waited out rather than
       ending the run, the terminal reading narrowed from any window to the
-      longest the response states, and the report naming which one. (Req:
-      snapshot-ingest — A run stays inside the quota the API states)
+      longest the response states, and the report naming which one. The waiting
+      is bounded as the retrying is, and a window the response does not let the
+      client measure counts as the longest — both stated in the requirement
+      during apply, having been implementation decisions the criteria as
+      written did not reach. (Req: snapshot-ingest — A run stays inside the
+      quota the API states)
