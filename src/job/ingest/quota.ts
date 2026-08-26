@@ -19,8 +19,8 @@
  * The one thing a response does not carry: it states a ceiling and a remainder
  * per window and names the window, but never says how long the window is. So
  * the length comes from the name, and a name absent here is a window this
- * client cannot pace — read as at least as long as any it knows, which is what
- * `spent` below turns on.
+ * client cannot pace at all: there is no span to count requests over, so
+ * `readyAt` passes over it rather than guessing one.
  */
 export const WINDOW_MS: Record<string, number> = {
 	second: 1_000,
@@ -37,13 +37,14 @@ export type Ceiling = { limit: number; span: number };
  *
  * Matched by shape rather than enumerated: the probe recorded four
  * `x-ratelimit-limit-*` ceilings, and an enumeration here would miss a fifth
- * window the service added. A window is taken only where both halves parse —
- * a ceiling with no remainder paces nothing and a remainder with no ceiling
- * bounds nothing.
+ * window the service added. Read off the ceiling headers alone: the remainder
+ * beside each is what a spent window is read from, and pacing needs only how
+ * many a window admits.
  *
- * `span` is `Infinity` for a name `WINDOW_MS` does not know, which is what
- * makes such a window the longest one there is: it can be paced by nothing and
- * outwaited by nothing.
+ * A ceiling that is not a positive number states no window — an unparseable
+ * one bounds nothing, and a zero one would hold every request for ever rather
+ * than pace any. `span` is `Infinity` for a name `WINDOW_MS` does not know,
+ * which is what makes `readyAt` pass over it.
  */
 export function stated(headers: Headers): Map<string, Ceiling> {
 	const found = new Map<string, Ceiling>();
