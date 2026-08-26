@@ -3,7 +3,7 @@
  * one lands, what a statistic's winrate is while both still do, and how much
  * of its distance from neutral survives the sample behind it.
  */
-import { describe, expect, test } from "bun:test";
+import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import {
 	adj,
 	isMeasured,
@@ -13,6 +13,9 @@ import {
 	wholeDays,
 	wrBlend,
 } from "./blend.ts";
+
+/** The zone this file was loaded under, which the block below must give back. */
+const AT_LOAD = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
 /** The parameter table the requirement fixes: kind, `k0`, half-life in days. */
 const KINDS: [PatchKind, number, number][] = [
@@ -46,10 +49,28 @@ describe("the prior's decay", () => {
 });
 
 describe("the days a prior decays over", () => {
+	// Nine hours ahead of UTC, so the two readings this block separates give
+	// different answers at all: run in UTC, where `bun test` starts whatever
+	// the machine's zone is, a count taken off the local calendar and one taken
+	// off the UTC timeline agree, and both cases below passed against the
+	// reading they exist to refuse. Given back by *assignment*, `"UTC"`
+	// standing in where the run carried no `TZ`: measured against bun 1.3.14, a
+	// `delete` neither restores the zone nor lets a later assignment take.
+	const zone = process.env.TZ;
+	beforeAll(() => {
+		process.env.TZ = "Asia/Tokyo";
+	});
+	afterAll(() => {
+		process.env.TZ = zone ?? "UTC";
+	});
+
 	test("a build instant is counted on the UTC timeline, not a local one [67]", () => {
+		// Asserted rather than assumed: a `TZ` assignment that did not take
+		// leaves this in UTC, where the reading this case refuses passes.
+		expect(Intl.DateTimeFormat().resolvedOptions().timeZone).toBe("Asia/Tokyo");
 		// 01:00 on the 2nd at +03:00 is 22:00 on the 1st in UTC, so the patch is
 		// nought days old. Read as a local date it would be one — a whole
-		// half-life for a major patch.
+		// half-life for a major patch — and in Tokyo that local date is the 2nd.
 		expect(
 			wholeDays(
 				new Date("2026-08-01T00:00:00.000Z"),
@@ -72,6 +93,9 @@ describe("the days a prior decays over", () => {
 	test("a patch's detected_at anchors at midnight UTC [67]", () => {
 		// The column is an instant; what the decay counts from is the day it
 		// fell on, so an evening release is not most of a day old by morning.
+		// The midnight is UTC's and not the machine's: both instants are the
+		// morning of the 2nd in Tokyo, where an anchor taken from the local
+		// calendar answers 0.
 		expect(
 			wholeDays(
 				new Date("2026-08-01T23:00:00.000Z"),
@@ -79,6 +103,12 @@ describe("the days a prior decays over", () => {
 			),
 		).toBe(1);
 	});
+});
+
+test("the zone the block above set is given back", () => {
+	// Nothing else in this file reads a calendar at all, so the file that pays
+	// for a restore that did not take is some later one.
+	expect(Intl.DateTimeFormat().resolvedOptions().timeZone).toBe(AT_LOAD);
 });
 
 describe("the blend", () => {
