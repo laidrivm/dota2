@@ -321,8 +321,10 @@ their criteria over what 5a already renders, as 4c was over 4a and 4b.
       hero ids with the same value [36]; `matchups[b][a]` negates
       `matchups[a][b]` exactly, the build having negated one number rather
       than computing the pair twice [37]; both matrices are keyed by every
-      hero of the pair, which is what "full" means and what tells a derived
-      order from a stored one; and a hero's `positions` omits every position
+      hero of the pair at both levels, which is what "full" means and is the
+      only case that would see a spurious key — a hero against itself
+      included, which the schema refuses to store and nothing otherwise stops
+      the export deriving; and a hero's `positions` omits every position
       it was never picked on [38]. Each case carries a second assertion that
       the value is not 0, without which a matrix of zeros — or of absent keys
       read as `undefined` on both sides — satisfies the symmetry. Mirroring is

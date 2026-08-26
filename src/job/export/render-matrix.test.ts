@@ -71,9 +71,16 @@ describe.skipIf(url === undefined)("the pair matrices", () => {
 		const bundle = await rendered(await seeded(clean));
 
 		// Full matrices: a hero that appears only as the other side of a
-		// stored row still has a row of its own.
+		// stored row still has a row of its own. Both levels, since the
+		// symmetry cases above read values and would not see a spurious key —
+		// including a hero against itself, which the schema refuses to store
+		// and nothing here would otherwise stop the export from deriving.
 		for (const matrix of [bundle.matchups, bundle.synergies])
-			expect(Object.keys(matrix).sort()).toEqual([a, b].sort());
+			expect([
+				Object.keys(matrix).sort(),
+				Object.keys(matrix[a] ?? {}),
+				Object.keys(matrix[b] ?? {}),
+			]).toEqual([[a, b].sort(), [b], [a]]);
 	});
 
 	test("a hero's positions omit every position it was never picked on [38]", async () => {
