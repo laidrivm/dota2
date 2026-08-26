@@ -80,6 +80,11 @@ export async function renderBundle(sql: SQL): Promise<SnapshotBundle> {
 			pick_share, meta_adj, sufficient
 		FROM hero_position_stats WHERE snapshot_id = ${id}
 		ORDER BY hero_id, position`;
+	// These two are read unordered where every read above is ordered, and
+	// deliberately: they become objects keyed by hero id, and a key that looks
+	// like an array index is enumerated in ascending numeric order whatever the
+	// insertion order was. So the rendered bytes are the same bytes either way
+	// — which group 8's ETag, being a hash of them, depends on.
 	const matchups: MatchupRow[] = await sql`SELECT hero_id, enemy_id,
 			advantage_adj
 		FROM hero_matchups WHERE snapshot_id = ${id}`;
