@@ -12,6 +12,7 @@ import {
 	settle,
 	stalls,
 	stallsMidBody,
+	states,
 	stub,
 } from "./stratz.fixture.ts";
 
@@ -150,26 +151,26 @@ describe("where the quota verdict overrules the retry policy", () => {
 	 * other test here, and would spend four attempts on a window it was told
 	 * after the first was empty.
 	 */
-	// spec: snapshot-ingest/a-rate-limited-response-with-nothing-remaining
+	// spec: snapshot-ingest/a-rate-limited-response-with-the-longest-window-spent
 	test("a window spent mid-retry stops the run there [84]", async () => {
 		const { fetch, calls } = stub([
 			fails,
-			limited({ "x-ratelimit-remaining-minute": "0" }, 429),
+			limited(states({ day: { limit: 15_000, remaining: 0 } }), 429),
 		]);
 		const query = client(fetch);
 
 		const raised = await raisedBy(query(Q));
 
-		expect(raised?.message).toMatch(/quota|remaining/i);
+		expect(raised?.message).toContain("day");
 		expect(calls).toHaveLength(2);
 	});
 
 	// The same status as the test above, differing only in what the window
 	// reports left — so what stops the retry can only be the remaining count.
-	// spec: snapshot-ingest/a-rate-limited-response-with-nothing-remaining
+	// spec: snapshot-ingest/a-rate-limited-response-with-the-longest-window-spent
 	test("a 429 reporting nothing remaining is attempted once [63]", async () => {
 		const { fetch, calls } = stub([
-			limited({ "x-ratelimit-remaining-minute": "0" }, 429),
+			limited(states({ day: { limit: 15_000, remaining: 0 } }), 429),
 		]);
 		const query = client(fetch);
 

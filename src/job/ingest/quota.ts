@@ -67,6 +67,39 @@ export function stated(headers: Headers): Map<string, Ceiling> {
 	return found;
 }
 
+/** What a spent window means: a wait a run outlasts, or the end of the run. */
+export type Verdict = { name: string; span: number; longest: boolean };
+
+/**
+ * The window this response reports nothing left in, and whether it is the
+ * longest the response states — or `undefined` where every window has room.
+ *
+ * A blank value is excluded because `Number("")` is 0, which would end a
+ * healthy run on an empty header. An unparseable one needs no exclusion of its
+ * own: it yields `NaN`, and every comparison against `NaN` is false.
+ *
+ * The longest spent window is the one returned, because that is the answer
+ * that decides the run: a response reporting both a spent day and a spent
+ * minute is a run that ends, not one that waits a minute and ends anyway.
+ */
+export function drained(headers: Headers): Verdict | undefined {
+	const windows = stated(headers);
+	const longest = Math.max(0, ...[...windows.values()].map(({ span }) => span));
+	let worst: { name: string; span: number } | undefined;
+	for (const [header, value] of headers) {
+		const named = /^x-ratelimit-remaining-(.+)$/i.exec(header);
+		if (named?.[1] === undefined) continue;
+		if (value.trim() === "" || !(Number(value) <= 0)) continue;
+		const name = named[1].toLowerCase();
+		const span =
+			windows.get(name)?.span ?? WINDOW_MS[name] ?? Number.POSITIVE_INFINITY;
+		if (worst === undefined || span > worst.span) worst = { name, span };
+	}
+	return worst === undefined
+		? undefined
+		: { ...worst, longest: worst.span >= longest };
+}
+
 /**
  * When the request now due may go out, given every window the last response
  * stated and the instants this client has already issued at.

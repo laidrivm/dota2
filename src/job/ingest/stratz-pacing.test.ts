@@ -8,8 +8,7 @@
  * ceilings are the response's; nothing here restates a number the service
  * enforces except as the response that carries it.
  *
- * What a spent window means is `stratz-quota.test.ts`'s, and is unchanged
- * here: any window at zero still ends the run.
+ * What a spent window means is `stratz-quota.test.ts`'s.
  */
 import { afterEach, beforeEach, describe, expect, jest, test } from "bun:test";
 import { client, json, ok, paced, Q, settle, stub } from "./stratz.fixture.ts";
