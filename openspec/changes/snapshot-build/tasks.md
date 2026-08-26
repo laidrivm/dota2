@@ -381,11 +381,17 @@ their criteria over what 5a already renders, as 4c was over 4a and 4b.
 
 ## 7. Atomic publication
 
-- [ ] 7.1 Write the atomicity tests: reads taken repeatedly across an export
+- [x] 7.1 Write the atomicity tests: reads taken repeatedly across an export
       always parse as complete JSON [31]; an export failing before its rename
       leaves the previous bundle served [44]; a temp file left by a crashed
-      export is not served at `/snapshot.json` [43]. (Req: snapshot-export —
-      Publication is atomic)
+      export is not served at `/snapshot.json` [43]. [31] is read as which
+      file the served name points at rather than as a read loop: measured at
+      eight megabytes, a write straight to that name was never caught half
+      done from outside, so a loop passes against the implementation the
+      criterion refuses — which is the measurement `icons.ts` already records.
+      The half of [27] group 5 left open lands here too, there being a write
+      now for a failed render not to make. (Req: snapshot-export — Publication
+      is atomic / The bundle is rendered from the newest published snapshot)
 - [ ] 7.2 Implement the write-then-rename publication, naming the temporary
       file so the serving route cannot mistake it for the bundle. (Req:
       snapshot-export — Publication is atomic)
