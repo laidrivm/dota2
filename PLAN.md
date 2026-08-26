@@ -235,6 +235,18 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       the contract it guards. Tightening it changes what the client accepts,
       which `snapshot-delivery` §*Malformed payload* pins, so it needs a delta
       spec rather than an edit.
+- [ ] **Two behaviours the build has and no criterion states.** Both are in
+      `openspec/specs/snapshot-build/`, found on PR #196 in text the sync
+      copied rather than authored, so both want a delta spec rather than an
+      edit. *Patch blending with a decaying prior* has no scenario for a
+      previous patch that exists and holds no row for the statistic while
+      `n_new > 0` — `wrBlend` answers `wr_blend = wr_new` and `n_eff = n_new`,
+      and `blend.test.ts` [14] asserts it, so the behaviour is settled and
+      only unwritten. *Snapshot retention* keeps the 30 most recent **and**
+      its two exemptions, so the retained set can exceed 30, while its
+      *The thirty-first snapshot* scenario says 30 remain and the oldest by
+      `snapshot_id` goes — true only while the oldest is not exempt, which is
+      what `retention.ts` does by deleting rows outside both sets.
 - [ ] **The `skills-lock.json` patch `skill-provenance` drafted** is still the
       user's to apply, in the skills repository rather than here, and its `ref`
       needs the upstream commit in `microsoft/playwright-cli`. It is open
