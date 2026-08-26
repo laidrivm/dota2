@@ -23,7 +23,7 @@ import {
 } from "../build/build.fixture.ts";
 import { buildSnapshot } from "../build/build.ts";
 import { cleaner, requiresDatabase, url } from "../db.fixture.ts";
-import { renderBundle } from "./render.ts";
+import { mirrored, renderBundle } from "./render.ts";
 
 requiresDatabase();
 
@@ -86,5 +86,23 @@ describe.skipIf(url === undefined)("the pair matrices", () => {
 			bundle.heroes.map((hero) => [hero.id, Object.keys(hero.positions)]),
 		);
 		expect(positions).toEqual({ [HERO]: ["1"], [OTHER]: ["3"] });
+	});
+});
+
+describe("mirroring a matrix of three", () => {
+	test("fills every order, including an id the loop already created", () => {
+		// Three heroes is the smallest case where the loop meets a key it wrote
+		// itself: walking 1 creates 2 and 3, and walking 2 then finds the entry
+		// its own pass had added. Two heroes never reach it, so the reasoning
+		// the function carries goes unexercised there.
+		const stored = { "1": { "2": 1.4, "3": -0.5 }, "2": { "3": 2.5 } };
+
+		const both = mirrored(structuredClone(stored));
+
+		expect(both).toEqual({
+			"1": { "2": 1.4, "3": -0.5 },
+			"2": { "1": 1.4, "3": 2.5 },
+			"3": { "1": -0.5, "2": 2.5 },
+		});
 	});
 });

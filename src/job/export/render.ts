@@ -210,9 +210,11 @@ function matrix<T extends { hero_id: number }>(
  * It writes into the object it is walking, and that is safe rather than
  * overlooked: `Object.entries` takes the keys as they are when it is called,
  * so a row added under a new id is not walked again, and one added under an
- * id already there is the same value written twice.
+ * id already there is the same value written twice. Exported for the case
+ * that reaches that second half, which needs three heroes — with two, the
+ * only id the loop creates is one the snapshot never held.
  */
-function mirrored(held: SynergyMatrix): SynergyMatrix {
+export function mirrored(held: SynergyMatrix): SynergyMatrix {
 	for (const [a, from] of Object.entries(held))
 		for (const [b, value] of Object.entries(from)) {
 			const back = held[b] ?? {};
