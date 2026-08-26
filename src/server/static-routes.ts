@@ -16,7 +16,9 @@ import { PUBLISHED } from "../job/export/publish.ts";
 const root = new URL("../../", import.meta.url);
 
 export const fontDir = new URL("src/app/styles/fonts/", root);
-const snapshotFile = new URL("src/fixtures/snapshot.json", root);
+// A path, not a URL: it is handed to the filesystem, and converting it here
+// is one conversion rather than one per request.
+const snapshotFile = fileURLToPath(new URL("src/fixtures/snapshot.json", root));
 
 /**
  * Where the export publishes the bundle. Written by the job, never by a build,
@@ -49,7 +51,17 @@ const FILE_KINDS: Record<string, { type: string; cache: string }> = {
 	css: { type: "text/css; charset=utf-8", cache: "no-cache" },
 };
 
-/** What a route answers with: a fixed file, or a per-request lookup. */
+/**
+ * What a route answers with: a fixed file, or a per-request lookup.
+ *
+ * Narrower than the runtime's own route type, and deliberately. Bun's includes
+ * a handler that may return `undefined` — the arm that hands the request to a
+ * WebSocket upgrade — and a route map admitting it selects the `Bun.serve`
+ * overload that *requires* a `websocket` handler beside it. Measured: widening
+ * this to `Bun.Serve.Options<unknown>["routes"]`, or to that type indexed by
+ * `string`, fails the typecheck at every `Bun.serve` call in this repository.
+ * Nothing here upgrades anything, so the union stays the shapes that are used.
+ */
 type Route =
 	| Response
 	| ((request: Request) => Response)
@@ -111,7 +123,7 @@ const iconRoute =
  * what a client holds is never fresh on its own account.
  */
 const snapshotRoute = (dir: URL) => async (): Promise<Response> => {
-	const bundle = new URL(PUBLISHED, dir);
+	const bundle = fileURLToPath(new URL(PUBLISHED, dir));
 	const file = (await Bun.file(bundle).exists()) ? bundle : snapshotFile;
 	return new Response(Bun.file(file), {
 		headers: {
