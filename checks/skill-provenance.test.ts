@@ -36,13 +36,6 @@ const sequenced = [...sequence.matchAll(/`\/([a-z][a-z0-9-]*)`/g)].map(
 );
 
 /**
- * Scoped by what it exempts: `/ponytail-review` is the one step of the
- * sequence the ponytail plugin supplies, so it has no commit in that
- * repository to be verified against.
- */
-const fromPlugin = ["ponytail-review"];
-
-/**
  * A skill a `CLAUDE.md` rule names is a gate too, without being sequenced.
  * Only the rules count — prose elsewhere in that file names skills without
  * depending on them.
@@ -52,9 +45,16 @@ const ruled = [...rules.matchAll(/`([a-z][a-z0-9-]*)` skill/g)].map(
 	(match) => match[1] as string,
 );
 
-const active = new Set(
-	[...sequenced, ...ruled].filter((skill) => !fromPlugin.includes(skill)),
-);
+/**
+ * No exemption: every skill the sequence and the rules name is verified
+ * against a commit. `/ponytail-review` was exempt until it left the sequence
+ * on 2026-08-26, the ponytail plugin having no commit in the skills
+ * repository to record — and the exemption goes with it rather than waiting,
+ * because a plugin step returning under it would pass with no provenance row
+ * at all, which is the state this file exists to refuse. Returning one fails
+ * here instead, and whoever adds it decides what to record.
+ */
+const active = new Set([...sequenced, ...ruled]);
 
 const rows = section(toolkit, "Provenance")
 	.split("\n")
