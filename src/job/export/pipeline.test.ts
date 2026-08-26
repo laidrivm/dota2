@@ -1,6 +1,6 @@
 /**
- * The whole producer, end to end: staging in, and the client's own loader
- * accepting what comes out.
+ * The whole producer, end to end, and the client's own loader accepting what
+ * comes out: once from staging, once from the source the run pulls.
  *
  * Every step between them is covered on its own elsewhere — the arithmetic
  * without a database, the render and the contract check against the shipped
@@ -24,11 +24,16 @@ import { staticRoutes } from "../../server/static-routes.ts";
 import { BUILT_AT, NEW_PATCH, seeded, stage } from "../build/build.fixture.ts";
 import { buildSnapshot } from "../build/build.ts";
 import { cleaner, requiresDatabase, url } from "../db.fixture.ts";
+import { icons, PATCH, RUN_AT } from "../ingest/ingest.fixture.ts";
+import { bundles, jobDeps } from "../run.fixture.ts";
+import { runJob } from "../run.ts";
 import { exportSnapshot } from "./publish.ts";
 
 requiresDatabase();
 
 const clean = cleaner();
+const iconsDir = icons();
+const bundle = bundles();
 
 const made: string[] = [];
 const servers: ReturnType<typeof Bun.serve>[] = [];
@@ -38,46 +43,75 @@ afterAll(async () => {
 	for (const dir of made) rmSync(dir, { recursive: true, force: true });
 });
 
-describe.skipIf(url === undefined)("staging to the client's loader", () => {
-	afterAll(() => {
-		globalThis.fetch = realFetch;
+/**
+ * What the client loads when `dir` is the directory the route serves.
+ *
+ * The client fetches one relative URL and the origin it would have been loaded
+ * from is the only thing in the way of it, so that is all this replaces.
+ * Everything the loader does with the answer — the validation, the caching,
+ * the fallback — is its own, and is what these cases are here to run.
+ */
+async function servedFrom(dir: string) {
+	const server = Bun.serve({
+		port: 0,
+		routes: staticRoutes(undefined, pathToFileURL(`${dir}/`)),
 	});
+	servers.push(server);
+	globalThis.fetch = ((input: string | URL | Request, init?: RequestInit) =>
+		realFetch(
+			new URL(input instanceof Request ? input.url : input, server.url),
+			init,
+		)) as typeof fetch;
+	return loadSnapshot();
+}
 
-	// spec: snapshot-export/a-bundle-has-been-published
-	test("a built snapshot is exported, served, and accepted [45]", async () => {
-		const sql = await seeded(clean);
-		await stage(sql, NEW_PATCH);
-		const built = await buildSnapshot(sql, NEW_PATCH, BUILT_AT);
-		const dir = mkdtempSync(join(tmpdir(), "d2ass-pipeline-"));
-		made.push(dir);
-
-		await exportSnapshot(sql, dir);
-
-		const server = Bun.serve({
-			port: 0,
-			routes: staticRoutes(undefined, pathToFileURL(`${dir}/`)),
+describe.skipIf(url === undefined)(
+	"the producer to the client's loader",
+	() => {
+		afterAll(() => {
+			globalThis.fetch = realFetch;
 		});
-		servers.push(server);
-		// The client fetches one relative URL and this is the only thing in the
-		// way of it: the origin it would have been loaded from. Everything the
-		// loader does with the answer — the validation, the caching, the
-		// fallback — is its own, and is what this case is here to run.
-		globalThis.fetch = ((input: string | URL | Request, init?: RequestInit) =>
-			realFetch(
-				new URL(input instanceof Request ? input.url : input, server.url),
-				init,
-			)) as typeof fetch;
 
-		const bundle = await loadSnapshot();
+		// spec: snapshot-export/a-bundle-has-been-published
+		test("a built snapshot is exported, served, and accepted [45]", async () => {
+			const sql = await seeded(clean);
+			await stage(sql, NEW_PATCH);
+			const built = await buildSnapshot(sql, NEW_PATCH, BUILT_AT);
+			const dir = mkdtempSync(join(tmpdir(), "d2ass-pipeline-"));
+			made.push(dir);
 
-		// The snapshot this run built, not the committed fixture standing in
-		// for it: the fixture carries `snapshotId` 1 and 33 heroes.
-		expect(bundle?.snapshotId).toBe(built);
-		expect(bundle?.heroes).toHaveLength(2);
-	});
-});
+			await exportSnapshot(sql, dir);
 
-test("the fetch the case above replaced is given back", () => {
+			const served = await servedFrom(dir);
+			// The snapshot this run built, not the committed fixture standing in
+			// for it: the fixture carries `snapshotId` 1 and 33 heroes.
+			expect(served?.snapshotId).toBe(built);
+			expect(served?.heroes).toHaveLength(2);
+		});
+
+		// spec: snapshot-ingest/a-run-that-succeeds
+		test("a whole run from the source is served and accepted [62]", async () => {
+			const sql = await clean();
+			const dir = bundle();
+
+			const report = await runJob(
+				jobDeps(sql, { icons: iconsDir, bundle: dir }, RUN_AT),
+				RUN_AT,
+			);
+
+			expect(report).toBeNull();
+			const served = await servedFrom(dir);
+			const [row] = await sql`SELECT snapshot_id FROM snapshots
+			WHERE patch_id = ${PATCH}`;
+			expect(served?.snapshotId).toBe(Number(row.snapshot_id));
+			// Nothing was seeded: these two heroes reached the bundle because the
+			// run upserted them from the reference the source answered with.
+			expect(served?.heroes).toHaveLength(2);
+		});
+	},
+);
+
+test("the fetch the cases above replaced is given back", () => {
 	// `bun test` runs every file in one process, and three suites here stub
 	// `fetch` for themselves — so the file that pays for a restore that did
 	// not take is some later one, which is why this is asserted rather than
