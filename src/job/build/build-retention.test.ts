@@ -119,6 +119,39 @@ describe.skipIf(url === undefined)("what retention keeps", () => {
 		expect(await survives(sql, published)).toBe(true);
 	});
 
+	test("two patches still blending both keep their prior [92]", async () => {
+		const sql = await seeded(clean);
+		// Three patches in a row, the last two both inside their own windows:
+		// a build of the third reads the second's snapshot, and a build of the
+		// second would still read the first's. Only one of them is being built
+		// here, which is the point — retention cannot know which comes next.
+		await sql`UPDATE patches SET is_major = false
+			WHERE patch_id = ${NEW_PATCH}`;
+		await sql`INSERT INTO patches (patch_id, base_version, is_major, detected_at)
+			VALUES ('z9.42', 'z9.42', false, '2026-08-02T00:00:00Z')`;
+		await stage(sql, OLD_PATCH);
+		const first = await buildSnapshot(
+			sql,
+			OLD_PATCH,
+			new Date("2026-07-02T00:00:00.000Z"),
+		);
+		await stage(sql, NEW_PATCH);
+		const second = await buildSnapshot(
+			sql,
+			NEW_PATCH,
+			new Date("2026-08-02T00:00:00.000Z"),
+		);
+		await stage(sql, "z9.42");
+
+		await repeatedly(sql, "z9.42", new Date("2026-08-03T00:00:00.000Z"), 30);
+
+		// Thirty of the third patch fill the count, so both older snapshots are
+		// past it and survive only by being exempt — and an exemption covering
+		// this build's own prior alone keeps the second and drops the first.
+		expect([await survives(sql, first), await survives(sql, second)]) //
+			.toEqual([true, true]);
+	});
+
 	// spec: snapshot-build/a-prior-that-has-decayed
 	test("a prior decayed to nothing is exempt no longer [90]", async () => {
 		const sql = await seeded(clean);

@@ -15,15 +15,9 @@
  */
 import type { SQL } from "bun";
 import { isMeasured, prior, wholeDays, wrOf } from "./blend.ts";
+import { retain } from "./retention.ts";
 import { type Prior, priorKey, type Staging, snapshotRows } from "./rows.ts";
 import { invalidReason } from "./validate.ts";
-
-/**
- * How many snapshots retention keeps, beyond the two exemptions below, fixed
- * by the criterion rather than chosen here — *Snapshot retention*, which
- * takes it from data-model §3.2. This is the only place the number stands.
- */
-const RETAINED = 30;
 
 /**
  * Build a snapshot of `patchId` as of `at`, and return its `snapshot_id`.
@@ -80,7 +74,7 @@ export async function buildSnapshot(
 	const snapshotId = Number(created.snapshot_id);
 
 	try {
-		await write(sql, snapshotId, staging, weight, priorPatchId);
+		await write(sql, snapshotId, staging, weight, priorPatchId, at);
 	} catch (error) {
 		// `building` is a state a snapshot passes through, never one it is left
 		// in, and the row above was written outside the transaction for exactly
@@ -129,6 +123,7 @@ async function write(
 	staging: Staging,
 	weight: number,
 	priorPatchId: string | null,
+	at: Date,
 ): Promise<void> {
 	const rows = snapshotRows(staging, {
 		weight,
@@ -161,37 +156,7 @@ async function write(
 		await tx`UPDATE snapshots SET status =
 				${invalid === undefined ? "published" : "failed"}
 			WHERE snapshot_id = ${snapshotId}`;
-		// Retention, here rather than after the transaction, so a build either
-		// leaves the database whole or leaves it untouched. The statistics rows
-		// go with the snapshot through the schema's cascade, so this is the
-		// whole of it: no table is named, and one added under that cascade is
-		// collected by carrying it.
-		//
-		// The count alone would be safe only while builds are at most daily,
-		// and nothing here bounds how often the job runs — so the snapshot this
-		// build read `wr_old` from is exempt from it whatever its age.
-		// `priorPatchId` is exactly that patch, and it is NULL exactly when the
-		// prior has decayed to nothing, which is when the exemption should stop.
-		//
-		// The newest published snapshot is exempt on the same terms, and for a
-		// reason the count hides: it is taken over snapshots at any status, so
-		// a run of failing builds — whose rows stay — walks the last published
-		// one out of it, and that is the snapshot the export renders from. Two
-		// exemptions of one row each, and often the same row.
-		await tx`DELETE FROM snapshots
-			WHERE snapshot_id NOT IN (
-					SELECT snapshot_id FROM snapshots
-					ORDER BY snapshot_id DESC LIMIT ${RETAINED}
-				)
-				AND snapshot_id IS DISTINCT FROM (
-					SELECT snapshot_id FROM snapshots
-					WHERE patch_id = ${priorPatchId} AND status = 'published'
-					ORDER BY snapshot_id DESC LIMIT 1
-				)
-				AND snapshot_id IS DISTINCT FROM (
-					SELECT snapshot_id FROM snapshots
-					WHERE status = 'published' ORDER BY snapshot_id DESC LIMIT 1
-				)`;
+		await retain(tx, at);
 	});
 }
 
