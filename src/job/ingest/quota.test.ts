@@ -1,13 +1,14 @@
 /**
  * The quota arithmetic without a client in front of it: which windows a
- * response states, and when the next request may go out.
+ * response states, which one it reports spent, and when the next request may
+ * go out.
  *
- * What the client does with those answers — holding a burst until the first
- * response, waiting a window out — is `stratz-pacing.test.ts`'s. These are the
- * readings it rests on.
+ * What the client does with those answers — waiting, ending the run, holding a
+ * burst until the first response — is `stratz-pacing.test.ts`'s and
+ * `stratz-quota.test.ts`'s. These are the readings those rest on.
  */
 import { describe, expect, test } from "bun:test";
-import { prune, readyAt, stated } from "./quota.ts";
+import { drained, prune, readyAt, stated } from "./quota.ts";
 
 const headers = (pairs: Record<string, string>) => new Headers(pairs);
 
@@ -58,6 +59,50 @@ describe("the windows a response states", () => {
 		["fractional", "2.5"],
 	])("a %s ceiling states no window", (_, value) => {
 		expect(stated(headers({ "x-ratelimit-limit-day": value })).size).toBe(0);
+	});
+});
+
+describe("the window a response reports spent", () => {
+	// spec: snapshot-ingest/the-longest-window-reports-nothing-remaining
+	test("the longest spent window is the one returned", () => {
+		const spent = drained(
+			headers({
+				"x-ratelimit-limit-minute": "150",
+				"x-ratelimit-limit-day": "15000",
+				"x-ratelimit-remaining-minute": "0",
+				"x-ratelimit-remaining-day": "0",
+			}),
+		);
+
+		// Both are spent, and the day is what decides the run: a client reading
+		// the minute would wait a minute and end anyway.
+		expect(spent).toEqual({ name: "day", span: 86_400_000, longest: true });
+	});
+
+	// spec: snapshot-ingest/a-refillable-window-reports-nothing-remaining
+	test("a shorter window spent beside a longer one with room is not the longest", () => {
+		const spent = drained(
+			headers({
+				"x-ratelimit-limit-minute": "150",
+				"x-ratelimit-limit-day": "15000",
+				"x-ratelimit-remaining-minute": "0",
+				"x-ratelimit-remaining-day": "14160",
+			}),
+		);
+
+		expect(spent).toEqual({ name: "minute", span: MINUTE, longest: false });
+	});
+
+	// spec: snapshot-ingest/a-window-at-its-stated-ceiling
+	test("a response with room everywhere reports no spent window", () => {
+		expect(
+			drained(
+				headers({
+					"x-ratelimit-limit-day": "15000",
+					"x-ratelimit-remaining-day": "1",
+				}),
+			),
+		).toBeUndefined();
 	});
 });
 

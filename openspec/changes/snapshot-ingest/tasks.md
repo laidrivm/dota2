@@ -475,7 +475,7 @@ disagreement is the work remaining, not a contradiction in the plan.
       no edit here [103]; a run against a stated minute ceiling issues no more
       than that many inside any sixty seconds [104]. (Req: snapshot-ingest — A
       run stays inside the quota the API states)
-- [ ] 13.2 Write the exhaustion tests: a refillable window reporting nothing
+- [x] 13.2 Write the exhaustion tests: a refillable window reporting nothing
       remaining suspends the run until that window turns and the run then
       continues [105]; the longest window reporting nothing remaining ends the
       run failed and the report names that window [106]; a `429` carrying
@@ -487,7 +487,7 @@ disagreement is the work remaining, not a contradiction in the plan.
       response rather than declared, and the arithmetic in a module of its own
       so it can be read against a case with no timer in front of it. (Req:
       snapshot-ingest — A run stays inside the quota the API states)
-- [ ] 13.4 Implement the verdict: a window that refills waited out rather than
+- [x] 13.4 Implement the verdict: a window that refills waited out rather than
       ending the run, the terminal reading narrowed from any window to the
       longest the response states, and the report naming which one. (Req:
       snapshot-ingest — A run stays inside the quota the API states)

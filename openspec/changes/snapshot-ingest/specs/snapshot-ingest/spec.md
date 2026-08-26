@@ -64,12 +64,18 @@ service enforces, and a client pacing only the window it was written against
 empties the ones it was not: the windows are not nested, and holding the
 shortest says nothing about the longest.
 
-WHEN a response reports zero remaining in any of its rate-limit windows the run
-SHALL stop without issuing a further request and end failed, rather than
-continuing into a refusal. That verdict is terminal and SHALL take precedence
-over *A request is retried only where retrying can succeed*: a `429` reporting
-zero remaining SHALL NOT be retried, because the retry answers a request the
-service might yet accept and this one it will not until the window turns.
+WHEN a response nevertheless reports zero remaining in a window that refills,
+the run SHALL wait for that window to turn and continue, issuing no request in
+the meantime. A window a run can outwait is not a spent quota — it is a key
+another caller is also spending, or a window this run entered part-used.
+
+A run SHALL end failed only WHERE the window reporting nothing left is the
+longest the API states, which no wait inside a run outlasts. The report SHALL
+name the window, because which one emptied is what says whether the run paced
+itself wrongly or the key was spent elsewhere. That verdict SHALL take
+precedence over *A request is retried only where retrying can succeed*: a `429`
+reporting nothing left in the longest window SHALL NOT be retried, because the
+retry answers a request the service might yet accept and this one it will not.
 
 #### Scenario: A window at its stated ceiling
 
@@ -77,15 +83,22 @@ service might yet accept and this one it will not until the window turns.
   further request is due
 - **THEN** that request SHALL NOT be issued until the window has turned
 
-#### Scenario: A window reports nothing remaining
+#### Scenario: A refillable window reports nothing remaining
 
-- **IF** a response reports zero remaining in any rate-limit window
-- **THEN** the run SHALL end failed, and no further request SHALL be issued
+- **IF** a response reports zero remaining in any window but the longest
+- **THEN** the run SHALL wait for that window to turn and then continue, rather
+  than end
 
-#### Scenario: A rate-limited response with nothing remaining
+#### Scenario: The longest window reports nothing remaining
+
+- **IF** a response reports zero remaining in the longest window the API states
+- **THEN** the run SHALL end failed naming that window, and no further request
+  SHALL be issued
+
+#### Scenario: A rate-limited response with the longest window spent
 
 - **IF** a request is answered `429` and that response reports zero remaining
-  in any rate-limit window
+  in the longest window
 - **THEN** exactly one attempt SHALL have been made, and the run SHALL end
   failed
 

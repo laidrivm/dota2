@@ -10,7 +10,7 @@
  * transport without a network.
  */
 
-import { type Ceiling, prune, readyAt, stated } from "./quota.ts";
+import { type Ceiling, drained, prune, readyAt, stated } from "./quota.ts";
 
 /** Where the statistics API answers. */
 const ENDPOINT = "https://api.stratz.com/graphql";
@@ -48,33 +48,19 @@ type Attempt =
 	| { kind: "fatal"; message: string }
 	/** Terminal for the whole run, not merely for this request. */
 	| { kind: "quota"; message: string }
+	/** A window that refills is spent; the same request goes again after it. */
+	| { kind: "wait"; span: number; message: string }
 	/** The service might yet accept this request. */
 	| { kind: "retry"; message: string };
 
 const fatal = (message: string): Attempt => ({ kind: "fatal", message });
 const quota = (message: string): Attempt => ({ kind: "quota", message });
+const hold = (span: number, message: string): Attempt => ({
+	kind: "wait",
+	span,
+	message,
+});
 const retry = (message: string): Attempt => ({ kind: "retry", message });
-
-/**
- * Whether a response reports a rate-limit window with nothing left in it.
- *
- * The remainder headers are matched by shape rather than enumerated. The probe
- * recorded the four `x-ratelimit-limit-*` ceilings and noted that remainders
- * ride alongside them, but not the remainder headers' own names — so an
- * enumeration here would be four guesses, and would miss a fifth window the
- * service added.
- *
- * A blank value is excluded because `Number("")` is 0, which would end a
- * healthy run on an empty header. An unparseable one needs no exclusion of its
- * own: it yields `NaN`, and every comparison against `NaN` is false.
- */
-function exhausted(headers: Headers): boolean {
-	for (const [name, value] of headers) {
-		if (!/^x-ratelimit-remaining-/i.test(name)) continue;
-		if (value.trim() !== "" && Number(value) <= 0) return true;
-	}
-	return false;
-}
 
 /**
  * Hold the caller until every window the API stated has room, then record this
@@ -143,10 +129,16 @@ async function attempt(
 		// what happens next even where the status is a success, and even where
 		// it is the `429` the retry policy would otherwise take.
 		learn(response.headers);
-		if (exhausted(response.headers))
-			return quota(
-				"the API reports no quota remaining in one of its rate-limit windows",
-			);
+		const empty = drained(response.headers);
+		if (empty !== undefined)
+			return empty.longest
+				? quota(
+						`the API reports nothing left in its ${empty.name} window, the longest it states and one no wait inside a run outlasts`,
+					)
+				: hold(
+						empty.span,
+						`the API reports nothing left in its ${empty.name} window`,
+					);
 
 		if (response.status === 403) return forbidden(response.headers);
 		if (response.status === 429 || response.status >= 500)
@@ -253,7 +245,12 @@ export function createClient(
 		if (spent !== "") throw new Error(spent);
 		const body = JSON.stringify({ query: document, variables });
 		let last = "";
-		for (let n = 1; n <= ATTEMPTS; n++) {
+		// Waits are counted apart from attempts and bounded like them. A wait is
+		// not a failed attempt — the request was never refused — but a source
+		// answering "nothing left" for ever would otherwise suspend a run that
+		// the job's whole contract says reaches an outcome.
+		let waits = 0;
+		for (let n = 1; n <= ATTEMPTS; ) {
 			if (answered !== undefined && issued.length > 0) await seen;
 			await reserve(issued, ceilings);
 			// Read again after the waits above and not only on the way in: both
@@ -270,8 +267,15 @@ export function createClient(
 				throw new Error(outcome.message);
 			}
 			if (outcome.kind === "fatal") throw new Error(outcome.message);
+			if (outcome.kind === "wait") {
+				if (++waits > ATTEMPTS)
+					throw new Error(`${outcome.message}; ${waits - 1} waits made`);
+				await sleep(outcome.span);
+				continue;
+			}
 			last = outcome.message;
 			if (n < ATTEMPTS) await sleep(FIRST_BACKOFF_MS * 2 ** (n - 1));
+			n++;
 		}
 		throw new Error(`${last}; ${ATTEMPTS} attempts made`);
 	};
