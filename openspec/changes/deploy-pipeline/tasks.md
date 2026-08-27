@@ -60,7 +60,7 @@ because the build stage failing to produce `dist/` fails the image build.
 
 ## 2. The image: the production install and both entry points
 
-- [ ] 2.1 Write the install cases: the production stage's install command
+- [x] 2.1 Write the install cases: the production stage's install command
       carries `--frozen-lockfile`, `--production` and `--ignore-scripts`, read
       from the `Dockerfile` because the last of the three has no consequence
       the rest of this bullet reaches; the container's effective uid is not
