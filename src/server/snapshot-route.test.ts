@@ -10,7 +10,7 @@
  * one route whose source moves.
  */
 import { afterAll, beforeAll, expect, test } from "bun:test";
-import { mkdtempSync, rmSync, statSync } from "node:fs";
+import { mkdtempSync, rmSync, statSync, utimesSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
@@ -197,6 +197,37 @@ test("a request carrying a stale ETag is answered with the new bundle [41]", asy
 		headers: { "if-none-match": etagOf(first) },
 	});
 
+	expect(second.status).toBe(200);
+	expect(etagOf(second)).not.toBe(etagOf(first));
+	expect((await second.json()).snapshotId).toBe(PUBLISHED_ID + 1);
+});
+
+/**
+ * The collision the validator's cache is keyed against, arranged rather than
+ * waited for: two publications sharing a timestamp. This repository's own
+ * filesystem never produced one in 200 tries and CI produced one on the first
+ * push that noticed, so the timestamps are set equal here and the case is the
+ * same on both.
+ */
+// spec: snapshot-export/a-new-bundle-has-been-published
+test("two publications sharing a timestamp still differ [41]", async () => {
+	const dir = emptyDir();
+	const at = serving(dir);
+	await publish(dir, PUBLISHED_ID);
+	const file = join(dir, PUBLISHED);
+	const when = new Date(1_700_000_000_000);
+	utimesSync(file, when, when);
+	const first = await fetch(`${at}${SNAPSHOT_URL}`);
+
+	await publish(dir, PUBLISHED_ID + 1);
+	utimesSync(file, when, when);
+	const second = await fetch(`${at}${SNAPSHOT_URL}`, {
+		headers: { "if-none-match": etagOf(first) },
+	});
+
+	// A publication renames a freshly written file over the name, so what tells
+	// the two apart is the inode: on the timestamp alone the client would be
+	// told the bundle it holds is still the current one.
 	expect(second.status).toBe(200);
 	expect(etagOf(second)).not.toBe(etagOf(first));
 	expect((await second.json()).snapshotId).toBe(PUBLISHED_ID + 1);
