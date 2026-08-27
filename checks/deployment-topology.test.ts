@@ -109,6 +109,23 @@ test("the application is on the shared network under a fixed name", () => {
 	expect(app.container_name).toBeTruthy();
 });
 
+// spec: deployment-topology/the-proxy-reaching-the-application
+test("the README's virtual host names that container and its port", () => {
+	// The name is what the proxy resolves, and the proxy's own file lives on
+	// the host where nothing here can read it — so the README's prose is the
+	// only copy this repository has, and a `container_name` changed without it
+	// is a 502 nobody changed anything to get.
+	const readme = readFileSync(join(root, "README.md"), "utf8");
+	// The target is lifted out rather than the whole file searched for a
+	// string this composed: a `toContain` over a README fails by printing the
+	// README, which says nothing about which of the two names moved.
+	const target = /proxying to `http:\/\/([^:`]+):(\d+)`/.exec(readme);
+	expect(target?.[1]).toBe(app.container_name);
+	// The port the image serves on, which nothing sets and `Bun.serve`
+	// defaults to.
+	expect(target?.[2]).toBe("3000");
+});
+
 // spec: deployment-topology/a-container-on-the-shared-network
 test("the database is on the private network and not the shared one", () => {
 	expect(db.networks).toEqual([private_[0] as string]);
