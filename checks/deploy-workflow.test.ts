@@ -4,28 +4,27 @@
  *
  * Every check here triggers on `pull_request` alone, so a squash merge puts a
  * commit on `main` that none of them has ever run against. The gate closing
- * that is `workflow_call` plus `needs:`, and it is only a gate while all three
- * halves hold: the check workflows stay callable, the deploy calls them, and
- * everything that builds, pushes or reaches the host sits behind those calls.
- * Any one of them silently absent leaves a deploy that runs unchecked and a
- * workflow that reads as though it does not.
+ * that is `workflow_call` plus `needs:`, and it is only a gate while both
+ * halves hold: the deploy calls the check workflows, and everything that
+ * builds, pushes or reaches the host sits behind those calls. What a called
+ * workflow has to be for the call to mean anything is
+ * `checks/deploy-workflow-callable.test.ts`.
  *
  * The four checks are named below by the command each runs, never by the file
  * it sits in. Two of them share `lint.yml` today, and a file-name list would
  * both freeze that and count three things while claiming four.
  */
 import { describe, expect, test } from "bun:test";
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
-
-/** The repository root: this file reads artefacts of it, from `checks/`. */
-const root = join(import.meta.dir, "..");
-
-/** The workflow whose gate this is. */
-const DEPLOY = "deploy.yml";
+import {
+	checks,
+	DEPLOY,
+	deploy,
+	gate,
+	repository,
+} from "./deploy-workflow.fixture.ts";
 
 /** The four checks that gate a deploy, each as the command that runs it. */
-const CHECKS = {
+export const CHECKS = {
 	linter: "bun run lint",
 	"type check": "bun run typecheck",
 	"unit suite": "bun test",
@@ -34,7 +33,20 @@ const CHECKS = {
 
 type Step = { run?: string };
 type Job = { needs?: string | string[]; uses?: string; steps?: Step[] };
-type Workflow = { on?: Record<string, unknown>; jobs?: Record<string, Job> };
+export type Workflow = {
+	on?: Record<string, unknown>;
+	concurrency?: { group?: string };
+	jobs?: Record<string, Job>;
+};
+
+/** Every workflow by file name, parsed. */
+export const parse = (files: Record<string, string>) =>
+	new Map<string, Workflow>(
+		Object.entries(files).map(([name, text]) => [
+			name,
+			(Bun.YAML.parse(text) ?? {}) as Workflow,
+		]),
+	);
 
 /** Every command a workflow's own steps run, trimmed as written. */
 const runsOf = (doc: Workflow) =>
@@ -45,6 +57,37 @@ const runsOf = (doc: Workflow) =>
 /** A job's dependencies, in either spelling GitHub accepts. */
 const needsOf = (job: Job | undefined) =>
 	typeof job?.needs === "string" ? [job.needs] : (job?.needs ?? []);
+
+/**
+ * Which checks each workflow owns, found by the commands it runs, and what is
+ * wrong with the finding.
+ *
+ * Keyed by workflow rather than by check, because one workflow owning two is
+ * the arrangement here: keyed the other way, `lint.yml` would be reported
+ * twice for one fault and would collide with itself in every comparison
+ * between workflows.
+ */
+export function ownersOf(docs: Map<string, Workflow>) {
+	const owners = new Map<string, string[]>();
+	const found: string[] = [];
+	for (const [check, command] of Object.entries(CHECKS)) {
+		const owning = [...docs]
+			.filter(([name, doc]) => name !== DEPLOY && runsOf(doc).includes(command))
+			.map(([name]) => name);
+		// Neither none nor two: a command no workflow runs is a check the
+		// dependency cannot be written against at all, and one two workflows run
+		// makes "the workflow owning it" a guess.
+		if (owning.length !== 1)
+			found.push(
+				`${check}: ${owning.length} workflows run \`${command}\`, expected one`,
+			);
+		else {
+			const name = owning[0] as string;
+			owners.set(name, [...(owners.get(name) ?? []), check]);
+		}
+	}
+	return { owners, problems: found };
+}
 
 /**
  * Every job `id` depends on, directly or through another.
@@ -66,87 +109,56 @@ function chain(jobs: Record<string, Job>, id: string): Set<string> {
 	return reach;
 }
 
-/**
- * Everything wrong with the gate, and an empty list when nothing is.
- *
- * `files` is every workflow in the repository by file name, the deploy among
- * them: which workflow owns which check is a reading of the set, not a fact
- * this file can be told.
- */
+/** Everything wrong with the gate, and an empty list when nothing is. */
 export function problems(files: Record<string, string>): string[] {
-	const found: string[] = [];
-	const docs = new Map<string, Workflow>(
-		Object.entries(files).map(([name, text]) => [
-			name,
-			(Bun.YAML.parse(text) ?? {}) as Workflow,
-		]),
-	);
+	const docs = parse(files);
+	const deployed = docs.get(DEPLOY);
+	if (!deployed)
+		return [`${DEPLOY}: absent — nothing deploys and nothing gates`];
 
-	const deploy = docs.get(DEPLOY);
-	if (!deploy) return [`${DEPLOY}: absent — nothing deploys and nothing gates`];
+	const { owners, problems: found } = ownersOf(docs);
 
 	// A workflow that runs on nothing deploys nothing, and one on a wider
 	// trigger deploys more than a merge. Compared whole rather than probed for
 	// a `push` key: a second trigger beside it is the failure.
-	if (!Bun.deepEquals(deploy.on, { push: { branches: ["main"] } }))
+	if (!Bun.deepEquals(deployed.on, { push: { branches: ["main"] } }))
 		found.push(
-			`${DEPLOY}: triggers on ${JSON.stringify(deploy.on)}, not a push to main`,
+			`${DEPLOY}: triggers on ${JSON.stringify(deployed.on)}, not a push to main`,
 		);
 
-	/** Which workflow owns each check, found by the command it runs. */
-	const owners = new Map<string, string>();
-	for (const [check, command] of Object.entries(CHECKS)) {
-		const owning = [...docs]
-			.filter(([name, doc]) => name !== DEPLOY && runsOf(doc).includes(command))
-			.map(([name]) => name);
-		// Neither none nor two: a command no workflow runs is a check the
-		// dependency cannot be written against at all, and one two workflows run
-		// makes "the workflow owning it" a guess.
-		if (owning.length !== 1)
-			found.push(
-				`${check}: ${owning.length} workflows run \`${command}\`, expected one`,
-			);
-		else owners.set(check, owning[0] as string);
-	}
-
-	for (const [check, name] of owners)
-		if (!("workflow_call" in (docs.get(name)?.on ?? {})))
-			found.push(
-				`${name}: the ${check}'s workflow exposes no workflow_call: trigger, so the deploy cannot depend on it`,
-			);
-
-	const jobs = deploy.jobs ?? {};
+	const jobs = deployed.jobs ?? {};
 
 	/** The deploy jobs calling each check workflow. */
 	const callers = new Map<string, string[]>();
 	for (const [id, job] of Object.entries(jobs)) {
 		const called = job.uses?.replace(/^\.\/\.github\/workflows\//, "");
-		if (called && [...owners.values()].includes(called))
+		if (called && owners.has(called))
 			callers.set(called, [...(callers.get(called) ?? []), id]);
 	}
 
 	/** The jobs that are the gate, and so are not behind it. */
 	const calling = new Set([...callers.values()].flat());
 
-	for (const [check, name] of owners) {
+	for (const [name, owned] of owners) {
+		const which = owned.join(" and ");
 		const ids = callers.get(name) ?? [];
 		if (ids.length === 0) {
-			found.push(`${DEPLOY}: no job calls ${name}, so the ${check} is skipped`);
+			found.push(`${DEPLOY}: no job calls ${name}, so the ${which} is skipped`);
 			continue;
 		}
 		// Everything else in the file: a job doing no deploy work is held to the
 		// same chain rather than told apart by what its steps look like, because
 		// the way a job reaches the host is exactly what a reader would have to
-		// enumerate — and an enumeration is what the next step escapes through.
+		// enumerate — and an enumeration is what the next change escapes through.
 		for (const id of Object.keys(jobs)) {
 			if (calling.has(id)) continue;
 			const reach = chain(jobs, id);
 			if (!ids.some((caller) => reach.has(caller)))
-				found.push(`${DEPLOY}: job \`${id}\` does not need the ${check}`);
+				found.push(`${DEPLOY}: job \`${id}\` does not need the ${which}`);
 		}
 	}
 
-	for (const command of runsOf(deploy))
+	for (const command of runsOf(deployed))
 		if ((Object.values(CHECKS) as string[]).includes(command))
 			found.push(
 				`${DEPLOY}: spells out \`${command}\`, which the workflow owning it already defines`,
@@ -154,45 +166,6 @@ export function problems(files: Record<string, string>): string[] {
 
 	return found;
 }
-
-const workflow = (on: object, jobs: object) => Bun.YAML.stringify({ on, jobs });
-
-/** What a check workflow triggers on once it is callable. */
-const CALLABLE = { pull_request: null, workflow_call: null };
-
-/** A set of check workflows this check has nothing to say about. */
-const checks = {
-	"lint.yml": workflow(CALLABLE, {
-		biome: { steps: [{ run: "bun run lint" }] },
-		typecheck: { steps: [{ run: "bun run typecheck" }] },
-	}),
-	"test.yml": workflow(CALLABLE, {
-		coverage: { steps: [{ run: "bun test" }] },
-	}),
-	"e2e.yml": workflow(CALLABLE, {
-		smoke: { steps: [{ run: "bunx playwright test" }] },
-	}),
-};
-
-/** The jobs that are the gate itself. */
-const gate = {
-	lint: { uses: "./.github/workflows/lint.yml" },
-	test: { uses: "./.github/workflows/test.yml" },
-	e2e: { uses: "./.github/workflows/e2e.yml" },
-};
-
-/** A deploy this check has nothing to say about, with `jobs` replaced. */
-const deploy = (jobs: object = {}) => ({
-	...checks,
-	[DEPLOY]: workflow(
-		{ push: { branches: ["main"] } },
-		{
-			...gate,
-			push: { needs: ["lint", "test", "e2e"], steps: [{ run: "docker push" }] },
-			...jobs,
-		},
-	),
-});
 
 // spec: deploy-workflow/the-gate-is-readable-in-the-workflow
 test("a deploy naming all four checks as dependencies passes", () => {
@@ -216,14 +189,63 @@ describe("a chain that does not reach every check", () => {
 		expect(problems(deploy(jobs))).toEqual([]);
 	});
 
+	test("terminates on a needs: cycle rather than following it forever", () => {
+		const jobs = {
+			build: { needs: ["push", "lint", "test", "e2e"], steps: [] },
+			push: { needs: "build", steps: [] },
+		};
+		expect(problems(deploy(jobs))).toEqual([]);
+	});
+
 	test("fails when a check is called by no job at all", () => {
 		const without = deploy();
-		without[DEPLOY] = workflow(
-			{ push: { branches: ["main"] } },
-			{ lint: gate.lint, test: gate.test, push: { needs: ["lint", "test"] } },
-		);
+		without[DEPLOY] = Bun.YAML.stringify({
+			on: { push: { branches: ["main"] } },
+			jobs: {
+				lint: gate.lint,
+				test: gate.test,
+				push: { needs: ["lint", "test"] },
+			},
+		});
 		expect(problems(without)).toEqual([
 			"deploy.yml: no job calls e2e.yml, so the end-to-end suite is skipped",
+		]);
+	});
+});
+
+// spec: deploy-workflow/a-check-the-deploy-cannot-depend-on
+describe("a check no single workflow owns", () => {
+	/**
+	 * A deploy calling only the two workflows the case leaves attributable. It
+	 * calls no third, because a job calling a workflow the gate cannot attribute
+	 * is not a caller — it is another job behind the gate, reported as one, and
+	 * the ownership fault is what these cases are about.
+	 */
+	const partial = () => {
+		const files = deploy();
+		files[DEPLOY] = Bun.YAML.stringify({
+			on: { push: { branches: ["main"] } },
+			jobs: {
+				lint: gate.lint,
+				test: gate.test,
+				push: { needs: ["lint", "test"] },
+			},
+		});
+		return files;
+	};
+
+	test("one no workflow runs at all is named", () => {
+		const gone = partial();
+		delete (gone as Record<string, string>)["e2e.yml"];
+		expect(problems(gone)).toEqual([
+			"end-to-end suite: 0 workflows run `bunx playwright test`, expected one",
+		]);
+	});
+
+	test("one two workflows run is named", () => {
+		const twice = { ...partial(), "smoke.yml": checks()["e2e.yml"] as string };
+		expect(problems(twice)).toEqual([
+			"end-to-end suite: 2 workflows run `bunx playwright test`, expected one",
 		]);
 	});
 });
@@ -237,27 +259,10 @@ describe("the trigger the deploy runs on", () => {
 			{ push: { branches: ["main"] }, workflow_dispatch: null },
 		],
 	])("%s fails", (_what, on) => {
-		const wrong = deploy();
-		wrong[DEPLOY] = workflow(on, {
-			...gate,
-			push: { needs: ["lint", "test", "e2e"] },
-		});
-		expect(problems(wrong)).toEqual([
+		expect(problems(deploy({}, on))).toEqual([
 			`deploy.yml: triggers on ${JSON.stringify(on)}, not a push to main`,
 		]);
 	});
-});
-
-// spec: deploy-workflow/a-check-the-deploy-cannot-depend-on
-test("a check workflow exposing no workflow_call trigger fails", () => {
-	const uncallable = deploy();
-	uncallable["e2e.yml"] = workflow(
-		{ pull_request: null },
-		{ smoke: { steps: [{ run: "bunx playwright test" }] } },
-	);
-	expect(problems(uncallable)).toEqual([
-		"e2e.yml: the end-to-end suite's workflow exposes no workflow_call: trigger, so the deploy cannot depend on it",
-	]);
 });
 
 // spec: deploy-workflow/the-commands-are-defined-once
@@ -272,14 +277,5 @@ test("a deploy running a check's own command fails", () => {
 
 // spec: deploy-workflow/the-gate-is-readable-in-the-workflow
 test("this repository passes", () => {
-	const dir = `${root}/.github/workflows`;
-	const files = Object.fromEntries(
-		[...new Bun.Glob("*.yml").scanSync(dir)].map((name) => [
-			name,
-			readFileSync(join(dir, name), "utf8"),
-		]),
-	);
-	// Guards the guard: an empty read satisfies nothing above and fails here.
-	expect(Object.keys(files).length).toBeGreaterThan(1);
-	expect(problems(files)).toEqual([]);
+	expect(problems(repository())).toEqual([]);
 });
