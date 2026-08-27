@@ -19,6 +19,7 @@ import {
 	app,
 	available,
 	buildsImage,
+	HOOK_MS,
 	image,
 	requiresDocker,
 	tidy,
@@ -46,14 +47,17 @@ const clear = () => tidy("volume", "rm", "-f", VOLUME);
 // Before as well as after: a run killed part way through leaves the volume,
 // and the fixture case below is about what an *empty* publication directory
 // serves.
-beforeAll(clear);
+beforeAll(clear, HOOK_MS);
 
 afterAll(() => {
-	for (const id of running) tidy("stop", id);
+	// `kill`, not `stop`: `stop` asks politely and waits out a grace period per
+	// container, which is time spent on a shutdown nothing here observes. These
+	// run with `--rm`, so killing removes them just the same.
+	for (const id of running) tidy("kill", id);
 	// After the containers, never before: a volume still attached to one is
 	// refused, and the removal would fail quietly on the way out.
 	clear();
-});
+}, HOOK_MS);
 
 /**
  * Start the image with no command of its own and wait until it answers.

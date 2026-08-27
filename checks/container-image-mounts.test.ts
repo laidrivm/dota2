@@ -18,6 +18,7 @@ import {
 	app,
 	available,
 	buildsImage,
+	HOOK_MS,
 	holds,
 	requiresDocker,
 	sh,
@@ -39,9 +40,9 @@ const clear = () => tidy("volume", "rm", "-f", VOLUME);
 // Before as well as after. A named volume takes the ownership of the mount
 // point the first time it is attached and keeps it, so one left by an earlier
 // run carries that run's answer into this one.
-beforeAll(clear);
+beforeAll(clear, HOOK_MS);
 
-afterAll(clear);
+afterAll(clear, HOOK_MS);
 
 describe.skipIf(!available)("the two runtime directories", () => {
 	buildsImage();
