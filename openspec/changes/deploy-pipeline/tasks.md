@@ -178,7 +178,7 @@ because the build stage failing to produce `dist/` fails the image build.
       was serving still up.
       (Req: deploy-workflow — The running container is replaced only once its
       replacement is on the host)
-- [ ] 5.2 Write the secrets cases in both directions: the registry, image
+- [x] 5.2 Write the secrets cases in both directions: the registry, image
       repository and container names are read from `env:` and never from
       `secrets`; the Docker Hub token, the SSH private key and the SSH host,
       port and user are each read from `secrets` and never written in the
