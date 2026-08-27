@@ -27,6 +27,14 @@ The gate list SHALL NOT be restated in the deploy workflow. The checks are
 already defined once each, and a second copy of the commands is a list that
 drifts from the first.
 
+Where a check is defined by a workflow of its own, that workflow SHALL be made
+callable, so the deploy can depend on it without copying it. This is not a
+detail left to implementation: a job cannot depend on a job in another
+workflow, and every check here triggers on `pull_request` alone, so as things
+stand the dependency this requirement asks for cannot be written at all. A
+check that cannot be called is a check the gate cannot include, and a gate
+that quietly excludes one is the defect above wearing the fix's clothes.
+
 #### Scenario: A commit whose checks fail
 
 - **WHEN** a commit reaches `main` and one of the checks fails against it
@@ -38,6 +46,14 @@ drifts from the first.
 - **THEN** the checks that gate it SHALL be named in it as dependencies, and
   the reader SHALL NOT have to consult repository settings to learn what
   gates a deploy
+
+#### Scenario: A check the deploy cannot depend on
+
+- **IF** a workflow naming one of the four checks exposes no trigger a deploy
+  can invoke it through
+- **THEN** the change SHALL be rejected — the dependency cannot be written,
+  and a gate that silently drops the check it could not reach passes for the
+  same reason it should have failed
 
 #### Scenario: The commands are defined once
 
