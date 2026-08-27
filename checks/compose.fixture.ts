@@ -34,17 +34,33 @@ const PROJECT = "d2ass-checks-compose";
 /** How long any one compose call may take. */
 const COMPOSE_MS = 300_000;
 
+/** The project file, read once for the two things this addresses it by. */
+const project = Bun.YAML.parse(
+	readFileSync(`${root}/docker-compose.yml`, "utf8"),
+) as {
+	services?: Record<string, { container_name?: string }>;
+	networks?: Record<string, { external?: boolean } | null>;
+};
+
 /** The shared network's name, read from the file rather than written again. */
 export const shared = (() => {
-	const file = Bun.YAML.parse(
-		readFileSync(`${root}/docker-compose.yml`, "utf8"),
-	) as { networks?: Record<string, { external?: boolean } | null> };
-	const found = Object.entries(file.networks ?? {})
+	const found = Object.entries(project.networks ?? {})
 		.filter(([, config]) => config?.external === true)
 		.map(([name]) => name);
 	if (found.length !== 1)
 		throw new Error(`expected one external network, found ${found.length}`);
 	return found[0] as string;
+})();
+
+/**
+ * What the application answers to on that network — read from the file for the
+ * same reason the network is, and because this is the name the deployment's
+ * virtual host resolves it by. A copy here would go on naming the old one.
+ */
+const address = (() => {
+	const name = project.services?.app?.container_name;
+	if (!name) throw new Error("the app service declares no container_name");
+	return name;
 })();
 
 let dir: string | undefined;
@@ -149,7 +165,7 @@ export function request(path: string) {
 			image(),
 			"bun",
 			"-e",
-			`const answer = await fetch("http://d2ass-app:3000${path}");
+			`const answer = await fetch("http://${address}:3000${path}");
 			 console.log(answer.status);
 			 console.log(await answer.text());`,
 		],
