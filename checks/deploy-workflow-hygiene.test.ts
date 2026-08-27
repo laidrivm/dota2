@@ -39,7 +39,10 @@ type Workflow = {
 	concurrency?: { group?: string };
 	jobs?: Record<
 		string,
-		{ steps?: { run?: string; with?: { script?: string } }[] }
+		{
+			permissions?: string | Record<string, string>;
+			steps?: { run?: string; with?: { script?: string } }[];
+		}
 	>;
 };
 
@@ -66,17 +69,38 @@ export function problems(deploy: string): string[] {
 	// in it, and this workflow cannot do its job without naming several.
 	if (pins === 0) found.push("deploy.yml: no pinned action at all");
 
-	// A mapping, never a string. `write-all` and `read-all` are the two strings
-	// GitHub accepts here, and both grant scopes this workflow does not use.
-	const permissions = doc.permissions;
-	if (typeof permissions !== "object" || permissions === null)
-		found.push(
-			`deploy.yml: permissions is ${permissions === undefined ? "absent" : `\`${permissions}\``}, not a set of scopes`,
-		);
-	else
+	// The workflow's block and every job's. A job may widen what the workflow
+	// declared, so reading only the top of the file leaves the one place a
+	// scope is actually taken unread.
+	const blocks: [string, Workflow["permissions"]][] = [
+		["permissions", doc.permissions],
+		...Object.entries(doc.jobs ?? {}).map(
+			([id, job]): [string, Workflow["permissions"]] => [
+				`job \`${id}\`'s permissions`,
+				job.permissions,
+			],
+		),
+	];
+	for (const [where, permissions] of blocks) {
+		// A mapping, never a string. `write-all` and `read-all` are the two
+		// strings GitHub accepts here, and both grant scopes this workflow does
+		// not use. A job declaring none inherits the workflow's, which is read
+		// above — so absent is a fault only at the top.
+		if (permissions === undefined) {
+			if (where === "permissions")
+				found.push("deploy.yml: permissions is absent, not a set of scopes");
+			continue;
+		}
+		if (typeof permissions !== "object" || permissions === null) {
+			found.push(
+				`deploy.yml: ${where} is \`${permissions}\`, not a set of scopes`,
+			);
+			continue;
+		}
 		for (const [scope, granted] of Object.entries(permissions))
 			if (granted !== "read" && granted !== "none")
-				found.push(`deploy.yml: permissions grants ${scope}: ${granted}`);
+				found.push(`deploy.yml: ${where} grants ${scope}: ${granted}`);
+	}
 
 	if (!doc.concurrency?.group)
 		found.push("deploy.yml: no concurrency group, so two deploys can overlap");
@@ -157,6 +181,16 @@ describe("the permissions the workflow takes", () => {
 		});
 		expect(problems(write)).toEqual([
 			"deploy.yml: permissions grants packages: write",
+		]);
+	});
+
+	test("a job widening what the workflow declared fails", () => {
+		const widened = hosted().replace(
+			"  host:\n    needs: image\n",
+			"  host:\n    needs: image\n    permissions: write-all\n",
+		);
+		expect(problems(widened)).toEqual([
+			"deploy.yml: job `host`'s permissions is `write-all`, not a set of scopes",
 		]);
 	});
 
