@@ -168,6 +168,9 @@ Rules about how work is carried out here. They do not age with the code.
   any count the source states itself.
 - Re-run the older probe before overwriting a recorded measurement your new
   one contradicts.
+- Restore a file a probe edited from a copy taken before it, never with `git
+  checkout` — which discards every uncommitted change in that file, not the
+  probe alone.
 - Exercise a pre-written decision rule, or a condition you have written, only
   against a case that could have produced the opposite outcome — for a
   condition, name that case before writing it.
@@ -189,6 +192,7 @@ Rules about how work is carried out here. They do not age with the code.
   count and a silent no-op all read as a successful edit.
 - Edit a file with the editing tool, never a shell heredoc, when its text
   carries a backtick or `${`.
+- Write a commit message from the staged diff, never from the last change made.
 - Verify a test file's split by the full describe path of every test, never by
   their count — a block absorbed into its neighbour runs exactly as many.
 - Split a file to the cap that will apply to it, not the one that applies
