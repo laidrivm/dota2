@@ -116,6 +116,8 @@ describes is rewritten, the rule is a candidate for deletion.
   re-subscribing the listener when that state changes.
 - A guard against malformed input must cover the whole value, not a prefix —
   anchor both ends or parse it.
+- Read a value a tool consumes from the structure that tool parses, and where it
+  takes effect — never from a line of the file that resembles it.
 - Scope a scan by what it exempts, never by an enumeration of what it covers —
   the collections the scan itself walks included.
 - State a scan's exemptions in the scan; never inherit them from another tool's
