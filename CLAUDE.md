@@ -127,8 +127,10 @@ describes is rewritten, the rule is a candidate for deletion.
   never from the copy the scan blanked.
 - Where a delimiter's meaning depends on the position within a construct, track
   that position, never infer it from a nesting count.
-- Comment what a reader would otherwise "fix": a deliberate departure from the
-  obvious implementation, or a precondition the code does not check.
+- Comment what a reader would otherwise "fix" — a deliberate departure from the
+  obvious implementation, or a precondition the code does not check — and
+  re-read that comment when the code under it moves: one naming a check the
+  code no longer makes is a defect no test sees.
 - Await a rejection from a driver's query object through `then(ok, err)`,
   never `expect().rejects`, which hangs on a thenable instead of failing.
 - Convert a `file:` URL with `fileURLToPath` before handing it to the
@@ -184,7 +186,9 @@ Rules about how work is carried out here. They do not age with the code.
   carries a backtick or `${`.
 - Verify a test file's split by the full describe path of every test, never by
   their count — a block absorbed into its neighbour runs exactly as many.
-- Split a file to the cap that will apply to it, not the one that applies today.
+- Split a file to the cap that will apply to it, not the one that applies
+  today, and re-measure the diff budget afterwards — a split counts its moved
+  lines in it twice.
 - A suite that may skip locally fails the CI job that owns it when it skips
   there — supply what it needs, and assert it ran.
 - Cite the requirement that fixes a value; never restate the value in another
