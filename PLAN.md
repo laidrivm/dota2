@@ -96,15 +96,12 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
   `openspec/specs/container-image/`, `openspec/specs/deploy-workflow/`,
   `openspec/specs/deployment-topology/` and
   `openspec/specs/snapshot-schedule/`.
+- **`proposal-slicing`** — PR #223,
+  `archive/2026-08-28-proposal-slicing`; both requirements are in
+  `openspec/specs/change-slicing/`.
 
 ### Open
 
-- [ ] **`proposal-slicing`** — proposed,
-      `openspec/changes/proposal-slicing/`. A propose-stage branch at or over
-      the diff budget's failing threshold splits into `spec/<slug>` and
-      `spec/<slug>-plan` — the seam #130/#132 and #141/#142 each cut by hand —
-      and the `oversize:` override stops admitting an unsplit one. One task
-      group, so `chore/proposal-slicing`.
 - [ ] **The board draws no hero it did not ship with.** The tile takes its
       colour from a `--hero-<short>` token, and the palette was written against
       the fixture's kebab slugs where the ingest writes STRATZ's snake_case and
@@ -333,17 +330,21 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       requirement stands on its own second reason, that no reader runs `git log
       -S` before editing, so this is an overstated clause rather than a broken
       criterion; correcting it is a delta spec, not an edit here.
-- [ ] **The always-on trigger has fired.** The set is 555 lines against the
-      ~500 `CLAUDE.md` states. The Process sublist sits at 20, its own
-      threshold, and stayed there only because this session's two captured
-      rules went to `docs/verification.md` rather than into it.
+- [ ] **The always-on trigger has fired, and by more than it last recorded.**
+      Re-measured 2026-08-28: the set is 617 lines against the ~500
+      `CLAUDE.md` states, where the entry previously read 555. Both sublist
+      figures moved with it — Process sits at 24 and Code at 20, so two of the
+      three are now at or past the ~20 threshold rather than one.
       `docs/rulebook-growth.md` asks for a promotion rather than a prune, and
-      the cluster is the same one: five Process rules are about what counts as
-      evidence — how a gate is probed, when an empty result is an absence,
-      where a count comes from, which measurement may be overwritten — and
-      `docs/verification.md` already owns exactly that, sixteen rules of it.
-      Moving those five takes the sublist to fifteen and buys the always-on
-      set back under its budget.
+      the cluster it named still holds: five Process rules are about what
+      counts as evidence — how a gate is probed, when an empty result is an
+      absence, where a count comes from, which measurement may be overwritten
+      — and `docs/verification.md` already owns exactly that. What no longer
+      holds is the conclusion drawn from it: moving those five takes Process
+      to 19 and the set to about 607, so it clears one sublist and leaves the
+      set a hundred lines over. Closing this now needs a decision about where
+      the bulk goes, `PLAN.md` being the larger half at 390 lines, and that is
+      a change rather than an edit here.
 
 ## Standing constraints
 
