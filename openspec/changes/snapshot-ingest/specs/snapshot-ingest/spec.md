@@ -78,10 +78,17 @@ reporting nothing left in the longest window SHALL NOT be retried, because the
 retry answers a request the service might yet accept and this one it will not.
 
 A window the response does not let the client measure SHALL count as the
-longest — one whose name carries no length, or one reported spent in a response
-that states no ceiling to compare it against. Neither can be shown to turn
-inside a run, and waiting out a window whose end nobody can name is waiting for
-an instant that may never come.
+longest — one whose name carries no length, or one reported spent where the
+response states no ceiling at all, leaving nothing to measure it against.
+Neither can be shown to turn inside a run, and waiting out a window whose end
+nobody can name is waiting for an instant that may never come.
+
+A window whose name does carry a length SHALL be waited out even WHERE the
+response states no ceiling of its own for it. The length is what a wait needs
+and the ceiling is what pacing needs, so a response naming a spent minute and
+no minute ceiling still says when that minute turns. Ending the run there would
+spend a day's quota to avoid a minute's wait, which is the whole of what this
+requirement was rewritten to stop.
 
 The waiting SHALL be bounded as the retrying is, and a run whose window has not
 turned inside that bound SHALL end failed naming it. A wait is not a failed
