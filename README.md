@@ -129,6 +129,88 @@ To roll back, set `D2ASS_IMAGE` on the host to a previous commit's SHA tag —
 `laidrivm/d2ass:<sha>`, which no later deploy overwrites — then
 `docker compose pull && docker compose up -d`. That is the whole of it.
 
+It stays that simple only while every schema change is additive. `connect()`
+reapplies `src/job/schema.sql` on every connection, and applying an older one
+to a newer database does nothing — every statement in it is `IF NOT EXISTS`,
+and it carries no `DROP`, no `ALTER COLUMN` and no type change. So a rollback
+leaves the newer shape in place and runs the older code against it. A release
+that drops a column, narrows a type or changes what a stored value means is
+therefore not rollback-safe, and either ships its own backward step or is
+rolled forward instead.
+
+### Where each value lives
+
+Which of the three homes a value belongs in is decided by what disclosing it
+would grant, and `checks/deploy-workflow-secrets.test.ts` holds that line in
+both directions:
+
+- **`deploy.yml`'s `env:`** — the registry, the Docker Hub account and the
+  image repository. None of them grants anything: the repository is public and
+  its name already discloses the account. In the open so that a reader can see
+  what this workflow deploys, and so the secret store stays auditable for what
+  is actually sensitive.
+- **The GitHub `production` environment** — `DOCKERHUB_TOKEN`, which can push
+  to that repository, and `SSH_HOST`, `SSH_PORT`, `SSH_USER` and `SSH_KEY`,
+  which reach the machine. The environment is what stands between a workflow
+  run and all five.
+- **`.env` in the project directory on the host** — read by `docker-compose.yml`
+  rather than by the workflow. `.env.example` is the list of what exists and
+  what each one is for; the host's copy is that file filled in.
+
+### The proxy in front of it
+
+The application publishes no port. `nginx-proxy` — a container on that machine,
+not a host package — holds `:80` and `:443` and reaches it by container name
+over `web-network`, exactly as it reaches everything else there. The virtual
+host is `/root/nginx/conf.d/d2ass.conf`, modelled on the neighbouring
+`mellon.sh.conf`: `listen 443 ssl`, the certificate pair, `include
+snippets/ssl-params.conf`, and a `location /` with
+`snippets/proxy-headers.conf` proxying to `http://d2ass-app:3000`.
+
+Prose here rather than a file in this repository, because the file that is
+actually read lives on the host and a committed copy would drift from it in
+silence.
+
+Two things about it are ordering rather than content, which is why the
+bootstrap below is a sequence. nginx refuses to start against a configuration
+naming a certificate file that is not there, so the certificate exists before
+the virtual host does. And the Cloudflare record must be **DNS only**:
+Cloudflare defaults a new `A` record to proxied, and a proxied record puts
+their TLS in front and sends the challenge through their edge, which is not
+how the neighbouring domains on this machine work.
+
+The certificate is issued **DNS-01 through the Cloudflare plugin**, not the
+default. `certbot certonly` defaults to the standalone authenticator, which
+binds the port `nginx-proxy` holds, so standalone cannot complete here at all
+— and on this machine the standalone certificates are exactly the ones whose
+renewals fail.
+
+One gap is inherited rather than introduced, and this deployment does not
+close it: all three of the host's `/etc/letsencrypt/renewal-hooks/`
+directories are empty, so a certificate that does renew never reaches the
+proxy container, which reads `/etc/letsencrypt` only when it starts. Until
+that is fixed, a renewal is followed by reloading `nginx-proxy` by hand.
+`PLAN.md` carries it.
+
+### Bootstrapping a host
+
+Manual, all of it, and in this order:
+
+1. A Cloudflare `A` record for `d2ass.laidrivm.com` pointing at the VPS,
+   **DNS only**.
+2. `certbot certonly --dns-cloudflare` for that name, with a zone-scoped API
+   token.
+3. `/root/nginx/conf.d/d2ass.conf` as above, then reload `nginx-proxy`.
+4. `docker-compose.yml` and a filled-in `.env` in the project directory — the
+   one the crontab entry below names, which is also the one `deploy.yml`'s
+   host script changes into.
+5. The GitHub `production` environment with its secrets, and then a deploy,
+   which is what first puts an image on the host.
+6. The crontab entry below.
+
+No `docker login` on the host at any point: the image repository is public,
+which is one fewer credential on the machine and one fewer thing to expire.
+
 ### The nightly job
 
 The job is not a service — it is a process that exits — so the host's cron is

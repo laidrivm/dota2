@@ -238,14 +238,14 @@ because the build stage failing to produce `dist/` fails the image build.
       **(e2e)** 1.5, deferred to this task by Task 4.
       (Req: app-shell — Static production build / Build output is
       self-contained)
-- [ ] 7.2 Write the README operations section: how a deploy happens, how to
+- [x] 7.2 Write the README operations section: how a deploy happens, how to
       roll back by a previous commit's tag, where the secrets live, and the
       nginx virtual host as prose — including that the Cloudflare record must
       be DNS only and that the certificate has to exist before the proxy is
       reloaded.
       (Req: deploy-workflow — Every deployed image is named by the commit it
       was built from)
-- [ ] 7.3 Write the README bootstrap sequence in the order the design fixes,
+- [x] 7.3 Write the README bootstrap sequence in the order the design fixes,
       and name the host's empty certbot renewal hooks as a thing this
       deployment inherits. The project directory on the host is written in
       `deploy.yml`'s script already and Task 6.4's crontab entry will name it
