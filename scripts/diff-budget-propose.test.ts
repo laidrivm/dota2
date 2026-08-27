@@ -43,6 +43,7 @@ test("an unsplit proposal carrying no marker is still told where to split", () =
 	expect(g.code).toBe(1);
 });
 
+// spec: change-slicing/an-unsplit-proposal-reaching-for-the-override
 test("a branch authoring two unsplit proposals is refused", () => {
 	const dir = repo(
 		{ "a.ts": "one\n" },
@@ -67,15 +68,23 @@ test("renaming a change directory to a new slug authors no proposal", () => {
 		{
 			"openspec/changes/old-slug/proposal.md": null,
 			"openspec/changes/old-slug/tasks.md": null,
-			"openspec/changes/new-slug/proposal.md": lines(400),
-			"openspec/changes/new-slug/tasks.md": tasks(20, " "),
+			// Both edited on the way, so neither pairs exactly: an identical
+			// move is matched before the limit is consulted, and it is the
+			// leftover matrix that `renameLimit` refuses to search.
+			"openspec/changes/new-slug/proposal.md": lines(401),
+			"openspec/changes/new-slug/tasks.md": tasks(21, " "),
 			"src/model.ts": lines(900),
 		},
 	);
 	// Detection off, which is what makes this discriminating: on the default
 	// the rename is spotted whether or not the script asks for it, so dropping
 	// the script's `-M` would pass here and the case would guard nothing.
+	// `renameLimit` is set too and guards nothing here, deliberately: git pairs
+	// same-basename files before it consults the limit, and every path this
+	// pathspec matches is named `proposal.md` or `tasks.md`. The script's `-l0`
+	// is exercised by the counting suite, where basenames differ.
 	git(dir, "config", "diff.renames", "false");
+	git(dir, "config", "diff.renameLimit", "1");
 	const g = gate(dir, "main", "oversize: the rename rides a large change\n");
 	expect(g.line).toContain("OVERRIDE");
 	expect(g.code).toBe(0);
@@ -136,6 +145,7 @@ test("proposal.md for one change and tasks.md for another is not one unsplit pro
 	);
 	const g = gate(dir, "main", "oversize: two changes touched, one authored\n");
 	expect(g.line).toContain("OVERRIDE — 900 lines");
+	expect(g.code).toBe(0);
 });
 
 // spec: change-slicing/an-archived-change-is-not-a-new-proposal
@@ -160,6 +170,7 @@ test("an archive move is not the authoring of a proposal", () => {
 
 // Without a glob that stops at a separator, both paths below reduce to the
 // same `archive` directory and read as one unsplit proposal.
+// spec: change-slicing/an-archived-change-is-not-a-new-proposal
 test("an archived change's artefacts are not matched as a change directory", () => {
 	const dir = repo(
 		{ "a.ts": "one\n" },
@@ -170,6 +181,7 @@ test("an archived change's artefacts are not matched as a change directory", () 
 	);
 	const g = gate(dir, "main", "oversize: an archive arriving whole\n");
 	expect(g.line).toContain("OVERRIDE — 900 lines");
+	expect(g.code).toBe(0);
 });
 
 test("adding proposal.md beside an already-tracked tasks.md is not an unsplit proposal", () => {
@@ -182,6 +194,7 @@ test("adding proposal.md beside an already-tracked tasks.md is not an unsplit pr
 	);
 	const g = gate(dir, "main", "oversize: the plan predates the proposal\n");
 	expect(g.line).toContain("OVERRIDE — 900 lines");
+	expect(g.code).toBe(0);
 });
 
 test("modifying both artefacts without adding either is not an unsplit proposal", () => {
@@ -197,6 +210,7 @@ test("modifying both artefacts without adding either is not an unsplit proposal"
 	);
 	const g = gate(dir, "main", "oversize: the proposal was rewritten\n");
 	expect(g.line).toContain("OVERRIDE — 900 lines");
+	expect(g.code).toBe(0);
 });
 
 test("a proposal.md outside openspec/changes/ does not trigger the refusal", () => {
@@ -206,6 +220,7 @@ test("a proposal.md outside openspec/changes/ does not trigger the refusal", () 
 	);
 	const g = gate(dir, "main", "oversize: documentation, not a change\n");
 	expect(g.line).toContain("OVERRIDE — 900 lines");
+	expect(g.code).toBe(0);
 });
 
 // The reader is holding the branch that needs splitting, so the line answers
@@ -218,6 +233,7 @@ test("the refused gate line names both branches of the seam", () => {
 	expect(g.line).toContain("spec/<slug>-plan");
 	expect(g.line).toContain("FAIL");
 	expect(g.line).not.toContain("OVERRIDE");
+	expect(g.code).toBe(1);
 });
 
 // spec: change-slicing/an-unsplit-proposal-whose-marker-names-no-reason

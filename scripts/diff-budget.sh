@@ -44,14 +44,14 @@ EXCLUDE=(':(exclude)bun.lock' ':(exclude)*.woff2' ':(exclude)src/fixtures/snapsh
 # Classification is by pathspec, so `src/app/latest.ts` stays source.
 TESTS=('*.test.ts' '*.test.tsx' 'e2e/**')
 
-# `-M` for the reason `authored_proposal` carries it, and here it decides the
-# number rather than a branch of it: a moved file is nothing to read where the
-# rename is detected and its whole length twice where it is not, so the same
-# branch measured PASS at 0 and FAIL at 800 across `diff.renames`. The gate
-# exists to give one answer, so it asks for detection rather than inheriting a
+# `-M -l0` for the reason `authored_proposal` carries them, and here they
+# decide the number rather than a branch of it: a moved file is nothing to read
+# where the rename is detected and its whole length twice where it is not, so
+# the same branch measured PASS at 0 and FAIL at 800 across `diff.renames`. The
+# gate exists to give one answer, so it asks rather than inheriting a
 # preference.
 count() {
-	git diff -M "${base}...HEAD" -- "$@" "${EXCLUDE[@]}" | awk '
+	git diff -M -l0 "${base}...HEAD" -- "$@" "${EXCLUDE[@]}" | awk '
 		/^diff --git / { inhunk = 0; next }
 		/^@@/          { inhunk = 1; next }
 		!inhunk && /^\+\+\+ / {
@@ -106,13 +106,20 @@ count() {
 # from moving: `/opsx:archive` relocates the pair, and a relocation adds
 # nothing.
 #
-# `-M` is what makes that second half hold whatever the developer's config
-# says. Rename detection is on by default but `diff.renames=false` turns it
-# off, and without it a change directory renamed to a new slug reads as a
-# deletion plus two additions — both of which do match the glob, so the branch
-# would be refused for authoring a proposal it merely moved.
+# `-M -l0` is what makes that second half hold whatever the developer's config
+# says: `diff.renames=false` turns detection off outright, and without it a
+# change directory renamed to a new slug reads as deletions plus additions —
+# the additions match the glob, so the branch would be refused for authoring a
+# proposal it merely moved.
+#
+# `-l0` cannot be exercised here and is carried anyway, so that both calls ask
+# git the same question. `diff.renameLimit` skips detection once the candidate
+# matrix outgrows the limit, but git pairs same-basename files before it
+# consults one, and every path this pathspec matches is named `proposal.md` or
+# `tasks.md` — measured, a limit of 1 changes nothing here. Where basenames
+# differ it does bite, which is `count`'s case and where the flag is tested.
 authored_proposal() {
-	git diff -M --diff-filter=A --name-only "${base}...HEAD" -- \
+	git diff -M -l0 --diff-filter=A --name-only "${base}...HEAD" -- \
 		':(glob)openspec/changes/*/proposal.md' \
 		':(glob)openspec/changes/*/tasks.md' |
 		sed -E 's|^openspec/changes/([^/]+)/.*|\1|' | sort | uniq -d
