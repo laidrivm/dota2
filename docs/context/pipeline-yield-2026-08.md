@@ -1068,3 +1068,80 @@ measured before being written, not guessed.
   expired six days earlier
 - Not run: preflight, code-review, review-order, first-five, security-review,
   ponytail-review, checklist
+
+## 2026-08-27 — feat/deploy-pipeline-1, -2, -3
+
+Three task groups of `deploy-pipeline`, each merged (#208, #211, #212). Each
+ran four of the pre-PR sequence's five steps: `warm` is step 3 and no group
+reached its trigger, no manifest gaining a dependency all session. The `Not
+run` line at the end names skills outside the sequence entirely. Counts are
+per group, in the order they ran.
+
+Group 1 — the image, its pins and the container harness:
+
+- zombies: OPEN → PASS — 8 gaps, 7 acted on, 1 skipped (a guard on a guard
+  whose sibling `requiresDatabase()` is untested by the same reasoning)
+- warm: not run — `package.json` changed, but with a script and no dependency
+- triage: OPEN → PASS — 7 groups, 4 high-risk files read, 2 findings. Both were
+  claims the branch falsified rather than defects in it: `PLAN.md` counting
+  eight `bun-version` pin sites where the base already carried nine, and
+  `test.yml` saying its Postgres pin waited on "a Dockerfile that ecosystem can
+  see" — one arrived on the branch and the pin stayed outside what it reads
+- coderabbit-local: PASS — 6 findings, 6 dispositioned (1 applied, 2 rejected,
+  3 skipped). The applied one caught my own comment overstating its test: it
+  claimed a value read into an `ENV` would be caught and the assertions reached
+  only the filesystem
+- coderabbit: PASS — 6 findings, 6 dispositioned (4 applied, 2 skipped). The
+  Major was the session's most useful single finding: `scripts/test-docker.sh`
+  and the README both listed the production install, both entry points, the
+  mount points, the compose topology and the schedule as things the Docker job
+  checks, none of which was written. A reader of `main` would have believed it
+
+Group 2 — the production install and both entry points:
+
+- zombies: OPEN → PASS — 5 gaps, 4 acted on, 1 skipped (harness error
+  reporting, not product behaviour)
+- warm: not run — no manifest changed
+- triage: OPEN → PASS — 6 groups, 1 high-risk file read, 1 finding: `/app`
+  restated as a literal in four test files while the `Dockerfile`'s `WORKDIR`
+  fixes it. Silent and total if it moved — every `holds()` call would ask about
+  a path no image has and answer `false`, which is what the exclusion cases
+  assert
+- coderabbit-local: PASS — 5 findings, 5 dispositioned (3 applied, 2 rejected).
+  One Major was real and its stated reason understated it: unguarded `docker`
+  in a top-level teardown hook throws on a machine without a daemon, so the
+  file fails for want of the very thing the skip exists to tolerate
+- coderabbit: PASS — 3 findings, 3 dispositioned (1 applied, 2 rejected). One
+  rejection was a hallucination — `behavior` claimed on a line, absent from the
+  file, the change and the reviewed revision alike
+
+Group 3 — the compose project:
+
+- zombies: OPEN → PASS — 4 gaps, 2 acted on, 2 skipped as compose's own
+  semantics. One of the two acted on was a real defect: the job's
+  `DATABASE_URL` was composed by interpolating `POSTGRES_PASSWORD`, and
+  measured on bun 1.3.14 a password holding `/` or `#` throws before a
+  connection is attempted while `@` or `:` parses into a different password
+  than was set — `openssl rand -base64` emits `/` and `+`
+- warm: not run — no manifest changed
+- triage: OPEN → PASS — 6 groups, 2 high-risk files read, 2 findings, both
+  about a reader having to know rather than find
+- coderabbit-local: PASS — 6 findings, 6 dispositioned (4 applied, 1 rejected,
+  1 skipped). The Major: the fixture removed the shared network on the way out
+  whether or not it had created it
+- coderabbit: PASS — 6 findings, 6 dispositioned (5 applied, 1 skipped). The
+  sharpest was a claim of mine, not a defect in code: the compose comment said
+  Dependabot's `docker` ecosystem reads compose files. Checked against GitHub's
+  supported-ecosystems table — `docker-compose` is a separate package manager,
+  so the Postgres digest was a pin nothing raised, and the comment citing the
+  Safety rule about naming a pin's updater was itself breaking it
+
+- Not run this session: preflight, code-review, review-order, first-five,
+  security-review, ponytail-review, checklist
+
+Two observations the counts do not carry. Every group's `coderabbit` pass found
+something its own `coderabbit-local` pass on the same text had not — 4, 1 and 5
+applied respectively — so the two are not redundant even when nothing changed
+between them. And across all six review passes the highest-value findings were
+about *prose*: comments and task text asserting behaviour the code did not
+have. Four of the six Majors were of that shape.
