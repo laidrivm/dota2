@@ -27,6 +27,11 @@ services:
     volumes:
       - bundle:/app/snapshot
       - icons:/app/icons
+    # No `depends_on` on the database, and not an omission: the server opens no
+    # connection at all. It answers from `dist/`, from the two volumes above and
+    # from files in the image, so it serves correctly while the database is
+    # still starting — and waiting on it would only delay the one thing here
+    # that has nothing to wait for.
 
   db:
     # Pinned by digest, and by the same digest `.github/workflows/test.yml`
