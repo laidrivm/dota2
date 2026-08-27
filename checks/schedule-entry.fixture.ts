@@ -8,11 +8,7 @@
  *
  * `checks/schedule.fixture.ts` is what runs it.
  */
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
-
-/** The repository root: this file reads an artefact of it, from `checks/`. */
-const root = join(import.meta.dir, "..");
+import { fenced } from "./readme.fixture.ts";
 
 /**
  * The entry, taken from the README's one fenced block tagged `crontab`.
@@ -23,13 +19,8 @@ const root = join(import.meta.dir, "..");
  * carries every token the entry does. The tag is what says which of the two is
  * the thing cron reads.
  */
-/** The file the entry and everything said about it live in. */
-export const README = readFileSync(join(root, "README.md"), "utf8");
-
 export const ENTRY = (() => {
-	const found = [...README.matchAll(/```([a-z]*)\n([\s\S]*?)```/g)]
-		.filter((block) => block[1] === "crontab")
-		.map((block) => (block[2] as string).trim());
+	const found = fenced("crontab");
 	if (found.length !== 1)
 		throw new Error(
 			`expected one fenced block tagged crontab in the README, found ${found.length}`,

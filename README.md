@@ -220,11 +220,14 @@ machine this project happens to run on.
    ```
 
    With the virtual host above in `/root/nginx/conf.d/`.
-4. **The project**: `docker-compose.yml` and a `.env` beside it, in a directory
-   of your choosing — the one the crontab entry below names, and the one
-   `deploy.yml`'s host script changes into. Copy `.env.example` and fill it in;
-   `D2ASS_IMAGE` can be `laidrivm/d2ass:latest` to start with, since the
-   repository is public.
+4. **The project**: `docker-compose.yml` and a `.env` beside it, in
+   `/root/d2ass` — which is not arbitrary and not yours to pick freely: the
+   crontab entry below and `deploy.yml`'s host script both name it, so putting
+   the project elsewhere means changing it in both. Copy `.env.example` and
+   fill it in. `D2ASS_IMAGE` can be `laidrivm/d2ass:latest` to get the first
+   container up, since the repository is public — but a deploy replaces it
+   with the commit's SHA and that is what should be serving: a machine running
+   `latest` cannot say which commit it is running.
 5. **Up**: `docker compose pull && docker compose up -d`. No `docker login` at
    any point — one fewer credential on the machine and one fewer thing to
    expire.
@@ -269,18 +272,32 @@ answers `syntax error near unexpected token '}'` — measured. To install it
 without an editor, append it instead:
 
 ```sh
-(crontab -l 2>/dev/null; echo '17 4 * * * { date -Iseconds; flock -n -E 99 /var/lock/d2ass-job.lock docker compose --progress quiet -f /root/d2ass/docker-compose.yml run --rm job; echo "exit $?"; } >> /var/log/d2ass-job.log 2>&1') | crontab -
+crontab -l 2>/dev/null | grep -qF d2ass-job.lock ||
+  (crontab -l 2>/dev/null; echo '17 4 * * * { date -Iseconds; flock -n -E 99 /var/lock/d2ass-job.lock docker compose --progress quiet -f /root/d2ass/docker-compose.yml run --rm job; echo "exit $?"; } >> /var/log/d2ass-job.log 2>&1') | crontab -
 ```
+
+The `grep` is what makes running it twice harmless. Without it a second run
+appends a second entry, and `flock` does not save you from that — it refuses a
+run that *overlaps* one, and the duplicate fires at the same minute as the
+first, so whichever loses the lock is refused while the other rebuilds the
+snapshot a second time that night.
 
 Single quotes around it are what keep the shell from expanding `$?` on the way
 in; the entry's own quotes are double, so nothing inside needs escaping.
 
-Its three paths are this deployment's rather than yours. The project directory
-is the one `deploy.yml`'s host script changes into, and
-`checks/snapshot-schedule.test.ts` fails if the two stop agreeing — so on a
-fork, change it in both. The lock and the log are under `/var`, which is
-root-owned: an entry installed for anyone else wants two paths that user can
-write.
+Its three paths are this deployment's. The project directory is the one
+`deploy.yml`'s host script changes into and `checks/snapshot-schedule.test.ts`
+fails if the two stop agreeing, so on a fork change it in both.
+
+The other two are only a question if you install the entry for someone other
+than root. `/var/lock` is a symlink to `/run/lock` and world-writable on Debian
+and Ubuntu, so the lock is fine either way — measured on `ubuntu:24.04`.
+`/var/log` is not: it is `root:root` and `755`, so a non-root crontab cannot
+create the log and the entry fails before `docker compose` runs. Either install
+it for root, or point the log somewhere that user owns — beside the project
+directory does.
+
+
 
 On one line, because a crontab has no continuation — a line broken over two is
 two entries, the second of which is not a schedule. And with no `%` anywhere

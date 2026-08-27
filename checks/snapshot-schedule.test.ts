@@ -15,6 +15,7 @@ import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { down, PROJECT, projectFile, up } from "./compose.fixture.ts";
 import { DEPLOY, repository } from "./deploy-workflow.fixture.ts";
 import { buildsImage, HOOK_MS, requiresDocker } from "./docker.fixture.ts";
+import { only } from "./readme.fixture.ts";
 import {
 	clean,
 	containers,
@@ -25,14 +26,7 @@ import {
 	standIn,
 	under,
 } from "./schedule.fixture.ts";
-import {
-	ENTRY,
-	FILE,
-	LOCK,
-	LOG,
-	README,
-	SCHEDULE,
-} from "./schedule-entry.fixture.ts";
+import { ENTRY, FILE, LOCK, LOG, SCHEDULE } from "./schedule-entry.fixture.ts";
 
 requiresDocker();
 requiresSchedule();
@@ -93,7 +87,15 @@ describe("the entry the README names", () => {
 		// quoted inside a command that appends it — because typing the first at
 		// a prompt is what fails. Two copies of one line drift; this is what
 		// makes the second the first.
-		expect(README).toContain(`echo '${ENTRY}'`);
+		//
+		// The whole command, from the block that carries it: that the entry's
+		// text appears somewhere says nothing about whether anything still
+		// pipes it to `crontab`, which is the half that installs it.
+		const install = only("sh", "crontab -");
+		expect(install).toContain(`echo '${ENTRY}'`);
+		expect(install).toMatch(/\|\s*crontab -\s*$/);
+		// And that running it twice leaves one entry rather than two.
+		expect(install).toMatch(/crontab -l[^\n]*\|\s*grep -qF/);
 	});
 
 	// spec: snapshot-schedule/a-scheduled-invocation
