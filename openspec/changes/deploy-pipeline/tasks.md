@@ -116,7 +116,8 @@ because the build stage failing to produce `dist/` fails the image build.
       (Req: deploy-workflow — A deploy runs only against a commit the checks
       have passed)
 - [ ] 4.2 Write the tag cases: both `latest` and the commit SHA appear as push
-      tags, and the README names the rollback.
+      tags; the reference handed to the compose project on the host is the SHA
+      and never `latest`; and the README names the rollback.
       (Req: deploy-workflow — Every deployed image is named by the commit it
       was built from)
 - [ ] 4.3 Add `workflow_call:` to `lint.yml`, `test.yml`, `e2e.yml` and the
@@ -153,7 +154,8 @@ because the build stage failing to produce `dist/` fails the image build.
       activity, usage, open issues about the credential path — and record the
       vetting in the pull request.
 - [ ] 5.5 Add the host steps to `deploy.yml`: pull first, then bring the
-      project up on the new image.
+      project up — both on the commit's SHA, passed in so the compose file
+      resolves it rather than a mutable tag.
 
 ## 6. The schedule
 
