@@ -9,11 +9,12 @@
  * Whether the way back is written down is
  * `checks/deploy-workflow-rollback.test.ts`.
  *
- * The host half is vacuous until Task 5.5 adds the steps that reach the
- * machine — there is no `D2ASS_IMAGE` in the workflow to be wrong yet. The
- * fixtures below exercise it both ways regardless, which is what makes it a
- * rule rather than a hope, and 5.1 is where the real file gains a host step
- * for it to read.
+ * The host half reads the line that *gives* the reference a value, not every
+ * line naming it: the action is also told which variables to forward, and
+ * `envs: D2ASS_IMAGE` names the reference while saying nothing about what it
+ * holds. What the line says is resolved through the workflow's own `env:`
+ * first, since what is written there is `${{ env.IMAGE }}` rather than the
+ * repository's name.
  */
 import { describe, expect, test } from "bun:test";
 import {
@@ -41,6 +42,9 @@ const tagsOf = (step: Step) =>
 		.flatMap((line) => String(line).split(/[\n,]/))
 		.map((tag) => tag.trim())
 		.filter(Boolean);
+
+/** A line giving the reference a value, in either spelling one is written in. */
+const ASSIGNS = new RegExp(`(^|[\\s,])${REFERENCE}\\s*[:=]`);
 
 /** What a tag names, which is everything after the repository's own colon. */
 const referenceOf = (tag: string) => tag.slice(tag.lastIndexOf(":") + 1);
@@ -86,19 +90,25 @@ export function problems(deploy: string): string[] {
 				found.push(`deploy.yml: pushes ${tag}, which is not ${image}`);
 	}
 
-	for (const line of deploy.split(/\r\n|\n|\r/)) {
-		if (!line.includes(REFERENCE)) continue;
-		// Read line by line rather than through the parse: the reference reaches
-		// the host inside a shell script, an `env:` value or an action's `script`
-		// block depending on how 5.5 writes it, and a rule that has to be moved
-		// when that is decided is a rule that will not be.
+	let assigned = 0;
+	for (const raw of deploy.split(/\r\n|\n|\r/)) {
+		// Lines that *give* the reference a value, not every line naming it: the
+		// action is also told which variables to forward, and `envs: D2ASS_IMAGE`
+		// names the reference while saying nothing about what it holds.
+		if (!ASSIGNS.test(raw)) continue;
+		assigned++;
+		// Read line by line rather than through the parse, because the reference
+		// reaches the host as an `env:` value that a shell then reads — but
+		// resolved through the workflow's own `env:` first, since what is written
+		// there is `${{ env.IMAGE }}` and not the repository's name.
+		const line = resolve(raw, envOf(deploy));
 		if (line.includes("latest"))
 			found.push(
-				`deploy.yml: ${REFERENCE} is handed \`latest\`: ${line.trim()}`,
+				`deploy.yml: ${REFERENCE} is handed \`latest\`: ${raw.trim()}`,
 			);
 		else if (!line.includes("github.sha"))
 			found.push(
-				`deploy.yml: ${REFERENCE} is handed no commit SHA: ${line.trim()}`,
+				`deploy.yml: ${REFERENCE} is handed no commit SHA: ${raw.trim()}`,
 			);
 		// The whole reference, bounded, not the two halves separately. Each half
 		// on its own reads as correct while the pair names something the run
@@ -107,9 +117,12 @@ export function problems(deploy: string): string[] {
 		// }}-debug` carries this repository and another tag.
 		else if (image && !names(line, `${image}:${SHA}`))
 			found.push(
-				`deploy.yml: ${REFERENCE} is not ${image}:${SHA}: ${line.trim()}`,
+				`deploy.yml: ${REFERENCE} is not ${image}:${SHA}: ${raw.trim()}`,
 			);
 	}
+
+	if (assigned === 0)
+		found.push(`deploy.yml: nothing gives the host a ${REFERENCE}`);
 
 	return found;
 }
@@ -187,10 +200,8 @@ describe("the tags a build pushes", () => {
 
 // spec: deploy-workflow/the-image-the-host-is-running
 describe("the reference handed to the host", () => {
-	const host = (value: string) =>
-		built({ script: `${REFERENCE}=${value} docker compose up -d` });
-	const said = (value: string) =>
-		`script: ${REFERENCE}=${value} docker compose up -d`;
+	const host = (value: string) => built({ reference: value });
+	const said = (value: string) => `${REFERENCE}: ${value}`;
 
 	test("the commit's SHA tag passes", () => {
 		expect(problems(host(TAGS[1] as string))).toEqual([]);
@@ -206,6 +217,19 @@ describe("the reference handed to the host", () => {
 		// commit, and neither names a reference this run pushed.
 		expect(problems(host(value))).toEqual([
 			`deploy.yml: ${REFERENCE} ${message}: ${said(value)}`,
+		]);
+	});
+
+	test("a workflow that only forwards the name, never setting it, fails", () => {
+		// `envs: D2ASS_IMAGE` names the reference and says nothing about what it
+		// holds. Counting it would leave the host given nothing and the check
+		// reporting nothing.
+		const forwarded = built().replace(
+			new RegExp(`^\\s*${REFERENCE}: .*$`, "m"),
+			"          UNRELATED: 1",
+		);
+		expect(problems(forwarded)).toEqual([
+			`deploy.yml: nothing gives the host a ${REFERENCE}`,
 		]);
 	});
 
