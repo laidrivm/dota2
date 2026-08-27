@@ -6,7 +6,7 @@
  * read the file's lines, and `Bun.YAML.stringify` emits the whole document on
  * one flow-style line.
  */
-import { REFERENCE, SHA } from "./deploy-workflow.fixture.ts";
+import { REFERENCE, SHA } from "./deploy-tags.fixture.ts";
 
 /**
  * A secret as the workflow reads it. Assembled rather than written plain:

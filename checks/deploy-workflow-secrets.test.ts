@@ -20,8 +20,12 @@ import { deployed } from "./deploy-workflow.fixture.ts";
 /** The values that grant nothing, each of which belongs in `env:`. */
 const OPEN = ["REGISTRY", "REGISTRY_USER", "IMAGE"];
 
-/** What a secret in the store must not be: any of the three above, by name. */
-const NOT_SECRET = /REGISTRY|IMAGE|CONTAINER/;
+/**
+ * What a secret in the store must not be: any of the three above, by name.
+ * Case-insensitive, because the expression context is — `secrets.registry`
+ * reads the same secret as `secrets.REGISTRY`.
+ */
+const NOT_SECRET = /REGISTRY|IMAGE|CONTAINER/i;
 
 /** The connection inputs the requirement names, in the action's spelling. */
 const CONNECTION = ["host", "port", "username", "key"];
@@ -89,7 +93,7 @@ describe("a value that grants nothing", () => {
 		expect(problems(hosted())).toEqual([]);
 	});
 
-	test.each(["REGISTRY", "IMAGE", "DOCKER_CONTAINER"])(
+	test.each(["REGISTRY", "IMAGE", "DOCKER_CONTAINER", "registry"])(
 		"read from secrets.%s fails",
 		(name) => {
 			const stored = hosted().replace(
@@ -112,6 +116,14 @@ describe("a value that grants nothing", () => {
 
 // spec: deploy-workflow/the-host-s-address-in-a-public-repository
 describe("a value that does grant something", () => {
+	test("a second step opening a connection fails", () => {
+		const twice = hosted();
+		const doubled = twice + twice.slice(twice.indexOf(`      - uses: ${SSH}@`));
+		expect(problems(doubled)).toContainEqual(
+			`deploy.yml: 2 ${SSH} steps, expected one`,
+		);
+	});
+
 	test.each(CONNECTION)("%s written in the open fails", (input) => {
 		const open = hosted({
 			inputs: Object.fromEntries(

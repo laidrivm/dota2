@@ -17,7 +17,8 @@
  */
 import { describe, expect, test } from "bun:test";
 import { hosted, SCRIPT, SSH } from "./deploy-host.fixture.ts";
-import { deployed } from "./deploy-workflow.fixture.ts";
+import { BUILDER } from "./deploy-tags.fixture.ts";
+import { chain, deployed } from "./deploy-workflow.fixture.ts";
 
 /** A line that runs docker at all, whichever way it spells the call. */
 const DOCKER = /(^|\s|[;&|])docker(\s|$)/;
@@ -25,11 +26,26 @@ const DOCKER = /(^|\s|[;&|])docker(\s|$)/;
 /** A line that pulls, which is the one docker call allowed to be first. */
 const PULL = /(^|\s|[;&|])docker\s+(compose\s+)?pull(\s|$)/;
 
-/** The shell settings that stop a script at its first failing command. */
-const ERREXIT = /^\s*set\s+-[a-z]*e[a-z]*(\s|$)/;
+/**
+ * A line that turns on stopping at the first failing command.
+ *
+ * Every flag on the line, not the first group: `set -x -e` and `set -o
+ * errexit` both do it and neither carries the `e` where a single-group read
+ * would look. `-o errexit` is spelled out because `-o` takes a word.
+ */
+const ERREXIT = /^\s*set\s+(.*\s)?(-[a-z]*e[a-z]*|-o\s+errexit)(\s|$)/;
 
 type Step = { uses?: string; with?: { script?: string } };
-type Workflow = { jobs?: Record<string, { steps?: Step[] }> };
+type Job = { needs?: string | string[]; steps?: Step[] };
+type Workflow = { jobs?: Record<string, Job> };
+
+/** The jobs holding a step that uses `action`. */
+const jobsUsing = (jobs: Record<string, Job>, action: string) =>
+	Object.entries(jobs)
+		.filter(([, job]) =>
+			(job.steps ?? []).some((step) => step.uses?.startsWith(`${action}@`)),
+		)
+		.map(([id]) => id);
 
 /**
  * The lines of every host script the workflow runs.
@@ -44,9 +60,23 @@ export const scriptsOf = (deploy: string) =>
 		.filter((step) => step.uses?.startsWith(`${SSH}@`))
 		.map((step) => (step.with?.script ?? "").split("\n").map((l) => l.trim()));
 
-/** Everything wrong with the host script, and nothing when nothing is. */
+/** Everything wrong with the host steps, and nothing when nothing is. */
 export function problems(deploy: string): string[] {
 	const found: string[] = [];
+	const jobs = ((Bun.YAML.parse(deploy) ?? {}) as Workflow).jobs ?? {};
+
+	// Reaching the host after the checks is not enough: a host job depending on
+	// them alone satisfies the gate and then pulls a tag no build has produced.
+	// It has to be behind the push itself.
+	const pushing = jobsUsing(jobs, BUILDER);
+	if (pushing.length === 0) found.push("deploy.yml: no job pushes an image");
+	for (const id of jobsUsing(jobs, SSH))
+		for (const built of pushing)
+			if (!chain(jobs, id).has(built))
+				found.push(
+					`deploy.yml: job \`${id}\` reaches the host without needing \`${built}\``,
+				);
+
 	const scripts = scriptsOf(deploy);
 	// Guards every assertion below: with no host step they pass by having no
 	// script to be wrong about, which is exactly how this check would go quiet
@@ -71,9 +101,16 @@ export function problems(deploy: string): string[] {
 				);
 		// The pull going first only means anything while a failed one ends the
 		// script: without this the deploy carries on to the replacement having
-		// nothing to replace the container with.
-		if (!lines.some((line) => ERREXIT.test(line)))
+		// nothing to replace the container with. And it has to be on before the
+		// pull — one turned on afterwards guards every step but the one whose
+		// failure this exists to survive.
+		const stops = lines.findIndex((line) => ERREXIT.test(line));
+		if (stops === -1)
 			found.push("deploy.yml: the host script does not stop on a failure");
+		else if (stops > first)
+			found.push(
+				`deploy.yml: \`${lines[stops]}\` comes after the pull it should guard`,
+			);
 	}
 
 	return found;
@@ -103,11 +140,28 @@ describe("the order the host script runs in", () => {
 		]);
 	});
 
-	test("a workflow with no host step at all fails", () => {
-		const bare = hosted().replace(`${SSH}@`, "actions/checkout@");
-		expect(problems(bare)).toEqual([
-			`deploy.yml: 0 ${SSH} steps, expected one`,
-		]);
+	test("pull and up on one line passes", () => {
+		// `&&` short-circuits, so the pull is first and nothing follows a failed
+		// one — the same guarantee the two-line form gives.
+		const script = ["set -eu", "docker compose pull && docker compose up -d"];
+		expect(problems(hosted({ script }))).toEqual([]);
+	});
+
+	test.each([
+		[
+			"no host step at all",
+			(y: string) => y.replace(`${SSH}@`, "actions/checkout@"),
+			0,
+		],
+		[
+			"a second one",
+			(y: string) => y + y.slice(y.indexOf(`      - uses: ${SSH}@`)),
+			2,
+		],
+	])("a workflow with %s fails", (_what, mangle, count) => {
+		expect(problems(mangle(hosted()))).toContainEqual(
+			`deploy.yml: ${count} ${SSH} steps, expected one`,
+		);
 	});
 });
 
@@ -119,13 +173,23 @@ describe("a pull that cannot succeed", () => {
 		]);
 	});
 
-	test.each(["set -e", "set -eu", "set -euo pipefail"])(
-		"passes with `%s`",
-		(setting) => {
-			const script = [setting, ...SCRIPT.slice(1)];
-			expect(problems(hosted({ script }))).toEqual([]);
-		},
-	);
+	test.each([
+		"set -e",
+		"set -eu",
+		"set -euo pipefail",
+		"set -x -e",
+		"set -o errexit",
+	])("passes with `%s`", (setting) => {
+		const script = [setting, ...SCRIPT.slice(1)];
+		expect(problems(hosted({ script }))).toEqual([]);
+	});
+
+	test("one turned on after the pull fails", () => {
+		const script = ["docker compose pull", "set -eu", "docker compose up -d"];
+		expect(problems(hosted({ script }))).toEqual([
+			"deploy.yml: `set -eu` comes after the pull it should guard",
+		]);
+	});
 
 	test("`set -u` alone does not count", () => {
 		// It stops on an unset variable and carries on past a failed command,
@@ -134,6 +198,21 @@ describe("a pull that cannot succeed", () => {
 		expect(problems(hosted({ script }))).toEqual([
 			"deploy.yml: the host script does not stop on a failure",
 		]);
+	});
+});
+
+// spec: deploy-workflow/the-image-is-pulled-first
+describe("when the host is reached", () => {
+	test("a host job that does not need the push fails", () => {
+		const parallel = hosted().replace("    needs: image\n", "");
+		expect(problems(parallel)).toEqual([
+			"deploy.yml: job `host` reaches the host without needing `image`",
+		]);
+	});
+
+	test("a workflow that pushes nothing at all fails", () => {
+		const nothing = hosted().replace(`${BUILDER}@`, "actions/checkout@");
+		expect(problems(nothing)).toEqual(["deploy.yml: no job pushes an image"]);
 	});
 });
 
