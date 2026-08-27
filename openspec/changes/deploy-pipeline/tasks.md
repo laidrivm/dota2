@@ -233,7 +233,7 @@ because the build stage failing to produce `dist/` fails the image build.
 
 ## 7. Documentation, the deferred smoke case, and the plan
 
-- [ ] 7.1 Verify `dist/` served by a plain static file server loads and
+- [x] 7.1 Verify `dist/` served by a plain static file server loads and
       reaches Setup with no other process running — `ui-foundation`
       **(e2e)** 1.5, deferred to this task by Task 4.
       (Req: app-shell — Static production build / Build output is
