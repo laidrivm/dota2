@@ -185,7 +185,7 @@ because the build stage failing to produce `dist/` fails the image build.
       open; the deploy job declares `environment: production`.
       (Req: deploy-workflow — A value is a secret only when disclosing it
       would grant something)
-- [ ] 5.3 Write the hygiene cases: an action named by tag fails; a SHA with no
+- [x] 5.3 Write the hygiene cases: an action named by tag fails; a SHA with no
       version comment beside it fails; the workflow's `permissions:` grants
       exactly the scopes it uses, so a block widened to `write-all` fails
       while the declared set passes; the workflow declares a concurrency
