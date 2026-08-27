@@ -85,6 +85,17 @@ describe.skipIf(!available)("the two runtime directories", () => {
 		expect(wrote.stderr.toString()).toContain("denied");
 	}, 60_000);
 
+	// Cited by no criterion: the requirement asks that the two directories be
+	// writable, and this is the other side of the same `chown` — everything
+	// the image carries but those two stays root-owned, so the container can
+	// read its own source and not rewrite it. A `chown -R /app` satisfies the
+	// criterion above and fails here, which is why it is worth a case.
+	test("the container cannot write to its own source", () => {
+		const wrote = sh("echo tampered >> /app/src/server/server.ts");
+		expect(wrote.exitCode).not.toBe(0);
+		expect(wrote.stderr.toString()).toContain("denied");
+	}, 60_000);
+
 	// spec: container-image/a-file-shipped-at-a-mount-point
 	test.each(["snapshot", "icons"])(
 		"%s is in the image and holds nothing",
