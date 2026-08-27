@@ -23,7 +23,7 @@ import { DOCKER_ENV, image, tidy } from "./docker.fixture.ts";
 const root = join(import.meta.dir, "..");
 
 /** Fixed, for the reason the image tag is: a name reused is a project replaced. */
-const PROJECT = "d2ass-checks-compose";
+export const PROJECT = "d2ass-checks-compose";
 
 /** How long any one compose call may take. */
 const COMPOSE_MS = 300_000;
@@ -89,8 +89,12 @@ function directory(): string {
 		join(dir, "docker-compose.yml"),
 		renamed.join(`container_name: ${address}`),
 	);
+	// `.env` rather than a name of its own: compose reads the one beside the
+	// file it is given, so a command that names no env file — the schedule's
+	// crontab entry, which `checks/snapshot-schedule.test.ts` runs against this
+	// project — resolves the same values `compose()` below passes explicitly.
 	writeFileSync(
-		join(dir, "project.env"),
+		join(dir, ".env"),
 		[
 			`D2ASS_IMAGE=${image()}`,
 			// Values this run chose, and nothing reads them anywhere else.
@@ -101,6 +105,13 @@ function directory(): string {
 	);
 	return dir;
 }
+
+/**
+ * The project file this run's copy lives at, for a command that addresses the
+ * project as the host does — by the file alone, with `COMPOSE_PROJECT_NAME`
+ * saying which project it is and `.env` beside it supplying the values.
+ */
+export const projectFile = () => join(directory(), "docker-compose.yml");
 
 /** Run one compose command against this run's project. */
 export function compose(...argv: string[]) {
@@ -114,7 +125,7 @@ export function compose(...argv: string[]) {
 			"-f",
 			join(home, "docker-compose.yml"),
 			"--env-file",
-			join(home, "project.env"),
+			join(home, ".env"),
 			...argv,
 		],
 		{

@@ -213,19 +213,37 @@ is the slowest thing in the repository.
 ### The schedule refuses overlap with `flock`, and the record separates the outcomes
 
 ```sh
-17 4 * * * { date -Is; flock -n -E 99 /var/lock/d2ass-job.lock \
-    docker compose -f /root/d2ass/docker-compose.yml run --rm job; \
-    echo "exit $?"; } >> /var/log/d2ass-job.log 2>&1
+17 4 * * * { date -Iseconds; flock -n -E 99 /var/lock/d2ass-job.lock docker compose --progress quiet -f /root/d2ass/docker-compose.yml run --rm job; echo "exit $?"; } >> /var/log/d2ass-job.log 2>&1
 ```
+
+The README holds the installable copy and the checks read it from there; this
+one is here for the reasoning around it. Three things it settles that an
+earlier draft of this section did not. It is **one line**: a crontab has no
+continuation, so the wrapped rendering this replaced was two entries, the
+second not a schedule. `date -Iseconds` rather than `-Is`, which is a GNU
+shorthand — the spelling both GNU and BSD accept costs nothing and lets the
+record's cases run wherever `flock` is. And `--progress quiet`, measured:
+without it compose writes network and pull progress to stderr, which the
+redirection puts in the record — so a run that succeeded left a dozen lines of
+layer downloads rather than the two the requirement is about.
 
 `flock` holds the lock for the lifetime of the process it starts, and the
 kernel releases it however that process ends — so a run killed outright does
 not wedge the schedule, which no application-level flag or lock file achieves
 without a cleanup path of its own.
 
+More exactly, and measured while writing the exclusion cases: the lock is a
+descriptor, and a descriptor is *inherited*. `flock` passes it to the `docker
+compose` it starts, so the lock is held until the last process of the run
+exits, not until `flock` does. It still needs nothing to release it — killing
+the whole run releases it, and so does the machine going down — but a kill
+that reaches only part of the tree leaves the survivor holding it, and the
+next invocation is refused rather than started. Worth knowing if a run is ever
+cleared by hand: kill the run, not the shell.
+
 `-E 99` is what makes the entry emit the status `snapshot-schedule` fixes for
 a refusal; the reason that value is not `flock`'s own default is stated
-there. The `date -Is`
+there. The `date -Iseconds`
 before and the `echo "exit $?"` after are what make the file answer *did it
 run*, not only *why did it break* — `run.ts` prints nothing on success, so a
 file of reports alone cannot distinguish a healthy schedule from a scheduler

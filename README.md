@@ -129,6 +129,48 @@ To roll back, set `D2ASS_IMAGE` on the host to a previous commit's SHA tag —
 `laidrivm/d2ass:<sha>`, which no later deploy overwrites — then
 `docker compose pull && docker compose up -d`. That is the whole of it.
 
+### The nightly job
+
+The job is not a service — it is a process that exits — so the host's cron is
+what starts it, and the schedule lives outside the compose project so that
+either can change without restarting the other. One entry, installed with
+`crontab -e` as the user that owns the project directory:
+
+```sh
+17 4 * * * { date -Iseconds; flock -n -E 99 /var/lock/d2ass-job.lock docker compose --progress quiet -f /root/d2ass/docker-compose.yml run --rm job; echo "exit $?"; } >> /var/log/d2ass-job.log 2>&1
+```
+
+On one line, because a crontab has no continuation — a line broken over two is
+two entries, the second of which is not a schedule. And with no `%` anywhere
+in it, which crontab turns into a newline instead of passing on.
+
+- **04:17, host time.** Off the hour, so the run does not queue behind
+  everything else on the box that fires on one.
+- **`flock -n` refuses a second run rather than queueing it.** The case it
+  exists for is a run still going when the next invocation arrives: two builds
+  in flight validate against the same older snapshot, and the smaller then
+  publishes over the larger. `-E 99` is the status a refusal ends with, and it
+  is not a small number by accident — the job itself exits `0` or `1` and
+  nothing else, so a refusal carrying either would be one the record cannot
+  tell from a run. The lock is a descriptor held by the run's processes and
+  released by the kernel however they ended, so a run killed outright does not
+  wedge the schedule — clearing one by hand means killing the run, not the
+  shell that started it, since the descriptor is inherited downwards.
+- **`/var/log/d2ass-job.log` is the whole of the reporting.** The instant the
+  run began, whatever it wrote, and the status it ended with — the three
+  answer *did it run*, *why did it break* and *did it break at all*, and none
+  of them substitutes for another. Nothing reads the file: this deployment
+  ships no alert, and giving the record a reader belongs to the change that
+  adds error tracking. It grows by a few lines a day and wants `logrotate`
+  only if that ever stops being true.
+- **`--progress quiet` keeps compose's own progress out of it**, so a run that
+  succeeds leaves two lines and a run that fails leaves the report between
+  them.
+
+`checks/snapshot-schedule.test.ts` and its exclusion half read that line out of
+this file and run it, so the block above is the entry rather than a picture of
+one.
+
 ## E2E smoke suite
 
 `bunx playwright test` — Chromium only. The runner starts `bun run dev`
