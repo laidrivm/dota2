@@ -115,12 +115,12 @@ const iconRoute =
 /**
  * The validator last computed, and the file state it was computed from.
  *
- * The key is the resolved path *and* `mtimeNs`, and both halves earn their
- * place. The path, because this route has two sources and a key that forgets
- * which one it read hands the previous source's validator to the next. The
- * nanoseconds, because two writes inside one millisecond share a millisecond
- * timestamp — which is why `dist-routes.ts` reads `mtimeNs` for its listing
- * cache as well.
+ * The key is the resolved path, the inode *and* `mtimeNs`, and all three earn
+ * their place. The path, because this route has two sources and a key that
+ * forgets which one it read hands the previous source's validator to the next.
+ * The nanoseconds, because two writes inside one millisecond share a
+ * millisecond timestamp — which is why `dist-routes.ts` reads `mtimeNs` for
+ * its listing cache as well. The inode is the paragraph below.
  *
  * One slot, because one process serves one publication directory. A second
  * server in the same process — which is what this route's own suite runs —

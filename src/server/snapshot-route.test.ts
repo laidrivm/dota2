@@ -43,6 +43,9 @@ const publish = (dir: string, snapshotId: number) =>
 /** What a response offers as its validator, or the empty string for none. */
 const etagOf = (response: Response) => response.headers.get("etag") ?? "";
 
+/** The inode at `path`: the half of the route's cache key a rename always moves. */
+const inodeOf = (path: string) => statSync(path, { bigint: true }).ino;
+
 /** A publication directory of its own, removed when the file finishes. */
 const emptyDir = () => {
 	const dir = mkdtempSync(join(tmpdir(), "d2ass-served-"));
@@ -237,22 +240,26 @@ test("two publications sharing a timestamp still differ [41]", async () => {
 test("a re-export of identical bytes is still answered 304 [50]", async () => {
 	const dir = emptyDir();
 	const at = serving(dir);
+	const file = join(dir, PUBLISHED);
+	// One timestamp for both, as the case above: the inode alone separates them.
+	const when = new Date(1_700_000_000_000);
 	await publish(dir, PUBLISHED_ID);
+	utimesSync(file, when, when);
 	const first = await fetch(`${at}${SNAPSHOT_URL}`);
-	const before = statSync(join(dir, PUBLISHED), { bigint: true }).mtimeNs;
+	const before = inodeOf(file);
 
 	// The same bundle published again: a rename puts a different file at the
-	// name, so the timestamp moves and the bytes do not.
+	// name, so the file behind it moves and the bytes do not.
 	await publish(dir, PUBLISHED_ID);
+	utimesSync(file, when, when);
 	const second = await fetch(`${at}${SNAPSHOT_URL}`, {
 		headers: { "if-none-match": etagOf(first) },
 	});
 
-	// Asserted, because the case rests on it: had the file not been rewritten,
-	// a validator derived from the timestamp would pass here too.
-	expect(statSync(join(dir, PUBLISHED), { bigint: true }).mtimeNs).not.toBe(
-		before,
-	);
+	// Asserted because the case rests on it: with the key unmoved the route
+	// answers from the stored hash without re-reading, and the 304 proves
+	// nothing about the bytes.
+	expect(inodeOf(file)).not.toBe(before);
 	expect(second.status).toBe(304);
 });
 
