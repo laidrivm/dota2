@@ -141,7 +141,7 @@ because the build stage failing to produce `dist/` fails the image build.
       command.
       (Req: deploy-workflow — A deploy runs only against a commit the checks
       have passed)
-- [ ] 4.2 Write the tag cases: both `latest` and the commit SHA appear as push
+- [x] 4.2 Write the tag cases: both `latest` and the commit SHA appear as push
       tags; the reference handed to the compose project on the host is the SHA
       and never `latest`; and the README names the rollback.
       (Req: deploy-workflow — Every deployed image is named by the commit it
