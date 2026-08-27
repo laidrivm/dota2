@@ -86,12 +86,14 @@ export function problems(deploy: string): string[] {
 			found.push(
 				`deploy.yml: ${REFERENCE} is handed no commit SHA: ${line.trim()}`,
 			);
-		// The commit alone does not say which image: a SHA tag on another
-		// repository is a reference this run never pushed, and it reads as
-		// correct because the half that is checked is the half that is right.
-		else if (image && !names(line, image))
+		// The whole reference, bounded, not the two halves separately. Each half
+		// on its own reads as correct while the pair names something the run
+		// never pushed: `someone-else/d2ass:${{ github.sha }}` carries this
+		// commit and another repository, and `laidrivm/d2ass:${{ github.sha
+		// }}-debug` carries this repository and another tag.
+		else if (image && !names(line, `${image}:${SHA}`))
 			found.push(
-				`deploy.yml: ${REFERENCE} names an image other than ${image}: ${line.trim()}`,
+				`deploy.yml: ${REFERENCE} is not ${image}:${SHA}: ${line.trim()}`,
 			);
 	}
 
@@ -161,10 +163,11 @@ describe("the reference handed to the host", () => {
 	test.each([
 		[TAGS[0] as string, "is handed `latest`"],
 		["laidrivm/d2ass:v2", "is handed no commit SHA"],
-		[`someone-else/d2ass:${SHA}`, "names an image other than laidrivm/d2ass"],
+		[`someone-else/d2ass:${SHA}`, `is not laidrivm/d2ass:${SHA}`],
+		[`${TAGS[1] as string}-debug`, `is not laidrivm/d2ass:${SHA}`],
 	])("%s fails", (value, message) => {
-		// The last of the three is the one a reader would pass: the SHA is this
-		// run's, and the image it tags is not this run's at all.
+		// The last two are the ones a reader would pass: each carries this run's
+		// commit, and neither names a reference this run pushed.
 		expect(problems(host(value))).toEqual([
 			`deploy.yml: ${REFERENCE} ${message}: ${said(value)}`,
 		]);
