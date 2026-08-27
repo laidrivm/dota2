@@ -62,6 +62,13 @@ describe.skipIf(!available)("the build context", () => {
 		expect(holds(`${app}/node_modules/.host-copy`)).toBe(false);
 	});
 
+	// Cited by no criterion: `.dockerignore` excludes `dist` for a reason of
+	// its own, which no requirement states and which this is here to hold to.
+	test("the bundle is the build stage's, not the context's", () => {
+		expect(holds(`${app}/dist/index.html`)).toBe(true);
+		expect(holds(`${app}/dist/stale.js`)).toBe(false);
+	});
+
 	// spec: container-image/the-directories-no-run-reads
 	describe("the directories no run reads", () => {
 		test.each([
