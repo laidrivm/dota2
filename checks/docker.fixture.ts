@@ -46,16 +46,35 @@ const TAG = "d2ass-checks:context";
 export const SECRET = ["d2ass", "check", "secret", "3f9a1c"].join("-");
 
 /**
+ * How long each kind of docker call may take. Every one of them is a
+ * *synchronous* spawn, so a daemon that accepts the connection and then stops
+ * answering blocks the thread the test runner's own timer runs on: bun's
+ * per-case timeout cannot fire, and the case hangs until CI's job limit rather
+ * than until its own. These are what make that a failure instead.
+ *
+ * Each sits below the timeout of the case that owns it — `RUN` under the 60s
+ * on the search case, `BUILD` under the 900s on `buildsImage` — so the call
+ * fails first and says why, rather than the case failing with nothing to read.
+ */
+const PROBE_MS = 10_000;
+const BUILD_MS = 600_000;
+const RUN_MS = 45_000;
+
+/**
  * Whether a daemon is reachable, not merely whether the client is installed:
  * `docker --version` answers on a machine whose daemon is stopped, and every
  * case here needs one that runs containers.
  */
 export const available = (() => {
 	try {
+		// A timeout reports `null` here rather than a status, so it takes the
+		// same branch a refusal does — which is the right answer: a daemon that
+		// cannot describe itself in ten seconds cannot run these cases either.
 		return (
 			Bun.spawnSync(["docker", "info"], {
 				stdout: "ignore",
 				stderr: "ignore",
+				timeout: PROBE_MS,
 			}).exitCode === 0
 		);
 	} catch {
@@ -89,6 +108,10 @@ const PLANTED: Record<string, string> = {
 	// The host's install, marked so it can be told from the one the production
 	// stage performs — the two are otherwise the same directory name.
 	"node_modules/.host-copy": SECRET,
+	// A bundle from the developer's own build. `COPY --from` merges into a
+	// directory rather than replacing it, so one sent in the context would
+	// survive beside the fresh one the build stage produced.
+	"dist/stale.js": "console.log('a previous build');\n",
 	"test-results/.last-run.json": "{}\n",
 	"playwright-report/index.html": "<!doctype html>\n",
 	"reports/mutation/index.html": "<!doctype html>\n",
@@ -146,7 +169,10 @@ export function image(): string {
 		const build = Bun.spawnSync(["docker", "build", "-t", TAG, dir], {
 			stdout: "pipe",
 			stderr: "pipe",
+			timeout: BUILD_MS,
 		});
+		if (build.exitedDueToTimeout)
+			throw new Error(`docker build did not finish within ${BUILD_MS}ms`);
 		if (build.exitCode !== 0)
 			throw new Error(`docker build failed:\n${build.stderr.toString()}`);
 	} finally {
@@ -166,9 +192,17 @@ export const buildsImage = () =>
 		// A cold build installs twice from the registry and bundles the app.
 	}, 900_000);
 
-/** Run `script` under `sh` in the image, replacing whatever it would have run. */
-export const sh = (script: string, ...opts: string[]) =>
-	Bun.spawnSync(
+/**
+ * Run `script` under `sh` in the image, replacing whatever it would have run.
+ *
+ * A run that timed out throws rather than being returned. Bun reports one as
+ * `exitCode: null`, which every caller comparing against `0` reads as an
+ * ordinary failure — and for `holds` below that means a container which never
+ * answered is indistinguishable from a path the image does not have. Raised
+ * here rather than at each call site, which is where all of them route.
+ */
+export function sh(script: string, ...opts: string[]) {
+	const run = Bun.spawnSync(
 		[
 			"docker",
 			"run",
@@ -180,8 +214,12 @@ export const sh = (script: string, ...opts: string[]) =>
 			"-c",
 			script,
 		],
-		{ stdout: "pipe", stderr: "pipe" },
+		{ stdout: "pipe", stderr: "pipe", timeout: RUN_MS },
 	);
+	if (run.exitedDueToTimeout)
+		throw new Error(`docker run did not finish within ${RUN_MS}ms: ${script}`);
+	return run;
+}
 
 /** Whether the image holds `path`, of any kind. */
 export const holds = (path: string) => sh(`test -e '${path}'`).exitCode === 0;
