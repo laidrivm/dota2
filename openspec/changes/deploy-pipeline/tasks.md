@@ -206,12 +206,12 @@ because the build stage failing to produce `dist/` fails the image build.
 
 ## 6. The schedule
 
-- [ ] 6.1 Write the record cases: a run that completes leaves the start
+- [x] 6.1 Write the record cases: a run that completes leaves the start
       instant and a zero status with nothing between them; a run that fails
       leaves the report naming the step and a non-zero status. Docker-gated.
       (Req: snapshot-schedule — Every invocation leaves a record of when it
       ran and how it ended)
-- [ ] 6.2 Write the exclusion cases, each against a run that is actually in
+- [x] 6.2 Write the exclusion cases, each against a run that is actually in
       flight rather than against the interval: a second invocation starts no
       second job container and leaves the first untouched; its status is `99`,
       which the job itself never emits; an invocation after the run has
@@ -219,11 +219,11 @@ because the build stage failing to produce `dist/` fails the image build.
       able to start. Docker-gated.
       (Req: snapshot-schedule — A second run cannot start while one is in
       flight)
-- [ ] 6.3 Write the case that one invocation runs a job container to
+- [x] 6.3 Write the case that one invocation runs a job container to
       completion and removes it. Docker-gated.
       (Req: snapshot-schedule — The job runs on a schedule outside the
       application)
-- [ ] 6.4 Settle what the entry still leaves open — the lock path, the log
+- [x] 6.4 Settle what the entry still leaves open — the lock path, the log
       path and the hour — and record the whole line in the README as the one
       to install. The conflict status is not among them: `snapshot-schedule`
       fixes it at `99`, and the entry cites that rather than choosing again.
