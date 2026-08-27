@@ -39,6 +39,7 @@ describe.skipIf(!schedulable)("an invocation while a run is in flight", () => {
 	afterAll(clean, HOOK_MS);
 
 	// spec: snapshot-schedule/an-invocation-arriving-while-a-run-is-in-flight
+	// spec: snapshot-schedule/the-refusal-is-distinguishable-from-a-failure
 	test(
 		"starts no second container, leaves the first, and records 99",
 		async () => {
@@ -53,7 +54,6 @@ describe.skipIf(!schedulable)("an invocation while a run is in flight", () => {
 			// alone, which a second container replacing the first would also
 			// satisfy.
 			expect(containers()).toEqual([first]);
-			// spec: snapshot-schedule/the-refusal-is-distinguishable-from-a-failure
 			// 99, which the job itself never emits: `src/job/run.ts` exits 0 or 1
 			// and nothing else, so a refusal carrying either would be a refusal
 			// the record cannot tell from a run.
