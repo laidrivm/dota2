@@ -15,6 +15,36 @@ import { REFERENCE, SHA } from "./deploy-tags.fixture.ts";
  */
 export const secret = (name: string) => `\${{ secrets.${name} }}`;
 
+/**
+ * How a GitHub expression reaches into a context, in both spellings it accepts.
+ *
+ * `github.event` and `github['event']` are the same lookup, and so are
+ * `secrets.SSH_KEY` and `secrets['SSH_KEY']`. A pattern written for the dotted
+ * form alone reads a workflow using the indexed one as a workflow doing
+ * neither, which is the direction that matters: the indexed form is what a
+ * name the dotted syntax cannot spell has to be written in.
+ */
+const lookup = (context: string, name: string) =>
+	`${context}\\s*(?:\\.\\s*(${name})|\\[\\s*['"](${name})['"]\\s*\\])`;
+
+/** A context member's name, in the characters GitHub allows one. */
+const MEMBER = "[A-Za-z_][A-Za-z0-9_-]*";
+
+/** An expression reaching a value an outsider can choose the text of. */
+export const EVENT = new RegExp(`\\$\\{\\{[^}]*${lookup("github", "event")}`);
+
+/** Every secret a text reads, however each reference is spelled. */
+export const secretsIn = (text: string) =>
+	[...text.matchAll(new RegExp(lookup("secrets", MEMBER), "g"))].map(
+		([, dotted, indexed]) => (dotted ?? indexed) as string,
+	);
+
+/** Whether a value is one secret and nothing else beside it. */
+export const isSecret = (value: string) =>
+	new RegExp(`^\\$\\{\\{\\s*${lookup("secrets", MEMBER)}\\s*\\}\\}$`).test(
+		value,
+	);
+
 /** The action that opens the connection, named without its pin. */
 export const SSH = "appleboy/ssh-action";
 
