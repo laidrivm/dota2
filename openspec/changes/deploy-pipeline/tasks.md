@@ -69,7 +69,7 @@ because the build stage failing to produce `dist/` fails the image build.
       build rather than resolving afresh. Docker-gated but for the first.
       (Req: container-image — The production stage installs only what a run
       needs)
-- [ ] 2.2 Write the entry-point cases: the image run with no command serves
+- [x] 2.2 Write the entry-point cases: the image run with no command serves
       the application; a font the build copied is answered from the image
       rather than `404`; `/snapshot.json` answers with the committed fixture
       against an empty publication directory; the job entry point run without
