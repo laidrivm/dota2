@@ -27,7 +27,7 @@ because the build stage failing to produce `dist/` fails the image build.
       fail; this repository passes.
       (Req: container-image — Every base image is pinned by digest, and a
       named updater raises it)
-- [ ] 1.2 Write the build-context cases, one per category the requirement
+- [x] 1.2 Write the build-context cases, one per category the requirement
       names: the built image holds no `.git`; no `.env` when one is present in
       the context, and no `.env.example`, which is tracked and therefore in
       every context; a `node_modules` that is the production install rather than
