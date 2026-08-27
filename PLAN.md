@@ -27,7 +27,7 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
 
 ## Requirement sources
 
-- `tasks/task-5.md`, `tasks/task-7.md` — the infrastructure tasks still open.
+- `tasks/task-5.md` — the infrastructure task still open.
 - `spec-inbox/` (gitignored, see its README) — unsorted product specs; the data
   model and model spec still feed Phase 3.
 - Design: the private claude.ai/design project "Draft board screen design",
@@ -91,6 +91,11 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
 - **Phase 3b — `snapshot-ingest`** — twenty-one PRs, #141 to #202,
   `archive/2026-08-27-snapshot-ingest`; specs at
   `openspec/specs/snapshot-ingest/` and `openspec/specs/hero-reference/`.
+- **`deploy-pipeline`** (Task 7) — seven PRs, #208 to #218,
+  `archive/2026-08-27-deploy-pipeline`; specs at
+  `openspec/specs/container-image/`, `openspec/specs/deploy-workflow/`,
+  `openspec/specs/deployment-topology/` and
+  `openspec/specs/snapshot-schedule/`.
 
 ### Open
 
@@ -111,23 +116,6 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       Generating 86 more colours would entrench a placeholder whose reason has
       gone; drawing the image instead is smaller and needs a delta spec, the
       criterion pinning the background to the token.
-- [ ] **`deploy-pipeline`** (Task 7) — implementing,
-      `openspec/changes/deploy-pipeline/`. The whole deployment: the image,
-      the compose project, the deploy workflow, and the crontab entry whose
-      `flock` refuses a second run while one is in flight. Seven task groups,
-      so `feat/deploy-pipeline-1` … `-7`, in order: 1–5 merged as PRs #208,
-      #211, #212, #214 and #215, with 6 and 7 open. This entry collapses into
-      *Done* when the last of them merges and the change is archived. The
-      proposal branch stood
-      at 1104 lines and was cut by hand into `spec/deploy-pipeline` and
-      `spec/deploy-pipeline-plan` — the seam `proposal-slicing` mechanises,
-      cut here for the third time. Decisions settled: Docker Hub, public, so
-      the host needs no registry credential; the existing VPS;
-      `d2ass.laidrivm.com` on Cloudflare DNS-only; TLS at the host's
-      nginx-proxy container. **Two** shared volumes, not one — `snapshot/` and
-      `icons/`, which this entry previously got wrong. Carried
-      `ui-foundation` **(e2e)** 1.5, deferred here by Task 4 and closed in
-      group 7 by `e2e/static-build.spec.ts`.
 - [ ] **Task 5** — error tracking (precondition: the product is deployed).
       Carries the snapshot job's failure alert, which `deploy-pipeline` moved
       here on finding it in no step and no acceptance criterion of
