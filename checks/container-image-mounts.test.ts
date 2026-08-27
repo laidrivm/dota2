@@ -13,7 +13,7 @@
  * Neither is reachable from a build or a unit test, which is why these run a
  * container with a real volume attached.
  */
-import { afterAll, describe, expect, test } from "bun:test";
+import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import {
 	available,
 	buildsImage,
@@ -31,13 +31,20 @@ requiresDocker();
  */
 const VOLUME = "d2ass-checks-bundle";
 
-afterAll(() => {
+/** Remove it, so a run always starts against a volume nothing has written. */
+const clear = () =>
 	Bun.spawnSync(["docker", "volume", "rm", "-f", VOLUME], {
 		stdout: "ignore",
 		stderr: "ignore",
 		timeout: 45_000,
 	});
-});
+
+// Before as well as after. A named volume takes the ownership of the mount
+// point the first time it is attached and keeps it, so one left by an earlier
+// run carries that run's answer into this one.
+beforeAll(clear);
+
+afterAll(clear);
 
 describe.skipIf(!available)("the two runtime directories", () => {
 	buildsImage();
@@ -61,11 +68,18 @@ describe.skipIf(!available)("the two runtime directories", () => {
 	// does not hold, and creates it owned by `root` — so a volume at a path the
 	// image never made is exactly what the non-root user cannot write. Without
 	// this, the case above passes whether or not the image creates anything.
+	//
+	// An anonymous volume rather than the named one, and that is the whole of
+	// what makes it a control: a volume takes the ownership of the mount point
+	// it is first attached to and keeps it, so reusing the one the case above
+	// wrote through carries `bun` here and the write succeeds. Measured — the
+	// case passed against a reused volume and fails against a fresh one.
+	// `--rm` takes an anonymous volume away with the container.
 	test("a volume at a path the image does not hold is not writable", () => {
 		const wrote = sh(
 			"echo published > /app/not-a-mount-point/bundle.json",
 			"-v",
-			`${VOLUME}:/app/not-a-mount-point`,
+			"/app/not-a-mount-point",
 		);
 		expect(wrote.exitCode).not.toBe(0);
 		expect(wrote.stderr.toString()).toContain("denied");
