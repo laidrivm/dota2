@@ -111,19 +111,23 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       Generating 86 more colours would entrench a placeholder whose reason has
       gone; drawing the image instead is smaller and needs a delta spec, the
       criterion pinning the background to the token.
-- [ ] **`deploy-pipeline`** (Task 7) — proposed,
+- [ ] **`deploy-pipeline`** (Task 7) — implementing,
       `openspec/changes/deploy-pipeline/`. The whole deployment: the image,
       the compose project, the deploy workflow, and the crontab entry whose
       `flock` refuses a second run while one is in flight. Seven task groups,
-      so `feat/deploy-pipeline-1` … `-7`, in order. The proposal branch stood
+      so `feat/deploy-pipeline-1` … `-7`, in order: 1–5 merged as PRs #208,
+      #211, #212, #214 and #215, with 6 and 7 open. This entry collapses into
+      *Done* when the last of them merges and the change is archived. The
+      proposal branch stood
       at 1104 lines and was cut by hand into `spec/deploy-pipeline` and
       `spec/deploy-pipeline-plan` — the seam `proposal-slicing` mechanises,
       cut here for the third time. Decisions settled: Docker Hub, public, so
       the host needs no registry credential; the existing VPS;
       `d2ass.laidrivm.com` on Cloudflare DNS-only; TLS at the host's
       nginx-proxy container. **Two** shared volumes, not one — `snapshot/` and
-      `icons/`, which this entry previously got wrong. Carries
-      `ui-foundation` **(e2e)** 1.5, deferred here by Task 4.
+      `icons/`, which this entry previously got wrong. Carried
+      `ui-foundation` **(e2e)** 1.5, deferred here by Task 4 and closed in
+      group 7 by `e2e/static-build.spec.ts`.
 - [ ] **Task 5** — error tracking (precondition: the product is deployed).
       Carries the snapshot job's failure alert, which `deploy-pipeline` moved
       here on finding it in no step and no acceptance criterion of
