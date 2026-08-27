@@ -123,7 +123,13 @@ test("the README's virtual host names that container and its port", () => {
 	// From the example virtual host itself, which is what an operator copies,
 	// rather than from prose beside it — the `proxy_pass` line is where the
 	// name takes effect.
-	const target = /proxy_pass\s+http:\/\/([^:;\s]+):(\d+);/.exec(readme);
+	// One, asserted: the README carries a single virtual host, and a second
+	// example added later would be a divergent copy this test read past.
+	const proxied = [
+		...readme.matchAll(/proxy_pass\s+http:\/\/([^:;\s]+):(\d+);/g),
+	];
+	expect(proxied).toHaveLength(1);
+	const target = proxied[0];
 	expect(target?.[1]).toBe(app.container_name);
 	// The port the image serves on, which nothing sets and `Bun.serve`
 	// defaults to.
@@ -137,7 +143,9 @@ test("the README creates the shared network this file joins", () => {
 	// them create one network and the project ask for another, and the project
 	// would not come up at all.
 	const readme = readFileSync(join(root, "README.md"), "utf8");
-	const created = /docker network create (\S+)/.exec(readme);
+	const creations = [...readme.matchAll(/docker network create (\S+)/g)];
+	expect(creations).toHaveLength(1);
+	const created = creations[0];
 	// Named, before it is compared: a README that stopped saying how to create
 	// the network leaves this `undefined`, which would match a compose file
 	// declaring no external network and pass on two absences.
