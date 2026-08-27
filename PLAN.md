@@ -298,16 +298,23 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       written three times and executed nowhere. Ships on
       `feat/focus-restore-idiom`; its `design.md` admits abandoning the lift if
       the helper turns out to be a bare `setTimeout` wrapper.
-- [ ] **Eight workflow pins nothing updates.** `bun-version: 1.3.14` stands in
-      eight jobs across five workflows, and Dependabot raises none of them: its
+- [ ] **Ten workflow pins nothing updates.** `bun-version: 1.3.14` stands in
+      ten jobs across five workflows, and Dependabot raises none of them: its
       `github-actions` ecosystem updates `uses:` refs only, and its `bun`
       ecosystem updates `@types/bun` in `package.json` — which carries that
-      same version, so a bump there leaves all eight behind with nothing
+      same version, so a bump there leaves all ten behind with nothing
       saying so. `CLAUDE.md`'s Safety rule about naming what updates a pin
       applies to every one of them; the branch that added the rule commented
-      only the service image it was found on, because one comment among eight
+      only the service image it was found on, because one comment among ten
       tells a reader nothing. Closing it is either a comment per site or a
       check that reconciles the workflows against the manifest.
+
+      Counted eight when this was written and nine by the time
+      `feat/deploy-pipeline-1` read it, which is the argument for the check
+      rather than the comments: a count nothing measures drifts every time a
+      job is added. That branch's `Dockerfile` is the tenth site and the one
+      exception — its `oven/bun:1.3.14-alpine` is pinned by digest and the
+      `docker` ecosystem entry beside it is what raises that one.
 - [ ] **A captured rule is sent to the costliest of its two homes.**
       `openspec/specs/local-review-loop/spec.md` §*A justification survives
       only when it is a convention* says a skipped Minor becomes a rule in
