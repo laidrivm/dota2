@@ -189,9 +189,9 @@ kernel releases it however that process ends — so a run killed outright does
 not wedge the schedule, which no application-level flag or lock file achieves
 without a cleanup path of its own.
 
-`-E 99` earns its place because of the record. `flock`'s default conflict
-status is `1`, which is exactly what a failed run exits with, so without it
-the log cannot say whether a run failed or never started. The `date -Is`
+`-E 99` is what makes the entry emit the status `snapshot-schedule` fixes for
+a refusal; the reason that value is not `flock`'s own default is stated
+there. The `date -Is`
 before and the `echo "exit $?"` after are what make the file answer *did it
 run*, not only *why did it break* — `run.ts` prints nothing on success, so a
 file of reports alone cannot distinguish a healthy schedule from a scheduler
