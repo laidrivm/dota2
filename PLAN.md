@@ -131,15 +131,22 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       and exit status to a log on the host, and nothing reads it. Until then a
       failed run degrades quietly — the export runs last, so the previously
       published bundle keeps serving while the data ages.
-- [ ] **The VPS renews certificates that never reach the proxy.**
-      `/etc/letsencrypt/renewal-hooks/` is empty in all three phases, and the
-      `nginx-proxy` container reads `/etc/letsencrypt` at start, so a renewal
-      is invisible to it until something restarts it. Measured on
-      2026-08-27: `fizzbuzz.digital` and `mellon.sh` both expired on
-      2026-08-21, the latter a live domain. `d2ass.laidrivm.com` will inherit
-      the same path 90 days after its certificate is issued. The fix is a
-      deploy hook that reloads the proxy, and it is host state, so it lands as
-      a documented step rather than as a file here.
+- [ ] **The VPS's certificate renewal is broken twice over.** Renewal itself
+      fails: four of its five certificates are issued `authenticator =
+      standalone`, which binds port `80` that the `nginx-proxy` container
+      holds, so `certbot renew` reported `2 renew failure(s)` and
+      `fizzbuzz.digital` and `mellon.sh` expired on 2026-08-21, the latter a
+      live domain. The two other standalone certificates were skipped only as
+      not yet due and fail the same way when they are; the one that renews,
+      `laidrivm.com`, is `dns-cloudflare` and never needs port `80`. Delivery
+      fails independently: `/etc/letsencrypt/renewal-hooks/` is empty in all
+      three phases, and the container reads `/etc/letsencrypt` at start, so
+      even a certificate that did renew reaches nothing. Measured 2026-08-27.
+      The fix is both halves — the four moved to `dns-cloudflare`, and a
+      deploy hook that reloads the proxy — and both are host state, so they
+      land as documented steps rather than as files here. `deploy-pipeline`
+      sidesteps the first for its own certificate by issuing it
+      `dns-cloudflare` from the start; it inherits the second.
 - [ ] **Workflow hygiene is practised everywhere and stated nowhere.**
       Measured over the six workflows: every one pins its actions by SHA with
       a version comment and declares `permissions:`, five of six declare a

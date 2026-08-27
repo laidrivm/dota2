@@ -22,11 +22,15 @@ publishing it would not start.
 DNS is Cloudflare, authoritative but not proxying — `laidrivm.com`,
 `mellon.sh` and `matrix.laidrivm.com` all resolve straight to the machine.
 
-Two things on that box are broken and are not this change's to fix:
-`fizzbuzz.digital` and `mellon.sh` hold certificates that expired on
-2026-08-21, and all three `/etc/letsencrypt/renewal-hooks/` directories are
-empty, so a renewed certificate never reaches the nginx container, which reads
-them only at start. Both become a `PLAN.md` entry.
+Two independent things on that box are broken, and neither is this change's
+to fix. Renewal itself fails: four of the five certificates are issued
+`authenticator = standalone`, which binds port `80` that `nginx-proxy` holds,
+so `certbot renew` reported `2 renew failure(s)` and `fizzbuzz.digital` and
+`mellon.sh` expired on 2026-08-21. And delivery fails independently of that:
+all three `/etc/letsencrypt/renewal-hooks/` directories are empty, so even a
+certificate that did renew never reaches the container, which reads
+`/etc/letsencrypt` only at start. Both become a `PLAN.md` entry; the first is
+why this change issues its own certificate a different way.
 
 The pattern source named by the task, `laidrivm/mellon`'s `ci.yml`, was read
 as well. Its shape is adopted; five of its properties are deliberately not.
@@ -135,8 +139,29 @@ host and a copy in the repository would drift from it silently.
 
 Ordering matters and is why the README states a bootstrap sequence: nginx
 refuses to start with a configuration naming a certificate file that is not
-there. The DNS record, then `certbot certonly`, then the virtual host, then
-the reload.
+there. The DNS record, then the certificate, then the virtual host, then the
+reload.
+
+**The challenge is DNS-01 through the Cloudflare plugin, not the default.**
+`certbot certonly` defaults to the standalone authenticator, which binds port
+`80` — and on this machine `nginx-proxy` holds it, so standalone cannot
+complete at all. Webroot would work but needs an
+`/.well-known/acme-challenge/` location in the proxy's configuration before
+the certificate exists, which inverts the ordering above.
+
+This is not a hypothetical, and the machine already answers it. Of its five
+certificates, four are issued `authenticator = standalone` and one —
+`laidrivm.com` — is `dns-cloudflare`. The four are exactly the ones that fail:
+`certbot renew` reported `2 renew failure(s)` on 2026-08-27, `fizzbuzz.digital`
+and `mellon.sh` having passed their renewal window and expired on 2026-08-21,
+while the other two standalone certificates were merely skipped as not yet due
+and will fail the same way when they are. The one that renews is the one that
+never needs port `80`.
+
+So: `dns-cloudflare`, with an API token scoped to the zone, which is the
+pattern already working there. DNS is Cloudflare regardless — the record has
+to be created by hand anyway — and DNS-01 is indifferent to which process owns
+port `80`.
 
 The Cloudflare record must be **DNS only**. Cloudflare defaults a new `A`
 record to proxied, and a proxied record would put Cloudflare's own TLS in
@@ -248,9 +273,17 @@ Not adopted, each a hygiene rule `tasks/task-7.md` names:
 - **The new certificate will expire in 90 days exactly as `mellon.sh`'s did**
   → the renewal-hook gap is real and outside this change; the README names it
   and the `PLAN.md` entry carries it, so it is not discovered by an outage.
-- **`appleboy/ssh-action` is a third party with the deploy key** → vetted like
-  a dependency before it is pinned, and the vetting reported in the pull
-  request, per `tasks/task-7.md`.
+- **`appleboy/ssh-action` is a third party with the deploy key** → vetted
+  here rather than deferred, the design being where the dependency is chosen
+  and the looking being cheap. Read on 2026-08-27: 6,179 stars, MIT, not
+  archived, last pushed 2026-08-16, releases still cut on a regular cadence
+  (`v1.2.5` 2026-01-28, `v1.2.4` 2025-11-28, `v1.2.3` 2025-11-08), 32 open
+  issues, none of them a disclosed handling flaw in the credential path. The
+  residual risk is structural rather than specific — the private key is handed
+  to a third-party action, which is true of every action of this kind — and
+  the `production` environment gate is what bounds who can trigger it. Task
+  5.4 re-reads this at the moment the SHA is pinned, since the verdict ages
+  and the pin is what makes it binding.
 - **Host state lives outside the repository** — the virtual host, the crontab
   entry, `.env`, the certificate → a rebuilt VPS is a manual bootstrap. Making
   it reproducible is configuration management, which this deliberately is not.
@@ -264,15 +297,28 @@ Nothing is migrated; there is no prior deployment. The host bootstrap, in
 order, all of it manual and all of it in the README:
 
 1. Cloudflare `A` record `d2ass.laidrivm.com` → the VPS, **DNS only**.
-2. `certbot certonly` for that name.
+2. `certbot certonly --dns-cloudflare` for that name, with a zone-scoped
+   API token — never the standalone authenticator, for the reason above.
 3. `/root/nginx/conf.d/d2ass.conf`, then reload `nginx-proxy`.
 4. `/root/d2ass/docker-compose.yml` and `/root/d2ass/.env`.
 5. GitHub `production` environment with its secrets; first deploy.
 6. The crontab entry.
 
-Rollback is `docker compose pull` of a previous commit's SHA tag and
-`up -d` — no state migrates either way, the database schema being applied
-idempotently on connect.
+Rollback is `docker compose pull` of a previous commit's SHA tag and `up -d`.
+
+**It is safe while every schema change stays additive, and that is a
+constraint rather than an observation.** `connect()` reapplies `schema.sql` on
+every connection, and applying an *older* `schema.sql` to a newer database is
+a no-op: all twenty-one of its statements are `CREATE TABLE IF NOT EXISTS`,
+`ADD COLUMN IF NOT EXISTS` or `CREATE INDEX IF NOT EXISTS`, and it carries no
+`DROP`, no `ALTER COLUMN`, no `RENAME` and no type change. So a rollback
+leaves the newer shape in place and runs the older code against it, which
+additive changes survive and nothing else does.
+
+A release that drops a column, narrows a type, or changes what a stored value
+means is therefore not rollback-safe, and saying so is this plan's job: the
+alternative is discovering it during the rollback. Such a release either ships
+its own backward step or is rolled forward instead.
 
 ## Open Questions
 
