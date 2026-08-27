@@ -36,6 +36,7 @@ export const EXEMPT: Record<string, string> = {
 	".env.example": "copied to `.env`, which tooling reads from the root",
 	Dockerfile: "the build context's root is the directory holding it",
 	".dockerignore": "read from the build context's root, beside the Dockerfile",
+	"docker-compose.yml": "the deployment's project file, resolved from the root",
 };
 
 /**

@@ -1,0 +1,97 @@
+# The deployment: the application, its own PostgreSQL, and the job as a service
+# run on demand rather than kept up.
+#
+# Nothing here publishes a port. The application joins the reverse proxy's
+# existing network and is reached by container name — a published port would be
+# a second way in, unencrypted, beside the proxy that exists to terminate TLS.
+# The database joins neither: it sits on a network private to this project,
+# because the shared one carries every other application on the host and a
+# database placed there is reachable by all of them, guarded by a password in
+# an env file and by nothing else.
+#
+# `checks/deployment-topology.test.ts` reads this file and fails on any of that
+# changing.
+
+services:
+  app:
+    image: ${D2ASS_IMAGE}
+    # Fixed rather than derived from the project directory, which is the host's
+    # and not this repository's: the proxy's virtual host resolves the
+    # application by this name, and a name that moves when the checkout moves
+    # is a 502 nobody changed anything to get.
+    container_name: d2ass-app
+    restart: always
+    networks:
+      - web-network
+      - internal
+    volumes:
+      - bundle:/app/snapshot
+      - icons:/app/icons
+
+  db:
+    # Pinned by digest, and by the same digest `.github/workflows/test.yml`
+    # runs its service container on — `checks/deployment-topology.test.ts`
+    # fails if the two stop agreeing. Unlike that one, this pin has an updater:
+    # Dependabot's `docker` ecosystem reads compose files.
+    image: postgres:18-alpine@sha256:d3e1620b530c944afa6e887d22eb899824da68e19c52024bf98f5220c88a65b2
+    restart: always
+    networks:
+      - internal
+    volumes:
+      - database:/var/lib/postgresql/data
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    # Over TCP, not the socket: the entrypoint runs initdb against a temporary
+    # server bound to the socket alone, so a socket probe reports ready while
+    # connections opened on it are about to be closed.
+    healthcheck:
+      test: ["CMD", "pg_isready", "-h", "127.0.0.1", "-U", "postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  job:
+    image: ${D2ASS_IMAGE}
+    # A profile is what keeps `docker compose up` from starting it. The job is
+    # a process that exits, and the schedule on the host is what invokes it —
+    # `docker compose run --rm job` activates this profile on its own.
+    profiles:
+      - job
+    # No `restart`: a policy on a process that exits is a process docker starts
+    # again, which is the overlap the schedule's lock exists to prevent.
+    networks:
+      - web-network
+      - internal
+    volumes:
+      - bundle:/app/snapshot
+      - icons:/app/icons
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      # Composed here rather than asked for: the password is one value, and a
+      # connection string carrying a second copy of it is a second thing to
+      # keep in step.
+      DATABASE_URL: postgres://postgres:${POSTGRES_PASSWORD}@db:5432/postgres
+      STRATZ_API_KEY: ${STRATZ_API_KEY}
+      # Written literally, matching the mounts above: the server resolves both
+      # relative to the image's working directory with no override, so these
+      # are where the job has to write for the application to read.
+      BUNDLE_DIR: /app/snapshot
+      ICONS_DIR: /app/icons
+    command: ["bun", "src/job/run.ts"]
+
+volumes:
+  # Written by the job and read by the application, both of them, at the paths
+  # above. This is what the deployment exists to arrange.
+  bundle:
+  icons:
+  database:
+
+networks:
+  # The proxy's own, created outside this project and shared with every other
+  # application on the host.
+  web-network:
+    external: true
+  # This project's, carrying the database and nothing else's.
+  internal:
