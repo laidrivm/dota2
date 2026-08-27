@@ -178,7 +178,7 @@ is the slowest thing in the repository.
 
 ### The schedule refuses overlap with `flock`, and the record separates the outcomes
 
-```
+```sh
 17 4 * * * { date -Is; flock -n -E 99 /var/lock/d2ass-job.lock \
     docker compose -f /root/d2ass/docker-compose.yml run --rm job; \
     echo "exit $?"; } >> /var/log/d2ass-job.log 2>&1

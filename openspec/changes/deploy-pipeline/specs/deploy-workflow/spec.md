@@ -65,9 +65,16 @@ that quietly excludes one is the defect above wearing the fix's clothes.
 ### Requirement: Every deployed image is named by the commit it was built from
 
 Each build SHALL push the image under two tags: the commit's full SHA and
-`latest`. The SHA tag is what makes a rollback possible — the previous
-release is an image that still exists under a name nothing overwrites — and
-`latest` is what the host's compose file resolves.
+`latest`. The host SHALL run the SHA tag, the deploy passing that reference
+to the compose project; `latest` SHALL name the most recent build for a
+reader and SHALL NOT be what anything runs.
+
+Resolving `latest` on the host leaves this requirement's own subject
+unanswerable. Nothing on the machine would say which commit is serving; two
+deploys close together would race for the name; and `docker compose up` run by
+hand months later would fetch whatever the tag had become rather than what was
+deployed. The SHA makes the deploy deterministic and the rollback a change of
+one value.
 
 The README SHALL state the rollback: which tag to pull, and that bringing the
 host up on it is the whole of the operation. A rollback nobody has written
@@ -78,6 +85,12 @@ down is a rollback performed under pressure from memory.
 - **WHEN** the workflow finishes for a commit
 - **THEN** the registry SHALL hold that image under both the commit's SHA and
   `latest`
+
+#### Scenario: The image the host is running
+
+- **WHEN** the running container's image reference is read on the host
+- **THEN** it SHALL name the commit's SHA, never `latest` — the machine
+  itself answers which commit is serving
 
 #### Scenario: A release that has to be undone
 
