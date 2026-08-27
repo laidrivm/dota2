@@ -112,6 +112,12 @@ const PLANTED: Record<string, string> = {
 	// directory rather than replacing it, so one sent in the context would
 	// survive beside the fresh one the build stage produced.
 	"dist/stale.js": "console.log('a previous build');\n",
+	// The two runtime directories. The job writes both and the server reads
+	// both, and the image has to hold them empty: a file shipped at either
+	// path is a second source for what the server answers from its listing,
+	// one that survives every export.
+	"snapshot/snapshot.json": '{"shipped":true}\n',
+	"icons/1.png": "not really a png\n",
 	"test-results/.last-run.json": "{}\n",
 	"playwright-report/index.html": "<!doctype html>\n",
 	"reports/mutation/index.html": "<!doctype html>\n",
@@ -127,7 +133,7 @@ const PLANTED: Record<string, string> = {
  * and report on it. `--exclude-standard` then leaves out exactly what
  * `PLANTED` supplies deliberately, so no gitignored file arrives twice.
  */
-function fabricate(): string {
+function fabricate(extra: Record<string, string> = {}): string {
 	const dir = mkdtempSync(join(tmpdir(), "d2ass-context-"));
 	const ls = Bun.spawnSync(
 		["git", "ls-files", "-z", "--cached", "--others", "--exclude-standard"],
@@ -147,12 +153,37 @@ function fabricate(): string {
 		copyFileSync(join(root, path), target);
 	}
 
-	for (const [path, body] of Object.entries(PLANTED)) {
+	for (const [path, body] of Object.entries({ ...PLANTED, ...extra })) {
 		const target = join(dir, path);
 		mkdirSync(dirname(target), { recursive: true });
 		writeFileSync(target, body);
 	}
 	return dir;
+}
+
+/**
+ * Build a context of its own, with `extra` written over the tree, and report
+ * how the build ended rather than throwing.
+ *
+ * For the cases that are *about* a build refusing: the shared image above
+ * throws on a non-zero status, which is right when a build failing means the
+ * suite cannot run and wrong when it is the assertion. Tagged rather than left
+ * dangling so a build that unexpectedly succeeds replaces one image instead of
+ * leaving one behind per run.
+ */
+export function buildWith(extra: Record<string, string>) {
+	const dir = fabricate(extra);
+	try {
+		const build = Bun.spawnSync(
+			["docker", "build", "-t", `${TAG}-probe`, dir],
+			{ stdout: "pipe", stderr: "pipe", timeout: BUILD_MS },
+		);
+		if (build.exitedDueToTimeout)
+			throw new Error(`docker build did not finish within ${BUILD_MS}ms`);
+		return { exitCode: build.exitCode, stderr: build.stderr.toString() };
+	} finally {
+		rmSync(dir, { recursive: true, force: true });
+	}
 }
 
 let built: string | undefined;
