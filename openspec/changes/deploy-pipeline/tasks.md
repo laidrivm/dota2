@@ -192,12 +192,12 @@ because the build stage failing to produce `dist/` fails the image build.
       group; a `run:` block interpolating a `github.event.*` value fails.
       (Req: deploy-workflow — The deploy workflow is held to the hygiene the
       others already practise)
-- [ ] 5.4 Vet `appleboy/ssh-action` as a dependency before pinning it — repo
+- [x] 5.4 Vet `appleboy/ssh-action` as a dependency before pinning it — repo
       activity, usage, open issues about the credential path — and record the
       vetting in the pull request.
       (Req: deploy-workflow — The deploy workflow is held to the hygiene the
       others already practise)
-- [ ] 5.5 Add the host steps to `deploy.yml`: pull first, then bring the
+- [x] 5.5 Add the host steps to `deploy.yml`: pull first, then bring the
       project up — both on the commit's SHA, passed in so the compose file
       resolves it rather than a mutable tag.
       (Req: deploy-workflow — The running container is replaced only once its

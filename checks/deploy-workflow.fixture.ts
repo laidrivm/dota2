@@ -251,7 +251,7 @@ export const built = ({
 	push = "true",
 	tags = TAGS,
 	copies = 1,
-	script = "",
+	reference = `\${{ env.IMAGE }}:${SHA}`,
 } = {}) =>
 	`env:
   IMAGE: laidrivm/d2ass
@@ -266,7 +266,16 @@ ${Array.from(
           tags: |
 ${tags.map((tag) => `            ${tag}`).join("\n")}`,
 ).join("\n")}
-${script ? `      - uses: appleboy/ssh-action@${"b".repeat(40)} # v1.2.5\n        with:\n          script: ${script}\n` : ""}`;
+      - uses: appleboy/ssh-action@${"b".repeat(40)} # v1.2.5
+        env:
+          ${REFERENCE}: ${reference}
+        with:
+          envs: ${REFERENCE}
+          script: |
+            set -eu
+            docker compose pull
+            docker compose up -d
+`;
 
 /** A README the rollback cases have nothing to say about. */
 export const ROLLBACK = `# d2ass

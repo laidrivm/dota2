@@ -69,3 +69,37 @@ jobs:
             ${{ env.IMAGE }}:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+  host:
+    needs: image
+    runs-on: ubuntu-latest
+    # The same gate as the build: the environment is what stands between a run
+    # and the private key, rather than the job's own conditions alone.
+    environment: production
+    steps:
+      - uses: appleboy/ssh-action@0ff4204d59e8e51228ff73bce53f80d53301dee2 # v1.2.5
+        env:
+          # The commit's own tag, never `latest`: the compose file resolves the
+          # image from this, so the machine itself answers which commit is
+          # serving and a rollback is a change of this one value.
+          D2ASS_IMAGE: ${{ env.IMAGE }}:${{ github.sha }}
+        with:
+          # Host, port and user as well as the key: this repository is public
+          # and the machine does not listen on the default port. Each is its own
+          # secret rather than one `host:port` string — the action renders a
+          # combined value in a form GitHub's masking does not match
+          # (appleboy/ssh-action#393), and separate values are masked whole.
+          host: ${{ secrets.SSH_HOST }}
+          port: ${{ secrets.SSH_PORT }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          envs: D2ASS_IMAGE
+          # `set -eu` is what makes the order below mean anything: without it a
+          # pull that cannot succeed is followed by a replacement with nothing
+          # to replace the container with, and the deploy reports failure over a
+          # service that is down.
+          script: |
+            set -eu
+            cd /root/d2ass
+            docker compose pull
+            docker compose up -d
