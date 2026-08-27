@@ -61,19 +61,30 @@ describe.skipIf(!available)("the compose project", () => {
 			// container exposes and the host cannot reach.
 			const listed = compose("ps", "--format", "json");
 			expect(listed.exitCode).toBe(0);
-			const published = listed.stdout
+			const containers = listed.stdout
 				.toString()
 				.split("\n")
 				.filter(Boolean)
-				.flatMap((line) => {
-					const container = JSON.parse(line) as {
-						Service?: string;
-						Publishers?: { PublishedPort?: number }[];
-					};
-					return (container.Publishers ?? [])
-						.filter((port) => (port.PublishedPort ?? 0) !== 0)
-						.map(() => container.Service);
-				});
+				.map(
+					(line) =>
+						JSON.parse(line) as {
+							Service?: string;
+							Publishers?: { PublishedPort?: number }[];
+						},
+				);
+			// What it read, before what it read says anything: compose emits one
+			// object per line here, and a version emitting a single array would
+			// leave `Publishers` undefined on every entry — an assertion below
+			// that passes having looked at nothing.
+			expect(containers.map((container) => container.Service).sort()).toEqual([
+				"app",
+				"db",
+			]);
+			const published = containers.flatMap((container) =>
+				(container.Publishers ?? [])
+					.filter((port) => (port.PublishedPort ?? 0) !== 0)
+					.map(() => container.Service),
+			);
 			expect(published).toEqual([]);
 		},
 		HOOK_MS,
