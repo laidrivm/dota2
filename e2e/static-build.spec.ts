@@ -67,6 +67,17 @@ function build(into: string): void {
 	const built = spawnSync("sh", ["-c", parts.join(word)], {
 		cwd: root,
 		encoding: "utf8",
+		// What the build needs and nothing else, so the bundle under test does
+		// not depend on who ran it. It cannot be the whole story: `cwd` has to
+		// be the repository root — the build reads `index.html` and `src/` —
+		// and bun loads the `.env` sitting there whatever this passes. Nothing
+		// under `src/` reads a variable today, so that reaches no bundle; this
+		// is what keeps the *spawn* from carrying one in.
+		env: Object.fromEntries(
+			["PATH", "HOME", "TMPDIR"]
+				.map((name) => [name, process.env[name]])
+				.filter((pair): pair is [string, string] => pair[1] !== undefined),
+		),
 	});
 	if (built.status !== 0)
 		throw new Error(`the build failed:\n${built.stderr}${built.stdout}`);
@@ -139,7 +150,10 @@ test("dist on a static host loads, fetches its snapshot and reaches Setup", asyn
 	// would pass every assertion below while proving the opposite.
 	const elsewhere: string[] = [];
 	page.on("request", (request) => {
-		if (!request.url().startsWith(origin)) elsewhere.push(request.url());
+		// The parsed origin, not a prefix: `http://127.0.0.1:<port>@elsewhere/`
+		// starts with this origin and goes somewhere else entirely, which is
+		// the one thing this listener exists to catch.
+		if (new URL(request.url()).origin !== origin) elsewhere.push(request.url());
 	});
 
 	const snapshot = page.waitForResponse((response) =>

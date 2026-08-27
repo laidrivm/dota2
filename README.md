@@ -171,19 +171,24 @@ Prose here rather than a file in this repository, because the file that is
 actually read lives on the host and a committed copy would drift from it in
 silence.
 
-Two things about it are ordering rather than content, which is why the
-bootstrap below is a sequence. nginx refuses to start against a configuration
-naming a certificate file that is not there, so the certificate exists before
-the virtual host does. And the Cloudflare record must be **DNS only**:
-Cloudflare defaults a new `A` record to proxied, and a proxied record puts
-their TLS in front and sends the challenge through their edge, which is not
-how the neighbouring domains on this machine work.
+One thing about it is ordering rather than content, which is why the bootstrap
+below is a sequence: nginx refuses to start against a configuration naming a
+certificate file that is not there, so the certificate exists before the
+virtual host does.
 
 The certificate is issued **DNS-01 through the Cloudflare plugin**, not the
 default. `certbot certonly` defaults to the standalone authenticator, which
 binds the port `nginx-proxy` holds, so standalone cannot complete here at all
-— and on this machine the standalone certificates are exactly the ones whose
-renewals fail.
+— and on this machine the standalone certificates are the ones whose renewals
+fail. DNS-01 proves the name by a `_acme-challenge` TXT record, so it is
+indifferent to what holds port `80` and to how the `A` record is served.
+
+The Cloudflare record is nonetheless **DNS only**, for a reason of its own
+rather than the certificate's: Cloudflare defaults a new `A` record to
+proxied, and a proxied record terminates TLS at their edge rather than at the
+`nginx-proxy` this deployment configures — a second certificate in front of
+the one certbot issues, and not how the neighbouring domains on this machine
+are served.
 
 One gap is inherited rather than introduced, and this deployment does not
 close it: all three of the host's `/etc/letsencrypt/renewal-hooks/`

@@ -103,18 +103,19 @@ const quoted = (path: string) => `'${path.replaceAll("'", `'\\''`)}'`;
 /** The entry's command with the host's three paths replaced by this run's. */
 function tailored(file: string, log: string) {
 	let command = COMMAND;
-	for (const [was, now] of [
+	const replacements: [string, string][] = [
 		[LOCK, under("run.lock")],
 		[LOG, log],
 		[FILE, file],
-	]) {
-		const parts = command.split(was as string);
+	];
+	for (const [was, now] of replacements) {
+		const parts = command.split(was);
 		// Exactly one, asserted rather than assumed: a replacement matching
 		// nothing leaves the host's own path in the line, and the case would
 		// then write to the deployment's log or lock the deployment's file.
 		if (parts.length !== 2)
 			throw new Error(`expected one ${was} in the entry: ${COMMAND}`);
-		command = parts.join(quoted(now as string));
+		command = parts.join(quoted(now));
 	}
 	return command;
 }
