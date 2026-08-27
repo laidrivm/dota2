@@ -19,17 +19,33 @@ test("an empty diff counts zero and passes", () => {
 
 // The count must not move with a developer's preferences: measured, the same
 // rename read 0 lines with detection on and 800 with it off, so a branch could
-// pass locally and fail in CI on a setting neither of them states.
-test("a rename counts the same whatever diff.renames says", () => {
-	const dir = repo({ "big.ts": lines(400) }, {});
-	git(dir, "mv", "big.ts", "moved.ts");
-	git(dir, "commit", "-qm", "move");
+// pass locally and fail in CI on a setting neither of them states. Both
+// settings that reach detection are hostile here — `renameLimit` skips it on a
+// diff carrying more files than the limit, which `renames` alone does not
+// cover.
+test("a rename counts the same whatever the rename settings say", () => {
+	// Both edited on the way, so neither pairs exactly: an identical move is
+	// matched before the limit is consulted, and it is the leftover matrix
+	// that `renameLimit` refuses to search.
+	const a = lines(400);
+	const b = `${lines(400)}b\n`;
+	const dir = repo(
+		{ "a.ts": a, "b.ts": b },
+		{
+			"a.ts": null,
+			"b.ts": null,
+			"moved-a.ts": `${a}a edit\n`,
+			"moved-b.ts": `${b}b edit\n`,
+		},
+	);
 	git(dir, "config", "diff.renames", "false");
+	git(dir, "config", "diff.renameLimit", "1");
 
 	const g = gate(dir);
 
-	// Nothing to read: the file moved and not one of its lines changed.
-	expect(g.total).toBe(0);
+	// One added line each is all there is to read; undetected, the four files
+	// would contribute their whole length instead.
+	expect(g.total).toBe(2);
 });
 
 test("excluded artefacts contribute nothing", () => {
