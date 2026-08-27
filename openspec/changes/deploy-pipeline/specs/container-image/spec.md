@@ -68,6 +68,15 @@ means a dependency's install script does not execute during the image build,
 which is the supply-chain position `bunfig.toml` already takes for a local
 install.
 
+Running as that user SHALL grant it no more of the image than a run writes.
+Only the two runtime directories SHALL be owned by it; everything the copy and
+the install left SHALL stay root-owned, which is readable by any user and
+writable by none but root. Reading is the whole of what either entry point
+does with its own source, so the wider grant buys nothing and costs the one
+thing a non-root user was for — a container that can rewrite the code it is
+about to run is a container whose user boundary ends at the first process that
+reaches it.
+
 #### Scenario: The install command the production stage runs
 
 - **WHEN** the production stage's install command is read from the
@@ -84,6 +93,13 @@ install.
 - **WHEN** the image's default command is run and the container's user is
   read
 - **THEN** it SHALL not be `root`, and the effective uid SHALL not be `0`
+
+#### Scenario: What the container's user may write
+
+- **WHEN** the container writes to a path under the application root that is
+  neither of the two runtime directories
+- **THEN** it SHALL be refused — the grant is those two, and an image that
+  handed its user the whole tree would satisfy every other scenario here
 
 #### Scenario: A development dependency in the image
 
