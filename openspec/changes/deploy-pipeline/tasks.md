@@ -132,7 +132,7 @@ because the build stage failing to produce `dist/` fails the image build.
 
 ## 4. Deploy: the gate and the tags
 
-- [ ] 4.1 Write `checks/deploy-workflow.test.ts` for the gate: assert that
+- [x] 4.1 Write `checks/deploy-workflow.test.ts` for the gate: assert that
       every job that builds, pushes or reaches the host has all four of the
       linter, type-check, unit and end-to-end workflows in its `needs:` chain,
       so a failing check leaves none of the three able to run, and a chain
