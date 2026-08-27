@@ -177,7 +177,7 @@ describe("a value that does grant something", () => {
 			},
 		});
 		expect(problems(wrong)).toContainEqual(
-			'deploy.yml: the connection\'s host is `${{ secrets["SSH_HOST"] }}`, not a secret',
+			`deploy.yml: the connection's host is \`\${{ secrets["SSH_HOST"] }}\`, not a secret`,
 		);
 	});
 
