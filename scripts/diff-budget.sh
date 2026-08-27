@@ -89,6 +89,23 @@ count() {
 	'
 }
 
+# The change directories in which this branch authored a proposal: those where
+# it added both `proposal.md` and `tasks.md`. Printing nothing means the branch
+# is not a propose-stage one, or is one half of a split.
+#
+# `:(glob)` is what stops `*` at a path separator. A plain pathspec's wildcard
+# crosses one, so `openspec/changes/archive/<date>-<slug>/proposal.md` would
+# match and reduce to the `archive` directory — an archive holding both files
+# would then read as an unsplit proposal. `--diff-filter=A` tells authoring
+# from moving: `/opsx:archive` relocates the pair, and a relocation adds
+# nothing.
+authored_proposal() {
+	git diff --diff-filter=A --name-only "${base}...HEAD" -- \
+		':(glob)openspec/changes/*/proposal.md' \
+		':(glob)openspec/changes/*/tasks.md' |
+		sed -E 's|^openspec/changes/([^/]+)/.*|\1|' | sort | uniq -d
+}
+
 # A pipeline that died partway still prints a number, so the exit status is
 # what says the count is whole; the numeric test catches an empty half, which
 # arithmetic would otherwise read as a zero.
@@ -100,22 +117,33 @@ total=$((source_lines + test_lines))
 if [ "$total" -ge "$FAIL_AT" ]; then
 	verdict="FAIL"
 	tail=" — over ${FAIL_AT}"
-	# The override lives in the pull request body, which the caller passes in
-	# `PR_BODY`; a marker with nothing after it names no reason and clears
-	# nothing. GitHub bodies arrive with CRLF line endings, and the trailing
-	# `[[:space:]]` strip below takes the carriage return with it.
-	markers=$(printf '%s\n' "${PR_BODY:-}" | grep -E '^[[:space:]]*oversize:' || true)
-	if [ -n "$markers" ]; then
-		# The first marker that carries a reason decides, so an empty one
-		# earlier in the body does not shadow a later valid one.
-		reason=$(printf '%s\n' "$markers" |
-			sed -E 's/^[[:space:]]*oversize:[[:space:]]*//; s/[[:space:]]+$//' |
-			grep -m1 -v '^$' || true)
-		if [ -n "$reason" ]; then
-			verdict="OVERRIDE"
-			tail=" — over ${FAIL_AT}, oversize: ${reason}"
-		else
-			tail=" — over ${FAIL_AT}, oversize: marker carries no reason"
+	if [ -n "$(authored_proposal)" ]; then
+		# The body is not read at all here: the marker admits a diff the
+		# project cannot make smaller, and this one it can, along the seam the
+		# four artefacts already are. Naming the two branches answers the
+		# reader holding the branch, so the failure needs no trip to the
+		# capability — including when the marker carries no reason, since the
+		# reason it would ask for is one this refusal would not accept.
+		tail="${tail}, split it: proposal.md and the delta specs on"
+		tail="${tail} spec/<slug>, design.md and tasks.md on spec/<slug>-plan"
+	else
+		# The override lives in the pull request body, which the caller passes
+		# in `PR_BODY`; a marker with nothing after it names no reason and
+		# clears nothing. GitHub bodies arrive with CRLF line endings, and the
+		# trailing `[[:space:]]` strip below takes the carriage return with it.
+		markers=$(printf '%s\n' "${PR_BODY:-}" | grep -E '^[[:space:]]*oversize:' || true)
+		if [ -n "$markers" ]; then
+			# The first marker that carries a reason decides, so an empty one
+			# earlier in the body does not shadow a later valid one.
+			reason=$(printf '%s\n' "$markers" |
+				sed -E 's/^[[:space:]]*oversize:[[:space:]]*//; s/[[:space:]]+$//' |
+				grep -m1 -v '^$' || true)
+			if [ -n "$reason" ]; then
+				verdict="OVERRIDE"
+				tail=" — over ${FAIL_AT}, oversize: ${reason}"
+			else
+				tail=" — over ${FAIL_AT}, oversize: marker carries no reason"
+			fi
 		fi
 	fi
 elif [ "$total" -ge "$WARN_AT" ]; then
