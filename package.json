@@ -13,6 +13,7 @@
 		"diff-budget": "bash scripts/diff-budget.sh",
 		"test:coverage": "bun test --coverage",
 		"test:db": "bash scripts/test-db.sh",
+		"test:docker": "bash scripts/test-docker.sh",
 		"prepare": "simple-git-hooks"
 	},
 	"simple-git-hooks": {
