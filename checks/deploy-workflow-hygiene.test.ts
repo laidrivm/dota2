@@ -19,7 +19,7 @@
  * is exactly the half a reader needs to know how far behind a pin has fallen.
  */
 import { describe, expect, test } from "bun:test";
-import { hosted, SSH } from "./deploy-host.fixture.ts";
+import { EVENT, hosted, SSH } from "./deploy-host.fixture.ts";
 import { deployed } from "./deploy-workflow.fixture.ts";
 
 /** A `uses:` line, with whatever follows the reference on it. */
@@ -30,9 +30,6 @@ const PINNED = /^[^@\s]+@[0-9a-f]{40}$/;
 
 /** The version beside a pin, which is what says how old it is. */
 const VERSION = /^\s*#\s*v\S+/;
-
-/** An expression reaching a value an outsider can choose the text of. */
-const EVENT = /\$\{\{[^}]*github\.event\b/;
 
 type Workflow = {
 	permissions?: string | Record<string, string>;
@@ -220,6 +217,13 @@ describe("an event value reaching a shell", () => {
 
 	test("interpolated into an action's script:, it fails", () => {
 		const script = [`echo "\${{ github.event.head_commit.message }}"`];
+		expect(problems(hosted({ script }))).toEqual([
+			`deploy.yml: a script: block interpolates an event value: ${script[0]}`,
+		]);
+	});
+
+	test("the indexed spelling reaches a shell just the same", () => {
+		const script = [`echo "\${{ github['event'].pull_request.title }}"`];
 		expect(problems(hosted({ script }))).toEqual([
 			`deploy.yml: a script: block interpolates an event value: ${script[0]}`,
 		]);

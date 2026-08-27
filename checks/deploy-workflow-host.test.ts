@@ -35,6 +35,9 @@ const PULL = /(^|\s|[;&|])docker\s+(compose\s+)?pull(\s|$)/;
  */
 const ERREXIT = /^\s*set\s+(.*\s)?(-[a-z]*e[a-z]*|-o\s+errexit)(\s|$)/;
 
+/** A line that turns it off again, which the one above says nothing about. */
+const NO_ERREXIT = /^\s*set\s+(.*\s)?(\+[a-z]*e[a-z]*|\+o\s+errexit)(\s|$)/;
+
 type Step = { uses?: string; with?: { script?: string } };
 type Job = { needs?: string | string[]; steps?: Step[] };
 type Workflow = { jobs?: Record<string, Job> };
@@ -101,15 +104,24 @@ export function problems(deploy: string): string[] {
 				);
 		// The pull going first only means anything while a failed one ends the
 		// script: without this the deploy carries on to the replacement having
-		// nothing to replace the container with. And it has to be on before the
-		// pull — one turned on afterwards guards every step but the one whose
-		// failure this exists to survive.
-		const stops = lines.findIndex((line) => ERREXIT.test(line));
-		if (stops === -1)
-			found.push("deploy.yml: the host script does not stop on a failure");
-		else if (stops > first)
+		// nothing to replace the container with.
+		//
+		// The question is whether it is in force *at the pull*, not whether it
+		// appears anywhere — one turned on afterwards guards every step but the
+		// one whose failure this exists to survive, and `set +e` before the pull
+		// turns it off again while leaving the enabling line in the file to read.
+		let stopping = false;
+		let changed = -1;
+		for (let at = 0; at < first; at++) {
+			const line = lines[at] as string;
+			if (ERREXIT.test(line)) [stopping, changed] = [true, at];
+			else if (NO_ERREXIT.test(line)) [stopping, changed] = [false, at];
+		}
+		if (!stopping)
 			found.push(
-				`deploy.yml: \`${lines[stops]}\` comes after the pull it should guard`,
+				changed === -1 && !lines.some((line) => ERREXIT.test(line))
+					? "deploy.yml: the host script does not stop on a failure"
+					: `deploy.yml: the script is not stopping on a failure when the pull runs: \`${changed === -1 ? (lines.find((line) => ERREXIT.test(line)) as string) : lines[changed]}\``,
 			);
 	}
 
@@ -184,10 +196,25 @@ describe("a pull that cannot succeed", () => {
 		expect(problems(hosted({ script }))).toEqual([]);
 	});
 
-	test("one turned on after the pull fails", () => {
-		const script = ["docker compose pull", "set -eu", "docker compose up -d"];
+	test.each([
+		[
+			"turned on only after the pull",
+			["docker compose pull", "set -eu", "docker compose up -d"],
+			"set -eu",
+		],
+		[
+			"turned off again before it",
+			["set -eu", "set +e", "docker compose pull", "docker compose up -d"],
+			"set +e",
+		],
+		[
+			"turned off by the long form",
+			["set -eu", "set +o errexit", "docker compose pull"],
+			"set +o errexit",
+		],
+	])("%s fails", (_what, script, named) => {
 		expect(problems(hosted({ script }))).toEqual([
-			"deploy.yml: `set -eu` comes after the pull it should guard",
+			`deploy.yml: the script is not stopping on a failure when the pull runs: \`${named}\``,
 		]);
 	});
 

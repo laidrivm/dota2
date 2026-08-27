@@ -14,7 +14,14 @@
  * the action's, and is read off the step.
  */
 import { describe, expect, test } from "bun:test";
-import { hosted, SECRETS, SSH, secret } from "./deploy-host.fixture.ts";
+import {
+	hosted,
+	isSecret,
+	SECRETS,
+	SSH,
+	secret,
+	secretsIn,
+} from "./deploy-host.fixture.ts";
 import { deployed } from "./deploy-workflow.fixture.ts";
 
 /** The values that grant nothing, each of which belongs in `env:`. */
@@ -29,9 +36,6 @@ const NOT_SECRET = /REGISTRY|IMAGE|CONTAINER/i;
 
 /** The connection inputs the requirement names, in the action's spelling. */
 const CONNECTION = ["host", "port", "username", "key"];
-
-/** A `secrets.NAME` reference, whichever expression carries it. */
-const SECRET = /secrets\.([A-Za-z_][A-Za-z0-9_]*)/g;
 
 type Step = { uses?: string; with?: Record<string, string> };
 type Job = { environment?: string; secrets?: unknown; steps?: Step[] };
@@ -51,8 +55,8 @@ export function problems(deploy: string): string[] {
 	// Read off the whole file rather than off the steps: a non-secret in the
 	// store is wrong wherever it is reached from, and a rule that only looked
 	// where one is expected would miss the one place nobody expected.
-	for (const [, name] of deploy.matchAll(SECRET))
-		if (NOT_SECRET.test(name as string))
+	for (const name of secretsIn(deploy))
+		if (NOT_SECRET.test(name))
 			found.push(
 				`deploy.yml: secrets.${name} grants nothing and belongs in env:`,
 			);
@@ -69,7 +73,7 @@ export function problems(deploy: string): string[] {
 			const value = step.with?.[input];
 			// Compared whole: a value that merely *contains* a secret is one that
 			// carries something beside it, and what is beside it is in the open.
-			if (!value || !/^\$\{\{\s*secrets\.[A-Za-z0-9_]+\s*\}\}$/.test(value))
+			if (!value || !isSecret(value))
 				found.push(
 					`deploy.yml: the connection's ${input} is ${value ? `\`${value}\`` : "absent"}, not a secret`,
 				);
@@ -77,7 +81,7 @@ export function problems(deploy: string): string[] {
 
 	for (const [id, job] of Object.entries(doc.jobs ?? {})) {
 		if (
-			JSON.stringify(job).includes("secrets.") &&
+			secretsIn(JSON.stringify(job)).length > 0 &&
 			job.environment !== "production"
 		)
 			found.push(
@@ -146,6 +150,21 @@ describe("a value that does grant something", () => {
 		);
 	});
 
+	test("the indexed spelling of a secret is one too", () => {
+		// `secrets['SSH_HOST']` is the same lookup as `secrets.SSH_HOST`, and a
+		// pattern written for the dotted form alone reads this as no secret at
+		// all — so the value would be reported as written in the open.
+		const indexed = hosted({
+			inputs: {
+				host: `\${{ secrets['SSH_HOST'] }}`,
+				port: secret("SSH_PORT"),
+				username: secret("SSH_USER"),
+				key: secret("SSH_KEY"),
+			},
+		});
+		expect(problems(indexed)).toEqual([]);
+	});
+
 	test("a fallback written beside the secret fails", () => {
 		// A whole-value comparison, not a search. The fallback is the reason:
 		// `22` in the open is the default this machine deliberately does not
@@ -165,9 +184,7 @@ describe("a value that does grant something", () => {
 	});
 
 	test("every name the requirement lists is one the workflow reads", () => {
-		const read = new Set(
-			[...hosted().matchAll(SECRET)].map(([, name]) => name as string),
-		);
+		const read = new Set(secretsIn(hosted()));
 		expect([...read].sort()).toEqual([...SECRETS].sort());
 	});
 });

@@ -17,6 +17,7 @@
  * repository's name.
  */
 import { describe, expect, test } from "bun:test";
+import { SSH } from "./deploy-host.fixture.ts";
 import {
 	BUILDER,
 	built,
@@ -32,7 +33,8 @@ import { deployed } from "./deploy-workflow.fixture.ts";
 
 type Step = {
 	uses?: string;
-	with?: { tags?: string | string[]; push?: boolean | string };
+	env?: Record<string, string>;
+	with?: { tags?: string | string[]; push?: boolean | string; envs?: string };
 };
 type Workflow = { jobs?: Record<string, { steps?: Step[] }> };
 
@@ -90,13 +92,31 @@ export function problems(deploy: string): string[] {
 				found.push(`deploy.yml: pushes ${tag}, which is not ${image}`);
 	}
 
-	let assigned = 0;
+	// What the host is actually handed, read through the parse. A line that
+	// looks like an assignment is not one: `echo D2ASS_IMAGE=…` inside the
+	// script sets nothing, and counting it would leave the check reporting
+	// green over a step that forwards no value at all.
+	const opening = Object.values(doc.jobs ?? {})
+		.flatMap((job) => job.steps ?? [])
+		.filter((step) => step.uses?.startsWith(`${SSH}@`));
+	for (const step of opening) {
+		if (!step.env?.[REFERENCE])
+			found.push(`deploy.yml: the host step declares no ${REFERENCE}`);
+		else if (
+			!String(step.with?.envs ?? "")
+				.split(/[\s,]+/)
+				.includes(REFERENCE)
+		)
+			found.push(`deploy.yml: ${REFERENCE} is declared but never forwarded`);
+	}
+	if (opening.length === 0)
+		found.push(`deploy.yml: nothing hands the host a ${REFERENCE}`);
+
 	for (const raw of deploy.split(/\r\n|\n|\r/)) {
 		// Lines that *give* the reference a value, not every line naming it: the
 		// action is also told which variables to forward, and `envs: D2ASS_IMAGE`
 		// names the reference while saying nothing about what it holds.
 		if (!ASSIGNS.test(raw)) continue;
-		assigned++;
 		// Read line by line rather than through the parse, because the reference
 		// reaches the host as an `env:` value that a shell then reads — but
 		// resolved through the workflow's own `env:` first, since what is written
@@ -120,9 +140,6 @@ export function problems(deploy: string): string[] {
 				`deploy.yml: ${REFERENCE} is not ${image}:${SHA}: ${raw.trim()}`,
 			);
 	}
-
-	if (assigned === 0)
-		found.push(`deploy.yml: nothing gives the host a ${REFERENCE}`);
 
 	return found;
 }
@@ -220,16 +237,27 @@ describe("the reference handed to the host", () => {
 		]);
 	});
 
-	test("a workflow that only forwards the name, never setting it, fails", () => {
-		// `envs: D2ASS_IMAGE` names the reference and says nothing about what it
-		// holds. Counting it would leave the host given nothing and the check
-		// reporting nothing.
-		const forwarded = built().replace(
-			new RegExp(`^\\s*${REFERENCE}: .*$`, "m"),
-			"          UNRELATED: 1",
-		);
-		expect(problems(forwarded)).toEqual([
-			`deploy.yml: nothing gives the host a ${REFERENCE}`,
+	test("a script line that merely looks like an assignment is not one", () => {
+		// `echo D2ASS_IMAGE=…` sets nothing the host receives. Read as text it
+		// counts, and the step forwarding no value at all reports green.
+		const echoed = built()
+			.replace(
+				new RegExp(`^\\s*${REFERENCE}: .*$`, "m"),
+				"          UNRELATED: 1",
+			)
+			.replace(
+				"            docker compose pull",
+				`            echo ${REFERENCE}=laidrivm/d2ass:${SHA}`,
+			);
+		expect(problems(echoed)).toEqual([
+			`deploy.yml: the host step declares no ${REFERENCE}`,
+		]);
+	});
+
+	test("a value declared but never forwarded fails", () => {
+		const kept = built().replace(`          envs: ${REFERENCE}\n`, "");
+		expect(problems(kept)).toEqual([
+			`deploy.yml: ${REFERENCE} is declared but never forwarded`,
 		]);
 	});
 
