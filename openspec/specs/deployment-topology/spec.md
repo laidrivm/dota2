@@ -1,8 +1,16 @@
 # deployment-topology Specification
 
 ## Purpose
-TBD - created by archiving change deploy-pipeline. Update Purpose after archive.
+
+How the deployment is wired on the host: reachable through the reverse proxy
+alone and never by a published port, a database on a network private to this
+project rather than the one every other application on the machine shares, and
+the bundle and the icon mirror as one set of files the job writes and the
+application reads without a restart. A credential stops a caller authorised to
+try; the network is what stops one that should never have reached the port.
+
 ## Requirements
+
 ### Requirement: The application is reachable only through the proxy
 
 The compose project SHALL publish no port on the host. The application

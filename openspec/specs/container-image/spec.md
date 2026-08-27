@@ -1,8 +1,17 @@
 # container-image Specification
 
 ## Purpose
-TBD - created by archiving change deploy-pipeline. Update Purpose after archive.
+
+One image for both entry points, and what it is allowed to hold. The base
+pinned by digest with a named updater that raises it, a build context stated as
+what it excludes rather than what it copies, a production install carrying only
+what a run needs and running as nobody in particular, and the two directories
+the job writes and the server reads — created empty, owned by the user the
+container runs as, because Docker creates a missing mount point as root and the
+failure appears on the first real run and in no build.
+
 ## Requirements
+
 ### Requirement: Every base image is pinned by digest, and a named updater raises it
 
 The `Dockerfile` SHALL reference each base image by digest
