@@ -25,9 +25,12 @@ because the build stage failing to produce `dist/` fails the image build.
       ecosystem entry covering its directory fails; this repository passes.
       (Req: container-image — Every base image is pinned by digest, and a
       named updater raises it)
-- [ ] 1.2 Write the build-context cases: the built image holds no `.git`, no
-      `.env` when one is present in the context, and a `node_modules` that is
-      the production install rather than the host's copy. Docker-gated.
+- [ ] 1.2 Write the build-context cases, one per category the requirement
+      names: the built image holds no `.git`; no `.env` when one is present in
+      the context; a `node_modules` that is the production install rather than
+      the host's copy; no `.claude/` and no `openspec/`; and none of
+      `test-results/`, `playwright-report/`, `reports/` or `.stryker-tmp/`.
+      Docker-gated.
       (Req: container-image — The build context carries nothing the image
       must not hold)
 - [ ] 1.3 Add the multistage `Dockerfile` with its base pinned by digest, and
@@ -74,7 +77,9 @@ because the build stage failing to produce `dist/` fails the image build.
       service binds a host port; the database attaches to the project's
       private network and not to the shared proxy network; the application and
       the job attach to both and mount both named volumes at the paths the
-      server resolves.
+      server resolves; and the application service declares a fixed
+      `container_name`, which is what the README's virtual host resolves it
+      by.
       (Req: deployment-topology — The application is reachable only through
       the proxy / The database is reachable only from this project)
 - [ ] 3.2 Write the shared-files cases: a bundle the job publishes is served
@@ -95,11 +100,13 @@ because the build stage failing to produce `dist/` fails the image build.
 
 ## 4. Deploy: the gate and the tags
 
-- [ ] 4.1 Write `checks/deploy-workflow.test.ts` for the gate: the deploy job
-      depends on the linter, type-check, unit and end-to-end workflows, and a
-      deploy job carrying no such dependency fails the check; each of those
-      four workflows carries a `workflow_call:` trigger; the deploy workflow
-      spells out no check's own command.
+- [ ] 4.1 Write `checks/deploy-workflow.test.ts` for the gate: assert that
+      every job that builds, pushes or reaches the host has all four of the
+      linter, type-check, unit and end-to-end workflows in its `needs:` chain,
+      so a failing check leaves none of the three able to run, and a chain
+      missing one fails the case; each of those four workflows carries a
+      `workflow_call:` trigger; the deploy workflow spells out no check's own
+      command.
       (Req: deploy-workflow — A deploy runs only against a commit the checks
       have passed)
 - [ ] 4.2 Write the tag cases: both `latest` and the commit SHA appear as push
@@ -108,25 +115,32 @@ because the build stage failing to produce `dist/` fails the image build.
       was built from)
 - [ ] 4.3 Add `workflow_call:` to `lint.yml`, `test.yml`, `e2e.yml` and the
       type-check's workflow, changing nothing else in them.
-- [ ] 4.4 Add `.github/workflows/deploy.yml` with those four as `needs:`,
-      buildx, `cache-from/to: type=gha`, and both tags pushed to the public
-      Docker Hub repository.
+- [ ] 4.4 Add `.github/workflows/deploy.yml`, triggered on push to `main`,
+      with those four as `needs:`, buildx, `cache-from/to: type=gha`, and both
+      tags pushed to the public Docker Hub repository. Assert the trigger in
+      4.1's file: a workflow that runs on nothing deploys nothing, and one
+      that runs on a wider trigger deploys more than a merge.
 
 ## 5. Deploy: replacement order, secrets, and the workflow's own hygiene
 
-- [ ] 5.1 Write the ordering case: the pull step precedes every step that
-      stops or replaces the running container.
+- [ ] 5.1 Write the ordering cases: the pull step precedes every step that
+      stops or replaces the running container, and a pull that cannot succeed
+      ends the host script before any of them runs, leaving the container that
+      was serving still up.
       (Req: deploy-workflow — The running container is replaced only once its
       replacement is on the host)
-- [ ] 5.2 Write the secrets cases: the registry, image repository and
-      container names are read from `env:` and never from `secrets`; the
-      deploy job declares `environment: production`.
+- [ ] 5.2 Write the secrets cases in both directions: the registry, image
+      repository and container names are read from `env:` and never from
+      `secrets`; the Docker Hub token, the SSH private key and the SSH host,
+      port and user are each read from `secrets` and never written in the
+      open; the deploy job declares `environment: production`.
       (Req: deploy-workflow — A value is a secret only when disclosing it
       would grant something)
 - [ ] 5.3 Write the hygiene cases: an action named by tag fails; a SHA with no
-      version comment beside it fails; the workflow declares `permissions:`;
-      the workflow declares a concurrency group; a `run:` block interpolating
-      a `github.event.*` value fails.
+      version comment beside it fails; the workflow's `permissions:` grants
+      exactly the scopes it uses, so a block widened to `write-all` fails
+      while the declared set passes; the workflow declares a concurrency
+      group; a `run:` block interpolating a `github.event.*` value fails.
       (Req: deploy-workflow — The deploy workflow is held to the hygiene the
       others already practise)
 - [ ] 5.4 Vet `appleboy/ssh-action` as a dependency before pinning it — repo
