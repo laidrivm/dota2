@@ -9,7 +9,7 @@
  * maintained, and a stale digest reads exactly like a fresh one. The second
  * half is an absence, and absences are what review misses.
  */
-import { expect, test } from "bun:test";
+import { describe, expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
@@ -136,22 +136,62 @@ const dockerEntry = (over: Partial<Entry> = {}) => ({
 const file = (...updates: object[]) =>
 	Bun.YAML.stringify({ version: 2, updates });
 
+/** The dependabot file this check has nothing to say about. */
+const covered = file(bunEntry, dockerEntry());
+
 // spec: container-image/a-base-image-referenced-by-tag
-test("a base image referenced by tag is named", () => {
-	const found = problems(
-		"FROM oven/bun:1.3.14-alpine AS build\n",
-		file(bunEntry, dockerEntry()),
-	);
-	expect(found).toEqual([
-		"Dockerfile: FROM oven/bun:1.3.14-alpine AS build: no @sha256: digest",
-	]);
+describe("a base image referenced by tag", () => {
+	test("is named", () => {
+		const found = problems("FROM oven/bun:1.3.14-alpine AS build\n", covered);
+		expect(found).toEqual([
+			"Dockerfile: FROM oven/bun:1.3.14-alpine AS build: no @sha256: digest",
+		]);
+	});
+
+	test("is named at any line, not only the first", () => {
+		const found = problems(`${pinned}FROM alpine:3.22 AS extra\n`, covered);
+		expect(found).toEqual([
+			"Dockerfile: FROM alpine:3.22 AS extra: no @sha256: digest",
+		]);
+	});
+
+	test("passes when a flag precedes a pinned image", () => {
+		const from = `FROM --platform=linux/amd64 oven/bun:1.3.14-alpine@sha256:${"a".repeat(64)}\n`;
+		expect(problems(from, covered)).toEqual([]);
+	});
+
+	// The anchors, one end each. A guard matching a prefix passes a truncated
+	// digest and a guard matching a suffix passes a longer one, and both read
+	// in the file exactly like the anchored form.
+	test.each([63, 65])("fails on a digest of %i hex characters", (length) => {
+		const from = `FROM oven/bun:1.3.14-alpine@sha256:${"a".repeat(length)}\n`;
+		expect(problems(from, covered)).toEqual([
+			`Dockerfile: ${from.trim()}: no @sha256: digest`,
+		]);
+	});
+
+	test("reports a file carrying no FROM line at all", () => {
+		// It builds nothing, and it satisfies every assertion above.
+		expect(problems("# nothing here\n", covered)).toEqual([
+			"Dockerfile: no FROM line",
+		]);
+	});
 });
 
 // spec: container-image/a-digest-with-no-updater
-test("a digest-pinned Dockerfile no docker entry covers fails", () => {
-	expect(problems(pinned, file(bunEntry))).toEqual([
-		"dependabot: no `docker` ecosystem entry — the digests above are pins nothing raises",
-	]);
+describe("a digest with no updater", () => {
+	const message =
+		"dependabot: no `docker` ecosystem entry — the digests above are pins nothing raises";
+
+	test("fails when the file carries entries but not this one", () => {
+		expect(problems(pinned, file(bunEntry))).toEqual([message]);
+	});
+
+	test("fails on a file carrying no updates at all", () => {
+		// The same answer, rather than a throw on a missing key: a dependabot
+		// file emptied is the absence this scenario is about, not a broken read.
+		expect(problems(pinned, "version: 2\n")).toEqual([message]);
+	});
 });
 
 // spec: container-image/an-entry-naming-another-directory
