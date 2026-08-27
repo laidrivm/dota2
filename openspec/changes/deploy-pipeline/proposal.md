@@ -38,9 +38,12 @@ change is where the schedule arrives, so this is where the refusal lands.
   host to add, and the manual bootstrap the first deploy needs.
 - The automated form of `ui-foundation` **(e2e)** 1.5, which Task 4 deferred to
   this task.
-- `PLAN.md` corrections this change's own findings force: the failure alert
-  moves from the Task 7 entry to Task 5, and the VPS's expired certificates and
-  empty certbot renewal hooks become a queue entry of their own.
+- `PLAN.md` corrections this change's own findings force, all three written at
+  the propose stage where the decisions were taken: the failure alert moves
+  from the Task 7 entry to Task 5; the VPS's expired certificates and empty
+  certbot renewal hooks become a queue entry of their own; and so does
+  workflow hygiene, which all six workflows practise and which no rule and no
+  criterion states.
 
 ## Non-goals
 
