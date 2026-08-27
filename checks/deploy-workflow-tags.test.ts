@@ -50,7 +50,10 @@ export function problems(deploy: string): string[] {
 
 	const pushing = Object.values(doc.jobs ?? {})
 		.flatMap((job) => job.steps ?? [])
-		.filter((step) => step.uses?.startsWith(BUILDER));
+		// The `@` is part of the boundary: without it `docker/build-push-actions`
+		// or any other name this one is a prefix of would be read as the builder,
+		// and every assertion below would then be about the wrong step.
+		.filter((step) => step.uses?.startsWith(`${BUILDER}@`));
 	// Guards the two assertions under it, both of which are about the tags a
 	// push carries: with no pushing step they would pass by having none.
 	if (pushing.length !== 1)
@@ -127,6 +130,11 @@ describe("the tags a build pushes", () => {
 
 	test.each([
 		["no build step at all", { builder: "actions/checkout" }, 0],
+		[
+			"only an action this one's name is a prefix of",
+			{ builder: `${BUILDER}s` },
+			0,
+		],
 		["a second build step", { copies: 2 }, 2],
 	])("a workflow with %s fails", (_what, over, count) => {
 		expect(problems(built(over))).toEqual([
