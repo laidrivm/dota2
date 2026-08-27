@@ -28,6 +28,7 @@ type Service = {
 	volumes?: string[];
 	restart?: string;
 	profiles?: string[];
+	environment?: Record<string, string>;
 };
 
 type Compose = {
@@ -171,6 +172,35 @@ test("the database is pinned to the digest the workflow runs", () => {
 	);
 	expect(pinned).toHaveLength(1);
 	expect(db.image).toBe(pinned[0]);
+});
+
+// Cited by no criterion: the compose file composes the job's connection string,
+// and doing that by interpolation would make the operator's choice of password
+// a syntax question. Measured on bun 1.3.14: `/` or `#` in a password throws
+// ERR_INVALID_URL before a connection is attempted, and `@` or `:` parses into
+// a different password than was set.
+test("the connection string carries no password to escape", () => {
+	const url = job.environment?.DATABASE_URL ?? "";
+	expect(url).toBeTruthy();
+	// No credentials between the scheme and the host at all — an interpolated
+	// one reads here as the literal `${POSTGRES_PASSWORD}` and would pass a
+	// check looking only for the password's value.
+	expect(url).not.toMatch(/^[a-z]+:\/\/[^/@]*:[^/@]*@/);
+	expect(job.environment?.PGPASSWORD).toBeTruthy();
+});
+
+// Cited by no criterion: `.env.example` is what says which variables exist, and
+// the host's own file is a copy of it — so a service gaining one the example
+// does not name is a deploy that interpolates an empty string.
+test("every variable the compose file reads is in .env.example", () => {
+	const raw = readFileSync(`${root}/docker-compose.yml`, "utf8");
+	const read = new Set(
+		[...raw.matchAll(/\$\{([A-Z0-9_]+)\}/g)].map((match) => match[1] as string),
+	);
+	expect(read.size).toBeGreaterThan(0);
+	const documented = readFileSync(`${root}/.env.example`, "utf8");
+	for (const name of read)
+		expect(documented).toMatch(new RegExp(`^${name}=`, "m"));
 });
 
 // spec: snapshot-schedule/the-job-is-not-kept-running
