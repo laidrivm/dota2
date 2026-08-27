@@ -1189,3 +1189,71 @@ roads. And `coderabbit-local` being unavailable cost nothing measurable on this
 branch: `coderabbit` on the PR found four findings on group 5 anyway, which is
 the same order as the three the local pass found on group 4 before the PR pass
 found four more.
+
+## 2026-08-27 — deploy-pipeline groups 6 and 7, archive, and the README rewrite
+
+Five branches this session; the sequence ran on each.
+
+`feat/deploy-pipeline-6`
+
+- diff-budget: WARN — 736 lines, marked `oversize:`
+- zombies: OPEN — 3 gaps, 3 acted on
+- triage: PASS — 5 groups, 1 defect found: `/root/d2ass` was written in the
+  crontab entry, in `deploy.yml` and in a fixture, with a check over only two
+  of the three
+- coderabbit-local: PASS — 0 findings
+- warm: not run, no dependency manifest changed
+
+`feat/deploy-pipeline-7`
+
+- diff-budget: PASS — 311 lines
+- zombies: OPEN — 1 gap, 1 acted on
+- triage: PASS — 4 groups, 0 defects; 2 restatements left unbound with reasons
+- coderabbit-local: PASS — 7 findings over three passes, 7 dispositioned
+  (4 applied, 2 skipped, 1 Major dismissed by the user)
+- coderabbit: PASS — 6 findings, 6 dispositioned (4 applied, 2 skipped)
+
+`chore/harness-defaults-rule`
+
+- triage: PASS — 1 group, nothing above Low
+- coderabbit-local: PASS — 0 findings
+
+`chore/archive-deploy-pipeline`
+
+- zombies: OPEN — 1 gap, 1 acted on
+- triage: PASS — 4 groups, 1 defect found: `openspec archive` had left
+  `TBD — Update Purpose after archive` in all four specs it created
+- coderabbit-local: PASS — 0 findings
+- coderabbit: PASS — 2 findings, 2 applied
+
+`docs/deploy-for-any-host`
+
+- diff-budget: PASS — 312 lines
+- triage: PASS — 2 groups, 2 defects found: the network name a reader is told
+  to create, and the entry's second copy, neither bound to anything
+- coderabbit-local: PASS — 7 findings over two passes (5 applied, 1 skipped,
+  1 rejected)
+- coderabbit: PASS — 8 findings, 8 dispositioned (6 applied, 2 skipped)
+
+- Not run this session: preflight, code-review, review-order, first-five,
+  security-review, ponytail-review, checklist
+
+Three things the counts do not carry.
+
+`coderabbit-local` returned 0 findings on both branches where `triage` had
+already found a defect, and found 7 on each branch where triage found none or
+two. Across this session the two steps have not once found the same thing —
+`triage`'s finds were all one shape (a value restated with nothing binding the
+copies), and the bot's were all another (a check that passes vacuously, or
+prose that overpromises).
+
+The PR-stage `coderabbit` found 16 findings across three PRs *after*
+`coderabbit-local` had returned clean or been fully dispositioned on the same
+code. Two of those were the session's only Majors, and one — an internal
+contradiction in `snapshot-schedule`'s record requirement — the local pass
+could not have found, because it reads the diff and the contradiction was
+between a requirement and a scenario that arrived in the same commit.
+
+The local pass reviewed with `--base` set to the previous group's branch on
+`feat/deploy-pipeline-7`, and the CLI reviewed the parent branch's files too.
+That widened it for free and is worth doing deliberately on a stacked branch.
