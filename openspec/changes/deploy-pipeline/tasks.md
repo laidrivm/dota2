@@ -45,9 +45,12 @@ because the build stage failing to produce `dist/` fails the image build.
       schedule, cooldown and grouping the existing entries carry.
       (Req: container-image — Every base image is pinned by digest, and a
       named updater raises it)
-- [ ] 1.5 Add `Dockerfile`, `.dockerignore` and `docker-compose.yml` to
-      `scripts/repo-layout.ts`'s exemption list, each with the reason it sits
-      at the root, and reconcile the README layout section.
+- [x] 1.5 Add `Dockerfile` and `.dockerignore` to `scripts/repo-layout.ts`'s
+      exemption list, each with the reason it sits at the root, and reconcile
+      the README layout section. `docker-compose.yml` is Task 3.4's, not this
+      one's: `stray()` reports an entry naming a file the repository does not
+      track, so exempting it before the file exists fails the check this
+      bullet is written to satisfy.
       (Req: repo-layout — The repository root holds only what is exempted by
       name)
 - [ ] 1.6 Add `scripts/test-docker.sh` and a `test:docker` script, plus the CI
@@ -111,7 +114,9 @@ because the build stage failing to produce `dist/` fails the image build.
 - [ ] 3.4 Add `docker-compose.yml`: the application, its PostgreSQL pinned by
       digest, and the job as a service run on demand; two named volumes; the
       external proxy network and a private one; `restart: always` on the two
-      that stay up and none on the job.
+      that stay up and none on the job. Add it to `scripts/repo-layout.ts`'s
+      exemption list here, which is where Task 1.5 left it — the entry and the
+      file it names arrive together or the check fails.
       (Req: deployment-topology — The application is reachable only through
       the proxy / The database is reachable only from this project / The
       bundle and the icon mirror are one set of files, shared)

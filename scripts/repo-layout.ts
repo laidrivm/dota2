@@ -34,6 +34,8 @@ export const EXEMPT: Record<string, string> = {
 	".coderabbit.yaml": "the review bot reads it from the repository root",
 	".gitignore": "git reads it from the root, and it governs the whole tree",
 	".env.example": "copied to `.env`, which tooling reads from the root",
+	Dockerfile: "the build context's root is the directory holding it",
+	".dockerignore": "read from the build context's root, beside the Dockerfile",
 };
 
 /**
