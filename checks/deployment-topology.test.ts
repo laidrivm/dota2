@@ -138,6 +138,10 @@ test("the README creates the shared network this file joins", () => {
 	// would not come up at all.
 	const readme = readFileSync(join(root, "README.md"), "utf8");
 	const created = /docker network create (\S+)/.exec(readme);
+	// Named, before it is compared: a README that stopped saying how to create
+	// the network leaves this `undefined`, which would match a compose file
+	// declaring no external network and pass on two absences.
+	expect(created?.[1]).toBeTypeOf("string");
 	expect(created?.[1]).toBe(shared[0]);
 });
 
