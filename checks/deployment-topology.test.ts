@@ -16,6 +16,7 @@
 import { describe, expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { only } from "./readme.fixture.ts";
 
 /** The repository root: this file reads artefacts of it, from `checks/`. */
 const root = join(import.meta.dir, "..");
@@ -115,18 +116,15 @@ test("the README's virtual host names that container and its port", () => {
 	// the host where nothing here can read it — so the README's prose is the
 	// only copy this repository has, and a `container_name` changed without it
 	// is a 502 nobody changed anything to get.
-	const readme = readFileSync(join(root, "README.md"), "utf8");
-	// The target is lifted out rather than the whole file searched for a
-	// string this composed: a `toContain` over a README fails by printing the
-	// README, which says nothing about which of the two names moved.
-	//
-	// From the example virtual host itself, which is what an operator copies,
-	// rather than from prose beside it — the `proxy_pass` line is where the
-	// name takes effect.
-	// One, asserted: the README carries a single virtual host, and a second
-	// example added later would be a divergent copy this test read past.
+	// From the example virtual host an operator copies, rather than from the
+	// file it sits in: a value matched anywhere in the prose is one that can
+	// still be right while the example carrying it is gone. And exactly one
+	// inside it, so a second `proxy_pass` added later is read rather than
+	// stepped over.
 	const proxied = [
-		...readme.matchAll(/proxy_pass\s+http:\/\/([^:;\s]+):(\d+);/g),
+		...only("nginx", "proxy_pass").matchAll(
+			/proxy_pass\s+http:\/\/([^:;\s]+):(\d+);/g,
+		),
 	];
 	expect(proxied).toHaveLength(1);
 	const target = proxied[0];
@@ -142,8 +140,11 @@ test("the README creates the shared network this file joins", () => {
 	// is a refusal rather than a request — so a name that drifted would have
 	// them create one network and the project ask for another, and the project
 	// would not come up at all.
-	const readme = readFileSync(join(root, "README.md"), "utf8");
-	const creations = [...readme.matchAll(/docker network create (\S+)/g)];
+	const creations = [
+		...only("sh", "docker network create").matchAll(
+			/docker network create (\S+)/g,
+		),
+	];
 	expect(creations).toHaveLength(1);
 	const created = creations[0];
 	// Named, before it is compared: a README that stopped saying how to create
