@@ -33,7 +33,10 @@ type Step = {
 	uses?: string;
 	with?: { tags?: string | string[]; push?: boolean | string };
 };
-type Workflow = { jobs?: Record<string, { steps?: Step[] }> };
+type Workflow = {
+	env?: Record<string, string>;
+	jobs?: Record<string, { steps?: Step[] }>;
+};
 
 /** The tag list as the action reads it: newlines or commas, either way. */
 const tagsOf = (step: Step) =>
@@ -50,6 +53,20 @@ const tagsOf = (step: Step) =>
  * about this file's own text rather than about anything it checks.
  */
 const SHA = `\${{ github.sha }}`;
+
+/**
+ * Whether `text` names `image` as a whole reference rather than as the start
+ * of another one.
+ *
+ * `laidrivm/d2ass-old` contains `laidrivm/d2ass`, and a substring test would
+ * read a README left behind by a rename as one that had followed it. Bounded
+ * on both sides by the characters a repository name is made of, so the `:`
+ * before a tag still counts as the end of one.
+ */
+const names = (text: string, image: string) =>
+	new RegExp(
+		`(?<![\\w./-])${image.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(?![\\w./-])`,
+	).test(text);
 
 /** What a tag names, which is everything after the repository's own colon. */
 const referenceOf = (tag: string) => tag.slice(tag.lastIndexOf(":") + 1);
@@ -95,7 +112,14 @@ export function problems(deploy: string, readme: string): string[] {
 			);
 	}
 
-	// One passage, not three mentions scattered through the file: a rollback
+	// The repository the workflow pushes to, read from it rather than written
+	// here: the README has to name the same one, and the two copies drift the
+	// moment either is a value this file states itself.
+	const image = doc.env?.IMAGE;
+	if (!image)
+		found.push("deploy.yml: no IMAGE in env, so nothing names what is pushed");
+
+	// One passage, not four mentions scattered through the file: a rollback
 	// named in one place and its command in another is a procedure the reader
 	// has to assemble while the site is down.
 	const named = readme
@@ -104,11 +128,12 @@ export function problems(deploy: string, readme: string): string[] {
 			(block) =>
 				/roll ?back/i.test(block) &&
 				block.includes(REFERENCE) &&
-				block.includes("docker compose"),
+				block.includes("docker compose") &&
+				(!image || names(block, image)),
 		);
 	if (!named)
 		found.push(
-			`README: no passage names the rollback with both ${REFERENCE} and the command`,
+			`README: no passage names the rollback with ${REFERENCE}, ${image ?? "the image"} and the command`,
 		);
 
 	return found;
@@ -130,7 +155,9 @@ const workflow = ({
 	copies = 1,
 	script = "",
 } = {}) =>
-	`jobs:
+	`env:
+  IMAGE: laidrivm/d2ass
+jobs:
   deploy:
     steps:
 ${Array.from(
@@ -148,8 +175,8 @@ const README = `# d2ass
 
 Some other section.
 
-Roll back by setting ${REFERENCE} to the previous commit's SHA tag, then
-docker compose pull && docker compose up -d.
+Roll back by setting ${REFERENCE} to laidrivm/d2ass at the previous commit's
+SHA tag, then docker compose pull && docker compose up -d.
 `;
 
 // spec: deploy-workflow/a-deploy-completes
@@ -225,11 +252,25 @@ describe("the reference handed to the host", () => {
 
 // spec: deploy-workflow/a-release-that-has-to-be-undone
 describe("the rollback in the README", () => {
-	const message = `README: no passage names the rollback with both ${REFERENCE} and the command`;
+	const message = `README: no passage names the rollback with ${REFERENCE}, laidrivm/d2ass and the command`;
 
 	test("a passage naming neither the value nor the command fails", () => {
 		const vague = "# d2ass\n\nA bad release can be rolled back.\n";
 		expect(problems(workflow(), vague)).toEqual([message]);
+	});
+
+	test("a passage naming a different image repository fails", () => {
+		// The drift this closes: the README goes on naming the repository a
+		// rename moved away from, and every other word of it still reads true.
+		const stale = README.replace("laidrivm/d2ass", "laidrivm/d2ass-old");
+		expect(problems(workflow(), stale)).toEqual([message]);
+	});
+
+	test("a workflow naming no image at all fails", () => {
+		const nameless = workflow().replace("env:\n  IMAGE: laidrivm/d2ass\n", "");
+		expect(problems(nameless, README)).toEqual([
+			"deploy.yml: no IMAGE in env, so nothing names what is pushed",
+		]);
 	});
 
 	test("the two spread across separate passages fails", () => {

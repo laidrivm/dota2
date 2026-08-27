@@ -16,78 +16,18 @@
  */
 import { describe, expect, test } from "bun:test";
 import {
+	CHECKS,
 	checks,
 	DEPLOY,
 	deploy,
 	gate,
+	type Job,
+	needsOf,
+	ownersOf,
+	parse,
 	repository,
+	runsOf,
 } from "./deploy-workflow.fixture.ts";
-
-/** The four checks that gate a deploy, each as the command that runs it. */
-export const CHECKS = {
-	linter: "bun run lint",
-	"type check": "bun run typecheck",
-	"unit suite": "bun test",
-	"end-to-end suite": "bunx playwright test",
-};
-
-type Step = { run?: string };
-type Job = { needs?: string | string[]; uses?: string; steps?: Step[] };
-export type Workflow = {
-	on?: Record<string, unknown>;
-	concurrency?: { group?: string };
-	jobs?: Record<string, Job>;
-};
-
-/** Every workflow by file name, parsed. */
-export const parse = (files: Record<string, string>) =>
-	new Map<string, Workflow>(
-		Object.entries(files).map(([name, text]) => [
-			name,
-			(Bun.YAML.parse(text) ?? {}) as Workflow,
-		]),
-	);
-
-/** Every command a workflow's own steps run, trimmed as written. */
-const runsOf = (doc: Workflow) =>
-	Object.values(doc.jobs ?? {}).flatMap((job) =>
-		(job.steps ?? []).flatMap((step) => (step.run ? [step.run.trim()] : [])),
-	);
-
-/** A job's dependencies, in either spelling GitHub accepts. */
-const needsOf = (job: Job | undefined) =>
-	typeof job?.needs === "string" ? [job.needs] : (job?.needs ?? []);
-
-/**
- * Which checks each workflow owns, found by the commands it runs, and what is
- * wrong with the finding.
- *
- * Keyed by workflow rather than by check, because one workflow owning two is
- * the arrangement here: keyed the other way, `lint.yml` would be reported
- * twice for one fault and would collide with itself in every comparison
- * between workflows.
- */
-export function ownersOf(docs: Map<string, Workflow>) {
-	const owners = new Map<string, string[]>();
-	const found: string[] = [];
-	for (const [check, command] of Object.entries(CHECKS)) {
-		const owning = [...docs]
-			.filter(([name, doc]) => name !== DEPLOY && runsOf(doc).includes(command))
-			.map(([name]) => name);
-		// Neither none nor two: a command no workflow runs is a check the
-		// dependency cannot be written against at all, and one two workflows run
-		// makes "the workflow owning it" a guess.
-		if (owning.length !== 1)
-			found.push(
-				`${check}: ${owning.length} workflows run \`${command}\`, expected one`,
-			);
-		else {
-			const name = owning[0] as string;
-			owners.set(name, [...(owners.get(name) ?? []), check]);
-		}
-	}
-	return { owners, problems: found };
-}
 
 /**
  * Every job `id` depends on, directly or through another.
