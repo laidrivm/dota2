@@ -77,8 +77,13 @@ because the build stage failing to produce `dist/` fails the image build.
       (Req: container-image — One image carries both entry points and
       everything each reads)
 - [x] 2.3 Write the mount-point cases: a named volume mounted at the
-      publication path is written by the non-root job; an image holding any
-      file under `snapshot/` or `icons/` fails the check.
+      publication path is writable by the image's non-root user; an image
+      holding any file under `snapshot/` or `icons/` fails the check.
+      The permission is what this step closes, and it is what the criterion's
+      own reason names — the mount point existing in the image, owned by that
+      user. The job *itself* writing a bundle through that volume needs a
+      database and a key, which arrive with the compose project, so it is
+      Task 3.2 that closes the criterion's observable end to end.
       (Req: container-image — One image carries both entry points and
       everything each reads)
 - [x] 2.4 Make the production stage install with `--frozen-lockfile
