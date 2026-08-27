@@ -20,7 +20,7 @@ because the build stage failing to produce `dist/` fails the image build.
 
 ## 1. The image: pinning, build context, and something that runs
 
-- [ ] 1.1 Write `checks/container-image.test.ts`: a `FROM` line carrying no
+- [x] 1.1 Write `checks/container-image.test.ts`: a `FROM` line carrying no
       `@sha256:` fails; a `docker` ecosystem entry that is absent, that names
       a directory the `Dockerfile` does not sit in, or whose schedule,
       cooldown or grouping differs from the entries already in the file each
