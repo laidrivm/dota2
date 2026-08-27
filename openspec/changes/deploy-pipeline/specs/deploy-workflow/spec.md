@@ -95,8 +95,12 @@ the version as a trailing comment, SHALL declare a `permissions:` block
 granting no scope it does not use, SHALL declare a concurrency group, and
 SHALL interpolate no `github.event.*` value into a `run:` block.
 
-None of this is new practice: all six workflows already in the repository do
-every one of it. It is written here because it is practised and stated
+None of this is new practice, though it is not uniform either: measured over
+the six workflows already in the repository, every one pins its actions by
+SHA with a version comment and declares `permissions:`, five of six declare a
+concurrency group — `audit.yml` does not — and the one workflow that reads
+`github.event.*` at all passes it through `env:` rather than into a `run:`
+block. It is written here because it is practised and stated
 nowhere — no rule in `CLAUDE.md`, no criterion in any capability — and this
 workflow is the one that holds a deploy key. The scope is deliberately this
 workflow alone: generalising the same criteria to every workflow in the tree

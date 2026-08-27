@@ -39,9 +39,8 @@ start instant is what answers *whether* it ran. The exit status is what
 separates the outcomes that produce no report at all.
 
 This file is the whole of the record, and deliberately: this change ships no
-alert, and the host has no mail transport, so cron's own delivery of a job's
-output reaches nobody. Giving the record a reader belongs to the change that
-adds error tracking.
+alert, so nothing carries a run's outcome anywhere on its own. Giving the
+record a reader belongs to the change that adds error tracking.
 
 #### Scenario: A run that fails
 
