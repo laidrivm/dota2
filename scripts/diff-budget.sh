@@ -44,8 +44,14 @@ EXCLUDE=(':(exclude)bun.lock' ':(exclude)*.woff2' ':(exclude)src/fixtures/snapsh
 # Classification is by pathspec, so `src/app/latest.ts` stays source.
 TESTS=('*.test.ts' '*.test.tsx' 'e2e/**')
 
+# `-M` for the reason `authored_proposal` carries it, and here it decides the
+# number rather than a branch of it: a moved file is nothing to read where the
+# rename is detected and its whole length twice where it is not, so the same
+# branch measured PASS at 0 and FAIL at 800 across `diff.renames`. The gate
+# exists to give one answer, so it asks for detection rather than inheriting a
+# preference.
 count() {
-	git diff "${base}...HEAD" -- "$@" "${EXCLUDE[@]}" | awk '
+	git diff -M "${base}...HEAD" -- "$@" "${EXCLUDE[@]}" | awk '
 		/^diff --git / { inhunk = 0; next }
 		/^@@/          { inhunk = 1; next }
 		!inhunk && /^\+\+\+ / {
