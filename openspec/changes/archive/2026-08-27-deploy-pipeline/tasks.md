@@ -253,7 +253,7 @@ because the build stage failing to produce `dist/` fails the image build.
       third that can drift.
       (Req: none — the host bootstrap is state outside the repository, which
       no criterion of this change reaches.)
-- [ ] 7.4 Tick this change's steps in `PLAN.md` as they merge, and collapse
+- [x] 7.4 Tick this change's steps in `PLAN.md` as they merge, and collapse
       its queue entry when the last one does. The three entries the proposal
       stage owed — the alert moving to Task 5, the VPS's renewal hooks, and
       workflow hygiene being stated nowhere — were written when the decisions
