@@ -168,8 +168,10 @@ because the build stage failing to produce `dist/` fails the image build.
       completion and removes it. Docker-gated.
       (Req: snapshot-schedule — The job runs on a schedule outside the
       application)
-- [ ] 6.4 Settle the entry: the lock path, the log path, the conflict status,
-      and the hour, and record them in the README as the line to install.
+- [ ] 6.4 Settle what the entry still leaves open — the lock path, the log
+      path and the hour — and record the whole line in the README as the one
+      to install. The conflict status is not among them: `snapshot-schedule`
+      fixes it at `99`, and the entry cites that rather than choosing again.
 
 ## 7. Documentation, the deferred smoke case, and the plan
 
