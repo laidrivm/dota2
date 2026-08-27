@@ -94,7 +94,9 @@ describe("no service binds a host port", () => {
 		// A published port is a second way in, unencrypted, beside the proxy
 		// that exists to terminate TLS — and it is reachable from the internet
 		// the moment it is bound, whatever the proxy is configured to do.
-		expect(services[name]?.ports).toBeUndefined();
+		// Absent or empty, both of which publish nothing: rejecting the empty
+		// list would fail a file that is correct.
+		expect(services[name]?.ports ?? []).toHaveLength(0);
 	});
 });
 

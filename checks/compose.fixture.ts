@@ -65,6 +65,9 @@ const address = (() => {
 
 let dir: string | undefined;
 
+/** Whether this run created the shared network, and so may remove it. */
+let made = false;
+
 /** Where the copied project file and its env file live for this run. */
 function directory(): string {
 	if (dir) return dir;
@@ -110,8 +113,17 @@ export function compose(...argv: string[]) {
  * runner.
  */
 export function up() {
-	// Idempotent: it exists on the deployment and nowhere else.
-	tidy("network", "create", shared);
+	// Created only where there is none, and remembered, because `down` must not
+	// take away what this did not make: on a developer's machine the name may
+	// already belong to something else's proxy, and removing it would break
+	// whatever was using it in exchange for tidiness. `docker network create`
+	// refuses a name that exists, which is what makes its status the answer.
+	made =
+		Bun.spawnSync(["docker", "network", "create", shared], {
+			stdout: "ignore",
+			stderr: "ignore",
+			timeout: COMPOSE_MS,
+		}).exitCode === 0;
 	const started = compose("up", "-d");
 	if (started.exitCode !== 0)
 		throw new Error(`compose up failed:\n${started.stderr.toString()}`);
@@ -130,7 +142,8 @@ export function up() {
 export function down() {
 	if (!dir) return;
 	compose("down", "-v", "--remove-orphans");
-	tidy("network", "rm", shared);
+	if (made) tidy("network", "rm", shared);
+	made = false;
 	rmSync(dir, { recursive: true, force: true });
 	dir = undefined;
 }
@@ -144,6 +157,32 @@ export function down() {
  */
 export const inJob = (script: string) =>
 	compose("run", "--rm", "--entrypoint", "sh", "job", "-c", script);
+
+/**
+ * When the application container last started, and how many times it has been
+ * restarted.
+ *
+ * What the requirement says is that a published bundle is served *by the
+ * process that was already running*. Content changing does not say that on its
+ * own: `restart: always` means a container that died between two requests
+ * comes back, reads the volume fresh, and answers correctly — the assertion
+ * passing for the one reason it exists to rule out.
+ */
+export function incarnation() {
+	const read = Bun.spawnSync(
+		[
+			"docker",
+			"inspect",
+			"--format",
+			"{{.State.StartedAt}} {{.RestartCount}}",
+			address,
+		],
+		{ stdout: "pipe", stderr: "pipe", timeout: COMPOSE_MS },
+	);
+	if (read.exitCode !== 0)
+		throw new Error(`docker inspect failed:\n${read.stderr.toString()}`);
+	return read.stdout.toString().trim();
+}
 
 /**
  * Ask the application for `path` from a container on the shared network,
@@ -165,7 +204,11 @@ export function request(path: string) {
 			image(),
 			"bun",
 			"-e",
-			`const answer = await fetch("http://${address}:3000${path}");
+			// The URL is serialised rather than spliced in: a path carrying a
+			// quote or a newline would otherwise end the string literal and
+			// become script. Nothing passes one today, and this is shared
+			// machinery that later groups will hand more varied paths.
+			`const answer = await fetch(${JSON.stringify(`http://${address}:3000${path}`)});
 			 console.log(answer.status);
 			 console.log(await answer.text());`,
 		],

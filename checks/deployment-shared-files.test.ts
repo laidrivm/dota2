@@ -13,7 +13,14 @@
  * does.
  */
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
-import { compose, down, inJob, request, up } from "./compose.fixture.ts";
+import {
+	compose,
+	down,
+	incarnation,
+	inJob,
+	request,
+	up,
+} from "./compose.fixture.ts";
 import {
 	available,
 	buildsImage,
@@ -60,6 +67,7 @@ describe.skipIf(!available)("the compose project", () => {
 			// Before, so what follows is a change rather than a coincidence: the
 			// image ships the fixture and an assertion made only afterwards would
 			// pass against it.
+			const serving = incarnation();
 			const before = request("/snapshot.json");
 			expect(before.status).toBe(200);
 			expect(before.body).not.toContain("published-by-the-job");
@@ -83,6 +91,10 @@ describe.skipIf(!available)("the compose project", () => {
 			const after = request("/snapshot.json");
 			expect(after.status).toBe(200);
 			expect(after.body).toContain("published-by-the-job");
+			// The same incarnation: `restart: always` would otherwise let a
+			// container that died and came back read the volume fresh and
+			// satisfy the assertion above for the one reason it rules out.
+			expect(incarnation()).toBe(serving);
 		},
 		HOOK_MS,
 	);
