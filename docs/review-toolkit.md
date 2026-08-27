@@ -71,14 +71,14 @@ Before every PR that changes code — a feature, a bugfix, a chore alike, and
 whether or not it goes through the OpenSpec stages. Completing a task group
 starts the sequence in the same turn; never ask whether to run it.
 
-1. `bun run diff-budget`, first, because over budget says the step was cut too
-   wide rather than that the code is wrong — and re-cutting it changes the
-   diff every gate below reads. It reports how many lines the reviewer must
-   read and names its own thresholds in the gate line, so a reader never looks
-   them up here. Over budget: cut the step, or put `oversize: <reason>` in the
-   pull request body — a marker with nothing after it clears nothing. A gate
-   that reports it could not measure is neither: it means the base is
-   unresolvable, and in CI it fails the check rather than passing unmeasured.
+1. `bun run diff-budget`, first, because over budget says the reviewable unit
+   was cut too wide rather than that the code is wrong — and re-cutting it
+   changes the diff every gate below reads. It reports how many lines the
+   reviewer must read, and names its own thresholds and, where it has one, the
+   remedy in the gate line, so a reader never looks either up here. A gate
+   that reports it could not measure is neither over budget nor within it: it
+   means the base is unresolvable, and in CI it fails the check rather than
+   passing unmeasured.
 2. `/zombies` with **no arguments** — diff mode reads the real code and
    existing tests, cross-checks the implementation against the
    proposal-stage edge-case list, and catches the edges only implementation
