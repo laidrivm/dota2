@@ -127,12 +127,16 @@ const iconRoute =
  * finds a key that does not match and hashes again, so the cache costs
  * accuracy nothing and buys nothing there either.
  *
- * `mtimeNs` is what says the file behind the name changed, and it is the whole
- * of what says so: two publications sharing a nanosecond would reuse the first
- * one's hash. Measured against this filesystem — 200 write-and-rename
- * publications in a tight loop produced 200 distinct timestamps — and held
- * besides by there being one publisher, which `publish.ts` records and the
- * schedule enforces.
+ * The inode is what says the file behind the name changed, and the timestamp
+ * rides beside it rather than carrying that alone. A publication renames a
+ * freshly written file over the published name, so every one of them puts a
+ * different inode there — measured, five publications and five distinct
+ * inodes. The timestamp cannot say as much on its own: two publications inside
+ * one of the filesystem's ticks share it, and this cache answered the second
+ * with the first one's hash until the inode joined the key. Which is not a
+ * hypothetical — CI met it, where a returning client was told the bundle it
+ * held was still current and this repository's own filesystem never produced
+ * the collision in 200 tries.
  *
  * No case reaches the path's half, and none can: it separates the two sources
  * only where their timestamps coincide to the nanosecond, and `utimesSync`
@@ -154,7 +158,8 @@ let tag = "";
  * when the file behind the name changes.
  */
 async function validator(file: string): Promise<string> {
-	const key = `${file}:${statSync(file, { bigint: true }).mtimeNs}`;
+	const seen = statSync(file, { bigint: true });
+	const key = `${file}:${seen.ino}:${seen.mtimeNs}`;
 	if (key !== taggedFor) {
 		// The pair is written and read with no `await` between, so two requests
 		// resolving different files cannot hand each other the other's answer:
