@@ -165,6 +165,22 @@ describe("a value that does grant something", () => {
 		expect(problems(indexed)).toEqual([]);
 	});
 
+	test("a double-quoted indexed name is not a secret", () => {
+		// An expression string is single-quoted in this language, so this one is
+		// a parse error — approving it would pass a workflow that fails the run.
+		const wrong = hosted({
+			inputs: {
+				host: `\${{ secrets["SSH_HOST"] }}`,
+				port: secret("SSH_PORT"),
+				username: secret("SSH_USER"),
+				key: secret("SSH_KEY"),
+			},
+		});
+		expect(problems(wrong)).toContainEqual(
+			'deploy.yml: the connection\'s host is `${{ secrets["SSH_HOST"] }}`, not a secret',
+		);
+	});
+
 	test("a fallback written beside the secret fails", () => {
 		// A whole-value comparison, not a search. The fallback is the reason:
 		// `22` in the open is the default this machine deliberately does not

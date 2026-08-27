@@ -45,9 +45,6 @@ const tagsOf = (step: Step) =>
 		.map((tag) => tag.trim())
 		.filter(Boolean);
 
-/** A line giving the reference a value, in either spelling one is written in. */
-const ASSIGNS = new RegExp(`(^|[\\s,])${REFERENCE}\\s*[:=]`);
-
 /** What a tag names, which is everything after the repository's own colon. */
 const referenceOf = (tag: string) => tag.slice(tag.lastIndexOf(":") + 1);
 
@@ -92,53 +89,45 @@ export function problems(deploy: string): string[] {
 				found.push(`deploy.yml: pushes ${tag}, which is not ${image}`);
 	}
 
-	// What the host is actually handed, read through the parse. A line that
-	// looks like an assignment is not one: `echo D2ASS_IMAGE=…` inside the
-	// script sets nothing, and counting it would leave the check reporting
-	// green over a step that forwards no value at all.
+	// What the host is actually handed, read through the parse and from nowhere
+	// else. A line that looks like an assignment is not one: `echo
+	// D2ASS_IMAGE=…:latest` inside the script sets nothing the host receives,
+	// and a text scan reads it as both a value that exists and a wrong one.
 	const opening = Object.values(doc.jobs ?? {})
 		.flatMap((job) => job.steps ?? [])
 		.filter((step) => step.uses?.startsWith(`${SSH}@`));
+	if (opening.length === 0)
+		found.push(`deploy.yml: nothing hands the host a ${REFERENCE}`);
+
 	for (const step of opening) {
-		if (!step.env?.[REFERENCE])
+		const written = step.env?.[REFERENCE];
+		if (!written) {
 			found.push(`deploy.yml: the host step declares no ${REFERENCE}`);
-		else if (
+			continue;
+		}
+		// Declared and never forwarded is the same absence wearing a value.
+		if (
 			!String(step.with?.envs ?? "")
 				.split(/[\s,]+/)
 				.includes(REFERENCE)
 		)
 			found.push(`deploy.yml: ${REFERENCE} is declared but never forwarded`);
-	}
-	if (opening.length === 0)
-		found.push(`deploy.yml: nothing hands the host a ${REFERENCE}`);
-
-	for (const raw of deploy.split(/\r\n|\n|\r/)) {
-		// Lines that *give* the reference a value, not every line naming it: the
-		// action is also told which variables to forward, and `envs: D2ASS_IMAGE`
-		// names the reference while saying nothing about what it holds.
-		if (!ASSIGNS.test(raw)) continue;
-		// Read line by line rather than through the parse, because the reference
-		// reaches the host as an `env:` value that a shell then reads — but
-		// resolved through the workflow's own `env:` first, since what is written
+		// Resolved through the workflow's own `env:`, since what is written
 		// there is `${{ env.IMAGE }}` and not the repository's name.
-		const line = resolve(raw, envOf(deploy));
-		if (line.includes("latest"))
+		const value = resolve(written, envOf(deploy));
+		if (value.includes("latest"))
+			found.push(`deploy.yml: ${REFERENCE} is handed \`latest\`: ${written}`);
+		else if (!value.includes("github.sha"))
 			found.push(
-				`deploy.yml: ${REFERENCE} is handed \`latest\`: ${raw.trim()}`,
-			);
-		else if (!line.includes("github.sha"))
-			found.push(
-				`deploy.yml: ${REFERENCE} is handed no commit SHA: ${raw.trim()}`,
+				`deploy.yml: ${REFERENCE} is handed no commit SHA: ${written}`,
 			);
 		// The whole reference, bounded, not the two halves separately. Each half
 		// on its own reads as correct while the pair names something the run
 		// never pushed: `someone-else/d2ass:${{ github.sha }}` carries this
 		// commit and another repository, and `laidrivm/d2ass:${{ github.sha
 		// }}-debug` carries this repository and another tag.
-		else if (image && !names(line, `${image}:${SHA}`))
-			found.push(
-				`deploy.yml: ${REFERENCE} is not ${image}:${SHA}: ${raw.trim()}`,
-			);
+		else if (image && !names(value, `${image}:${SHA}`))
+			found.push(`deploy.yml: ${REFERENCE} is not ${image}:${SHA}: ${written}`);
 	}
 
 	return found;
@@ -218,7 +207,7 @@ describe("the tags a build pushes", () => {
 // spec: deploy-workflow/the-image-the-host-is-running
 describe("the reference handed to the host", () => {
 	const host = (value: string) => built({ reference: value });
-	const said = (value: string) => `${REFERENCE}: ${value}`;
+	const said = (value: string) => value;
 
 	test("the commit's SHA tag passes", () => {
 		expect(problems(host(TAGS[1] as string))).toEqual([]);
@@ -235,6 +224,16 @@ describe("the reference handed to the host", () => {
 		expect(problems(host(value))).toEqual([
 			`deploy.yml: ${REFERENCE} ${message}: ${said(value)}`,
 		]);
+	});
+
+	test("an echoed value beside a correct one is not read at all", () => {
+		// The script can say anything; what the host is handed is the step's
+		// `env:`. Scanning the text reads this as a second, wrong value.
+		const echoed = built().replace(
+			"            docker compose pull",
+			`            echo ${REFERENCE}=laidrivm/d2ass:latest`,
+		);
+		expect(problems(echoed)).toEqual([]);
 	});
 
 	test("a script line that merely looks like an assignment is not one", () => {
