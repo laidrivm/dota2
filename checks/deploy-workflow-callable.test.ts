@@ -14,8 +14,14 @@
  * shape this takes.
  */
 import { describe, expect, test } from "bun:test";
-import { check, checks, JOBS, repository } from "./deploy-workflow.fixture.ts";
-import { ownersOf, parse } from "./deploy-workflow.test.ts";
+import {
+	check,
+	checks,
+	JOBS,
+	ownersOf,
+	parse,
+	repository,
+} from "./deploy-workflow.fixture.ts";
 
 /** Everything wrong with the called workflows, empty when nothing is. */
 export function problems(files: Record<string, string>): string[] {
