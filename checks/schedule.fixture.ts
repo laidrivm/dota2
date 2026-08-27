@@ -1,11 +1,6 @@
 /**
- * The crontab entry the README names, run here against a project of this
- * file's own.
- *
- * The entry is read out of the README rather than written again, because the
- * README is where an operator installs it from: a copy here would drift, and
- * the drift would be invisible — the copy would go on passing while the line
- * actually pasted into a crontab did something else.
+ * Running the entry `checks/schedule-entry.fixture.ts` reads, against a
+ * project of this file's own.
  *
  * Three values in it are the host's and cannot be this run's: the lock, the
  * log and the project file. Each is replaced with one under a temporary
@@ -21,69 +16,13 @@ import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { available, DOCKER_ENV, image, tidy } from "./docker.fixture.ts";
-
-/** The repository root: this file reads an artefact of it, from `checks/`. */
-const root = join(import.meta.dir, "..");
+import { COMMAND, FILE, LOCK, LOG } from "./schedule-entry.fixture.ts";
 
 /** How long one invocation of the entry may take. */
 const INVOKE_MS = 180_000;
 
 /** How long a probe of the host's own tools may take. */
 const PROBE_MS = 10_000;
-
-/**
- * The entry, taken from the one fenced block in the README that names `flock`.
- *
- * Found by that token rather than by a heading or a position: a section
- * renamed or moved leaves this reading the same line, and two blocks naming it
- * is an ambiguity worth a failure rather than a guess.
- */
-export const ENTRY = (() => {
-	const found = [
-		...readFileSync(join(root, "README.md"), "utf8").matchAll(
-			/```[a-z]*\n([\s\S]*?)```/g,
-		),
-	]
-		.map((block) => (block[1] as string).trim())
-		.filter((block) => block.includes("flock"));
-	if (found.length !== 1)
-		throw new Error(
-			`expected one fenced block naming flock in the README, found ${found.length}`,
-		);
-	return found[0] as string;
-})();
-
-/** The five schedule fields, and the command they run. */
-const stated = /^((?:\S+\s+){5})(.+)$/s.exec(ENTRY);
-if (!stated)
-	throw new Error(`the entry states no schedule and command: ${ENTRY}`);
-
-/** When the entry fires, as crontab's five fields. */
-export const SCHEDULE = (stated[1] as string).trim();
-
-/** What it runs when it does. */
-export const COMMAND = stated[2] as string;
-
-/** One path the entry names, or a throw saying which one it does not. */
-const path = (what: string, pattern: RegExp) => {
-	const found = pattern.exec(COMMAND);
-	if (!found) throw new Error(`the entry names no ${what}: ${COMMAND}`);
-	return found[1] as string;
-};
-
-/**
- * The lock the exclusion is held on: `flock`'s last argument before the
- * command it runs, rather than a token matched by its extension — the
- * exclusion works whatever the file is called, and a pattern that insists on a
- * name is a check on the name.
- */
-export const LOCK = path("lock file", /\bflock\s+(?:\S+\s+)*?(\S+)\s+docker\b/);
-
-/** The file the record is appended to. */
-export const LOG = path("log file", />>\s*(\S+)/);
-
-/** The project file the invocation runs the job from. */
-export const FILE = path("compose file", /\bdocker\s+compose\b.*?\s-f\s+(\S+)/);
 
 /**
  * Whether the host can run the entry at all.
@@ -226,13 +165,31 @@ export const start = (file: string, log: string) =>
  * the same descriptor. Killing the shell and `flock` alone leaves the docker
  * client holding the lock, and the next invocation is refused — which is the
  * scenario passing for the reason it exists to rule out.
+ *
+ * And it waits for them to be gone. `pkill` returns once the signal is
+ * *delivered*, and the lock is released when the last holder is reaped — a
+ * difference of milliseconds that decides the case, measured as a run that
+ * passed alone and was refused when a second file shared the process.
  */
-export const killRun = () =>
-	Bun.spawnSync(["pkill", "-9", "-f", directory()], {
+export function killRun() {
+	const killed = Bun.spawnSync(["pkill", "-9", "-f", directory()], {
 		stdout: "ignore",
 		stderr: "ignore",
 		timeout: PROBE_MS,
 	});
+	for (let attempt = 0; attempt < 200; attempt++) {
+		const left = Bun.spawnSync(["pgrep", "-f", directory()], {
+			stdout: "ignore",
+			stderr: "ignore",
+			timeout: PROBE_MS,
+		});
+		// A status of its own, rather than no match: `pgrep` answers 1 when
+		// nothing matches, and this run's directory is on no other command line.
+		if (left.exitCode !== 0) return killed;
+		Bun.sleepSync(50);
+	}
+	throw new Error("the run outlived a SIGKILL");
+}
 
 /** This run's containers, of any state, as `id state` lines. */
 export function containers(project = PROJECT, service?: string) {

@@ -17,18 +17,14 @@ import { buildsImage, HOOK_MS, requiresDocker } from "./docker.fixture.ts";
 import {
 	clean,
 	containers,
-	ENTRY,
-	FILE,
 	invoke,
-	LOCK,
-	LOG,
 	records,
 	requiresSchedule,
-	SCHEDULE,
 	schedulable,
 	standIn,
 	under,
 } from "./schedule.fixture.ts";
+import { ENTRY, FILE, LOCK, LOG, SCHEDULE } from "./schedule-entry.fixture.ts";
 
 requiresDocker();
 requiresSchedule();
