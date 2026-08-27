@@ -130,6 +130,17 @@ test("the README's virtual host names that container and its port", () => {
 	expect(target?.[2]).toBe("3000");
 });
 
+// spec: deployment-topology/the-proxy-reaching-the-application
+test("the README creates the shared network this file joins", () => {
+	// The README tells an operator to create it by name, and `external: true`
+	// is a refusal rather than a request — so a name that drifted would have
+	// them create one network and the project ask for another, and the project
+	// would not come up at all.
+	const readme = readFileSync(join(root, "README.md"), "utf8");
+	const created = /docker network create (\S+)/.exec(readme);
+	expect(created?.[1]).toBe(shared[0]);
+});
+
 // spec: deployment-topology/a-container-on-the-shared-network
 test("the database is on the private network and not the shared one", () => {
 	expect(db.networks).toEqual([private_[0] as string]);

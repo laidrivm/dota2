@@ -23,12 +23,11 @@ const root = join(import.meta.dir, "..");
  * carries every token the entry does. The tag is what says which of the two is
  * the thing cron reads.
  */
+/** The file the entry and everything said about it live in. */
+export const README = readFileSync(join(root, "README.md"), "utf8");
+
 export const ENTRY = (() => {
-	const found = [
-		...readFileSync(join(root, "README.md"), "utf8").matchAll(
-			/```([a-z]*)\n([\s\S]*?)```/g,
-		),
-	]
+	const found = [...README.matchAll(/```([a-z]*)\n([\s\S]*?)```/g)]
 		.filter((block) => block[1] === "crontab")
 		.map((block) => (block[2] as string).trim());
 	if (found.length !== 1)
