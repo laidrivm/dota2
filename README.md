@@ -101,6 +101,13 @@ what is covered passes in silence on the first thing nobody thought of.
   from its statistics rows to the status it settles at. Arguments pass through,
   so `bun run test:db ./src/job/ingest/ingest.test.ts` runs one file — the `./`
   matters, since a bare argument is matched as a substring of every path.
+- `bun run test:docker` — the same suite with a Docker daemon behind it and a
+  skip treated as a failure. Without it the container-gated cases skip: what
+  the build context sent, what the production install left, both entry points,
+  the two mount points, and the compose project's topology. It builds one
+  image from a context this fabricates — the working tree plus a `.env`, a
+  `.git` and an installed `node_modules` — and every gated case reads that one
+  image. Arguments pass through as `test:db`'s do.
 - `bun run test:coverage` — the same suite with Bun's built-in coverage
   reporter. The number is visibility, not a gate: no threshold is configured
   and none should be added without a decision made against real numbers.

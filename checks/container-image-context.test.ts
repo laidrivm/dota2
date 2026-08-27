@@ -8,10 +8,10 @@
  * looks right and matches nothing leaves the file shipping while the file it
  * was written in reads correct.
  */
-import { describe, expect } from "bun:test";
+import { describe, expect, test } from "bun:test";
 import {
+	available,
 	buildsImage,
-	dockerTest,
 	holds,
 	requiresDocker,
 	SECRET,
@@ -19,55 +19,57 @@ import {
 } from "./docker.fixture.ts";
 
 requiresDocker();
-buildsImage();
 
 /** Where the image's `WORKDIR` puts everything the context sent. */
 const app = "/app";
 
-// spec: container-image/the-version-control-directory
-dockerTest("the image holds no .git", () => {
-	expect(holds(`${app}/.git`)).toBe(false);
-});
+describe.skipIf(!available)("the build context", () => {
+	buildsImage();
 
-// spec: container-image/a-local-environment-file
-dockerTest(
-	"a .env in the context reaches neither the image nor its files",
-	() => {
-		// Both halves: a `.env` excluded by name but read into an `ENV` or baked
-		// into a layer would satisfy the first assertion and leak all the same.
+	// spec: container-image/the-version-control-directory
+	test("the image holds no .git", () => {
+		expect(holds(`${app}/.git`)).toBe(false);
+	});
+
+	// The last argument is a timeout: the search below reads every file the
+	// image holds, `node_modules` included, which is well past the default one
+	// on a cold page cache.
+	//
+	// spec: container-image/a-local-environment-file
+	test("a .env in the context reaches neither the image nor its files", () => {
+		// Both halves: a `.env` excluded by name but read into an `ENV` or
+		// baked into a layer would satisfy the first assertion and leak all
+		// the same.
 		expect(holds(`${app}/.env`)).toBe(false);
 		const grep = sh(`grep -rl '${SECRET}' ${app} 2>/dev/null; true`);
 		expect(grep.stdout.toString().trim()).toBe("");
-	},
-	// The search reads every file the image holds, `node_modules` included,
-	// which is well past the default timeout on a cold page cache.
-	60_000,
-);
+	}, 60_000);
 
-// spec: container-image/the-committed-example-file
-dockerTest("the image holds no .env.example", () => {
-	expect(holds(`${app}/.env.example`)).toBe(false);
-});
+	// spec: container-image/the-committed-example-file
+	test("the image holds no .env.example", () => {
+		expect(holds(`${app}/.env.example`)).toBe(false);
+	});
 
-// spec: container-image/the-host-s-installed-modules
-dockerTest("the image's node_modules is the production install", () => {
-	// The directory has to be there for its absence of the marker to mean
-	// anything: an image with no `node_modules` at all passes the second
-	// assertion and runs nothing.
-	expect(holds(`${app}/node_modules`)).toBe(true);
-	expect(holds(`${app}/node_modules/.host-copy`)).toBe(false);
-});
+	// spec: container-image/the-host-s-installed-modules
+	test("the image's node_modules is the production install", () => {
+		// The directory has to be there for its absence of the marker to mean
+		// anything: an image with no `node_modules` at all passes the second
+		// assertion and runs nothing.
+		expect(holds(`${app}/node_modules`)).toBe(true);
+		expect(holds(`${app}/node_modules/.host-copy`)).toBe(false);
+	});
 
-// spec: container-image/the-directories-no-run-reads
-describe("the directories no run reads", () => {
-	dockerTest.each([
-		".claude",
-		"openspec",
-		"test-results",
-		"playwright-report",
-		"reports",
-		".stryker-tmp",
-	])("the image holds no %s", (name) => {
-		expect(holds(`${app}/${name}`)).toBe(false);
+	// spec: container-image/the-directories-no-run-reads
+	describe("the directories no run reads", () => {
+		test.each([
+			".claude",
+			"openspec",
+			"test-results",
+			"playwright-report",
+			"reports",
+			".stryker-tmp",
+		])("the image holds no %s", (name) => {
+			expect(holds(`${app}/${name}`)).toBe(false);
+		});
 	});
 });

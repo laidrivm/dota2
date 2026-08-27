@@ -183,14 +183,29 @@ describe("the extensions this repository carries", () => {
 			.stdout.toString()
 			.split("\0")
 			.filter(Boolean);
-		const extensions = [
-			...new Set(tracked.map((path) => path.slice(path.lastIndexOf(".")))),
-		].sort();
+		// Read off the file's own name, not off the path, and answering with
+		// the whole name where there is no extension to read. Taking the last
+		// dot's index over the path made a name carrying no dot at all report
+		// its final character — `Dockerfile` ruling as `e`, which `Makefile`
+		// and every other extensionless name would then join in silence — and
+		// made a name under a dotted directory report the whole path. A leading
+		// dot is not a separator either, which is why `.gitignore` is its own
+		// name here rather than an empty one.
+		const extension = (path: string) => {
+			const name = path.slice(path.lastIndexOf("/") + 1);
+			const dot = name.lastIndexOf(".");
+			return dot <= 0 ? name : name.slice(dot);
+		};
+		const extensions = [...new Set(tracked.map(extension))].sort();
 		// `.example` is ruled uncapped: an environment template is read by
 		// variable name rather than by line, as `.json` and `.toml` are.
 		// `.sql` is ruled uncapped on the same terms: a schema is read by table.
+		// `Dockerfile` and `.dockerignore` are ruled uncapped for the reason
+		// `.gitignore` is: one is read stage by stage and the others entry by
+		// entry, and neither is a file a reader holds whole.
 		expect(extensions).toEqual([
 			".css",
+			".dockerignore",
 			".example",
 			".gitignore",
 			".html",
@@ -207,6 +222,7 @@ describe("the extensions this repository carries", () => {
 			".woff2",
 			".yaml",
 			".yml",
+			"Dockerfile",
 		]);
 	});
 });

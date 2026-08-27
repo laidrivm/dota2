@@ -76,9 +76,6 @@ export const requiresDocker = () =>
 		expect(Bun.env.DOCKER_REQUIRED === "1" && !available).toBe(false);
 	});
 
-/** `test` where a daemon is reachable, and `test.skip` where none is. */
-export const dockerTest = available ? test : test.skip;
-
 /**
  * Files no clone carries and every developer's checkout does, planted so the
  * `.dockerignore` has something to exclude. A directory nobody planted is a

@@ -53,7 +53,7 @@ because the build stage failing to produce `dist/` fails the image build.
       bullet is written to satisfy.
       (Req: repo-layout — The repository root holds only what is exempted by
       name)
-- [ ] 1.6 Add `scripts/test-docker.sh` and a `test:docker` script, plus the CI
+- [x] 1.6 Add `scripts/test-docker.sh` and a `test:docker` script, plus the CI
       job that runs it and fails when the cases skipped.
       (Req: none — the harness the Docker-gated cases above run under. A
       suite that skips in the job that owns it is a suite that failed.)
