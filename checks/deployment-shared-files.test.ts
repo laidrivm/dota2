@@ -50,6 +50,35 @@ describe.skipIf(!available)("the compose project", () => {
 		HOOK_MS,
 	);
 
+	// spec: deployment-topology/the-database-on-the-host
+	test(
+		"publishes no port from any container",
+		() => {
+			// `checks/deployment-topology.test.ts` reads the same claim off the
+			// file; this is the project actually up, which is what the scenario
+			// says. Read from what compose reports rather than from the display
+			// column: a publisher with a `PublishedPort` of 0 is a port the
+			// container exposes and the host cannot reach.
+			const listed = compose("ps", "--format", "json");
+			expect(listed.exitCode).toBe(0);
+			const published = listed.stdout
+				.toString()
+				.split("\n")
+				.filter(Boolean)
+				.flatMap((line) => {
+					const container = JSON.parse(line) as {
+						Service?: string;
+						Publishers?: { PublishedPort?: number }[];
+					};
+					return (container.Publishers ?? [])
+						.filter((port) => (port.PublishedPort ?? 0) !== 0)
+						.map(() => container.Service);
+				});
+			expect(published).toEqual([]);
+		},
+		HOOK_MS,
+	);
+
 	// spec: deployment-topology/the-proxy-reaching-the-application
 	test(
 		"answers by container name over the shared network",
