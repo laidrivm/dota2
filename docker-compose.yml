@@ -37,8 +37,14 @@ services:
     restart: always
     networks:
       - internal
+    # At `/var/lib/postgresql`, not the `data` subdirectory under it. From 18
+    # the image stores its cluster in a major-version-specific directory so
+    # that `pg_upgrade --link` does not cross a mount boundary, and it refuses
+    # to start against a volume mounted at the old path — measured, and it
+    # refuses by crash-looping, which `restart: always` turns into a service
+    # that never comes up and never stops trying.
     volumes:
-      - database:/var/lib/postgresql/data
+      - database:/var/lib/postgresql
     environment:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     # Over TCP, not the socket: the entrypoint runs initdb against a temporary

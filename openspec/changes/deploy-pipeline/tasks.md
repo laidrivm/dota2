@@ -107,12 +107,12 @@ because the build stage failing to produce `dist/` fails the image build.
       by.
       (Req: deployment-topology — The application is reachable only through
       the proxy / The database is reachable only from this project)
-- [ ] 3.2 Write the shared-files cases: a bundle the job publishes is served
+- [x] 3.2 Write the shared-files cases: a bundle the job publishes is served
       by the application process that was already running, and an image the
       ingest mirrors is served without a restart. Docker-gated.
       (Req: deployment-topology — The bundle and the icon mirror are one set
       of files, shared)
-- [ ] 3.3 Write the case that bringing the project up starts no job container.
+- [x] 3.3 Write the case that bringing the project up starts no job container.
       Docker-gated.
       (Req: snapshot-schedule — The job runs on a schedule outside the
       application)
