@@ -26,6 +26,50 @@ test("an unsplit proposal over the threshold is refused whatever its body carrie
 	expect(g.code).toBe(1);
 });
 
+// The ordinary case: an author who never reached for the marker still gets
+// the seam named, because the remedy is the same one either way.
+// spec: change-slicing/an-unsplit-proposal-reaching-for-the-override
+test("an unsplit proposal carrying no marker is still told where to split", () => {
+	const dir = repo({ "a.ts": "one\n" }, authored("no-marker", 900));
+	const g = gate(dir, "main");
+	expect(g.line).toContain("spec/<slug>-plan");
+	expect(g.code).toBe(1);
+});
+
+test("a branch authoring two unsplit proposals is refused", () => {
+	const dir = repo(
+		{ "a.ts": "one\n" },
+		{
+			...authored("first", 450),
+			...authored("second", 450),
+		},
+	);
+	const g = gate(dir, "main", "oversize: two proposals in one push\n");
+	expect(g.line).toContain("FAIL — 900 lines");
+	expect(g.code).toBe(1);
+});
+
+// The one move whose destination does match the glob, so the addition filter
+// is the only thing between it and a refusal it has not earned.
+test("renaming a change directory to a new slug authors no proposal", () => {
+	const dir = repo(
+		{
+			"openspec/changes/old-slug/proposal.md": lines(400),
+			"openspec/changes/old-slug/tasks.md": tasks(20, " "),
+		},
+		{
+			"openspec/changes/old-slug/proposal.md": null,
+			"openspec/changes/old-slug/tasks.md": null,
+			"openspec/changes/new-slug/proposal.md": lines(400),
+			"openspec/changes/new-slug/tasks.md": tasks(20, " "),
+			"src/model.ts": lines(900),
+		},
+	);
+	const g = gate(dir, "main", "oversize: the rename rides a large change\n");
+	expect(g.line).toContain("OVERRIDE");
+	expect(g.code).toBe(0);
+});
+
 // spec: change-slicing/an-unsplit-proposal-reaching-for-the-override
 test("the refusal fires at exactly the failing threshold", () => {
 	const dir = repo({ "a.ts": "one\n" }, authored("at-threshold", 800));
