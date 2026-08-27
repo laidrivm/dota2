@@ -88,6 +88,9 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
 - **Phase 3a — `snapshot-build`** — sixteen PRs, #177 to #195,
   `archive/2026-08-26-snapshot-build`; specs at
   `openspec/specs/snapshot-build/` and `openspec/specs/snapshot-export/`.
+- **Phase 3b — `snapshot-ingest`** — twenty-one PRs, #141 to #202,
+  `archive/2026-08-27-snapshot-ingest`; specs at
+  `openspec/specs/snapshot-ingest/` and `openspec/specs/hero-reference/`.
 
 ### Open
 
@@ -96,32 +99,18 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       the diff budget's failing threshold splits into `spec/<slug>` and
       `spec/<slug>-plan` — the seam #130/#132 and #141/#142 each cut by hand —
       and the `oversize:` override stops admitting an unsplit one. One task
-      group, so `chore/proposal-slicing`. Ahead of Phase 3b in the queue,
-      stepping over it.
-- [ ] **Phase 3b — `snapshot-ingest`** — applying,
-      `openspec/changes/snapshot-ingest/`. The schema and the database edge,
-      the rate-limited STRATZ client, the reference upserts, the mirrored hero
-      images, and the entry point that drives 3a to a published snapshot or a
-      failed one. Group 12, the last, split on the seam between its two
-      requirements because whole it measured 840 lines against a gate that
-      fails at 800: `-12a` carried the entry point and is merged as PR #198,
-      leaving `-12b` and the coverage record it writes. Everything before them
-      is merged, thirteen PRs. 11c
-      closed the first of the two readings this change left open — every hero
-      the reference holds reaches `staging_hero_stats`, the zero-pick row
-      included, and the reference is the tables rather than the response that
-      last filled them. The second, the window a run covered recorded on the
-      `snapshots` row, is group 12's, which is where `Covered` and the
-      snapshot the build made from it are held together. 11c ran ahead of 3a
-      because 3a's fixtures seed staging and would otherwise have encoded 126
-      heroes where the reference holds 127. A second probe
-      moved three assumptions, all in `docs/context/stratz-probe-2026-08.md`:
-      the meta comes from a daily endpoint that can filter the game mode, patch
-      detection leaves STRATZ whose version list stalled eight months back, and
-      hero images come from Valve's CDN under the slug STRATZ publishes — the
-      probe reached that CDN by way of OpenDota's index, which the change's
-      design.md replaces with a derivation measured over all 127 heroes. Owns no
-      schedule — Task 7 sets when the job runs and alerts when it stops.
+      group, so `chore/proposal-slicing`.
+- [ ] **The board draws no hero it did not ship with.** The tile takes its
+      colour from a `--hero-<short>` token, and the palette was written against
+      the fixture's kebab slugs where the ingest writes STRATZ's snake_case and
+      Valve's internal names: 29 of 127 real heroes resolve a colour, 22 of the
+      51 tokens are reachable by no hero at all, and 86 have none under any
+      spelling. `draft-board` §*Hero tile* admits the grey fallback, so this is
+      not a defect — but a run now mirrors 127 real images into `icons/` and
+      carries `heroes.icon` in the bundle, and nothing in `src/app/` reads it.
+      Generating 86 more colours would entrench a placeholder whose reason has
+      gone; drawing the image instead is smaller and needs a delta spec, the
+      criterion pinning the background to the token.
 - [ ] **Task 7** — the whole deployment: Docker image, compose (`app` +
       `postgres`, bundle on a volume both mount), the snapshot job's entry in
       the VPS's existing crontab, the failure alert, and the deploy workflow.
