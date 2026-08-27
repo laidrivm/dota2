@@ -76,7 +76,7 @@ because the build stage failing to produce `dist/` fails the image build.
       `BUNDLE_DIR` exits non-zero naming that variable. Docker-gated.
       (Req: container-image — One image carries both entry points and
       everything each reads)
-- [ ] 2.3 Write the mount-point cases: a named volume mounted at the
+- [x] 2.3 Write the mount-point cases: a named volume mounted at the
       publication path is written by the non-root job; an image holding any
       file under `snapshot/` or `icons/` fails the check.
       (Req: container-image — One image carries both entry points and
