@@ -44,3 +44,18 @@ updates:
     groups:
       images:
         patterns: ["*"]
+
+  # Separate from the entry above, and not a duplicate of it: `docker` and
+  # `docker-compose` are two package managers to Dependabot, and the first does
+  # not read compose files. Without this the Postgres digest in
+  # docker-compose.yml would be a pin nothing raises.
+  - package-ecosystem: "docker-compose"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    cooldown:
+      default-days: 3
+    groups:
+      images:
+        patterns: ["*"]

@@ -50,6 +50,35 @@ const RUN_MS = 45_000;
 export const HOOK_MS = 120_000;
 
 /**
+ * The environment a docker call is given, rather than whatever the run
+ * inherited.
+ *
+ * Bun loads the repository's `.env` into `Bun.env`, and a spawn inherits it, so
+ * without this a developer's own variables reach every command here. For
+ * `docker compose` that is not theoretical: shell variables take precedence
+ * over `--env-file`, so an ambient `D2ASS_IMAGE` silently tests a different
+ * image, and `COMPOSE_PROFILES=job` starts the job on `up` — measured, and it
+ * is the case asserting the job is *not* started that it defeats.
+ *
+ * What is kept is what addresses the daemon: which one, and where its
+ * credentials are. Pinning those instead would break a remote or Desktop
+ * context, which is the opposite of what this is for.
+ */
+export const DOCKER_ENV: Record<string, string> = Object.fromEntries(
+	[
+		"PATH",
+		"HOME",
+		"DOCKER_HOST",
+		"DOCKER_CONTEXT",
+		"DOCKER_CONFIG",
+		"DOCKER_TLS_VERIFY",
+		"DOCKER_CERT_PATH",
+	]
+		.map((name) => [name, Bun.env[name]])
+		.filter((pair): pair is [string, string] => pair[1] !== undefined),
+);
+
+/**
  * Whether a daemon is reachable, not merely whether the client is installed:
  * `docker --version` answers on a machine whose daemon is stopped, and every
  * case here needs one that runs containers.
@@ -64,6 +93,7 @@ export const available = (() => {
 				stdout: "ignore",
 				stderr: "ignore",
 				timeout: PROBE_MS,
+				env: DOCKER_ENV,
 			}).exitCode === 0
 		);
 	} catch {
@@ -99,7 +129,7 @@ export function buildWith(extra: Record<string, string>) {
 	try {
 		const build = Bun.spawnSync(
 			["docker", "build", "-t", `${TAG}-probe`, dir],
-			{ stdout: "pipe", stderr: "pipe", timeout: BUILD_MS },
+			{ stdout: "pipe", stderr: "pipe", timeout: BUILD_MS, env: DOCKER_ENV },
 		);
 		if (build.exitedDueToTimeout)
 			throw new Error(`docker build did not finish within ${BUILD_MS}ms`);
@@ -124,6 +154,7 @@ export function image(): string {
 			stdout: "pipe",
 			stderr: "pipe",
 			timeout: BUILD_MS,
+			env: DOCKER_ENV,
 		});
 		if (build.exitedDueToTimeout)
 			throw new Error(`docker build did not finish within ${BUILD_MS}ms`);
@@ -168,7 +199,7 @@ export function sh(script: string, ...opts: string[]) {
 			"-c",
 			script,
 		],
-		{ stdout: "pipe", stderr: "pipe", timeout: RUN_MS },
+		{ stdout: "pipe", stderr: "pipe", timeout: RUN_MS, env: DOCKER_ENV },
 	);
 	if (run.exitedDueToTimeout)
 		throw new Error(`docker run did not finish within ${RUN_MS}ms: ${script}`);
@@ -192,6 +223,7 @@ export const tidy = (...argv: string[]) => {
 		stdout: "ignore",
 		stderr: "ignore",
 		timeout: RUN_MS,
+		env: DOCKER_ENV,
 	});
 };
 
@@ -218,7 +250,7 @@ export function app(): string {
 			"{{.Config.WorkingDir}}",
 			image(),
 		],
-		{ stdout: "pipe", stderr: "pipe", timeout: PROBE_MS },
+		{ stdout: "pipe", stderr: "pipe", timeout: PROBE_MS, env: DOCKER_ENV },
 	);
 	const found = read.stdout.toString().trim();
 	if (read.exitCode !== 0 || found === "")
