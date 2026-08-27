@@ -274,6 +274,13 @@ without an editor, append it instead:
 Single quotes around it are what keep the shell from expanding `$?` on the way
 in; the entry's own quotes are double, so nothing inside needs escaping.
 
+Its three paths are this deployment's rather than yours. The project directory
+is the one `deploy.yml`'s host script changes into, and
+`checks/snapshot-schedule.test.ts` fails if the two stop agreeing — so on a
+fork, change it in both. The lock and the log are under `/var`, which is
+root-owned: an entry installed for anyone else wants two paths that user can
+write.
+
 On one line, because a crontab has no continuation — a line broken over two is
 two entries, the second of which is not a schedule. And with no `%` anywhere
 in it, which crontab turns into a newline instead of passing on.
