@@ -205,8 +205,8 @@ Rules that keep something out of the repository or off the machine. They do
 not age with the code.
 
 - Before the first dependency install or tool run in a repo, verify
-  `.gitignore` covers its outputs (`node_modules/`, build dirs, local
-  settings).
+  `.gitignore` covers its outputs (`node_modules`, build dirs, local
+  settings) with no trailing slash.
 - Reconcile a vendored skill's `allowed-tools` and `disable-model-invocation`
   against this project's policy before the skill is used.
 - Run each of the `playwright-cli` skill's three npm-family paths through bun
