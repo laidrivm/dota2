@@ -146,7 +146,7 @@ because the build stage failing to produce `dist/` fails the image build.
       and never `latest`; and the README names the rollback.
       (Req: deploy-workflow — Every deployed image is named by the commit it
       was built from)
-- [ ] 4.3 Add `workflow_call:` to `lint.yml`, `test.yml`, `e2e.yml` and the
+- [x] 4.3 Add `workflow_call:` to `lint.yml`, `test.yml`, `e2e.yml` and the
       type-check's workflow, changing nothing else in them.
       (Req: deploy-workflow — A deploy runs only against a commit the checks
       have passed)

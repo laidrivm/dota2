@@ -1,13 +1,22 @@
 name: E2E
 
+# `workflow_call` alongside it, so `.github/workflows/deploy.yml` can depend on
+# this workflow against the commit on `main` rather than trusting a run over
+# the pull request's own object. It changes nothing about what runs here.
 on:
   pull_request:
+  workflow_call:
 
 permissions:
   contents: read
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  # The workflow's own name, written out rather than `${{ github.workflow }}`,
+  # which in a called workflow is the *caller's* name: the three checks the
+  # deploy calls would share one group and cancel each other, and a cancelled
+  # job fails the `needs:` that was gating on it. On a pull request the two
+  # spellings are the same string.
+  group: e2e-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
