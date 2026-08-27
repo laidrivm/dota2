@@ -80,6 +80,18 @@ test.beforeAll(async () => {
 	served = mkdtempSync(join(tmpdir(), "d2ass-static-"));
 	build(served);
 
+	// Three attempts, because the port is chosen by binding one and letting it
+	// go: between that and `http.server` binding it, something else on the
+	// machine may take it. Rare, and a flake gets fixed rather than retried.
+	for (let attempt = 0; attempt < 3; attempt++) {
+		if (await serve(served)) return;
+		host?.kill();
+	}
+	throw new Error(`nothing answered on ${origin}`);
+});
+
+/** Start the static host on a free port, and say whether it answered. */
+async function serve(directory: string): Promise<boolean> {
 	const port = await freePort();
 	origin = `http://127.0.0.1:${port}`;
 	host = spawn(
@@ -91,21 +103,24 @@ test.beforeAll(async () => {
 			"--bind",
 			"127.0.0.1",
 			"--directory",
-			served,
+			directory,
 		],
 		{ stdio: "ignore" },
 	);
 
-	for (let attempt = 0; attempt < 100; attempt++) {
+	for (let waited = 0; waited < 100; waited++) {
+		// A process that has already exited is a port lost to something else,
+		// and no amount of waiting brings it back.
+		if (host.exitCode !== null) return false;
 		try {
-			if ((await fetch(origin)).ok) return;
+			if ((await fetch(origin)).ok) return true;
 		} catch {
 			// Not listening yet, which is what the next attempt is for.
 		}
 		await new Promise((wait) => setTimeout(wait, 100));
 	}
-	throw new Error(`nothing answered on ${origin}`);
-});
+	return false;
+}
 
 test.afterAll(() => {
 	host?.kill();
