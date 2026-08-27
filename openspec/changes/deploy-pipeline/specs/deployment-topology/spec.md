@@ -10,8 +10,7 @@ the proxy SHALL reach it by container name.
 
 A published port is a second way in, unencrypted, beside the proxy that exists
 to terminate TLS — and it is reachable from the internet the moment it is
-bound, whatever the proxy is configured to do. The host in question also has
-`:3000` bound already, so publishing is not merely unwise here but impossible.
+bound, whatever the proxy is configured to do.
 
 #### Scenario: The project brought up
 
