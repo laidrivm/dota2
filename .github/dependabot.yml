@@ -26,3 +26,21 @@ updates:
     groups:
       dependencies:
         update-types: ["minor", "patch"]
+
+  # What raises the base image digest the Dockerfile pins. Without this entry
+  # the digest is a pin nobody moves, and a stale one reads exactly like a
+  # fresh one — so checks/container-image.test.ts fails if the entry goes
+  # missing, names another directory, or takes terms of its own.
+  #
+  # Same schedule and cooldown as the two above, read off them by that check
+  # rather than restated anywhere.
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    cooldown:
+      default-days: 3
+    groups:
+      images:
+        patterns: ["*"]

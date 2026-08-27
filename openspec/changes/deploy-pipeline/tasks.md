@@ -41,7 +41,7 @@ because the build stage failing to produce `dist/` fails the image build.
       (Req: container-image — Every base image is pinned by digest, and a
       named updater raises it / The build context carries nothing the image
       must not hold)
-- [ ] 1.4 Add the `docker` ecosystem entry to `.github/dependabot.yml`, on the
+- [x] 1.4 Add the `docker` ecosystem entry to `.github/dependabot.yml`, on the
       schedule, cooldown and grouping the existing entries carry.
       (Req: container-image — Every base image is pinned by digest, and a
       named updater raises it)
