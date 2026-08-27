@@ -16,6 +16,7 @@ import { afterAll, describe, expect, test } from "bun:test";
 import { readdirSync } from "node:fs";
 import { join } from "node:path";
 import {
+	app,
 	available,
 	buildsImage,
 	image,
@@ -132,7 +133,7 @@ describe.skipIf(!available)("the image run with no command of its own", () => {
 	test("answers /snapshot.json with the committed fixture", async () => {
 		// An empty named volume over the publication path, which is the state a
 		// first deploy is in: the directory exists and no export has filled it.
-		const url = await serve("-v", `${VOLUME}:/app/snapshot`);
+		const url = await serve("-v", `${VOLUME}:${app()}/snapshot`);
 		const answer = await fetch(`${url}/snapshot.json`);
 		expect(answer.status).toBe(200);
 		const served = (await answer.json()) as { snapshotId: number };

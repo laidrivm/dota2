@@ -15,6 +15,7 @@
  */
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import {
+	app,
 	available,
 	buildsImage,
 	holds,
@@ -55,9 +56,9 @@ describe.skipIf(!available)("the two runtime directories", () => {
 		// `docker run` without `--user` takes the image's own, so this is the
 		// job's real identity rather than one the case chose for it.
 		const wrote = sh(
-			"echo published > /app/snapshot/bundle.json && cat /app/snapshot/bundle.json",
+			`echo published > ${app()}/snapshot/bundle.json && cat ${app()}/snapshot/bundle.json`,
 			"-v",
-			`${VOLUME}:/app/snapshot`,
+			`${VOLUME}:${app()}/snapshot`,
 		);
 		expect(wrote.stderr.toString()).toBe("");
 		expect(wrote.exitCode).toBe(0);
@@ -77,9 +78,9 @@ describe.skipIf(!available)("the two runtime directories", () => {
 	// `--rm` takes an anonymous volume away with the container.
 	test("a volume at a path the image does not hold is not writable", () => {
 		const wrote = sh(
-			"echo published > /app/not-a-mount-point/bundle.json",
+			`echo published > ${app()}/not-a-mount-point/bundle.json`,
 			"-v",
-			"/app/not-a-mount-point",
+			`${app()}/not-a-mount-point`,
 		);
 		expect(wrote.exitCode).not.toBe(0);
 		expect(wrote.stderr.toString()).toContain("denied");
@@ -91,7 +92,7 @@ describe.skipIf(!available)("the two runtime directories", () => {
 	// read its own source and not rewrite it. A `chown -R /app` satisfies the
 	// criterion above and fails here, which is why it is worth a case.
 	test("the container cannot write to its own source", () => {
-		const wrote = sh("echo tampered >> /app/src/server/server.ts");
+		const wrote = sh(`echo tampered >> ${app()}/src/server/server.ts`);
 		expect(wrote.exitCode).not.toBe(0);
 		expect(wrote.stderr.toString()).toContain("denied");
 	}, 60_000);
@@ -104,8 +105,8 @@ describe.skipIf(!available)("the two runtime directories", () => {
 			// an empty directory here is an exclusion that worked rather than a
 			// developer who happened to have run neither the export nor the
 			// ingest.
-			expect(holds(`/app/${name}`)).toBe(true);
-			const listing = sh(`ls -A /app/${name}`);
+			expect(holds(`${app()}/${name}`)).toBe(true);
+			const listing = sh(`ls -A ${app()}/${name}`);
 			expect(listing.stdout.toString().trim()).toBe("");
 		},
 	);
@@ -118,7 +119,7 @@ describe.skipIf(!available)("the two runtime directories", () => {
 			// against the name `bun`: the two agree today, and if the image ever
 			// switches user this asks the question that matters instead of the one
 			// that was true when it was written.
-			const owner = sh(`stat -c %U /app/${name}`).stdout.toString().trim();
+			const owner = sh(`stat -c %U ${app()}/${name}`).stdout.toString().trim();
 			const user = sh("id -un").stdout.toString().trim();
 			expect(owner).toBe(user);
 		},

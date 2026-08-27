@@ -11,6 +11,7 @@ import { describe, expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import {
+	app,
 	available,
 	buildsImage,
 	buildWith,
@@ -21,9 +22,6 @@ import {
 
 /** The repository root: this file reads artefacts of it, from `checks/`. */
 const root = join(import.meta.dir, "..");
-
-/** Where the image's `WORKDIR` puts everything the context sent. */
-const app = "/app";
 
 requiresDocker();
 
@@ -110,7 +108,9 @@ describe.skipIf(!available)("the production image", () => {
 		// Read from the manifest rather than named here: a devDependency added
 		// later joins this case without anybody remembering to add it.
 		expect(dev.length).toBeGreaterThan(0);
-		const present = dev.filter((name) => holds(`${app}/node_modules/${name}`));
+		const present = dev.filter((name) =>
+			holds(`${app()}/node_modules/${name}`),
+		);
 		expect(present).toEqual([]);
 	});
 });
