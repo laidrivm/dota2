@@ -10,6 +10,8 @@ single-source rule this file inherits.
 - Escape a literal `_` or `%` in a `LIKE` pattern with an explicit `ESCAPE`
   clause, never a backslash inside a template literal, which removes it before
   SQL is parsed.
+- Pin on the command line any git behaviour a user's configuration can
+  disable, rename detection included.
 
 ## Dependency safety
 
