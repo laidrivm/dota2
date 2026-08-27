@@ -21,6 +21,7 @@ import {
 	holds,
 	requiresDocker,
 	sh,
+	tidy,
 } from "./docker.fixture.ts";
 
 requiresDocker();
@@ -33,12 +34,7 @@ requiresDocker();
 const VOLUME = "d2ass-checks-bundle";
 
 /** Remove it, so a run always starts against a volume nothing has written. */
-const clear = () =>
-	Bun.spawnSync(["docker", "volume", "rm", "-f", VOLUME], {
-		stdout: "ignore",
-		stderr: "ignore",
-		timeout: 45_000,
-	});
+const clear = () => tidy("volume", "rm", "-f", VOLUME);
 
 // Before as well as after. A named volume takes the ownership of the mount
 // point the first time it is attached and keeps it, so one left by an earlier
@@ -51,7 +47,7 @@ describe.skipIf(!available)("the two runtime directories", () => {
 	buildsImage();
 
 	// spec: container-image/a-volume-mounted-where-the-image-holds-no-directory
-	test("a volume at the publication path is written by the non-root job", () => {
+	test("a volume at the publication path is writable by the image's user", () => {
 		// Written as the user the image runs as, which is the whole question:
 		// `docker run` without `--user` takes the image's own, so this is the
 		// job's real identity rather than one the case chose for it.

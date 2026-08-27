@@ -12,7 +12,7 @@
  * `ENOENT` before it binds and the container exits — which is what makes
  * every case below a real one rather than a restatement of the `Dockerfile`.
  */
-import { afterAll, describe, expect, test } from "bun:test";
+import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { readdirSync } from "node:fs";
 import { join } from "node:path";
 import {
@@ -21,6 +21,7 @@ import {
 	buildsImage,
 	image,
 	requiresDocker,
+	tidy,
 } from "./docker.fixture.ts";
 
 /** The repository root: this file reads artefacts of it, from `checks/`. */
@@ -39,20 +40,19 @@ const running: string[] = [];
  */
 const VOLUME = "d2ass-checks-empty";
 
+/** Remove it, so a run always starts against a volume nothing has written. */
+const clear = () => tidy("volume", "rm", "-f", VOLUME);
+
+// Before as well as after: a run killed part way through leaves the volume,
+// and the fixture case below is about what an *empty* publication directory
+// serves.
+beforeAll(clear);
+
 afterAll(() => {
-	for (const id of running)
-		Bun.spawnSync(["docker", "stop", id], {
-			stdout: "ignore",
-			stderr: "ignore",
-			timeout: 45_000,
-		});
+	for (const id of running) tidy("stop", id);
 	// After the containers, never before: a volume still attached to one is
 	// refused, and the removal would fail quietly on the way out.
-	Bun.spawnSync(["docker", "volume", "rm", "-f", VOLUME], {
-		stdout: "ignore",
-		stderr: "ignore",
-		timeout: 45_000,
-	});
+	clear();
 });
 
 /**

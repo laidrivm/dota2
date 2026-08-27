@@ -15,9 +15,9 @@ import {
 	buildsImage,
 	holds,
 	requiresDocker,
-	SECRET,
 	sh,
 } from "./docker.fixture.ts";
+import { SECRET } from "./docker-context.fixture.ts";
 
 requiresDocker();
 
