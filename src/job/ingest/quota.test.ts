@@ -93,6 +93,25 @@ describe("the window a response reports spent", () => {
 		expect(spent).toEqual({ name: "minute", span: MINUTE, longest: false });
 	});
 
+	/**
+	 * A spent window with no ceiling of its own, beside one that has both. The
+	 * length comes from the name, so the wait has an end and the run takes it:
+	 * reading this as terminal would spend a day's quota to avoid a minute's
+	 * wait, which is what the requirement was rewritten to stop.
+	 */
+	// spec: snapshot-ingest/a-refillable-window-reports-nothing-remaining
+	test("a spent window states no ceiling and is still waited out", () => {
+		const spent = drained(
+			headers({
+				"x-ratelimit-limit-day": "15000",
+				"x-ratelimit-remaining-day": "14160",
+				"x-ratelimit-remaining-minute": "0",
+			}),
+		);
+
+		expect(spent).toEqual({ name: "minute", span: MINUTE, longest: false });
+	});
+
 	// spec: snapshot-ingest/a-window-at-its-stated-ceiling
 	test("a response with room everywhere reports no spent window", () => {
 		expect(
