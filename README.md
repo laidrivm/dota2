@@ -159,73 +159,120 @@ both directions:
 
 ### The proxy in front of it
 
-The application publishes no port. `nginx-proxy` — a container on that machine,
-not a host package — holds `:80` and `:443` and reaches it by container name
-over `web-network`, exactly as it reaches everything else there. The virtual
-host is `/root/nginx/conf.d/d2ass.conf`, modelled on the neighbouring
-`mellon.sh.conf`: `listen 443 ssl`, the certificate pair, `include
-snippets/ssl-params.conf`, and a `location /` with
-`snippets/proxy-headers.conf` proxying to `http://d2ass-app:3000`.
+The application publishes no port. It joins an external Docker network called
+`web-network` and answers on `d2ass-app:3000`, so whatever terminates TLS has
+to be on that network too — a reverse proxy in a container beside it, which is
+what the bootstrap below sets up. A published port would be a second way in,
+unencrypted, beside the proxy that exists to prevent exactly that.
 
-Prose here rather than a file in this repository, because the file that is
-actually read lives on the host and a committed copy would drift from it in
-silence.
+A minimal virtual host for it, at `conf.d/d2ass.conf` in whatever directory the
+proxy mounts:
 
-One thing about it is ordering rather than content, which is why the bootstrap
-below is a sequence: nginx refuses to start against a configuration naming a
-certificate file that is not there, so the certificate exists before the
-virtual host does.
+```nginx
+server {
+    listen 443 ssl;
+    server_name d2ass.example.com;
 
-The certificate is issued **DNS-01 through the Cloudflare plugin**, not the
-default. `certbot certonly` defaults to the standalone authenticator, which
-binds the port `nginx-proxy` holds, so standalone cannot complete here at all
-— and on this machine the standalone certificates are the ones whose renewals
-fail. DNS-01 proves the name by a `_acme-challenge` TXT record, so it is
-indifferent to what holds port `80` and to how the `A` record is served.
+    ssl_certificate     /etc/letsencrypt/live/d2ass.example.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/d2ass.example.com/privkey.pem;
 
-The Cloudflare record is nonetheless **DNS only**, for a reason of its own
-rather than the certificate's: Cloudflare defaults a new `A` record to
-proxied, and a proxied record terminates TLS at their edge rather than at the
-`nginx-proxy` this deployment configures — a second certificate in front of
-the one certbot issues, and not how the neighbouring domains on this machine
-are served.
+    location / {
+        proxy_pass http://d2ass-app:3000;
+        proxy_set_header Host              $host;
+        proxy_set_header X-Real-IP         $remote_addr;
+        proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+```
 
-One gap is inherited rather than introduced, and this deployment does not
-close it: all three of the host's `/etc/letsencrypt/renewal-hooks/`
-directories are empty, so a certificate that does renew never reaches the
-proxy container, which reads `/etc/letsencrypt` only when it starts. Until
-that is fixed, a renewal is followed by reloading `nginx-proxy` by hand.
-`PLAN.md` carries it.
+`d2ass-app` is the container name `docker-compose.yml` fixes, and
+`checks/deployment-topology.test.ts` fails if this example and that file stop
+agreeing.
 
 ### Bootstrapping a host
 
-Manual, all of it, and in this order:
+For a clean machine with Docker on it. Everything runs in a container — the
+application, its database, and the proxy — and nothing here is specific to the
+machine this project happens to run on.
 
-1. A Cloudflare `A` record for `d2ass.laidrivm.com` pointing at the VPS,
-   **DNS only**.
-2. `certbot certonly --dns-cloudflare` for that name, with a zone-scoped API
-   token.
-3. `/root/nginx/conf.d/d2ass.conf` as above, then reload `nginx-proxy`.
-4. `docker-compose.yml` and a filled-in `.env` in the project directory — the
-   one the crontab entry below names, which is also the one `deploy.yml`'s
-   host script changes into.
-5. The GitHub `production` environment with its secrets, and then a deploy,
-   which is what first puts an image on the host.
-6. The crontab entry below.
+1. **A DNS `A` record** for your domain, pointing at the machine. If your
+   provider offers to proxy the traffic — Cloudflare's orange cloud — turn it
+   off: TLS is terminated by the proxy you are about to run, and a provider
+   proxying it puts a second certificate in front of the one you issue.
+2. **A certificate**, while nothing is holding port 80 yet:
+   `certbot certonly --standalone -d d2ass.example.com`. Do this before
+   starting the proxy, not after — once the proxy holds `:80`, standalone
+   cannot complete, and renewal then needs either the proxy stopped for a
+   moment (`--pre-hook`/`--post-hook`) or a webroot or DNS plugin instead.
+   Whichever you choose, the proxy reads `/etc/letsencrypt` only when it
+   starts, so a renewal has to be followed by reloading it.
+3. **The network and the proxy**:
 
-No `docker login` on the host at any point: the image repository is public,
-which is one fewer credential on the machine and one fewer thing to expire.
+   ```sh
+   docker network create web-network
+   docker run -d --name nginx-proxy --restart always \
+     --network web-network -p 80:80 -p 443:443 \
+     -v /root/nginx/conf.d:/etc/nginx/conf.d:ro \
+     -v /etc/letsencrypt:/etc/letsencrypt:ro \
+     nginx:alpine
+   ```
+
+   With the virtual host above in `/root/nginx/conf.d/`.
+4. **The project**: `docker-compose.yml` and a `.env` beside it, in a directory
+   of your choosing — the one the crontab entry below names, and the one
+   `deploy.yml`'s host script changes into. Copy `.env.example` and fill it in;
+   `D2ASS_IMAGE` can be `laidrivm/d2ass:latest` to start with, since the
+   repository is public.
+5. **Up**: `docker compose pull && docker compose up -d`. No `docker login` at
+   any point — one fewer credential on the machine and one fewer thing to
+   expire.
+6. **The crontab entry** below, which is the only part of this the application
+   does not do for itself.
+
+Nothing above is reproduced by anything in this repository: a rebuilt machine
+is this list again, by hand.
+
+### Deploying your own fork
+
+The workflow pushes to the image repository named in `.github/workflows/deploy.yml`'s
+`env:` block and to the host named in its secrets, so a fork needs both changed
+before a push to `main` does anything for you:
+
+- **`env:` in `deploy.yml`** — `REGISTRY`, `REGISTRY_USER` and `IMAGE` are
+  yours to set, and they are in the open because none of them grants anything.
+- **A `production` environment** in your repository's settings, holding
+  `DOCKERHUB_TOKEN` and the four `SSH_*` secrets above. The environment is the
+  gate: without it the deploy job cannot reach either the registry or the
+  machine.
+
+Until both exist the checks still run on every pull request — it is only the
+deploy that needs them.
+
 
 ### The nightly job
 
 The job is not a service — it is a process that exits — so the host's cron is
 what starts it, and the schedule lives outside the compose project so that
-either can change without restarting the other. One entry, installed with
-`crontab -e` as the user that owns the project directory:
+either can change without restarting the other. One entry, owned by the user
+that owns the project directory:
 
-```sh
+```crontab
 17 4 * * * { date -Iseconds; flock -n -E 99 /var/lock/d2ass-job.lock docker compose --progress quiet -f /root/d2ass/docker-compose.yml run --rm job; echo "exit $?"; } >> /var/log/d2ass-job.log 2>&1
 ```
+
+**That is a crontab line, not a shell command.** `crontab -e` opens an editor;
+paste it there. Typing `crontab -e` and the line together at a prompt makes the
+shell read `{` as an argument rather than as the start of a group, and it
+answers `syntax error near unexpected token '}'` — measured. To install it
+without an editor, append it instead:
+
+```sh
+(crontab -l 2>/dev/null; echo '17 4 * * * { date -Iseconds; flock -n -E 99 /var/lock/d2ass-job.lock docker compose --progress quiet -f /root/d2ass/docker-compose.yml run --rm job; echo "exit $?"; } >> /var/log/d2ass-job.log 2>&1') | crontab -
+```
+
+Single quotes around it are what keep the shell from expanding `$?` on the way
+in; the entry's own quotes are double, so nothing inside needs escaping.
 
 On one line, because a crontab has no continuation — a line broken over two is
 two entries, the second of which is not a schedule. And with no `%` anywhere

@@ -119,7 +119,11 @@ test("the README's virtual host names that container and its port", () => {
 	// The target is lifted out rather than the whole file searched for a
 	// string this composed: a `toContain` over a README fails by printing the
 	// README, which says nothing about which of the two names moved.
-	const target = /proxying to `http:\/\/([^:`]+):(\d+)`/.exec(readme);
+	//
+	// From the example virtual host itself, which is what an operator copies,
+	// rather than from prose beside it — the `proxy_pass` line is where the
+	// name takes effect.
+	const target = /proxy_pass\s+http:\/\/([^:;\s]+):(\d+);/.exec(readme);
 	expect(target?.[1]).toBe(app.container_name);
 	// The port the image serves on, which nothing sets and `Bun.serve`
 	// defaults to.

@@ -15,23 +15,25 @@ import { join } from "node:path";
 const root = join(import.meta.dir, "..");
 
 /**
- * The entry, taken from the one fenced block in the README that names `flock`.
+ * The entry, taken from the README's one fenced block tagged `crontab`.
  *
- * Found by that token rather than by a heading or a position: a section
- * renamed or moved leaves this reading the same line, and two blocks naming it
- * is an ambiguity worth a failure rather than a guess.
+ * By the tag rather than by a heading, a position, or a token in the line: a
+ * section renamed or moved leaves this reading the same block, and the README
+ * also shows a shell command that installs the entry — which quotes it, and so
+ * carries every token the entry does. The tag is what says which of the two is
+ * the thing cron reads.
  */
 export const ENTRY = (() => {
 	const found = [
 		...readFileSync(join(root, "README.md"), "utf8").matchAll(
-			/```[a-z]*\n([\s\S]*?)```/g,
+			/```([a-z]*)\n([\s\S]*?)```/g,
 		),
 	]
-		.map((block) => (block[1] as string).trim())
-		.filter((block) => block.includes("flock"));
+		.filter((block) => block[1] === "crontab")
+		.map((block) => (block[2] as string).trim());
 	if (found.length !== 1)
 		throw new Error(
-			`expected one fenced block naming flock in the README, found ${found.length}`,
+			`expected one fenced block tagged crontab in the README, found ${found.length}`,
 		);
 	return found[0] as string;
 })();
