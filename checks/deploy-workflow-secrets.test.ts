@@ -34,7 +34,7 @@ const CONNECTION = ["host", "port", "username", "key"];
 const SECRET = /secrets\.([A-Za-z_][A-Za-z0-9_]*)/g;
 
 type Step = { uses?: string; with?: Record<string, string> };
-type Job = { environment?: string; steps?: Step[] };
+type Job = { environment?: string; secrets?: unknown; steps?: Step[] };
 type Workflow = { env?: Record<string, string>; jobs?: Record<string, Job> };
 
 /** Everything wrong with the split, and nothing when nothing is. */
@@ -75,7 +75,7 @@ export function problems(deploy: string): string[] {
 				);
 		}
 
-	for (const [id, job] of Object.entries(doc.jobs ?? {}))
+	for (const [id, job] of Object.entries(doc.jobs ?? {})) {
 		if (
 			JSON.stringify(job).includes("secrets.") &&
 			job.environment !== "production"
@@ -83,6 +83,14 @@ export function problems(deploy: string): string[] {
 			found.push(
 				`deploy.yml: job \`${id}\` reads a secret outside the production environment`,
 			);
+		// A called workflow given `secrets: inherit` gets all of them, including
+		// the deploy key, and it is gated by nothing this file declares — the
+		// environment guards the job that calls, not the workflow that is called.
+		if (job.secrets !== undefined)
+			found.push(
+				`deploy.yml: job \`${id}\` hands its secrets to another workflow`,
+			);
+	}
 
 	return found;
 }
@@ -171,6 +179,16 @@ describe("what stands between a run and the credentials", () => {
 		expect(problems(ungated)).toEqual([
 			"deploy.yml: job `image` reads a secret outside the production environment",
 			"deploy.yml: job `host` reads a secret outside the production environment",
+		]);
+	});
+
+	test("a job handing its secrets to a called workflow fails", () => {
+		const inherited = hosted().replace(
+			"  host:\n",
+			"  called:\n    uses: ./.github/workflows/lint.yml\n    secrets: inherit\n\n  host:\n",
+		);
+		expect(problems(inherited)).toEqual([
+			"deploy.yml: job `called` hands its secrets to another workflow",
 		]);
 	});
 

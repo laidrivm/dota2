@@ -247,7 +247,10 @@ because the build stage failing to produce `dist/` fails the image build.
       was built from)
 - [ ] 7.3 Write the README bootstrap sequence in the order the design fixes,
       and name the host's empty certbot renewal hooks as a thing this
-      deployment inherits.
+      deployment inherits. The project directory on the host is written in
+      `deploy.yml`'s script already and Task 6.4's crontab entry will name it
+      again, so bind the README's copy to one of those rather than adding a
+      third that can drift.
       (Req: none — the host bootstrap is state outside the repository, which
       no criterion of this change reaches.)
 - [ ] 7.4 Tick this change's steps in `PLAN.md` as they merge, and collapse
