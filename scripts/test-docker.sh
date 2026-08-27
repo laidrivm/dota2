@@ -2,10 +2,14 @@
 # Run the suite with a Docker daemon behind it, and say that a skip is a
 # failure rather than a green nobody earned.
 #
-# Without this, `bun test` skips every case that reads a real image — what the
-# build context sent, what the production install left, both entry points, the
-# two mount points, the compose project's topology and the schedule's refusal
-# — and reports exactly what a run that exercised them reports.
+# Without this, `bun test` skips every case that reads a real image and reports
+# exactly what a run that exercised them reports. Today that is the build
+# context: what a developer's checkout sent to the builder and what the image
+# was therefore allowed to keep. The rest of the container-gated cases arrive
+# with the task groups that own them — the production install and both entry
+# points with group 2, the compose project with group 3, the schedule with
+# group 6 — and each is gated by this script the moment it is written, so this
+# list is what has been implemented rather than what is planned.
 #
 # Thinner than `scripts/test-db.sh`, which starts a container and takes it away
 # again: what these cases need is a daemon, and `checks/docker.fixture.ts`
