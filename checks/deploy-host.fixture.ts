@@ -23,9 +23,13 @@ export const secret = (name: string) => `\${{ secrets.${name} }}`;
  * form alone reads a workflow using the indexed one as a workflow doing
  * neither, which is the direction that matters: the indexed form is what a
  * name the dotted syntax cannot spell has to be written in.
+ *
+ * Single quotes only. An expression string is single-quoted in this language
+ * and `secrets["SSH_KEY"]` is a parse error, so accepting it would approve an
+ * input that fails the run rather than the check.
  */
 const lookup = (context: string, name: string) =>
-	`${context}\\s*(?:\\.\\s*(${name})|\\[\\s*['"](${name})['"]\\s*\\])`;
+	`${context}\\s*(?:\\.\\s*(${name})|\\[\\s*'(${name})'\\s*\\])`;
 
 /** A context member's name, in the characters GitHub allows one. */
 const MEMBER = "[A-Za-z_][A-Za-z0-9_-]*";

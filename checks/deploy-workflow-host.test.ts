@@ -61,7 +61,15 @@ export const scriptsOf = (deploy: string) =>
 	Object.values(((Bun.YAML.parse(deploy) ?? {}) as Workflow).jobs ?? {})
 		.flatMap((job) => job.steps ?? [])
 		.filter((step) => step.uses?.startsWith(`${SSH}@`))
-		.map((step) => (step.with?.script ?? "").split("\n").map((l) => l.trim()));
+		// Segments, not lines: `set -eu; docker compose pull` runs two commands
+		// in order on one line, and reading the line whole answers neither which
+		// came first nor what state the second ran under.
+		.map((step) =>
+			(step.with?.script ?? "")
+				.split(/\n|;|&&|\|\|/)
+				.map((segment) => segment.trim())
+				.filter((segment) => segment !== ""),
+		);
 
 /** Everything wrong with the host steps, and nothing when nothing is. */
 export function problems(deploy: string): string[] {
@@ -149,6 +157,25 @@ describe("the order the host script runs in", () => {
 		const script = ["set -eu", "docker compose up -d"];
 		expect(problems(hosted({ script }))).toEqual([
 			"deploy.yml: the host script pulls nothing",
+		]);
+	});
+
+	test("the setting and the pull on one line passes", () => {
+		// Valid shell, and read as a whole line it carries neither pattern in a
+		// form either would match — so the line has to be read as the two
+		// commands it is.
+		const script = ["set -eu; docker compose pull", "docker compose up -d"];
+		expect(problems(hosted({ script }))).toEqual([]);
+	});
+
+	test("turned off on the pull's own line fails", () => {
+		const script = [
+			"set -eu",
+			"set +e; docker compose pull",
+			"docker compose up -d",
+		];
+		expect(problems(hosted({ script }))).toEqual([
+			"deploy.yml: the script is not stopping on a failure when the pull runs: `set +e`",
 		]);
 	});
 
