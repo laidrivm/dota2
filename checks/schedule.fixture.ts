@@ -182,13 +182,17 @@ export const start = (file: string, log: string) =>
  * passed alone and was refused when a second file shared the process.
  */
 export function killRun() {
-	const killed = Bun.spawnSync(["pkill", "-9", "-f", directory()], {
+	// Escaped, because both take a pattern rather than a string: a `+` or a
+	// `[` in `TMPDIR` would make this match processes it was not about, or
+	// none at all.
+	const pattern = directory().replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+	const killed = Bun.spawnSync(["pkill", "-9", "-f", pattern], {
 		stdout: "ignore",
 		stderr: "ignore",
 		timeout: PROBE_MS,
 	});
 	for (let attempt = 0; attempt < 200; attempt++) {
-		const left = Bun.spawnSync(["pgrep", "-f", directory()], {
+		const left = Bun.spawnSync(["pgrep", "-f", pattern], {
 			stdout: "ignore",
 			stderr: "ignore",
 			timeout: PROBE_MS,
