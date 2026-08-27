@@ -146,15 +146,26 @@ because the build stage failing to produce `dist/` fails the image build.
       and never `latest`; and the README names the rollback.
       (Req: deploy-workflow — Every deployed image is named by the commit it
       was built from)
-- [x] 4.3 Add `workflow_call:` to `lint.yml`, `test.yml`, `e2e.yml` and the
-      type-check's workflow, changing nothing else in them.
+- [x] 4.3 Add `workflow_call:` to `lint.yml`, `test.yml` and `e2e.yml` — the
+      type check's workflow is `lint.yml`, which holds it as a job — and write
+      each workflow's own name into its concurrency group. That second edit is
+      not an aside: in a called workflow `github.workflow` is the *caller's*
+      name, so the three would resolve to one group and `cancel-in-progress`
+      would cancel two of the gates, failing the `needs:` gating on them. On a
+      pull request the two spellings are the same string, so nothing about
+      today's runs moves. Nothing else in them changes.
       (Req: deploy-workflow — A deploy runs only against a commit the checks
       have passed)
 - [x] 4.4 Add `.github/workflows/deploy.yml`, triggered on push to `main`,
-      with those four as `needs:`, buildx, `cache-from/to: type=gha`, and both
-      tags pushed to the public Docker Hub repository. Assert the trigger in
-      4.1's file: a workflow that runs on nothing deploys nothing, and one
-      that runs on a wider trigger deploys more than a merge.
+      with those three workflows as `needs:`, buildx, `cache-from/to:
+      type=gha`, and both tags pushed to the public Docker Hub repository.
+      Assert the trigger in 4.1's file: a workflow that runs on nothing
+      deploys nothing, and one that runs on a wider trigger deploys more than
+      a merge. The registry, its account and the image repository sit in
+      `env:` and the Docker Hub token in the `production` environment, which
+      is Task 5.2's criterion reached here because a push cannot happen
+      without them; the README gains the rollback the tag pair exists for,
+      which Task 7.2 grows into the operations section around it.
       (Req: deploy-workflow — A deploy runs only against a commit the checks
       have passed / Every deployed image is named by the commit it was built
       from)
