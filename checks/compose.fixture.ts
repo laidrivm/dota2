@@ -14,16 +14,10 @@
  * runner nothing has made one, and `external: true` is a refusal rather than a
  * request.
  */
-import {
-	copyFileSync,
-	mkdtempSync,
-	readFileSync,
-	rmSync,
-	writeFileSync,
-} from "node:fs";
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { image, tidy } from "./docker.fixture.ts";
+import { DOCKER_ENV, image, tidy } from "./docker.fixture.ts";
 
 /** The repository root: this file reads artefacts of it, from `checks/`. */
 const root = join(import.meta.dir, "..");
@@ -57,7 +51,19 @@ export const shared = (() => {
  * same reason the network is, and because this is the name the deployment's
  * virtual host resolves it by. A copy here would go on naming the old one.
  */
-const address = (() => {
+const address = "d2ass-checks-app";
+
+/**
+ * The name the file gives it, which this run replaces with its own.
+ *
+ * `container_name` is global to the daemon rather than scoped to the project,
+ * so a run using the deployment's would collide with a real one — and
+ * `docker inspect` under that name would answer about the wrong container.
+ * Read all the same, because the replacement has to find something: a file
+ * that stopped declaring one would otherwise leave this silently renaming
+ * nothing while the project derived a name of its own.
+ */
+const declared = (() => {
 	const name = project.services?.app?.container_name;
 	if (!name) throw new Error("the app service declares no container_name");
 	return name;
@@ -72,7 +78,17 @@ let made = false;
 function directory(): string {
 	if (dir) return dir;
 	dir = mkdtempSync(join(tmpdir(), "d2ass-compose-"));
-	copyFileSync(`${root}/docker-compose.yml`, join(dir, "docker-compose.yml"));
+	const file = readFileSync(`${root}/docker-compose.yml`, "utf8");
+	const renamed = file.split(`container_name: ${declared}`);
+	// Exactly one, asserted rather than assumed: a replacement that matched
+	// nothing leaves the deployment's own name in the copy, which is the
+	// collision this exists to avoid.
+	if (renamed.length !== 2)
+		throw new Error(`expected one container_name: ${declared}`);
+	writeFileSync(
+		join(dir, "docker-compose.yml"),
+		renamed.join(`container_name: ${address}`),
+	);
 	writeFileSync(
 		join(dir, "project.env"),
 		[
@@ -101,7 +117,13 @@ export function compose(...argv: string[]) {
 			join(home, "project.env"),
 			...argv,
 		],
-		{ stdout: "pipe", stderr: "pipe", timeout: COMPOSE_MS, cwd: home },
+		{
+			stdout: "pipe",
+			stderr: "pipe",
+			timeout: COMPOSE_MS,
+			cwd: home,
+			env: DOCKER_ENV,
+		},
 	);
 }
 
@@ -177,7 +199,7 @@ export function incarnation() {
 			"{{.State.StartedAt}} {{.RestartCount}}",
 			address,
 		],
-		{ stdout: "pipe", stderr: "pipe", timeout: COMPOSE_MS },
+		{ stdout: "pipe", stderr: "pipe", timeout: COMPOSE_MS, env: DOCKER_ENV },
 	);
 	if (read.exitCode !== 0)
 		throw new Error(`docker inspect failed:\n${read.stderr.toString()}`);
@@ -212,7 +234,7 @@ export function request(path: string) {
 			 console.log(answer.status);
 			 console.log(await answer.text());`,
 		],
-		{ stdout: "pipe", stderr: "pipe", timeout: COMPOSE_MS },
+		{ stdout: "pipe", stderr: "pipe", timeout: COMPOSE_MS, env: DOCKER_ENV },
 	);
 	const out = asked.stdout.toString();
 	const newline = out.indexOf("\n");

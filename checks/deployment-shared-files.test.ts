@@ -104,6 +104,7 @@ describe.skipIf(!available)("the compose project", () => {
 		"serves an image the ingest mirrored, without a restart",
 		() => {
 			const name = "9999.png";
+			const serving = incarnation();
 			const before = request(`/icons/${name}`);
 			expect(before.status).toBe(404);
 
@@ -115,6 +116,9 @@ describe.skipIf(!available)("the compose project", () => {
 			const after = request(`/icons/${name}`);
 			expect(after.status).toBe(200);
 			expect(after.body).toContain("mirrored-by-the-ingest");
+			// As above: the listing is taken per request, so what proves it is
+			// the same process answering, not merely the right bytes.
+			expect(incarnation()).toBe(serving);
 		},
 		HOOK_MS,
 	);

@@ -37,7 +37,8 @@ services:
     # Pinned by digest, and by the same digest `.github/workflows/test.yml`
     # runs its service container on — `checks/deployment-topology.test.ts`
     # fails if the two stop agreeing. Unlike that one, this pin has an updater:
-    # Dependabot's `docker` ecosystem reads compose files.
+    # `.github/dependabot.yml`'s `docker-compose` entry, which is a separate
+    # ecosystem from `docker` and the only one that reads this file.
     image: postgres:18-alpine@sha256:d3e1620b530c944afa6e887d22eb899824da68e19c52024bf98f5220c88a65b2
     restart: always
     networks:
