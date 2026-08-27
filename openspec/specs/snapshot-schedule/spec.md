@@ -38,8 +38,26 @@ scheduler is what invokes it.
 
 ### Requirement: Every invocation leaves a record of when it ran and how it ended
 
-Each invocation SHALL append to a file on the host the instant it started and
-the exit status it ended with, with anything the job wrote between the two.
+Each invocation SHALL append to a file on the host the instant it started, and
+— for every invocation that reaches its own end — the exit status it ended
+with, with anything the job wrote between the two.
+
+Two things the file does not promise, both of them consequences of what the
+requirements beside this one allow, and each stated because a reader would
+otherwise take the promise for more than it is.
+
+It does not promise that one invocation's lines are contiguous. A refusal
+arrives precisely while another run is in flight, and two processes appending
+to one file interleave — so a refusal's instant and its `99` may land between a
+running invocation's instant and its status. What separates the invocations is
+therefore the status *values*, which is why the refusal carries one the job
+itself never emits, and never their position in the file.
+
+And it does not promise a status for an invocation that was killed. The final
+append is the invocation's own last act, so a process killed outright never
+makes it — no supervising process closes that hole either, being killable in
+the same way. An instant with no status under it is what a killed run looks
+like, and it is readable as exactly that.
 
 All three parts are load-bearing and none substitutes for another. The report
 alone answers *why* a run failed — `run.ts` composes one line naming the step
@@ -64,6 +82,12 @@ record a reader belongs to the change that adds error tracking.
 - **THEN** the file SHALL hold the instant it started and a zero status — so
   that a schedule which is working and a scheduler which never fired are
   distinguishable without reading anything else
+
+#### Scenario: A run that was killed
+
+- **IF** an invocation is killed before it reaches its own end
+- **THEN** the file SHALL hold the instant it started and no status under it,
+  which is what distinguishes a run that was killed from one that ended
 
 ### Requirement: A second run cannot start while one is in flight
 

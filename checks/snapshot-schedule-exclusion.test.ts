@@ -111,8 +111,9 @@ describe.skipIf(!schedulable)("an invocation while a run is in flight", () => {
 	);
 
 	// spec: snapshot-schedule/a-run-that-dies-without-tidying-up
+	// spec: snapshot-schedule/a-run-that-was-killed
 	test(
-		"starts after a run that was killed outright",
+		"starts after a run that was killed outright, which left no status",
 		async () => {
 			const file = standIn(INFLIGHT);
 			const killed = start(file, under("killed.log"));
@@ -124,6 +125,13 @@ describe.skipIf(!schedulable)("an invocation while a run is in flight", () => {
 			// own would still be set here, and every later invocation refused.
 			expect(killRun().exitCode).toBe(0);
 			await killed.exited;
+
+			// The instant it started and nothing under it: the final append is
+			// the invocation's own last act, so a run killed outright never
+			// makes it, and an unfinished record is what a killed run is.
+			const cut = readFileSync(under("killed.log"), "utf8");
+			expect(cut).toMatch(/^\d{4}-\d\d-\d\dT/);
+			expect(cut).not.toContain("exit ");
 
 			const log = under("next.log");
 			invoke(standIn("exit 0"), log);
