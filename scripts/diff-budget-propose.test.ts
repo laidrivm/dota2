@@ -1,5 +1,12 @@
 import { afterAll, expect, test } from "bun:test";
-import { cleanup, gate, lines, repo, tasks } from "./diff-budget.fixture.ts";
+import {
+	cleanup,
+	gate,
+	git,
+	lines,
+	repo,
+	tasks,
+} from "./diff-budget.fixture.ts";
 
 /**
  * The propose stage's own seam. A branch that authors a proposal — adding both
@@ -49,8 +56,8 @@ test("a branch authoring two unsplit proposals is refused", () => {
 	expect(g.code).toBe(1);
 });
 
-// The one move whose destination does match the glob, so the addition filter
-// is the only thing between it and a refusal it has not earned.
+// The one move whose destination does match the glob, so what the script asks
+// git for is the only thing between it and a refusal it has not earned.
 test("renaming a change directory to a new slug authors no proposal", () => {
 	const dir = repo(
 		{
@@ -65,6 +72,10 @@ test("renaming a change directory to a new slug authors no proposal", () => {
 			"src/model.ts": lines(900),
 		},
 	);
+	// Detection off, which is what makes this discriminating: on the default
+	// the rename is spotted whether or not the script asks for it, so dropping
+	// the script's `-M` would pass here and the case would guard nothing.
+	git(dir, "config", "diff.renames", "false");
 	const g = gate(dir, "main", "oversize: the rename rides a large change\n");
 	expect(g.line).toContain("OVERRIDE");
 	expect(g.code).toBe(0);
