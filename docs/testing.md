@@ -16,6 +16,8 @@ single-source rule this file inherits.
 - Give a fixture for a symmetry or antisymmetry case inputs that disagree —
   two sides carrying equal counts satisfy the criterion whichever way the code
   derived them.
+- Arrange the filesystem or clock state a case rests on — a shared timestamp,
+  a coarse tick — rather than waiting for the machine to produce it.
 - Route `/zombies` findings by layer: Zero/One/Many/Boundaries/Interface/
   Exceptions → unit or integration tests; Simple scenarios marked
   `(e2e candidate)` → the Playwright smoke suite.
