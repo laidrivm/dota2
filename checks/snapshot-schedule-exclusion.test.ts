@@ -7,12 +7,15 @@
  * long one lasts, and the run this protects against is precisely the one that
  * ran longer than expected.
  *
- * The refusing invocation writes to a log of its own rather than the one the
- * run in flight is appending to. On the host both go to the same file and
- * interleave, which is what `>>` from two processes means; here the two are
- * separated so each record can be read as the invocation that wrote it.
+ * The refusing invocation mostly writes to a log of its own rather than the
+ * one the run in flight is appending to, so each record can be read as the
+ * invocation that wrote it. On the host both go to the same file and
+ * interleave, which is what `>>` from two processes means — asserted here once,
+ * so that the separation is a convenience of the other cases rather than a
+ * claim about what the deployment produces.
  */
 import { afterAll, describe, expect, test } from "bun:test";
+import { readFileSync } from "node:fs";
 import { buildsImage, HOOK_MS, requiresDocker } from "./docker.fixture.ts";
 import {
 	clean,
@@ -64,6 +67,31 @@ describe.skipIf(!schedulable)("an invocation while a run is in flight", () => {
 			// And the run it was refused for still ends of its own accord.
 			await running.exited;
 			expect(records(under("held.log"))[0]?.status).toBe(0);
+		},
+		HOOK_MS,
+	);
+
+	// spec: snapshot-schedule/the-refusal-is-distinguishable-from-a-failure
+	test(
+		"leaves both outcomes in one file, which is what the host gets",
+		async () => {
+			// The arrangement the host actually has, asserted once so that the
+			// separate logs above are a convenience rather than a claim: two
+			// invocations appending to the same file interleave, the refusal's
+			// two lines landing inside the running one's. What survives that is
+			// the statuses — which is the whole of what the record has to
+			// separate, and why `99` is a value nothing else emits rather than
+			// a position in the file.
+			const file = standIn(INFLIGHT);
+			const log = under("shared.log");
+			const running = start(file, log);
+			inFlight();
+			invoke(file, log);
+			await running.exited;
+
+			const written = readFileSync(log, "utf8");
+			expect(written).toContain("exit 99");
+			expect(written).toContain("exit 0");
 		},
 		HOOK_MS,
 	);
