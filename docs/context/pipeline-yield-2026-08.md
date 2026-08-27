@@ -1028,3 +1028,43 @@ measured before being written, not guessed.
   rejections needed the user: both stood
 - Not run: preflight, code-review, review-order, first-five, security-review,
   ponytail-review, checklist
+
+## 2026-08-27 — deploy-pipeline, proposed in two halves (PRs #205, #206)
+
+- diff-budget: FAIL once at 1104 against a failing threshold of 800, then WARN
+  on both halves at 714 and 671 — the one gate this session that changed the
+  shape of the work rather than its content. It forced the propose branch to be
+  cut by hand into `spec/deploy-pipeline` and `spec/deploy-pipeline-plan`, the
+  third time that seam has been cut by hand and the reason `proposal-slicing`
+  is proposed
+- zombies: OPEN → PASS — 36 gaps over the proposal text, 34 written as
+  tests-first task bullets, 2 dispositioned without one. One of the 36 was a
+  defect in the spec rather than a missing test: a named volume mounted where
+  the image holds no directory is created owned by `root`, so the non-root job
+  could not have written the bundle. The criterion said the opposite before
+  this run
+- triage: PASS twice — 7 defects, none of which the skill reported itself, it
+  returning no findings by design. Over the propose diff: three false claims in
+  specs written the same hour, the load-bearing one being "all six workflows
+  already do every one of it" about workflow hygiene, where `audit.yml`
+  declares no concurrency group. Over the plan branch: four task bullets still
+  asserting what the criteria said before CodeRabbit sharpened them on #205
+- warm: not run — no dependency manifest changed. `appleboy/ssh-action` was
+  nonetheless vetted by hand, under a CodeRabbit finding rather than under this
+  skill, because a workflow action is a dependency no manifest tracks
+- coderabbit-local: PASS twice — 13 findings, 13 dispositioned (11 applied, 1
+  skipped, 1 half-applied and half-rejected). The rejected half asked for a
+  test that `nginx-proxy` targets the application's container name, which no
+  artefact here can express: the virtual host is host state by decision
+- coderabbit: PASS twice — 13 findings over #205 and #206, 13 dispositioned
+  (10 applied, 1 rejected, 2 skipped). Three of the ten were Major and correct
+  against artefacts that had already passed a local pass on the same text: the
+  host resolving `latest` while the requirement was titled for the commit an
+  image was built from; `certbot certonly` defaulting to an authenticator that
+  binds a port the proxy container holds; and "no state migrates either way"
+  asserted of a rollback whose schema had not been read. The middle one is the
+  session's sharpest result — checking it against the machine found four of its
+  five certificates issued the same broken way, which is why two of them had
+  expired six days earlier
+- Not run: preflight, code-review, review-order, first-five, security-review,
+  ponytail-review, checklist
