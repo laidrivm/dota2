@@ -179,8 +179,9 @@ server's port (`BUN_PORT`/`PORT`, else 3000 — the same precedence `Bun.serve`
 uses, so both sides agree).
 `--repeat-each=3` is the flake gate a change has to clear before CI sees it.
 
-One spec, `e2e/smoke.spec.ts`, covering the paths `bun test` cannot reach
-without a DOM:
+Three specs, covering the paths `bun test` cannot reach without a DOM.
+
+`e2e/smoke.spec.ts` — the paths a user walks:
 
 - Setup completed by keyboard alone — named radio groups, arrow keys within
   a group, a focus ring that only `:focus-visible` draws.
@@ -190,10 +191,21 @@ without a DOM:
 - An axe scan on every state above, asserting zero violations. A rule is
   never excluded without a user decision recorded at the exclusion site.
 
+`e2e/board.spec.ts` — the board's own paths, and the three mechanisms the
+move to CSS modules put under them: a removal control revealed by a custom
+property, mirroring as a property of the grid, and the walk from a control
+up to its row through `data-` markers rather than class names the bundler
+now owns. It carries the suite's one fixture, a set-up session.
+
+`e2e/static-build.spec.ts` — `dist/` on a plain static file host, which is
+what `app-shell` claims of the production build. It builds into a directory
+of its own and serves it with Python's `http.server`, so the dev server the
+other two run against is neither used nor disturbed, and asserts that the
+page reaches Setup having asked nothing of anywhere else.
+
 New e2e tests arrive one way: a `/zombies` finding marked `(e2e candidate)`.
 The backlog is the **(e2e)** bullets in the archived `draft-board` and
-`hero-picker` task lists; the second spec file is where fixtures earn their
-existence, which is why this one has none.
+`hero-picker` task lists.
 
 e2e never runs in a git hook — it is `e2e.yml` on pull requests, nothing else.
 
