@@ -20,8 +20,9 @@ entry, a hook or a CI check leaves this file the way it would leave
 - Commits: imperative subject ≤ 72 chars, body only when the diff doesn't
   explain itself. Commit per completed task-list item, not per file.
 - The only trailer a commit carries is `Co-Authored-By: Claude Opus 5
-  <noreply@anthropic.com>` — no session URL, no run id, whatever the harness
-  offers by default.
+  <noreply@anthropic.com>`, and a pull request body carries no attribution
+  line at all — no session URL, no run id, no generated-with footer, whatever
+  the harness offers by default.
 - Never configure a push to `main` — `remote.<name>.push`, `push.default` set
   to `matching`, `upstream` or `tracking`, `remote.<name>.mirror` — the guard
   reads the command's own words and cannot see a destination that comes from
