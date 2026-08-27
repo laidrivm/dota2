@@ -79,8 +79,9 @@ they route through `CLAUDE.md`'s fix & capture loop like every other rule.
   `git reset --hard`, or `git stash drop`.
 - Never move the working tree off a branch whose work is unpushed — cut the
   next branch in a worktree instead.
-- Stage explicit paths in a worktree you scaffolded; `git add -A` there commits
-  the scaffolding.
+- Stage explicit paths in a worktree you scaffolded, and wherever the tree
+  holds more than one commit's work; `git add -A` is for a tree that is exactly
+  one, and in a worktree it commits the scaffolding besides.
 - Remove a worktree as soon as its branch is the one to push — a branch checked
   out in one cannot be checked out anywhere else.
 - Never state another repository's mutable properties — visibility, default
