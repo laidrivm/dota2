@@ -60,9 +60,11 @@ function build(into: string): void {
 		throw new Error(
 			`expected the build script to name dist four times: ${scripts.build}`,
 		);
-	// Quoted, because this path is a temporary directory's rather than a word
-	// somebody chose, and `sh` would split it at a space.
-	const built = spawnSync("sh", ["-c", parts.join(`'${into}'`)], {
+	// One word to `sh`, whatever it holds: this path is a temporary
+	// directory's rather than one somebody chose, so a space in it would
+	// otherwise split the argument and an apostrophe would end it.
+	const word = `'${into.replaceAll("'", `'\\''`)}'`;
+	const built = spawnSync("sh", ["-c", parts.join(word)], {
 		cwd: root,
 		encoding: "utf8",
 	});
