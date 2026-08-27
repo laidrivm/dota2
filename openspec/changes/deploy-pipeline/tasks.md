@@ -98,7 +98,7 @@ because the build stage failing to produce `dist/` fails the image build.
 
 ## 3. The compose project
 
-- [ ] 3.1 Write `checks/deployment-topology.test.ts` over the compose file: no
+- [x] 3.1 Write `checks/deployment-topology.test.ts` over the compose file: no
       service binds a host port; the database attaches to the project's
       private network and not to the shared proxy network; the application and
       the job attach to both and mount both named volumes at the paths the
