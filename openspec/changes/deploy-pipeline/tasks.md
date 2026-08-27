@@ -81,11 +81,11 @@ because the build stage failing to produce `dist/` fails the image build.
       file under `snapshot/` or `icons/` fails the check.
       (Req: container-image — One image carries both entry points and
       everything each reads)
-- [ ] 2.4 Make the production stage install with `--frozen-lockfile
+- [x] 2.4 Make the production stage install with `--frozen-lockfile
       --production --ignore-scripts` and run as the non-root `bun` user.
       (Req: container-image — The production stage installs only what a run
       needs)
-- [ ] 2.5 Carry `src/`, `dist/`, `package.json` and `tsconfig.json` into the
+- [x] 2.5 Carry `src/`, `dist/`, `package.json` and `tsconfig.json` into the
       production stage, and create `snapshot/` and `icons/` empty and owned by
       `bun`.
       (Req: container-image — One image carries both entry points and

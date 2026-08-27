@@ -26,11 +26,44 @@ FROM oven/bun:1.3.14-alpine@sha256:5acc90a93e91ff07bf72aa90a7c9f0fa189765aec90b4
 WORKDIR /app
 
 COPY . .
-RUN bun install --frozen-lockfile
+
+# Each flag closes a distinct hole and none substitutes for another.
+# `--frozen-lockfile` refuses to resolve afresh, so the image holds the
+# versions the lockfile settled and a drifted manifest fails the build instead
+# of shipping. `--production` leaves the development dependencies out, so a
+# build-time tool cannot be reached from a running container. `--ignore-scripts`
+# means a dependency's install script does not execute during the build, which
+# is the position `bunfig.toml` already takes for a local install — and it is
+# the one flag with no consequence a running container shows, so
+# `checks/container-image-install.test.ts` reads it from this line.
+RUN bun install --frozen-lockfile --production --ignore-scripts
 
 # `dist/` is excluded from the context on purpose — a developer's own is stale
 # — so the built bundle arrives from the stage that built it.
 COPY --from=build /app/dist ./dist
+
+# The two directories the job writes and the server reads, created here and
+# left empty.
+#
+# Created, because Docker creates a missing mount point itself and creates it
+# owned by `root`: a named volume mounted where the image holds nothing leaves
+# the non-root job below unable to write the bundle it has just built — a
+# failure that appears on the first real run and in no build.
+#
+# Empty, because the server answers both from a listing taken per request, so
+# a file shipped at either path is a second source for what it serves, one no
+# export can replace. `.dockerignore` is what keeps a developer's own out of
+# the context; this line is what makes the directories exist regardless.
+#
+# `chown` covers the whole tree rather than these two alone: `COPY` above ran
+# as root, so every file the image carries is root-owned, and the install
+# directory has to be writable by the user that reads it.
+RUN mkdir -p snapshot icons && chown -R bun:bun /app
+
+# The base image provides `bun` and defaults to root all the same. Nothing here
+# needs to write outside `/app`, and the deploy hands this image a database
+# password and a STRATZ key.
+USER bun
 
 # The server, the job being the entry point that has to be asked for.
 CMD ["bun", "src/server/server.ts"]
