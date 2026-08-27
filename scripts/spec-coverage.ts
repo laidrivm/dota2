@@ -198,7 +198,7 @@ export function check(cwd?: string) {
 	};
 }
 
-export const FLOOR = 385; // +2 stryker.config.json criteria whose tests a ponytail-review pass cut, +1 commit-gates/the-list-has-one-home whose THEN is a review verdict, +1 mutation-floor/the-gate-is-not-picked-up-by-the-suite, confirmed by probe because a test would restate which file the gate lives in, +2 agent-rulebook scenarios on where a prohibition's prose may stand, which nothing in the suite can cite because nothing parses prose; 385 since e2e/static-build.spec.ts closed app-shell/build-output-is-self-contained, which had waited for a deployment to serve dist from
+export const FLOOR = 386; // +2 stryker.config.json criteria whose tests a ponytail-review pass cut, +1 commit-gates/the-list-has-one-home whose THEN is a review verdict, +1 mutation-floor/the-gate-is-not-picked-up-by-the-suite, confirmed by probe because a test would restate which file the gate lives in, +2 agent-rulebook scenarios on where a prohibition's prose may stand, which nothing in the suite can cite because nothing parses prose, +1 change-slicing/the-second-pull-request-s-base, which no test can close: the second pull request carries the same diff whichever branch it opened from, so nothing distinguishes the criterion met from the criterion broken; 386 since proposal-slicing synced, having landed 385 at e2e/static-build.spec.ts closed app-shell/build-output-is-self-contained, which had waited for a deployment to serve dist from
 
 /**
  * This file's own `FLOOR` line — the reason lives on it, so the check reads it
