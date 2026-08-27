@@ -58,9 +58,15 @@ record a reader belongs to the change that adds error tracking.
 ### Requirement: A second run cannot start while one is in flight
 
 An invocation arriving while another is still running SHALL be refused
-without starting a second job container, and SHALL end with a status distinct
-from any the job itself produces, so the record separates *refused* from
-*failed*.
+without starting a second job container, and SHALL end with status `99`, so
+the record separates *refused* from *failed*.
+
+`99` rather than an adjective, and `99` rather than any small number:
+`src/job/run.ts` exits `0` when every step completed and `1` for every report
+it returns, and those two are the whole of what the job emits — so a refusal
+carrying either is a refusal the record cannot tell from a run. The exclusion
+mechanism's own default for a conflict is `1`, which is the collision this
+value exists to avoid.
 
 The refusal is what closes a hole the build cannot close for itself.
 `buildSnapshot` reads the newest published snapshot's hero count before the
@@ -82,12 +88,13 @@ run this protects against is precisely the one that ran longer than expected.
 
 - **WHEN** a run is still executing and the schedule's entry is invoked again
 - **THEN** no second job container SHALL start, the running one SHALL be
-  unaffected, and the record SHALL carry the status that means refused
+  unaffected, and the record SHALL carry status `99`
 
 #### Scenario: The refusal is distinguishable from a failure
 
 - **WHEN** the record is read for an invocation that was refused
-- **THEN** its status SHALL differ from the status a failing run produces
+- **THEN** its status SHALL be `99`, which is neither the `0` a completed run
+  produces nor the `1` every failing one does
 
 #### Scenario: The lock after the run ends
 

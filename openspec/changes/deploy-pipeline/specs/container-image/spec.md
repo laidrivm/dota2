@@ -33,6 +33,21 @@ absence and absences are what review misses.
 - **THEN** the check SHALL fail — the pin would otherwise be raised by
   nobody, and a stale digest reads exactly like a fresh one
 
+#### Scenario: An entry naming another directory
+
+- **IF** the `docker` ecosystem entry names a directory the `Dockerfile` does
+  not sit in
+- **THEN** the check SHALL fail — an entry that covers nothing raises nothing,
+  and it reads from the file exactly like one that does
+
+#### Scenario: An entry on terms of its own
+
+- **IF** the `docker` entry's schedule, cooldown or grouping differs from what
+  the entries already in the file carry
+- **THEN** the check SHALL fail — the cooldown in particular is what lets a
+  poisoned release be unpublished before an update adopts it, and an entry
+  that opts out of it is a supply-chain hole with an updater's name on it
+
 #### Scenario: The repository as it stands
 
 - **WHEN** the check runs over this repository after the change
@@ -52,6 +67,17 @@ build-time tool cannot be reached from a running container; `--ignore-scripts`
 means a dependency's install script does not execute during the image build,
 which is the supply-chain position `bunfig.toml` already takes for a local
 install.
+
+#### Scenario: The install command the production stage runs
+
+- **WHEN** the production stage's install command is read from the
+  `Dockerfile`
+- **THEN** it SHALL carry `--frozen-lockfile`, `--production` and
+  `--ignore-scripts`
+- **AND** this SHALL be checked directly rather than through a consequence,
+  because `--ignore-scripts` has none that the scenarios below reach: an
+  install script that ran during the build leaves every other assertion here
+  true
 
 #### Scenario: The running process is not root
 
@@ -102,6 +128,13 @@ own file, holding a STRATZ key and a database password, sitting beside the
 - **WHEN** a `.env` file is present in the build context and the image is
   built
 - **THEN** the image SHALL hold no `.env` file, and no value from it
+
+#### Scenario: The committed example file
+
+- **WHEN** the image is built from a context holding `.env.example`
+- **THEN** the image SHALL hold no `.env.example` — it is tracked, so unlike a
+  developer's `.env` it is in every context on every machine, and neither
+  entry point reads it
 
 #### Scenario: The host's installed modules
 
