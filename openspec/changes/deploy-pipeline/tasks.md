@@ -38,8 +38,13 @@ because the build stage failing to produce `dist/` fails the image build.
       must not hold)
 - [ ] 1.3 Add the multistage `Dockerfile` with its base pinned by digest, and
       `.dockerignore` written as what it excludes.
+      (Req: container-image — Every base image is pinned by digest, and a
+      named updater raises it / The build context carries nothing the image
+      must not hold)
 - [ ] 1.4 Add the `docker` ecosystem entry to `.github/dependabot.yml`, on the
       schedule, cooldown and grouping the existing entries carry.
+      (Req: container-image — Every base image is pinned by digest, and a
+      named updater raises it)
 - [ ] 1.5 Add `Dockerfile`, `.dockerignore` and `docker-compose.yml` to
       `scripts/repo-layout.ts`'s exemption list, each with the reason it sits
       at the root, and reconcile the README layout section.
@@ -47,6 +52,8 @@ because the build stage failing to produce `dist/` fails the image build.
       name)
 - [ ] 1.6 Add `scripts/test-docker.sh` and a `test:docker` script, plus the CI
       job that runs it and fails when the cases skipped.
+      (Req: none — the harness the Docker-gated cases above run under. A
+      suite that skips in the job that owns it is a suite that failed.)
 
 ## 2. The image: the production install and both entry points
 
@@ -73,9 +80,13 @@ because the build stage failing to produce `dist/` fails the image build.
       everything each reads)
 - [ ] 2.4 Make the production stage install with `--frozen-lockfile
       --production --ignore-scripts` and run as the non-root `bun` user.
+      (Req: container-image — The production stage installs only what a run
+      needs)
 - [ ] 2.5 Carry `src/`, `dist/`, `package.json` and `tsconfig.json` into the
       production stage, and create `snapshot/` and `icons/` empty and owned by
       `bun`.
+      (Req: container-image — One image carries both entry points and
+      everything each reads)
 
 ## 3. The compose project
 
@@ -101,8 +112,13 @@ because the build stage failing to produce `dist/` fails the image build.
       digest, and the job as a service run on demand; two named volumes; the
       external proxy network and a private one; `restart: always` on the two
       that stay up and none on the job.
+      (Req: deployment-topology — The application is reachable only through
+      the proxy / The database is reachable only from this project / The
+      bundle and the icon mirror are one set of files, shared)
 - [ ] 3.5 Add the deployment's variables to `.env.example` if the compose file
       introduces any the four already there do not cover.
+      (Req: none — `.env.example` documents what a run reads, and the four
+      variables already there are the whole of it unless compose adds one.)
 
 ## 4. Deploy: the gate and the tags
 
@@ -122,11 +138,16 @@ because the build stage failing to produce `dist/` fails the image build.
       was built from)
 - [ ] 4.3 Add `workflow_call:` to `lint.yml`, `test.yml`, `e2e.yml` and the
       type-check's workflow, changing nothing else in them.
+      (Req: deploy-workflow — A deploy runs only against a commit the checks
+      have passed)
 - [ ] 4.4 Add `.github/workflows/deploy.yml`, triggered on push to `main`,
       with those four as `needs:`, buildx, `cache-from/to: type=gha`, and both
       tags pushed to the public Docker Hub repository. Assert the trigger in
       4.1's file: a workflow that runs on nothing deploys nothing, and one
       that runs on a wider trigger deploys more than a merge.
+      (Req: deploy-workflow — A deploy runs only against a commit the checks
+      have passed / Every deployed image is named by the commit it was built
+      from)
 
 ## 5. Deploy: replacement order, secrets, and the workflow's own hygiene
 
@@ -153,9 +174,14 @@ because the build stage failing to produce `dist/` fails the image build.
 - [ ] 5.4 Vet `appleboy/ssh-action` as a dependency before pinning it — repo
       activity, usage, open issues about the credential path — and record the
       vetting in the pull request.
+      (Req: deploy-workflow — The deploy workflow is held to the hygiene the
+      others already practise)
 - [ ] 5.5 Add the host steps to `deploy.yml`: pull first, then bring the
       project up — both on the commit's SHA, passed in so the compose file
       resolves it rather than a mutable tag.
+      (Req: deploy-workflow — The running container is replaced only once its
+      replacement is on the host / Every deployed image is named by the
+      commit it was built from)
 
 ## 6. The schedule
 
@@ -180,6 +206,9 @@ because the build stage failing to produce `dist/` fails the image build.
       path and the hour — and record the whole line in the README as the one
       to install. The conflict status is not among them: `snapshot-schedule`
       fixes it at `99`, and the entry cites that rather than choosing again.
+      (Req: snapshot-schedule — The job runs on a schedule outside the
+      application / Every invocation leaves a record of when it ran and how
+      it ended / A second run cannot start while one is in flight)
 
 ## 7. Documentation, the deferred smoke case, and the plan
 
@@ -193,14 +222,20 @@ because the build stage failing to produce `dist/` fails the image build.
       nginx virtual host as prose — including that the Cloudflare record must
       be DNS only and that the certificate has to exist before the proxy is
       reloaded.
+      (Req: deploy-workflow — Every deployed image is named by the commit it
+      was built from)
 - [ ] 7.3 Write the README bootstrap sequence in the order the design fixes,
       and name the host's empty certbot renewal hooks as a thing this
       deployment inherits.
+      (Req: none — the host bootstrap is state outside the repository, which
+      no criterion of this change reaches.)
 - [ ] 7.4 Tick this change's steps in `PLAN.md` as they merge, and collapse
       its queue entry when the last one does. The three entries the proposal
       stage owed — the alert moving to Task 5, the VPS's renewal hooks, and
       workflow hygiene being stated nowhere — were written when the decisions
       were taken and are not this step's.
+      (Req: none — queue bookkeeping, which `CLAUDE.md` requires and no
+      capability states.)
 
 This step closes no acceptance criterion of its own beyond 7.1's, which
 belongs to `app-shell` and is verified rather than added here.
