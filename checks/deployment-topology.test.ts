@@ -125,8 +125,15 @@ test.each([
 describe("the bundle and the icon mirror are mounted where the server reads", () => {
 	const named = Object.keys(compose.volumes ?? {});
 
-	test("the file declares the two named volumes", () => {
-		expect(named).toHaveLength(2);
+	test("every mount names a volume the file declares", () => {
+		// Not a count: the database has one of its own that neither of the two
+		// services below touches, so the shared pair is a subset rather than
+		// the whole list. What matters is that no mount names a host path or a
+		// volume nothing declared, which compose would create unremarked.
+		const mounted = Object.values(services).flatMap((s) => s.volumes ?? []);
+		expect(mounted.length).toBeGreaterThan(0);
+		for (const entry of mounted)
+			expect(named).toContain(entry.split(":")[0] as string);
 	});
 
 	test.each([
@@ -143,8 +150,27 @@ describe("the bundle and the icon mirror are mounted where the server reads", ()
 		expect(mounts.map((m) => m.target).sort()).toEqual(
 			[`${workdir}/icons`, `${workdir}/snapshot`].sort(),
 		);
-		expect(mounts.map((m) => m.volume).sort()).toEqual([...named].sort());
+		// The same two named volumes for both services, whatever they are
+		// called: sharing is the point, and two services each with a volume of
+		// its own reads identically in the file.
+		expect(mounts.map((m) => m.volume).sort()).toEqual(
+			(app.volumes ?? []).map((e) => e.split(":")[0]).sort(),
+		);
 	});
+});
+
+// Cited by no criterion: this branch puts a second copy of the Postgres digest
+// in the tree, and the copies have to agree. `scripts/test-db.sh` takes its
+// image from the workflow, and Dependabot's `docker` ecosystem reads compose
+// files and not workflows — so a bump lands here and leaves that one behind,
+// with the local harness and CI then running different databases.
+test("the database is pinned to the digest the workflow runs", () => {
+	const workflow = readFileSync(`${root}/.github/workflows/test.yml`, "utf8");
+	const pinned = [...workflow.matchAll(/image:\s*(postgres:\S+)/g)].map(
+		(match) => match[1],
+	);
+	expect(pinned).toHaveLength(1);
+	expect(db.image).toBe(pinned[0]);
 });
 
 // spec: snapshot-schedule/the-job-is-not-kept-running

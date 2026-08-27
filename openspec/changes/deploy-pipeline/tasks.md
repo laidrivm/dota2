@@ -116,7 +116,7 @@ because the build stage failing to produce `dist/` fails the image build.
       Docker-gated.
       (Req: snapshot-schedule — The job runs on a schedule outside the
       application)
-- [ ] 3.4 Add `docker-compose.yml`: the application, its PostgreSQL pinned by
+- [x] 3.4 Add `docker-compose.yml`: the application, its PostgreSQL pinned by
       digest, and the job as a service run on demand; two named volumes; the
       external proxy network and a private one; `restart: always` on the two
       that stay up and none on the job. Add it to `scripts/repo-layout.ts`'s
@@ -125,7 +125,7 @@ because the build stage failing to produce `dist/` fails the image build.
       (Req: deployment-topology — The application is reachable only through
       the proxy / The database is reachable only from this project / The
       bundle and the icon mirror are one set of files, shared)
-- [ ] 3.5 Add the deployment's variables to `.env.example` if the compose file
+- [x] 3.5 Add the deployment's variables to `.env.example` if the compose file
       introduces any the four already there do not cover.
       (Req: none — `.env.example` documents what a run reads, and the four
       variables already there are the whole of it unless compose adds one.)
