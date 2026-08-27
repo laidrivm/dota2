@@ -1145,3 +1145,47 @@ applied respectively — so the two are not redundant even when nothing changed
 between them. And across all six review passes the highest-value findings were
 about *prose*: comments and task text asserting behaviour the code did not
 have. Four of the six Majors were of that shape.
+
+## 2026-08-27 — feat/deploy-pipeline-4
+
+- zombies: OPEN — 9 gaps, 8 acted on (1 rejected: a deploy calling a check
+  workflow by its remote form, which this repository never does and could not
+  trust if it did)
+- warm: PASS — 3 dependencies vetted, 0 findings, 0 acted on
+- triage: OPEN — 5 groups, 1 high-risk — High/Medium read, 2 defects found. One
+  was the sharpest finding of the branch and no bot raised it: the callable
+  check imported the gate check, so bun registered eleven cases twice and
+  reported them under the wrong file
+- coderabbit-local: PASS — 8 findings over three passes, 8 dispositioned
+  (4 applied, 1 rejected, 3 skipped)
+- coderabbit: PASS — 7 findings, 7 dispositioned (6 applied, 1 skipped)
+
+## 2026-08-27 — feat/deploy-pipeline-5
+
+- zombies: PASS — 9 gaps, 9 acted on. Three were holes in a rule rather than
+  missing cases: `set -o errexit` and `set -x -e` were rejected on correct
+  scripts, and `github.event.*` was read out of `run:` alone while 5.5 had just
+  added an action's `script:`
+- warm: PASS — 1 dependency vetted, 0 findings, 0 acted on. Two open issues
+  recorded rather than filed away: #393, which is why the host and the port stay
+  separate secrets, and #275, which is why host-key verification is a named gap
+- triage: PASS — 5 groups, 1 high-risk read, 2 defects found. `secrets: inherit`
+  serialises without a dot, so the environment rule never saw it; and permissions
+  were read at the top of the file only, where a job may widen them
+- coderabbit-local: BLOCKED — review refused: the CLI produced nothing on the
+  first attempt and hung past ten minutes on the second, killed by the user's
+  instruction. 0 findings
+- coderabbit: PASS — 7 findings over two rounds, 7 dispositioned (6 applied,
+  1 skipped)
+
+- Not run this session: preflight, code-review, review-order, first-five,
+  security-review, ponytail-review, checklist
+
+Two observations the counts do not carry. `coderabbit`'s second round on group 5
+reversed half of what its first round asked for — I had added both a parse and a
+text scan "to be safe", and the scan was the source of the false positives the
+second round found. The bot was right both times; the fault was keeping two
+roads. And `coderabbit-local` being unavailable cost nothing measurable on this
+branch: `coderabbit` on the PR found four findings on group 5 anyway, which is
+the same order as the three the local pass found on group 4 before the PR pass
+found four more.
