@@ -21,13 +21,16 @@ because the build stage failing to produce `dist/` fails the image build.
 ## 1. The image: pinning, build context, and something that runs
 
 - [ ] 1.1 Write `checks/container-image.test.ts`: a `FROM` line carrying no
-      `@sha256:` fails; a digest-pinned `Dockerfile` with no `docker`
-      ecosystem entry covering its directory fails; this repository passes.
+      `@sha256:` fails; a `docker` ecosystem entry that is absent, that names
+      a directory the `Dockerfile` does not sit in, or whose schedule,
+      cooldown or grouping differs from the entries already in the file each
+      fail; this repository passes.
       (Req: container-image — Every base image is pinned by digest, and a
       named updater raises it)
 - [ ] 1.2 Write the build-context cases, one per category the requirement
       names: the built image holds no `.git`; no `.env` when one is present in
-      the context; a `node_modules` that is the production install rather than
+      the context, and no `.env.example`, which is tracked and therefore in
+      every context; a `node_modules` that is the production install rather than
       the host's copy; no `.claude/` and no `openspec/`; and none of
       `test-results/`, `playwright-report/`, `reports/` or `.stryker-tmp/`.
       Docker-gated.
@@ -47,10 +50,13 @@ because the build stage failing to produce `dist/` fails the image build.
 
 ## 2. The image: the production install and both entry points
 
-- [ ] 2.1 Write the install cases: the container's effective uid is not `0`; a
-      package listed only under `devDependencies` is absent from the image; a
-      `package.json` naming a version the lockfile lacks fails the build
-      rather than resolving afresh. Docker-gated.
+- [ ] 2.1 Write the install cases: the production stage's install command
+      carries `--frozen-lockfile`, `--production` and `--ignore-scripts`, read
+      from the `Dockerfile` because the last of the three has no consequence
+      the rest of this bullet reaches; the container's effective uid is not
+      `0`; a package listed only under `devDependencies` is absent from the
+      image; a `package.json` naming a version the lockfile lacks fails the
+      build rather than resolving afresh. Docker-gated but for the first.
       (Req: container-image — The production stage installs only what a run
       needs)
 - [ ] 2.2 Write the entry-point cases: the image run with no command serves
@@ -158,8 +164,8 @@ because the build stage failing to produce `dist/` fails the image build.
       ran and how it ended)
 - [ ] 6.2 Write the exclusion cases, each against a run that is actually in
       flight rather than against the interval: a second invocation starts no
-      second job container and leaves the first untouched; its status differs
-      from the status a failing run produces; an invocation after the run has
+      second job container and leaves the first untouched; its status is `99`,
+      which the job itself never emits; an invocation after the run has
       ended starts normally; a run killed outright leaves the next invocation
       able to start. Docker-gated.
       (Req: snapshot-schedule — A second run cannot start while one is in
