@@ -172,12 +172,11 @@ because the build stage failing to produce `dist/` fails the image build.
 - [ ] 7.3 Write the README bootstrap sequence in the order the design fixes,
       and name the host's empty certbot renewal hooks as a thing this
       deployment inherits.
-- [ ] 7.4 Move the failure alert out of `PLAN.md`'s Task 7 entry and into
-      Task 5's, and add the queue entry for the VPS's expired certificates and
-      empty renewal hooks.
-- [ ] 7.5 Add the queue entry for workflow hygiene being practised in every
-      workflow and stated in no rule and no capability, which this change
-      scopes to the deploy workflow alone.
+- [ ] 7.4 Tick this change's steps in `PLAN.md` as they merge, and collapse
+      its queue entry when the last one does. The three entries the proposal
+      stage owed — the alert moving to Task 5, the VPS's renewal hooks, and
+      workflow hygiene being stated nowhere — were written when the decisions
+      were taken and are not this step's.
 
 This step closes no acceptance criterion of its own beyond 7.1's, which
 belongs to `app-shell` and is verified rather than added here.

@@ -111,18 +111,45 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       Generating 86 more colours would entrench a placeholder whose reason has
       gone; drawing the image instead is smaller and needs a delta spec, the
       criterion pinning the background to the token.
-- [ ] **Task 7** — the whole deployment: Docker image, compose (`app` +
-      `postgres`, bundle on a volume both mount), the snapshot job's entry in
-      the VPS's existing crontab, the failure alert, and the deploy workflow.
-      That crontab entry also has to refuse a second run while one is in
-      flight, which `tasks/task-7.md` states with the case behind it.
-      Open decisions: registry GHCR or Docker Hub, same VPS or a new one, and
-      who terminates TLS. Follows Phase 3, because a deploy sized to the static
-      bundle alone is a container, a compose file and a workflow that the
-      database and the job then reopen. Carries `ui-foundation` **(e2e)** 1.5,
-      which Task 4 deferred here: serving `dist/` under a plain static server
-      is nearly free once the container exists.
+- [ ] **`deploy-pipeline`** (Task 7) — proposed,
+      `openspec/changes/deploy-pipeline/`. The whole deployment: the image,
+      the compose project, the deploy workflow, and the crontab entry whose
+      `flock` refuses a second run while one is in flight. Seven task groups,
+      so `feat/deploy-pipeline-1` … `-7`, in order. The proposal branch stood
+      at 1104 lines and was cut by hand into `spec/deploy-pipeline` and
+      `spec/deploy-pipeline-plan` — the seam `proposal-slicing` mechanises,
+      cut here for the third time. Decisions settled: Docker Hub, public, so
+      the host needs no registry credential; the existing VPS;
+      `d2ass.laidrivm.com` on Cloudflare DNS-only; TLS at the host's
+      nginx-proxy container. **Two** shared volumes, not one — `snapshot/` and
+      `icons/`, which this entry previously got wrong. Carries
+      `ui-foundation` **(e2e)** 1.5, deferred here by Task 4.
 - [ ] **Task 5** — error tracking (precondition: the product is deployed).
+      Carries the snapshot job's failure alert, which `deploy-pipeline` moved
+      here on finding it in no step and no acceptance criterion of
+      `tasks/task-7.md`: the schedule writes each run's start instant, report
+      and exit status to a log on the host, and nothing reads it. Until then a
+      failed run degrades quietly — the export runs last, so the previously
+      published bundle keeps serving while the data ages.
+- [ ] **The VPS renews certificates that never reach the proxy.**
+      `/etc/letsencrypt/renewal-hooks/` is empty in all three phases, and the
+      `nginx-proxy` container reads `/etc/letsencrypt` at start, so a renewal
+      is invisible to it until something restarts it. Measured on
+      2026-08-27: `fizzbuzz.digital` and `mellon.sh` both expired on
+      2026-08-21, the latter a live domain. `d2ass.laidrivm.com` will inherit
+      the same path 90 days after its certificate is issued. The fix is a
+      deploy hook that reloads the proxy, and it is host state, so it lands as
+      a documented step rather than as a file here.
+- [ ] **Workflow hygiene is practised everywhere and stated nowhere.**
+      Measured over the six workflows: every one pins its actions by SHA with
+      a version comment and declares `permissions:`, five of six declare a
+      concurrency group — `audit.yml` does not — and the one reading
+      `github.event.*` passes it through `env:`. No rule in `CLAUDE.md` and no
+      criterion in any capability says any of it, so `tasks/task-7.md`'s
+      "all workflow hygiene rules apply" points at nothing.
+      `deploy-pipeline` writes the criteria for its own workflow alone;
+      generalising them needs a check over all of them and a home that is not
+      a capability about deploying.
 - [ ] **The design project's guideline pages show superseded inks.**
       `guidelines/colors-hero-palette.html` (52 swatches) and
       `guidelines/component-hero-tile.html` (5) hardcode `#1b1d12`/`#f4f3fb`
