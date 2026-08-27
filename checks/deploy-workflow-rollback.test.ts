@@ -29,18 +29,23 @@ export function problems(deploy: string, readme: string): string[] {
 			// Degrades rather than throws on a workflow naming no image:
 			// `checks/deploy-workflow-tags.test.ts` is what reports that, and
 			// reporting it twice tells the reader there are two faults.
-			(!image || names(block, image)),
+			(!image || names(block, image)) &&
+			// And not by the tag that moves. A rollback documented as `:latest`
+			// puts the host on whatever the next deploy makes of that name —
+			// the failure the SHA tag exists to prevent, written down as the
+			// recovery procedure.
+			!(image && block.includes(`${image}:latest`)),
 	);
 	return named
 		? []
 		: [
-				`README: no passage names the rollback with ${REFERENCE}, ${image ?? "the image"} and the command`,
+				`README: no passage names the rollback with ${REFERENCE}, a ${image ?? "image"} tag that is not \`latest\`, and the command`,
 			];
 }
 
 // spec: deploy-workflow/a-release-that-has-to-be-undone
 describe("the rollback in the README", () => {
-	const message = `README: no passage names the rollback with ${REFERENCE}, laidrivm/d2ass and the command`;
+	const message = `README: no passage names the rollback with ${REFERENCE}, a laidrivm/d2ass tag that is not \`latest\`, and the command`;
 
 	test("a passage naming the value, the image and the command passes", () => {
 		expect(problems(built(), ROLLBACK)).toEqual([]);
@@ -54,6 +59,14 @@ describe("the rollback in the README", () => {
 	test("a passage naming a different image repository fails", () => {
 		const stale = ROLLBACK.replace("laidrivm/d2ass", "laidrivm/d2ass-old");
 		expect(problems(built(), stale)).toEqual([message]);
+	});
+
+	test("a passage rolling back to `latest` fails", () => {
+		const mutable = ROLLBACK.replace(
+			"laidrivm/d2ass at the previous commit's\nSHA tag",
+			"laidrivm/d2ass:latest",
+		);
+		expect(problems(built(), mutable)).toEqual([message]);
 	});
 
 	test("the two spread across separate passages fails", () => {

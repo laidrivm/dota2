@@ -20,9 +20,11 @@ import {
 	BUILDER,
 	built,
 	deployed,
+	envOf,
 	imageOf,
 	names,
 	REFERENCE,
+	resolve,
 	SHA,
 	TAGS,
 } from "./deploy-workflow.fixture.ts";
@@ -48,6 +50,10 @@ export function problems(deploy: string): string[] {
 	const found: string[] = [];
 	const doc = (Bun.YAML.parse(deploy) ?? {}) as Workflow;
 
+	const image = imageOf(deploy);
+	if (!image)
+		found.push("deploy.yml: no IMAGE in env, so nothing names what is pushed");
+
 	const pushing = Object.values(doc.jobs ?? {})
 		.flatMap((job) => job.steps ?? [])
 		// The `@` is part of the boundary: without it `docker/build-push-actions`
@@ -64,16 +70,21 @@ export function problems(deploy: string): string[] {
 		// and the step reads identically but for this one word.
 		if (step.with?.push !== true && step.with?.push !== "true")
 			found.push("deploy.yml: the build step does not push");
-		const references = tagsOf(step).map(referenceOf);
+		const tags = tagsOf(step).map((tag) => resolve(tag, envOf(deploy)));
+		const references = tags.map(referenceOf);
 		if (!references.includes("latest"))
 			found.push("deploy.yml: no `latest` among the tags pushed");
 		if (!references.includes(SHA))
 			found.push("deploy.yml: no commit SHA among the tags pushed");
+		// The repository as well as the reference: a pair of tags on
+		// `other/repository` carries both `latest` and this commit and satisfies
+		// the two assertions above while pushing nothing this deploy owns.
+		// Compared whole rather than by prefix, so `laidrivm/d2ass-old` is not
+		// this repository.
+		for (const tag of tags)
+			if (image && tag.slice(0, tag.lastIndexOf(":")) !== image)
+				found.push(`deploy.yml: pushes ${tag}, which is not ${image}`);
 	}
-
-	const image = imageOf(deploy);
-	if (!image)
-		found.push("deploy.yml: no IMAGE in env, so nothing names what is pushed");
 
 	for (const line of deploy.split(/\r\n|\n|\r/)) {
 		if (!line.includes(REFERENCE)) continue;
@@ -139,6 +150,23 @@ describe("the tags a build pushes", () => {
 	])("a workflow with %s fails", (_what, over, count) => {
 		expect(problems(built(over))).toEqual([
 			`deploy.yml: ${count} ${BUILDER} steps, expected one`,
+		]);
+	});
+
+	test("tags on another repository fail, both of them", () => {
+		// Both carry the right reference, so the two assertions above pass and
+		// the registry gets an image this deploy does not own.
+		const tags = ["other/repository:latest", `other/repository:${SHA}`];
+		expect(problems(built({ tags }))).toEqual([
+			"deploy.yml: pushes other/repository:latest, which is not laidrivm/d2ass",
+			`deploy.yml: pushes other/repository:${SHA}, which is not laidrivm/d2ass`,
+		]);
+	});
+
+	test("a tag on a repository this one's name is a prefix of fails", () => {
+		const tags = [TAGS[0] as string, `laidrivm/d2ass-old:${SHA}`];
+		expect(problems(built({ tags }))).toEqual([
+			`deploy.yml: pushes laidrivm/d2ass-old:${SHA}, which is not laidrivm/d2ass`,
 		]);
 	});
 

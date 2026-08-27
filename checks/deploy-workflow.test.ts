@@ -68,6 +68,15 @@ export function problems(files: Record<string, string>): string[] {
 
 	const jobs = deployed.jobs ?? {};
 
+	// A job in its own `needs:` chain is a workflow GitHub refuses to run, and
+	// it reaches every gate *through the cycle* — so the reachability below
+	// would report a gate correctly expressed on a file that never executes,
+	// which is the one shape of "green and not deploying" this check exists to
+	// tell apart from a deploy.
+	for (const id of Object.keys(jobs))
+		if (chain(jobs, id).has(id))
+			found.push(`${DEPLOY}: job \`${id}\` is in its own needs chain`);
+
 	/** The deploy jobs calling each check workflow. */
 	const callers = new Map<string, string[]>();
 	for (const [id, job] of Object.entries(jobs)) {
@@ -129,12 +138,19 @@ describe("a chain that does not reach every check", () => {
 		expect(problems(deploy(jobs))).toEqual([]);
 	});
 
-	test("terminates on a needs: cycle rather than following it forever", () => {
+	test("a needs: cycle is named rather than followed forever", () => {
+		// Both halves at once: the traversal terminates, and what it found is
+		// reported. A cycle reaches every gate through itself, so a check that
+		// only measured reachability would call this workflow correctly gated —
+		// and GitHub would refuse to run it.
 		const jobs = {
 			build: { needs: ["push", "lint", "test", "e2e"], steps: [] },
 			push: { needs: "build", steps: [] },
 		};
-		expect(problems(deploy(jobs))).toEqual([]);
+		expect(problems(deploy(jobs))).toEqual([
+			"deploy.yml: job `push` is in its own needs chain",
+			"deploy.yml: job `build` is in its own needs chain",
+		]);
 	});
 
 	test("fails when a check is called by no job at all", () => {

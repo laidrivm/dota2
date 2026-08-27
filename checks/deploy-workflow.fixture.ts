@@ -27,7 +27,7 @@ export const CHECKS = {
 export type Step = { run?: string };
 export type Job = { needs?: string | string[]; uses?: string; steps?: Step[] };
 export type Workflow = {
-	on?: Record<string, unknown>;
+	on?: string | string[] | Record<string, unknown>;
 	concurrency?: { group?: string };
 	jobs?: Record<string, Job>;
 };
@@ -40,6 +40,22 @@ export const parse = (files: Record<string, string>) =>
 			(Bun.YAML.parse(text) ?? {}) as Workflow,
 		]),
 	);
+
+/**
+ * The events a workflow triggers on, whatever form it wrote them in.
+ *
+ * GitHub accepts `on: pull_request`, `on: [pull_request, workflow_call]` and
+ * the mapping this repository uses. A membership test against the raw value
+ * throws on the first — `in` refuses a string right operand — and reads array
+ * *indexes* on the second, reporting every trigger as absent on a file that
+ * declares them all.
+ */
+export const triggersOf = (doc: Workflow) => {
+	const on = doc.on;
+	if (typeof on === "string") return new Set([on]);
+	if (Array.isArray(on)) return new Set(on.map(String));
+	return new Set(Object.keys(on ?? {}));
+};
 
 /** Every command a workflow's own steps run, trimmed as written. */
 export const runsOf = (doc: Workflow) =>
@@ -86,7 +102,10 @@ export function ownersOf(docs: Map<string, Workflow>) {
 export function repository(): Record<string, string> {
 	const dir = `${root}/.github/workflows`;
 	const files = Object.fromEntries(
-		[...new Bun.Glob("*.yml").scanSync(dir)].map((name) => [
+		// Both extensions: GitHub runs a `.yaml` workflow exactly as it runs a
+		// `.yml` one, and a check stored under the spelling this did not scan
+		// would be a second owner nothing here could see.
+		[...new Bun.Glob("*.{yml,yaml}").scanSync(dir)].map((name) => [
 			name,
 			readFileSync(join(dir, name), "utf8"),
 		]),
@@ -120,7 +139,10 @@ export const JOBS: Record<string, object> = {
  */
 export const check = (
 	name: string,
-	{ on, group }: { on?: object; group?: string | null } = {},
+	{
+		on,
+		group,
+	}: { on?: string | string[] | object; group?: string | null } = {},
 ) =>
 	Bun.YAML.stringify({
 		on: on ?? { pull_request: null, workflow_call: null },
@@ -196,9 +218,24 @@ export const names = (text: string, image: string) =>
  * anywhere a check could restate it: two copies of a name drift the moment
  * either is a value a file states itself.
  */
-export const imageOf = (deploy: string) =>
-	((Bun.YAML.parse(deploy) ?? {}) as { env?: Record<string, string> }).env
-		?.IMAGE;
+export const envOf = (deploy: string) =>
+	((Bun.YAML.parse(deploy) ?? {}) as { env?: Record<string, string> }).env ??
+	{};
+
+export const imageOf = (deploy: string) => envOf(deploy).IMAGE;
+
+/**
+ * A tag with the workflow's own `env:` values put in.
+ *
+ * The real file writes `${{ env.IMAGE }}:latest`, so a tag compared as text
+ * against the image would never match the one thing it must. Resolved from
+ * what the workflow declares, not from anything restated here.
+ */
+export const resolve = (tag: string, env: Record<string, string>) =>
+	tag.replace(
+		/\$\{\{\s*env\.(\w+)\s*\}\}/g,
+		(whole, name) => env[name] ?? whole,
+	);
 
 /** The two tags a build is meant to push. */
 export const TAGS = ["laidrivm/d2ass:latest", `laidrivm/d2ass:${SHA}`];
