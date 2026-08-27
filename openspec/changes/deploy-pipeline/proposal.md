@@ -109,10 +109,11 @@ runtime, neither of which the built bundle depends on.
 - **New pinned artefact**: the base image digest, whose updater is the
   Dependabot entry this change adds — the Safety rule about naming what updates
   a pin is satisfied by that entry rather than by a comment.
-- **Secrets**: two, both in the `production` environment — the Docker Hub token
-  and the SSH private key. The registry, image name and container names are not
-  secrets and are written in the open; the SSH host, port and user stay secrets
-  because this repository is public and the port is not the default one.
+- **Secrets**: five, all in the `production` environment — the Docker Hub
+  token, the SSH private key, and the SSH host, port and user. The last three
+  are secrets because this repository is public and the host does not listen
+  for SSH on the default port. The registry, image name and container names
+  are not secrets and are written in the open.
 - **Host state outside the repository**: the nginx virtual host, the crontab
   entry, the `.env` file and the TLS certificate. Each is documented in the
   README as a bootstrap step rather than applied by the workflow.
