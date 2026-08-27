@@ -55,10 +55,14 @@ COPY --from=build /app/dist ./dist
 # export can replace. `.dockerignore` is what keeps a developer's own out of
 # the context; this line is what makes the directories exist regardless.
 #
-# `chown` covers the whole tree rather than these two alone: `COPY` above ran
-# as root, so every file the image carries is root-owned, and the install
-# directory has to be writable by the user that reads it.
-RUN mkdir -p snapshot icons && chown -R bun:bun /app
+# `chown` covers these two and nothing else, which is the whole of what the
+# container needs to write. Everything else `COPY` and the install left is
+# root-owned and world-readable, and reading is all the server and the job do
+# with it — measured by building the image both ways, the narrow one serving
+# the page, the fonts, the job's own startup check and a write through a
+# mounted volume alike. `chown -R /app` would additionally let the running
+# container rewrite its own source.
+RUN mkdir -p snapshot icons && chown bun:bun snapshot icons
 
 # The base image provides `bun` and defaults to root all the same. Nothing here
 # needs to write outside `/app`, and the deploy hands this image a database
