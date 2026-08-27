@@ -117,6 +117,18 @@ The snapshot is `src/fixtures/snapshot.json` until the Phase 3 pipeline
 exists; the client only ever knows the URL `/snapshot.json`
 (`src/app/snapshot.ts`).
 
+## Deploying it
+
+A push to `main` runs `.github/workflows/deploy.yml`: it calls the lint, test
+and e2e workflows against that commit, and only then builds the image and
+pushes it to Docker Hub under two tags — `latest`, which names the newest
+build for a reader, and the commit's SHA, which is what the host actually
+runs.
+
+To roll back, set `D2ASS_IMAGE` on the host to a previous commit's SHA tag —
+`laidrivm/d2ass:<sha>`, which no later deploy overwrites — then
+`docker compose pull && docker compose up -d`. That is the whole of it.
+
 ## E2E smoke suite
 
 `bunx playwright test` — Chromium only. The runner starts `bun run dev`
