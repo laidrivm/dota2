@@ -309,12 +309,19 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       tells a reader nothing. Closing it is either a comment per site or a
       check that reconciles the workflows against the manifest.
 
-      Counted eight when this was written and nine by the time
-      `feat/deploy-pipeline-1` read it, which is the argument for the check
-      rather than the comments: a count nothing measures drifts every time a
-      job is added. That branch's `Dockerfile` is the tenth site and the one
-      exception — its `oven/bun:1.3.14-alpine` is pinned by digest and the
-      `docker` ecosystem entry beside it is what raises that one.
+      Ten is the count of workflow jobs, and it is the whole of what this entry
+      is about. It said eight when it was written and the tree already carried
+      nine before `feat/deploy-pipeline-1` added its Docker job — which is the
+      argument for the reconciling check rather than for a comment per site: a
+      count nothing measures drifts every time a job is added.
+
+      That branch also puts `1.3.14` in a place this entry does not reach, and
+      the distinction is the point rather than a footnote: the `Dockerfile`'s
+      `oven/bun:1.3.14-alpine` is not a workflow job, it is pinned by digest
+      rather than by version string, and the `docker` ecosystem entry beside it
+      is what raises it. It is the one site of the version that something
+      updates, so a check written for this entry has to tell the two kinds
+      apart rather than count them together.
 - [ ] **A captured rule is sent to the costliest of its two homes.**
       `openspec/specs/local-review-loop/spec.md` §*A justification survives
       only when it is a convention* says a skipped Minor becomes a rule in
