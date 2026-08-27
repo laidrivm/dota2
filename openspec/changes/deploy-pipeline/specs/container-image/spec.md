@@ -160,9 +160,11 @@ point resolves at runtime: `src/app/styles/fonts/`, which the font routes are
 built from; `src/fixtures/snapshot.json`, which `/snapshot.json` answers with
 until an export has published; and `src/job/schema.sql`, which the job applies
 on connect. Each is resolved from a source path rather than from `dist/`, so
-an image carrying only the built bundle answers the font routes `404` and
-cannot open a database connection at all — a failure that appears only at
-runtime, in a container, and not in any build.
+an image carrying only the built bundle does not serve at all: the route map
+is built by scanning the font directory, so the server throws before it binds
+and the container exits, and the job cannot open a database connection either
+— a failure that appears only at runtime, in a container, and not in any
+build.
 
 The image SHALL hold `snapshot/` and `icons/` as empty directories owned by
 the user the container runs as, and SHALL ship no file in either.

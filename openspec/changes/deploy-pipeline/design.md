@@ -79,8 +79,17 @@ resolves three things from *source* paths rather than from `dist/`:
 
 So the production stage carries `src/`, `dist/`, the production
 `node_modules`, `package.json` and `tsconfig.json`. This is the failure that
-would otherwise appear only at runtime, in a container, and in no build: the
-image starts, serves the page, and answers every font request `404`.
+would otherwise appear only at runtime, in a container, and in no build.
+
+An earlier draft said the image would start, serve the page, and answer every
+font request `404`. Measured on 2026-08-27 by building exactly that image, it
+does not: `staticRoutes()` scans `src/app/styles/fonts/` when it builds the
+route map, so a production stage without it throws `ENOENT` at
+`static-routes.ts:249` before `Bun.serve` binds, and the container exits. The
+correction runs the argument's way — the failure is louder than assumed, not
+quieter — and the reason for carrying `src/` is unchanged. It is recorded
+because the shape of a failure is what a reader plans around: a crash loop is
+watched for differently from a page that renders wrong.
 
 ### The two runtime directories are mount points the image creates empty
 
