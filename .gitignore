@@ -1,6 +1,11 @@
 .DS_Store
 .claude/skills/
-node_modules/
+# No trailing slash, unlike every other directory entry here, and not a slip:
+# a pattern ending in `/` matches a directory and nothing else. A worktree has
+# no modules of its own, so `node_modules` gets symlinked in for the git hooks
+# to run at all — and a symlink is not a directory, so the slashed form left it
+# untracked-but-visible, one `git add -A` away from being committed.
+node_modules
 dist/
 .claude/settings.local.json
 .env*
