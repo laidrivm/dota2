@@ -59,8 +59,11 @@ jobs:
         # Nothing raises this pin. Dependabot's `github-actions` ecosystem
         # updates only `owner/repo@ref` and states that container registry URLs
         # are unsupported; its `docker` ecosystem reads Dockerfiles and
-        # Kubernetes manifests, neither of which this is. Moving it is a hand
-        # edit until Task 7 brings a Dockerfile that ecosystem can see.
+        # Kubernetes manifests, neither of which this is. That ecosystem is
+        # now enabled — `.github/dependabot.yml` carries it, for the
+        # `Dockerfile` at the root — and this pin is still outside what it
+        # reads, a service image in a workflow being neither of those two
+        # kinds of file. Moving it stays a hand edit.
         image: postgres:18-alpine@sha256:d3e1620b530c944afa6e887d22eb899824da68e19c52024bf98f5220c88a65b2
         env:
           POSTGRES_PASSWORD: postgres
