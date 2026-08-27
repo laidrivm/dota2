@@ -17,6 +17,13 @@ entry, a hook or a CI check leaves this file the way it would leave
   implementation's, and a squash-merged branch is never freed — check the name
   against closed pull requests before branching, never against the base's
   ancestry, which reports a squash-merged branch as unmerged.
+- A proposal at or over the diff budget's failing threshold ships as two pull
+  requests instead: `proposal.md` and the delta specs on
+  `spec/<proposal-slug>`, then `design.md` and `tasks.md` on
+  `spec/<proposal-slug>-plan`. The second opens from the default branch with
+  the first already merged, not from the first branch — the gate names the
+  seam in its refusal, but neither the second name nor its base is anything it
+  can enforce.
 - Commits: imperative subject ≤ 72 chars, body only when the diff doesn't
   explain itself. Commit per completed task-list item, not per file.
 - The only trailer a commit carries is `Co-Authored-By: Claude Opus 5
