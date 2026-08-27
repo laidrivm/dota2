@@ -13,6 +13,7 @@
  */
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { down, PROJECT, projectFile, up } from "./compose.fixture.ts";
+import { DEPLOY, repository } from "./deploy-workflow.fixture.ts";
 import { buildsImage, HOOK_MS, requiresDocker } from "./docker.fixture.ts";
 import {
 	clean,
@@ -63,6 +64,20 @@ describe("the entry the README names", () => {
 		// with a `PATH` of its own: a relative path here resolves somewhere
 		// nobody chose, and the record would be written there.
 		for (const named of [LOCK, LOG, FILE]) expect(named).toMatch(/^\//);
+	});
+
+	// spec: snapshot-schedule/a-scheduled-invocation
+	test("runs the project the deploy workflow puts on the host", () => {
+		// The one value this line and `deploy.yml`'s host script both name.
+		// The README's prose around the entry points at it rather than
+		// restating the path, but the entry itself has to be complete — an
+		// operator pastes it — so the two literals are bound here instead of
+		// by not existing. A deployment moved on the host changes one of them
+		// and fails this.
+		const directory = /^\s*cd (\S+)$/m.exec(repository()[DEPLOY] ?? "")?.[1];
+		if (!directory)
+			throw new Error("the deploy workflow changes into no directory");
+		expect(FILE.startsWith(`${directory}/`)).toBe(true);
 	});
 
 	// spec: snapshot-schedule/a-scheduled-invocation
