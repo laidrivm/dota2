@@ -1226,7 +1226,9 @@ Five branches this session; the sequence ran on each.
 - coderabbit-local: PASS — 0 findings
 - coderabbit: PASS — 2 findings, 2 applied
 
-`docs/deploy-for-any-host`
+`docs/deploy-for-any-host` — named for the README it rewrites, but carrying a
+new fixture and three rewritten assertions, so the full sequence applies rather
+than the single `coderabbit-local` pass a documentation branch gets.
 
 - diff-budget: PASS — 312 lines
 - triage: PASS — 2 groups, 2 defects found: the network name a reader is told
