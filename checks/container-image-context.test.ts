@@ -37,12 +37,15 @@ describe.skipIf(!available)("the build context", () => {
 	//
 	// spec: container-image/a-local-environment-file
 	test("a .env in the context reaches neither the image nor its files", () => {
-		// Both halves: a `.env` excluded by name but read into an `ENV` or
-		// baked into a layer would satisfy the first assertion and leak all
-		// the same.
+		// Three places, because the requirement is that no *value* from the
+		// file reaches the image and the file's own name answers for only one
+		// of them: excluded by name, absent from every file the image holds,
+		// and absent from the environment the image declares — a value read
+		// into an `ENV` sits in none of the files and leaks all the same.
 		expect(holds(`${app}/.env`)).toBe(false);
 		const grep = sh(`grep -rl '${SECRET}' ${app} 2>/dev/null; true`);
 		expect(grep.stdout.toString().trim()).toBe("");
+		expect(sh("env").stdout.toString()).not.toContain(SECRET);
 	}, 60_000);
 
 	// spec: container-image/the-committed-example-file
