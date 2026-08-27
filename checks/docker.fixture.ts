@@ -252,5 +252,39 @@ export function sh(script: string, ...opts: string[]) {
 	return run;
 }
 
+let workdir: string | undefined;
+
+/**
+ * The image's own `WORKDIR`, which is where everything the context sent ends
+ * up and what every path below is written from.
+ *
+ * Read off the built image rather than written here, because the failure of
+ * restating it is silent and total: `WORKDIR` moves, every `holds` call asks
+ * about a path no image has, and each one answers `false` — which is what the
+ * exclusion cases are asserting, so the whole suite passes having checked
+ * nothing.
+ */
+export function app(): string {
+	if (workdir) return workdir;
+	const read = Bun.spawnSync(
+		[
+			"docker",
+			"image",
+			"inspect",
+			"--format",
+			"{{.Config.WorkingDir}}",
+			image(),
+		],
+		{ stdout: "pipe", stderr: "pipe", timeout: PROBE_MS },
+	);
+	const found = read.stdout.toString().trim();
+	if (read.exitCode !== 0 || found === "")
+		throw new Error(
+			`the image declares no WORKDIR:\n${read.stderr.toString()}`,
+		);
+	workdir = found;
+	return workdir;
+}
+
 /** Whether the image holds `path`, of any kind. */
 export const holds = (path: string) => sh(`test -e '${path}'`).exitCode === 0;

@@ -10,6 +10,7 @@
  */
 import { describe, expect, test } from "bun:test";
 import {
+	app,
 	available,
 	buildsImage,
 	holds,
@@ -20,15 +21,12 @@ import {
 
 requiresDocker();
 
-/** Where the image's `WORKDIR` puts everything the context sent. */
-const app = "/app";
-
 describe.skipIf(!available)("the build context", () => {
 	buildsImage();
 
 	// spec: container-image/the-version-control-directory
 	test("the image holds no .git", () => {
-		expect(holds(`${app}/.git`)).toBe(false);
+		expect(holds(`${app()}/.git`)).toBe(false);
 	});
 
 	// The last argument is a timeout: the search below reads every file the
@@ -42,15 +40,15 @@ describe.skipIf(!available)("the build context", () => {
 		// of them: excluded by name, absent from every file the image holds,
 		// and absent from the environment the image declares — a value read
 		// into an `ENV` sits in none of the files and leaks all the same.
-		expect(holds(`${app}/.env`)).toBe(false);
-		const grep = sh(`grep -rl '${SECRET}' ${app} 2>/dev/null; true`);
+		expect(holds(`${app()}/.env`)).toBe(false);
+		const grep = sh(`grep -rl '${SECRET}' ${app()} 2>/dev/null; true`);
 		expect(grep.stdout.toString().trim()).toBe("");
 		expect(sh("env").stdout.toString()).not.toContain(SECRET);
 	}, 60_000);
 
 	// spec: container-image/the-committed-example-file
 	test("the image holds no .env.example", () => {
-		expect(holds(`${app}/.env.example`)).toBe(false);
+		expect(holds(`${app()}/.env.example`)).toBe(false);
 	});
 
 	// spec: container-image/the-host-s-installed-modules
@@ -58,15 +56,15 @@ describe.skipIf(!available)("the build context", () => {
 		// The directory has to be there for its absence of the marker to mean
 		// anything: an image with no `node_modules` at all passes the second
 		// assertion and runs nothing.
-		expect(holds(`${app}/node_modules`)).toBe(true);
-		expect(holds(`${app}/node_modules/.host-copy`)).toBe(false);
+		expect(holds(`${app()}/node_modules`)).toBe(true);
+		expect(holds(`${app()}/node_modules/.host-copy`)).toBe(false);
 	});
 
 	// Cited by no criterion: `.dockerignore` excludes `dist` for a reason of
 	// its own, which no requirement states and which this is here to hold to.
 	test("the bundle is the build stage's, not the context's", () => {
-		expect(holds(`${app}/dist/index.html`)).toBe(true);
-		expect(holds(`${app}/dist/stale.js`)).toBe(false);
+		expect(holds(`${app()}/dist/index.html`)).toBe(true);
+		expect(holds(`${app()}/dist/stale.js`)).toBe(false);
 	});
 
 	// spec: container-image/the-directories-no-run-reads
@@ -79,7 +77,7 @@ describe.skipIf(!available)("the build context", () => {
 			"reports",
 			".stryker-tmp",
 		])("the image holds no %s", (name) => {
-			expect(holds(`${app}/${name}`)).toBe(false);
+			expect(holds(`${app()}/${name}`)).toBe(false);
 		});
 	});
 });
