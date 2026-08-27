@@ -38,6 +38,18 @@ const BUILD_MS = 600_000;
 const RUN_MS = 45_000;
 
 /**
+ * What a hook doing docker work is given, against bun's own default of 5s.
+ *
+ * Every call below is a *synchronous* spawn, and bun cannot fire a hook's
+ * timer while one blocks the thread — so a hook that overruns runs to
+ * completion and is then reported as timed out, with its real elapsed time in
+ * the message. That is why the default is not merely tight here but
+ * misleading: it named 25s on a CI runner where the same hooks take 3s on a
+ * developer's machine, and nothing in the message says which call was slow.
+ */
+export const HOOK_MS = 120_000;
+
+/**
  * Whether a daemon is reachable, not merely whether the client is installed:
  * `docker --version` answers on a machine whose daemon is stopped, and every
  * case here needs one that runs containers.
