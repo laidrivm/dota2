@@ -1,0 +1,46 @@
+# What the build context must not send.
+#
+# The `Dockerfile` copies the tree, so this file is where what the image must
+# not hold is stated, and it is stated as what it removes: a file type nobody
+# excluded is a file type that ships.
+#
+# Named rather than described. "The specification directories" is a phrase two
+# readers resolve differently, where `openspec` is a path a test can look for
+# inside an image — `checks/container-image-context.test.ts` does exactly that,
+# one case per entry below. A path added later is admitted by naming it here,
+# which is the decision being taken rather than defaulted.
+
+# The whole history of a public repository, in an image that is world-readable
+# and that no run reads a commit out of.
+.git
+
+# A developer's own file, holding a STRATZ key and a database password, sitting
+# beside this one in the context that is sent to the builder. `.env.example` is
+# tracked and therefore in every context on every machine; neither entry point
+# reads either.
+.env*
+
+# The host's install: another platform's binaries, and every development
+# dependency. The production stage performs its own. No trailing separator,
+# matching `.gitignore`'s reasoning — a worktree has this as a symlink.
+node_modules
+
+# Read by neither entry point: the agent configuration, the specifications, and
+# the run outputs of the four tools that write them.
+.claude
+openspec
+test-results
+playwright-report
+reports
+.stryker-tmp
+
+# Built by the build stage and copied from it. A developer's own is stale, and
+# `COPY --from` merges into a directory rather than replacing it, so a stale
+# bundle sent here would survive beside the fresh one.
+dist
+
+# Written by the job at runtime and mounted over at both paths. The server
+# answers from its listing of each, so a file shipped in either is a source no
+# export can replace.
+snapshot
+icons

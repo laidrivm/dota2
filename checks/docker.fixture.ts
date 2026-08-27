@@ -37,8 +37,13 @@ const TAG = "d2ass-checks:context";
  * A value planted in the fabricated `.env` and searched for in the image. The
  * requirement is that no *value* from the file reaches the image, which a
  * check for the file's own name does not answer.
+ *
+ * Assembled rather than written whole, and not a stylistic choice: this file
+ * is itself in the build context, so a literal here is a copy of the sentinel
+ * inside the image — which the search then finds, failing the case on its own
+ * source rather than on a leak.
  */
-export const SECRET = "d2ass-check-secret-3f9a1c";
+export const SECRET = ["d2ass", "check", "secret", "3f9a1c"].join("-");
 
 /**
  * Whether a daemon is reachable, not merely whether the client is installed:
@@ -94,16 +99,20 @@ const PLANTED: Record<string, string> = {
 };
 
 /**
- * A build context: every tracked file as the working tree holds it, plus
- * `PLANTED`.
+ * A build context: every file the working tree holds and `.gitignore` does not
+ * cover, plus `PLANTED`.
  *
- * The working tree rather than `git archive HEAD`, so a `Dockerfile` edited
- * and not yet committed is the one built — the alternative silently builds the
- * previous commit's and reports on it.
+ * `--others` beside `--cached`, so a `Dockerfile` written and not yet committed
+ * is the one built — tracked files alone silently build the previous commit's
+ * and report on it. `--exclude-standard` then leaves out exactly what
+ * `PLANTED` supplies deliberately, so no gitignored file arrives twice.
  */
 function fabricate(): string {
 	const dir = mkdtempSync(join(tmpdir(), "d2ass-context-"));
-	const ls = Bun.spawnSync(["git", "ls-files", "-z"], { cwd: root });
+	const ls = Bun.spawnSync(
+		["git", "ls-files", "-z", "--cached", "--others", "--exclude-standard"],
+		{ cwd: root },
+	);
 	if (ls.exitCode !== 0) throw new Error(ls.stderr.toString());
 
 	// `-z` terminates rather than separates, so the last field is empty.

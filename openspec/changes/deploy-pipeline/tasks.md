@@ -36,7 +36,7 @@ because the build stage failing to produce `dist/` fails the image build.
       Docker-gated.
       (Req: container-image — The build context carries nothing the image
       must not hold)
-- [ ] 1.3 Add the multistage `Dockerfile` with its base pinned by digest, and
+- [x] 1.3 Add the multistage `Dockerfile` with its base pinned by digest, and
       `.dockerignore` written as what it excludes.
       (Req: container-image — Every base image is pinned by digest, and a
       named updater raises it / The build context carries nothing the image
