@@ -20,7 +20,6 @@ import { describe, expect, test } from "bun:test";
 import {
 	BUILDER,
 	built,
-	deployed,
 	envOf,
 	imageOf,
 	names,
@@ -28,7 +27,8 @@ import {
 	resolve,
 	SHA,
 	TAGS,
-} from "./deploy-workflow.fixture.ts";
+} from "./deploy-tags.fixture.ts";
+import { deployed } from "./deploy-workflow.fixture.ts";
 
 type Step = {
 	uses?: string;

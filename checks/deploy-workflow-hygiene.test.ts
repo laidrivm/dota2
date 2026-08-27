@@ -37,7 +37,10 @@ const EVENT = /\$\{\{[^}]*github\.event\b/;
 type Workflow = {
 	permissions?: string | Record<string, string>;
 	concurrency?: { group?: string };
-	jobs?: Record<string, { steps?: { run?: string }[] }>;
+	jobs?: Record<
+		string,
+		{ steps?: { run?: string; with?: { script?: string } }[] }
+	>;
 };
 
 /** Everything wrong with the workflow's hygiene, and nothing when nothing is. */
@@ -78,12 +81,19 @@ export function problems(deploy: string): string[] {
 	if (!doc.concurrency?.group)
 		found.push("deploy.yml: no concurrency group, so two deploys can overlap");
 
+	// Both shells a step can carry. The requirement names `run:`, and an
+	// action's `script:` is the same thing reached a different way — a title
+	// carrying shell metacharacters becomes shell in either.
 	for (const job of Object.values(doc.jobs ?? {}))
 		for (const step of job.steps ?? [])
-			if (step.run && EVENT.test(step.run))
-				found.push(
-					`deploy.yml: a run: block interpolates an event value: ${step.run.trim()}`,
-				);
+			for (const [kind, shell] of [
+				["run:", step.run],
+				["script:", step.with?.script],
+			] as const)
+				if (shell && EVENT.test(shell))
+					found.push(
+						`deploy.yml: a ${kind} block interpolates an event value: ${shell.trim()}`,
+					);
 
 	return found;
 }
@@ -171,6 +181,13 @@ describe("an event value reaching a shell", () => {
 		const run = `echo "\${{ github.event.pull_request.title }}"`;
 		expect(problems(hosted({ run }))).toEqual([
 			`deploy.yml: a run: block interpolates an event value: ${run}`,
+		]);
+	});
+
+	test("interpolated into an action's script:, it fails", () => {
+		const script = [`echo "\${{ github.event.head_commit.message }}"`];
+		expect(problems(hosted({ script }))).toEqual([
+			`deploy.yml: a script: block interpolates an event value: ${script[0]}`,
 		]);
 	});
 

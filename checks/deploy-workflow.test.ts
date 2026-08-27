@@ -17,37 +17,16 @@
 import { describe, expect, test } from "bun:test";
 import {
 	CHECKS,
+	chain,
 	checks,
 	DEPLOY,
 	deploy,
 	gate,
-	type Job,
-	needsOf,
 	ownersOf,
 	parse,
 	repository,
 	runsOf,
 } from "./deploy-workflow.fixture.ts";
-
-/**
- * Every job `id` depends on, directly or through another.
- *
- * Transitive, because a deploy job that needs a build job that needs the
- * checks is gated exactly as tightly as one naming them itself — and reading
- * only the direct list would fail a workflow that is correct. `reach` doubles
- * as the visited set, so a `needs:` cycle terminates rather than hanging.
- */
-function chain(jobs: Record<string, Job>, id: string): Set<string> {
-	const reach = new Set<string>();
-	const queue = [...needsOf(jobs[id])];
-	while (queue.length > 0) {
-		const next = queue.shift() as string;
-		if (reach.has(next)) continue;
-		reach.add(next);
-		queue.push(...needsOf(jobs[next]));
-	}
-	return reach;
-}
 
 /** Everything wrong with the gate, and an empty list when nothing is. */
 export function problems(files: Record<string, string>): string[] {

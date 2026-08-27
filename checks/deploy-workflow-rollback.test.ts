@@ -11,12 +11,12 @@
 import { describe, expect, test } from "bun:test";
 import {
 	built,
-	deployed,
 	imageOf,
 	names,
 	REFERENCE,
 	ROLLBACK,
-} from "./deploy-workflow.fixture.ts";
+} from "./deploy-tags.fixture.ts";
+import { deployed } from "./deploy-workflow.fixture.ts";
 
 /** What is wrong with the README's rollback, and nothing when nothing is. */
 export function problems(deploy: string, readme: string): string[] {
