@@ -1,0 +1,71 @@
+name: Deploy
+
+# A push to `main`, and nothing else. Every check in this repository triggers
+# on `pull_request` alone, so a squash merge puts a commit here that none of
+# them has ever run against — this is the event that produces the object meant
+# to serve, and a wider trigger would deploy more than a merge.
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  # Never two deploys at once: they would race for the `latest` tag and, once
+  # Task 5.5 adds the host steps, for the container itself. Not cancelled in
+  # flight — a deploy stopped between the pull and the replacement leaves the
+  # host in a state nobody chose, which is worse than a queue.
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  # In the open rather than in the secret store. Neither grants anything —
+  # the registry repository is public and its name already discloses the
+  # account — and a non-secret held as a secret hides from a reader what this
+  # workflow actually deploys, while making the store itself unauditable for
+  # what is really sensitive.
+  REGISTRY: docker.io
+  REGISTRY_USER: laidrivm
+  IMAGE: laidrivm/d2ass
+
+jobs:
+  # The gate: the repository's own check workflows, called rather than copied.
+  # The commands keep one home each, the dependency is readable here instead of
+  # in repository settings, and every one of them runs against this commit.
+  lint:
+    uses: ./.github/workflows/lint.yml
+  test:
+    uses: ./.github/workflows/test.yml
+  e2e:
+    uses: ./.github/workflows/e2e.yml
+
+  image:
+    needs: [lint, test, e2e]
+    runs-on: ubuntu-latest
+    # What stands between a run and the registry credentials, rather than the
+    # job's own conditions alone.
+    environment: production
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e # v4.3.0
+      - uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ env.REGISTRY_USER }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
+        with:
+          context: .
+          push: true
+          # Both tags, and they answer different questions. The SHA is what the
+          # host runs, so the machine itself says which commit is serving and a
+          # rollback is a change of one value; `latest` names the most recent
+          # build for a reader and is what nothing runs.
+          tags: |
+            ${{ env.IMAGE }}:latest
+            ${{ env.IMAGE }}:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

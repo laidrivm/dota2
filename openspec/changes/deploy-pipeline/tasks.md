@@ -150,7 +150,7 @@ because the build stage failing to produce `dist/` fails the image build.
       type-check's workflow, changing nothing else in them.
       (Req: deploy-workflow — A deploy runs only against a commit the checks
       have passed)
-- [ ] 4.4 Add `.github/workflows/deploy.yml`, triggered on push to `main`,
+- [x] 4.4 Add `.github/workflows/deploy.yml`, triggered on push to `main`,
       with those four as `needs:`, buildx, `cache-from/to: type=gha`, and both
       tags pushed to the public Docker Hub repository. Assert the trigger in
       4.1's file: a workflow that runs on nothing deploys nothing, and one
