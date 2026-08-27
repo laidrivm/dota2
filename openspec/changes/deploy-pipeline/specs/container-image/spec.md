@@ -73,10 +73,18 @@ install.
 
 ### Requirement: The build context carries nothing the image must not hold
 
-A `.dockerignore` SHALL exclude the repository's version control directory,
-every `.env` file, the host's `node_modules`, the agent and specification
-directories, and the test run outputs. The built image SHALL contain none of
-them.
+A `.dockerignore` SHALL exclude, and the built image SHALL contain none of:
+`.git/`; every `.env` file, the committed `.env.example` included, since the
+image needs no example either; the host's `node_modules/`; `.claude/` and
+`openspec/`; and the run outputs `test-results/`, `playwright-report/`,
+`reports/` and `.stryker-tmp/`.
+
+They are named rather than described because a category name is not a
+checkable exclusion: "the specification directories" is a phrase two readers
+resolve differently, where `openspec/` is a path a test can look for inside an
+image. A path added later is admitted by naming it here, which is the decision
+being made rather than defaulted — `repo-layout`'s exemption list on the same
+terms.
 
 The exclusion is stated as what it removes rather than as a copy list,
 because the `Dockerfile` copies the tree: a file type nobody excluded is a
@@ -100,6 +108,13 @@ own file, holding a STRATZ key and a database password, sitting beside the
 - **WHEN** `node_modules/` is present in the build context
 - **THEN** the image's `node_modules` SHALL be the one the production install
   produced, never the host's copy
+
+#### Scenario: The directories no run reads
+
+- **WHEN** the built image is inspected for `.claude/`, `openspec/`,
+  `test-results/`, `playwright-report/`, `reports/` and `.stryker-tmp/`
+- **THEN** it SHALL hold none of them — neither entry point opens any, and an
+  image is where the smallest thing that runs belongs
 
 ### Requirement: One image carries both entry points and everything each reads
 
