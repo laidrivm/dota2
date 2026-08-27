@@ -16,34 +16,11 @@
  * unique tag would leave one behind on every run of the suite.
  */
 import { beforeAll, expect, test } from "bun:test";
-import {
-	copyFileSync,
-	lstatSync,
-	mkdirSync,
-	mkdtempSync,
-	rmSync,
-	writeFileSync,
-} from "node:fs";
-import { tmpdir } from "node:os";
-import { dirname, join } from "node:path";
-
-/** The repository root: this file reads artefacts of it, from `checks/`. */
-const root = join(import.meta.dir, "..");
+import { rmSync } from "node:fs";
+import { fabricate } from "./docker-context.fixture.ts";
 
 /** The tag the shared image is built under. */
 const TAG = "d2ass-checks:context";
-
-/**
- * A value planted in the fabricated `.env` and searched for in the image. The
- * requirement is that no *value* from the file reaches the image, which a
- * check for the file's own name does not answer.
- *
- * Assembled rather than written whole, and not a stylistic choice: this file
- * is itself in the build context, so a literal here is a copy of the sentinel
- * inside the image — which the search then finds, failing the case on its own
- * source rather than on a leak.
- */
-export const SECRET = ["d2ass", "check", "secret", "3f9a1c"].join("-");
 
 /**
  * How long each kind of docker call may take. Every one of them is a
@@ -94,72 +71,6 @@ export const requiresDocker = () =>
 	test("the job that requires docker is given a daemon", () => {
 		expect(Bun.env.DOCKER_REQUIRED === "1" && !available).toBe(false);
 	});
-
-/**
- * Files no clone carries and every developer's checkout does, planted so the
- * `.dockerignore` has something to exclude. A directory nobody planted is a
- * directory the image trivially does not hold.
- */
-const PLANTED: Record<string, string> = {
-	// A `.git` directory: the whole history, on a machine where the image is
-	// world-readable.
-	".git/HEAD": "ref: refs/heads/main\n",
-	".env": `STRATZ_API_KEY=${SECRET}\n`,
-	// The host's install, marked so it can be told from the one the production
-	// stage performs — the two are otherwise the same directory name.
-	"node_modules/.host-copy": SECRET,
-	// A bundle from the developer's own build. `COPY --from` merges into a
-	// directory rather than replacing it, so one sent in the context would
-	// survive beside the fresh one the build stage produced.
-	"dist/stale.js": "console.log('a previous build');\n",
-	// The two runtime directories. The job writes both and the server reads
-	// both, and the image has to hold them empty: a file shipped at either
-	// path is a second source for what the server answers from its listing,
-	// one that survives every export.
-	"snapshot/snapshot.json": '{"shipped":true}\n',
-	"icons/1.png": "not really a png\n",
-	"test-results/.last-run.json": "{}\n",
-	"playwright-report/index.html": "<!doctype html>\n",
-	"reports/mutation/index.html": "<!doctype html>\n",
-	".stryker-tmp/sandbox/copy.ts": "export {};\n",
-};
-
-/**
- * A build context: every file the working tree holds and `.gitignore` does not
- * cover, plus `PLANTED`.
- *
- * `--others` beside `--cached`, so a `Dockerfile` written and not yet committed
- * is the one built — tracked files alone silently build the previous commit's
- * and report on it. `--exclude-standard` then leaves out exactly what
- * `PLANTED` supplies deliberately, so no gitignored file arrives twice.
- */
-function fabricate(extra: Record<string, string> = {}): string {
-	const dir = mkdtempSync(join(tmpdir(), "d2ass-context-"));
-	const ls = Bun.spawnSync(
-		["git", "ls-files", "-z", "--cached", "--others", "--exclude-standard"],
-		{ cwd: root },
-	);
-	if (ls.exitCode !== 0) throw new Error(ls.stderr.toString());
-
-	// `-z` terminates rather than separates, so the last field is empty.
-	for (const path of ls.stdout.toString().split("\0").filter(Boolean)) {
-		// Regular files only: git also lists a path deleted from the work tree,
-		// a symlink and a submodule's gitlink, and none of the three is a file
-		// a `COPY .` would send.
-		if (!lstatSync(join(root, path), { throwIfNoEntry: false })?.isFile())
-			continue;
-		const target = join(dir, path);
-		mkdirSync(dirname(target), { recursive: true });
-		copyFileSync(join(root, path), target);
-	}
-
-	for (const [path, body] of Object.entries({ ...PLANTED, ...extra })) {
-		const target = join(dir, path);
-		mkdirSync(dirname(target), { recursive: true });
-		writeFileSync(target, body);
-	}
-	return dir;
-}
 
 /**
  * Build a context of its own, with `extra` written over the tree, and report
@@ -251,6 +162,26 @@ export function sh(script: string, ...opts: string[]) {
 		throw new Error(`docker run did not finish within ${RUN_MS}ms: ${script}`);
 	return run;
 }
+
+/**
+ * Run a docker command for its effect alone, and do nothing where there is no
+ * daemon to run it against.
+ *
+ * For teardown, which is the one place a suite touches docker outside its own
+ * cases: a `beforeAll` or `afterAll` sits at the top level of its file and runs
+ * whether or not the cases under it were skipped, so an unguarded `docker` on
+ * a machine that has none throws — and the file fails for want of the daemon
+ * the skip existed to tolerate. Failures are swallowed for the same reason a
+ * cleanup's are: it runs on the way out of a suite that has already reported.
+ */
+export const tidy = (...argv: string[]) => {
+	if (!available) return;
+	Bun.spawnSync(["docker", ...argv], {
+		stdout: "ignore",
+		stderr: "ignore",
+		timeout: RUN_MS,
+	});
+};
 
 let workdir: string | undefined;
 
