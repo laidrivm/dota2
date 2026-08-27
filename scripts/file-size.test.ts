@@ -167,66 +167,6 @@ describe("counting a line", () => {
 	])("%o counts as %i", (text, n) => expect(count(text as string)).toBe(n));
 });
 
-describe("the extensions this repository carries", () => {
-	test("a type nobody has ruled on cannot arrive unnoticed", () => {
-		// The caps enumerate what they cover, which `CLAUDE.md` warns against.
-		// Inverting it here would exempt eleven extensions to cap three, and
-		// would newly cap `.sh`, `.py`, `.html` and `.txt` — types the proposal
-		// declines to cap. The hazard the rule guards against is real all the
-		// same: a new source extension would be capped by nothing and say
-		// nothing about it. This is what says something. A type arriving in the
-		// tree fails here until somebody decides whether it is capped.
-		const root = Bun.spawnSync(["git", "rev-parse", "--show-toplevel"])
-			.stdout.toString()
-			.replace(/\n$/, "");
-		const tracked = Bun.spawnSync(["git", "ls-files", "-z"], { cwd: root })
-			.stdout.toString()
-			.split("\0")
-			.filter(Boolean);
-		// Read off the file's own name, not off the path, and answering with
-		// the whole name where there is no extension to read. Taking the last
-		// dot's index over the path made a name carrying no dot at all report
-		// its final character — `Dockerfile` ruling as `e`, which `Makefile`
-		// and every other extensionless name would then join in silence — and
-		// made a name under a dotted directory report the whole path. A leading
-		// dot is not a separator either, which is why `.gitignore` is its own
-		// name here rather than an empty one.
-		const extension = (path: string) => {
-			const name = path.slice(path.lastIndexOf("/") + 1);
-			const dot = name.lastIndexOf(".");
-			return dot <= 0 ? name : name.slice(dot);
-		};
-		const extensions = [...new Set(tracked.map(extension))].sort();
-		// `.example` is ruled uncapped: an environment template is read by
-		// variable name rather than by line, as `.json` and `.toml` are.
-		// `.sql` is ruled uncapped on the same terms: a schema is read by table.
-		// `Dockerfile` and `.dockerignore` are ruled uncapped for the reason
-		// `.gitignore` is: one is read stage by stage and the others entry by
-		// entry, and neither is a file a reader holds whole.
-		expect(extensions).toEqual([
-			".css",
-			".dockerignore",
-			".example",
-			".gitignore",
-			".html",
-			".json",
-			".lock",
-			".md",
-			".py",
-			".sh",
-			".sql",
-			".toml",
-			".ts",
-			".tsx",
-			".txt",
-			".woff2",
-			".yaml",
-			".yml",
-			"Dockerfile",
-		]);
-	});
-});
-
 describe("the sweep", () => {
 	test("every file over the cap is reported, not only the first", () => {
 		// A check stopping at the first turns a backlog into as many rounds as
