@@ -172,7 +172,7 @@ because the build stage failing to produce `dist/` fails the image build.
 
 ## 5. Deploy: replacement order, secrets, and the workflow's own hygiene
 
-- [ ] 5.1 Write the ordering cases: the pull step precedes every step that
+- [x] 5.1 Write the ordering cases: the pull step precedes every step that
       stops or replaces the running container, and a pull that cannot succeed
       ends the host script before any of them runs, leaving the container that
       was serving still up.
