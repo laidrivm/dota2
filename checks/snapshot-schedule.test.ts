@@ -29,8 +29,15 @@ import { ENTRY, FILE, LOCK, LOG, SCHEDULE } from "./schedule-entry.fixture.ts";
 requiresDocker();
 requiresSchedule();
 
-/** An ISO instant, which is the whole of what the entry's `date` writes. */
-const INSTANT = /^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d/;
+/**
+ * An ISO instant, which is the whole of what the entry's `date` writes.
+ *
+ * The offset is part of it and is asserted: `date -Iseconds` writes the host's
+ * local time, so two records either side of a clock change are comparable only
+ * because each says which offset it was written under. `Z` as well as `±hh:mm`
+ * — GNU writes the second, and a host set to UTC may write either.
+ */
+const INSTANT = /^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(Z|[+-]\d\d:\d\d)$/;
 
 describe("the entry the README names", () => {
 	// spec: snapshot-schedule/a-scheduled-invocation
@@ -98,6 +105,24 @@ describe.skipIf(!schedulable)("the record an invocation leaves", () => {
 			expect(records(log)).toEqual([
 				{ at: expect.stringMatching(INSTANT), body: [report], status: 1 },
 			]);
+		},
+		HOOK_MS,
+	);
+
+	// spec: snapshot-schedule/a-run-that-fails
+	test(
+		"holds what went wrong when the entry could not start a run at all",
+		() => {
+			// The failure nobody arranges and everybody eventually has: the
+			// project file moved, or the path in the crontab was wrong from the
+			// start. Without this the record would say only that something
+			// exited non-zero, and a reader would look for the fault in the job.
+			const log = under("absent.log");
+			invoke(under("no-such-project.yml"), log);
+			const [record, ...rest] = records(log);
+			expect(rest).toEqual([]);
+			expect(record?.status).not.toBe(0);
+			expect(record?.body.join("\n")).toContain("no-such-project.yml");
 		},
 		HOOK_MS,
 	);
