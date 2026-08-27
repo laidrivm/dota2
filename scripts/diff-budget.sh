@@ -99,8 +99,14 @@ count() {
 # would then read as an unsplit proposal. `--diff-filter=A` tells authoring
 # from moving: `/opsx:archive` relocates the pair, and a relocation adds
 # nothing.
+#
+# `-M` is what makes that second half hold whatever the developer's config
+# says. Rename detection is on by default but `diff.renames=false` turns it
+# off, and without it a change directory renamed to a new slug reads as a
+# deletion plus two additions — both of which do match the glob, so the branch
+# would be refused for authoring a proposal it merely moved.
 authored_proposal() {
-	git diff --diff-filter=A --name-only "${base}...HEAD" -- \
+	git diff -M --diff-filter=A --name-only "${base}...HEAD" -- \
 		':(glob)openspec/changes/*/proposal.md' \
 		':(glob)openspec/changes/*/tasks.md' |
 		sed -E 's|^openspec/changes/([^/]+)/.*|\1|' | sort | uniq -d
