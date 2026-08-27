@@ -127,16 +127,20 @@ const workflow = ({
 	builder = BUILDER,
 	push = "true",
 	tags = TAGS,
+	copies = 1,
 	script = "",
 } = {}) =>
 	`jobs:
   deploy:
     steps:
-      - uses: ${builder}@${"a".repeat(40)} # v6.20.0
+${Array.from(
+	{ length: copies },
+	() => `      - uses: ${builder}@${"a".repeat(40)} # v6.20.0
         with:
           push: ${push}
           tags: |
-${tags.map((tag) => `            ${tag}`).join("\n")}
+${tags.map((tag) => `            ${tag}`).join("\n")}`,
+).join("\n")}
 ${script ? `      - uses: appleboy/ssh-action@${"b".repeat(40)} # v1.2.5\n        with:\n          script: ${script}\n` : ""}`;
 
 /** A README this check has nothing to say about. */
@@ -173,9 +177,20 @@ describe("the tags a build pushes", () => {
 		]);
 	});
 
-	test("a workflow with no build step at all fails", () => {
-		const found = problems(workflow({ builder: "actions/checkout" }), README);
-		expect(found).toEqual([`deploy.yml: 0 ${BUILDER} steps, expected one`]);
+	test.each([
+		["no build step at all", { builder: "actions/checkout" }, 0],
+		["a second build step", { copies: 2 }, 2],
+	])("a workflow with %s fails", (_what, over, count) => {
+		expect(problems(workflow(over), README)).toEqual([
+			`deploy.yml: ${count} ${BUILDER} steps, expected one`,
+		]);
+	});
+
+	test("a build step carrying no tags at all reports both", () => {
+		expect(problems(workflow({ tags: [] }), README)).toEqual([
+			"deploy.yml: no `latest` among the tags pushed",
+			"deploy.yml: no commit SHA among the tags pushed",
+		]);
 	});
 });
 
@@ -194,6 +209,16 @@ describe("the reference handed to the host", () => {
 	])("%s fails", (value, message) => {
 		expect(problems(host(value), README)).toEqual([
 			`deploy.yml: ${REFERENCE} ${message}: script: ${REFERENCE}=${value} docker compose up -d`,
+		]);
+	});
+
+	test("a line naming the SHA and falling back to `latest` fails", () => {
+		// The stricter reading wins: a fallback is a path on which the host runs
+		// a mutable tag, and it is the path taken exactly when something has
+		// already gone wrong.
+		const both = `${TAGS[1] as string} || ${REFERENCE}=${TAGS[0] as string}`;
+		expect(problems(host(both), README)).toEqual([
+			`deploy.yml: ${REFERENCE} is handed \`latest\`: script: ${REFERENCE}=${both} docker compose up -d`,
 		]);
 	});
 });
