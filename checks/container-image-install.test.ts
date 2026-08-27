@@ -34,8 +34,10 @@ requiresDocker();
  * gains a stage would otherwise have this reading whichever one happens to be
  * last, and reporting on the wrong install is worse than reporting on none.
  */
-function productionInstall(): string {
-	const lines = readFileSync(`${root}/Dockerfile`, "utf8").split("\n");
+function productionInstall(dockerfile?: string): string {
+	const lines = (
+		dockerfile ?? readFileSync(`${root}/Dockerfile`, "utf8")
+	).split("\n");
 	const start = lines.findIndex((line) =>
 		/^FROM\s.*\sAS\s+production$/i.test(line),
 	);
@@ -59,6 +61,32 @@ describe("the install command the production stage runs", () => {
 			expect(productionInstall()).toContain(flag);
 		},
 	);
+
+	// The reading itself, because every assertion above rests on it having
+	// found the right line: one that answered with a later stage's install, or
+	// with nothing, reports on something else while looking correct.
+	test("is read from the production stage, not from a later one", () => {
+		const install = productionInstall(
+			[
+				"FROM base AS production",
+				"RUN bun install --frozen-lockfile --production --ignore-scripts",
+				"FROM base AS tooling",
+				"RUN bun install --some-other-way",
+			].join("\n"),
+		);
+		expect(install).toContain("--ignore-scripts");
+		expect(install).not.toContain("--some-other-way");
+	});
+
+	test.each([
+		["declares no production stage", "FROM base AS build\nRUN bun install\n"],
+		["runs no bun install", 'FROM base AS production\nCMD ["bun", "x"]\n'],
+	])("refuses a Dockerfile that %s", (_what, dockerfile) => {
+		// Thrown rather than answered with an empty string: a caller that got
+		// one back would assert `toContain` against it and fail with the flag's
+		// name, sending a reader to the wrong line entirely.
+		expect(() => productionInstall(dockerfile)).toThrow();
+	});
 });
 
 describe.skipIf(!available)("the production image", () => {
