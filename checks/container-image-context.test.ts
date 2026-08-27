@@ -39,6 +39,9 @@ dockerTest(
 		const grep = sh(`grep -rl '${SECRET}' ${app} 2>/dev/null; true`);
 		expect(grep.stdout.toString().trim()).toBe("");
 	},
+	// The search reads every file the image holds, `node_modules` included,
+	// which is well past the default timeout on a cold page cache.
+	60_000,
 );
 
 // spec: container-image/the-committed-example-file
