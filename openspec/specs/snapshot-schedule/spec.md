@@ -1,8 +1,17 @@
 # snapshot-schedule Specification
 
 ## Purpose
-TBD - created by archiving change deploy-pipeline. Update Purpose after archive.
+
+The nightly job as the host starts it: a process that exits, invoked by cron
+rather than kept up as a service, so the deployment and the schedule change
+independently. Every invocation leaves the instant it began, whatever it wrote,
+and the status it ended with — the three answer *did it run*, *why did it
+break*, and *did it break at all*, and none substitutes for another. A second
+invocation arriving while one is in flight is refused rather than queued, with
+a status neither a completed run nor a failed one emits.
+
 ## Requirements
+
 ### Requirement: The job runs on a schedule outside the application
 
 The job SHALL be started by the host's own scheduler once a day, as a

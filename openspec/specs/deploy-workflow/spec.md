@@ -1,8 +1,16 @@
 # deploy-workflow Specification
 
 ## Purpose
-TBD - created by archiving change deploy-pipeline. Update Purpose after archive.
+
+What has to be true before a commit reaches the host, and what the host is
+told to run. The repository's own checks called as the gate rather than copied
+into it, every image named by the commit it was built from so a rollback is a
+change of one value, a replacement that happens only once its replacement is on
+the machine, and the split between what is held in the open and what is held as
+a secret — decided by what disclosing it would grant.
+
 ## Requirements
+
 ### Requirement: A deploy runs only against a commit the checks have passed
 
 The deploy SHALL NOT build an image, push one, or open a connection to the
