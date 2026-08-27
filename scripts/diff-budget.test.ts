@@ -1,5 +1,5 @@
 import { afterAll, expect, test } from "bun:test";
-import { cleanup, gate, lines, repo } from "./diff-budget.fixture.ts";
+import { cleanup, gate, git, lines, repo } from "./diff-budget.fixture.ts";
 
 /**
  * What the gate counts and what it refuses to: which paths are excluded,
@@ -15,6 +15,21 @@ test("an empty diff counts zero and passes", () => {
 	const g = gate(repo({ "a.ts": "one\n" }, {}));
 	expect(g.line).toBe("DIFF gate: PASS — 0 lines (0 source / 0 test)");
 	expect(g.code).toBe(0);
+});
+
+// The count must not move with a developer's preferences: measured, the same
+// rename read 0 lines with detection on and 800 with it off, so a branch could
+// pass locally and fail in CI on a setting neither of them states.
+test("a rename counts the same whatever diff.renames says", () => {
+	const dir = repo({ "big.ts": lines(400) }, {});
+	git(dir, "mv", "big.ts", "moved.ts");
+	git(dir, "commit", "-qm", "move");
+	git(dir, "config", "diff.renames", "false");
+
+	const g = gate(dir);
+
+	// Nothing to read: the file moved and not one of its lines changed.
+	expect(g.total).toBe(0);
 });
 
 test("excluded artefacts contribute nothing", () => {
