@@ -25,7 +25,14 @@ import {
 	standIn,
 	under,
 } from "./schedule.fixture.ts";
-import { ENTRY, FILE, LOCK, LOG, SCHEDULE } from "./schedule-entry.fixture.ts";
+import {
+	ENTRY,
+	FILE,
+	LOCK,
+	LOG,
+	README,
+	SCHEDULE,
+} from "./schedule-entry.fixture.ts";
 
 requiresDocker();
 requiresSchedule();
@@ -78,6 +85,15 @@ describe("the entry the README names", () => {
 		if (!directory)
 			throw new Error("the deploy workflow changes into no directory");
 		expect(FILE.startsWith(`${directory}/`)).toBe(true);
+	});
+
+	// spec: snapshot-schedule/a-scheduled-invocation
+	test("is the same line the README's install command writes", () => {
+		// The README shows the entry twice — once as the block cron reads, once
+		// quoted inside a command that appends it — because typing the first at
+		// a prompt is what fails. Two copies of one line drift; this is what
+		// makes the second the first.
+		expect(README).toContain(`echo '${ENTRY}'`);
 	});
 
 	// spec: snapshot-schedule/a-scheduled-invocation
