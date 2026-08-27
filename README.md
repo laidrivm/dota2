@@ -166,7 +166,8 @@ what the bootstrap below sets up. A published port would be a second way in,
 unencrypted, beside the proxy that exists to prevent exactly that.
 
 A minimal virtual host for it, at `conf.d/d2ass.conf` in whatever directory the
-proxy mounts:
+proxy mounts. `d2ass.example.com` stands for your own domain in all three
+places it appears — the `server_name` and both certificate paths:
 
 ```nginx
 server {
