@@ -1002,3 +1002,29 @@ no case reached. Weakening each entry in turn showed five of six unexercised
 in group 6's contract check, and the same probe over group 8b's validator
 showed the 304 carried no `ETag` that any case would notice. Both were
 measured before being written, not guessed.
+
+## 2026-08-27 — snapshot-ingest groups 12 and 13, two defect fixes, the archive (PRs #198–#203)
+
+- diff-budget: FAIL three times and it re-cut the work twice — group 12 at 840
+  split into `-12a`/`-12b`, group 13 at 977 into `-13a`/`-13b`, and the archive
+  at 871 shipped with an `oversize:` marker instead. Two of the three FAILs
+  were caused by an earlier split: moving a case out of a file to stay under
+  the 300-line cap counts its lines twice here, ~160 of 829 on `-13a` and ~598
+  of 871 on the archive, both measured rather than asserted
+- zombies: OPEN → PASS four times — 15 gaps over groups 12, 13a, 13b and the
+  parameter-cap fix, 10 written as cases, 5 dispositioned without one
+- warm: not run, six times over — no dependency manifest changed all session
+- triage: PASS six times — 5 defects, none of which the skill reported itself:
+  a suite inheriting the developer's own `.env`, a `clean` emptying two staging
+  tables of six before deleting a hero, a fractional ceiling that paced its
+  window by nothing, a spec promising unbounded waiting the code bounded, and a
+  stale comment naming a guard that no longer existed
+- coderabbit-local: PASS five times, skipped once at the user's word — 9
+  findings, 9 dispositioned (5 applied, 3 skipped, 1 rejected). One was the
+  first Major the local pass has caught that a run would have hit: `sql.array`
+  existed and the hand-built array literal was unnecessary
+- coderabbit: PASS four times — 17 findings over PRs #198, #199, #201 and #202,
+  17 dispositioned (10 applied, 3 rejected with a measurement, 4 skipped). Two
+  rejections needed the user: both stood
+- Not run: preflight, code-review, review-order, first-five, security-review,
+  ponytail-review, checklist
