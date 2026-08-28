@@ -79,8 +79,7 @@ archive — uncited, they would raise it past `FLOOR` and fail the check.
       the accessible names with it: a tile given a `label` exposes exactly one
       name and the image contributes none, and a tile in a row that already
       names its hero stays out of the accessibility tree (*The image is drawn*,
-      *The image does not load*). Both landed in a spec of their own —
-      `e2e/board.spec.ts` with them in it passes the 300-line cap
+      *The image does not load*)
 - [x] 1.8 Assert in `e2e/hero-image.spec.ts` that opening the picker on an
       empty query renders every match and that every tile image carries
       `loading="lazy"`. The mirror is 127 files and 8.6 MB, which is why the
