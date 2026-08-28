@@ -1,6 +1,7 @@
+import { useState } from "preact/hooks";
 import type { HeroEntry } from "../../types.ts";
 import { cx } from "../cx.ts";
-import { heroAbbr, type Ink, tileInk } from "./format.ts";
+import { heroAbbr, type Ink, iconSrc, tileInk } from "./format.ts";
 import s from "./hero-tile.module.css";
 
 type TileSize = "lg" | "md" | "sm";
@@ -41,9 +42,10 @@ function inkFor(short: string): Ink {
 }
 
 /**
- * The coloured square that stands in for a hero icon. `label` is omitted
- * wherever the surrounding row already names the hero, so a screen reader
- * hears the name once rather than twice.
+ * The hero's mirrored image over the coloured square that stands in wherever
+ * there is none — the entry naming no image, or the request for it failing.
+ * `label` is omitted wherever the surrounding row already names the hero, so a
+ * screen reader hears the name once rather than twice.
  */
 export function HeroTile({
 	hero,
@@ -59,6 +61,14 @@ export function HeroTile({
 	// `fallback`, which resolves the fallback token through the same `var()`
 	// every other slug goes through.
 	const slug = hero?.short ?? "fallback";
+	const src = iconSrc(hero?.icon);
+
+	// The `src` that has loaded, not a boolean: Preact reuses a slot's component
+	// instance when the hero in it changes, and a boolean would carry the
+	// previous hero's verdict onto the next one's image. There is no `onError`
+	// — a request that fails never reaches this state, so no frame between the
+	// failure and a handler can paint a broken-image affordance.
+	const [loaded, setLoaded] = useState<string | null>(null);
 
 	return (
 		<span
@@ -69,6 +79,16 @@ export function HeroTile({
 				: { role: "img", "aria-label": label })}
 		>
 			{heroAbbr(hero?.name ?? "")}
+			{src !== null && (
+				<img
+					class={cx(s.tileImage, loaded === src ? s.tileImageShown : undefined)}
+					src={src}
+					alt=""
+					loading="lazy"
+					decoding="async"
+					onLoad={() => setLoaded(src)}
+				/>
+			)}
 		</span>
 	);
 }
