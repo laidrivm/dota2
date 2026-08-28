@@ -1259,3 +1259,74 @@ between a requirement and a scenario that arrived in the same commit.
 The local pass reviewed with `--base` set to the previous group's branch on
 `feat/deploy-pipeline-7`, and the CLI reviewed the parent branch's files too.
 That widened it for free and is worth doing deliberately on a stacked branch.
+
+## 2026-08-27 — chore/proposal-slicing (PR #223)
+
+- diff-budget: PASS — 471 lines (120 source / 351 test) at merge, 309 at the
+  first reading
+- zombies: PASS — 3 gaps, 3 acted on (one of them surfaced a real config
+  dependence in the code under test, not only a missing case)
+- warm: not run — no manifest changed
+- triage: PASS — 4 groups, 1 medium-risk reviewed
+- coderabbit-local: PASS — 0 findings on the first pass; 5 on the second,
+  after the CI fix and the two captured rules landed (3 acted on, 2 rejected)
+- coderabbit: PASS — 2 findings, 1 applied, 1 rejected (claimed a single-caller
+  helper the rule's own second clause exempts)
+- CI: the `database` job was red on a defect the branch did not introduce, and
+  was fixed on it
+- Not run: preflight, security-review, code-review, ponytail-review
+
+## 2026-08-28 — chore/archive-proposal-slicing (PR #224)
+
+Documentation route: step 1, `triage` alone, the grep, one `coderabbit-local`.
+
+- diff-budget: PASS — 122 lines, the archive move counting 0
+- triage: PASS — 3 groups, nothing above Low
+- grep for restating sites: found one defect, self-inflicted — a scripted
+  replacement had stitched the `FLOOR` comment's tail into ungrammatical prose
+- coderabbit-local: PASS — 3 findings, 3 rejected
+- Not run: zombies, warm, preflight, security-review, code-review
+
+## 2026-08-28 — chore/vps-certificate-renewal (PR #225)
+
+- diff-budget: PASS — 92 lines
+- coderabbit: PASS — 3 findings, 3 applied (2 Major)
+- Not run: zombies, warm, triage, coderabbit-local, preflight,
+  security-review, code-review — the session was being wrapped up, and the
+  skips were named rather than left implied
+
+Four things the counts do not carry.
+
+**A rule captured mid-session caught its own author twice.** The branch added
+"pin on the command line any git behaviour a user's configuration can disable"
+after `-M` turned out to be needed. Applying it to the artefacts the branch
+already carried found `count()` inheriting the same setting — where it decides
+the number rather than a branch of it: the same moved file measured PASS at 0
+and FAIL at 800 across `diff.renames`. Then the PR bot found the application
+was still incomplete, because `diff.renames` and `diff.renameLimit` are two
+knobs to one switch. A rule's first application is worth re-reading as
+suspiciously as the code it was written for.
+
+**Two separate reasons a test looked like a guard and was not.** The rename
+case passed with the flag removed, because git's default detection made the
+outcome the same either way — fixed by setting `diff.renames=false` in the
+fixture. The `renameLimit` case then passed for a second reason: git matches
+exact renames, and same-basename pairs, *before* it consults the limit, so the
+case had to be made an inexact rename between differing basenames before the
+flag became load-bearing. Both were only visible by removing the flag and
+watching. Do that for every flag a test claims to guard.
+
+**The CI flake was in a precondition, not in the behaviour.** `[50]` asserted
+that `mtime` moved between two publications — true on this repository's
+filesystem (0 collisions in 300 tries) and false on CI, where both landed
+inside one clock tick. The behaviour under test was never wrong. Arranging the
+hard state, as the collision case two tests above already did, beats waiting
+for the filesystem to produce it.
+
+**The runbook was the source of the production defect.** `README.md` told the
+reader to issue certificates with `certbot --standalone` and described the
+resulting conflict with the proxy as a choice. It is not one — standalone
+issues once and fails every renewal after, silently. Four certificates on the
+host had been issued that way and two had expired. Prose that teaches the
+broken procedure is its own defect class, and it is invisible to every gate
+here: no test reads the README's instructions for whether they work.
