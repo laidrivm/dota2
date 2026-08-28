@@ -7,6 +7,7 @@ import {
 	formatWinProbability,
 	heroAbbr,
 	INK_THRESHOLD,
+	iconSrc,
 	inkFor,
 	relativeLuminance,
 	scoreTone,
@@ -24,6 +25,32 @@ describe("heroAbbr", () => {
 		["", ""],
 	])("%p → %p", (name, abbr) => {
 		expect(heroAbbr(name)).toBe(abbr);
+	});
+});
+
+// spec: draft-board/the-image-is-drawn draft-board/the-image-does-not-load
+describe("iconSrc", () => {
+	test.each([
+		["/icons/pudge.png"],
+		// The underscore is what the ingest writes, where the fixture's `short`
+		// beside it reads `bounty-hunter`.
+		["/icons/bounty_hunter.png"],
+	])("%p is served from this origin and comes back unchanged", (icon) => {
+		expect(iconSrc(icon)).toBe(icon);
+	});
+
+	test.each([
+		[undefined],
+		[""],
+		["/icons/.png"],
+		["/icons/../../etc/passwd.png"],
+		["https://cdn.stratz.com/images/dota2/heroes/pudge.png"],
+		["/icons/pudge.png?v=2"],
+		["/icons/Pudge.PNG"],
+		// What says the pattern is anchored at its end and not only at its start.
+		["/icons/pudge.png\n"],
+	])("%p names no image and yields null", (icon) => {
+		expect(iconSrc(icon)).toBeNull();
 	});
 });
 

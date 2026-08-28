@@ -25,14 +25,14 @@ archive — uncited, they would raise it past `FLOOR` and fail the check.
 
 ## 1. The tile draws the hero
 
-- [ ] 1.1 Add `iconSrc(icon: unknown): string | null` to
+- [x] 1.1 Add `iconSrc(icon: unknown): string | null` to
       `src/app/board/format.ts` — returns the value when it matches
       `/^\/icons\/[a-z0-9_-]+\.png$/` and `null` for everything else, `undefined`
       and the empty string included. It never throws: an absent `icon` is a
       state the tile renders, not an error. It sits with the board's other
       non-DOM branches and is the only place the payload's `icon` is trusted
       (*The image is drawn*, *The image does not load*)
-- [ ] 1.2 Cover it in `src/app/board/format.test.ts` before 1.3 exists, as the
+- [x] 1.2 Cover it in `src/app/board/format.test.ts` before 1.3 exists, as the
       contract the tile will lean on: `undefined` and `""` yield `null`;
       `/icons/pudge.png` comes back unchanged; `/icons/bounty_hunter.png` is
       accepted, since the underscore is what the ingest writes where the

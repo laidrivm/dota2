@@ -16,6 +16,22 @@ export function heroAbbr(name: string): string {
 		.toUpperCase();
 }
 
+/** Mirrors `isSlug` in `src/job/ingest/icons.ts`, which is the one rule for
+ * what a mirrored file may be named, checked here where the name arrives.
+ * Anchored at both ends: a prefix match would let anything follow the `.png`. */
+const ICON_PATH = /^\/icons\/[a-z0-9_-]+\.png$/;
+
+/**
+ * The path the tile requests its image from, or `null` when the payload names
+ * none this origin serves. `snapshot.ts`'s `isHeroEntry` checks `id` and `name`
+ * only, so `icon` reaches the board unvalidated and this is the only place it is
+ * trusted. A value that does not match is treated exactly as an absent one — the
+ * tile has a state for that — rather than thrown on, so one malformed path costs
+ * the board a picture and not its other nine slots.
+ */
+export const iconSrc = (icon: unknown): string | null =>
+	typeof icon === "string" && ICON_PATH.test(icon) ? icon : null;
+
 const HEX = /^#([0-9a-f]{6})$/i;
 
 /**
