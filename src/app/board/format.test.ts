@@ -47,10 +47,20 @@ describe("iconSrc", () => {
 		["https://cdn.stratz.com/images/dota2/heroes/pudge.png"],
 		["/icons/pudge.png?v=2"],
 		["/icons/Pudge.PNG"],
+		// Refused by the separator, where the traversal above is refused by the
+		// dot — the character class rules out both, and each needs its own case.
+		["/icons/heroes/pudge.png"],
 		// What says the pattern is anchored at its end and not only at its start.
 		["/icons/pudge.png\n"],
 	])("%p names no image and yields null", (icon) => {
 		expect(iconSrc(icon)).toBeNull();
+	});
+
+	/** Every rejection above also fails the pattern once stringified, so this is
+	 * what holds the `typeof` guard: `icon` arrives from the payload, and JSON
+	 * can carry an array whose one element stringifies to a path that matches. */
+	test("a value that is not a string never becomes a src", () => {
+		expect(iconSrc(["/icons/pudge.png"])).toBeNull();
 	});
 });
 

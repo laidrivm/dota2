@@ -1,3 +1,4 @@
+import { AxeBuilder } from "@axe-core/playwright";
 import { expect, type Page } from "@playwright/test";
 import { test } from "./session.ts";
 
@@ -133,6 +134,11 @@ test("a tile shows its image, and the one whose request failed shows its square"
 	await expect(square).toHaveText("ZEUS");
 	await expect(drawn).toHaveText("PUDG");
 	await expect(namedTile(page, "Bans", "Pudge")).toHaveCount(1);
+
+	// A board carrying images is a state this suite reaches, and the rule is
+	// every reached state — the scans elsewhere run against Setup and a board
+	// with nothing drafted into it.
+	expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
 });
 
 // spec: draft-board/the-image-does-not-load
@@ -232,8 +238,63 @@ test("the picker renders every hero on an empty query, each asking to load lazil
 					count: images.length,
 					eager: images.filter((i) => i.getAttribute("loading") !== "lazy")
 						.length,
+					blocking: images.filter((i) => i.getAttribute("decoding") !== "async")
+						.length,
 				};
 			}),
 		)
-		.toEqual({ count: bundle.heroes.length, eager: 0 });
+		.toEqual({ count: bundle.heroes.length, eager: 0, blocking: 0 });
+});
+
+// spec: draft-board/the-image-does-not-load
+test("a tile whose request answers with bytes that are not an image shows its square", async ({
+	page,
+	session,
+}) => {
+	// Answered rather than refused, and answered `200`: the criterion names the
+	// bytes failing to decode beside the request failing, and only a body the
+	// decoder rejects reaches that half of it.
+	await page.route(`**${await iconPath(page, "Pudge")}`, (route) =>
+		route.fulfill({ contentType: "image/png", body: "not a PNG" }),
+	);
+
+	await session("R Radiant");
+	await ban(page, "Pudge");
+
+	const tile = namedTile(page, "Bans", "Pudge");
+	await expect
+		.poll(() => tile.evaluate(imageState, false))
+		.toMatchObject({
+			opacity: "0",
+		});
+	await expect(tile).toHaveText("PUDG");
+});
+
+// spec: draft-board/the-image-does-not-load
+test("a hero entry naming no image renders no image element at all", async ({
+	page,
+	session,
+}) => {
+	// The other half of the criterion, and the one no routed request reaches: a
+	// tile that never asks. The snapshot is the real one with a single field
+	// emptied, so nothing else about the hero moves.
+	const bundle = (await (await page.request.get("/snapshot.json")).json()) as {
+		heroes: { name: string; icon: string }[];
+	};
+	const pudge = bundle.heroes.find((hero) => hero.name === "Pudge");
+	if (pudge === undefined) throw new Error("no Pudge in the snapshot");
+	pudge.icon = "";
+	await page.route("**/snapshot.json", (route) =>
+		route.fulfill({
+			contentType: "application/json",
+			body: JSON.stringify(bundle),
+		}),
+	);
+
+	await session("R Radiant");
+	await ban(page, "Pudge");
+
+	const tile = namedTile(page, "Bans", "Pudge");
+	await expect(tile).toHaveText("PUDG");
+	expect(await tile.evaluate(imageState, false)).toBeNull();
 });
