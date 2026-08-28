@@ -101,6 +101,6 @@ archive — uncited, they would raise it past `FLOOR` and fail the check.
       how the hero tile derives its colour and ink from the design tokens", true
       of the fallback alone once this lands — is reworded by `/opsx:archive`,
       which is where that file is written
-- [ ] 1.12 Run the pre-PR sequence from `docs/review-toolkit.md`, in its order.
+- [x] 1.12 Run the pre-PR sequence from `docs/review-toolkit.md`, in its order.
       `bun test`, `bun run lint`, `bun run typecheck` and `bun run diff-budget`
       are part of it and none of them is the whole of it
