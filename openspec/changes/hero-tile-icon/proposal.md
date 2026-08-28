@@ -42,14 +42,11 @@ sync with `--tile-ink-*`.
 - The accessible name is unchanged: the wrapper keeps its `role="img"` and
   `aria-label` where it has one, and the image contributes no second name.
 - The requirement is copied whole, so a drift inside it is corrected in the same
-  move. The live requirement — the one on `main` today — puts the ink crossover
-  at 0.22; `format.ts` has held `INK_THRESHOLD = 0.18` since `1b85ee5`, and
-  `format.test.ts` pins the code's value, asserting `#2e7fd0` at luminance 0.203
-  takes dark lettering, which 0.22 refuses. **The delta writes 0.18**, which is
-  the only figure this change publishes anywhere. The spec is what moves; no
-  code, no colour and no test does. `PLAN.md`'s entry on the design project's
-  swatch pages already reads the threshold as 0.18, so 0.22 survives in no other
-  artefact.
+  move: the live requirement's ink crossover has disagreed with `format.ts`
+  since `1b85ee5`, and `format.test.ts` pins the code's figure. The delta writes
+  what the code has, in §*Ink follows the background*, which is the only place
+  in this change that states either number. The spec is what moves; no code, no
+  colour and no test does.
 
 ## Non-goals
 

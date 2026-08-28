@@ -11,10 +11,17 @@ the code's behaviour does not move. Each is cited below by the task that must
 leave it standing.
 
 *Ink follows the background* is the one with a caveat, and it is about the spec
-rather than the code: the live requirement says the crossover is 0.22 where
-`format.ts` has held 0.18 since `1b85ee5`, so the delta writes 0.18 — one
-number, the one already shipped and already tested. No task changes a threshold,
-because none of them is wrong.
+rather than the code: the live requirement's crossover figure has disagreed with
+`format.ts` since `1b85ee5`, so the delta writes the one the code has and
+`format.test.ts` already pins. Read the figure there and nowhere else. No task
+changes a threshold, because no threshold is wrong.
+
+Every test a task below asks for carries a `// spec:` citation naming the
+criterion it closes, per `docs/testing.md` §*Citing the criterion a test
+closes*. The two identifiers are `draft-board/the-image-is-drawn` and
+`draft-board/the-image-does-not-load`; a delta spec's criteria may be cited
+before they are live, and they join `scripts/spec-coverage.ts`'s count at
+archive — uncited, they would raise it past `FLOOR` and fail the check.
 
 ## 1. The tile draws the hero
 
@@ -73,13 +80,13 @@ because none of them is wrong.
       name and the image contributes none, and a tile in a row that already
       names its hero stays out of the accessibility tree (*The image is drawn*,
       *The image does not load*)
-- [ ] 1.8 Add the picker's request count to `e2e/board.spec.ts`: opening the
-      picker on an empty query renders every match and fetches fewer images than
-      there are matches. The mirror is 127 files and 8.6 MB, which is what
-      `loading="lazy"` exists here to keep off the first paint. Assert the
-      inequality and not a number — `loading="lazy"` is a hint a user agent may
-      decline, so a count would be asserting a promise the platform does not
-      make (*The image is drawn*)
+- [ ] 1.8 Assert in `e2e/board.spec.ts` that opening the picker on an empty
+      query renders every match and that every tile image carries
+      `loading="lazy"`. The mirror is 127 files and 8.6 MB, which is why the
+      attribute is there — but it is a hint a conforming user agent may decline,
+      so what the suite checks is the request the application makes and not the
+      traffic that follows. Neither a request count nor an inequality over one
+      (*The image is drawn*)
 - [ ] 1.9 Add to `e2e/static-build.spec.ts` that the served `dist/`, which
       carries no `icons/`, renders the board as palette squares throughout. This
       is the case a fresh clone is in as well, and it is what keeps `app-shell`

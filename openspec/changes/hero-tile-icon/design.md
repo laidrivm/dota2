@@ -38,7 +38,7 @@ fresh clone, and it is what `e2e/static-build.spec.ts` runs against.
 - The tile behaves identically whether or not the mirror is populated, with no
   broken-image affordance in the empty case.
 - No new dependency, no new route, no new payload field, no call-site change.
-- Opening the picker does not fetch 8.6 MB.
+- Opening the picker asks the browser not to fetch 8.6 MB.
 
 **Non-Goals:** as `proposal.md` §*Non-goals* sets out — the slug mismatch, the
 palette's contents, the design project's swatch pages, a second mirrored size,
@@ -119,29 +119,36 @@ as well as on the page. It goes on every tile rather than on the picker's alone
 scale, and one attribute is cheaper than a prop that says which.
 
 It is a hint and not a budget: the attribute lets a user agent fetch an
-off-screen image whenever it likes, and none of them promises a number. So what
-is claimed here is a reduction and not a ceiling, and the check that goes with
-it asserts *fewer requests than matches* rather than a count. Buying a count
-would mean deciding what is visible in the application rather than asking the
-browser — a virtualised grid — and 127 lazy images is not a reason to build one.
+off-screen image whenever it likes, and a conforming one may fetch every match.
+So what is claimed here is a request, not a reduction, and the check that goes
+with it asserts the request — every tile carries the attribute — rather than any
+property of the traffic. A count, or even an inequality, would be asserting a
+promise the platform does not make, and would fail against a browser doing
+nothing wrong. Buying a real bound means deciding visibility in the application
+rather than asking the browser — a virtualised grid — and 127 lazy images is not
+a reason to build one.
 
 `decoding="async"` rides with it so a slow decode does not block the frame that
 opens the picker.
 
 ### The ink threshold is corrected where the requirement is copied
 
-The live requirement fixes the crossover at 0.22; `format.ts` has held
-`INK_THRESHOLD = 0.18` since `1b85ee5`, and `format.test.ts` asserts `#2e7fd0`
-(luminance 0.203) takes dark lettering, which 0.22 refuses. A `MODIFIED`
-requirement is copied whole, so the number is either corrected here or
-re-published wrong. The spec moves to the code; no colour and no threshold
+The live requirement's crossover figure is stale: `format.ts` has held a
+different `INK_THRESHOLD` since `1b85ee5`, and `format.test.ts` pins the code's
+by asserting `#2e7fd0` takes dark lettering, which the spec's figure refuses. A
+`MODIFIED` requirement is copied whole, so it is either corrected here or
+re-published wrong. The spec moves to the code; no colour, no code and no test
 changes.
+
+Neither figure is written here or in `proposal.md`. The delta spec carries the
+one this change publishes and is the only artefact that states it — a value
+restated beside its criterion is checked by nothing and drifts from it.
 
 ## Risks / Trade-offs
 
 - **A 68 KB image drawn at 26px.** → The mirror holds one size, and
   `hero-reference` says why; a second is its own change. What this change pays
-  is bounded instead: lazy loading defers what is off-screen, and the route's
+  is bounded where it can be: the tiles ask to be loaded lazily, and the route's
   `immutable` year means a hero is fetched once and then read from cache for up
   to a year — until the cache evicts it, which is the browser's call and not
   something this design gets to promise away.
