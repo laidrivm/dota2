@@ -120,23 +120,6 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       and exit status to a log on the host, and nothing reads it. Until then a
       failed run degrades quietly — the export runs last, so the previously
       published bundle keeps serving while the data ages.
-- [ ] **Stalwart serves a self-signed certificate on every mail port.**
-      Found 2026-08-28 while closing the renewal entry above, and older than
-      it: the switch from two loaded certificates to none happened
-      2026-08-24T05:01Z. `mail.laidrivm.com:993`, `:465` and `:995` answer
-      with `CN = rcgen self signed cert` whatever the SNI, so a mail client
-      that verifies gets nothing usable. The cause is in its own log from
-      2026-07-13 — `Failed to read secret from file
-      '/etc/letsencrypt/live/mellon.sh/privkey.pem': Permission denied` —
-      because stalwart runs as uid 2000 and certbot writes private keys
-      `0600 root`. Two lineages predate that default and are still `0644`,
-      which is what the two loaded certificates were; the next renewal of
-      `laidrivm.com` closes the last of them. The `docker restart stalwart`
-      in the deploy hook therefore achieves nothing today and becomes correct
-      the moment this is fixed, which is why it stands. Fixing it is a choice
-      with a security dimension and so is the user's: a group-readable key, a
-      copy into a stalwart-owned directory made by the hook, or stalwart
-      running its own ACME.
 - [ ] **Workflow hygiene is practised everywhere and stated nowhere.**
       Measured over the six workflows: every one pins its actions by SHA with
       a version comment and declares `permissions:`, five of six declare a
@@ -332,7 +315,7 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       -S` before editing, so this is an overstated clause rather than a broken
       criterion; correcting it is a delta spec, not an edit here.
 - [ ] **The always-on trigger has fired, and by more than it last recorded.**
-      Re-measured 2026-08-28: the set is 618 lines against the ~500
+      Re-measured 2026-08-28: the set is 601 lines against the ~500
       `CLAUDE.md` states, where the entry previously read 555. Both sublist
       figures moved with it — Process sits at 24 and Code at 20, so two of the
       three are now at or past the ~20 threshold rather than one.
@@ -342,9 +325,9 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       absence, where a count comes from, which measurement may be overwritten
       — and `docs/verification.md` already owns exactly that. What no longer
       holds is the conclusion drawn from it: moving those five takes Process
-      to 19 and the set to about 608, so it clears one sublist and leaves the
+      to 19 and the set to about 591, so it clears one sublist and leaves the
       set a hundred lines over. Closing this now needs a decision about where
-      the bulk goes, `PLAN.md` being the larger half at 391 lines, and that is
+      the bulk goes, `PLAN.md` being the larger half at 374 lines, and that is
       a change rather than an edit here.
 
 ## Standing constraints
