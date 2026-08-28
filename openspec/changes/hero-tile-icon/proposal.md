@@ -32,7 +32,7 @@ sync with `--tile-ink-*`.
 - The abbreviation and the `--tile-ink-*` rule narrow to that fallback. When the
   image is there, it is the whole tile.
 - The fallback covers two states, not one: a hero whose entry carries no `icon`,
-  and an `icon` whose request does not resolve. The second is the ordinary state
+  and an `icon` whose image does not load. The second is the ordinary state
   of a fresh clone and of the static build — `icons/` is gitignored and written
   only by a job run, and `bun run build` copies fonts and the snapshot into
   `dist/` but no images — so a tile that degrades to the square is what keeps
@@ -41,13 +41,15 @@ sync with `--tile-ink-*`.
   sizes and the image is cropped to it, so no row's geometry moves.
 - The accessible name is unchanged: the wrapper keeps its `role="img"` and
   `aria-label` where it has one, and the image contributes no second name.
-- The requirement is copied whole, so a drift inside it is corrected in the
-  same move: it fixes the ink crossover at 0.22 where `format.ts` has held
-  `INK_THRESHOLD = 0.18` since `1b85ee5`, and `format.test.ts` pins the code's
-  value — `#2e7fd0`, luminance 0.203, is asserted to take dark lettering, which
-  0.22 would refuse. The spec is what moves; no code and no colour does.
-  `PLAN.md`'s entry on the design project's swatch pages already reads the
-  threshold as 0.18, so nothing else restates 0.22.
+- The requirement is copied whole, so a drift inside it is corrected in the same
+  move. The live requirement — the one on `main` today — puts the ink crossover
+  at 0.22; `format.ts` has held `INK_THRESHOLD = 0.18` since `1b85ee5`, and
+  `format.test.ts` pins the code's value, asserting `#2e7fd0` at luminance 0.203
+  takes dark lettering, which 0.22 refuses. **The delta writes 0.18**, which is
+  the only figure this change publishes anywhere. The spec is what moves; no
+  code, no colour and no test does. `PLAN.md`'s entry on the design project's
+  swatch pages already reads the threshold as 0.18, so 0.22 survives in no other
+  artefact.
 
 ## Non-goals
 
@@ -87,4 +89,9 @@ None.
   their tests; only the state they describe narrows.
 - `e2e/` — the board and static-build specs run against a tree whose `icons/`
   may be empty, which is the fallback path they will exercise.
+- `openspec/specs/draft-board/spec.md` — the requirement, at archive; and with
+  it that file's §*Purpose*, whose closing clause says the tile derives its
+  colour and ink from the design tokens and after this describes the fallback
+  alone. No pull request of this change edits that file: `/opsx:archive` is
+  where it is written, and `tasks.md` 1.11 carries the sentence there.
 - No dependency, no route, no payload field, and no server change.
