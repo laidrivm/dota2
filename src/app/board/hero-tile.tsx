@@ -63,11 +63,16 @@ export function HeroTile({
 	const slug = hero?.short ?? "fallback";
 	const src = iconSrc(hero?.icon);
 
-	// The `src` that has loaded, not a boolean: Preact reuses a slot's component
-	// instance when the hero in it changes, and a boolean would carry the
-	// previous hero's verdict onto the next one's image. There is no `onError`
-	// — a request that fails never reaches this state, so no frame between the
-	// failure and a handler can paint a broken-image affordance.
+	// The `src` that has loaded, rather than a boolean: were a slot's hero ever
+	// replaced without the tile unmounting, Preact would reuse the instance and
+	// a boolean would carry the previous hero's verdict onto the next one's
+	// image. No call site does that today — the model blocks suggestions for a
+	// filled role, and every other site is keyed by hero id — so the safer
+	// state is the free one, not the guarded one.
+	//
+	// There is no `onError`: a request that fails never reaches the state that
+	// reveals the element, so no frame between the failure and a handler can
+	// paint a broken-image affordance.
 	const [loaded, setLoaded] = useState<string | null>(null);
 
 	return (

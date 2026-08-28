@@ -170,3 +170,46 @@ test("dist on a static host loads, fetches its snapshot and reaches Setup", asyn
 
 	expect(elsewhere).toEqual([]);
 });
+
+// spec: draft-board/the-image-does-not-load
+test("dist carries no icons, so the board is palette squares throughout", async ({
+	page,
+}) => {
+	await page.goto(origin);
+	const bundle = (await (
+		await page.request.get(`${origin}/snapshot.json`)
+	).json()) as {
+		heroes: unknown[];
+	};
+	await page.getByRole("radio", { name: "R Radiant" }).check();
+	await page.getByRole("radio", { name: "1 C Carry" }).click();
+
+	// The picker is where every hero has a tile at once, so one screen covers
+	// the whole board's worth of them.
+	await page.getByRole("button", { name: "Add ban" }).click();
+	await expect(page.getByRole("dialog")).toBeVisible();
+
+	// Every hero's tile asked for an image the build does not carry, the host
+	// answered 404, and not one is revealed — each showing the abbreviation over
+	// its palette square instead. The tile count is what keeps that from being
+	// satisfied by a picker holding no tiles at all.
+	//
+	// The picker's tiles carry no label, so none is reachable by role: the grid
+	// names each hero beside its tile, and a second name is what the requirement
+	// forbids.
+	await expect
+		.poll(() =>
+			page.getByRole("dialog").evaluate((el) => {
+				const images = [...el.querySelectorAll("img")];
+				return {
+					tiles: images.length,
+					shown: images.filter((i) => getComputedStyle(i).opacity !== "0")
+						.length,
+					unlettered: images.filter(
+						(i) => (i.parentElement?.textContent ?? "") === "",
+					).length,
+				};
+			}),
+		)
+		.toEqual({ tiles: bundle.heroes.length, shown: 0, unlettered: 0 });
+});
