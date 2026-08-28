@@ -24,7 +24,7 @@
 		"@axe-core/playwright": "4.13.0",
 		"@biomejs/biome": "2.5.10",
 		"@playwright/test": "1.62.1",
-		"@stryker-mutator/core": "9.6.1",
+		"@stryker-mutator/core": "10.0.0",
 		"@types/bun": "1.4.0",
 		"simple-git-hooks": "2.13.1",
 		"typescript": "7.0.2"
