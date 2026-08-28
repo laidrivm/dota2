@@ -9,10 +9,6 @@ import { test } from "./session.ts";
  * from `icons/`: the mirror is gitignored and written only by a job run, so a
  * fresh clone and CI have none, and a suite needing one would pass on the
  * machine that ran the ingest and nowhere else.
- *
- * A tile's image is read inside `evaluate` rather than located: `alt=""` keeps
- * it out of the accessibility tree, which is the whole point of it, so no role
- * locator reaches it and a class selector is what this suite refuses.
  */
 
 /** A 1×1 red PNG. Nothing here reads a pixel — only that it decodes. */
@@ -50,8 +46,9 @@ const failIcon = (page: Page, icon: string) =>
  * helper of this file's called from inside would be undefined there.
  *
  * `withinParent` steps up one first, for a tile reached through the name
- * rendered beside it. The box is compared against the image's own tile either
- * way, which is the claim — the source is 256x144 and the tile is a square.
+ * rendered beside it. `fills` compares the image against its own tile, which is
+ * what the CSS claims; that the crop preserves the source's aspect is not
+ * asserted here, and the PNG above is 1x1 rather than the mirror's 256x144.
  */
 const imageState = (element: Element, withinParent: boolean) => {
 	const scope = withinParent ? element.parentElement : element;
@@ -75,8 +72,9 @@ const namedTile = (page: Page, region: string, name: string) =>
 		.getByRole("img", { name, exact: true });
 
 /**
- * A tile in a row that names its hero: the tile is `aria-hidden`, so the walk
- * starts from the name beside it and steps up to the pair's own container.
+ * The name a slot renders beside its tile. The tile itself is `aria-hidden`,
+ * because this row already names the hero, so it is reached through this and
+ * `imageState`'s `withinParent` rather than by a locator of its own.
  */
 const slotTile = (page: Page, name: string) =>
 	page
