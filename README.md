@@ -201,13 +201,35 @@ machine this project happens to run on.
    provider offers to proxy the traffic — Cloudflare's orange cloud — turn it
    off: TLS is terminated by the proxy you are about to run, and a provider
    proxying it puts a second certificate in front of the one you issue.
-2. **A certificate**, while nothing is holding port 80 yet:
-   `certbot certonly --standalone -d d2ass.example.com`. Do this before
-   starting the proxy, not after — once the proxy holds `:80`, standalone
-   cannot complete, and renewal then needs either the proxy stopped for a
-   moment (`--pre-hook`/`--post-hook`) or a webroot or DNS plugin instead.
-   Whichever you choose, the proxy reads `/etc/letsencrypt` only when it
-   starts, so a renewal has to be followed by reloading it.
+2. **A certificate, and the hook that delivers it.** Issue it with a DNS
+   challenge rather than `--standalone`: the proxy in the next step holds
+   `:80` for good, and standalone needs that port free on *every* renewal, so
+   a first issue succeeds and every renewal after it fails — silently, until
+   the certificate expires. This project's own host proved it, with four
+   standalone certificates and two of them expired before anyone looked. With
+   the zone at Cloudflare, whose API works whether or not its proxying is on:
+
+   ```sh
+   certbot certonly --authenticator dns-cloudflare \
+     --dns-cloudflare-credentials /root/.secrets/cloudflare.ini \
+     --dns-cloudflare-propagation-seconds 30 -d d2ass.example.com
+   ```
+
+   Renewing is only half of it. The proxy reads `/etc/letsencrypt` when it
+   starts and never again, so a renewed certificate reaches nobody until
+   something says so — an executable deploy hook at
+   `/etc/letsencrypt/renewal-hooks/deploy/reload-proxy.sh`, which certbot runs
+   only when a certificate actually changed:
+
+   ```sh
+   #!/bin/sh
+   docker exec nginx-proxy nginx -s reload
+   ```
+
+   A container that bind-mounts individual certificate *files* instead of the
+   whole directory has to be restarted there rather than reloaded: those paths
+   under `live/` are symlinks, and Docker resolves a file bind mount once, at
+   container start, so the swap a renewal performs never reaches it.
 3. **The network and the proxy**:
 
    ```sh
