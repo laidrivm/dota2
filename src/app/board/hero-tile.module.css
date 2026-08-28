@@ -3,6 +3,10 @@
 
 .tile {
 	display: flex;
+	/* The image is laid over the abbreviation rather than behind it: a
+	   background image paints below the element's content, and hiding the
+	   letters under one would need CSS to know whether it loaded. */
+	position: relative;
 	align-items: center;
 	justify-content: center;
 	flex-shrink: 0;
@@ -34,6 +38,26 @@
 	height: var(--tile-sm);
 	border-radius: var(--r-tile-sm);
 	font-size: var(--fs-tile-sm);
+}
+
+/* The source is 256x144, so it is scaled to cover the square and cropped about
+   its centre — the tile's own box is unchanged and no row's geometry moves.
+   Invisible until a `load` says there is something to show, which is what keeps
+   a failed request from painting a broken-image affordance for a frame. */
+
+.tileImage {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	border-radius: inherit;
+	object-fit: cover;
+	object-position: center;
+	opacity: 0;
+}
+
+.tileImageShown {
+	opacity: 1;
 }
 
 .tileInkDark {

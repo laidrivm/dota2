@@ -42,12 +42,12 @@ archive — uncited, they would raise it past `FLOOR` and fail the check.
       `/icons/pudge.png?v=2`, `/icons/Pudge.PNG`, and `/icons/pudge.png\n` —
       the last is what says the pattern is anchored at both ends and not only
       at the start (*The image is drawn*, *The image does not load*)
-- [ ] 1.3 Render the image in `src/app/board/hero-tile.tsx`: the span keeps its
+- [x] 1.3 Render the image in `src/app/board/hero-tile.tsx`: the span keeps its
       background and its abbreviation, and an `<img src>` from 1.1 is laid over
       them with `alt=""`, `loading="lazy"` and `decoding="async"`. `null` from
       1.1 renders no element at all. The five call sites and their props do not
       change (*The image is drawn*)
-- [ ] 1.4 Reveal the image only once it has loaded: the tile holds the `src`
+- [x] 1.4 Reveal the image only once it has loaded: the tile holds the `src`
       that fired `load`, the image is styled `opacity: 0` and becomes visible
       when that state equals the `src` it is currently asking for. There is no
       `onError` — a failure never reaches the state that reveals the element, so
@@ -55,13 +55,13 @@ archive — uncited, they would raise it past `FLOOR` and fail the check.
       affordance. The state is the `src` and not a boolean, which Preact's reuse
       of a slot's component instance would carry from one hero to the next
       (*The image does not load*)
-- [ ] 1.5 Size and crop the image in `src/app/board/hero-tile.module.css`:
+- [x] 1.5 Size and crop the image in `src/app/board/hero-tile.module.css`:
       absolutely positioned to fill the tile, `object-fit: cover`, centre
       `object-position`, so the 256×144 source is cropped to the square at all
       three sizes and no row's geometry moves. Every value stays a token
       reference or a keyword — `app-shell` §*Style values come from design
       tokens* is unchanged by this (*The image is drawn*)
-- [ ] 1.6 Confirm by reading the component that the four carried criteria still
+- [x] 1.6 Confirm by reading the component that the four carried criteria still
       hold with an image present: the abbreviation is still `heroAbbr(name)`
       (*Abbreviation*), the ink still comes from `tileInk` on the resolved token
       (*Ink follows the background*), an unknown slug still resolves
