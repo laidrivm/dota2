@@ -57,3 +57,6 @@ What counts as evidence for a claim, and what a claim may rest on.
 - Pin the environment a case needs in order to discriminate, and assert the pin
   took — a case that fails only under some clocks or locales passes under the
   one CI runs.
+- Read a listing to its end before concluding a row is absent — a window
+  bounded by `head`, `tail` or a line range and a row that is not there print
+  the same nothing.
