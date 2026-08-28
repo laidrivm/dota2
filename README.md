@@ -207,7 +207,20 @@ machine this project happens to run on.
    a first issue succeeds and every renewal after it fails — silently, until
    the certificate expires. This project's own host proved it, with four
    standalone certificates and two of them expired before anyone looked. With
-   the zone at Cloudflare, whose API works whether or not its proxying is on:
+   the zone at Cloudflare, whose API works whether or not its proxying is on.
+
+   The plugin is a separate package and the credentials file is one you write;
+   certbot provides neither, and refuses a file others can read. On Debian or
+   Ubuntu:
+
+   ```sh
+   apt install certbot python3-certbot-dns-cloudflare
+   printf 'dns_cloudflare_api_token = %s\n' "$CF_TOKEN" \
+     > /root/.secrets/cloudflare.ini
+   chmod 600 /root/.secrets/cloudflare.ini
+   ```
+
+   The token needs `Zone:DNS:Edit` on every zone the certificate names. Then:
 
    ```sh
    certbot certonly --authenticator dns-cloudflare \
@@ -230,6 +243,27 @@ machine this project happens to run on.
    whole directory has to be restarted there rather than reloaded: those paths
    under `live/` are symlinks, and Docker resolves a file bind mount once, at
    container start, so the swap a renewal performs never reaches it.
+
+   Two checks, because the obvious one proves less than it looks. A plain
+   `certbot renew --dry-run` does not run deploy hooks, so it says nothing
+   about whether the reload happens — ask for them, then read back what the
+   proxy actually serves rather than what is on disk:
+
+   ```sh
+   certbot renew --dry-run --run-deploy-hooks
+   openssl s_client -servername d2ass.example.com \
+     -connect d2ass.example.com:443 </dev/null 2>/dev/null |
+     openssl x509 -noout -dates
+   ```
+
+   And confirm something runs `certbot renew` unattended at all, since a
+   certificate nothing renews fails exactly as quietly as one nothing
+   delivers. The Debian package installs a systemd timer and a cron entry; a
+   `pip` install brings neither, and then the schedule is yours to write:
+
+   ```sh
+   systemctl list-timers 'certbot*'
+   ```
 3. **The network and the proxy**:
 
    ```sh
