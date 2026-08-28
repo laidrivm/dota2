@@ -68,21 +68,21 @@ archive — uncited, they would raise it past `FLOOR` and fail the check.
       `--hero-fallback` through the same `var()` (*Hero missing from the
       palette*), and `hero === undefined` still renders the `fallback` slug with
       an empty abbreviation and no image (*Hero missing from the snapshot*)
-- [x] 1.7 Extend the browser half — `e2e/hero-image.spec.ts`, its own spec
-      because `e2e/board.spec.ts` with these in it passes the 300-line cap —
-      with the states side by side against a routed snapshot: a hero whose
-      image loads shows it with no visible abbreviation; a hero whose image
-      request is failed by the route shows the abbreviation over its palette
-      square; a slot whose hero is replaced after a failure shows the
-      replacement's image. Cover the window 1.4 exists to close, not only the
-      state after it — hold the image request open, assert the tile shows its
-      square and no broken-image affordance *while* the request is in flight,
-      then fail it and assert the same. Assert the accessible names with it: a
-      tile given a `label` exposes exactly one name and the image contributes
-      none, and a tile in a row that already names its hero stays out of the
-      accessibility tree (*The image is drawn*, *The image does not load*)
-- [x] 1.8 Assert in `e2e/hero-image.spec.ts` that opening the picker on an empty
-      query renders every match and that every tile image carries
+- [x] 1.7 The browser half, in `e2e/hero-image.spec.ts`, the states side by
+      side against a routed snapshot: a hero whose image loads shows it with no
+      visible abbreviation; a hero whose image request is failed by the route
+      shows the abbreviation over its palette square; a slot whose hero is
+      replaced after a failure shows the replacement's image. Cover the window
+      1.4 exists to close, not only the state after it — hold the image request
+      open, assert the tile shows its square and no broken-image affordance
+      *while* the request is in flight, then fail it and assert the same. Assert
+      the accessible names with it: a tile given a `label` exposes exactly one
+      name and the image contributes none, and a tile in a row that already
+      names its hero stays out of the accessibility tree (*The image is drawn*,
+      *The image does not load*). Both landed in a spec of their own —
+      `e2e/board.spec.ts` with them in it passes the 300-line cap
+- [x] 1.8 Assert in `e2e/hero-image.spec.ts` that opening the picker on an
+      empty query renders every match and that every tile image carries
       `loading="lazy"`. The mirror is 127 files and 8.6 MB, which is why the
       attribute is there — but it is a hint a conforming user agent may decline,
       so what the suite checks is the request the application makes and not the
