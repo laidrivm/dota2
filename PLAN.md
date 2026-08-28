@@ -120,22 +120,23 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       and exit status to a log on the host, and nothing reads it. Until then a
       failed run degrades quietly — the export runs last, so the previously
       published bundle keeps serving while the data ages.
-- [ ] **The VPS's certificate renewal is broken twice over.** Renewal itself
-      fails: four of its five certificates are issued `authenticator =
-      standalone`, which binds port `80` that the `nginx-proxy` container
-      holds, so `certbot renew` reported `2 renew failure(s)` and
-      `fizzbuzz.digital` and `mellon.sh` expired on 2026-08-21, the latter a
-      live domain. The two other standalone certificates were skipped only as
-      not yet due and fail the same way when they are; the one that renews,
-      `laidrivm.com`, is `dns-cloudflare` and never needs port `80`. Delivery
-      fails independently: `/etc/letsencrypt/renewal-hooks/` is empty in all
-      three phases, and the container reads `/etc/letsencrypt` at start, so
-      even a certificate that did renew reaches nothing. Measured 2026-08-27.
-      The fix is both halves — the four moved to `dns-cloudflare`, and a
-      deploy hook that reloads the proxy — and both are host state, so they
-      land as documented steps rather than as files here. `deploy-pipeline`
-      sidesteps the first for its own certificate by issuing it
-      `dns-cloudflare` from the start; it inherits the second.
+- [ ] **Stalwart serves a self-signed certificate on every mail port.**
+      Found 2026-08-28 while closing the renewal entry above, and older than
+      it: the switch from two loaded certificates to none happened
+      2026-08-24T05:01Z. `mail.laidrivm.com:993`, `:465` and `:995` answer
+      with `CN = rcgen self signed cert` whatever the SNI, so a mail client
+      that verifies gets nothing usable. The cause is in its own log from
+      2026-07-13 — `Failed to read secret from file
+      '/etc/letsencrypt/live/mellon.sh/privkey.pem': Permission denied` —
+      because stalwart runs as uid 2000 and certbot writes private keys
+      `0600 root`. Two lineages predate that default and are still `0644`,
+      which is what the two loaded certificates were; the next renewal of
+      `laidrivm.com` closes the last of them. The `docker restart stalwart`
+      in the deploy hook therefore achieves nothing today and becomes correct
+      the moment this is fixed, which is why it stands. Fixing it is a choice
+      with a security dimension and so is the user's: a group-readable key, a
+      copy into a stalwart-owned directory made by the hook, or stalwart
+      running its own ACME.
 - [ ] **Workflow hygiene is practised everywhere and stated nowhere.**
       Measured over the six workflows: every one pins its actions by SHA with
       a version comment and declares `permissions:`, five of six declare a
@@ -331,7 +332,7 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       -S` before editing, so this is an overstated clause rather than a broken
       criterion; correcting it is a delta spec, not an edit here.
 - [ ] **The always-on trigger has fired, and by more than it last recorded.**
-      Re-measured 2026-08-28: the set is 617 lines against the ~500
+      Re-measured 2026-08-28: the set is 618 lines against the ~500
       `CLAUDE.md` states, where the entry previously read 555. Both sublist
       figures moved with it — Process sits at 24 and Code at 20, so two of the
       three are now at or past the ~20 threshold rather than one.
@@ -341,9 +342,9 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       absence, where a count comes from, which measurement may be overwritten
       — and `docs/verification.md` already owns exactly that. What no longer
       holds is the conclusion drawn from it: moving those five takes Process
-      to 19 and the set to about 607, so it clears one sublist and leaves the
+      to 19 and the set to about 608, so it clears one sublist and leaves the
       set a hundred lines over. Closing this now needs a decision about where
-      the bulk goes, `PLAN.md` being the larger half at 390 lines, and that is
+      the bulk goes, `PLAN.md` being the larger half at 391 lines, and that is
       a change rather than an edit here.
 
 ## Standing constraints
