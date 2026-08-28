@@ -102,17 +102,27 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
 
 ### Open
 
-- [ ] **The board draws no hero it did not ship with.** The tile takes its
-      colour from a `--hero-<short>` token, and the palette was written against
-      the fixture's kebab slugs where the ingest writes STRATZ's snake_case and
-      Valve's internal names: 29 of 127 real heroes resolve a colour, 22 of the
-      51 tokens are reachable by no hero at all, and 86 have none under any
-      spelling. `draft-board` §*Hero tile* admits the grey fallback, so this is
-      not a defect — but a run now mirrors 127 real images into `icons/` and
-      carries `heroes.icon` in the bundle, and nothing in `src/app/` reads it.
-      Generating 86 more colours would entrench a placeholder whose reason has
-      gone; drawing the image instead is smaller and needs a delta spec, the
-      criterion pinning the background to the token.
+- [ ] **`hero-tile-icon`** — proposed,
+      `openspec/changes/hero-tile-icon/`. The board draws no hero it did not
+      ship with: the tile takes its colour from a `--hero-<short>` token, and
+      the palette was written against the fixture's kebab slugs where the
+      ingest writes STRATZ's snake_case and Valve's internal names, so 29 of
+      127 real heroes resolve a colour, 22 of the 51 tokens are reachable by no
+      hero at all, and 86 have none under any spelling. `draft-board` §*Hero
+      tile* admits the grey fallback, so this is not a defect — but a run
+      mirrors 127 real images into `icons/` and carries `heroes.icon` in the
+      bundle, and nothing in `src/app/` reads it. The proposal draws the image
+      and demotes the palette to what stands behind it; one task group, so
+      `feat/hero-tile-icon`. It declines the slug mismatch, which stays here as
+      the entry below.
+- [ ] **Whose spelling of a hero's `short` is canonical.** The client's kebab
+      (`anti-mage`, the fixture and all 51 palette tokens) or Valve's internal
+      name as STRATZ republishes it (`antimage`, every row the ingest writes).
+      Left open by `hero-tile-icon`, which makes the palette unreachable for a
+      hero that has an image and so removes the cost of deciding wrongly, not
+      the decision. Settling it reaches the fixture, `colors.css` and the design
+      project's swatch pages at once, which is why it is not that change's to
+      take.
 - [ ] **Task 5** — error tracking (precondition: the product is deployed).
       Carries the snapshot job's failure alert, which `deploy-pipeline` moved
       here on finding it in no step and no acceptance criterion of
