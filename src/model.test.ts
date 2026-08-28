@@ -68,6 +68,23 @@ describe("enemy role inference (§1)", () => {
 		);
 	});
 
+	test("injectivity: openness stays within [0,1] and lowest on contested roles", () => {
+		// Lich and Oracle are both pos5-dominant. Because an assignment gives a
+		// role to at most one of them, no role can be occupied twice — which is
+		// what keeps openness off negative values — and the backtracking that
+		// frees a role again is what leaves the roles neither plays near 1.
+		const open = computeModel(
+			bundle,
+			session({ enemyPicks: [H.lich, H.oracle] }),
+		).enemyOpenRoles;
+		for (const value of Object.values(open)) {
+			expect(value).toBeGreaterThanOrEqual(0);
+			expect(value).toBeLessThanOrEqual(1);
+		}
+		expect(open["5"]).toBeLessThan(open["4"]);
+		expect(open["4"]).toBeLessThan(open["1"]);
+	});
+
 	test("ε floor: a 0-share role still gets nonzero marginal", () => {
 		// Anti-Mage is pos1-only; role 3 has zero share but must stay > 0.
 		const out = computeModel(bundle, session({ enemyPicks: [H.antiMage] }));

@@ -95,7 +95,7 @@ export function survivors(report: Report): number {
 	return count;
 }
 
-export const FLOOR = 67; // first measurement: 267 mutants, 200 killed
+export const FLOOR = 66; // was 67: an injectivity case kills the role guard too
 
 /**
  * The `FLOOR` declaration in `source`, or `""` when it holds none — a floor
