@@ -1,4 +1,5 @@
-import { test as base, expect, type Page } from "@playwright/test";
+import { expect, type Page } from "@playwright/test";
+import { test } from "./session.ts";
 
 /**
  * The board's own paths, and the three mechanisms the move to CSS modules put
@@ -7,22 +8,7 @@ import { test as base, expect, type Page } from "@playwright/test";
  * moves, and the walk from a removal control up to its row and its region
  * reads `data-` markers — the class names it used to read are the bundler's
  * now.
- *
- * Accessible names carry the hotkey hint, because the `.kbd` span renders
- * inside the `<label>`: an option is `R Radiant`, never `Radiant`.
  */
-const test = base.extend<{ session: (side: string) => Promise<void> }>({
-	session: async ({ page }, use) => {
-		await use(async (side) => {
-			await page.goto("/");
-			await page.getByRole("radio", { name: side }).check();
-			// The second choice completes the session, so the control unmounts with
-			// it and `check()` would have nothing left to confirm against.
-			await page.getByRole("radio", { name: "1 C Carry" }).click();
-			await expect(page.getByRole("region", { name: "Bans" })).toBeVisible();
-		});
-	},
-});
 
 /** Takes the hero `Enter` picks, for whichever entry control opened the picker. */
 const pickFirst = async (page: Page) => {

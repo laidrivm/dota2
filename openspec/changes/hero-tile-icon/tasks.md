@@ -68,7 +68,7 @@ archive — uncited, they would raise it past `FLOOR` and fail the check.
       `--hero-fallback` through the same `var()` (*Hero missing from the
       palette*), and `hero === undefined` still renders the `fallback` slug with
       an empty abbreviation and no image (*Hero missing from the snapshot*)
-- [ ] 1.7 Extend `e2e/board.spec.ts` with the browser half, the states side by
+- [x] 1.7 Extend `e2e/board.spec.ts` with the browser half, the states side by
       side against a routed snapshot: a hero whose image loads shows it with no
       visible abbreviation; a hero whose image request is failed by the route
       shows the abbreviation over its palette square; a slot whose hero is
@@ -80,14 +80,14 @@ archive — uncited, they would raise it past `FLOOR` and fail the check.
       name and the image contributes none, and a tile in a row that already
       names its hero stays out of the accessibility tree (*The image is drawn*,
       *The image does not load*)
-- [ ] 1.8 Assert in `e2e/board.spec.ts` that opening the picker on an empty
+- [x] 1.8 Assert in `e2e/board.spec.ts` that opening the picker on an empty
       query renders every match and that every tile image carries
       `loading="lazy"`. The mirror is 127 files and 8.6 MB, which is why the
       attribute is there — but it is a hint a conforming user agent may decline,
       so what the suite checks is the request the application makes and not the
       traffic that follows. Neither a request count nor an inequality over one
       (*The image is drawn*)
-- [ ] 1.9 Add to `e2e/static-build.spec.ts` that the served `dist/`, which
+- [x] 1.9 Add to `e2e/static-build.spec.ts` that the served `dist/`, which
       carries no `icons/`, renders the board as palette squares throughout. This
       is the case a fresh clone is in as well, and it is what keeps `app-shell`
       §*Static production build* true (*The image does not load*)
