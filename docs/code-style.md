@@ -12,6 +12,8 @@ single-source rule this file inherits.
   SQL is parsed.
 - Pin on the command line any git behaviour a user's configuration can
   disable, rename detection included.
+- Reveal an image when it loads, never hide it when it fails — the `error`
+  event is queued, so a failure paints before the handler runs.
 
 ## Dependency safety
 

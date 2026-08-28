@@ -13,6 +13,8 @@ single-source rule this file inherits.
   a new test, break the code it guards and watch it fail. Break the mechanism
   the test names, not the feature it exercises: a second rule reaching the
   same result makes a passing test evidence about nothing.
+- Assert an inequality, never a count, on behaviour the platform defines as a
+  hint.
 - Give a fixture for a symmetry or antisymmetry case inputs that disagree —
   two sides carrying equal counts satisfy the criterion whichever way the code
   derived them.
