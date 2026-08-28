@@ -91,10 +91,10 @@ archive — uncited, they would raise it past `FLOOR` and fail the check.
       carries no `icons/`, renders the board as palette squares throughout. This
       is the case a fresh clone is in as well, and it is what keeps `app-shell`
       §*Static production build* true (*The image does not load*)
-- [ ] 1.10 Close this change's entry in `PLAN.md`'s Open queue in the pull
+- [x] 1.10 Close this change's entry in `PLAN.md`'s Open queue in the pull
       request that implements it, and leave behind, as its own entry, the
       slug-mismatch decision `proposal.md` §*Non-goals* declines
-- [ ] 1.11 Carry this note forward to the archive rather than acting on it: no
+- [x] 1.11 Carry this note forward to the archive rather than acting on it: no
       pull request of this change edits `openspec/specs/draft-board/spec.md`,
       and the sync copies requirements and nothing else, so its §*Purpose* — "and
       how the hero tile derives its colour and ink from the design tokens", true

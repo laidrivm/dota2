@@ -102,7 +102,7 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
 
 ### Open
 
-- [ ] **`hero-tile-icon`** — proposed,
+- [x] **`hero-tile-icon`** — applied,
       `openspec/changes/hero-tile-icon/`. The board draws no hero it did not
       ship with: the tile takes its colour from a `--hero-<short>` token, and
       the palette was written against the fixture's kebab slugs where the
