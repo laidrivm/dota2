@@ -63,21 +63,33 @@ That leaves the image above the text, which is what an overlaid `<img>` is.
 source to the square at each of the three sizes; nothing in any row's geometry
 moves, because the tile's own box is unchanged.
 
-### The failure is handled in code, not left to the user agent's rendering
+### The image is invisible until it has loaded, and there is no error path
 
-An `<img alt="">` whose request fails is widely said to render nothing visible,
-which would make the fallback free. That has not been measured here and is not
-relied on: `playwright.config.ts` runs one project, `chromium`, so a behaviour
-that differs per engine would be asserted in one engine and unchecked in the
-rest. The criterion *The image does not resolve* says the
-tile presents no broken-image affordance, and that is made true by not rendering
-the element.
+The tile holds one piece of state: the `src` that has *loaded*. The image is
+rendered at `opacity: 0` and becomes visible only when that state equals the
+`src` it is currently asking for.
 
-The state is the `src` that failed, not a boolean: Preact reuses a tile's
-component instance when the hero in that slot changes, so a boolean would leave
-the next hero's image suppressed by the previous hero's failure. Comparing the
-failed `src` against the current one resets itself and needs no `key` at any
-call site.
+The obvious arrangement is the opposite one — render the image, and hide it in
+an `onError`. It is rejected because it cannot satisfy its own criterion: an
+`<img>` enters the broken state and the `error` event is *queued*, so a frame
+can be painted between the failure and the handler. An `alt=""` image that fails
+is a replaced element of natural size 0 and would paint nothing, but this one
+carries an explicit width and height from the CSS that fills the tile, which is
+exactly the case the natural-size rule does not cover. So a broken-image
+affordance is a frame away, and *The image does not load* forbids it.
+Starting at `opacity: 0` has no such window: there is no first paint to lose,
+because nothing is shown until a `load` says there is something to show.
+
+It is also the smaller of the two. It carries one state rather than two, and it
+needs no `onError` at all — a request that fails simply never reaches the state
+that reveals the element, whether it failed to fetch, failed to decode, or
+answered something that was not an image.
+
+The state is the `src`, not a boolean, for the same reason either arrangement
+would need: Preact reuses a tile's component instance when the hero in that slot
+changes, so a boolean would carry the previous hero's verdict onto the next
+one's image. Comparing the loaded `src` against the current one resets itself
+and needs no `key` at any call site.
 
 ### `hero.icon` is validated before it becomes a `src`, in `format.ts`
 
@@ -106,6 +118,13 @@ as well as on the page. It goes on every tile rather than on the picker's alone
 — a bans row of twelve and two panels of five are the same argument at smaller
 scale, and one attribute is cheaper than a prop that says which.
 
+It is a hint and not a budget: the attribute lets a user agent fetch an
+off-screen image whenever it likes, and none of them promises a number. So what
+is claimed here is a reduction and not a ceiling, and the check that goes with
+it asserts *fewer requests than matches* rather than a count. Buying a count
+would mean deciding what is visible in the application rather than asking the
+browser — a virtualised grid — and 127 lazy images is not a reason to build one.
+
 `decoding="async"` rides with it so a slow decode does not block the frame that
 opens the picker.
 
@@ -122,8 +141,10 @@ changes.
 
 - **A 68 KB image drawn at 26px.** → The mirror holds one size, and
   `hero-reference` says why; a second is its own change. What this change pays
-  is bounded instead: lazy loading defers everything off-screen, and the route's
-  `immutable` year means each hero is fetched once per browser, ever.
+  is bounded instead: lazy loading defers what is off-screen, and the route's
+  `immutable` year means a hero is fetched once and then read from cache for up
+  to a year — until the cache evicts it, which is the browser's call and not
+  something this design gets to promise away.
 - **`loading="lazy"` defers an image the user is looking at.** The attribute is
   a hint, and a browser that defers too eagerly shows the palette square for a
   moment. → That state is a specified one, not a defect: it is what every tile

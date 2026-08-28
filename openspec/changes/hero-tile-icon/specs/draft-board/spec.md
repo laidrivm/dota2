@@ -8,8 +8,8 @@ A hero tile SHALL be a square in the mono font, at one of three sizes: 40px in
 the bans row, 34px in a team slot, 26px on a suggestion chip. It SHALL draw the
 hero's mirrored image, requested from this origin at the path the hero entry's
 `icon` field names, scaled to cover the square and cropped about its centre.
-WHERE the tile draws no image — the hero entry carries no `icon`, or the request
-for it does not resolve — the tile SHALL show the hero's abbreviation, the first
+WHERE the tile draws no image — the hero entry carries no `icon`, or the image
+does not load — the tile SHALL show the hero's abbreviation, the first
 four letters of its name with non-letters removed and uppercased, over the
 `--hero-<short>` token, or over `--hero-fallback` when the palette has no entry
 for that hero. That fallback's ink SHALL be `--tile-ink-light` when its
@@ -20,16 +20,18 @@ image SHALL contribute no name beside it.
 
 #### Scenario: The image is drawn
 
-- **WHEN** the hero entry carries `icon` and the request for that path resolves
+- **WHEN** the hero entry carries `icon` and the image at that path loads
 - **THEN** the tile SHALL show that image filling the square, and no
   abbreviation SHALL be visible
 
-#### Scenario: The image does not resolve
+#### Scenario: The image does not load
 
-- **IF** the hero entry carries no `icon`, or the request for the path it names
-  answers a status other than 200
+- **IF** the hero entry carries no `icon`, or the image at the path it names
+  does not load — the request failing, the bytes failing to decode, or the
+  answer not being an image
 - **THEN** the tile SHALL show the abbreviation over its palette background, and
-  SHALL present no broken-image affordance
+  SHALL present no broken-image affordance at any point, the frames before the
+  failure is known included
 
 #### Scenario: Abbreviation
 
