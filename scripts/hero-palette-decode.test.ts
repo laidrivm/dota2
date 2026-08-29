@@ -150,7 +150,16 @@ describe("what the decoder refuses, by saying which shape arrived", () => {
 		[
 			"pixel data shorter than the header promises",
 			() => png({ width: 4, height: 4 }, [[0, 1, 2, 3, 255]]),
-			"stops short",
+			"5 bytes where IHDR names 68",
+		],
+		[
+			"pixel data longer than the header promises",
+			() =>
+				png({ width: 1, height: 1 }, [
+					[0, 1, 2, 3, 255],
+					[0, 9, 9, 9, 255],
+				]),
+			"10 bytes where IHDR names 5",
 		],
 		[
 			"a file with no header at all",
