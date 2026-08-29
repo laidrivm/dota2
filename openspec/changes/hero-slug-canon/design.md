@@ -16,9 +16,10 @@ the source is a non-interlaced 8-bit PNG, but not one shape: of 29 fetched,
 saw; the decoder reads the header rather than trusting it.
 
 `src/app/board/format.test.ts` already holds every hero colour to 4.5:1 against
-the ink `format.ts`'s 0.18 luminance threshold picks, and its token pattern
-`--(hero-[a-z0-9-]+)` matches no underscore — a palette keyed on
-`bounty_hunter` would leave that test silently. No capability states that floor
+the ink `format.ts`'s 0.18 luminance threshold picks. The token pattern it uses
+today, `--(hero-[a-z0-9-]+)`, matches no underscore — a palette keyed on
+`bounty_hunter` would leave that test silently — so it widens to the slug rule,
+underscore included. No capability states that floor
 today; `hero-palette` gives it one.
 
 ## Goals / Non-Goals
@@ -69,9 +70,20 @@ Measured over 29 portraits, that is not enough on its own: 15 land in hue
 0–40 and 13 in hue 127–235, with nothing in yellow, green, purple or pink, and
 Anti-Mage (`#9f5023`), Bane (`#502d17`), Juggernaut (`#a54c13`) and Techies
 (`#95562f`) are one colour to the eye. So the anchor is then moved: colours are
-placed in slug order, `--hero-fallback` first, and each is searched over hue
-rotations in 4° steps and saturation/value offsets for the nearest candidate
-that clears both floors.
+placed in slug order, `--hero-fallback` first at its committed value, and each
+is searched for the nearest candidate that clears both floors.
+
+*Nearest* is a fixed enumeration, because byte-determinism is a property of the
+order rather than of the arithmetic: candidates are generated in HSV — hue
+offset ascending from 0° in 4° steps, then value offset over
+0, ±0.08, ±0.16, ±0.24, then saturation offset over 0, ∓0.12, with saturation
+clamped to [0.15, 1] and value to [0.06, 1] — and each is rounded to 8-bit
+channels before anything is measured, so two candidates never differ below the
+precision the token is written at. Distance is ΔE76 in CIELAB, contrast is
+against the ink the 0.18 threshold picks. The first candidate clearing both is
+taken; ties cannot arise, since the enumeration is ordered and the first match
+wins. A hero for which the enumeration runs out fails the run before any file
+is written, which is what `hero-palette` requires.
 
 ### The floors are 15 ΔE76 and 4.5:1, because 15 is what fits
 
