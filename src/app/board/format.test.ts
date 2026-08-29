@@ -123,10 +123,15 @@ describe("the shipped palette", () => {
 		const declared = [...(await read()).matchAll(/--(hero-[^:\s]+):/g)].map(
 			([, name]) => name,
 		);
-		expect(entries.map(([, name]) => name)).toEqual(
-			expect.arrayContaining(declared),
-		);
+		const heroes = entries
+			.map(([, name]) => name)
+			.filter((name) => name?.startsWith("hero-"));
+		expect(heroes).toEqual(declared);
 		expect(declared.length).toBeGreaterThan(50);
+		// Equality above rather than containment, so a token declared twice
+		// fails here: the cascade keeps the last of the pair, which puts one
+		// hero on another's colour and reads as a colour choice.
+		expect(declared).toHaveLength(new Set(declared).size);
 
 		const unparseable = entries
 			.filter(([, , value]) => relativeLuminance(value ?? "") === null)

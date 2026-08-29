@@ -279,6 +279,14 @@ describe("the slug the fixture carries", () => {
 		);
 	});
 
+	test("no two heroes share one", () => {
+		// Each `short` above is well-formed on its own, so a row copied and
+		// half-edited passes every other case here and puts two heroes on one
+		// colour in the board.
+		const shorts = fixture.heroes.map((hero) => hero.short);
+		expect(shorts).toHaveLength(new Set(shorts).size);
+	});
+
 	// spec: hero-palette/the-fixture-s-two-derived-spellings
 	test("a hero's icon is its own short, not a second spelling", () => {
 		const wrong = fixture.heroes
