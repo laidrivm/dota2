@@ -22,11 +22,10 @@ const SIGNATURE = [137, 80, 78, 71, 13, 10, 26, 10];
 export type Portrait = { width: number; height: number; rgba: Uint8Array };
 
 /**
- * A byte, or 0 for one outside the array.
- *
- * That is not a guard against a short read — the callers below have already
- * checked their lengths — but the filter definition itself: the byte above the
- * first row, and the byte left of the first pixel, are defined to be zero.
+ * A byte, or 0 for one outside the array — not a guard against a short read,
+ * the callers below having checked their lengths, but the filter definition
+ * itself: the byte above the first row and the byte left of the first pixel
+ * are defined to be zero.
  */
 const at = (bytes: Uint8Array, i: number) => (i < 0 ? 0 : (bytes[i] ?? 0));
 
@@ -48,7 +47,6 @@ function readHeader(body: Uint8Array): Header {
 	const height = view.getUint32(4);
 	const depth = view.getUint8(8);
 	const colour = view.getUint8(9);
-	const interlace = view.getUint8(12);
 	if (width === 0 || height === 0)
 		throw new Error(`it measures ${width}×${height}`);
 	if (depth !== 8)
@@ -58,7 +56,18 @@ function readHeader(body: Uint8Array): Header {
 		throw new Error(
 			`its colour type is ${colour}, and only 2 (RGB) and 6 (RGBA) are read`,
 		);
-	if (interlace !== 0) throw new Error("it is interlaced");
+	// All seven header fields are ruled on: compression and filter method have
+	// one defined value each, and a file naming another is refused by name
+	// rather than reached as a zlib error or an unknown row filter.
+	for (const [offset, what] of [
+		[10, "compression"],
+		[11, "filter"],
+	] as const) {
+		const method = view.getUint8(offset);
+		if (method !== 0)
+			throw new Error(`its ${what} method is ${method}, and only 0 is read`);
+	}
+	if (view.getUint8(12) !== 0) throw new Error("it is interlaced");
 	return { width, height, channels };
 }
 
@@ -279,9 +288,11 @@ if (import.meta.main) {
 		process.exit(2);
 	}
 	try {
-		// Built whole before anything is printed: a mirror this cannot read
-		// leaves no half a palette behind for somebody to paste.
-		console.log(palette(dir).join("\n"));
+		// Built whole before anything is printed, so a mirror this cannot read
+		// leaves no half a palette to paste — and an empty one prints nothing
+		// rather than the blank line an empty join would write.
+		const lines = palette(dir);
+		if (lines.length > 0) console.log(lines.join("\n"));
 	} catch (cause) {
 		console.error(cause instanceof Error ? cause.message : String(cause));
 		process.exit(1);
