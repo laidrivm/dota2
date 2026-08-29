@@ -375,7 +375,7 @@ Kept because no single file in the tree is where a reader would look for them.
   are written from `src/app/styles/tokens/colors.css`: one swatch per token in
   file order, background `var(--hero-<slug>)`, label the slug verbatim, letters
   `heroAbbr` of the hero's display name, ink `var(--tile-ink-dark)` or
-  `--tile-ink-light` by the 0.18 luminance threshold. The project's own
+  `var(--tile-ink-light)` by the 0.18 luminance threshold. The project's own
   `tokens/colors.css` carries the same hero block and nothing else of it is
   the repository's to touch. Regenerating them is part of regenerating the
   palette: CSS cannot pick an ink by its background's luminance, so a hero
