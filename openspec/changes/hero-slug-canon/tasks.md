@@ -24,7 +24,7 @@ writes no file and changes no shipped behaviour.
 - [x] 1.3 Read a directory of `<slug>.png`, refuse a name that is not a slug
       under `^[a-z0-9_-]+$`, and print the token lines to stdout in slug order
       (*The same mirror twice*).
-- [ ] 1.4 Tests for the decoder and the anchor, from PNGs the test builds
+- [x] 1.4 Tests for the decoder and the anchor, from PNGs the test builds
       itself: ZOMBIES 1, 2, 3, 5, 6, 10, 11, 15, 16, 17, 18, 19.
 
 ## 2. The palette and the fixture take the ingest's slug
