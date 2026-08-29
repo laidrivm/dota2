@@ -131,9 +131,12 @@ const DECLARATION = /^\t--hero-[^:]+:.*$/;
  *
  * The fallback's own line is carried through untouched rather than rewritten:
  * its value is not the run's to change, and copying the line keeps whatever
- * comment it carries without this script having to know what that says.
+ * comment it carries without this script having to know what that says. So
+ * `heroes` is every token *except* that one — asking for the whole palette and
+ * dropping its first entry here would put a caller one index away from losing
+ * a hero in silence.
  */
-export function render(css: string, palette: Placed[]): string {
+export function render(css: string, heroes: Placed[]): string {
 	const lines = css.split("\n");
 	const block = lines.flatMap((l, i) => (DECLARATION.test(l) ? [i] : []));
 	const first = block[0];
@@ -149,7 +152,7 @@ export function render(css: string, palette: Placed[]): string {
 	if (fallback === undefined)
 		throw new Error("the token file declares no --hero-fallback to keep");
 
-	lines.splice(first, block.length, fallback, ...palette.slice(1).map(line));
+	lines.splice(first, block.length, fallback, ...heroes.map(line));
 	return lines.join("\n");
 }
 
@@ -182,7 +185,7 @@ if (import.meta.main) {
 			anchors(dir),
 			{ dark, light },
 		);
-		writeFileSync(tokens, render(css, palette));
+		writeFileSync(tokens, render(css, palette.slice(1)));
 		// A palette of one has no pair, and `Math.min` of nothing is infinite:
 		// reporting that verbatim would read as a measurement.
 		const pair = Number.isFinite(minimum)
