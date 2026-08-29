@@ -226,6 +226,7 @@ describe("the mirror a palette is read from", () => {
 
 // spec: hero-palette/a-portrait-the-decoder-cannot-read
 // spec: hero-palette/a-mirror-holding-every-hero-the-palette-knows
+// spec: hero-palette/a-hero-the-mirror-has-no-portrait-for
 describe("the generator as a person runs it", () => {
 	test("a readable mirror is written into the token file", () => {
 		const dir = mirror({ "axe.png": solid(197, 59, 48) });

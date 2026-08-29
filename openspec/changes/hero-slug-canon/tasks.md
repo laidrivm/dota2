@@ -86,7 +86,7 @@ whole-requirement copy.
 - [x] 3.6 Re-read the comments over the palette block — `one unique color per
       hero` and the `--tile-ink-*` note — against what the generator now
       guarantees, and correct what has stopped being true.
-- [ ] 3.7 Tests: ZOMBIES 4, 8, 9, 20, 24. ZOMBIES 7 — that adding a portrait
+- [x] 3.7 Tests: ZOMBIES 4, 8, 9, 20, 24. ZOMBIES 7 — that adding a portrait
       moves no placed token — is not written: greedy placement in slug order
       does not hold it, and `design.md` says so under *Risks*.
 - [x] 3.8 Check `e2e/` for an assertion pinning a hero colour or a kebab slug,
