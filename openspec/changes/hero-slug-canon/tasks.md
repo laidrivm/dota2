@@ -65,12 +65,20 @@ whole-requirement copy.
       of the file byte-identical and needing no reformatting by `biome ci .`,
       and report the achieved minimum ΔE76 (ZOMBIES 12, 13, 14).
 - [ ] 3.3 Run the generator over the full mirror and commit the palette: one
-      token per mirrored portrait, `--hero-fallback` kept for a hero released
-      since (*A hero the mirror has no portrait for*). Re-check the file
-      against the 200-line cap in `scripts/file-size.ts`.
+      token per mirrored portrait, plus `--hero-fallback` on every run whatever
+      the mirror holds, which is what a hero released since the run resolves
+      (*A mirror holding every hero the palette knows*; *A hero the mirror has
+      no portrait for*). Re-check the file against the 200-line cap in
+      `scripts/file-size.ts`.
 - [ ] 3.4 Apply the `draft-board` delta: *Ink follows the background* cites the
       0.18 threshold instead of Bane's and Io's hex values, which the
-      regenerated palette no longer carries.
+      regenerated palette no longer carries, and the requirement's sentence
+      says the ink follows whichever background resolved rather than the
+      fallback token alone. Re-run the five criteria the whole-requirement copy
+      carries — *The image is drawn*, *The image does not load*,
+      *Abbreviation*, *Hero missing from the palette*, *Hero missing from the
+      snapshot* — against the regenerated palette; the change delivers none of
+      them anew and must leave all five passing.
 - [ ] 3.5 Replace the two ink cases in `src/app/board/format.test.ts` that
       borrow `#4a3d85` and `#dce8f2` from the palette: after regeneration
       neither colour is in it, so the case chooses its own values either side

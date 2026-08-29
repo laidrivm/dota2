@@ -39,10 +39,18 @@ mirror names its files with.
 
 ### Requirement: Every hero colour clears the ink floor
 
-Every token in the palette, `--hero-fallback` included, SHALL reach a contrast
-ratio of at least 4.5:1 against whichever of `--tile-ink-dark` and
+The palette SHALL carry `--hero-fallback` on every run of the generator,
+whatever the mirror holds, because it is what `draft-board` §*Hero tile*
+resolves for a hero the palette has no token for. Every token in it, that one
+included, SHALL reach a contrast ratio of at least 4.5:1 against whichever of `--tile-ink-dark` and
 `--tile-ink-light` the luminance threshold in `draft-board` §*Hero tile* picks
 for it.
+
+#### Scenario: A mirror holding every hero the palette knows
+
+- **WHEN** the generator runs over a mirror no hero is missing from
+- **THEN** the palette SHALL still carry `--hero-fallback`, unchanged in value
+  by the run
 
 #### Scenario: A colour that would not clear the floor
 

@@ -36,12 +36,14 @@ either working. The palette is load-bearing for nothing but its own tokens.
 - **BREAKING for the palette's provenance**: all 127 colours are computed,
   including the 51 authored by hand today. The design project stops being the
   palette's source and becomes its mirror.
-- Each computed colour is lifted or darkened until it clears 4.5:1 against the
-  ink `format.ts`'s threshold picks for it, which is the floor
-  `src/app/board/format.test.ts` already holds the current 52 to.
+- A computed colour is legible and tellable from its neighbours before it is
+  written; `hero-palette` states both floors, and this is the first capability
+  to state either — `src/app/board/format.test.ts` holds the current 52 to a
+  contrast floor no requirement owns.
 - The contrast test's own token pattern widens to the slug rule in
-  `src/job/ingest/icons.ts`: `--(hero-[a-z0-9-]+)` matches no underscore, so
-  `--hero-bounty_hunter` would leave the test silently.
+  `src/job/ingest/icons.ts`. The pattern it carries today,
+  `--(hero-[a-z0-9-]+)`, matches no underscore, so `--hero-bounty_hunter` would
+  leave the test silently.
 - `draft-board` §*Hero tile* stops naming two colours by hex. The scenario that
   pins the ink crossover cites the threshold instead, so a regenerated palette
   does not put a spec and a token file into disagreement.
