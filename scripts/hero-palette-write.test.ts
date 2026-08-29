@@ -108,8 +108,6 @@ describe("the block the write replaces", () => {
 		],
 		["no hero colour at all", css(), "no hero colour"],
 	])("%s stops the write", (_, source, reason) => {
-		expect(() =>
-			render(source, [{ slug: "fallback", colour: "#3a4250" }]),
-		).toThrow(reason);
+		expect(() => render(source, [])).toThrow(reason);
 	});
 });
