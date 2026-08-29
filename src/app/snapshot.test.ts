@@ -251,3 +251,39 @@ describe("provenance line", () => {
 		expect(formatProvenance(bundle)).toBe("patch 7.41d · snapshot Jul 18");
 	});
 });
+
+/**
+ * The fixture stands in for a bundle wherever one has not been fetched, so
+ * what it spells `short` is what the board looks a palette token up under.
+ * Its heroes are hand-written rows rather than ingested ones, which is the
+ * only place in the tree where the two spellings could drift apart again.
+ */
+// spec: hero-palette/a-hero-whose-slug-and-display-name-diverge
+// spec: hero-palette/a-slug-carrying-a-separator
+describe("the slug the fixture carries", () => {
+	test("every hero is spelled the way the mirror names its files", () => {
+		const wrong = fixture.heroes
+			.filter((hero) => !/^[a-z0-9_-]+$/.test(hero.short))
+			.map((hero) => `${hero.name} ${hero.short}`);
+		expect(wrong).toEqual([]);
+	});
+
+	test.each([
+		["Zeus", "zuus"],
+		["Clockwerk", "rattletrap"],
+		["Wraith King", "skeleton_king"],
+		["Anti-Mage", "antimage"],
+	])("%s carries the source's own name for it, %s", (name, short) => {
+		expect(fixture.heroes.find((hero) => hero.name === name)?.short).toBe(
+			short,
+		);
+	});
+
+	// spec: hero-palette/the-fixture-s-two-derived-spellings
+	test("a hero's icon is its own short, not a second spelling", () => {
+		const wrong = fixture.heroes
+			.filter((hero) => hero.icon !== `/icons/${hero.short}.png`)
+			.map((hero) => `${hero.short} ${hero.icon}`);
+		expect(wrong).toEqual([]);
+	});
+});
