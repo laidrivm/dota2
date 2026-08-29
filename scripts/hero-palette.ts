@@ -183,8 +183,13 @@ if (import.meta.main) {
 			{ dark, light },
 		);
 		writeFileSync(tokens, render(css, palette));
+		// A palette of one has no pair, and `Math.min` of nothing is infinite:
+		// reporting that verbatim would read as a measurement.
+		const pair = Number.isFinite(minimum)
+			? `${minimum.toFixed(2)} ΔE76 between the closest pair`
+			: "no pair to measure";
 		console.log(
-			`${palette.length} colours, ${minimum.toFixed(2)} ΔE76 between the closest pair`,
+			`${palette.length} colour${palette.length === 1 ? "" : "s"}, ${pair}`,
 		);
 	} catch (cause) {
 		console.error(cause instanceof Error ? cause.message : String(cause));
