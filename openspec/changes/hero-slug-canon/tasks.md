@@ -97,10 +97,10 @@ whole-requirement copy.
 Closes no acceptance criterion: nothing in this step is behaviour the
 application exhibits.
 
-- [ ] 4.1 Regenerate the design project's `guidelines/colors-hero-palette.html`
+- [x] 4.1 Regenerate the design project's `guidelines/colors-hero-palette.html`
       and `guidelines/component-hero-tile.html` from the committed tokens
       through DesignSync, which also settles the `--tile-ink-*` desync those
       pages carry. If DesignSync is still refusing to authenticate, write what
       is stale into `PLAN.md` instead and say so in the pull request.
-- [ ] 4.2 Close the open decision in `PLAN.md`, and fold in or delete the
+- [x] 4.2 Close the open decision in `PLAN.md`, and fold in or delete the
       design-page entry according to what 4.1 achieved.
