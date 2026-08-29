@@ -99,11 +99,22 @@ export const MIN_CONTRAST = 4.5;
  * Where a colour may be moved to, nearest first.
  *
  * A fixed enumeration rather than a nearest-neighbour search, because what
- * makes a run repeatable is the order rather than the arithmetic: hue turns
- * first and in the smallest steps, so a colour that clears both floors
- * unmoved is returned unmoved, and one that does not travels as little as the
- * grid allows. Every candidate is rounded to eight bits before it is measured,
- * so no two of them differ below the precision a token is written at.
+ * makes a run repeatable is the order rather than the arithmetic. It opens at
+ * the anchor itself, so a colour clearing both floors unmoved is returned
+ * unmoved. After that it is not nearest-first and does not claim to be: the
+ * dimensions are tried in the order `design.md` lists them — hue outermost,
+ * then value, then saturation — so every value and saturation variant at one
+ * hue is exhausted before the hue turns. Over the committed roster that puts
+ * the furthest-moved colour 126 ΔE76 from its anchor.
+ *
+ * Sweeping hue innermost would move each colour less on its own, and does not
+ * work: measured over the same 127 anchors it runs out before placing them
+ * all. The two orders enumerate the same 1890 candidates and differ only in
+ * sequence, so what decides the outcome is which colours the earlier heroes
+ * take out of circulation.
+ *
+ * Every candidate is rounded to eight bits before it is measured, so no two
+ * of them differ below the precision a token is written at.
  */
 function* candidates(colour: string) {
 	const { hue, saturation, value } = hsv(

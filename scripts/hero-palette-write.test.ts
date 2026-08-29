@@ -80,7 +80,7 @@ describe("the generator as a person runs it", () => {
 		writeFileSync(wrong, ":root {\n\t--hero-fallback: #3a4250;\n}\n");
 		const call = run(dir, wrong);
 		expect(call.status).not.toBe(0);
-		expect(call.err).toContain("no ink pair");
+		expect(call.err).toContain("no --tile-ink-light");
 	});
 
 	test("no token file to write is refused before anything is read", () => {
