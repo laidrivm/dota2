@@ -114,3 +114,21 @@ export function mirror(files: Record<string, Uint8Array>): string {
 /** A one-pixel RGBA portrait, as a file the mirror can hold. */
 export const solid = (r: number, g: number, b: number): Uint8Array =>
 	png({ width: 1, height: 1 }, [[0, r, g, b, 255]]);
+
+/**
+ * The generator run as a person runs it. Spawned rather than called, because
+ * what the exit code and the two streams carry is the whole of what a person
+ * gets, and none of it is observable from inside the module.
+ */
+export function run(...args: string[]) {
+	const call = Bun.spawnSync([
+		"bun",
+		`${import.meta.dir}/hero-palette.ts`,
+		...args,
+	]);
+	return {
+		status: call.exitCode,
+		out: call.stdout.toString(),
+		err: call.stderr.toString(),
+	};
+}
