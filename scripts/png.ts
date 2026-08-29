@@ -17,11 +17,12 @@ const SIGNATURE = [137, 80, 78, 71, 13, 10, 26, 10];
 export type Portrait = { width: number; height: number; rgba: Uint8Array };
 
 /**
- * A byte, or 0 outside the array — not a short-read guard, the callers below
- * having checked their lengths, but the filter definition: the byte above the
- * first row and the byte left of the first pixel are zero.
+ * A byte at an index the callers have already checked is in range. The `?? 0`
+ * is what satisfies the compiler's unchecked-index rule and nothing more —
+ * the filter definition's zero byte above the first row and left of the first
+ * pixel is supplied by `unfilter`'s own guards, not here.
  */
-const at = (bytes: Uint8Array, i: number) => (i < 0 ? 0 : (bytes[i] ?? 0));
+const at = (bytes: Uint8Array, i: number) => bytes[i] ?? 0;
 
 /** How many bytes a pixel occupies, per colour type this reads. */
 const CHANNELS: Record<number, number> = { 2: 3, 6: 4 };
@@ -138,6 +139,10 @@ export function decodePortrait(bytes: Uint8Array): Portrait {
 		const body = bytes.subarray(cursor + 8, cursor + 8 + length);
 		if (type === "IHDR") header = readHeader(body);
 		else if (type === "IDAT") parts.push(body);
+		// Transparency this decoder does not apply. On a colour type 2 file it
+		// names one colour as see-through, and every pixel here would come
+		// back opaque instead — which `anchorColour` would then weigh.
+		else if (type === "tRNS") throw new Error("it carries a tRNS chunk");
 		else if (type === "IEND") break;
 		cursor += 12 + length;
 	}

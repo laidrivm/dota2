@@ -6,7 +6,7 @@
  * bytes on the wire.
  */
 import { describe, expect, test } from "bun:test";
-import { chunk, png, SIGNATURE } from "./hero-palette.fixture.ts";
+import { chunk, ihdr, png, SIGNATURE } from "./hero-palette.fixture.ts";
 import { decodePortrait } from "./png.ts";
 
 /**
@@ -175,6 +175,18 @@ describe("what the decoder refuses, by saying which shape arrived", () => {
 					...chunk("IEND"),
 				]),
 			"no IDAT",
+		],
+		[
+			"a file carrying transparency this decoder does not apply",
+			() =>
+				Uint8Array.from([
+					...SIGNATURE,
+					...ihdr({ width: 1, height: 1, colour: 2 }),
+					...chunk("tRNS", [0, 1, 0, 2, 0, 3]),
+					...chunk("IDAT", [0]),
+					...chunk("IEND"),
+				]),
+			"tRNS",
 		],
 		[
 			"a chunk claiming more bytes than the file holds",

@@ -37,15 +37,30 @@ describe("the generator as a person runs it", () => {
 		expect(readFileSync(tokens, "utf8")).toContain("\t--hero-axe: ");
 	});
 
-	test("the fallback is carried through whatever the mirror holds", () => {
+	test("an empty mirror is refused rather than emptying the palette", () => {
+		// It reaches the write with a palette of one, which would leave a
+		// tracked file holding the fallback and no hero at all — and exit 0
+		// while doing it, so nothing would say the palette had been dropped.
 		const tokens = tokenFile();
 		const before = readFileSync(tokens, "utf8");
-		expect(run(mirror({}), tokens).status).toBe(0);
-		const after = readFileSync(tokens, "utf8");
+		const call = run(mirror({}), tokens);
+		expect(call.status).not.toBe(0);
+		expect(call.err).toContain("no hero colour at all");
+		expect(readFileSync(tokens, "utf8")).toBe(before);
+	});
+
+	test("the fallback is carried through the heroes that remain", () => {
+		const tokens = tokenFile();
+		const after = (() => {
+			expect(
+				run(mirror({ "abaddon.png": solid(69, 196, 180) }), tokens).status,
+			).toBe(0);
+			return readFileSync(tokens, "utf8");
+		})();
 		expect(after).toContain(FALLBACK_LINE);
-		// The one hero the mirror did not hold is gone, and nothing else moved.
+		// The hero the mirror did not hold is gone; the one it did is there.
 		expect(after).not.toContain("--hero-axe:");
-		expect(before.split("\n").length - after.split("\n").length).toBe(1);
+		expect(after).toContain("--hero-abaddon:");
 	});
 
 	test("one unreadable portrait leaves the committed palette alone", () => {
@@ -62,15 +77,6 @@ describe("the generator as a person runs it", () => {
 		expect(call.status).not.toBe(0);
 		expect(call.err).toContain("pudge.png");
 		expect(readFileSync(tokens, "utf8")).toBe(before);
-	});
-
-	test("a mirror of one hero reports no pair rather than an infinity", () => {
-		// `Math.min` of no pair is infinite, and printing that reads as a
-		// measurement somebody could quote.
-		const tokens = tokenFile();
-		expect(run(mirror({}), tokens).out.trim()).toBe(
-			"1 colour, no pair to measure",
-		);
 	});
 
 	test("a token file declaring no ink pair is refused", () => {
@@ -108,6 +114,36 @@ describe("the block the write replaces", () => {
 		],
 		["no hero colour at all", css(), "no hero colour"],
 	])("%s stops the write", (_, source, reason) => {
-		expect(() => render(source, [])).toThrow(reason);
+		// A hero to write, so the refusal under test is the file's shape and
+		// not the empty-palette guard that runs before it.
+		expect(() => render(source, [{ slug: "axe", colour: "#c53b30" }])).toThrow(
+			reason,
+		);
+	});
+
+	test("a hero declaration inside a comment is not one of them", () => {
+		// Without blanking the comments first, the second line here reads as a
+		// declaration, falls inside the block, and is spliced away — leaving
+		// the file with a comment nothing closes.
+		const source = [
+			":root {",
+			"\t/* dropped when the roster changed:",
+			"\t--hero-old: #123456; */",
+			"\t--hero-fallback: #3a4250;",
+			"\t--hero-axe: #c53b30;",
+			"}",
+			"",
+		].join("\n");
+		const out = render(source, [{ slug: "abaddon", colour: "#45c4b4" }]);
+		expect(out).toContain("\t/* dropped when the roster changed:");
+		expect(out).toContain("\t--hero-old: #123456; */");
+		expect(out).toContain("\t--hero-abaddon: #45c4b4;");
+		expect(out).not.toContain("--hero-axe:");
+	});
+
+	test("a palette with no hero in it stops the write", () => {
+		expect(() => render(css(fallback, "\t--hero-axe: #c53b30;"), [])).toThrow(
+			"no hero colour at all",
+		);
 	});
 });
