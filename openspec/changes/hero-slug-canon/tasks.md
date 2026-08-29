@@ -79,7 +79,7 @@ whole-requirement copy.
       *Abbreviation*, *Hero missing from the palette*, *Hero missing from the
       snapshot* — against the regenerated palette; the change delivers none of
       them anew and must leave all five passing.
-- [ ] 3.5 Replace the two ink cases in `src/app/board/format.test.ts` that
+- [x] 3.5 Replace the two ink cases in `src/app/board/format.test.ts` that
       borrow `#4a3d85` and `#dce8f2` from the palette: after regeneration
       neither colour is in it, so the case chooses its own values either side
       of the threshold.
@@ -89,7 +89,7 @@ whole-requirement copy.
 - [ ] 3.7 Tests: ZOMBIES 4, 8, 9, 20, 24. ZOMBIES 7 — that adding a portrait
       moves no placed token — is not written: greedy placement in slug order
       does not hold it, and `design.md` says so under *Risks*.
-- [ ] 3.8 Check `e2e/` for an assertion pinning a hero colour or a kebab slug,
+- [x] 3.8 Check `e2e/` for an assertion pinning a hero colour or a kebab slug,
       and move it to the property rather than the value if one exists.
 
 ## 4. The design project and the queue
