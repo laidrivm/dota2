@@ -4,11 +4,10 @@
  * The board draws a hero's square in `--hero-<short>`, and `<short>` is the
  * slug the ingest writes — the same name `icons.ts` gives the mirrored file,
  * which is why the mirror is what this reads. Run by hand when the roster
- * changes, never in CI and never in the snapshot job; its output is committed.
- * It prints the token lines and writes no file.
- *
- * The portraits are decoded here rather than by a dependency: `node:zlib`
- * inflates the pixel stream, and un-filtering 8-bit RGB and RGBA is the rest.
+ * changes, never in CI and never in the snapshot job; its output is committed,
+ * and it writes no file of its own. The portraits are decoded here rather than
+ * by a dependency: `node:zlib` inflates the pixel stream, and un-filtering
+ * 8-bit RGB and RGBA is the rest.
  */
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
@@ -22,10 +21,9 @@ const SIGNATURE = [137, 80, 78, 71, 13, 10, 26, 10];
 export type Portrait = { width: number; height: number; rgba: Uint8Array };
 
 /**
- * A byte, or 0 for one outside the array — not a guard against a short read,
- * the callers below having checked their lengths, but the filter definition
- * itself: the byte above the first row and the byte left of the first pixel
- * are defined to be zero.
+ * A byte, or 0 outside the array — not a short-read guard, the callers below
+ * having checked their lengths, but the filter definition: the byte above the
+ * first row and the byte left of the first pixel are zero.
  */
 const at = (bytes: Uint8Array, i: number) => (i < 0 ? 0 : (bytes[i] ?? 0));
 
@@ -101,8 +99,11 @@ function predictor(filter: number, a: number, b: number, c: number): number {
 function unfilter(raw: Uint8Array, header: Header): Uint8Array {
 	const { width, height, channels } = header;
 	const stride = width * channels;
-	if (raw.length < height * (stride + 1))
-		throw new Error("its pixel data stops short of the size IHDR names");
+	const want = height * (stride + 1);
+	if (raw.length !== want)
+		throw new Error(
+			`its pixel data is ${raw.length} bytes where IHDR names ${want}`,
+		);
 	const out = new Uint8Array(height * stride);
 	for (let y = 0; y < height; y++) {
 		const row = y * (stride + 1);
@@ -288,9 +289,8 @@ if (import.meta.main) {
 		process.exit(2);
 	}
 	try {
-		// Built whole before anything is printed, so a mirror this cannot read
-		// leaves no half a palette to paste — and an empty one prints nothing
-		// rather than the blank line an empty join would write.
+		// Built whole before printing, so a mirror this cannot read leaves no
+		// half a palette to paste; an empty one prints nothing at all.
 		const lines = palette(dir);
 		if (lines.length > 0) console.log(lines.join("\n"));
 	} catch (cause) {
