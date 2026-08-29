@@ -1,13 +1,13 @@
 /**
- * The PNG decoder in `hero-palette.ts`: what it reads, and what it refuses.
+ * What `png.ts` reads, and what it refuses.
  *
  * Apart from `hero-palette.test.ts`, which asks what colour a portrait yields
- * once it is decoded. The two halves together are over the file cap, and the
- * seam is where the pixels are: everything here is bytes on the wire.
+ * once it is decoded. The seam is where the pixels are: everything here is
+ * bytes on the wire.
  */
 import { describe, expect, test } from "bun:test";
 import { chunk, png, SIGNATURE } from "./hero-palette.fixture.ts";
-import { decodePortrait } from "./hero-palette.ts";
+import { decodePortrait } from "./png.ts";
 
 /**
  * A 2×2 image and its five encodings, the filtered bytes worked out by hand

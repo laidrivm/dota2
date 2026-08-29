@@ -9,178 +9,17 @@
  * by a dependency: `node:zlib` inflates the pixel stream, and un-filtering
  * 8-bit RGB and RGBA is the rest.
  */
-import { readdirSync, readFileSync } from "node:fs";
+import { readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { inflateSync } from "node:zlib";
+import { relativeLuminance } from "../src/app/board/format.ts";
 import { isSlug } from "../src/job/ingest/icons.ts";
+import { hsv, type Placed, place } from "./hero-colour.ts";
+import { decodePortrait, type Portrait } from "./png.ts";
 
-/** The eight bytes every PNG opens with. */
-const SIGNATURE = [137, 80, 78, 71, 13, 10, 26, 10];
+/** A byte, or 0 outside the array — the pixels below are read in fours. */
+const at = (bytes: Uint8Array, i: number) => bytes[i] ?? 0;
 
-/** A decoded portrait, always four channels whatever the file carried. */
-export type Portrait = { width: number; height: number; rgba: Uint8Array };
-
-/**
- * A byte, or 0 outside the array — not a short-read guard, the callers below
- * having checked their lengths, but the filter definition: the byte above the
- * first row and the byte left of the first pixel are zero.
- */
-const at = (bytes: Uint8Array, i: number) => (i < 0 ? 0 : (bytes[i] ?? 0));
-
-/** How many bytes a pixel occupies, per colour type this reads. */
-const CHANNELS: Record<number, number> = { 2: 3, 6: 4 };
-
-type Header = { width: number; height: number; channels: number };
-
-/**
- * What IHDR says, refusing every shape this decoder does not implement by
- * saying which one arrived. A mirrored portrait is a non-interlaced 8-bit PNG
- * of colour type 2 or 6 — measured over the mirror rather than assumed — and
- * anything else stops the run instead of being guessed at.
- */
-function readHeader(body: Uint8Array): Header {
-	if (body.length !== 13) throw new Error("its IHDR is not 13 bytes long");
-	const view = new DataView(body.buffer, body.byteOffset, body.byteLength);
-	const width = view.getUint32(0);
-	const height = view.getUint32(4);
-	const depth = view.getUint8(8);
-	const colour = view.getUint8(9);
-	if (width === 0 || height === 0)
-		throw new Error(`it measures ${width}×${height}`);
-	if (depth !== 8)
-		throw new Error(`its bit depth is ${depth}, and only 8 is read`);
-	const channels = CHANNELS[colour];
-	if (channels === undefined)
-		throw new Error(
-			`its colour type is ${colour}, and only 2 (RGB) and 6 (RGBA) are read`,
-		);
-	// All seven header fields are ruled on: compression and filter method have
-	// one defined value each, and a file naming another is refused by name
-	// rather than reached as a zlib error or an unknown row filter.
-	for (const [offset, what] of [
-		[10, "compression"],
-		[11, "filter"],
-	] as const) {
-		const method = view.getUint8(offset);
-		if (method !== 0)
-			throw new Error(`its ${what} method is ${method}, and only 0 is read`);
-	}
-	if (view.getUint8(12) !== 0) throw new Error("it is interlaced");
-	return { width, height, channels };
-}
-
-/** What a filtered byte is added to, by the filter its row declares. */
-function predictor(filter: number, a: number, b: number, c: number): number {
-	switch (filter) {
-		case 0:
-			return 0;
-		case 1:
-			return a;
-		case 2:
-			return b;
-		case 3:
-			return (a + b) >> 1;
-		case 4: {
-			// Paeth: whichever neighbour the linear estimate lands nearest.
-			const p = a + b - c;
-			const pa = Math.abs(p - a);
-			const pb = Math.abs(p - b);
-			const pc = Math.abs(p - c);
-			return pa <= pb && pa <= pc ? a : pb <= pc ? b : c;
-		}
-		default:
-			throw new Error(
-				`its row filter ${filter} is not one of the five PNG defines`,
-			);
-	}
-}
-
-/** The inflated stream, one filter byte per row, un-filtered into raw pixels. */
-function unfilter(raw: Uint8Array, header: Header): Uint8Array {
-	const { width, height, channels } = header;
-	const stride = width * channels;
-	const want = height * (stride + 1);
-	if (raw.length !== want)
-		throw new Error(
-			`its pixel data is ${raw.length} bytes where IHDR names ${want}`,
-		);
-	const out = new Uint8Array(height * stride);
-	for (let y = 0; y < height; y++) {
-		const row = y * (stride + 1);
-		const filter = at(raw, row);
-		const line = y * stride;
-		const above = line - stride;
-		for (let x = 0; x < stride; x++) {
-			const a = x >= channels ? at(out, line + x - channels) : 0;
-			const b = y > 0 ? at(out, above + x) : 0;
-			const c = x >= channels && y > 0 ? at(out, above + x - channels) : 0;
-			out[line + x] =
-				(at(raw, row + 1 + x) + predictor(filter, a, b, c)) & 0xff;
-		}
-	}
-	return out;
-}
-
-/**
- * A portrait's pixels, as RGBA whatever the file's colour type.
- *
- * Chunk CRCs are not checked: these files came off this project's own mirror,
- * and corruption a CRC would catch is corruption `inflateSync` fails on.
- */
-export function decodePortrait(bytes: Uint8Array): Portrait {
-	if (bytes.length < 8 || SIGNATURE.some((byte, i) => at(bytes, i) !== byte))
-		throw new Error("it does not open with a PNG signature");
-	const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
-	let header: Header | undefined;
-	const parts: Uint8Array[] = [];
-	// 8 signature bytes, then chunks of length, type, body and CRC.
-	for (let cursor = 8; cursor + 8 <= bytes.length; ) {
-		const length = view.getUint32(cursor);
-		if (cursor + 12 + length > bytes.length)
-			throw new Error("a chunk in it runs past the end of the file");
-		const type = String.fromCharCode(...bytes.subarray(cursor + 4, cursor + 8));
-		const body = bytes.subarray(cursor + 8, cursor + 8 + length);
-		if (type === "IHDR") header = readHeader(body);
-		else if (type === "IDAT") parts.push(body);
-		else if (type === "IEND") break;
-		cursor += 12 + length;
-	}
-	if (header === undefined) throw new Error("it carries no IHDR chunk");
-	if (parts.length === 0) throw new Error("it carries no IDAT chunk");
-
-	const raw = unfilter(
-		new Uint8Array(inflateSync(Buffer.concat(parts))),
-		header,
-	);
-	const { width, height, channels } = header;
-	const rgba = new Uint8Array(width * height * 4);
-	for (let pixel = 0; pixel < width * height; pixel++) {
-		const from = pixel * channels;
-		const to = pixel * 4;
-		rgba[to] = at(raw, from);
-		rgba[to + 1] = at(raw, from + 1);
-		rgba[to + 2] = at(raw, from + 2);
-		rgba[to + 3] = channels === 4 ? at(raw, from + 3) : 255;
-	}
-	return { width, height, rgba };
-}
-
-/** Hue in [0, 360), saturation and value in [0, 1], from 8-bit channels. */
-function hsv(r: number, g: number, b: number) {
-	const max = Math.max(r, g, b);
-	const span = max - Math.min(r, g, b);
-	let hue = 0;
-	if (span !== 0) {
-		if (max === r) hue = 60 * (((g - b) / span) % 6);
-		else if (max === g) hue = 60 * ((b - r) / span + 2);
-		else hue = 60 * ((r - g) / span + 4);
-	}
-	return {
-		hue: (hue + 360) % 360,
-		saturation: max === 0 ? 0 : span / max,
-		value: max / 255,
-	};
-}
+const FALLBACK = /--hero-fallback:\s*(#[0-9a-f]{6});/;
 
 const BUCKETS = 24;
 /** A pixel too transparent, too dark or too grey to say anything about hue. */
@@ -268,12 +107,12 @@ export function readMirror(dir: string): string[] {
 		.sort();
 }
 
-/** The palette a mirror yields: one `--hero-<slug>` line per portrait. */
-export function palette(dir: string): string[] {
+/** Each mirrored portrait's own colour, before any of them is moved apart. */
+export function anchors(dir: string): Placed[] {
 	return readMirror(dir).map((slug) => {
 		const file = join(dir, `${slug}.png`);
 		try {
-			return `\t--hero-${slug}: ${anchorColour(decodePortrait(readFileSync(file)))};`;
+			return { slug, colour: anchorColour(decodePortrait(readFileSync(file))) };
 		} catch (cause) {
 			throw new Error(
 				`${file} could not be read: ${cause instanceof Error ? cause.message : String(cause)}`,
@@ -282,17 +121,71 @@ export function palette(dir: string): string[] {
 	});
 }
 
+/** A token declaration, as the file already writes them. */
+const line = ({ slug, colour }: Placed) => `\t--hero-${slug}: ${colour};`;
+
+const DECLARATION = /^\t--hero-[^:]+:.*$/;
+
+/**
+ * `css` with its hero block replaced and every other byte left alone.
+ *
+ * The fallback's own line is carried through untouched rather than rewritten:
+ * its value is not the run's to change, and copying the line keeps whatever
+ * comment it carries without this script having to know what that says.
+ */
+export function render(css: string, palette: Placed[]): string {
+	const lines = css.split("\n");
+	const block = lines.flatMap((l, i) => (DECLARATION.test(l) ? [i] : []));
+	const first = block[0];
+	const last = block.at(-1);
+	if (first === undefined || last === undefined)
+		throw new Error("the token file declares no hero colour to replace");
+	if (last - first + 1 !== block.length)
+		throw new Error("the token file's hero declarations are not contiguous");
+
+	const fallback = lines
+		.slice(first, last + 1)
+		.find((l) => l.startsWith("\t--hero-fallback:"));
+	if (fallback === undefined)
+		throw new Error("the token file declares no --hero-fallback to keep");
+
+	lines.splice(first, block.length, fallback, ...palette.slice(1).map(line));
+	return lines.join("\n");
+}
+
 if (import.meta.main) {
-	const dir = process.argv[2];
-	if (dir === undefined) {
-		console.error("usage: bun scripts/hero-palette.ts <mirror directory>");
+	const [, , dir, tokens] = process.argv;
+	if (dir === undefined || tokens === undefined) {
+		console.error(
+			"usage: bun scripts/hero-palette.ts <mirror directory> <token file>",
+		);
 		process.exit(2);
 	}
 	try {
-		// Built whole before printing, so a mirror this cannot read leaves no
-		// half a palette to paste; an empty one prints nothing at all.
-		const lines = palette(dir);
-		if (lines.length > 0) console.log(lines.join("\n"));
+		const css = readFileSync(tokens, "utf8");
+		const read = (name: string) =>
+			relativeLuminance(
+				new RegExp(`--${name}:\\s*([^;]+);`).exec(css)?.[1]?.trim() ?? "",
+			);
+		const dark = read("tile-ink-dark");
+		const light = read("tile-ink-light");
+		const fallback = FALLBACK.exec(css)?.[1];
+		if (dark === null || light === null || fallback === undefined)
+			throw new Error(
+				`${tokens} declares no ink pair and fallback to place against`,
+			);
+
+		// Placed before anything is written, so a mirror that cannot be placed
+		// leaves the committed palette exactly as it was.
+		const { palette, minimum } = place(
+			{ slug: "fallback", colour: fallback },
+			anchors(dir),
+			{ dark, light },
+		);
+		writeFileSync(tokens, render(css, palette));
+		console.log(
+			`${palette.length} colours, ${minimum.toFixed(2)} ΔE76 between the closest pair`,
+		);
 	} catch (cause) {
 		console.error(cause instanceof Error ? cause.message : String(cause));
 		process.exit(1);

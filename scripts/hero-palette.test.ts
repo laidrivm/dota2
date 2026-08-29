@@ -5,11 +5,12 @@
  */
 
 import { afterAll, describe, expect, test } from "bun:test";
-import { mkdirSync } from "node:fs";
+import { mkdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import {
 	chunk,
 	cleanup,
+	FALLBACK_LINE,
 	ihdr,
 	mirror,
 	png,
@@ -17,8 +18,9 @@ import {
 	run,
 	SIGNATURE,
 	solid,
+	tokenFile,
 } from "./hero-palette.fixture.ts";
-import { anchorColour, palette, readMirror } from "./hero-palette.ts";
+import { anchorColour, anchors, readMirror } from "./hero-palette.ts";
 
 afterAll(cleanup);
 
@@ -170,16 +172,16 @@ describe("the mirror a palette is read from", () => {
 		expect(() => readMirror(dir)).toThrow(name);
 	});
 
-	test("the same mirror yields the same palette twice", () => {
+	test("the same mirror yields the same anchors twice", () => {
 		const dir = mirror({
 			"axe.png": solid(197, 59, 48),
 			"abaddon.png": solid(69, 196, 180),
 		});
-		expect(palette(dir)).toEqual([
-			"\t--hero-abaddon: #45c4b4;",
-			"\t--hero-axe: #c53b30;",
+		expect(anchors(dir)).toEqual([
+			{ slug: "abaddon", colour: "#45c4b4" },
+			{ slug: "axe", colour: "#c53b30" },
 		]);
-		expect(palette(dir)).toEqual(palette(dir));
+		expect(anchors(dir)).toEqual(anchors(dir));
 	});
 
 	test("a portrait that cannot be read names its own file", () => {
@@ -187,7 +189,7 @@ describe("the mirror a palette is read from", () => {
 			"axe.png": solid(197, 59, 48),
 			"pudge.png": png({ width: 1, height: 1, depth: 16 }, [[0, 0, 0, 0]]),
 		});
-		expect(() => palette(dir)).toThrow("pudge.png");
+		expect(() => anchors(dir)).toThrow("pudge.png");
 	});
 
 	test("pixel data that is not a zlib stream names its file too", () => {
@@ -200,7 +202,7 @@ describe("the mirror a palette is read from", () => {
 			...chunk("IEND"),
 		]);
 		const dir = mirror({ "pudge.png": broken });
-		expect(() => palette(dir)).toThrow("pudge.png");
+		expect(() => anchors(dir)).toThrow("pudge.png");
 	});
 
 	test("a directory inside the mirror stops the run", () => {
@@ -209,8 +211,8 @@ describe("the mirror a palette is read from", () => {
 		expect(() => readMirror(dir)).toThrow("thumbnails");
 	});
 
-	test("a mirror holding no portrait yields no token", () => {
-		expect(palette(mirror({}))).toEqual([]);
+	test("a mirror holding no portrait yields no anchor", () => {
+		expect(anchors(mirror({}))).toEqual([]);
 	});
 
 	test("a fabricated name cannot write outside the mirror", () => {
@@ -223,39 +225,46 @@ describe("the mirror a palette is read from", () => {
 });
 
 // spec: hero-palette/a-portrait-the-decoder-cannot-read
+// spec: hero-palette/a-mirror-holding-every-hero-the-palette-knows
 describe("the generator as a person runs it", () => {
-	test("a readable mirror prints the palette and succeeds", () => {
+	test("a readable mirror is written into the token file", () => {
 		const dir = mirror({ "axe.png": solid(197, 59, 48) });
-		expect(run(dir)).toEqual({
-			status: 0,
-			out: "\t--hero-axe: #c53b30;\n",
-			err: "",
-		});
+		const tokens = tokenFile();
+		const call = run(dir, tokens);
+		expect(call.status).toBe(0);
+		expect(call.out).toMatch(/2 colours, [0-9.]+ ΔE76/);
+		expect(readFileSync(tokens, "utf8")).toContain("\t--hero-axe: ");
 	});
 
-	test("one unreadable portrait leaves no palette on stdout at all", () => {
-		// The other two portraits decode. A run that printed what it had before
-		// reaching the third would hand somebody two thirds of a palette to
-		// paste, which is the failure this criterion is about.
+	test("the fallback is carried through whatever the mirror holds", () => {
+		const tokens = tokenFile();
+		const before = readFileSync(tokens, "utf8");
+		expect(run(mirror({}), tokens).status).toBe(0);
+		const after = readFileSync(tokens, "utf8");
+		expect(after).toContain(FALLBACK_LINE);
+		// The one hero the mirror did not hold is gone, and nothing else moved.
+		expect(after).not.toContain("--hero-axe:");
+		expect(before.split("\n").length - after.split("\n").length).toBe(1);
+	});
+
+	test("one unreadable portrait leaves the committed palette alone", () => {
+		// The other two decode. A run that wrote what it had before reaching
+		// the third would leave two thirds of a palette in a tracked file.
 		const dir = mirror({
 			"abaddon.png": solid(69, 196, 180),
 			"axe.png": solid(197, 59, 48),
 			"pudge.png": png({ width: 1, height: 1, depth: 16 }, [[0, 0, 0, 0]]),
 		});
-		const call = run(dir);
-		expect(call.out).toBe("");
+		const tokens = tokenFile();
+		const before = readFileSync(tokens, "utf8");
+		const call = run(dir, tokens);
 		expect(call.status).not.toBe(0);
 		expect(call.err).toContain("pudge.png");
+		expect(readFileSync(tokens, "utf8")).toBe(before);
 	});
 
-	test("a mirror holding no portrait prints nothing at all", () => {
-		// Not the blank line an empty join would write: what this prints is
-		// pasted into a token file, and a stray newline is a diff.
-		expect(run(mirror({}))).toEqual({ status: 0, out: "", err: "" });
-	});
-
-	test("no directory to read is refused before anything is read", () => {
-		const call = run();
+	test("no token file to write is refused before anything is read", () => {
+		const call = run(mirror({}));
 		expect(call.status).not.toBe(0);
 		expect(call.err).toContain("usage:");
 	});
