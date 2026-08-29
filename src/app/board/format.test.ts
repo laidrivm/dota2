@@ -111,11 +111,22 @@ describe("the shipped palette", () => {
 	test("every colour the tile reads parses to a luminance", async () => {
 		const entries = [
 			...(await read()).matchAll(
-				/--(hero-[a-z0-9-]+|tile-ink-[a-z]+):\s*([^;]+);/g,
+				/--(hero-[a-z0-9_-]+|tile-ink-[a-z]+):\s*([^;]+);/g,
 			),
 		];
 
-		expect(entries.length).toBeGreaterThan(50);
+		// Not a number beside the palette, which a pattern that stopped
+		// matching would satisfy by shrinking under it: every hero
+		// declaration in the file has to be one of the entries above, so a
+		// spelling the pattern does not cover fails here rather than leaving
+		// quietly.
+		const declared = [...(await read()).matchAll(/--(hero-[^:\s]+):/g)].map(
+			([, name]) => name,
+		);
+		expect(entries.map(([, name]) => name)).toEqual(
+			expect.arrayContaining(declared),
+		);
+		expect(declared.length).toBeGreaterThan(50);
 
 		const unparseable = entries
 			.filter(([, , value]) => relativeLuminance(value ?? "") === null)
@@ -143,7 +154,7 @@ describe("the shipped palette", () => {
 			(Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
 
 		const failures = [
-			...css.matchAll(/--(hero-[a-z0-9-]+):\s*([^;]+);/g),
+			...css.matchAll(/--(hero-[a-z0-9_-]+):\s*([^;]+);/g),
 		].flatMap(([, name, value]) => {
 			const luminance = relativeLuminance(value ?? "");
 			if (luminance === null) return [];
