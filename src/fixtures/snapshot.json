@@ -71,7 +71,7 @@
 		{
 			"id": 62,
 			"name": "Bounty Hunter",
-			"short": "bounty-hunter",
+			"short": "bounty_hunter",
 			"icon": "/icons/bounty_hunter.png",
 			"aliases": ["bh", "bounty"],
 			"sufficient": true,
@@ -161,7 +161,7 @@
 		{
 			"id": 112,
 			"name": "Winter Wyvern",
-			"short": "winter-wyvern",
+			"short": "winter_wyvern",
 			"icon": "/icons/winter_wyvern.png",
 			"aliases": ["ww", "wyvern"],
 			"sufficient": true,
@@ -191,8 +191,8 @@
 		{
 			"id": 22,
 			"name": "Zeus",
-			"short": "zeus",
-			"icon": "/icons/zeus.png",
+			"short": "zuus",
+			"icon": "/icons/zuus.png",
 			"aliases": ["zues"],
 			"sufficient": true,
 			"contest": 0.55,
@@ -221,7 +221,7 @@
 		{
 			"id": 71,
 			"name": "Spirit Breaker",
-			"short": "spirit-breaker",
+			"short": "spirit_breaker",
 			"icon": "/icons/spirit_breaker.png",
 			"aliases": ["sb", "bara"],
 			"sufficient": true,
@@ -281,7 +281,7 @@
 		{
 			"id": 6,
 			"name": "Drow Ranger",
-			"short": "drow-ranger",
+			"short": "drow_ranger",
 			"icon": "/icons/drow_ranger.png",
 			"aliases": ["drow", "traxex"],
 			"sufficient": true,
@@ -401,7 +401,7 @@
 		{
 			"id": 12,
 			"name": "Phantom Lancer",
-			"short": "phantom-lancer",
+			"short": "phantom_lancer",
 			"icon": "/icons/phantom_lancer.png",
 			"aliases": ["pl"],
 			"sufficient": true,
@@ -431,8 +431,8 @@
 		{
 			"id": 54,
 			"name": "Lifestealer",
-			"short": "lifestealer",
-			"icon": "/icons/lifestealer.png",
+			"short": "life_stealer",
+			"icon": "/icons/life_stealer.png",
 			"aliases": ["naix"],
 			"sufficient": true,
 			"contest": 0.27,
@@ -521,7 +521,7 @@
 		{
 			"id": 60,
 			"name": "Night Stalker",
-			"short": "night-stalker",
+			"short": "night_stalker",
 			"icon": "/icons/night_stalker.png",
 			"aliases": ["ns", "balanar"],
 			"sufficient": true,
@@ -611,8 +611,8 @@
 		{
 			"id": 69,
 			"name": "Doom",
-			"short": "doom",
-			"icon": "/icons/doom.png",
+			"short": "doom_bringer",
+			"icon": "/icons/doom_bringer.png",
 			"aliases": ["lucifer"],
 			"sufficient": true,
 			"contest": 0.23,
@@ -641,8 +641,8 @@
 		{
 			"id": 51,
 			"name": "Clockwerk",
-			"short": "clockwerk",
-			"icon": "/icons/clockwerk.png",
+			"short": "rattletrap",
+			"icon": "/icons/rattletrap.png",
 			"aliases": ["clock", "rattletrap"],
 			"sufficient": true,
 			"contest": 0.18,
@@ -671,7 +671,7 @@
 		{
 			"id": 90,
 			"name": "Keeper of the Light",
-			"short": "keeper-of-the-light",
+			"short": "keeper_of_the_light",
 			"icon": "/icons/keeper_of_the_light.png",
 			"aliases": ["kotl", "ezalor"],
 			"sufficient": true,
@@ -731,8 +731,8 @@
 		{
 			"id": 83,
 			"name": "Treant Protector",
-			"short": "treant-protector",
-			"icon": "/icons/treant_protector.png",
+			"short": "treant",
+			"icon": "/icons/treant.png",
 			"aliases": ["treant", "rooftrellen"],
 			"sufficient": true,
 			"contest": 0.18,
@@ -851,8 +851,8 @@
 		{
 			"id": 42,
 			"name": "Wraith King",
-			"short": "wraith-king",
-			"icon": "/icons/wraith_king.png",
+			"short": "skeleton_king",
+			"icon": "/icons/skeleton_king.png",
 			"aliases": ["wk", "skeleton king", "sk"],
 			"sufficient": true,
 			"contest": 0.12,
@@ -881,8 +881,8 @@
 		{
 			"id": 1,
 			"name": "Anti-Mage",
-			"short": "anti-mage",
-			"icon": "/icons/anti-mage.png",
+			"short": "antimage",
+			"icon": "/icons/antimage.png",
 			"aliases": ["am", "magina"],
 			"sufficient": true,
 			"contest": 0.24,
@@ -936,7 +936,7 @@
 		{
 			"id": 95,
 			"name": "Troll Warlord",
-			"short": "troll-warlord",
+			"short": "troll_warlord",
 			"icon": "/icons/troll_warlord.png",
 			"aliases": ["troll"],
 			"sufficient": true,

@@ -20,50 +20,53 @@ import random
 
 rng = random.Random(42)
 
-# name, id, aliases, positions {pos: (share, meta_pp)}, side_radiant_pp,
-# phase (p1, p2, last) pp, contest, sufficient
+# name, id, slug, aliases, positions {pos: (share, meta_pp)}, side_radiant_pp,
+# phase (p1, p2, last) pp, contest, sufficient. The slug is spelled out rather
+# than derived: it is the hero source's own name for the hero, which no
+# transform recovers from the display one, and it is what the ingest writes,
+# what the mirror names its files with, and what the palette is keyed on.
 HEROES = [
     # --- bans in the brief's mock state ---
-    ("Snapfire",        128, ["snap"],            {4: (0.65, 2.1), 5: (0.35, 1.9)}, 0.4, (0.2, 0.3, 0.1), 0.81, True),
-    ("Invoker",          74, ["invo", "voker"],   {2: (0.75, 2.8), 1: (0.25, 1.1)}, -0.6, (0.6, -0.2, -0.4), 0.58, True),
-    ("Bounty Hunter",    62, ["bh", "bounty"],    {4: (0.80, 6.2), 3: (0.20, 2.0)}, 0.2, (0.3, 0.1, -0.2), 0.13, True),
-    ("Enigma",           33, ["nigma"],           {3: (0.55, 5.8), 4: (0.45, 4.9)}, 0.1, (-0.5, 0.6, 0.2), 0.09, True),
-    ("Pudge",            14, ["butcher"],         {4: (0.85, 0.6), 2: (0.15, 0.2)}, 0.3, (0.1, 0.4, -0.3), 0.85, True),
-    ("Winter Wyvern",   112, ["ww", "wyvern"],    {5: (0.70, 3.8), 4: (0.30, 3.2)}, 0.1, (0.2, 0.8, -0.4), 0.12, True),
+    ("Snapfire",        128, "snapfire",            ["snap"],            {4: (0.65, 2.1), 5: (0.35, 1.9)}, 0.4, (0.2, 0.3, 0.1), 0.81, True),
+    ("Invoker",          74, "invoker",             ["invo", "voker"],   {2: (0.75, 2.8), 1: (0.25, 1.1)}, -0.6, (0.6, -0.2, -0.4), 0.58, True),
+    ("Bounty Hunter",    62, "bounty_hunter",       ["bh", "bounty"],    {4: (0.80, 6.2), 3: (0.20, 2.0)}, 0.2, (0.3, 0.1, -0.2), 0.13, True),
+    ("Enigma",           33, "enigma",              ["nigma"],           {3: (0.55, 5.8), 4: (0.45, 4.9)}, 0.1, (-0.5, 0.6, 0.2), 0.09, True),
+    ("Pudge",            14, "pudge",               ["butcher"],         {4: (0.85, 0.6), 2: (0.15, 0.2)}, 0.3, (0.1, 0.4, -0.3), 0.85, True),
+    ("Winter Wyvern",   112, "winter_wyvern",       ["ww", "wyvern"],    {5: (0.70, 3.8), 4: (0.30, 3.2)}, 0.1, (0.2, 0.8, -0.4), 0.12, True),
     # --- my team mock picks ---
-    ("Zeus",             22, ["zues"],            {2: (0.60, 0.3), 4: (0.40, 0.1)}, 0.2, (0.3, 0.2, -0.6), 0.55, True),
-    ("Spirit Breaker",   71, ["sb", "bara"],      {4: (0.70, 2.4), 3: (0.30, 1.8)}, -0.3, (0.2, 0.4, -0.2), 0.38, True),
+    ("Zeus",             22, "zuus",                ["zues"],            {2: (0.60, 0.3), 4: (0.40, 0.1)}, 0.2, (0.3, 0.2, -0.6), 0.55, True),
+    ("Spirit Breaker",   71, "spirit_breaker",      ["sb", "bara"],      {4: (0.70, 2.4), 3: (0.30, 1.8)}, -0.3, (0.2, 0.4, -0.2), 0.38, True),
     # --- enemy mock picks ---
-    ("Undying",          85, ["dirge"],           {5: (0.60, 2.2), 4: (0.40, 2.4)}, 0.5, (0.1, 0.3, 0.0), 0.29, True),
-    ("Drow Ranger",       6, ["drow", "traxex"],  {1: (0.90, 2.1), 2: (0.10, 0.8)}, 0.7, (0.2, 0.2, 0.1), 0.49, True),
-    ("Axe",               2, ["mogul khan"],      {3: (0.85, 0.9), 4: (0.15, 0.3)}, -0.1, (-0.4, 0.3, 0.4), 0.51, True),
-    ("Lion",             26, ["demon witch"],     {4: (0.55, -0.6), 5: (0.45, -1.1)}, -0.2, (0.1, -0.1, 0.0), 0.55, True),
+    ("Undying",          85, "undying",             ["dirge"],           {5: (0.60, 2.2), 4: (0.40, 2.4)}, 0.5, (0.1, 0.3, 0.0), 0.29, True),
+    ("Drow Ranger",       6, "drow_ranger",         ["drow", "traxex"],  {1: (0.90, 2.1), 2: (0.10, 0.8)}, 0.7, (0.2, 0.2, 0.1), 0.49, True),
+    ("Axe",               2, "axe",                 ["mogul khan"],      {3: (0.85, 0.9), 4: (0.15, 0.3)}, -0.1, (-0.4, 0.3, 0.4), 0.51, True),
+    ("Lion",             26, "lion",                ["demon witch"],     {4: (0.55, -0.6), 5: (0.45, -1.1)}, -0.2, (0.1, -0.1, 0.0), 0.55, True),
     # --- carry suggestion pool ---
-    ("Spectre",          67, ["spec"],            {1: (0.95, 3.1), 2: (0.05, 0.5)}, 0.3, (-1.2, 0.4, 1.6), 0.30, True),
-    ("Phantom Lancer",   12, ["pl"],              {1: (0.92, 2.7), 2: (0.08, 0.4)}, -0.4, (-1.5, 0.3, 1.4), 0.42, True),
-    ("Lifestealer",      54, ["naix"],            {1: (0.97, 3.6), 3: (0.03, 0.2)}, 0.1, (-2.0, 0.5, 0.6), 0.27, True),
-    ("Juggernaut",        8, ["jug", "jugger"],   {1: (0.96, 2.5), 3: (0.04, 0.1)}, 0.6, (-0.3, 0.2, 0.5), 0.24, True),
-    ("Slark",            93, ["fish"],            {1: (0.94, 1.6), 2: (0.06, 0.3)}, 0.2, (-1.0, -0.4, 1.5), 0.25, True),
+    ("Spectre",          67, "spectre",             ["spec"],            {1: (0.95, 3.1), 2: (0.05, 0.5)}, 0.3, (-1.2, 0.4, 1.6), 0.30, True),
+    ("Phantom Lancer",   12, "phantom_lancer",      ["pl"],              {1: (0.92, 2.7), 2: (0.08, 0.4)}, -0.4, (-1.5, 0.3, 1.4), 0.42, True),
+    ("Lifestealer",      54, "life_stealer",        ["naix"],            {1: (0.97, 3.6), 3: (0.03, 0.2)}, 0.1, (-2.0, 0.5, 0.6), 0.27, True),
+    ("Juggernaut",        8, "juggernaut",          ["jug", "jugger"],   {1: (0.96, 2.5), 3: (0.04, 0.1)}, 0.6, (-0.3, 0.2, 0.5), 0.24, True),
+    ("Slark",            93, "slark",               ["fish"],            {1: (0.94, 1.6), 2: (0.06, 0.3)}, 0.2, (-1.0, -0.4, 1.5), 0.25, True),
     # --- offlane suggestion pool ---
-    ("Night Stalker",    60, ["ns", "balanar"],   {3: (0.80, 3.9), 4: (0.20, 2.6)}, 0.7, (0.4, 0.5, -0.5), 0.33, True),
-    ("Dawnbreaker",     135, ["dawn", "valora"],  {3: (0.75, 1.7), 4: (0.25, 1.2)}, -0.6, (-0.6, 0.6, 0.7), 0.31, True),
-    ("Tidehunter",       29, ["tide"],            {3: (0.90, 0.4), 5: (0.10, -0.3)}, 0.0, (-0.7, 0.1, 0.8), 0.17, True),
-    ("Doom",             69, ["lucifer"],         {3: (0.85, 0.5), 1: (0.15, 0.1)}, -0.3, (-0.2, -0.1, 0.6), 0.23, True),
-    ("Clockwerk",        51, ["clock", "rattletrap"], {4: (0.75, 2.3), 3: (0.25, 1.5)}, 0.0, (0.4, -0.1, -0.9), 0.18, True),
+    ("Night Stalker",    60, "night_stalker",       ["ns", "balanar"],   {3: (0.80, 3.9), 4: (0.20, 2.6)}, 0.7, (0.4, 0.5, -0.5), 0.33, True),
+    ("Dawnbreaker",     135, "dawnbreaker",         ["dawn", "valora"],  {3: (0.75, 1.7), 4: (0.25, 1.2)}, -0.6, (-0.6, 0.6, 0.7), 0.31, True),
+    ("Tidehunter",       29, "tidehunter",          ["tide"],            {3: (0.90, 0.4), 5: (0.10, -0.3)}, 0.0, (-0.7, 0.1, 0.8), 0.17, True),
+    ("Doom",             69, "doom_bringer",        ["lucifer"],         {3: (0.85, 0.5), 1: (0.15, 0.1)}, -0.3, (-0.2, -0.1, 0.6), 0.23, True),
+    ("Clockwerk",        51, "rattletrap",          ["clock", "rattletrap"], {4: (0.75, 2.3), 3: (0.25, 1.5)}, 0.0, (0.4, -0.1, -0.9), 0.18, True),
     # --- support suggestion pool ---
-    ("Keeper of the Light", 90, ["kotl", "ezalor"], {5: (0.75, 4.2), 4: (0.25, 3.5)}, -0.3, (0.2, 0.1, 0.9), 0.22, True),
-    ("Oracle",          111, ["ora"],             {5: (0.85, 3.0), 4: (0.15, 2.2)}, -0.4, (0.3, 0.4, 0.1), 0.15, True),
-    ("Treant Protector", 83, ["treant", "rooftrellen"], {5: (0.70, 3.9), 4: (0.30, 3.3)}, 1.1, (0.2, 0.9, 0.3), 0.18, True),
-    ("Bane",              3, ["atropos"],         {5: (0.80, 2.8), 4: (0.20, 2.1)}, 0.5, (0.1, 0.6, 0.0), 0.13, True),
-    ("Lich",             31, ["ethreain"],        {5: (0.90, 1.3), 4: (0.10, 0.7)}, 0.4, (-0.1, 0.5, -0.7), 0.22, True),
+    ("Keeper of the Light", 90, "keeper_of_the_light", ["kotl", "ezalor"], {5: (0.75, 4.2), 4: (0.25, 3.5)}, -0.3, (0.2, 0.1, 0.9), 0.22, True),
+    ("Oracle",          111, "oracle",              ["ora"],             {5: (0.85, 3.0), 4: (0.15, 2.2)}, -0.4, (0.3, 0.4, 0.1), 0.15, True),
+    ("Treant Protector", 83, "treant",              ["treant", "rooftrellen"], {5: (0.70, 3.9), 4: (0.30, 3.3)}, 1.1, (0.2, 0.9, 0.3), 0.18, True),
+    ("Bane",              3, "bane",                ["atropos"],         {5: (0.80, 2.8), 4: (0.20, 2.1)}, 0.5, (0.1, 0.6, 0.0), 0.13, True),
+    ("Lich",             31, "lich",                ["ethreain"],        {5: (0.90, 1.3), 4: (0.10, 0.7)}, 0.4, (-0.1, 0.5, -0.7), 0.22, True),
     # --- search & model test cases ---
-    ("Clinkz",           56, ["bone fletcher", "bone"], {1: (0.85, 2.0), 2: (0.15, 0.6)}, 1.4, (0.2, 0.3, -0.2), 0.13, True),
-    ("Wraith King",      42, ["wk", "skeleton king", "sk"], {1: (0.90, 1.5), 3: (0.10, 0.4)}, 0.0, (-1.1, 0.6, 0.4), 0.12, True),
-    ("Anti-Mage",         1, ["am", "magina"],    {1: (1.00, -0.7)}, 0.9, (-3.4, -1.1, 2.8), 0.24, True),
-    ("Razor",            15, ["lightning revenant"], {1: (0.60, -1.2), 3: (0.40, -0.9)}, 0.9, (-0.9, 0.2, 0.4), 0.10, True),
-    ("Troll Warlord",    95, ["troll"],           {1: (0.95, 0.2), 2: (0.05, 0.0)}, 0.4, (-2.6, 0.3, -0.5), 0.06, True),
+    ("Clinkz",           56, "clinkz",              ["bone fletcher", "bone"], {1: (0.85, 2.0), 2: (0.15, 0.6)}, 1.4, (0.2, 0.3, -0.2), 0.13, True),
+    ("Wraith King",      42, "skeleton_king",       ["wk", "skeleton king", "sk"], {1: (0.90, 1.5), 3: (0.10, 0.4)}, 0.0, (-1.1, 0.6, 0.4), 0.12, True),
+    ("Anti-Mage",         1, "antimage",            ["am", "magina"],    {1: (1.00, -0.7)}, 0.9, (-3.4, -1.1, 2.8), 0.24, True),
+    ("Razor",            15, "razor",               ["lightning revenant"], {1: (0.60, -1.2), 3: (0.40, -0.9)}, 0.9, (-0.9, 0.2, 0.4), 0.10, True),
+    ("Troll Warlord",    95, "troll_warlord",       ["troll"],           {1: (0.95, 0.2), 2: (0.05, 0.0)}, 0.4, (-2.6, 0.3, -0.5), 0.06, True),
     # insufficient-data hero (recently released)
-    ("Largo",           150, [],                  {3: (0.55, 0.0), 1: (0.45, 0.0)}, 0.0, (0.0, 0.0, 0.0), 0.12, False),
+    ("Largo",           150, "largo",               [],                  {3: (0.55, 0.0), 1: (0.45, 0.0)}, 0.0, (0.0, 0.0, 0.0), 0.12, False),
 ]
 
 # Hand-set matchup advantages, pp, from the row hero's perspective.
@@ -105,7 +108,7 @@ def noise(scale):
 
 
 heroes_json = []
-for name, hid, aliases, positions, side_r, (p1, p2, plast), contest, sufficient in HEROES:
+for name, hid, slug, aliases, positions, side_r, (p1, p2, plast), contest, sufficient in HEROES:
     pos_json = {}
     for pos, (share, meta) in positions.items():
         pos_json[str(pos)] = {
@@ -116,8 +119,8 @@ for name, hid, aliases, positions, side_r, (p1, p2, plast), contest, sufficient 
     heroes_json.append({
         "id": hid,
         "name": name,
-        "short": name.lower().replace(" ", "-").replace("'", ""),
-        "icon": f"/icons/{name.lower().replace(' ', '_').replace(chr(39), '')}.png",
+        "short": slug,
+        "icon": f"/icons/{slug}.png",
         "aliases": aliases,
         "sufficient": sufficient,
         "contest": contest,
@@ -132,7 +135,7 @@ for name, hid, aliases, positions, side_r, (p1, p2, plast), contest, sufficient 
 matchups = {str(ids[n]): {} for n in names}
 for i, a in enumerate(names):
     for b in names[i + 1:]:
-        if not (next(h for h in HEROES if h[0] == a)[7] and next(h for h in HEROES if h[0] == b)[7]):
+        if not (next(h for h in HEROES if h[0] == a)[8] and next(h for h in HEROES if h[0] == b)[8]):
             adv = 0.0  # insufficient hero: neutral everywhere
         elif (a, b) in NOTABLE_MATCHUPS:
             adv = NOTABLE_MATCHUPS[(a, b)]
@@ -147,7 +150,7 @@ for i, a in enumerate(names):
 synergies = {str(ids[n]): {} for n in names}
 for i, a in enumerate(names):
     for b in names[i + 1:]:
-        if not (next(h for h in HEROES if h[0] == a)[7] and next(h for h in HEROES if h[0] == b)[7]):
+        if not (next(h for h in HEROES if h[0] == a)[8] and next(h for h in HEROES if h[0] == b)[8]):
             syn = 0.0
         elif (a, b) in NOTABLE_SYNERGIES:
             syn = NOTABLE_SYNERGIES[(a, b)]
