@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import type { Role } from "../../types.ts";
+import rawFixture from "../../fixtures/snapshot.json" with { type: "json" };
+import type { Role, SnapshotBundle } from "../../types.ts";
 import {
 	formatAdvantage,
 	formatPhase,
@@ -14,6 +15,8 @@ import {
 	tileInk,
 	topRoles,
 } from "./format.ts";
+
+const fixture = rawFixture as unknown as SnapshotBundle;
 
 describe("heroAbbr", () => {
 	test.each([
@@ -178,6 +181,18 @@ describe("the shipped palette", () => {
 		});
 
 		expect(failures).toEqual([]);
+	});
+
+	// spec: hero-palette/the-fixture-agrees-with-the-palette
+	test("every hero the fixture carries resolves a token", async () => {
+		// The mirror the palette is generated from is written by a job run and
+		// carried by no clone, so the fixture is what a checkout can hold the
+		// palette against at all.
+		const css = await read();
+		const missing = fixture.heroes
+			.map((hero) => hero.short)
+			.filter((short) => !css.includes(`--hero-${short}:`));
+		expect(missing).toEqual([]);
 	});
 
 	test("the fallback colour exists, so a hero off the palette still renders", async () => {
