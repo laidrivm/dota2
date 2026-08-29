@@ -39,7 +39,7 @@ unchanged here — only their names — so no tile changes appearance.
       in `src/job/` is edited.
 - [x] 2.2 Rename the 51 hero tokens in `src/app/styles/tokens/colors.css` to
       those slugs (*A hero whose slug and display name diverge*).
-- [ ] 2.3 Give each row of `src/fixtures/generate_fixture.py` an explicit slug,
+- [x] 2.3 Give each row of `src/fixtures/generate_fixture.py` an explicit slug,
       derive `icon` from it rather than from the display name, and regenerate
       `snapshot.json` (*The fixture agrees with the palette*; *The fixture's two
       derived spellings*).
