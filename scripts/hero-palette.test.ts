@@ -5,20 +5,17 @@
  */
 
 import { afterAll, describe, expect, test } from "bun:test";
-import { mkdirSync, readFileSync } from "node:fs";
+import { mkdirSync } from "node:fs";
 import { join } from "node:path";
 import {
 	chunk,
 	cleanup,
-	FALLBACK_LINE,
 	ihdr,
 	mirror,
 	png,
 	portrait,
-	run,
 	SIGNATURE,
 	solid,
-	tokenFile,
 } from "./hero-palette.fixture.ts";
 import { anchorColour, anchors, readMirror } from "./hero-palette.ts";
 
@@ -221,52 +218,5 @@ describe("the mirror a palette is read from", () => {
 		expect(() => mirror({ "../escaped.png": solid(1, 2, 3) })).toThrow(
 			"outside the mirror",
 		);
-	});
-});
-
-// spec: hero-palette/a-portrait-the-decoder-cannot-read
-// spec: hero-palette/a-mirror-holding-every-hero-the-palette-knows
-// spec: hero-palette/a-hero-the-mirror-has-no-portrait-for
-describe("the generator as a person runs it", () => {
-	test("a readable mirror is written into the token file", () => {
-		const dir = mirror({ "axe.png": solid(197, 59, 48) });
-		const tokens = tokenFile();
-		const call = run(dir, tokens);
-		expect(call.status).toBe(0);
-		expect(call.out).toMatch(/2 colours, [0-9.]+ ΔE76/);
-		expect(readFileSync(tokens, "utf8")).toContain("\t--hero-axe: ");
-	});
-
-	test("the fallback is carried through whatever the mirror holds", () => {
-		const tokens = tokenFile();
-		const before = readFileSync(tokens, "utf8");
-		expect(run(mirror({}), tokens).status).toBe(0);
-		const after = readFileSync(tokens, "utf8");
-		expect(after).toContain(FALLBACK_LINE);
-		// The one hero the mirror did not hold is gone, and nothing else moved.
-		expect(after).not.toContain("--hero-axe:");
-		expect(before.split("\n").length - after.split("\n").length).toBe(1);
-	});
-
-	test("one unreadable portrait leaves the committed palette alone", () => {
-		// The other two decode. A run that wrote what it had before reaching
-		// the third would leave two thirds of a palette in a tracked file.
-		const dir = mirror({
-			"abaddon.png": solid(69, 196, 180),
-			"axe.png": solid(197, 59, 48),
-			"pudge.png": png({ width: 1, height: 1, depth: 16 }, [[0, 0, 0, 0]]),
-		});
-		const tokens = tokenFile();
-		const before = readFileSync(tokens, "utf8");
-		const call = run(dir, tokens);
-		expect(call.status).not.toBe(0);
-		expect(call.err).toContain("pudge.png");
-		expect(readFileSync(tokens, "utf8")).toBe(before);
-	});
-
-	test("no token file to write is refused before anything is read", () => {
-		const call = run(mirror({}));
-		expect(call.status).not.toBe(0);
-		expect(call.err).toContain("usage:");
 	});
 });

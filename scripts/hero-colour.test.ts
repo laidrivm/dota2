@@ -13,6 +13,8 @@ import { describe, expect, test } from "bun:test";
 import {
 	contrast,
 	deltaE76,
+	hex,
+	hsv,
 	type Inks,
 	lab,
 	MIN_CONTRAST,
@@ -119,5 +121,49 @@ describe("the fallback", () => {
 			PURE,
 		);
 		expect(palette[0]).toEqual(FALLBACK);
+	});
+});
+
+describe("the colour spaces the search measures in", () => {
+	test.each([
+		["#000000"],
+		["#ffffff"],
+		["#9f5023"],
+		["#2e7fd0"],
+		["#767676"],
+		["#010203"],
+	])("%s survives a trip through HSV and back", (colour) => {
+		// Every token in the palette is written by `hex` out of coordinates
+		// `hsv` produced, so a rounding error in either shifts all of them.
+		const { hue, saturation, value } = hsv(
+			Number.parseInt(colour.slice(1, 3), 16),
+			Number.parseInt(colour.slice(3, 5), 16),
+			Number.parseInt(colour.slice(5, 7), 16),
+		);
+		expect(hex(hue, saturation, value)).toBe(colour);
+	});
+
+	test("lightness runs from black at 0 to white at 100", () => {
+		// The 15 ΔE76 floor is a distance in this space and nothing else pins
+		// its scale, so a wrong white point would silently rescale it.
+		expect(lab("#000000")[0]).toBe(0);
+		expect(lab("#ffffff")[0]).toBeCloseTo(100, 4);
+	});
+
+	test.each([["#000000"], ["#808080"], ["#ffffff"]])(
+		"%s sits on the neutral axis",
+		(grey) => {
+			// Not exactly zero: the sRGB matrix is the rounded four-decimal one,
+			// which leaves white at a = 0.005, b = -0.010. That is a
+			// fifteen-hundredth of the floor these numbers are compared against,
+			// and the same rounding is in `format.ts`'s luminance — one
+			// precision across both beats a closer white point in one of them.
+			const [, a, b] = lab(grey);
+			expect(Math.hypot(a, b)).toBeLessThan(0.05);
+		},
+	);
+
+	test("a value that is not a colour is refused, not scored", () => {
+		expect(() => contrast("no such colour", PURE)).toThrow("is not a colour");
 	});
 });
