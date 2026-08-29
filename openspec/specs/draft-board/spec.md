@@ -204,8 +204,9 @@ WHERE the tile draws no image — the hero entry carries no `icon`, or the image
 does not load — the tile SHALL show the hero's abbreviation, the first
 four letters of its name with non-letters removed and uppercased, over the
 `--hero-<short>` token, or over `--hero-fallback` when the palette has no entry
-for that hero. That fallback's ink SHALL be `--tile-ink-light` when its
-background's relative luminance is below 0.18 and `--tile-ink-dark` otherwise.
+for that hero. That abbreviation's ink SHALL be `--tile-ink-light` when the
+background it is drawn on — whichever of the two tokens resolved — has a
+relative luminance below 0.18, and `--tile-ink-dark` otherwise.
 Every tile SHALL either carry an accessible name naming its hero, or be hidden
 from assistive technology when the row it sits in already names that hero; the
 image SHALL contribute no name beside it. WHERE the snapshot holds no hero for
@@ -235,9 +236,9 @@ assistive technology, and SHALL never be left both nameless and exposed.
 #### Scenario: Ink follows the background
 
 - **WHILE** the tile draws no image
-- **WHEN** the hero is `Bane` (`#4a3d85`, luminance 0.065)
+- **WHEN** the hero's palette token has a relative luminance below 0.18
 - **THEN** the tile ink SHALL be `--tile-ink-light`
-- **WHEN** the hero is `Io` (`#dce8f2`, luminance 0.793)
+- **WHEN** that luminance is 0.18 or above
 - **THEN** the tile ink SHALL be `--tile-ink-dark`
 
 #### Scenario: Hero missing from the palette

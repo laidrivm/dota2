@@ -70,7 +70,7 @@ whole-requirement copy.
       (*A mirror holding every hero the palette knows*; *A hero the mirror has
       no portrait for*). Re-check the file against the 200-line cap in
       `scripts/file-size.ts`.
-- [ ] 3.4 Apply the `draft-board` delta: *Ink follows the background* cites the
+- [x] 3.4 Apply the `draft-board` delta: *Ink follows the background* cites the
       0.18 threshold instead of Bane's and Io's hex values, which the
       regenerated palette no longer carries, and the requirement's sentence
       says the ink follows whichever background resolved rather than the
