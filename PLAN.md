@@ -306,7 +306,7 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       -S` before editing, so this is an overstated clause rather than a broken
       criterion; correcting it is a delta spec, not an edit here.
 - [ ] **The always-on trigger has fired, and by more than it last recorded.**
-      Re-measured on `hero-slug-canon`'s last step: the set is 618 lines
+      Re-measured on `hero-slug-canon`'s last step: the set is 637 lines
       against the ~500 `CLAUDE.md` states, where the entry read 613 and 555
       before that. It reached 633 over that change's four steps and this one
       brought it back by deleting two settled entries. The sublist figures did
@@ -320,7 +320,7 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       holds is the conclusion drawn from it: moving those five takes Process
       to 19 and the set to about 606, so it clears one sublist and leaves the
       set a hundred lines over. Closing this now needs a decision about where
-      the bulk goes, `PLAN.md` being the larger half at 386 lines, and that is
+      the bulk goes, `PLAN.md` being the larger half at 410 lines, and that is
       a change rather than an edit here.
 - [ ] **Nothing checks that `snapshot.json` is what its generator produces.**
       `src/fixtures/generate_fixture.py` writes the committed fixture and no
@@ -335,6 +335,25 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       the Python source with a regex instead is the thing `CLAUDE.md` forbids
       — a value read from a line that resembles the structure rather than from
       the structure its tool parses.
+- [ ] **Five sets of letters name more than one hero.** `heroAbbr` in
+      `src/app/board/format.ts` takes a display name's first four letters with
+      non-letters removed, and over the 128-hero palette that collides five
+      times: `DARK` for Dark Seer and Dark Willow, `EART` for Earth Spirit and
+      Earthshaker, `PHAN` for both Phantoms, `SLAR` for Slardar and Slark, and
+      `SHAD` for Shadow Fiend, Shadow Demon and Shadow Shaman. Two heroes
+      sharing a square's lettering are told apart by colour alone — and the
+      palette guarantees 15 ΔE76 between any two, so they are distinguishable
+      but not readable. What is wanted is a mechanism for exceptions, by
+      community abbreviation or by any other rule; which one is open. Three
+      things bound it. The rule is pinned by `draft-board` §*Hero tile*, whose
+      *Abbreviation* scenario fixes `Keeper of the Light` to `KEEP`, so any
+      change is a delta spec. The cost is narrowed but not removed by
+      `hero-tile-icon`: lettering shows only where the portrait does not load.
+      And a partial source already exists — the fixture's `aliases` carry
+      `kotl`, `bh`, `naix`, `wk` and others, for 33 of the 128. Found on
+      `hero-slug-canon`'s last step, where the regenerated swatch page put the
+      whole roster on one page for the first time; before it, 52 swatches
+      collided once.
 
 ## Standing constraints
 
