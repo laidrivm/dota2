@@ -115,6 +115,9 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       Settling it reaches the fixture, `colors.css` and the design project's
       swatch pages at once, which is why it is not that change's to take.
       `hero-slug-canon` takes it; this entry closes with that change's step 4.
+      Its step 2 has since moved the fixture and all 51 tokens onto the ingest
+      slug, so the tree now answers the question and only the design pages
+      still spell it the other way.
 - [ ] **`hero-slug-canon`** — proposed, `openspec/changes/hero-slug-canon/`.
       The slug the ingest writes becomes canonical and the palette moves to it,
       regenerated from the mirrored portraits for every hero the mirror holds
