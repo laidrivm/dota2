@@ -1,99 +1,16 @@
 import { AxeBuilder } from "@axe-core/playwright";
-import { expect, type Page } from "@playwright/test";
+import { expect } from "@playwright/test";
+import {
+	ban,
+	failIcon,
+	iconPath,
+	imageState,
+	namedTile,
+	pick,
+	serveIcon,
+	slotTile,
+} from "./hero-image.ts";
 import { test } from "./session.ts";
-
-/**
- * The hero image, and the square it degrades to.
- *
- * The loading half fulfils the request from a PNG this file carries rather than
- * from `icons/`: the mirror is gitignored and written only by a job run, so a
- * fresh clone and CI have none, and a suite needing one would pass on the
- * machine that ran the ingest and nowhere else.
- */
-
-/** A 1×1 red PNG. Nothing here reads a pixel — only that it decodes. */
-const PNG = Buffer.from(
-	"iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGP4z8AAAAMBAQDJ/pLvAAAAAElFTkSuQmCC",
-	"base64",
-);
-
-/**
- * A hero's image path, read from the snapshot this page will load. Never
- * assembled from the name: the slug is the ingest's — `Zeus` is `zuus.png` and
- * `Queen of Pain` is `queenofpain.png` — and whose spelling is canonical is
- * `PLAN.md`'s open question, not this suite's to answer.
- */
-async function iconPath(page: Page, name: string): Promise<string> {
-	const bundle = (await (await page.request.get("/snapshot.json")).json()) as {
-		heroes: { name: string; icon: string }[];
-	};
-	const icon = bundle.heroes.find((hero) => hero.name === name)?.icon;
-	if (icon === undefined) throw new Error(`no ${name} in the snapshot`);
-	return icon;
-}
-
-const serveIcon = (page: Page, icon: string) =>
-	page.route(`**${icon}`, (route) =>
-		route.fulfill({ contentType: "image/png", body: PNG }),
-	);
-
-const failIcon = (page: Page, icon: string) =>
-	page.route(`**${icon}`, (route) => route.abort("failed"));
-
-/**
- * What the tile's image is doing, or `null` when the tile rendered none. It
- * closes over nothing: only the function itself crosses into the page, so a
- * helper of this file's called from inside would be undefined there.
- *
- * `withinParent` steps up one first, for a tile reached through the name
- * rendered beside it. `fills` compares the image against its own tile, which is
- * what the CSS claims; that the crop preserves the source's aspect is not
- * asserted here, and the PNG above is 1x1 rather than the mirror's 256x144.
- */
-const imageState = (element: Element, withinParent: boolean) => {
-	const scope = withinParent ? element.parentElement : element;
-	const image = scope?.querySelector("img") ?? null;
-	if (image === null || image.parentElement === null) return null;
-	const box = image.getBoundingClientRect();
-	const tile = image.parentElement.getBoundingClientRect();
-	return {
-		opacity: getComputedStyle(image).opacity,
-		loading: image.getAttribute("loading"),
-		fills:
-			Math.round(box.width) === Math.round(tile.width) &&
-			Math.round(box.height) === Math.round(tile.height),
-	};
-};
-
-/** A tile the row does not name for it, so the wrapper carries the name. */
-const namedTile = (page: Page, region: string, name: string) =>
-	page
-		.getByRole("region", { name: region, exact: true })
-		.getByRole("img", { name, exact: true });
-
-/**
- * The name a slot renders beside its tile. The tile itself is `aria-hidden`,
- * because this row already names the hero, so it is reached through this and
- * `imageState`'s `withinParent` rather than by a locator of its own.
- */
-const slotTile = (page: Page, name: string) =>
-	page
-		.getByRole("region", { name: "My team", exact: true })
-		.getByText(name, { exact: true });
-
-/** Bans the named hero through the picker, the way a user reaches one. */
-async function ban(page: Page, name: string) {
-	await page.getByRole("button", { name: "Add ban" }).click();
-	await pick(page, name);
-}
-
-/** Takes the named hero in an open picker. */
-async function pick(page: Page, name: string) {
-	await expect(page.getByRole("dialog")).toBeVisible();
-	await page.getByLabel("Search heroes").fill(name);
-	await page.keyboard.press("Enter");
-	await expect(page.getByRole("dialog")).toBeHidden();
-}
 
 // spec: draft-board/the-image-is-drawn draft-board/the-image-does-not-load
 test("a tile shows its image, and the one whose request failed shows its square", async ({
@@ -116,6 +33,8 @@ test("a tile shows its image, and the one whose request failed shows its square"
 		.toEqual({
 			opacity: "1",
 			loading: "lazy",
+			settled: true,
+			drew: true,
 			fills: true,
 		});
 	await expect
@@ -123,6 +42,11 @@ test("a tile shows its image, and the one whose request failed shows its square"
 		.toEqual({
 			opacity: "0",
 			loading: "lazy",
+			// `settled` with `drew: false` is what says the request came back and
+			// came back empty; the square asserted without it accepts the state
+			// before the failure, which looks identical.
+			settled: true,
+			drew: false,
 			fills: true,
 		});
 
@@ -159,22 +83,21 @@ test("a tile shows no broken-image affordance while its request is in flight", a
 	await session("R Radiant");
 	await ban(page, "Pudge");
 
+	// `settled: false` is what puts this reading inside the window rather than
+	// after it: the request is demonstrably still open when the square is read.
 	const tile = namedTile(page, "Bans", "Pudge");
 	await expect
 		.poll(() => tile.evaluate(imageState, false))
-		.toMatchObject({
-			opacity: "0",
-		});
+		.toMatchObject({ opacity: "0", settled: false });
 	await expect(tile).toHaveText("PUDG");
 
 	fail?.();
-	// Unchanged by the failure: the state that reveals the image is never
-	// reached, so the failure has nothing to take back.
+	// Unchanged by the failure, now that the failure has demonstrably landed:
+	// the state that reveals the image is never reached, so there is nothing
+	// for it to take back.
 	await expect
 		.poll(() => tile.evaluate(imageState, false))
-		.toMatchObject({
-			opacity: "0",
-		});
+		.toMatchObject({ opacity: "0", settled: true, drew: false });
 	await expect(tile).toHaveText("PUDG");
 });
 
@@ -262,9 +185,7 @@ test("a tile whose request answers with bytes that are not an image shows its sq
 	const tile = namedTile(page, "Bans", "Pudge");
 	await expect
 		.poll(() => tile.evaluate(imageState, false))
-		.toMatchObject({
-			opacity: "0",
-		});
+		.toMatchObject({ opacity: "0", settled: true, drew: false });
 	await expect(tile).toHaveText("PUDG");
 });
 

@@ -208,8 +208,19 @@ test("dist carries no icons, so the board is palette squares throughout", async 
 					unlettered: images.filter(
 						(i) => (i.parentElement?.textContent ?? "") === "",
 					).length,
+					// Every request has come back, and every one came back empty.
+					// Without these the fallback is asserted against a state that
+					// looks the same before any request has finished at all.
+					pending: images.filter((i) => !i.complete).length,
+					drew: images.filter((i) => i.naturalWidth > 0).length,
 				};
 			}),
 		)
-		.toEqual({ tiles: bundle.heroes.length, shown: 0, unlettered: 0 });
+		.toEqual({
+			tiles: bundle.heroes.length,
+			shown: 0,
+			unlettered: 0,
+			pending: 0,
+			drew: 0,
+		});
 });
