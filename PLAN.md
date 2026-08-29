@@ -306,17 +306,19 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       -S` before editing, so this is an overstated clause rather than a broken
       criterion; correcting it is a delta spec, not an edit here.
 - [ ] **The always-on trigger has fired, and by more than it last recorded.**
-      Re-measured 2026-08-29: the set is 613 lines against the ~500
-      `CLAUDE.md` states, where the entry previously read 555. Both sublist
-      figures moved with it — Process sits at 24 and Code at 20, so two of the
-      three are now at or past the ~20 threshold rather than one.
+      Re-measured on `hero-slug-canon`'s last step: the set is 618 lines
+      against the ~500 `CLAUDE.md` states, where the entry read 613 and 555
+      before that. It reached 633 over that change's four steps and this one
+      brought it back by deleting two settled entries. The sublist figures did
+      not move — Process sits at 24 and Code at 20, so two of the three are at
+      or past the ~20 threshold rather than one.
       `docs/rulebook-growth.md` asks for a promotion rather than a prune, and
       the cluster it named still holds: five Process rules are about what
       counts as evidence — how a gate is probed, when an empty result is an
       absence, where a count comes from, which measurement may be overwritten
       — and `docs/verification.md` already owns exactly that. What no longer
       holds is the conclusion drawn from it: moving those five takes Process
-      to 19 and the set to about 603, so it clears one sublist and leaves the
+      to 19 and the set to about 606, so it clears one sublist and leaves the
       set a hundred lines over. Closing this now needs a decision about where
       the bulk goes, `PLAN.md` being the larger half at 386 lines, and that is
       a change rather than an edit here.
