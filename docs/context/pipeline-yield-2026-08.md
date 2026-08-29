@@ -1330,3 +1330,112 @@ issues once and fails every renewal after, silently. Four certificates on the
 host had been issued that way and two had expired. Prose that teaches the
 broken procedure is its own defect class, and it is invisible to every gate
 here: no test reads the README's instructions for whether they work.
+
+## 2026-08-28 — dependabot/bun/stryker-mutator/core-10.0.0
+
+Recovered from the session transcript on 2026-08-29, not written at the time.
+The gate lines are what the skills reported in that session; the wrap-up's
+other four steps are a debrief of a conversation and are not reconstructible,
+so they are absent rather than invented. The same applies to the three
+entries below it.
+
+- zombies: PASS — 2 gaps, 2 acted on
+- warm: PASS — 1 dependency vetted, 0 findings
+- triage: PASS — 1 medium-risk group reviewed
+- coderabbit-local: PASS — 1 finding, 1 dispositioned
+- Not run: diff-budget — a Dependabot branch, and the gate had no base of its
+  own to measure against in that session
+
+## 2026-08-28 — spec/hero-tile-icon (PR #227)
+
+Recovered from the transcript.
+
+- diff-budget: PASS — 473 lines
+- zombies: PASS — 18 gaps, 18 acted on
+- coderabbit-local: PASS — 12 findings, 12 dispositioned
+- Not run: warm, triage
+
+## 2026-08-29 — feat/hero-tile-icon and its archive (PRs #228, #229)
+
+Recovered from the transcript.
+
+- diff-budget: PASS — 74 lines
+- zombies: PASS — 8 gaps, 6 acted on, 2 skipped
+- triage: PASS — 2 High/Medium groups reviewed
+- coderabbit-local: PASS — 2 findings, 2 dispositioned
+- Not run: warm
+
+## 2026-08-29 — chore/plan-hero-slug-cost, spec/hero-slug-canon (PRs #230, #231)
+
+Recovered from the transcript.
+
+- diff-budget: WARN — 510 lines, over 500, fails at 800
+- zombies: PASS — 28 gaps, 28 acted on
+- triage: PASS — 2 high-risk groups reviewed
+- coderabbit-local: PASS — 9 findings, 9 dispositioned
+- Not run: warm
+
+## 2026-08-29 — hero-slug-canon, four steps and the archive (PRs #232–#236)
+
+Five runs of the sequence in one session, one per branch.
+
+`feat/hero-slug-canon-1`
+- diff-budget: OVERRIDE — 840 lines, over 800, reason named in the PR body
+- zombies: PASS — 11 gaps, 11 acted on
+- triage: PASS — 1 medium-risk group reviewed
+- coderabbit-local: PASS — 1 finding, 0 acted on (1 skipped, Trivial)
+- coderabbit: PASS — 5 findings, 4 applied, 1 rejected — four inline, and one
+  posted out of grid twelve minutes later that the first report never saw
+- Not run: warm — no dependency manifest changed, and none did all session
+
+`feat/hero-slug-canon-2`
+- diff-budget: PASS — 219 lines
+- zombies: PASS — 3 gaps, 2 acted on, 1 queued (needs `python3` in CI)
+- triage: PASS — 2 medium-risk groups reviewed
+- coderabbit-local: OPEN — 1 finding, 1 dismissal, settled by the user
+- coderabbit: PASS — 1 finding, 1 applied
+
+`feat/hero-slug-canon-3`
+- diff-budget: OVERRIDE — 1045 lines, 178 of them a generated token block and
+  ~152 a file split counting its moved lines twice
+- zombies: PASS — 8 gaps, 8 acted on; one was a real output defect
+- triage: PASS — 1 high and 2 medium-risk groups reviewed; reading them found
+  an unchecked precondition the skills had not
+- coderabbit-local: PASS — 3 findings, 2 applied, 1 rejected on a measurement
+- coderabbit: PASS — 8 findings, 5 applied, 3 skipped
+
+`feat/hero-slug-canon-4`
+- diff-budget: PASS — 51 lines
+- triage: PASS — 1 medium-risk group reviewed
+- coderabbit-local: PASS — 1 finding, 1 applied
+- coderabbit: PASS — 3 findings, 1 applied, 2 rejected — all three arrived
+  after the local pass and were only seen by re-fetching the merged PR
+- Not run: zombies, warm — a documentation branch takes the reduced sequence
+
+`chore/hero-slug-canon-archive`
+- diff-budget: PASS — 115 lines
+- triage: PASS — 1 group, plus a grep for sites naming the change as active
+- coderabbit-local: OPEN — 1 finding, 1 dismissal, settled by the user
+- Not run: zombies, warm
+
+Three things the counts do not carry.
+
+**Two of the four `coderabbit` runs found things no local pass could have.**
+On step 1 and step 4 the bot posted after `coderabbit-local` had already
+returned, and on step 1 one finding was out of grid — in the review body's
+collapsed section, in neither the inline list nor the first report. Both were
+caught only by the toolkit's rule to re-fetch a merged PR. Without that rule
+four findings on this change go unread, one of them the tightening that is
+now in `png.ts`.
+
+**A gate caught the author twice in the same session, on the same rule.** The
+always-on measurement in `PLAN.md` was corrected three times, and twice the
+correction was itself wrong the moment it was written, because the edit added
+lines to the file it was counting. Recording a count of a file you are editing
+means counting after the edit, not before.
+
+**`/zombies` found a defect, not just a gap.** Step 3's idea 1 — that a
+one-colour palette reports its closest pair as `Infinity` — was a real thing
+the CLI printed, and step 3's later `coderabbit` run then found that the same
+path silently emptied the token file. The two together are the only reason an
+empty mirror is refused rather than destructive.
