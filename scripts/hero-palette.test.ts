@@ -3,12 +3,19 @@
  * of `hero-palette.ts` above the pixels. `hero-palette-decode.test.ts` holds
  * the half below them.
  */
+
 import { afterAll, describe, expect, test } from "bun:test";
+import { mkdirSync } from "node:fs";
+import { join } from "node:path";
 import {
+	chunk,
 	cleanup,
+	ihdr,
 	mirror,
 	png,
 	portrait,
+	run,
+	SIGNATURE,
 	solid,
 } from "./hero-palette.fixture.ts";
 import { anchorColour, palette, readMirror } from "./hero-palette.ts";
@@ -85,6 +92,50 @@ describe("the pixels a portrait's colour is not drawn from", () => {
 		expect(anchorColour(portrait(pixels))).toBe(expected);
 	});
 
+	// The other side of each floor, at the last 8-bit value it admits: the
+	// cases above would pass just as well against a floor set one step too
+	// high, and these are what say where it actually sits.
+	test.each([
+		[
+			"at the alpha floor",
+			[
+				[0, 0, 255, 250],
+				[0, 0, 255, 250],
+				[255, 0, 0, 255],
+			],
+			"#0000ff",
+		],
+		[
+			"at the darkest value the floor admits",
+			[
+				[0, 0, 39, 255],
+				[0, 0, 39, 255],
+				[51, 0, 0, 255],
+			],
+			"#000027",
+		],
+		[
+			"at exactly the saturation floor",
+			[
+				[100, 85, 85, 255],
+				[43, 51, 43, 255],
+			],
+			"#645555",
+		],
+	])("a pixel %s is kept", (_, pixels, expected) => {
+		expect(anchorColour(portrait(pixels))).toBe(expected);
+	});
+
+	test("a hue on a bucket edge falls in the higher bucket", () => {
+		// 15° exactly, against pure red at 0°. Sharing a bucket would average
+		// the two; separate buckets let the heavier one win outright.
+		const edge = portrait([
+			[200, 50, 0, 255],
+			[255, 0, 0, 255],
+		]);
+		expect(anchorColour(edge)).toBe("#ff0000");
+	});
+
 	// spec: hero-palette/a-portrait-the-decoder-cannot-read
 	test("a portrait with no pixel left is an error, not a default colour", () => {
 		const nothing = portrait([
@@ -137,5 +188,61 @@ describe("the mirror a palette is read from", () => {
 			"pudge.png": png({ width: 1, height: 1, depth: 16 }, [[0, 0, 0, 0]]),
 		});
 		expect(() => palette(dir)).toThrow("pudge.png");
+	});
+
+	test("pixel data that is not a zlib stream names its file too", () => {
+		// Otherwise the run reports zlib's own message, which says nothing
+		// about which of 127 portraits produced it.
+		const broken = Uint8Array.from([
+			...SIGNATURE,
+			...ihdr({ width: 1, height: 1 }),
+			...chunk("IDAT", [1, 2, 3, 4]),
+			...chunk("IEND"),
+		]);
+		const dir = mirror({ "pudge.png": broken });
+		expect(() => palette(dir)).toThrow("pudge.png");
+	});
+
+	test("a directory inside the mirror stops the run", () => {
+		const dir = mirror({ "axe.png": solid(1, 2, 3) });
+		mkdirSync(join(dir, "thumbnails"));
+		expect(() => readMirror(dir)).toThrow("thumbnails");
+	});
+
+	test("a mirror holding no portrait yields no token", () => {
+		expect(palette(mirror({}))).toEqual([]);
+	});
+});
+
+// spec: hero-palette/a-portrait-the-decoder-cannot-read
+describe("the generator as a person runs it", () => {
+	test("a readable mirror prints the palette and succeeds", () => {
+		const dir = mirror({ "axe.png": solid(197, 59, 48) });
+		expect(run(dir)).toEqual({
+			status: 0,
+			out: "\t--hero-axe: #c53b30;\n",
+			err: "",
+		});
+	});
+
+	test("one unreadable portrait leaves no palette on stdout at all", () => {
+		// The other two portraits decode. A run that printed what it had before
+		// reaching the third would hand somebody two thirds of a palette to
+		// paste, which is the failure this criterion is about.
+		const dir = mirror({
+			"abaddon.png": solid(69, 196, 180),
+			"axe.png": solid(197, 59, 48),
+			"pudge.png": png({ width: 1, height: 1, depth: 16 }, [[0, 0, 0, 0]]),
+		});
+		const call = run(dir);
+		expect(call.out).toBe("");
+		expect(call.status).not.toBe(0);
+		expect(call.err).toContain("pudge.png");
+	});
+
+	test("no directory to read is refused before anything is read", () => {
+		const call = run();
+		expect(call.status).not.toBe(0);
+		expect(call.err).toContain("usage:");
 	});
 });
