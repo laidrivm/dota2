@@ -70,9 +70,12 @@ describe("iconSrc", () => {
 describe("tile ink", () => {
 	// Two of these once borrowed hero colours, and the palette is generated
 	// now, so a case resting on one of its values is a case the next run can
-	// delete. Checked rather than assumed: none of the five is in the shipped
-	// palette. The greys additionally cannot ever be — the anchor ignores any
-	// pixel under 0.15 saturation, so no generated colour is one.
+	// delete. Checked rather than assumed: none of the seven is in the shipped
+	// palette. The greys additionally cannot ever be, and what holds that is
+	// the clamp in `candidates` in `scripts/hero-colour.ts` — every candidate,
+	// the unmoved first one included, passes through a saturation floor of
+	// 0.15. Not the anchor's per-pixel filter, which bounds the pixels it
+	// counts and not the average it returns.
 	test.each([
 		["#101010", "light"],
 		["#2f3b52", "light"],

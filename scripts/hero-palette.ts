@@ -129,6 +129,18 @@ const line = ({ slug, colour }: Placed) => `\t--hero-${slug}: ${colour};`;
 const DECLARATION = /^\t--hero-[^:]+:.*$/;
 
 /**
+ * `css` with every comment blanked to spaces, line structure intact.
+ *
+ * The block is located in this rather than in the source, so a hero
+ * declaration somebody commented out is not spliced away or taken for a break
+ * in the block. `format.test.ts` strips comments before it reads the same
+ * file; a writer and a reader that disagree about what a declaration is would
+ * disagree about which lines this file owns.
+ */
+const uncommented = (css: string) =>
+	css.replace(/\/\*[\s\S]*?\*\//g, (comment) => comment.replace(/[^\n]/g, " "));
+
+/**
  * `css` with its hero block replaced and every other byte left alone.
  *
  * The fallback's own line is carried through untouched rather than rewritten:
@@ -139,8 +151,14 @@ const DECLARATION = /^\t--hero-[^:]+:.*$/;
  * a hero in silence.
  */
 export function render(css: string, heroes: Placed[]): string {
+	if (heroes.length === 0)
+		throw new Error(
+			"a palette of no hero would leave the token file with no hero colour at all",
+		);
 	const lines = css.split("\n");
-	const block = lines.flatMap((l, i) => (DECLARATION.test(l) ? [i] : []));
+	const block = uncommented(css)
+		.split("\n")
+		.flatMap((l, i) => (DECLARATION.test(l) ? [i] : []));
 	const first = block[0];
 	const last = block.at(-1);
 	if (first === undefined || last === undefined)
@@ -193,13 +211,10 @@ if (import.meta.main) {
 			{ dark, light },
 		);
 		writeFileSync(tokens, render(css, palette.slice(1)));
-		// A palette of one has no pair, and `Math.min` of nothing is infinite:
-		// reporting that verbatim would read as a measurement.
-		const pair = Number.isFinite(minimum)
-			? `${minimum.toFixed(2)} ΔE76 between the closest pair`
-			: "no pair to measure";
+		// Always a pair: the write above refuses a palette of one, which is
+		// the only case `Math.min` would answer with an infinity.
 		console.log(
-			`${palette.length} colour${palette.length === 1 ? "" : "s"}, ${pair}`,
+			`${palette.length} colours, ${minimum.toFixed(2)} ΔE76 between the closest pair`,
 		);
 	} catch (cause) {
 		console.error(cause instanceof Error ? cause.message : String(cause));
