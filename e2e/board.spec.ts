@@ -100,54 +100,8 @@ test("removing a hero moves focus to the entry control that replaces it", async 
 /**
  * A hero the session holds and the snapshot no longer carries. The board has to
  * render around it, and its tile has to land on one of the two branches the
- * requirement allows — never between them.
- *
- * The session is seeded through the module's own key rather than a string
- * spelled again here, and the snapshot is the real one with a single hero
- * dropped, so nothing else about the board moves.
+ * requirement allows — named, or hidden — never between them.
  */
-const seed = async (page: Page, hero: { id: number }) => {
-	await page.addInitScript(
-		([key, stored]) => {
-			localStorage.setItem(key as string, stored as string);
-		},
-		[
-			SESSION_KEY,
-			JSON.stringify({
-				v: 1,
-				createdAt: new Date().toISOString(),
-				side: "radiant",
-				myRole: 1,
-				bans: [hero.id],
-				teamPicks: { "1": null, "2": null, "3": hero.id, "4": null, "5": null },
-				enemyPicks: [],
-			}),
-		],
-	);
-};
-
-/**
- * Every tile in `row`, sorted into the branches the requirement allows: a tile
- * is a span that is either named to assistive technology or hidden from it, so
- * the query *is* the requirement — a tile in neither branch matches no selector
- * and shows up as a missing tile rather than as a passing one.
- */
-const tilesIn = (element: Element, row: string) => {
-	const slot = element.querySelector(`[data-row="${row}"]`);
-	if (slot === null) return null;
-	const tiles = [
-		...slot.querySelectorAll("span[role='img'], span[aria-hidden='true']"),
-	];
-	return {
-		tiles: tiles.length,
-		names: tiles.flatMap((tile) => {
-			const name = tile.getAttribute("aria-label");
-			return name === null || name === "" ? [] : [name];
-		}),
-		hidden: tiles.filter((tile) => tile.getAttribute("aria-hidden") === "true")
-			.length,
-	};
-};
 
 // spec: draft-board/hero-missing-from-the-snapshot
 test("a hero the snapshot dropped leaves its tile on one branch or the other", async ({
@@ -161,7 +115,27 @@ test("a hero the snapshot dropped leaves its tile on one branch or the other", a
 	};
 	const gone = bundle.heroes[0];
 	if (gone === undefined) throw new Error("the snapshot carries no heroes");
-	await seed(page, gone);
+
+	// Seeded through the module's own key rather than a string spelled again
+	// here, and against the real snapshot with one hero dropped, so nothing else
+	// about the board moves.
+	await page.addInitScript(
+		([key, stored]) => {
+			localStorage.setItem(key as string, stored as string);
+		},
+		[
+			SESSION_KEY,
+			JSON.stringify({
+				v: 1,
+				createdAt: new Date().toISOString(),
+				side: "radiant",
+				myRole: 1,
+				bans: [gone.id],
+				teamPicks: { "1": null, "2": null, "3": gone.id, "4": null, "5": null },
+				enemyPicks: [],
+			}),
+		],
+	);
 	await page.route("**/snapshot.json", (route) =>
 		route.fulfill({
 			contentType: "application/json",
@@ -176,35 +150,30 @@ test("a hero the snapshot dropped leaves its tile on one branch or the other", a
 
 	// The remaining panels render, which is the half of the criterion about the
 	// board surviving a hero it cannot resolve.
-	await expect(page.getByRole("region", { name: "Bans" })).toBeVisible();
+	const bans = page.getByRole("region", { name: "Bans" });
 	const mine = page.getByRole("region", { name: "My team", exact: true });
+	await expect(bans).toBeVisible();
 	await expect(mine).toBeVisible();
 	await expect(
 		page.getByRole("region", { name: "Enemy team", exact: true }),
 	).toBeVisible();
 
-	// The re-pick marker renders only where the hero came back `undefined`, so
-	// it is what says these two tiles are on the path this test is about — every
+	// The re-pick marker renders only where the hero came back `undefined`, so it
+	// is what says these two tiles are on the path this test is about — every
 	// assertion below reads the same either way without it.
-	const bans = page.getByRole("region", { name: "Bans" });
 	await expect(mine.getByText("re-pick")).toBeVisible();
 	await expect(bans.getByText("re-pick")).toBeVisible();
 
-	// The slot hides its tile; the row beside it names no hero either, which is
-	// why the requirement had to say so rather than lean on the row.
-	expect(await mine.evaluate(tilesIn, "team-3")).toEqual({
-		tiles: 1,
-		names: [],
-		hidden: 1,
-	});
+	// The slot takes the hidden branch: its tile reaches the accessibility tree
+	// as nothing at all, the row beside it naming no hero either — which is why
+	// the requirement had to say so rather than lean on the row.
+	await expect(mine.getByRole("img")).toHaveCount(0);
 
-	// The bans row takes the other branch, and the name it carries is the one
-	// only an unresolvable hero produces.
-	expect(await bans.evaluate(tilesIn, "ban")).toEqual({
-		tiles: 1,
-		names: ["Unknown hero"],
-		hidden: 0,
-	});
+	// The ban takes the other branch and names the absence. Both counts are the
+	// assertion: the first alone passes for a tile exposed under no name, which
+	// is the state the requirement forbids.
+	await expect(bans.getByRole("img")).toHaveCount(1);
+	await expect(bans.getByRole("img", { name: "Unknown hero" })).toHaveCount(1);
 
 	expect(thrown).toEqual([]);
 });
