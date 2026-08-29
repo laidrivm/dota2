@@ -32,12 +32,12 @@ writes no file and changes no shipped behaviour.
 Closes *The palette is keyed on the slug the ingest writes*. The 51 colours are
 unchanged here — only their names — so no tile changes appearance.
 
-- [ ] 2.1 Populate a mirror locally through the existing `fetchHeroes()` and
+- [x] 2.1 Populate a mirror locally through the existing `fetchHeroes()` and
       `mirrorHeroImages()` — which needs a STRATZ key, the deployed database's
       `heroes.short_name` standing in for it — and take the slug for each of
       the 51 palette heroes and 33 fixture heroes from its file names. Nothing
       in `src/job/` is edited.
-- [ ] 2.2 Rename the 51 hero tokens in `src/app/styles/tokens/colors.css` to
+- [x] 2.2 Rename the 51 hero tokens in `src/app/styles/tokens/colors.css` to
       those slugs (*A hero whose slug and display name diverge*).
 - [ ] 2.3 Give each row of `src/fixtures/generate_fixture.py` an explicit slug,
       derive `icon` from it rather than from the display name, and regenerate
