@@ -105,19 +105,6 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
 
 ### Open
 
-- [ ] **Whose spelling of a hero's `short` is canonical.** The client's kebab
-      (`anti-mage`, the fixture and all 51 palette tokens) or Valve's internal
-      name as STRATZ republishes it (`antimage`, every row the ingest writes).
-      Left open by `hero-tile-icon`, which covers the square with an image
-      wherever one loads and so narrows the cost of deciding wrongly rather
-      than removing it — the square is still what a failed image load shows,
-      and what the mismatch costs there is counted in that change's proposal.
-      Settling it reaches the fixture, `colors.css` and the design project's
-      swatch pages at once, which is why it is not that change's to take.
-      `hero-slug-canon` takes it; this entry closes with that change's step 4.
-      Its step 2 has since moved the fixture and all 51 tokens onto the ingest
-      slug, so the tree now answers the question and only the design pages
-      still spell it the other way.
 - [ ] **`hero-slug-canon`** — proposed, `openspec/changes/hero-slug-canon/`.
       The slug the ingest writes becomes canonical and the palette moves to it,
       regenerated from the mirrored portraits for every hero the mirror holds
