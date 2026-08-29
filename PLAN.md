@@ -306,7 +306,7 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       -S` before editing, so this is an overstated clause rather than a broken
       criterion; correcting it is a delta spec, not an edit here.
 - [ ] **The always-on trigger has fired, and by more than it last recorded.**
-      Re-measured on `hero-slug-canon`'s last step: the set is 637 lines
+      Re-measured on `hero-slug-canon`'s last step: the set is 641 lines
       against the ~500 `CLAUDE.md` states, where the entry read 613 and 555
       before that. It reached 633 over that change's four steps and this one
       brought it back by deleting two settled entries. The sublist figures did
@@ -320,7 +320,7 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       holds is the conclusion drawn from it: moving those five takes Process
       to 19 and the set to about 606, so it clears one sublist and leaves the
       set a hundred lines over. Closing this now needs a decision about where
-      the bulk goes, `PLAN.md` being the larger half at 410 lines, and that is
+      the bulk goes, `PLAN.md` being the larger half at 414 lines, and that is
       a change rather than an edit here.
 - [ ] **Nothing checks that `snapshot.json` is what its generator produces.**
       `src/fixtures/generate_fixture.py` writes the committed fixture and no
@@ -394,7 +394,11 @@ Kept because no single file in the tree is where a reader would look for them.
   are written from `src/app/styles/tokens/colors.css`: one swatch per token in
   file order, background `var(--hero-<slug>)`, label the slug verbatim, letters
   `heroAbbr` of the hero's display name, ink `var(--tile-ink-dark)` or
-  `var(--tile-ink-light)` by the 0.18 luminance threshold. The project's own
+  `var(--tile-ink-light)` by the 0.18 luminance threshold. The display name is
+  not in `colors.css`, which holds slugs and colours alone: it comes from the
+  same place the slugs do, `heroes.name` in the deployed database, or
+  `heroes[].name` in the published bundle for the subset that carries stats.
+  The fallback's swatch has no hero and so no letters. The project's own
   `tokens/colors.css` carries the same hero block and nothing else of it is
   the repository's to touch. Regenerating them is part of regenerating the
   palette: CSS cannot pick an ink by its background's luminance, so a hero
