@@ -65,12 +65,16 @@ describe("iconSrc", () => {
 });
 
 describe("tile ink", () => {
+	// Neutral greys where two of these once borrowed hero colours: the palette
+	// is generated now, so a case resting on one of its values would be a case
+	// the next run could delete. No hero colour is a grey — the anchor ignores
+	// a pixel under 0.15 saturation — so these can only be the case's own.
 	test.each([
-		["#4a3d85", "light"],
+		["#101010", "light"],
 		["#2f3b52", "light"],
 		// Just above the crossover: black reads better on it than white does.
 		["#2e7fd0", "dark"],
-		["#dce8f2", "dark"],
+		["#e0e0e0", "dark"],
 		["#f0e3b2", "dark"],
 	])("%s takes %s lettering", (color, ink) => {
 		expect(tileInk(color)).toBe(ink as "dark");
