@@ -99,22 +99,12 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
 - **`proposal-slicing`** — PR #223,
   `archive/2026-08-28-proposal-slicing`; both requirements are in
   `openspec/specs/change-slicing/`.
+- **`hero-tile-icon`** — PRs #227 and #228,
+  `archive/2026-08-29-hero-tile-icon`; the requirement is `draft-board`
+  §*Hero tile* in `openspec/specs/draft-board/`.
 
 ### Open
 
-- [x] **`hero-tile-icon`** — applied,
-      `openspec/changes/hero-tile-icon/`. The board draws no hero it did not
-      ship with: the tile takes its colour from a `--hero-<short>` token, and
-      the palette was written against the fixture's kebab slugs where the
-      ingest writes STRATZ's snake_case and Valve's internal names, so 29 of
-      127 real heroes resolve a colour, 22 of the 51 tokens are reachable by no
-      hero at all, and 86 have none under any spelling. `draft-board` §*Hero
-      tile* admits the grey fallback, so this is not a defect — but a run
-      mirrors 127 real images into `icons/` and carries `heroes.icon` in the
-      bundle, and nothing in `src/app/` reads it. The proposal draws the image
-      and demotes the palette to what stands behind it; one task group, so
-      `feat/hero-tile-icon`. It declines the slug mismatch, which stays here as
-      the entry below.
 - [ ] **Whose spelling of a hero's `short` is canonical.** The client's kebab
       (`anti-mage`, the fixture and all 51 palette tokens) or Valve's internal
       name as STRATZ republishes it (`antimage`, every row the ingest writes).
@@ -147,7 +137,10 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       ink, having been authored at threshold 0.22: batrider, clockwerk, magnus,
       mars, slark, spectre, storm-spirit, treant-protector all move light →
       dark. The fix is to reference the tokens; the shortened swatch labels are
-      hand-authored, so the pages cannot simply be regenerated.
+      hand-authored, so the pages cannot simply be regenerated. Since
+      `hero-tile-icon` both pages are out of date a second way: the ink rule
+      now reaches only the square a tile falls back to, and they describe it
+      as reaching every tile.
 - [ ] **Mutation testing's scope predates the job tree.**
       `openspec/specs/mutation-floor/` scopes Stryker to `src/model.ts` alone
       and rules that a second file means a second configuration and a second

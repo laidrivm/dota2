@@ -4,8 +4,8 @@
 
 The board screen: which panels exist, what each renders from the session and
 the model output, how a pick is entered and removed, how the layout collapses
-to one column, and how the hero tile derives its colour and ink from the design
-tokens.
+to one column, and how the hero tile draws its hero — with the palette and ink
+the design tokens carry standing in wherever it draws no image.
 
 ## Requirements
 ### Requirement: Board composition
@@ -196,23 +196,43 @@ instead of either panel.
 
 ### Requirement: Hero tile
 
-A hero tile SHALL be a square carrying the hero's abbreviation — the first
-four letters of its name with non-letters removed, uppercased — in the mono
-font, at one of three sizes: 40px in the bans row, 34px in a team slot, 26px
-on a suggestion chip. Its background SHALL be the `--hero-<short>` token, or
-`--hero-fallback` when the palette has no entry for that hero. Its ink SHALL
-be `--tile-ink-light` when the background's relative luminance is below 0.22
-and `--tile-ink-dark` otherwise. Every tile SHALL either carry an accessible
-name naming its hero, or be hidden from assistive technology when the row it
-sits in already names that hero.
+A hero tile SHALL be a square in the mono font, at one of three sizes: 40px in
+the bans row, 34px in a team slot, 26px on a suggestion chip. It SHALL draw the
+hero's mirrored image, requested from this origin at the path the hero entry's
+`icon` field names, scaled to cover the square and cropped about its centre.
+WHERE the tile draws no image — the hero entry carries no `icon`, or the image
+does not load — the tile SHALL show the hero's abbreviation, the first
+four letters of its name with non-letters removed and uppercased, over the
+`--hero-<short>` token, or over `--hero-fallback` when the palette has no entry
+for that hero. That fallback's ink SHALL be `--tile-ink-light` when its
+background's relative luminance is below 0.18 and `--tile-ink-dark` otherwise.
+Every tile SHALL either carry an accessible name naming its hero, or be hidden
+from assistive technology when the row it sits in already names that hero; the
+image SHALL contribute no name beside it.
+
+#### Scenario: The image is drawn
+
+- **WHEN** the hero entry carries `icon` and the image at that path loads
+- **THEN** the tile SHALL show that image filling the square, and no
+  abbreviation SHALL be visible
+
+#### Scenario: The image does not load
+
+- **IF** the hero entry carries no `icon`, or the image at the path it names
+  does not load — the request failing, the bytes failing to decode, or the
+  answer not being an image
+- **THEN** the tile SHALL show the abbreviation over its palette background, and
+  SHALL present no broken-image affordance at any point, the frames before the
+  failure is known included
 
 #### Scenario: Abbreviation
 
-- **WHEN** the hero is `Keeper of the Light`
+- **WHEN** the hero is `Keeper of the Light` and the tile draws no image
 - **THEN** the tile SHALL read `KEEP`
 
 #### Scenario: Ink follows the background
 
+- **WHILE** the tile draws no image
 - **WHEN** the hero is `Bane` (`#4a3d85`, luminance 0.065)
 - **THEN** the tile ink SHALL be `--tile-ink-light`
 - **WHEN** the hero is `Io` (`#dce8f2`, luminance 0.793)
@@ -220,7 +240,8 @@ sits in already names that hero.
 
 #### Scenario: Hero missing from the palette
 
-- **IF** no `--hero-<short>` token exists for the hero
+- **IF** no `--hero-<short>` token exists for the hero and the tile draws no
+  image
 - **THEN** the tile SHALL use `--hero-fallback` and SHALL still render its
   abbreviation
 
