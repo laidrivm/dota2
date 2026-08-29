@@ -68,14 +68,18 @@ describe("iconSrc", () => {
 });
 
 describe("tile ink", () => {
-	// Neutral greys where two of these once borrowed hero colours: the palette
-	// is generated now, so a case resting on one of its values would be a case
-	// the next run could delete. No hero colour is a grey — the anchor ignores
-	// a pixel under 0.15 saturation — so these can only be the case's own.
+	// Two of these once borrowed hero colours, and the palette is generated
+	// now, so a case resting on one of its values is a case the next run can
+	// delete. Checked rather than assumed: none of the five is in the shipped
+	// palette. The greys additionally cannot ever be — the anchor ignores any
+	// pixel under 0.15 saturation, so no generated colour is one.
 	test.each([
 		["#101010", "light"],
 		["#2f3b52", "light"],
-		// Just above the crossover: black reads better on it than white does.
+		// The two greys either side of the crossover, one step of the darkest
+		// channel apart: 0.17789 takes white, 0.18116 takes black.
+		["#757575", "light"],
+		["#767676", "dark"],
 		["#2e7fd0", "dark"],
 		["#e0e0e0", "dark"],
 		["#f0e3b2", "dark"],

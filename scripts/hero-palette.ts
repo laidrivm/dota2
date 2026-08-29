@@ -19,7 +19,9 @@ import { decodePortrait, type Portrait } from "./png.ts";
 /** A byte, or 0 outside the array — the pixels below are read in fours. */
 const at = (bytes: Uint8Array, i: number) => bytes[i] ?? 0;
 
-const FALLBACK = /--hero-fallback:\s*(#[0-9a-f]{6});/;
+// Case-insensitive: CSS hex is, and only this repository's own file is
+// formatted to lower case.
+const FALLBACK = /--hero-fallback:\s*(#[0-9a-fA-F]{6});/;
 
 const BUCKETS = 24;
 /** A pixel too transparent, too dark or too grey to say anything about hue. */
@@ -173,10 +175,15 @@ if (import.meta.main) {
 		const dark = read("tile-ink-dark");
 		const light = read("tile-ink-light");
 		const fallback = FALLBACK.exec(css)?.[1];
+		// Named one by one: a person who has pointed this at the wrong file
+		// learns which token it went looking for.
+		const absent = [
+			dark === null && "--tile-ink-dark",
+			light === null && "--tile-ink-light",
+			fallback === undefined && "--hero-fallback",
+		].filter(Boolean);
 		if (dark === null || light === null || fallback === undefined)
-			throw new Error(
-				`${tokens} declares no ink pair and fallback to place against`,
-			);
+			throw new Error(`${tokens} declares no ${absent.join(", no ")}`);
 
 		// Placed before anything is written, so a mirror that cannot be placed
 		// leaves the committed palette exactly as it was.
