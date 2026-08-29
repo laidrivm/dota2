@@ -51,7 +51,9 @@ unchanged here — only their names — so no tile changes appearance.
 ## 3. The computed palette replaces the hand palette
 
 Closes *Every hero colour clears the ink floor*, *No two hero colours read as
-the same*, and `draft-board` *Hero tile*.
+the same*, and the one scenario of `draft-board` *Hero tile* this change moves,
+*Ink follows the background* — the other five are carried unchanged by the
+whole-requirement copy.
 
 - [ ] 3.1 Place the anchors: slug order, `--hero-fallback` first, each colour
       searched over hue rotations and saturation/value offsets for the nearest
