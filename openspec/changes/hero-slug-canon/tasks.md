@@ -64,7 +64,7 @@ whole-requirement copy.
 - [x] 3.2 Rewrite only the `--hero-*` block of `colors.css`, leaving the rest
       of the file byte-identical and needing no reformatting by `biome ci .`,
       and report the achieved minimum ΔE76 (ZOMBIES 12, 13, 14).
-- [ ] 3.3 Run the generator over the full mirror and commit the palette: one
+- [x] 3.3 Run the generator over the full mirror and commit the palette: one
       token per mirrored portrait, plus `--hero-fallback` on every run whatever
       the mirror holds, which is what a hero released since the run resolves
       (*A mirror holding every hero the palette knows*; *A hero the mirror has
@@ -83,7 +83,7 @@ whole-requirement copy.
       borrow `#4a3d85` and `#dce8f2` from the palette: after regeneration
       neither colour is in it, so the case chooses its own values either side
       of the threshold.
-- [ ] 3.6 Re-read the comments over the palette block — `one unique color per
+- [x] 3.6 Re-read the comments over the palette block — `one unique color per
       hero` and the `--tile-ink-*` note — against what the generator now
       guarantees, and correct what has stopped being true.
 - [ ] 3.7 Tests: ZOMBIES 4, 8, 9, 20, 24. ZOMBIES 7 — that adding a portrait

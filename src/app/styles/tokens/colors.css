@@ -37,61 +37,144 @@
 	--shadow-toast: 0 12px 32px rgba(0, 0, 0, 0.5);
 	/* hero tile */
 	--tile-inset: inset 0 0 0 1px rgba(255, 255, 255, 0.14);
-	/* Pure, not tinted: the softened pair left 13 of the 52 hero colours
-	   short of 4.5:1 with either ink, and no threshold could rescue them. */
+	/* Pure, not tinted. Measured when the palette was 52 hand-picked colours:
+	   the softened pair left 13 of them short of 4.5:1 with either ink, and no
+	   threshold rescued them. Softening them now would not fail that way — the
+	   generator below places every colour against whichever ink the threshold
+	   picks — but it would move most of the palette to do it. */
 	--tile-ink-dark: #000000; /* abbreviation on a light tile */
 	--tile-ink-light: #ffffff; /* abbreviation on a dark tile */
-	/* hero placeholder palette (one unique color per hero) */
+	/* Hero placeholder palette: the square a tile shows when its portrait does
+	   not load. Generated, not hand-written — `bun scripts/hero-palette.ts
+	   <mirror> <this file>` rewrites every line below from the mirrored
+	   portraits, so an edit here is lost on the next run. No two of them read
+	   alike: the generator holds every pair 15 ΔE76 apart. */
 	--hero-fallback: #3a4250; /* hero the palette has no entry for */
-	--hero-abaddon: #45c4b4;
-	--hero-antimage: #7761d8;
-	--hero-axe: #c53b30;
-	--hero-bane: #4a3d85;
-	--hero-batrider: #b5622e;
-	--hero-bloodseeker: #8f2430;
-	--hero-bounty_hunter: #9aa646;
-	--hero-bristleback: #8a6a4a;
-	--hero-clinkz: #c24e1a;
-	--hero-crystal_maiden: #8fd4f0;
-	--hero-dawnbreaker: #e8b545;
-	--hero-dazzle: #e87ab0;
-	--hero-doom_bringer: #a63c1e;
-	--hero-drow_ranger: #7ec2cf;
-	--hero-earthshaker: #7a5230;
-	--hero-enigma: #584bb5;
-	--hero-faceless_void: #776aa8;
-	--hero-invoker: #cdb464;
-	--hero-juggernaut: #dd8a2e;
-	--hero-keeper_of_the_light: #f0e3b2;
-	--hero-lich: #5fc8e8;
-	--hero-life_stealer: #b8ab96;
-	--hero-lina: #f28c3f;
-	--hero-lion: #9c4438;
-	--hero-luna: #8598d8;
-	--hero-magnataur: #5a7a9e;
-	--hero-mars: #d1543c;
-	--hero-mirana: #c4d6f0;
-	--hero-nevermore: #66323e;
-	--hero-night_stalker: #3f62b0;
-	--hero-oracle: #52c29a;
-	--hero-phantom_assassin: #566180;
-	--hero-phantom_lancer: #3aa8c0;
-	--hero-puck: #c77de0;
-	--hero-pudge: #a97a63;
-	--hero-rattletrap: #a86a3c;
-	--hero-skeleton_king: #2fbf7f;
-	--hero-slark: #2f8a6e;
-	--hero-snapfire: #e0693a;
-	--hero-spectre: #9a5fd0;
-	--hero-spirit_breaker: #5c6bd6;
-	--hero-storm_spirit: #2e7fd0;
-	--hero-sven: #46628f;
-	--hero-tidehunter: #4f9e5f;
-	--hero-tiny: #8a94a0;
-	--hero-treant: #4e8a3a;
-	--hero-undying: #8fa83e;
-	--hero-winter_wyvern: #a9c3e6;
-	--hero-wisp: #dce8f2;
-	--hero-witch_doctor: #b3812f;
-	--hero-zuus: #4da3e8;
+	--hero-abaddon: #112849;
+	--hero-abyssal_underlord: #937c58;
+	--hero-alchemist: #87512f;
+	--hero-ancient_apparition: #3b62a2;
+	--hero-antimage: #84370c;
+	--hero-arc_warden: #6c8cc5;
+	--hero-axe: #6e3731;
+	--hero-bane: #4b3120;
+	--hero-batrider: #875e1b;
+	--hero-beastmaster: #b48b4c;
+	--hero-bloodseeker: #6a1911;
+	--hero-bounty_hunter: #44150c;
+	--hero-brewmaster: #e2af65;
+	--hero-bristleback: #231208;
+	--hero-broodmother: #8e1e2c;
+	--hero-centaur: #745643;
+	--hero-chaos_knight: #b1541a;
+	--hero-chen: #bdbe93;
+	--hero-clinkz: #a76a11;
+	--hero-crystal_maiden: #84a3b9;
+	--hero-dark_seer: #523784;
+	--hero-dark_willow: #a8545e;
+	--hero-dawnbreaker: #dc9932;
+	--hero-dazzle: #4d7186;
+	--hero-death_prophet: #359374;
+	--hero-disruptor: #0f4c6e;
+	--hero-doom_bringer: #9a1f14;
+	--hero-dragon_knight: #bd1e00;
+	--hero-drow_ranger: #191f29;
+	--hero-earth_spirit: #405e10;
+	--hero-earthshaker: #5a2f0c;
+	--hero-elder_titan: #645222;
+	--hero-ember_spirit: #3d3002;
+	--hero-enchantress: #c88057;
+	--hero-enigma: #0f3d7e;
+	--hero-faceless_void: #7f5c94;
+	--hero-furion: #717b36;
+	--hero-grimstroke: #b34e38;
+	--hero-gyrocopter: #131d58;
+	--hero-hoodwink: #9faa2c;
+	--hero-huskar: #ab8924;
+	--hero-invoker: #8a786f;
+	--hero-jakiro: #ac6c5b;
+	--hero-juggernaut: #c86c0c;
+	--hero-keeper_of_the_light: #cfa68b;
+	--hero-kez: #5985dc;
+	--hero-kunkka: #5a6187;
+	--hero-largo: #bba856;
+	--hero-legion_commander: #c3ad29;
+	--hero-leshrac: #53a0ce;
+	--hero-lich: #4857ae;
+	--hero-life_stealer: #776e0a;
+	--hero-lina: #e6864a;
+	--hero-lion: #72871f;
+	--hero-lone_druid: #3e4814;
+	--hero-luna: #253190;
+	--hero-lycan: #e1d27a;
+	--hero-magnataur: #0075a0;
+	--hero-marci: #89b112;
+	--hero-mars: #518b00;
+	--hero-medusa: #93b352;
+	--hero-meepo: #504f33;
+	--hero-mirana: #47375a;
+	--hero-monkey_king: #d3d760;
+	--hero-morphling: #1523a0;
+	--hero-muerta: #1b1035;
+	--hero-naga_siren: #0e1162;
+	--hero-necrolyte: #267032;
+	--hero-nevermore: #222c0b;
+	--hero-night_stalker: #225cd1;
+	--hero-nyx_assassin: #4f1d88;
+	--hero-obsidian_destroyer: #1b5d47;
+	--hero-ogre_magi: #7f52af;
+	--hero-omniknight: #c2e048;
+	--hero-oracle: #6c754e;
+	--hero-pangolier: #611c38;
+	--hero-phantom_assassin: #3594aa;
+	--hero-phantom_lancer: #6db937;
+	--hero-phoenix: #d24f01;
+	--hero-primal_beast: #ffa977;
+	--hero-puck: #3182f6;
+	--hero-pudge: #9e9b63;
+	--hero-pugna: #347617;
+	--hero-queenofpain: #0e3500;
+	--hero-rattletrap: #259601;
+	--hero-razor: #184dd7;
+	--hero-riki: #2e2dc7;
+	--hero-ringmaster: #623ebd;
+	--hero-rubick: #7a70de;
+	--hero-sand_king: #679c4d;
+	--hero-shadow_demon: #c93141;
+	--hero-shadow_shaman: #d0ce28;
+	--hero-shredder: #a1dd14;
+	--hero-silencer: #ffd597;
+	--hero-skeleton_king: #35b686;
+	--hero-skywrath_mage: #9fd580;
+	--hero-slardar: #512960;
+	--hero-slark: #5f8751;
+	--hero-snapfire: #aa7cbf;
+	--hero-sniper: #974bc1;
+	--hero-spectre: #300048;
+	--hero-spirit_breaker: #7c2f88;
+	--hero-storm_spirit: #46bac3;
+	--hero-sven: #80607e;
+	--hero-techies: #6abf62;
+	--hero-templar_assassin: #9a8cbc;
+	--hero-terrorblade: #194c4e;
+	--hero-tidehunter: #86b98c;
+	--hero-tinker: #ba5dbf;
+	--hero-tiny: #2f9b4c;
+	--hero-treant: #588673;
+	--hero-troll_warlord: #a6e264;
+	--hero-tusk: #192f25;
+	--hero-undying: #2d7578;
+	--hero-ursa: #401238;
+	--hero-vengefulspirit: #d253d2;
+	--hero-venomancer: #55099e;
+	--hero-viper: #5b035b;
+	--hero-visage: #840ba1;
+	--hero-void_spirit: #813d76;
+	--hero-warlock: #68c306;
+	--hero-weaver: #9e2a9e;
+	--hero-windrunner: #75df54;
+	--hero-winter_wyvern: #a03886;
+	--hero-wisp: #d283d6;
+	--hero-witch_doctor: #452d3a;
+	--hero-zuus: #83caf3;
 }
