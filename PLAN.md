@@ -341,6 +341,19 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       set a hundred lines over. Closing this now needs a decision about where
       the bulk goes, `PLAN.md` being the larger half at 386 lines, and that is
       a change rather than an edit here.
+- [ ] **Nothing checks that `snapshot.json` is what its generator produces.**
+      `src/fixtures/generate_fixture.py` writes the committed fixture and no
+      test runs it, so an edit to the generator that nobody regenerates is
+      invisible — the two simply disagree. Raised by `/zombies` on
+      `hero-slug-canon`'s second step, which made a hero's `short` a
+      hand-written column where it had been derived from the display name, so
+      a wrong slug now survives in the generator alone. Not closed there: the
+      check has to run `python3`, which no workflow installs and no test
+      spawns today, and adding an interpreter to CI is an infrastructure
+      change that enters the OpenSpec cycle. Reading the `HEROES` table out of
+      the Python source with a regex instead is the thing `CLAUDE.md` forbids
+      — a value read from a line that resembles the structure rather than from
+      the structure its tool parses.
 
 ## Standing constraints
 
