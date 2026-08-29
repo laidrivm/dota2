@@ -55,13 +55,13 @@ the same*, and the one scenario of `draft-board` *Hero tile* this change moves,
 *Ink follows the background* — the other five are carried unchanged by the
 whole-requirement copy.
 
-- [ ] 3.1 Place the anchors: slug order, `--hero-fallback` first, each colour
+- [x] 3.1 Place the anchors: slug order, `--hero-fallback` first, each colour
       searched over hue rotations and saturation/value offsets for the nearest
       candidate at least 15 CIELAB ΔE76 from every placed colour and at least
       4.5:1 against the ink its own luminance selects. Fail rather than write a
       palette any pair of which is closer than 15 (*A colour that would not
       clear the floor*; *Two heroes whose portraits share a dominant colour*).
-- [ ] 3.2 Rewrite only the `--hero-*` block of `colors.css`, leaving the rest
+- [x] 3.2 Rewrite only the `--hero-*` block of `colors.css`, leaving the rest
       of the file byte-identical and needing no reformatting by `biome ci .`,
       and report the achieved minimum ΔE76 (ZOMBIES 12, 13, 14).
 - [ ] 3.3 Run the generator over the full mirror and commit the palette: one

@@ -15,7 +15,7 @@ import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { deflateSync } from "node:zlib";
-import type { Portrait } from "./hero-palette.ts";
+import type { Portrait } from "./png.ts";
 
 export const SIGNATURE = [137, 80, 78, 71, 13, 10, 26, 10];
 
@@ -130,6 +130,33 @@ export function mirror(files: Record<string, Uint8Array>): string {
 /** A one-pixel RGBA portrait, as a file the mirror can hold. */
 export const solid = (r: number, g: number, b: number): Uint8Array =>
 	png({ width: 1, height: 1 }, [[0, r, g, b, 255]]);
+
+/** The fallback line a fabricated token file carries, comment and all. */
+export const FALLBACK_LINE = "\t--hero-fallback: #3a4250; /* no entry */";
+
+/**
+ * A token file shaped like the one the generator writes: the two inks it
+ * measures against, the fallback it must carry through, and one hero token so
+ * the block it replaces is not empty.
+ */
+export function tokenFile(): string {
+	const dir = mkdtempSync(join(tmpdir(), "hero-tokens-"));
+	made.push(dir);
+	const file = join(dir, "colors.css");
+	writeFileSync(
+		file,
+		[
+			":root {",
+			"\t--tile-ink-dark: #000000;",
+			"\t--tile-ink-light: #ffffff;",
+			FALLBACK_LINE,
+			"\t--hero-axe: #c53b30;",
+			"}",
+			"",
+		].join("\n"),
+	);
+	return file;
+}
 
 /**
  * The generator run as a person runs it. Spawned rather than called, because
