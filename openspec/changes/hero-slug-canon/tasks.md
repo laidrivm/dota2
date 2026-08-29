@@ -43,7 +43,7 @@ unchanged here — only their names — so no tile changes appearance.
       derive `icon` from it rather than from the display name, and regenerate
       `snapshot.json` (*The fixture agrees with the palette*; *The fixture's two
       derived spellings*).
-- [ ] 2.4 Widen both token patterns in `src/app/board/format.test.ts` to the
+- [x] 2.4 Widen both token patterns in `src/app/board/format.test.ts` to the
       slug rule, and replace the `> 50` entry floor with one that describes the
       palette being read (*A slug carrying a separator*; ZOMBIES 22, 23).
 - [ ] 2.5 Tests: ZOMBIES 21, 25, 26, 27, 28.
