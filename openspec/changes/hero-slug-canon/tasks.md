@@ -11,17 +11,17 @@ under *The palette is generated from the mirrored portraits* — whose remaining
 criterion is closed in step 3, where the script gains its write. This step
 writes no file and changes no shipped behaviour.
 
-- [ ] 1.1 Decode a mirrored portrait in `scripts/hero-palette.ts`: inflate the
+- [x] 1.1 Decode a mirrored portrait in `scripts/hero-palette.ts`: inflate the
       IDAT stream with `node:zlib`, un-filter the five PNG filter types, and
       read 8-bit colour types 2 and 6 at whatever size IHDR names. Refuse
       16-bit, palette, greyscale and interlaced by naming the file (*A portrait
       the decoder cannot read*).
-- [ ] 1.2 Derive a portrait's anchor colour: 24 hue buckets weighted by
+- [x] 1.2 Derive a portrait's anchor colour: 24 hue buckets weighted by
       saturation × value, ignoring pixels with alpha < 250, value < 0.15 or
       saturation < 0.15, averaging the winning bucket. A portrait every pixel
       of which is ignored is an error naming the file, not a default colour
       (*A portrait the decoder cannot read*).
-- [ ] 1.3 Read a directory of `<slug>.png`, refuse a name that is not a slug
+- [x] 1.3 Read a directory of `<slug>.png`, refuse a name that is not a slug
       under `^[a-z0-9_-]+$`, and print the token lines to stdout in slug order
       (*The same mirror twice*).
 - [ ] 1.4 Tests for the decoder and the anchor, from PNGs the test builds
