@@ -123,6 +123,16 @@ describe("what the decoder refuses, by saying which shape arrived", () => {
 			"interlaced",
 		],
 		[
+			"a compression method PNG does not define",
+			() => png({ width: 1, height: 1, compression: 1 }, [[0, 1, 2, 3, 255]]),
+			"compression method is 1",
+		],
+		[
+			"a filter method PNG does not define",
+			() => png({ width: 1, height: 1, filterMethod: 1 }, [[0, 1, 2, 3, 255]]),
+			"filter method is 1",
+		],
+		[
 			"a file measuring nothing",
 			() => png({ width: 0, height: 1 }, [[0]]),
 			"measures 0×1",

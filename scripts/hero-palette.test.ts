@@ -212,6 +212,14 @@ describe("the mirror a palette is read from", () => {
 	test("a mirror holding no portrait yields no token", () => {
 		expect(palette(mirror({}))).toEqual([]);
 	});
+
+	test("a fabricated name cannot write outside the mirror", () => {
+		// `cleanup` removes the mirror directory and nothing else, so a case
+		// naming a file above it would leave that file on the machine for good.
+		expect(() => mirror({ "../escaped.png": solid(1, 2, 3) })).toThrow(
+			"outside the mirror",
+		);
+	});
 });
 
 // spec: hero-palette/a-portrait-the-decoder-cannot-read
@@ -238,6 +246,12 @@ describe("the generator as a person runs it", () => {
 		expect(call.out).toBe("");
 		expect(call.status).not.toBe(0);
 		expect(call.err).toContain("pudge.png");
+	});
+
+	test("a mirror holding no portrait prints nothing at all", () => {
+		// Not the blank line an empty join would write: what this prints is
+		// pasted into a token file, and a stray newline is a diff.
+		expect(run(mirror({}))).toEqual({ status: 0, out: "", err: "" });
 	});
 
 	test("no directory to read is refused before anything is read", () => {

@@ -13,7 +13,7 @@
  */
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 import { deflateSync } from "node:zlib";
 import type { Portrait } from "./hero-palette.ts";
 
@@ -42,6 +42,8 @@ export type HeaderFields = {
 	height: number;
 	depth?: number;
 	colour?: number;
+	compression?: number;
+	filterMethod?: number;
 	interlace?: number;
 };
 
@@ -51,6 +53,8 @@ export function ihdr({
 	height,
 	depth = 8,
 	colour = 6,
+	compression = 0,
+	filterMethod = 0,
 	interlace = 0,
 }: HeaderFields): number[] {
 	return chunk("IHDR", [
@@ -64,8 +68,8 @@ export function ihdr({
 		height & 0xff,
 		depth,
 		colour,
-		0,
-		0,
+		compression,
+		filterMethod,
 		interlace,
 	]);
 }
@@ -102,12 +106,24 @@ export function cleanup(): void {
 	made.length = 0;
 }
 
-/** A throwaway mirror directory holding the named files. */
+/**
+ * A throwaway mirror directory holding the named files.
+ *
+ * The names a case may ask for are deliberately not slugs — a capital, a
+ * `.part`, a wrong extension are what the refusals are tested with — so the
+ * one thing checked is that the file lands under `dir`. `cleanup()` removes
+ * `dir` alone, and a name climbing out of it would leave a file behind that
+ * nothing here would ever remove.
+ */
 export function mirror(files: Record<string, Uint8Array>): string {
 	const dir = mkdtempSync(join(tmpdir(), "hero-palette-"));
 	made.push(dir);
-	for (const [name, bytes] of Object.entries(files))
-		writeFileSync(join(dir, name), bytes);
+	for (const [name, bytes] of Object.entries(files)) {
+		const file = join(dir, name);
+		if (dirname(file) !== dir)
+			throw new Error(`${name} would land outside the mirror, at ${file}`);
+		writeFileSync(file, bytes);
+	}
 	return dir;
 }
 
@@ -121,11 +137,15 @@ export const solid = (r: number, g: number, b: number): Uint8Array =>
  * gets, and none of it is observable from inside the module.
  */
 export function run(...args: string[]) {
-	const call = Bun.spawnSync([
-		"bun",
-		`${import.meta.dir}/hero-palette.ts`,
-		...args,
-	]);
+	const call = Bun.spawnSync(
+		["bun", `${import.meta.dir}/hero-palette.ts`, ...args],
+		// Started outside the repository and given the one variable the case
+		// needs — `PATH`, to resolve `bun` — rather than inheriting the launch
+		// environment: bun fills a variable a case left out from the `.env`
+		// where the process starts, so an inherited cwd decides what the run
+		// reads.
+		{ cwd: tmpdir(), env: { PATH: process.env.PATH ?? "" } },
+	);
 	return {
 		status: call.exitCode,
 		out: call.stdout.toString(),
