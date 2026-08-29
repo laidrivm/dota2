@@ -108,11 +108,12 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
 - [ ] **Whose spelling of a hero's `short` is canonical.** The client's kebab
       (`anti-mage`, the fixture and all 51 palette tokens) or Valve's internal
       name as STRATZ republishes it (`antimage`, every row the ingest writes).
-      Left open by `hero-tile-icon`, which makes the palette unreachable for a
-      hero that has an image and so removes the cost of deciding wrongly, not
-      the decision. Settling it reaches the fixture, `colors.css` and the design
-      project's swatch pages at once, which is why it is not that change's to
-      take.
+      Left open by `hero-tile-icon`, which covers the square with an image
+      wherever one loads and so narrows the cost of deciding wrongly rather
+      than removing it — the square is still what a failed image load shows,
+      and what the mismatch costs there is counted in that change's proposal.
+      Settling it reaches the fixture, `colors.css` and the design project's
+      swatch pages at once, which is why it is not that change's to take.
 - [ ] **Task 5** — error tracking (precondition: the product is deployed).
       Carries the snapshot job's failure alert, which `deploy-pipeline` moved
       here on finding it in no step and no acceptance criterion of
@@ -318,7 +319,7 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       -S` before editing, so this is an overstated clause rather than a broken
       criterion; correcting it is a delta spec, not an edit here.
 - [ ] **The always-on trigger has fired, and by more than it last recorded.**
-      Re-measured 2026-08-29: the set is 604 lines against the ~500
+      Re-measured 2026-08-29: the set is 605 lines against the ~500
       `CLAUDE.md` states, where the entry previously read 555. Both sublist
       figures moved with it — Process sits at 24 and Code at 20, so two of the
       three are now at or past the ~20 threshold rather than one.
@@ -328,9 +329,9 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       absence, where a count comes from, which measurement may be overwritten
       — and `docs/verification.md` already owns exactly that. What no longer
       holds is the conclusion drawn from it: moving those five takes Process
-      to 19 and the set to about 594, so it clears one sublist and leaves the
+      to 19 and the set to about 595, so it clears one sublist and leaves the
       set a hundred lines over. Closing this now needs a decision about where
-      the bulk goes, `PLAN.md` being the larger half at 377 lines, and that is
+      the bulk goes, `PLAN.md` being the larger half at 378 lines, and that is
       a change rather than an edit here.
 
 ## Standing constraints
