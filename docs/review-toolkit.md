@@ -63,7 +63,11 @@ design, because settling it is the user's.
   user is present by definition, and a wrong fix on an open PR costs one more
   commit on a branch already under review. A merged PR still collects reviews:
   re-fetch it once after the merge, because a finding posted while it was being
-  merged exists in the API and in no report.
+  merged exists in the API and in no report. The same holds before it: the
+  bot's review lands on its own schedule and can arrive after a local pass has
+  already reported, so treat `Actionable comments posted: N` as what one review
+  posted inline rather than what the pull request holds — a second review, and
+  a collapsed out-of-grid section, are each counted separately.
 
 ## The pre-PR sequence
 
