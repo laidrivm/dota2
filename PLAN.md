@@ -102,16 +102,13 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
 - **`hero-tile-icon`** — PRs #227 and #228,
   `archive/2026-08-29-hero-tile-icon`; the requirement is `draft-board`
   §*Hero tile* in `openspec/specs/draft-board/`.
+- **`hero-slug-canon`** — PRs #232 to #235,
+  `archive/2026-08-29-hero-slug-canon`; specs at
+  `openspec/specs/hero-palette/`, and one requirement of
+  `openspec/specs/draft-board/`.
 
 ### Open
 
-- [ ] **`hero-slug-canon`** — proposed, `openspec/changes/hero-slug-canon/`.
-      The slug the ingest writes becomes canonical and the palette moves to it,
-      regenerated from the mirrored portraits for every hero the mirror holds
-      rather than 51 by hand. Ships on `feat/hero-slug-canon-1` … `-4`, in
-      order: the generator, then the rename of tokens and fixture, then the
-      computed palette, then the design project's swatch pages — the last gated
-      on DesignSync authenticating, which it does not today.
 - [ ] **Task 5** — error tracking (precondition: the product is deployed).
       Carries the snapshot job's failure alert, which `deploy-pipeline` moved
       here on finding it in no step and no acceptance criterion of
@@ -306,7 +303,7 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       -S` before editing, so this is an overstated clause rather than a broken
       criterion; correcting it is a delta spec, not an edit here.
 - [ ] **The always-on trigger has fired, and by more than it last recorded.**
-      Re-measured on `hero-slug-canon`'s last step: the set is 641 lines
+      Re-measured on `hero-slug-canon`'s last step: the set is 638 lines
       against the ~500 `CLAUDE.md` states, where the entry read 613 and 555
       before that. It reached 633 over that change's four steps and this one
       brought it back by deleting two settled entries. The sublist figures did
@@ -320,7 +317,7 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       holds is the conclusion drawn from it: moving those five takes Process
       to 19 and the set to about 606, so it clears one sublist and leaves the
       set a hundred lines over. Closing this now needs a decision about where
-      the bulk goes, `PLAN.md` being the larger half at 414 lines, and that is
+      the bulk goes, `PLAN.md` being the larger half at 411 lines, and that is
       a change rather than an edit here.
 - [ ] **Nothing checks that `snapshot.json` is what its generator produces.**
       `src/fixtures/generate_fixture.py` writes the committed fixture and no
