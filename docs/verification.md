@@ -60,3 +60,5 @@ What counts as evidence for a claim, and what a claim may rest on.
 - Read a listing to its end before concluding a row is absent — a window
   bounded by `head`, `tail` or a line range and a row that is not there print
   the same nothing.
+- Take a count of a file the edit writing it changes after that edit, never
+  before.
