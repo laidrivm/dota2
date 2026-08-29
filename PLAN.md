@@ -318,7 +318,7 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       -S` before editing, so this is an overstated clause rather than a broken
       criterion; correcting it is a delta spec, not an edit here.
 - [ ] **The always-on trigger has fired, and by more than it last recorded.**
-      Re-measured 2026-08-28: the set is 601 lines against the ~500
+      Re-measured 2026-08-29: the set is 604 lines against the ~500
       `CLAUDE.md` states, where the entry previously read 555. Both sublist
       figures moved with it — Process sits at 24 and Code at 20, so two of the
       three are now at or past the ~20 threshold rather than one.
@@ -328,9 +328,9 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       absence, where a count comes from, which measurement may be overwritten
       — and `docs/verification.md` already owns exactly that. What no longer
       holds is the conclusion drawn from it: moving those five takes Process
-      to 19 and the set to about 591, so it clears one sublist and leaves the
+      to 19 and the set to about 594, so it clears one sublist and leaves the
       set a hundred lines over. Closing this now needs a decision about where
-      the bulk goes, `PLAN.md` being the larger half at 374 lines, and that is
+      the bulk goes, `PLAN.md` being the larger half at 377 lines, and that is
       a change rather than an edit here.
 
 ## Standing constraints
