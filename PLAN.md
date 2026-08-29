@@ -152,7 +152,11 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       hand-authored, so the pages cannot simply be regenerated. Since
       `hero-tile-icon` both pages are out of date a second way: the ink rule
       now reaches only the square a tile falls back to, and they describe it
-      as reaching every tile.
+      as reaching every tile. And since `hero-slug-canon`'s third step a third:
+      the palette page's 52 swatches are keyed on the client's kebab and hold
+      colours nothing generates any more, so every swatch on it is superseded
+      rather than the eight inks named above. `hero-slug-canon`'s step 4
+      settles this entry or leaves it standing with what it could not reach.
 - [ ] **Mutation testing's scope predates the job tree.**
       `openspec/specs/mutation-floor/` scopes Stryker to `src/model.ts` alone
       and rules that a second file means a second configuration and a second
