@@ -129,21 +129,6 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       `deploy-pipeline` writes the criteria for its own workflow alone;
       generalising them needs a check over all of them and a home that is not
       a capability about deploying.
-- [ ] **The design project's guideline pages show superseded inks.**
-      `guidelines/colors-hero-palette.html` (52 swatches) and
-      `guidelines/component-hero-tile.html` (5) hardcode `#1b1d12`/`#f4f3fb`
-      inline rather than referencing `--tile-ink-*`. Eight also show the wrong
-      ink, having been authored at threshold 0.22: batrider, clockwerk, magnus,
-      mars, slark, spectre, storm-spirit, treant-protector all move light →
-      dark. The fix is to reference the tokens; the shortened swatch labels are
-      hand-authored, so the pages cannot simply be regenerated. Since
-      `hero-tile-icon` both pages are out of date a second way: the ink rule
-      now reaches only the square a tile falls back to, and they describe it
-      as reaching every tile. And since `hero-slug-canon`'s third step a third:
-      the palette page's 52 swatches are keyed on the client's kebab and hold
-      colours nothing generates any more, so every swatch on it is superseded
-      rather than the eight inks named above. `hero-slug-canon`'s step 4
-      settles this entry or leaves it standing with what it could not reach.
 - [ ] **Mutation testing's scope predates the job tree.**
       `openspec/specs/mutation-floor/` scopes Stryker to `src/model.ts` alone
       and rules that a second file means a second configuration and a second
@@ -383,6 +368,17 @@ Kept because no single file in the tree is where a reader would look for them.
   dependency dashboard and no lockfile maintenance; the nightly `bun audit`
   covers the latter.
 - **Docker on a VPS** — the deployment target.
+- **The design project's swatch pages are derived, not authored.**
+  `guidelines/colors-hero-palette.html` and `guidelines/component-hero-tile.html`
+  are written from `src/app/styles/tokens/colors.css`: one swatch per token in
+  file order, background `var(--hero-<slug>)`, label the slug verbatim, letters
+  `heroAbbr` of the hero's display name, ink `var(--tile-ink-dark)` or
+  `--tile-ink-light` by the 0.18 luminance threshold. The project's own
+  `tokens/colors.css` carries the same hero block and nothing else of it is
+  the repository's to touch. Regenerating them is part of regenerating the
+  palette: CSS cannot pick an ink by its background's luminance, so a hero
+  that crosses 0.18 keeps the old ink on the page until somebody runs it
+  again.
 - **Context7 is documentation, not a source of truth.** Its library pages are
   community-contributed and its authors warrant neither accuracy nor safety,
   so the review instruction treats retrieved text as evidence about whether an
