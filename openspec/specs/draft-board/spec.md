@@ -208,7 +208,9 @@ for that hero. That fallback's ink SHALL be `--tile-ink-light` when its
 background's relative luminance is below 0.18 and `--tile-ink-dark` otherwise.
 Every tile SHALL either carry an accessible name naming its hero, or be hidden
 from assistive technology when the row it sits in already names that hero; the
-image SHALL contribute no name beside it.
+image SHALL contribute no name beside it. WHERE the snapshot holds no hero for
+a tile, that tile SHALL either be named for the absence or be hidden from
+assistive technology, and SHALL never be left both nameless and exposed.
 
 #### Scenario: The image is drawn
 
@@ -250,7 +252,7 @@ image SHALL contribute no name beside it.
 - **IF** the session holds a hero id that the current snapshot does not
   contain
 - **THEN** the board SHALL render the remaining panels without throwing, and
-  that slot SHALL render a fallback tile with no name
+  that slot SHALL render a fallback tile hidden from assistive technology
 
 ### Requirement: Pick entry
 
