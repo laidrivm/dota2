@@ -115,23 +115,26 @@ describe("the shipped palette", () => {
 			),
 		];
 
-		// Not a number beside the palette, which a pattern that stopped
-		// matching would satisfy by shrinking under it: every hero
-		// declaration in the file has to be one of the entries above, so a
-		// spelling the pattern does not cover fails here rather than leaving
-		// quietly.
+		// The same declarations read again by a pattern no spelling can slip
+		// past, so a token the palette gains and the strict one does not
+		// cover fails here rather than leaving it quietly.
 		const declared = [...(await read()).matchAll(/--(hero-[^:\s]+):/g)].map(
 			([, name]) => name,
 		);
 		const heroes = entries
 			.map(([, name]) => name)
 			.filter((name) => name?.startsWith("hero-"));
+		// Equality rather than containment, so a token declared twice fails
+		// too: the cascade keeps the last of the pair, and the loser reads as
+		// a colour somebody chose.
 		expect(heroes).toEqual(declared);
-		expect(declared.length).toBeGreaterThan(50);
-		// Equality above rather than containment, so a token declared twice
-		// fails here: the cascade keeps the last of the pair, which puts one
-		// hero on another's colour and reads as a colour choice.
 		expect(declared).toHaveLength(new Set(declared).size);
+		// Counted on the loose sweep, where the floor this replaced sat on
+		// the strict one and a rename could satisfy it by shrinking under it.
+		// Not a floor on how large the palette should be: it is what stops a
+		// file with no hero token at all passing, which both assertions above
+		// do vacuously.
+		expect(declared.length).toBeGreaterThan(50);
 
 		const unparseable = entries
 			.filter(([, , value]) => relativeLuminance(value ?? "") === null)
