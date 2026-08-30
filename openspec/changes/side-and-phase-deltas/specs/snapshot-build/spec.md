@@ -19,6 +19,14 @@ about +5 on both sides and the model would weigh its strength twice.
 `src/types.ts` has declared side and phase "relative to the hero's overall
 winrate" since the contract was written.
 
+The overall winrate SHALL be taken over the same matches the side or phase
+rows were counted from, so that a difference in population between the
+harvest and the statistics API cancels rather than leaking into the delta.
+WHERE a hero has side or phase rows but no counted matches to take an
+overall winrate from, the build SHALL fail rather than fall back to 50: a
+silent 50 would restore the very double count this base exists to remove,
+and on one hero rather than all of them.
+
 After smoothing, the build SHALL subtract from each side and phase delta the
 mean of that component's deltas over every hero, taken per part. A hero's
 delta then says how much more or less that side or phase suits **it** than it
@@ -37,14 +45,6 @@ Where the advantage goes instead is `beta-refit`'s: the model has no
 intercept, so at `Δ = 0` it must answer 50% where the truth is nearer 54,
 and a logistic fitted with two parameters rather than one is where a
 constant of that shape belongs.
-
-The overall winrate SHALL be taken over the same matches the side or phase
-rows were counted from, so that a difference in population between the
-harvest and the statistics API cancels rather than leaking into the delta.
-WHERE a hero has side or phase rows but no counted matches to take an
-overall winrate from, the build SHALL fail rather than fall back to 50: a
-silent 50 would restore the very double count this base exists to remove,
-and on one hero rather than all of them.
 
 A side or phase row carrying zero matches reaches `n_eff = 0` and stores its
 column as 0. That is not the omission the next paragraph describes: omission
