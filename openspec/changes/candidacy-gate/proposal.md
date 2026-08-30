@@ -12,10 +12,12 @@ role a hero has ever been played in is a role the picker will recommend.
 
 `sufficient` does not catch it and was never meant to. It fires at
 `n_eff >= 500`, an absolute-sample test that answers "is this winrate worth
-believing". Over a patch that has run 159 days at Divine and Immortal, 0.35%
-of a popular hero's games clears 500 comfortably. The number is believable;
-the role is not one anybody picks. Two different questions, and the model
-asks only the first.
+believing". The meta window is thirty days — `SOURCE_DAYS` in
+`src/job/ingest/meta.ts`, capped by what the endpoint serves rather than
+chosen — and thirty days of Divine and Immortal is enough that 0.35% of a
+popular hero's games clears 500 comfortably. The number is believable; the
+role is not one anybody picks. Two different questions, and the model asks
+only the first.
 
 That meta shows the second cost. Smoothing pulls a thin sample towards
 neutral, so a role the hero genuinely loses reads as barely below average
