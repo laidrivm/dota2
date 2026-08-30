@@ -64,7 +64,8 @@ Closes `hero-reference/valve-s-own-post-names-a-patch`,
 
 ## 2. Which entry names the patch
 
-Closes `hero-reference/a-version-with-no-letter-precedes-its-a`.
+Closes `hero-reference/a-version-with-no-letter-precedes-its-a`,
+`hero-reference/a-newer-announcement-above-an-older-patch`.
 
 - [ ] 2.1 Write the failing cases first (ZOMBIES 4, 5, 6, 7, 8, 10): twenty
       patch items yield the newest; two sharing a date resolve by version
@@ -80,6 +81,12 @@ Closes `hero-reference/a-version-with-no-letter-precedes-its-a`.
 - [ ] 2.3 Order versions by the numeric parts first, then the letter with the
       empty string lowest. This is the arithmetic of the change and the one
       place a boundary case earns a test per boundary.
+- [ ] 2.4 Make the tie-break real in the query that picks the current patch.
+      `detectPatch` ends on `ORDER BY detected_at DESC LIMIT 1`, which says
+      nothing about which row wins when two instants match — and the
+      requirement now promises version order decides. A promise nothing
+      implements is worse than none, and the equal-instant case is already in
+      2.1.
 
 ## 3. The watchdog
 

@@ -40,10 +40,18 @@ breaking a tie between equal instants. One rule, and the scenario that has
 always stated it is unchanged.
 
 The run SHALL fail rather than proceed on a patch list it could not read whole:
-a response that cannot be fetched, one that parses to no patch at all, and one
-whose newest entry lacks a name or a release instant are each a failure, and
-none SHALL leave the ingest running against the patch `patches` happens to hold.
-Proceeding would blend under a `detected_at` no source confirmed this run.
+a response that cannot be fetched, one that yields no patch at all once the
+rule above has filtered it, and one whose newest **matching** item lacks a
+version or a date are each a failure, and none SHALL leave the ingest running
+against the patch `patches` happens to hold. Proceeding would blend under a
+`detected_at` no source confirmed this run.
+
+The filter runs before that check, and the ordering of the two is the whole
+of it. Under the previous source every entry was a patch, so "the newest
+entry" and "the newest patch" named the same thing; in this feed the newest
+entry is usually a tournament post. A validation applied to the raw newest
+entry would be testing an announcement's fields against a patch's
+requirements.
 
 #### Scenario: Valve's own post names a patch
 
@@ -59,6 +67,14 @@ Proceeding would blend under a `detected_at` no source confirmed this run.
   Valve's own, as `Dota 2 patch 7.41c is awful news for Batrider` does
 - **THEN** it SHALL NOT be read as a patch, its date being the article's and
   not the release's
+
+#### Scenario: A newer announcement above an older patch
+
+- **WHEN** the feed's newest items are Valve posts with no version and a
+  patch item sits below them, which is the ordinary state of this feed
+- **THEN** the patch item SHALL be read and the run SHALL NOT fail, the
+  failure check applying to what the rule matched and not to the raw newest
+  entry
 
 #### Scenario: A Valve post with no version
 
