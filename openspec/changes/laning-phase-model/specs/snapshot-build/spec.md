@@ -51,17 +51,27 @@ negative against all nine of its most frequent opponents, −4 to −15 pp.
 neutral by sample size* fixes `k` per statistic — 300, 400, 500 — and for
 this one the build SHALL compute `k = p(1−p)·10⁴ / var_true`, where `p` is
 the folded lane winrate above as a fraction. Over the pooled rows of every
-covered cell, writing `d_i` for a row's centred delta, `p_i` for its folded
-winrate and `n_i` for its `matchCount`:
+covered cell, writing `d_i` for a row's centred delta and `n_i` for its
+`matchCount`:
 
 ```text
-var_obs   = Σ(d_i − d̄)² / (N − 1)          over the N pooled rows
-var_noise = Σ p_i(1 − p_i)·10⁴ / n_i  / N   the mean of each row's own
+p_i       = (win + stompWin + 0.5·draw) / n_i        the folded rate
+E[X²]_i   = (win + stompWin + 0.25·draw) / n_i       X ∈ {1, 0.5, 0}
+v_i       = (E[X²]_i − p_i²) · 10⁴                   one game's variance, pp²
+
+var_obs   = Σ(d_i − d̄)² / (N − 1)     over the N pooled rows, d_i centred
+var_noise = Σ (v_i / n_i) / N          the mean of each row's own
 var_true  = var_obs − var_noise
-k         = mean of p_i(1 − p_i)·10⁴ over the rows,  divided by var_true
+k         = (Σ v_i / N) / var_true
 ```
 
-`p` is per row and not global because a pair at 0.2 and one at 0.5 do not
+`v_i` is **not** `p_i(1 − p_i)·10⁴`. A folded verdict takes three values, not
+two — a draw is half a win — so the Bernoulli variance is the wrong one, and
+wrong by a wide margin: draws are about a quarter of lane games (24.4%, 26.2%
+and 25.7% over the three cells measured), and assuming Bernoulli overstates
+the noise by 40%.
+
+It is per row and not global because a pair at 0.2 and one at 0.5 do not
 carry the same noise; the pooling is what turns those into one constant.
 
 `var_true` SHALL be taken over the **centred but unsmoothed** deltas — the
@@ -80,11 +90,11 @@ That is the shrinkage that is optimal rather than cautious, and it is what
 makes a thin statistic usable: a lane pair reaches 244 games at the median
 cell over twelve weeks, which `k = 400` would shrink to 38% of its size.
 
-Derived on three cells over twelve weeks it came out 61 at the median cell,
-17 at the busiest and 35 at a third — tens rather than hundreds, because a
+Derived on three cells over twelve weeks it came out 37 at the median cell,
+11 at the busiest and 24 at a third — tens rather than hundreds, because a
 lane delta carries more real signal than a match one. Three cells do not fix
 a constant, so the build SHALL record beside the pooled value the spread of
-the same decomposition run per cell — which is what said 17 to 61 — never the
+the same decomposition run per cell — which is what said 11 to 37 — never the
 mean of those, which nothing uses.
 
 #### Scenario: The mean opponent gives no lane advantage
@@ -126,8 +136,8 @@ mean of those, which nothing uses.
 #### Scenario: A derived constant far from what was measured
 
 - **IF** the derived `k` falls outside `[5, 400]`
-- **THEN** the build SHALL fail rather than publish — three cells measured 17
-  to 61, and a figure an order of magnitude outside that says the
+- **THEN** the build SHALL fail rather than publish — three cells measured 11
+  to 37, and a figure an order of magnitude outside that says the
   decomposition read noise as signal or the reverse
 
 #### Scenario: A stomp is a win and a draw is half of one

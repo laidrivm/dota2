@@ -108,8 +108,7 @@ Closes `snapshot-build/the-two-directions-of-a-lane-pair-are-independent`,
 ## 4. Centring against the hero's own laning strength
 
 Closes `snapshot-build/the-mean-opponent-gives-no-lane-advantage`,
-`snapshot-build/a-hero-with-one-lane-opponent`,
-`snapshot-build/centring-keeps-the-mirror`.
+`snapshot-build/a-hero-with-one-lane-opponent`.
 
 - [ ] 4.1 Write the failing cases first (ZOMBIES 16, 17): three opponents
       centre to a mean of exactly 0; a cell with one opponent centres it to
@@ -133,15 +132,20 @@ Closes `snapshot-build/the-constant-is-derived-not-configured`,
       recording only the mean of the per-cell figures fails; two builds over
       identical staging rows derive the same `k` whichever constant the
       snapshot they started from recorded.
-- [ ] 5.2 Take `var_true` over the **centred, unsmoothed** deltas. Taking it
+- [ ] 5.2 Take one game's variance as `E[X²] − p²` over the folded values,
+      never as `p(1 − p)`: a fold of `{1, 0.5, 0}` is not a Bernoulli draw,
+      draws are about a quarter of lane games, and assuming otherwise
+      overstates the noise by 40% and moved `k` from 37 to 61 on the median
+      cell. Write a case carrying draws (ZOMBIES 20's sibling).
+- [ ] 5.3 Take `var_true` over the **centred, unsmoothed** deltas. Taking it
       over the stored ones would define `k` in terms of what `k` produced,
       and 5.1's second case is what fails when it does.
-- [ ] 5.3 Pool every covered cell rather than averaging per-cell figures.
+- [ ] 5.4 Pool every covered cell rather than averaging per-cell figures.
       Each cell is centred on 0 already, so pooling is one decomposition over
       one population; a mean would weigh a three-opponent cell like a
       sixty-opponent one.
-- [ ] 5.4 Record the per-cell spread beside the pooled value, and compare it
-      in the pull request against the 17 to 61 three real cells measured
+- [ ] 5.5 Record the per-cell spread beside the pooled value, and compare it
+      in the pull request against the 11 to 37 three real cells measured
       (ZOMBIES 24). A fixture whose spread sits far outside that is a fixture
       that no longer resembles production.
 

@@ -356,7 +356,7 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       release of 30 July — and
       is bounded by the **major** patch rather than the letter one. The
       smoothing constant is derived as `k = p(1−p)·10⁴ / var_true`, which came
-      out 17 to 61 on three cells against the 400 a pair statistic uses,
+      out 11 to 37 on three cells against the 400 a pair statistic uses,
       because a lane delta carries more signal per game. Three cells do not
       fix it, so the build derives it over every cell and records the spread.
 

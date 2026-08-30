@@ -14,7 +14,9 @@ well as by hero — so it earns a requirement rather than an amendment.
 The export SHALL emit `lanes` as `Record<heroId, Record<position,
 Record<heroId, number>>>`, keyed by the hero, the position it was counted
 at, and the opponent — deriving the orders the database does not store from
-the antisymmetry the build guaranteed, as it does for `matchups`.
+a stored row of its own. Unlike `matchups`, both directions of a lane pair
+are pulled and stored separately, so there is no order the database lacks and
+none is derived by negation.
 
 The outer keys SHALL be hero ids as decimal integer strings and the middle
 keys the positions `1` to `5`.
