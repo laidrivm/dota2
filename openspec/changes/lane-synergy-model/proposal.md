@@ -27,13 +27,28 @@ share: a carry has one support beside it in nearly every game, where its
 opponents split across the pool. 3 239 games a pair against the 244 a median
 opponent cell reaches.
 
+The two directions of an ally pair agree far more closely than an opponent
+pair's do, and the reason is what the statistic is:
+
+```text
+                     two independent pulls of one pair
+allies     mean |difference|  0.21 pp    max 0.35
+opponents  mean |sum|         1.04 pp    max 1.50
+```
+
+Two allies see the **same** event — their lane won or it did not — where two
+opponents see complementary ones. It is still not an invariant to assert:
+0.35 pp is a disagreement, and the two pulls admit different games by their
+position filters. Both directions are stored, as they are for opponents.
+
 ## What Changes
 
 - The lane pull gains its ally half — the same endpoint, the same window, the
   flag flipped. What it asks for and what it costs is `snapshot-ingest`'s.
-- The build stores and centres it as `laning-phase-model` established for the
-  opponent half, with one difference: a lane synergy is **symmetric**, so it
-  is stored once rather than in both orders.
+- The build stores and centres it exactly as `laning-phase-model` established
+  for the opponent half — both directions from their own pulls, centred by the
+  row mean, its constant derived. The one difference is what the two
+  directions mean, and it is smaller than it looks.
 - The bundle carries a fourth matrix and the suggestion score a seventh
   component.
 
@@ -53,21 +68,21 @@ without it.
 
 - `snapshot-ingest`: *Lane outcomes are pulled per hero and position* fixes
   one pull; this makes it two.
-- `snapshot-build`: *Stored pair statistics carry their symmetry* gains the
-  symmetric case, and *The lane statistic is centred and its constant is
-  derived* covers a second statistic under the same rules.
+- `snapshot-build`: *The lane statistic is centred and its constant is
+  derived* covers a second statistic under the same rules. *Stored pair
+  statistics carry their symmetry* is **not** touched, for the reason
+  `laning-phase-model` records: a lane pair's two directions are independent
+  measurements, and this half is no different.
 - `snapshot-export`: *The lane matrix is expanded per position* gains a
   sibling for allies.
 - `draft-model`: *Suggestion scoring* gains a seventh component.
 
 ## Non-goals
 
-- **Merging the two lane statistics into one.** They are not two halves of a
-  quantity: one is antisymmetric and stored in both orders, the other
-  symmetric and stored once, and their correlations with what the bundle
-  already carries differ — `+0.204` against the stored matchup, `+0.182`
-  against the stored synergy. They are summed as separate components with
-  separate weights.
+- **Merging the two lane statistics into one.** They answer different
+  questions and correlate differently with what the bundle already carries —
+  `+0.204` against the stored matchup, `+0.182` against the stored synergy —
+  so they are summed as separate components with separate weights.
 - **Replacing `synergies`.** The match synergy answers who wins games
   together and this answers who wins a lane together; `+0.417` against the
   same pair's match outcome says they overlap more than the opponent pair
@@ -82,8 +97,7 @@ without it.
 ## Impact
 
 - `src/job/ingest/` — the pull built for opponents runs a second time.
-- `src/job/schema.sql` — a table beside `hero_lanes`, symmetric where that
-  one is antisymmetric.
+- `src/job/schema.sql` — a table beside `hero_lanes`, keyed the same way.
 - `src/job/build/`, `src/job/export/render.ts`, `src/model.ts`,
   `src/types.ts` — a fourth matrix and a seventh component, on the paths the
   opponent half opened.
