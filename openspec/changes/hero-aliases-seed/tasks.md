@@ -1,7 +1,11 @@
 # hero-aliases-seed — tasks
 
 Five steps, five pull requests, in this order. Each names the criteria it
-closes by their `<capability>/<scenario-slug>` identifiers.
+closes by their `<capability>/<scenario-slug>` identifiers. There is no
+closing group: `openspec/config.yaml` lets a step close no criterion only when
+it carries infrastructure, and amending a Purpose, updating `PLAN.md` and
+running the review sequence are none of that — so 5.3 to 5.6 cite no criterion
+and ride with the step that merges last.
 
 ## 1. The seed file and when it is applied
 
@@ -160,18 +164,15 @@ revalidation does not reach localStorage.
 - [ ] 5.1 Write the failing case first: `matchHeroes` over a hero entry with
       no `abbreviations` key returns it on a name match instead of throwing.
 - [ ] 5.2 Read both alias arrays as `?? []` in `matchHeroes`.
-
-## 6. Closing the change
-
-- [ ] 6.1 Update `PLAN.md`'s queue in the pull request that merges the last
-      step, not afterwards — including the hero-tile lettering entry, whose
-      "a partial source already exists ... for 33 of the 128" now describes
-      the fixture alone and no longer the published bundle.
-- [ ] 6.2 Amend `hero-picker`'s `## Purpose`, which reads "how its search
+- [ ] 5.3 Update `PLAN.md`'s queue in this step's pull request, not
+      afterwards — including the hero-tile lettering entry, whose "a partial
+      source already exists ... for 33 of the 128" now describes the fixture
+      alone and no longer the published bundle.
+- [ ] 5.4 Amend `hero-picker`'s `## Purpose`, which reads "how its search
       matches names and aliases" and now leaves out abbreviations. A Purpose
       is prose rather than a requirement, so no delta carries it: it is
       edited when the delta is synced, or it drifts from the requirement
       directly below it.
-- [ ] 6.3 Add the e2e bullet (ZOMBIES 26) to the backlog `PLAN.md` owns: a
+- [ ] 5.5 Add the e2e bullet (ZOMBIES 26) to the backlog `PLAN.md` owns: a
       player opens the picker, types `wk`, and Wraith King is selectable.
-- [ ] 6.4 Run the pre-PR sequence per `docs/review-toolkit.md` on every step.
+- [ ] 5.6 Run the pre-PR sequence per `docs/review-toolkit.md` on every step.
