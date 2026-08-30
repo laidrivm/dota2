@@ -102,43 +102,62 @@ pipeline already pulls, stores, blends, exports and scores twice over.
 - `src/fixtures/snapshot.json` — regenerated.
 - No new dependency. The pull is per hero **and position**, where the two it
   joins are per hero alone, so it multiplies where they do not: 300 cells at
-  `share >= 5%` against 128 heroes. At the pair pull's four-week cap that is
-  1 200 requests on top of today's 508, over the hourly ceiling of 1 500. Two
-  weeks fits at 600 added, 1 108 in all.
+  `share >= 5%` against 128 heroes, and twelve weeks rather than the pair
+  pull's four: 3 600 requests on top of today's 516, paced across about three
+  hours rather than refused. *The window, and the constant it needs* below
+  carries why twelve, and what the hourly ceiling does.
+
+## The window, and the constant it needs
+
+The pull is thin per pair, and both halves of the fix are measured rather
+than chosen.
+
+**Twelve weeks, because the quantity does not drift.** Nyx Assassin at
+position 3, weeks 7–12 against weeks 1–6, over the 69 pairs carrying 60 games
+in each half: **corr +0.801, mean absolute difference 3.4 pp**. That window
+spans a letter patch — 7.41e released on 30 July — so a lane delta survives
+one. It is bounded by the **major** patch rather than by the current letter
+patch, which is the opposite of what *Pair statistics are pulled per hero*
+does, and the drift figure is why.
+
+**A smoothing constant in the tens, not 400.** `k` is per statistic already —
+300 for meta, 400 for a pair, 500 for side and phase — and the right one
+follows from how much of a delta's spread is real. Decomposing the observed
+spread into signal and binomial noise, over twelve weeks:
+
+```text
+cell                     pairs   n/pair   sd obs   noise   sd true    k
+Nyx Assassin at 3 (median)  94      323      7.5     3.9       6.4    61
+Pudge at 2 (busiest)       106      678     12.9     4.4      12.2    17
+Juggernaut at 1            125     5264      8.7     2.1       8.4    35
+```
+
+`k = p(1−p)·10⁴ / var_true`, which is the shrinkage that is optimal rather
+than cautious. A lane delta needs less shrinking than a match one **because
+it carries more signal** — the same fact the 32.6 pp spread showed, arriving
+as a constant. At `k = 40` a median pair keeps 0.89 of its delta where
+`k = 400` keeps 0.38.
+
+Two independent readings agree: Spearman–Brown on the split-half correlation
+gives a reliability of `2(0.801)/1.801 = 0.889` at twelve weeks, against the
+0.80 the variance decomposition gives at the same depth.
+
+**What the window costs.** 300 cells at `share >= 5%` times twelve weeks is
+3 600 requests on top of today's 516. The hourly ceiling of 1 500 does not
+refuse it: *A run stays inside the quota the API states* has a run wait for a
+refilling window and continue, failing only on the longest window, and the
+daily ceiling is 15 000. So the cost is about three hours of wall clock, and
+*An invocation arriving while a run is in flight* already refuses an overlap.
 
 ## Open Questions
 
-**The depth this arrives at is the question the change turns on, and the
-evidence above does not settle it.** The 32.6 pp spread was measured over
-Phantom Lancer's 35 fattest opponents at position 1 — the busiest cell of the
-busiest configuration, each pair at 200 games or more. Away from it the pairs
-are thin, because the pull splits by position *and* needs the two heroes
-actually stood in one lane:
-
-```text
-cell                     2 weeks, per pair   n/(n+400) survives smoothing
-Pudge at 2 (busiest)                   132                          25%
-Nyx Assassin at 3 (median)              50                          11%
-Chen at 5 (thinnest)                    33                           8%
-a matchup pair today                 ~2 600                         87%
-```
-
-At `k = 400` — the constant *Smoothing towards neutral by sample size* fixes
-for a pair statistic — a median lane pair arrives at 11% of its measured
-size. Four weeks does not rescue it either: it reaches about 100 a pair.
-
-So one of three has to give, and none is free:
-
-- **A lower `k` for this statistic.** Defensible on its own terms — the
-  constant is per statistic already — but it means calling a 50-game delta
-  believable, which is what `k` exists to refuse.
-- **More weeks.** The lane signal is a laning-phase property and drifts more
-  slowly than a match one, so a longer window may be sound; but the requests
-  are linear in weeks and the ceiling is 1 500.
-- **A coarser pairing.** Lane outcome against an opposing **position** rather
-  than an opposing hero pools 126 rows into 5 and puts every cell in the
-  thousands. It stops being a pair statistic and much of the 32.6 pp is the
-  pairing.
+- **`k` varies by cell — 17 to 61 across three.** A single constant is what
+  the build's shape allows and ~40 is the middle of them, but three cells do
+  not fix it. It is re-derived over every cell during implementation, and the
+  step that does it records the spread rather than the mean alone.
+- **The window against a major patch.** Twelve weeks is measured to survive a
+  letter patch and nothing here measures a major one. Until something does,
+  the window is capped at the major patch's own age.
 
 ## Ordering
 
