@@ -2,10 +2,15 @@
 
 Ten steps, ten pull requests, in this order. Each names the criteria it
 closes by their `<capability>/<scenario-slug>` identifiers. There is no
-closing group: `openspec/config.yaml` lets a step close no criterion only when
-it carries infrastructure, and updating `PLAN.md` and running the review
-sequence are none of that — so 10.6 and 10.7 cite no criterion and ride with
-the step that merges last.
+closing group: `openspec/config.yaml` lets a *step* close no criterion only
+when it carries infrastructure, and every step here closes at least one.
+
+Several individual tasks close none, and each says so where it stands rather
+than here — 1.5 guards an assumption about the endpoint, 2.3, 5.4, 10.4 and
+10.5 record a measurement in the pull request, 3.3 and 7.3 refuse a shape,
+and 10.3 re-runs a floor another capability owns. Updating `PLAN.md` and
+running the review sequence are the last two, and they ride with the step
+that merges last.
 
 **`candidacy-gate` must be applied and synced first.** The `draft-model`
 delta replaces the requirement that change also replaces and is copied from
@@ -75,15 +80,24 @@ Closes `snapshot-ingest/a-major-patch-younger-than-the-window`,
 
 ## 3. Storing a lane pair antisymmetrically
 
-Closes `snapshot-build/a-lane-pair-each-hero-at-its-own-position`.
+Closes `snapshot-build/a-lane-pair-each-hero-at-its-own-position`,
+`snapshot-build/a-stomp-is-a-win-and-a-draw-is-half-of-one`.
 
-- [ ] 3.1 Write the failing case first: two rows for one lane pair, each hero
-      at the position it was counted at, sum to 0 within 1e-6.
-- [ ] 3.2 Add `hero_lanes` to `src/job/schema.sql` keyed
+- [ ] 3.1 Write the failing cases first: two rows for one lane pair, each hero
+      at the position it was counted at, sum to 0 within 1e-6; a row of 10
+      wins, 4 stomp wins, 2 draws, 20 losses and 4 stomp losses over 40 games
+      folds to 0.375.
+- [ ] 3.2 Fold the five verdicts and read `matchWinCount` not at all. The
+      five are mutually exclusive and exhaustive — verified over all 104 rows
+      of one pull — and `matchWinCount` counts the match over the same games,
+      which is what `matchups` already carries. Taking it here would restate
+      that component under a new name, and every figure in this change was
+      measured under the fold rather than under it.
+- [ ] 3.3 Add `hero_lanes` to `src/job/schema.sql` keyed
       `(hero_id, position, opponent_id)`, and to the sentinel reclaim in
       `src/job/db.fixture.ts` — the reclaim before the write, on the terms
       that file's own comment fixes.
-- [ ] 3.3 Assert the invariant holds **within** a position and is not
+- [ ] 3.4 Assert the invariant holds **within** a position and is not
       asserted across two (ZOMBIES 31). A case pairing `(a, 1, b)` with
       `(b, 4, a)` is the real shape — the offlaner and the carry stand in one
       lane at different positions — and a test written across the same
@@ -162,7 +176,12 @@ Closes `snapshot-export/a-lane-pair-the-database-stores-once`,
       (ZOMBIES 27). Its walk is two deep — `contract.ts:122-131` wants a
       root's values to be objects and theirs to be numbers — so
       `lanes[44]["1"]` holding `{"6": -3.2}` is refused today.
-- [ ] 7.3 Do **not** flatten to a composite key such as `lanes["44:1"]`. It
+- [ ] 7.3 Plant the malformed value under more than one hero and more than
+      one position, never only under the first of each. A third level checked
+      at `lanes[44]["1"]` and nowhere else passes a case written against that
+      one leaf while leaving every other unscanned — which is the failure the
+      two levels below it were written to avoid, arriving one level deeper.
+- [ ] 7.4 Do **not** flatten to a composite key such as `lanes["44:1"]`. It
       would pass the existing rule while reading as an id to a scan that never
       learned otherwise, which `contract.ts:118-121` names as the exact
       failure its exemption list is written to make loud.
@@ -226,7 +245,8 @@ Closes `draft-model/a-bundle-predating-the-lane-matrix`,
       the change's effect on ordering is written down while the weight is
       still 1.0 and nothing has fitted it.
 - [ ] 10.5 Say in the pull request what the run now costs: 3 600 requests
-      added to ~516, about three hours where it was under one.
+      added to ~516, and about three hours against the under-one-hour the run
+      takes today.
 - [ ] 10.6 Update `PLAN.md`'s queue in this step's pull request, not
       afterwards.
 - [ ] 10.7 Run the pre-PR sequence per `docs/review-toolkit.md` on every step,

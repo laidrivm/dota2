@@ -19,6 +19,11 @@ quarter of the list and it is 2.7%.
 lanes: Record<heroId, Record<position, Record<heroId, number>>>
 ```
 
+The snapshot row — the database's, not the bundle's — gains the pooled `k`
+and the spread of the per-cell figures beside the columns it already carries
+for a build's own parameters. Neither reaches the client: they are what makes
+a run's shrinkage answerable afterwards.
+
 ## Goals / Non-Goals
 
 **Goals:** the lane-opponent statistic pulled, stored antisymmetrically and
@@ -44,6 +49,12 @@ share ≥  5%   300 cells    share ≥ 20%   197 cells
 5% is the floor because below it the rows are noise rather than thin
 evidence: Phantom Lancer at position 3 — a 0.4% cell — answers 55 rows
 totalling 124 games, two a pair.
+
+A row carries `heroId1`, `heroId2`, `position`, five verdict counts summing
+to `matchCount`, and `matchWinCount` counted over the same games. The build
+folds the verdicts and ignores the last; *The lane statistic is centred and
+its constant is derived* fixes both, because how a lane win is counted is a
+decision an implementer would otherwise have to invent.
 
 ### Twelve weeks, bounded by the major patch
 
@@ -119,6 +130,15 @@ more real signal per game — the 32.6 pp spread arriving as a constant.
 Spearman–Brown on the split-half correlation corroborates: `2(0.801)/1.801 =
 0.889` against the 0.80 the decomposition gives at the same depth.
 
+### The row mean is recomputed every run
+
+`r(a, p)` is taken over whatever opponents the window currently holds, on
+every build, rather than held from the run that first covered the cell. It is
+not a choice so much as the shape of everything around it: the build reads
+staging and derives, and nothing in it persists a derived quantity across
+runs. Holding one would make a stored delta depend on when a cell was first
+seen, which is the reproducibility `k`'s own derivation is written to avoid.
+
 ### The component is not weighted through `laneWeights`
 
 `matchups` is, and must be: it is a match statistic that has to be told which
@@ -171,10 +191,10 @@ failure as the reason its exemption list is written as a list of what is
 
 ## Open Questions
 
-- Whether the 5% floor should be a share or a sample count. A share is what
-  the reference already stores and needs no extra pull; a count would track
-  what the pull actually returns. The first is cheaper and the second is what
-  the depth problem is really about.
-- Whether a hero's own row mean should be recomputed as opponents drop out
-  of the window, or held from the run that first covered the cell. Nothing
-  measured says these differ enough to matter.
+- Whether the 5% floor should one day be a sample count rather than a share.
+  The share is **decided** and the requirement fixes it: it is what the
+  reference already stores, so it costs no extra pull. A count would track
+  what the pull returns rather than what the reference predicts, which is
+  closer to what the depth problem is about — but nothing measured says the
+  two disagree on which cells they admit, and until something does, changing
+  it would trade a free reading for a paid one.

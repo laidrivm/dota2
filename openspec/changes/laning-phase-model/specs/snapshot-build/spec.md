@@ -36,6 +36,19 @@ anything across two different positions.
 
 ### Requirement: The lane statistic is centred and its constant is derived
 
+A row answers with five mutually exclusive verdicts and a sixth figure that
+is not one of them: `winCount`, `lossCount`, `drawCount`, `stompWinCount`,
+`stompLossCount` — summing to `matchCount`, verified over all 104 rows of one
+pull — beside `matchWinCount`, which counts the *match* over the same games
+and is what makes the endpoint worth reading.
+
+The build SHALL fold them as
+`(winCount + stompWinCount + 0.5·drawCount) / matchCount`, and SHALL read
+`matchWinCount` not at all. A stomp is a win of the lane and belongs with the
+wins; a draw is half of one; and `matchWinCount` is the quantity `matchups`
+already carries, so taking it here would restate that component under a new
+name. This is the definition every figure in this change was measured under.
+
 Two things this statistic does that the two before it do not, and both are
 because it is thinner and carries more signal per game.
 
@@ -70,7 +83,11 @@ negative against all nine of its most frequent opponents, −4 to −15 pp.
 
 **Its smoothing constant is derived rather than chosen.** *Smoothing towards
 neutral by sample size* fixes `k` per statistic — 300, 400, 500 — and for
-this one the build SHALL compute `k = p(1−p)·10⁴ / var_true`.
+this one the build SHALL compute `k = p(1−p)·10⁴ / var_true`, where `p` is
+the folded lane winrate above as a fraction and `p(1−p)·10⁴` is therefore a
+single row's sampling variance in percentage points squared. `p` is per row
+rather than global: a pair at 0.2 and one at 0.5 do not carry the same noise,
+and the noise term is a mean over the rows' own values.
 
 `var_true` SHALL be taken over the **centred but unsmoothed** deltas — the
 `lane_adj` above, before the smoothing that `k` is for — less the binomial
@@ -135,6 +152,13 @@ mean of those, which nothing uses.
 - **THEN** the build SHALL fail rather than publish — three cells measured 17
   to 61, and a figure an order of magnitude outside that says the
   decomposition read noise as signal or the reverse
+
+#### Scenario: A stomp is a win and a draw is half of one
+
+- **WHEN** a row carries 10 wins, 4 stomp wins, 2 draws, 20 losses and 4
+  stomp losses over 40 games
+- **THEN** its folded winrate SHALL be `(10 + 4 + 1) / 40 = 0.375`, and
+  `matchWinCount` SHALL not enter it
 
 #### Scenario: A spread that is entirely noise
 
