@@ -3,6 +3,11 @@
 **Written against the version `laning-phase-model` leaves behind.** That
 change creates the requirement below; there is no version of it on `main`.
 
+One of its scenarios is **renamed** rather than dropped, because the
+behaviour widens: `One request per cell, not per hero` becomes `One request
+per cell and side`. The identifier changes with the heading, so a test citing
+the old one stops resolving and is re-pointed by the step that lands this.
+
 ## MODIFIED Requirements
 
 ### Requirement: Lane outcomes are pulled per hero and position

@@ -52,6 +52,33 @@ allies at position 1, the lane delta and the stored synergy correlate
 - **THEN** that candidate's `counterRisk` component SHALL increase (toward
   zero) and its total score SHALL not decrease
 
+#### Scenario: A candidate with no lane row at the role scored
+
+- **WHEN** a candidate is scored for a role its lane data does not cover,
+  its share there having been below the pull's floor
+- **THEN** its `lane` component SHALL be 0 and its other components SHALL be
+  unchanged — a hero nobody plays there is not thereby a bad laner
+
+#### Scenario: One enemy covered and one not
+
+- **WHEN** a candidate's lane row holds a value for one entered enemy and no
+  key for another
+- **THEN** its `lane` component SHALL be the covered enemy's value times the
+  weight, and SHALL NOT be 0
+
+#### Scenario: A bundle predating the lane matrix
+
+- **IF** the bundle carries no `lanes`, as one cached before
+  `laning-phase-model` does
+- **THEN** every `lane` component SHALL be 0 and no score SHALL be `NaN`
+
+#### Scenario: The lane component is not weighted twice
+
+- **WHEN** one candidate is scored against two enemies whose inferred roles
+  differ
+- **THEN** its `lane` component SHALL be the plain sum of the two stored
+  values, unscaled by `laneWeights` and unnormalised by `L̄`
+
 #### Scenario: The two lane components read opposite halves of the board
 
 - **WHEN** a draft carries two picked allies and two entered enemies, and the

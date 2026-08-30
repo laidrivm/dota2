@@ -3,6 +3,22 @@
 **Written against the version `laning-phase-model` leaves behind.** That
 change creates the requirement below.
 
+Four of its scenarios are **renamed** rather than dropped, each widening from
+one lane statistic to either. The identifier changes with the heading, so a
+test citing the old one stops resolving and is re-pointed by the step that
+lands this:
+
+```text
+The mean opponent gives no lane advantage  →  The mean other hero gives no
+                                              lane advantage
+A hero with one lane opponent              →  A hero with one row in a
+                                              statistic
+The constant is derived, not configured    →  A constant is derived per
+                                              statistic
+The constant does not depend on the        →  A constant does not depend on
+last run's                                    the last run's
+```
+
 `Stored pair statistics carry their symmetry` is **not** modified, for the
 reason that change records and this half confirms: a lane pair's two
 directions are independent pulls, not one value mirrored. Measured over three
@@ -101,6 +117,14 @@ that is a fact about this patch rather than a licence to share one.
 - **THEN** it SHALL derive one over the opponent rows and one over the ally
   rows, from each statistic's own centred unsmoothed deltas, and SHALL record
   both with their per-cell ranges
+
+#### Scenario: A constant does not depend on the last run's
+
+- **WHEN** two builds run over identical staging rows, one starting from a
+  snapshot whose recorded constants were 11 and 29 and the other from one
+  recording 37 and 44
+- **THEN** both SHALL derive the same pair, the variance being taken before
+  smoothing
 
 #### Scenario: One statistic's rows do not move the other's constant
 
