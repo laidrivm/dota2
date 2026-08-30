@@ -15,12 +15,16 @@ requirement rather than patching it, and tests on `main` already close them.
 Closes `draft-model/a-role-the-hero-is-barely-played-in`,
 `draft-model/a-role-at-exactly-the-threshold`.
 
-- [ ] 1.1 Settle where the test data lives. The fixture's lowest share among
-      `sufficient` positions is 3%, so no case below can be written against
-      it as it stands: it needs positions either side of 0.005 and one
-      exactly on it. Either extend `src/fixtures/snapshot.json` or build the
-      bundle in `src/model.fixture.ts` — the fixture is also what the client
-      is served, so extending it changes what a developer sees in the app.
+- [ ] 1.1 Derive the test bundle in `src/model.fixture.ts`, not by editing
+      `src/fixtures/snapshot.json`. The fixture's lowest share among
+      `sufficient` positions is 3%, so the cases below need positions either
+      side of 0.005 and one exactly on it — and that file is what the client
+      is served until a run publishes, so a share invented to satisfy a test
+      would be a hero-position a developer sees in the app. `model.fixture.ts`
+      already exports the shipped bundle as `bundle` for all three model
+      suites; a variant of it with one share overridden is the smallest thing
+      that does not touch served data. The design says the fixture is not
+      regenerated, and this is what makes that true rather than aspirational.
 - [ ] 1.2 Write the failing cases first (ZOMBIES 1, 2, 3, 4, 5): a role whose
       every candidate is below the threshold yields an empty entries array
       rather than a missing block; a position at 0.0035 is absent from that
@@ -52,12 +56,16 @@ Closes `draft-model/the-threshold-does-not-reach-enemy-role-inference`,
       covers a share of exactly 0 and not one between the two constants,
       which is where a reader would assume the wrong thing.
 - [ ] 2.3 Widen `model-scoring.test.ts:107` (ZOMBIES 10). It asserts an
-      insufficient hero never becomes a candidate, and that holds only
-      because `h.sufficient` is evaluated before the share test: `share()`
-      synthesises `1 / keys.length` for an insufficient hero, so a
-      two-position one yields 0.5 and would pass `>= 0.005` outright. Assert
-      that the sufficiency test still gates first, which a reordered
-      conjunction would break and the current case would not report.
+      insufficient hero never becomes a candidate, and after this change that
+      rests entirely on the `h.sufficient` conjunct. `share()` returns 0 for
+      an insufficient *position* of a sufficient hero, but for an
+      insufficient *hero* it synthesises `1 / keys.length` — 0.5 for a
+      two-position hero — which clears `>= 0.005` easily. So the share test
+      does not subsume the sufficiency test, and the failure to guard against
+      is someone deleting `h.sufficient` as newly redundant. Assert the
+      invariant — an insufficient hero appears in no block — against a hero
+      whose synthesised share is above the threshold, which is the case that
+      would survive that deletion silently.
 - [ ] 2.4 Re-run the two criteria this requirement already carried, neither
       of which is this change's to close.
 
