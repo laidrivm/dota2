@@ -23,9 +23,11 @@ depth, holding a value of the declared type — and, where that type is
 `number`, a finite one, because `NaN` and the infinities are numbers to
 `typeof` and arithmetic on them is what a delta of `0/0` becomes. What that
 adds over the client's own check is the rest of each hero — `side`, `phase`,
-`positions`, `contest`, `sufficient` — and the two matrices, none of which the
-client inspects, and a missing one of which computes as `NaN` in the model
-rather than being refused.
+`positions`, `contest`, `sufficient` — and every matrix the bundle declares,
+none of which the client inspects, and a missing one of which computes as
+`NaN` in the model rather than being refused. Counted rather than named,
+because `laning-phase-model` adds a third and neither change waits for the
+other.
 
 The bundle SHALL carry `calibration` holding `alpha` and `beta`, both finite,
 taken from the newest calibration run that published a pair. WHERE no run has
