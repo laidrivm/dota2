@@ -30,8 +30,14 @@ Letter patches are now detected, which is what this change exists for: the
 previous source could not see them, so the spec recorded them as folded into
 their base version, and that reading is withdrawn. A version with no letter
 SHALL order **before** the same version with one — `7.41` precedes `7.41a`,
-which precedes `7.41b` — and the current patch is the newest by that order
-whose release instant is not after the run instant.
+which precedes `7.41b`.
+
+That order decides which of two items sharing a release instant is newer, and
+whether a version just read is newer than one already held. It does **not**
+decide which patch is current: that stays the held patch with the latest
+`detected_at` not after the run instant, as it always was, with version order
+breaking a tie between equal instants. One rule, and the scenario that has
+always stated it is unchanged.
 
 The run SHALL fail rather than proceed on a patch list it could not read whole:
 a response that cannot be fetched, one that parses to no patch at all, and one
@@ -106,23 +112,29 @@ Proceeding would blend under a `detected_at` no source confirmed this run.
 ### Requirement: The run reports how long detection has been silent
 
 The run's report SHALL state how many whole days have passed since the
-release instant of the newest patch `patches` holds, and SHALL say so as a
-failure once that exceeds a stated bound.
+release instant of the newest patch `patches` holds, and SHALL fail the run
+once that exceeds **120 days**.
 
 A source read through the text of a title is one that can stop matching
 without failing: the request succeeds, the parse finds nothing, and
 `detected_at` simply stops moving — which is exactly how the previous source
 went five patches without anyone noticing. Nothing else in the run would
-report it. Over the hundred posts measured, no gap between gameplay patches
-reached ninety days.
+report it.
+
+120 days is measured, not chosen round: over the twenty patches in the
+hundred posts read, the gaps run 100, 91, 75, 63, 61, 55 days and down. A
+ninety-day bound would have fired twice on genuine lulls. 120 clears the
+longest observed gap by a fifth and still reports a broken parse inside four
+months.
 
 #### Scenario: Detection has gone quiet
 
-- **WHEN** the newest held patch was released more days ago than the bound
-- **THEN** the run SHALL report that as a failure naming the patch and the
-  gap, rather than completing silently
+- **WHEN** the newest held patch was released 121 whole days ago
+- **THEN** the run SHALL fail, naming the patch and the gap, rather than
+  completing silently
 
 #### Scenario: A gap inside the bound
 
-- **WHEN** the newest held patch is younger than the bound
-- **THEN** the run SHALL report the gap and continue
+- **WHEN** the newest held patch was released 120 whole days ago
+- **THEN** the run SHALL report the gap and continue, the bound being
+  inclusive

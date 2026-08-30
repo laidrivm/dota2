@@ -69,8 +69,10 @@ None.
   else. It also holds five items with no pagination, making it the weaker of
   the two.
 - **Showing the stabilizing banner after a letter patch.** It stays a
-  major-patch signal: a letter patch moves winrates gently, and
-  `snapshot-export`'s requirement is unchanged.
+  major-patch signal: a letter patch moves winrates gently. The behaviour is
+  what is unchanged — the requirement itself is modified, because it claims
+  the flag is true exactly while the blend's prior weighs, and that stops
+  being true the moment a letter patch can be detected.
 - **Fitting the blend parameters.** They are exercised here for the first
   time, not chosen. `outcome-calibration` is what will eventually score two
   bundles built under different ones.
