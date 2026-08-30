@@ -41,8 +41,8 @@ slope and intercept fitted      0.2490      52.77%
   against, what a run refuses to publish, and how the intercept is signed
   are `beta-refit`'s to state.
 - The bundle carries the pair, so a refit reaches the client without a
-  deploy. Its shape and its absence are `snapshot-export`'s and
-  `snapshot-delivery`'s.
+  deploy. Its shape, and its omission when no run has fitted one, are
+  `snapshot-export`'s.
 - The win estimate reads the pair the bundle carries. What it does when the
   bundle carries none is `draft-model`'s.
 
@@ -104,8 +104,10 @@ does is behaviour of the model, and `draft-model` carries it.
   it.
 - `openspec/specs/mutation-floor/` — Stryker is scoped to `src/model.ts`, and
   this changes lines in it. The floor applies unchanged.
-- No new dependency, no schema change beyond the calibration run's own row,
-  no request to the statistics API.
+- No new dependency and no request to the statistics API. The database
+  schema changes only by the columns the calibration run's own row gains;
+  the **bundle** contract does change, which is `snapshot-export`'s delta
+  above and `SnapshotBundle`'s new optional field.
 
 ## Ordering
 
@@ -124,3 +126,13 @@ accuracy                         52.77%    54.43%
 
 A `β` fitted before the centring is a `β` fitted to a scale the next change
 removes, and it is eight times too small for the scale that replaces it.
+
+## How this proposal ships
+
+`design.md` and `tasks.md` are **not** absent — they are on
+`spec/beta-refit-plan`, which opens from `main` once this branch has merged.
+The four artefacts together are 828 lines, over the diff budget's failing
+threshold, and `docs/git-and-prs.md` fixes what happens then: `proposal.md`
+and the delta specs on `spec/<slug>`, `design.md` and `tasks.md` on
+`spec/<slug>-plan`. This change directory is therefore incomplete on purpose
+until the second branch lands, and complete when it does.

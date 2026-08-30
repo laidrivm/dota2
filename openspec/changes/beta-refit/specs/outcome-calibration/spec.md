@@ -50,8 +50,18 @@ quantity that changes meaning halfway through the store.
 #### Scenario: Both parameters, never one
 
 - **WHEN** a fit is taken over matches whose Radiant win rate is not 50%
-- **THEN** the recorded `α` SHALL be non-zero, and SHALL carry that rate:
-  `1/(1+e^(−α))` SHALL equal the sample's Radiant win rate to within 1 pp
+- **THEN** the recorded `α` SHALL be non-zero, and the pair's log-likelihood
+  over the sample SHALL be strictly greater than that of the best fit with
+  `α` held at 0
+
+`1/(1+e^(−α))` is **not** asserted to equal the sample's Radiant win rate.
+`α` is the conditional log-odds at `Δ = 0` and the win rate is the marginal
+one, and the two part company whenever `Δ` is not centred on 0: over equal
+samples at `Δ = −1` winning 40% and `Δ = +1` winning 80%, the fit gives
+`α = 0.4904`, `1/(1+e^(−α)) = 62.02%` and a marginal rate of 60.00% — a
+correct fit two points outside any tolerance a percentage point would
+allow. The nested comparison above is what "both parameters" actually
+means, and it holds by construction rather than by the sample's shape.
 
 ### Requirement: A fit that cannot be trusted is refused, not published
 
@@ -72,10 +82,19 @@ refused and which condition failed.
    failed fit.
 3. **The pair beats the base rate held out.** The pair SHALL be scored by
    cross-validation, no match scored by parameters fitted on it, and its
-   Brier SHALL be below that of a predictor answering the sample's Radiant
-   win rate for every match. This is the condition `β = 0.1` fails today —
-   0.4158 against a floor of 0.2497 — so it is the one that would have caught
-   the defect this change exists to remove.
+   Brier SHALL be strictly below that of a predictor answering the sample's
+   Radiant win rate for every match. This is the condition `β = 0.1` fails
+   today — 0.4158 against a floor of 0.2497 — so it is the one that would
+   have caught the defect this change exists to remove.
+
+   The cross-validation SHALL be deterministic, because this is a publish
+   gate: an unspecified partition means one store publishes or refuses
+   depending on a choice nothing records, and a gate whose outcome is not
+   reproducible is not a gate. Five folds, a match assigned to fold
+   `match_id mod 5`, and one Brier over every held-out prediction pooled —
+   never a mean of five per-fold Briers, which weights a short fold equally
+   with a long one. The baseline SHALL be computed over the same pooled set,
+   so the two numbers compared are taken over one population.
 
 A refused fit SHALL NOT fall back to `MODEL_CONSTANTS`. The previously
 published pair is a fit that passed these conditions; the constants are the
@@ -95,10 +114,18 @@ value that failed the third one.
 
 #### Scenario: A fit no better than the base rate
 
-- **IF** the fitted pair's held-out Brier is at or above that of a predictor
-  answering the sample's Radiant win rate for every match
+- **IF** the fitted pair's Brier over the pooled held-out predictions of the
+  five folds is at or above that of a predictor answering the sample's
+  Radiant win rate for every match in the same pooled set
 - **THEN** no pair SHALL be published, which is what `β = 0.1` would meet
   today at 0.4158 against 0.2497
+
+#### Scenario: The same store decides the same way twice
+
+- **WHEN** the gate runs twice over an unchanged store
+- **THEN** it SHALL reach the same publish-or-refuse decision and the same
+  held-out Brier, the folds being fixed by `match_id mod 5` rather than
+  drawn
 
 #### Scenario: The first run, with nothing published before
 
