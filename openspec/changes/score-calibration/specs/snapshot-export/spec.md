@@ -68,8 +68,22 @@ key sets room to change without the criterion moving.
 #### Scenario: A synergy stored once
 
 - **WHEN** `hero_synergies` holds one row `(a, b)` with `synergy_adj = 1.4`
-- **THEN** the bundle SHALL carry `synergies[a][b] = 1.4` and
-  `synergies[b][a] = 1.4`
+- **THEN** the bundle SHALL carry a cell at `synergies[a][b]` and one at
+  `synergies[b][a]`, holding the same value as each other
+
+The value is no longer 1.4 and this scenario no longer asserts one. With a
+single stored pair both row means and the grand mean are 1.4, so the centred
+cell is exactly 0 — the whole of that pair's value was the two heroes'
+strength, there being nothing else in the matrix to measure it against. What
+survives is what the scenario was always for: a pair stored once appears
+under both orders.
+
+#### Scenario: Three heroes, centred by hand
+
+- **WHEN** the only stored synergies are `(a, b) = 1`, `(a, c) = 2` and
+  `(b, c) = 4`
+- **THEN** the bundle SHALL carry `synergies[a][b] = −2/3`,
+  `synergies[a][c] = −1/6` and `synergies[b][c] = 5/6`, each within 1e-9
 
 #### Scenario: A matchup's mirror
 

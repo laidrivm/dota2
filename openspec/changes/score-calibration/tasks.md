@@ -14,9 +14,10 @@ trade is unmeasurable.
 
 The `snapshot-export` delta carries two criteria this change does not close —
 `a-synergy-stored-once` and `a-matchup-s-mirror`. They are the requirement's
-existing scenarios, copied whole because a `MODIFIED` delta replaces a
-requirement rather than patching it. Both keep passing and both now assert
-against centred values, which step 1 re-verifies.
+existing scenarios. `a-matchup-s-mirror` is carried unchanged.
+`a-synergy-stored-once` is not: with a single stored pair the centred value
+is 0 rather than the 1.4 it asserted, so its value assertion is gone and what
+remains is the mirroring it was always for. Step 1 re-verifies both.
 
 ## 1. The two centrings
 
@@ -26,8 +27,11 @@ Closes `snapshot-export/antisymmetry-survives-centring`,
 
 - [ ] 1.1 Write the failing cases first (ZOMBIES 3, 4, 7, 8, 9, 10, 13, 14,
       15): a two-hero matrix of each kind centres to values checkable by
-      hand; three heroes give a synergy matrix whose row means are all one
-      constant; an all-equal matrix centres to zeros; a hero paired with one
+      hand; three heroes with stored synergies 1, 2 and 4 give centred cells
+      of exactly `−2/3`, `−1/6` and `5/6`, which is what
+      `snapshot-export/three-heroes-centred-by-hand` fixes — **not** equal
+      row means, which the formula does not produce at any size and misses
+      by ±0.42 at three heroes; an all-equal matrix centres to zeros; a hero paired with one
       other has that cell as its mean; a uniformly `+5` row carries the 5
       nowhere; antisymmetry and symmetry both survive; and **subtracting only
       the row mean from `matchups` fails a test of its own** — it is the
@@ -89,4 +93,8 @@ Closes `snapshot-export/the-database-is-not-rewritten`.
       that is `outcome-calibration`'s.
 - [ ] 2.7 Update `PLAN.md`'s queue in this step's pull request, not
       afterwards.
-- [ ] 2.8 Run the pre-PR sequence per `docs/review-toolkit.md` on every step.
+- [ ] 2.8 Run the pre-PR sequence per `docs/review-toolkit.md` on every step,
+      and `bun test` and `bun run test:db` besides. The sequence names neither
+      and CI runs only `bun test` (`.github/workflows/test.yml:110`), so the
+      database-backed cases in `render.test.ts` — the file this change edits —
+      are exercised by nothing unless the second is run by hand.
