@@ -27,6 +27,12 @@ entry, a hook or a CI check leaves this file the way it would leave
   can enforce.
 - Commits: imperative subject ≤ 72 chars, body only when the diff doesn't
   explain itself. Commit per completed task-list item, not per file.
+- Once a branch is pushed, apply a review's findings in a new commit, never
+  by amending. An amend rewrites what the remote holds, so the next push is
+  refused as a non-fast-forward and only a force gets past it — and a force
+  is a destructive act put to the user for a defect that cost one commit to
+  fix. The extra commits vanish at squash-merge, which is what this
+  repository does.
 - The only trailer a commit carries is `Co-Authored-By: Claude Opus 5
   <noreply@anthropic.com>`, and a pull request body carries no attribution
   line at all — no session URL, no run id, no generated-with footer, whatever
