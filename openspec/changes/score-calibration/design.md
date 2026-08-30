@@ -7,8 +7,20 @@
 blended winrate less `NEUTRAL = 50` (`blend.ts:120`), which is why a hero's
 own strength sits in every cell of its row.
 
-No endpoint changes shape. `/snapshot.json` carries the same keys with the
-same types; what changes is what the numbers in two of them mean.
+`/snapshot.json` is an endpoint this project serves, so its shape is fixed
+here. It does not change:
+
+```text
+matchups:  Record<heroId, Record<heroId, number>>   full, both orders
+synergies: Record<heroId, Record<heroId, number>>   full, both orders
+```
+
+Both stay full matrices keyed by hero id as a string, every hero that has a
+pair carrying a row and every pair carrying both orders, each cell a finite
+number in percentage points. No key is added, removed or renamed, and no
+type moves. What changes is what the number in a cell means: the interaction
+between two heroes rather than that interaction plus both heroes'
+strength.
 
 ## Goals / Non-Goals
 
@@ -55,6 +67,14 @@ synergies  symmetric       syn'[a][b] = syn[a][b] − r_a − r_b + g
 Both follow from the same reading: a stored value is roughly one hero's
 strength, plus or minus the other's, plus the interaction. Removing the
 strengths in the way each matrix's symmetry allows leaves the interaction.
+
+Neither is exact, and how inexact depends on size. Centring cancels perfectly
+only where every row holds the same keys; these are hollow — no hero pairs
+with itself — so a row's mean is taken over one fewer hero than the grand
+mean. The residual is of order `1/n`: at three heroes the centred row means
+run −0.42 to +0.33 on values of order 1, and at the live bundle's 127 they
+run −0.040 to +0.038 against a raw spread of −5.13 to +4.74. The criterion's
+0.1 pp bound is a bound at production size and would be wrong at three.
 
 ### What it does to the reported defect
 
