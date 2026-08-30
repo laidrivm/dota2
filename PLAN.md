@@ -339,6 +339,21 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       instruction — `spec/beta-refit` carries `proposal.md` and the three
       delta specs, `spec/beta-refit-plan` carries `design.md` and `tasks.md`
       and opens from `main` once the first has merged.
+- [ ] **`suggestion-calibration`** — **not yet proposed**, and named as the
+      owner of work by three artefacts that have merged: `beta-refit`'s
+      proposal sends the component weights here, `outcome-calibration`'s sends
+      the scoring of suggestions rather than of the win estimate, and this
+      file's *Bans move a suggestion by 0.05%* sends the `counterRisk` weight.
+      Three pointers into a change that does not exist, which is why the entry
+      is written before the proposal is.
+
+      What it owns: the six weights — `meta`, `side`, `phase`, `synergy` and
+      `matchups` at 1.0, `counterRisk` at 0.5, none of them ever fitted — and
+      a scorer that replays a stored draft pick by pick, because
+      `outcome-calibration` scores only the finished 5v5 and a suggestion is
+      made before that exists. `beta-refit` fits two parameters against a
+      figure; this generalises the same machinery to six, and follows the
+      whole calibration chain.
 - [ ] **`scan-lift`** — proposed, `openspec/changes/scan-lift/`. One
       left-to-right source scanner in three copies, two of them blind in ways
       their own specifications forbid. Ships on `feat/scan-lift`; it also

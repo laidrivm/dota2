@@ -129,10 +129,15 @@ differ by a constant factor.
   before `outcome-calibration`, which is what makes the question answerable
   rather than a matter of taste.
 - **`counterRisk` reads `max(0, adv(c, h))`.** Centring shifts which pairs
-  are positive, so the term changes without being edited. → Its own change,
-  `ban-sharpening`, already measured it as contributing 0.05 pp on a 25 pp
-  score; this makes it neither better nor worse in a way anything can
-  currently see.
+  are positive, so the term changes without being edited, and by more than it
+  looks: uncentred, only 5 of 127 heroes carry `adv > 0` against a strong
+  candidate, because its column holds minus its own strength — the count of
+  its counters correlates −0.953 with its own meta. Centred it is 58, and
+  −0.199. → The direction is what
+  `draft-model` §*Counter-risk monotonic in bans* fixes, and it is unchanged;
+  the magnitude is the 0.5 weight, which no criterion pins and
+  `suggestion-calibration` fits. `PLAN.md` §*Bans move a suggestion by 0.05%*
+  carries the measurement.
 - **The fixture is regenerated, and the model's suite reads it.** Cases
   written against the old numbers may move. → They are read and re-fitted in
   the step that regenerates, rather than the regeneration being a separate
