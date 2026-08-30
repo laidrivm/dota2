@@ -19,6 +19,13 @@ answers with the hero's dominant position alone. So a cell is a request, and
 the pull multiplies where *Pair statistics are pulled per hero over at most
 four weeks* does not.
 
+The `week` argument SHALL be a Unix timestamp in seconds taken from **inside**
+the bucket, and from its middle, exactly as `pairs.ts` already computes one:
+a bucket id returns nothing at all — measured, `week: 2956` answered with zero
+rows where a timestamp inside that week answered with 126 — and the buckets
+turn on an hour nobody here knows, so the middle is the instant furthest from
+being wrong about it.
+
 The window SHALL be twelve weeks rather than that requirement's four, and
 SHALL be bounded by the **major** patch rather than by the current patch.
 A lane delta does not drift over that span: measured on Nyx Assassin at

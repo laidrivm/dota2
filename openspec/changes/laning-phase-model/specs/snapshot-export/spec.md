@@ -17,9 +17,17 @@ at, and the opponent — deriving the orders the database does not store from
 the antisymmetry the build guaranteed, as it does for `matchups`.
 
 The outer keys SHALL be hero ids as decimal integer strings and the middle
-keys the positions `1` to `5`, so the whole reaches
-`src/job/export/contract.ts`'s existing walk as a matrix of matrices rather
-than needing a shape it has no rule for.
+keys the positions `1` to `5`.
+
+`src/job/export/contract.ts` cannot check that as it stands, and the export
+SHALL NOT publish a shape it does not check. Its walk is exactly two levels
+deep — `contract.ts:122-131` requires a root's values to be objects and
+*their* values to be numbers — so `lanes[44]["1"]` holding `{"6": -3.2}` is
+refused for not holding the declared type. The walk SHALL gain a depth for
+this root rather than the matrix being flattened to a composite key: a key
+like `"44:1"` would pass the existing rule and read as an id to a scan that
+never learned otherwise, which is the failure that list of exemptions exists
+to make loud.
 
 A hero SHALL carry a row only for the positions the pull covered — those
 where its share reached the floor *Lane outcomes are pulled per hero and
