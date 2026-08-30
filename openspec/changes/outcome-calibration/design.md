@@ -31,7 +31,7 @@ decomposition, no alerting.
 The two disagree exactly where this project's known defect lives. Over the
 same 1 788 matches:
 
-```
+```text
 predictor                            accuracy    Brier
 always Radiant, p = 0.534              53.4%    0.2489
 always Radiant, p = 0.75               53.4%    0.2957
@@ -66,7 +66,7 @@ match, not one prediction per match. Turning them into a side's probability
 needs a combining rule, and the obvious one does not work. Taking each side's
 mean, differencing them and passing that through a logistic:
 
-```
+```text
 sign of the difference alone predicts       50.3%     (noise is 50%)
 best beta fitted in hindsight (0.015)      0.2498 Brier
 always Radiant                             0.2489 Brier

@@ -18,7 +18,7 @@ There is already a reason to expect it does not. `beta` is `0.1`, marked
 provisional in the model spec and never fitted, and it turns the draft
 advantages the model actually produces into claims no evidence supports:
 
-```
+```text
 Δ = 10 pp → 73.1%     Δ = 25 pp → 92.4%     Δ = 40 pp → 98.2%
 ```
 
