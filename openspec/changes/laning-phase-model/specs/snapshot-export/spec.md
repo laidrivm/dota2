@@ -35,11 +35,12 @@ position* fixes. A missing position is not a zero: the model reads an absent
 one as no contribution, and writing zeros would make a position nobody plays
 indistinguishable from one that is genuinely neutral.
 
-#### Scenario: A lane pair the database stores once
+#### Scenario: A lane pair, each direction from its own row
 
 - **WHEN** `hero_lanes` holds one row `(a, 1, b)` with `lane_adj = −3.2`
-- **THEN** the bundle SHALL carry `lanes[a]["1"][b] = -3.2`, and where `b`'s
-  own row at its position exists, that value SHALL be its negation
+- **THEN** the bundle SHALL carry `lanes[a]["1"][b] = -3.2`; and where `b`
+  has its own row at its own position, that value SHALL be rendered from that
+  row rather than from this one's negation
 
 #### Scenario: A hero at a position the pull did not cover
 

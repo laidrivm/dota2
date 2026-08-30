@@ -17,17 +17,19 @@ delta replaces the requirement that change also replaces and is copied from
 the version it leaves behind; out of order the sync keeps one edit and drops
 the other with nothing saying which.
 
-The two `MODIFIED` deltas carry four criteria this change does not close —
-every scenario the two requirements already had:
+The one `MODIFIED` delta carries two criteria this change does not close —
+both scenarios `draft-model` §*Suggestion scoring* already had:
   `draft-model/empty-draft-components-model-spec-7-1`,
-  `draft-model/counter-risk-monotonic-in-bans-model-spec-7-2`,
-  `snapshot-build/a-matchup-pair`,
-  `snapshot-build/a-synergy-pair`.
+  `draft-model/counter-risk-monotonic-in-bans-model-spec-7-2`.
 They are copied whole because a `MODIFIED` delta replaces a requirement
 rather than patching it, and tests on `main` close them. One changes meaning
 rather than staying still: *Empty draft components* now names `lane` among
 the components that are 0 with no enemies entered, so step 9 re-verifies it
 rather than assuming it.
+
+`snapshot-build` §*Stored pair statistics carry their symmetry* was modified
+by an earlier draft of this change and is not any more; that delta's own
+preamble says why.
 
 ## 1. The pull, one request per cell
 
@@ -78,13 +80,14 @@ Closes `snapshot-ingest/a-major-patch-younger-than-the-window`,
       across a window containing 7.41e. It is the whole argument for twelve
       weeks and the reviewer should not have to find it in `design.md`.
 
-## 3. Storing a lane pair antisymmetrically
+## 3. Storing a lane pair, both directions
 
-Closes `snapshot-build/a-lane-pair-each-hero-at-its-own-position`,
+Closes `snapshot-build/the-two-directions-of-a-lane-pair-are-independent`,
 `snapshot-build/a-stomp-is-a-win-and-a-draw-is-half-of-one`.
 
-- [ ] 3.1 Write the failing cases first: two rows for one lane pair, each hero
-      at the position it was counted at, sum to 0 within 1e-6; a row of 10
+- [ ] 3.1 Write the failing cases first: both directions of a lane pair are
+      stored, neither derived from the other, and nothing asserts they sum to
+      0 — measured, they sum to −0.72 to +1.50 pp; a row of 10
       wins, 4 stomp wins, 2 draws, 20 losses and 4 stomp losses over 40 games
       folds to 0.375.
 - [ ] 3.2 Fold the five verdicts and read `matchWinCount` not at all. The
@@ -97,13 +100,12 @@ Closes `snapshot-build/a-lane-pair-each-hero-at-its-own-position`,
       `(hero_id, position, opponent_id)`, and to the sentinel reclaim in
       `src/job/db.fixture.ts` — the reclaim before the write, on the terms
       that file's own comment fixes.
-- [ ] 3.4 Assert the invariant holds **within** a position and is not
-      asserted across two (ZOMBIES 31). A case pairing `(a, 1, b)` with
-      `(b, 4, a)` is the real shape — the offlaner and the carry stand in one
-      lane at different positions — and a test written across the same
-      position would pass while describing something that does not happen.
+- [ ] 3.4 Write the pair case across two **different** positions (ZOMBIES
+      31). `(a, 1, b)` beside `(b, 4, a)` is the real shape — the carry and
+      the offlaner stand in one lane at different positions — and a case
+      written at one position describes something that does not happen.
 
-## 4. Centring, by the form that keeps the mirror
+## 4. Centring against the hero's own laning strength
 
 Closes `snapshot-build/the-mean-opponent-gives-no-lane-advantage`,
 `snapshot-build/a-hero-with-one-lane-opponent`,
@@ -112,15 +114,11 @@ Closes `snapshot-build/the-mean-opponent-gives-no-lane-advantage`,
 - [ ] 4.1 Write the failing cases first (ZOMBIES 16, 17): three opponents
       centre to a mean of exactly 0; a cell with one opponent centres it to
       0, the mean being its own value.
-- [ ] 4.2 Write the mirror case **before** implementing, and check it fails
-      against the wrong form. `raw − r(a,p)` alone leaves a residual of 8.88
-      on a six-hero antisymmetric block where `raw − r(a,p) + r(b,q)` leaves
-      4.4e-16. This is the third change in this repository to meet that trap —
-      `score-calibration` settles it and `side-and-phase-deltas` was amended
-      to it — so the case exists to make the wrong form fail rather than to
-      confirm the right one.
-- [ ] 4.3 Handle `r(b, q)` where hero `b` has no covered cell: it is 0, and
-      both directions must read that same 0 or the sum stops being 0.
+- [ ] 4.2 Centre by the row mean alone. The antisymmetric form
+      `− r(a,p) + r(b,q)` that `score-calibration` uses for `matchups` is
+      **not** wanted: it preserves an invariant a lane pair does not have,
+      its two directions being independent pulls that disagree by about a
+      point. This change specified that form first and was wrong to.
 - [ ] 4.4 Pin the order against smoothing with a case (ZOMBIES 19): centring
       runs on the raw delta, before smoothing, and a cell mixing `n_eff` far
       above and far below `k` stores different numbers under the other order.
@@ -165,11 +163,12 @@ Closes `snapshot-build/a-derived-constant-far-from-what-was-measured`,
 
 ## 7. The matrix in the bundle
 
-Closes `snapshot-export/a-lane-pair-the-database-stores-once`,
+Closes `snapshot-export/a-lane-pair-each-direction-from-its-own-row`,
 `snapshot-export/a-hero-at-a-position-the-pull-did-not-cover`.
 
 - [ ] 7.1 Write the failing cases first (ZOMBIES 26, 28, 29): a stored row
-      reaches `lanes[a]["1"][b]` and its mirror is the negation; a position
+      reaches `lanes[a]["1"][b]`, and the opposite direction is rendered from
+      `b`'s own row rather than from this one's negation; a position
       below the floor carries no key at all, and specifically not one holding
       `{}` or zeros; a position key outside `"1"`–`"5"` is refused.
 - [ ] 7.2 Give `src/job/export/contract.ts` a third level for this root
@@ -212,8 +211,10 @@ Closes `draft-model/a-candidate-with-no-lane-row-at-the-role-scored`,
       counts its moved lines twice.
 - [ ] 9.2 Write the failing cases first (ZOMBIES 33, 34, 35, 38): an empty
       draft gives `lane` exactly 0; one entered enemy with a stored row gives
-      that value times the weight; a role the candidate's lane data does not
-      cover gives 0 with the other components unchanged; an enemy absent from
+      that value times `MODEL_CONSTANTS.weights.lane` — the component's own
+      weight, never `laneWeights`, which step 10 pins; a role the candidate's
+      lane data does not cover gives 0 with the other components unchanged;
+      an enemy absent from
       a covered row contributes 0 rather than `NaN`.
 - [ ] 9.3 Make the one-covered-one-not case fail against the wrong reading
       (ZOMBIES 34). "0 where the bundle carries no row, or none for an enemy

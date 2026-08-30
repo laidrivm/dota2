@@ -19,10 +19,12 @@ quarter of the list and it is 2.7%.
 lanes: Record<heroId, Record<position, Record<heroId, number>>>
 ```
 
-The snapshot row — the database's, not the bundle's — gains the pooled `k`
-and the spread of the per-cell figures beside the columns it already carries
-for a build's own parameters. Neither reaches the client: they are what makes
-a run's shrinkage answerable afterwards.
+The snapshot row — the database's, not the bundle's — gains three columns
+beside those it already carries for a build's own parameters: the pooled `k`,
+and the smallest and largest of the same decomposition run per cell. A range
+rather than a variance, because what it answers is "did the cells disagree
+more than the 17-to-61 three real ones did", and that is a comparison of
+bounds. None of the three reaches the client.
 
 ## Goals / Non-Goals
 
@@ -81,26 +83,30 @@ weeks    1     2     4     6     8    10    12
 n/pair  23    46    85   121   160   201   244
 ```
 
-### The centring is antisymmetric, and this is the third time that matters
+### The centring is by the row mean, because there is no mirror to keep
 
-Subtracting a row mean alone breaks the antisymmetry the requirement above it
-fixes. Measured on a six-hero antisymmetric block:
+A lane pair's two directions come from two independent pulls — `a` at its
+position listing `b`, and `b` at its own listing `a` — over game sets that
+overlap without coinciding. They are not one value stored once. Measured over
+four pairs at 5 000 games or more a side:
 
 ```text
-max |X[a][b] + X[b][a]|
-  raw                       0.00e+0
-  minus the row mean         8.8833
-  −r(a,p) + r(b,q)          4.44e-16
+opponent            lane(a,b)   lane(b,a)     sum
+Pudge at 4              −3.49       +2.77   −0.72
+Rubick at 4             −2.38       +3.25   +0.87
+Dawnbreaker at 3        −3.18       +4.24   +1.06
+Axe at 3                −6.16       +7.66   +1.50
 ```
 
-`score-calibration` settles this for `matchups` and `side-and-phase-deltas`
-had to be amended to it after the same slip. It is written into the
-requirement here rather than left to the implementer, because the wrong form
-is the one that looks right.
+So the antisymmetric form `− r(a,p) + r(b,q)` that `score-calibration` uses
+for `matchups` is not wanted here: it exists to preserve an invariant, and
+there is none. This change first specified it anyway, and the criterion it
+carried would have failed every build — an assertion at 1e-6 over quantities
+that disagree by about a point.
 
-`r(b, q)` is 0 where hero `b` has no covered cell. Antisymmetry survives:
-both directions read the same pair of means, so the sum is still 0 and the
-pair is centred on one side only.
+Plain row centring is what the statistic needs and all it needs. The model
+reads a candidate's own row and never the mirror, so nothing downstream wants
+the two directions tied together either.
 
 ### `k` is derived, from before the smoothing it feeds
 
@@ -113,7 +119,8 @@ cautious. Two things about the input that the first draft got wrong:
 - **It is pooled over every cell**, not averaged over per-cell figures. Each
   cell is already centred on 0, so pooling is one decomposition over one
   population; a mean would weigh a three-opponent cell like a sixty-opponent
-  one.
+  one. The requirement carries the three sums exactly, because "pooled" left
+  a denominator to guess at.
 
 Measured per cell over twelve weeks, to record the spread rather than to set
 the constant:

@@ -1,36 +1,13 @@
 # snapshot-build delta — laning-phase-model
 
-## MODIFIED Requirements
-
-### Requirement: Stored pair statistics carry their symmetry
-
-The build SHALL store matchups antisymmetrically, so that where rows exist
-for both orders `advantage_adj(a, b) = −advantage_adj(b, a)` within 1e-6,
-and SHALL store each synergy once, on the row whose `hero_id` is less than
-its `ally_id` (data-model §4.4).
-
-A lane matchup SHALL be stored antisymmetrically too, and per position: the
-row is `(hero, position, opponent)`, because what a hero does in a lane is
-not what it does at another position. The invariant holds within a lane, over
-the pair as each hero was counted at its own position; nothing here asserts
-anything across two different positions.
-
-#### Scenario: A matchup pair
-
-- **WHEN** `hero_matchups` holds rows for both `(a, b)` and `(b, a)`
-- **THEN** their `advantage_adj` values SHALL sum to 0 within 1e-6
-
-#### Scenario: A synergy pair
-
-- **WHEN** heroes `a` and `b` have played together and `a < b`
-- **THEN** `hero_synergies` SHALL hold the row `(a, b)` and SHALL NOT hold
-  the row `(b, a)`
-
-#### Scenario: A lane pair, each hero at its own position
-
-- **WHEN** `hero_lanes` holds a row for `(a, r, b)` and one for `(b, r', a)`,
-  `r` and `r'` being the positions each hero was counted at in that lane
-- **THEN** their `lane_adj` values SHALL sum to 0 within 1e-6
+`Stored pair statistics carry their symmetry` is **not** modified. A lane
+matchup was going to join it as a third antisymmetric statistic, and the data
+refuses: the two directions of a lane pair come from two independent pulls —
+`a` at its position listing `b`, and `b` at its own listing `a` — over game
+sets that overlap without coinciding. Measured over four pairs at 5 000 games
+or more a side, they sum to −0.72, +0.87, +1.06 and +1.50 pp rather than to
+0. An invariant asserted at 1e-6 on that is one no build could meet, and the
+model reads only a candidate's own row, so nothing needs the mirror either.
 
 ## ADDED Requirements
 
@@ -52,27 +29,16 @@ name. This is the definition every figure in this change was measured under.
 Two things this statistic does that the two before it do not, and both are
 because it is thinner and carries more signal per game.
 
-**It is centred where it is stored, not later**, and by the antisymmetric
-form. Writing `r(a, p)` for the mean of hero `a`'s lane deltas at position
-`p` over its opponents, the build SHALL store
+**It is centred where it is stored, not later.** Writing `r(a, p)` for the
+mean of hero `a`'s lane deltas at position `p` over its opponents, the build
+SHALL store `lane_adj(a, p, b) = raw(a, p, b) − r(a, p)`.
 
-```text
-lane_adj(a, p, b)  =  raw(a, p, b) − r(a, p) + r(b, q)
-```
-
-where `q` is the position hero `b` was counted at in that lane. Subtracting
-the row mean alone would break the antisymmetry the requirement above fixes:
-the two directions would then sum to `−(r(a,p) + r(b,q))` rather than to 0.
-Measured on a six-hero antisymmetric block, the residual is 8.88 by that form
-and 4.4e-16 by this one — which is the same arithmetic `score-calibration`
-settles for `matchups`, and the same trap `side-and-phase-deltas` fell into
-and had to amend.
-
-WHERE hero `b` has no covered cell at all, `r(b, q)` SHALL be 0 rather than
-omitted. Antisymmetry survives it: both directions then read the same pair of
-means, so the sum is still 0, and the pair is centred on one side only —
-which is stated here rather than discovered from a mirror that will not
-publish.
+The row mean alone, and not the antisymmetric `− r(a,p) + r(b,q)` that
+`score-calibration` uses for `matchups`. That form exists to preserve an
+antisymmetry, and a lane pair has none to preserve: its two directions are
+two independent measurements, not one value mirrored. Each row is centred
+against its own hero's laning strength, which is the whole of what centring
+is for here.
 
 Why it is centred at all: a stored `winrate − 50` carries the hero's own
 strength into every cell of its row, and `meta` carries that strength already
@@ -84,10 +50,19 @@ negative against all nine of its most frequent opponents, −4 to −15 pp.
 **Its smoothing constant is derived rather than chosen.** *Smoothing towards
 neutral by sample size* fixes `k` per statistic — 300, 400, 500 — and for
 this one the build SHALL compute `k = p(1−p)·10⁴ / var_true`, where `p` is
-the folded lane winrate above as a fraction and `p(1−p)·10⁴` is therefore a
-single row's sampling variance in percentage points squared. `p` is per row
-rather than global: a pair at 0.2 and one at 0.5 do not carry the same noise,
-and the noise term is a mean over the rows' own values.
+the folded lane winrate above as a fraction. Over the pooled rows of every
+covered cell, writing `d_i` for a row's centred delta, `p_i` for its folded
+winrate and `n_i` for its `matchCount`:
+
+```text
+var_obs   = Σ(d_i − d̄)² / (N − 1)          over the N pooled rows
+var_noise = Σ p_i(1 − p_i)·10⁴ / n_i  / N   the mean of each row's own
+var_true  = var_obs − var_noise
+k         = mean of p_i(1 − p_i)·10⁴ over the rows,  divided by var_true
+```
+
+`p` is per row and not global because a pair at 0.2 and one at 0.5 do not
+carry the same noise; the pooling is what turns those into one constant.
 
 `var_true` SHALL be taken over the **centred but unsmoothed** deltas — the
 `lane_adj` above, before the smoothing that `k` is for — less the binomial
@@ -139,12 +114,14 @@ mean of those, which nothing uses.
 - **THEN** both SHALL derive the same `k`, the variance being taken before
   smoothing
 
-#### Scenario: Centring keeps the mirror
+#### Scenario: The two directions of a lane pair are independent
 
-- **WHEN** a lane pair is centred and both heroes' cells were covered
-- **THEN** `lane_adj(a, p, b)` and `lane_adj(b, q, a)` SHALL still sum to 0
-  within 1e-6 — subtracting the row mean alone leaves 8.88 on a six-hero
-  block where this form leaves 4.4e-16
+- **WHEN** `hero_lanes` holds `(a, p, b)` and `(b, q, a)`, each written from
+  its own hero's pull
+- **THEN** the build SHALL store both and SHALL NOT derive either from the
+  other, nor assert that they sum to 0 — measured over four pairs at 5 000
+  games or more a side, the raw deltas sum to −0.72, +0.87, +1.06 and
+  +1.50 pp
 
 #### Scenario: A derived constant far from what was measured
 
