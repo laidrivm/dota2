@@ -61,11 +61,24 @@ pipeline already pulls, stores, blends, exports and scores twice over.
   covers are per hero alone.
 - `snapshot-build`: *Stored pair statistics carry their symmetry* fixes which
   matrices are antisymmetric and which symmetric; a lane matchup is
-  antisymmetric and needs saying so.
-- `snapshot-export`: *Pair statistics are expanded into full matrices* fixes
-  what the bundle's matrices hold; a third one joins them.
+  antisymmetric and needs saying so. Its centring and its derived constant
+  are an **added** requirement rather than an amendment to *Smoothing towards
+  neutral by sample size*, which `side-and-phase-deltas` already modifies.
+- `snapshot-export`: an **added** requirement for the lane matrix, which is
+  keyed by position as well as by hero. *Pair statistics are expanded into
+  full matrices* is deliberately untouched: `score-calibration` modifies it.
 - `draft-model`: *Suggestion scoring* fixes the components a score sums and
-  the weights they carry.
+  the weights they carry, and a seventh component is that sentence.
+  **This delta is written against the version `candidacy-gate` leaves
+  behind**, which modifies the same requirement.
+
+Three of the four requirements this change would naturally touch are already
+being modified by changes that have not been applied. Two of those collisions
+are routed into added requirements — and are the better shape anyway, the
+lane statistic being keyed differently from the two before it. The third
+cannot be: a component joining a weighted sum is the sentence
+`candidacy-gate` edits. With no order between two changes modifying one
+requirement, the second to sync silently drops the first's edit.
 
 ## Non-goals
 
@@ -161,7 +174,16 @@ daily ceiling is 15 000. So the cost is about three hours of wall clock, and
 
 ## Ordering
 
-Independent of the calibration chain, with one exception: it adds a component
-to the suggestion score, so it SHOULD NOT land between `outcome-calibration`
-and `suggestion-calibration` — a weight fit taken over five components and
-applied to six is a fit for a model that no longer exists.
+**`candidacy-gate` must be applied and synced first.** The `draft-model`
+delta replaces the requirement that change also replaces, and is copied from
+the version it leaves behind; out of order, the sync drops one of the two
+edits and nothing says which.
+
+It adds a component to the suggestion score besides, so it SHOULD NOT land
+between `outcome-calibration` and `suggestion-calibration` — a weight fit
+taken over six components and applied to seven is a fit for a model that no
+longer exists.
+
+Otherwise independent of the calibration chain. The two collisions with
+`side-and-phase-deltas` and `score-calibration` are routed into added
+requirements precisely so that neither change has to wait for the other.
