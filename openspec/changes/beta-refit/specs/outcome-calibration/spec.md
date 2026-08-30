@@ -49,19 +49,36 @@ quantity that changes meaning halfway through the store.
 
 #### Scenario: Both parameters, never one
 
-- **WHEN** a fit is taken over matches whose Radiant win rate is not 50%
-- **THEN** the recorded `α` SHALL be non-zero, and the pair's log-likelihood
-  over the sample SHALL be strictly greater than that of the best fit with
-  `α` held at 0
+- **WHEN** a fit is taken over ten matches at `Δ = −1` of which five are
+  Radiant wins and ten at `Δ = +1` of which eight are
+- **THEN** the recorded pair SHALL be `α = 0.6931`, `β = 0.6931` to four
+  decimals, whose log-likelihood is `−11.9355` against the `−12.9489` of the
+  best fit holding `α` at 0
 
-`1/(1+e^(−α))` is **not** asserted to equal the sample's Radiant win rate.
-`α` is the conditional log-odds at `Δ = 0` and the win rate is the marginal
-one, and the two part company whenever `Δ` is not centred on 0: over equal
-samples at `Δ = −1` winning 40% and `Δ = +1` winning 80%, the fit gives
-`α = 0.4904`, `1/(1+e^(−α)) = 62.02%` and a marginal rate of 60.00% — a
-correct fit two points outside any tolerance a percentage point would
-allow. The nested comparison above is what "both parameters" actually
-means, and it holds by construction rather than by the sample's shape.
+#### Scenario: A sample the slope alone already fits
+
+- **WHEN** a fit is taken over five matches at `Δ = −1` of which one is a
+  Radiant win and ten at `Δ = +1` of which eight are
+- **THEN** the recorded `α` SHALL be 0 and the pair SHALL be published, a
+  maximum-likelihood `α` of 0 being a fitted value rather than an unfitted one
+
+The recorded pair SHALL be the maximum-likelihood pair over the sample, and
+its log-likelihood SHALL therefore never be less than that of any fit holding
+`α` at 0. It is *not* required to be strictly greater, and neither is `α`
+required to be non-zero, because the second scenario is a case where the two
+coincide exactly: the group rates 1/5 and 8/10 are reproduced by `α = 0`,
+`β = ln 4` alone.
+
+Two things this requirement does **not** assert, each because a correct fit
+can violate it:
+
+- `1/(1+e^(−α))` is not the sample's Radiant win rate. `α` is the conditional
+  log-odds at `Δ = 0`, the win rate is marginal, and they part company
+  whenever `Δ` is not centred on 0 — over equal samples at `Δ = −1` winning
+  40% and `Δ = +1` winning 80%, the fit gives `α = 0.4904`,
+  `1/(1+e^(−α)) = 62.02%` against a marginal 60.00%.
+- A marginal rate away from 50% does not force `α` away from 0, which the
+  second scenario above is exactly.
 
 ### Requirement: A fit that cannot be trusted is refused, not published
 
