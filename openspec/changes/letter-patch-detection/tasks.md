@@ -34,6 +34,22 @@ Closes `hero-reference/valve-s-own-post-names-a-patch`,
       `api.steampowered.com/ISteamNews/GetNewsForApp/v2/?appid=570&count=100`
       and delete the OpenDota constant. Assert no module reaches
       `api.opendota.com` afterwards (ZOMBIES 13).
+- [ ] 1.5 Reroute `src/job/ingest/ingest.fixture.ts:108`, which decides what
+      a faked request answers by `String(url).includes("opendota")`. With the
+      constant gone that branch matches nothing and every patch-list request
+      in the database suites falls through to the branch returning a PNG —
+      a confusing failure rather than a silent one, but a failure in tests
+      that have nothing to do with this change.
+- [ ] 1.6 Rewrite the comment at `src/job/ingest/patches.ts:97`. It says "The
+      source lists majors only, so in practice this branch guards the
+      vendor's format rather than describing a patch it has ever served" —
+      which was true and is now the opposite of true, and a comment naming a
+      case the code no longer faces is the defect no test sees.
+- [ ] 1.7 Read `PLAN.md`'s standing constraint **STRATZ, not OpenDota**
+      against this change. It records why STRATZ won as the *statistics*
+      source and stays true, but with the last OpenDota call gone its title
+      invites a reader to look for a use that no longer exists. Decide
+      whether it is reworded or left, and say which in the pull request.
 
 ## 2. Which entry names the patch
 
