@@ -106,8 +106,10 @@ That is the useful half: it is the path every bundle takes until then.
       rather than a decimal integer string. `contract.ts:118-121` names that
       exact failure as why the list is written as an exemption — this is the
       change that exercises it.
-- [ ] 2.4 Render the field in `src/job/export/render.ts` from the newest run
-      that published a pair, and **omit the key entirely** when none has.
+- [ ] 2.4 Render the field in `src/job/export/render.ts` from the run with
+      the highest `snapshot_id` among those that published a pair — the key
+      the criterion names, not a wall-clock column — and **omit the key
+      entirely** when none has.
       Rendering `MODEL_CONSTANTS` under the name would make a bundle that was
       never fitted indistinguishable downstream from one that was, and the
       model's fallback is triggered by the absence rather than by a sentinel.
@@ -143,17 +145,25 @@ Closes `outcome-calibration/a-fit-over-the-whole-store`,
       either is published contradicts *A fit that cannot be trusted is
       refused, not published* — the two requirements answer different
       questions and a case must not straddle them.
-- [ ] 3.4 Add `alpha`, `beta` and the count to the per-run table
-      `outcome-calibration` creates in `src/job/schema.sql`, and to its
-      reclaim in `src/job/db.fixture.ts`. Read the table as that change left
-      it rather than as this file describes it. Add them the way
+- [ ] 3.4 Add `alpha`, `beta`, the count **and the refusal reason** to the
+      per-run table `outcome-calibration` creates in `src/job/schema.sql`, and
+      to its reclaim in `src/job/db.fixture.ts`. The reason is a column here
+      because 4.3 records it and nothing else would hold it — a task naming a
+      behaviour whose storage no other task adds is a behaviour that lands
+      with nowhere to go. One value per refusal condition plus the published
+      case, so a row always answers which of the four it was. Read the table
+      as that change left it rather than as this file describes it. Add them
+      the way
       `schema.sql:98-104` adds a column to `snapshots` — `ALTER TABLE … ADD
       COLUMN IF NOT EXISTS` beside the `CREATE TABLE IF NOT EXISTS`, which
       that file's own header explains: the schema is applied on every
       `connect()`, so a table that already exists is upgraded rather than
       skipped. Editing the `CREATE` alone leaves every existing database
       without the columns and no error to say so.
-- [ ] 3.5 Fit by maximum likelihood with step control, never a bare
+- [ ] 3.5 Fit by maximum likelihood on the terms the criterion now pins — at
+      most 500 iterations, a step accepted when it raises the log-likelihood
+      by more than `1e-12`, halved up to 40 times otherwise, and exhausting
+      the iterations counted as non-convergence — never a bare
       Newton–Raphson. The unguarded version returned `β = 3543.7` and
       `α = −1961.0` on the very matches this change measured, and it
       terminated rather than erroring — step 4 is what refuses that output,
@@ -217,10 +227,14 @@ cross-validation that produces a second number. It is also the condition
       fold would otherwise weigh as much as a full one. Compute the baseline
       over the same pooled set, so the two compared numbers come from one
       population.
-- [ ] 5.3 Assert determinism directly: the gate run twice over an unchanged
-      store reaches the same decision and the same Brier. This is a publish
-      gate, so a partition that varies means one store publishes or refuses
-      by a choice nothing records.
+- [ ] 5.3 Assert determinism against **permuted rows**, not merely against a
+      second run: the same matches returned in a different order reach the
+      same decision and the same Brier to every bit. Running twice over an
+      unchanged store exercises nothing, because the second run reads the
+      rows in whatever order the first did. Read them in `match_id` order and
+      start the fit at `α = 0`, `β = 0`; floating-point summation is not
+      associative, so row order moves the Brier in its last bits, and near a
+      strict `<` that decides whether the pair publishes.
 
 ## 6. What a refusal leaves standing
 

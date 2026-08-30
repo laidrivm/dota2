@@ -104,6 +104,15 @@ refused and which condition failed.
    `α = −1961.0`, which is every estimate at 0% or 100%. A run SHALL treat
    non-convergence, a non-finite parameter, or a `β` outside `[0, 1]` as a
    failed fit.
+
+   Convergence SHALL be defined rather than judged, this being a publish
+   gate: at most 500 iterations, a step accepted when it raises the
+   log-likelihood by more than `1e-12` and halved up to 40 times when it does
+   not, and convergence declared when no halving raises it. A run that
+   exhausts the iterations has not converged. These are the values the
+   measurements in this change were taken with; what matters is that two
+   implementations reading this requirement reach the same verdict on one
+   store, which "step control" alone does not give them.
 3. **The pair beats the base rate held out.** The pair SHALL be scored by
    cross-validation, no match scored by parameters fitted on it, and its
    Brier SHALL be strictly below that of a predictor answering the sample's
@@ -146,10 +155,11 @@ value that failed the third one.
 
 #### Scenario: The same store decides the same way twice
 
-- **WHEN** the gate runs twice over an unchanged store
+- **WHEN** the gate runs over one store and again over the same rows returned
+  in a different order
 - **THEN** it SHALL reach the same publish-or-refuse decision and the same
-  held-out Brier, the folds being fixed by `match_id mod 5` rather than
-  drawn
+  held-out Brier to every bit, the folds being fixed by `match_id mod 5` and
+  the rows read in `match_id` order rather than as the database returns them
 
 #### Scenario: The first run, with nothing published before
 
