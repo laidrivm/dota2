@@ -56,9 +56,13 @@ Closes `draft-model/the-side-carries-the-intercept-s-sign`,
       Nothing renders the field yet; step 2 does. It is declared here because
       the model reads it here, and a type the reader cannot name is a cast.
 - [ ] 1.5 Change `MODEL_CONSTANTS.beta` from `0.1` to the fitted value and set
-      `alpha` beside it — `0.0153` and `0.097`, measured over 1 446 matches
-      against a centred bundle. Not a cosmetic accompaniment to the mechanism:
-      until step 2 lands the constants are the *only* values in use, so a step
+      `alpha` beside it — `0.0153` and `0.0910`, the maximum-likelihood pair
+      over 1 446 matches scored against a centred bundle. Both from that one
+      fit: the `α` of about 0.097 elsewhere in these artefacts is the
+      bootstrap **median**, a different estimator, and taking one constant
+      from each would pair two numbers no single fit produced. Not a
+      cosmetic accompaniment to the mechanism: until step 2 lands the
+      constants are the *only* values in use, so a step
       that leaves `beta` at `0.1` ships the mechanism and none of the fix.
       Zero is the wrong `alpha` for the same reason — the model's `α = 0` is
       the defect, and a fallback reproducing it is a fallback to the bug.
