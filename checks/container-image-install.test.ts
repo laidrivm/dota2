@@ -15,7 +15,6 @@ import {
 	available,
 	buildsImage,
 	buildWith,
-	holds,
 	requiresDocker,
 	sh,
 } from "./docker.fixture.ts";
@@ -108,10 +107,31 @@ describe.skipIf(!available)("the production image", () => {
 		// Read from the manifest rather than named here: a devDependency added
 		// later joins this case without anybody remembering to add it.
 		expect(dev.length).toBeGreaterThan(0);
-		const present = dev.filter((name) =>
-			holds(`${app()}/node_modules/${name}`),
-		);
-		expect(present).toEqual([]);
+		// One container for the whole list, not one per name. `holds` starts a
+		// `docker run` per call, and bun cannot fire this case's timer while a
+		// synchronous spawn blocks the thread — so seven of them overran the
+		// 5s default and were reported at 6182ms, a number no configured limit
+		// explains. The same reading `HOOK_MS` records for hooks, reached here
+		// by removing the spawns rather than by raising the ceiling: the cost
+		// grew with the manifest, so the next devDependency would have brought
+		// it back.
+		const probe = `${app()}/node_modules`;
+		const listing = sh(
+			[probe, ...dev.map((name) => `${probe}/${name}`)]
+				.map((path) => `test -e '${path}' && echo '${path}'`)
+				.join("; "),
+		)
+			.stdout.toString()
+			.trim()
+			.split("\n")
+			.filter(Boolean);
+		// `node_modules` itself, asserted first: an image the script never
+		// reached answers with an empty listing, which is indistinguishable
+		// from every devDependency being absent — the result this case is
+		// looking for. Proving the query returns something is what makes the
+		// rest of it evidence.
+		expect(listing).toContain(probe);
+		expect(listing.filter((path) => path !== probe)).toEqual([]);
 	});
 });
 
