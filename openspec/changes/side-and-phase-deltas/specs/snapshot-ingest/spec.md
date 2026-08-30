@@ -59,6 +59,17 @@ after them — `hero-reference` states what each leaves behind instead.
   so that the component is measured for every hero or for none — a component
   measured for some heroes only fails the build
 
+#### Scenario: A part no hero has a match on
+
+- **WHEN** the harvest holds matches for the patch and no pick on one side
+  or in one phase at all
+- **THEN** the write SHALL still emit a zero-match row for that part on
+  every hero, so this writer never produces the state
+  `snapshot-build`'s *A part the component never measured* describes. That
+  requirement stands for a staging state some other writer could reach; this
+  one reaches it only by holding no match for the patch at all, which is the
+  scenario below
+
 #### Scenario: A hero the harvest has never seen
 
 - **WHEN** the harvest holds matches for the patch and a hero in `heroes`
