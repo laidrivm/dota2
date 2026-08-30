@@ -1,6 +1,6 @@
 # side-and-phase-deltas — tasks
 
-Three steps, three pull requests, in this order. Each names the criteria it
+Four steps, four pull requests, in this order. Each names the criteria it
 closes by their `<capability>/<scenario-slug>` identifiers.
 
 **`match-harvest` must be applied first** — every row this change writes is
@@ -76,7 +76,8 @@ Closes `snapshot-ingest/the-two-tables-the-write-now-covers`,
 ## 2. Every hero or no hero
 
 Closes `snapshot-ingest/a-hero-with-no-match-on-one-side`,
-`snapshot-ingest/a-hero-the-harvest-has-never-seen`.
+`snapshot-ingest/a-hero-the-harvest-has-never-seen`,
+`snapshot-ingest/a-part-no-hero-has-a-match-on`.
 
 No production code beyond what step 1 lands: the write emits zero-match rows
 from the start, because a step that did not would leave a build failing on
@@ -87,8 +88,11 @@ made for.
       picks on one side only still gets a zero-match row for the other; a
       hero the harvest never saw gets zero-match rows for every part; a
       patch whose picks are all on one side leaves no `dire` row for anyone,
-      which publishes; a match with fewer than ten picks contributes to
-      neither table.
+      which publishes. **Not** a case for a match with fewer than ten picks:
+      `match-harvest` rejects those rather than storing them, so the store
+      cannot hold one and a filter here would guard nothing. What is worth
+      asserting instead is the dependency — the phase count assumes five
+      picks a side — and that is 2.4.
 - [ ] 2.2 Assert the rows are written per hero of `heroes` and never per
       hero the harvest saw. *An unmeasured component is zero for every hero*
       fails a build where a component is measured for some heroes and not
@@ -99,37 +103,62 @@ made for.
       unmeasured; any match means a row for every hero, so it reads as
       measured for all of them. Writing zeros in the first case would set
       `side_measured` on a component nothing observed.
+- [ ] 2.4 Assert the aggregation's dependency on `match-harvest`, closing no
+      criterion: every stored match carries ten picks, five a side, because
+      that change refuses anything else. The phase count is wrong without it,
+      and the assertion is the seam between the two changes rather than a
+      filter this one applies.
 
-## 3. The base a delta is taken from
+## 3. What a column stores when there is nothing to store
+
+Closes `snapshot-build/a-zero-match-side-row`,
+`snapshot-build/a-hero-with-side-rows-and-no-counted-matches`.
+
+- [ ] 3.1 Write the failing cases first: a side row carrying zero matches
+      writes its column as 0, the column having no omission to fall back on
+      the way a row-stored statistic does; a hero with side rows but no
+      counted matches to take an overall winrate from fails the build rather
+      than storing a delta taken from 50.
+- [ ] 3.2 Read the carried clause before implementing either. *Smoothing
+      towards neutral by sample size* says an `n_eff` of 0 leaves a
+      statistic out of the snapshot, and then confines that to statistics
+      stored as rows — side and phase are columns on the hero row, and the
+      delta spells the distinction out because this change is what makes
+      zero-match rows routine.
+
+## 4. The base a delta is taken from
 
 Closes `snapshot-build/a-side-delta-on-a-hero-that-is-above-average`,
-`snapshot-build/a-hero-with-no-side-preference`.
+`snapshot-build/a-hero-with-no-side-preference`,
+`snapshot-build/the-same-sample-on-a-side`.
 
-- [ ] 3.1 Write the failing cases first (ZOMBIES 15, 16, 17, 18, 19): a hero
+- [ ] 4.1 Write the failing cases first (ZOMBIES 15, 16, 17, 18, 19): a hero
       at 55% overall and 56% on Radiant stores about 1.0 rather than 6.0; a
       hero whose side winrates both equal its overall stores 0 however far
       that overall sits from 50; `meta`, `matchup` and `synergy` still take
       50; the overall winrate is counted from the same matches and never
       from `hero_stats`, which `rows.ts:21` says holds none; a hero with
       side rows but no counted matches is refused rather than falling back
-      to 50.
-- [ ] 3.2 Give `delta()` a base per component rather than the single
+      to 50, which
+      `snapshot-build/a-hero-with-side-rows-and-no-counted-matches` now
+      fixes.
+- [ ] 4.2 Give `delta()` a base per component rather than the single
       `NEUTRAL` it subtracts today, and widen `blend.test.ts` (ZOMBIES 20),
       whose cases pin the 50 path and none of which pins that the caller
       passes the right base for the right component.
-- [ ] 3.3 Make `src/types.ts:71` and `:73` true. Both say these deltas are
+- [ ] 4.3 Make `src/types.ts:71` and `:73` true. Both say these deltas are
       "relative to the hero's overall winrate" and always have; the
       arithmetic never matched, and nothing noticed because the numbers were
       zero. The comments do not change — this is the step that stops them
       being wrong.
-- [ ] 3.4 Confirm the components are non-zero for the first time (ZOMBIES
+- [ ] 4.4 Confirm the components are non-zero for the first time (ZOMBIES
       21): a build over a fixture harvest publishes with `side_measured` and
       `phase_measured` both true and non-zero deltas on hero rows. Record
       the count of non-zero heroes against the 0 of 127 the proposal
       measured.
-- [ ] 3.5 Update `PLAN.md`'s queue in this step's pull request, not
+- [ ] 4.5 Update `PLAN.md`'s queue in this step's pull request, not
       afterwards.
-- [ ] 3.6 Run the pre-PR sequence per `docs/review-toolkit.md` on every
+- [ ] 4.6 Run the pre-PR sequence per `docs/review-toolkit.md` on every
       step, and `bun test` and `bun run test:db` besides. Every step here
       touches the database, and CI runs only the first
       (`.github/workflows/test.yml:110`).

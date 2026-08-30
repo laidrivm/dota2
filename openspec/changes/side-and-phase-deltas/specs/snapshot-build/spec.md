@@ -22,6 +22,18 @@ winrate" since the contract was written.
 The overall winrate SHALL be taken over the same matches the side or phase
 rows were counted from, so that a difference in population between the
 harvest and the statistics API cancels rather than leaking into the delta.
+WHERE a hero has side or phase rows but no counted matches to take an
+overall winrate from, the build SHALL fail rather than fall back to 50: a
+silent 50 would restore the very double count this base exists to remove,
+and on one hero rather than all of them.
+
+A side or phase row carrying zero matches reaches `n_eff = 0` and stores its
+column as 0. That is not the omission the next paragraph describes: omission
+is for a statistic stored as a row of its own, where a stored 0 and a
+measured neutral are indistinguishable. Side and phase are columns on the
+hero row, so they have no such choice — the column is written, and *An
+unmeasured component is zero for every hero* is what decides whether the
+whole component means anything.
 
 An `n_eff` of 0 never reaches this formula: the blending requirement above
 leaves that statistic out of the snapshot, because a stored `adj` of 0 and a
@@ -37,6 +49,18 @@ once for the whole snapshot instead of hero by hero.
   Radiant winrate is 56, at an `n_eff` far above `k`
 - **THEN** its stored `side_adj_radiant` SHALL approach 1.0, not 6.0
 
+#### Scenario: A hero with side rows and no counted matches
+
+- **IF** a hero carries side rows but the build can count no match to take
+  its overall winrate from
+- **THEN** the build SHALL fail rather than store a delta taken from 50
+
+#### Scenario: A zero-match side row
+
+- **WHEN** a hero's side row carries zero matches and its prior has decayed
+- **THEN** its `side_adj` column SHALL be written as 0, the column having no
+  omission to fall back on
+
 #### Scenario: A hero with no side preference
 
 - **WHEN** a hero's Radiant and Dire winrates both equal its overall winrate
@@ -45,12 +69,21 @@ once for the whole snapshot instead of hero by hero.
 
 #### Scenario: Sample equal to the constant
 
-- **WHEN** a statistic has `n_eff = k` and `wr_blend = 54`
+- **WHEN** a hero's meta on a position has `n_eff = k` and `wr_blend = 54`,
+  so its base is 50
 - **THEN** its stored `adj` SHALL equal 2.0
+
+#### Scenario: The same sample on a side
+
+- **WHEN** a hero's side statistic has `n_eff = k` and `wr_blend = 54` and
+  the hero's overall winrate over the same matches is 55
+- **THEN** its stored `adj` SHALL equal −0.5, the same inputs answering
+  differently because the base does
 
 #### Scenario: A sample far below the constant
 
-- **WHEN** a statistic has `n_eff = k / 9` and `wr_blend = 60`
+- **WHEN** a hero's meta on a position has `n_eff = k / 9` and
+  `wr_blend = 60`, so its base is 50
 - **THEN** its stored `adj` SHALL equal 1.0 — a tenth of the raw delta
 
 ### Requirement: An unmeasured component is zero for every hero
