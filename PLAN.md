@@ -339,6 +339,32 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       instruction — `spec/beta-refit` carries `proposal.md` and the three
       delta specs, `spec/beta-refit-plan` carries `design.md` and `tasks.md`
       and opens from `main` once the first has merged.
+- [ ] **`laning-phase-model`** — proposed,
+      `openspec/changes/laning-phase-model/`. The model has a lane concept and
+      no lane data: `laneWeights` is a hand-set 5×5 standing for which roles
+      meet in which lane, and what it weights is a *match* statistic. The lane
+      outcome is a different question about the same two heroes — over Phantom
+      Lancer's 35 most frequent lane opponents at position 1,
+      **corr(lane pp, match pp) = +0.066** and the lane spread is 32.6 pp
+      against the match's 14.3. Opponents only; lane allies are
+      `lane-synergy-model`'s.
+
+      Two figures were measured rather than chosen, and both are in the
+      proposal. The window is twelve weeks because the quantity does not
+      drift — two independent six-week halves correlate +0.801 with a mean
+      absolute difference of 3.4 pp, across a window containing 7.41e — and
+      is bounded by the **major** patch rather than the letter one. The
+      smoothing constant is derived as `k = p(1−p)·10⁴ / var_true`, which came
+      out 17 to 61 on three cells against the 400 a pair statistic uses,
+      because a lane delta carries more signal per game. Three cells do not
+      fix it, so the build derives it over every cell and records the spread.
+
+      Costs 3 600 requests on top of the run's ~516, paced across about three
+      hours: the hourly ceiling is not a refusal, since a run waits for a
+      refilling window and continues, and the schedule's lock already stops an
+      overlap. **`candidacy-gate` must be applied and synced first** — the
+      `draft-model` delta replaces the requirement that change also replaces.
+      Proposed over two pull requests at the diff budget's instruction.
 - [ ] **`suggestion-calibration`** — **not yet proposed**, and named as the
       owner of work by three artefacts that have merged: `beta-refit`'s
       proposal sends the component weights here, `outcome-calibration`'s sends
