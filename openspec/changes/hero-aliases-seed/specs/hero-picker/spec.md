@@ -13,7 +13,9 @@ Matches SHALL be ordered by what matched before they are ordered by name:
 every hero matched on its own name first, then every hero matched only on an
 abbreviation, then every hero matched only on a legacy alias, and within each
 of the three in ascending name order. A hero matching on more than one of the
-three SHALL take the highest of them.
+three SHALL be listed at the highest-priority one — nearest the top of the
+list, and so the *lowest* rank number wherever an implementation numbers
+them. "Highest" here is priority, never a numeral.
 
 The order is the ranking and nothing else is: no score, no match length, no
 frequency. A player typing `es` is shown both Earth Spirit and Ember Spirit
@@ -68,3 +70,10 @@ matched the same way.
 - **WHEN** a hero matches the query both on its own name and on a legacy
   alias
 - **THEN** it SHALL be ranked as a name match, appearing once
+
+#### Scenario: A bundle cached before abbreviations existed
+
+- **IF** the bundle the picker reads carries no `abbreviations` on a hero,
+  as a payload cached before this change does
+- **THEN** the search SHALL treat that hero as having none and match it on
+  its name and `aliases`, and SHALL NOT throw

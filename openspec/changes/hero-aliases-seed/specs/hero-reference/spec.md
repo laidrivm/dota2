@@ -49,8 +49,11 @@ Inserting only what is missing would make the file a log of everything ever
 added rather than a statement of what is true: an alias removed from the file
 would stay in the database for ever, the two would drift with nothing
 reporting it, and the drift would surface as a search result nobody can trace
-to a line of source. The table is small, hand-maintained, and referenced by
-nothing, so replacing it whole costs nothing that keeping it does not.
+to a line of source. The table is small, hand-maintained, and carries no foreign-key dependents,
+so replacing it whole costs nothing that keeping it does not. It is not
+unread — `src/job/export/render.ts` selects from it to render the bundle —
+but that read happens in a later step of the same run, after the replacement
+has committed, so it never observes the table mid-swap.
 
 #### Scenario: An alias removed from the file
 

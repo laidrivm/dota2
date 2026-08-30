@@ -1,6 +1,6 @@
 # hero-aliases-seed — tasks
 
-Four steps, four pull requests, in this order. Each names the criteria it
+Five steps, five pull requests, in this order. Each names the criteria it
 closes by their `<capability>/<scenario-slug>` identifiers.
 
 ## 1. The seed file and when it is applied
@@ -33,16 +33,24 @@ Closes `hero-reference/a-fresh-database`,
       never asked to add.
 - [ ] 1.3 Write `src/job/aliases.sql` — the English legacy names and
       abbreviations, one `INSERT` carrying `hero_id`, lower-case `alias` and
-      `kind`. Seed every hero that has an alias worth typing; a hero with
-      none contributes no row.
+      `kind`. "Every alias worth typing" is not a completion rule a test can
+      read, so fix an explicit inventory instead: enumerate the heroes to be
+      covered before writing the file, assert that count in the suite, and
+      list the heroes deliberately left with no alias. A seed that silently
+      omits half the roster otherwise passes every case below.
 - [ ] 1.4 Apply it from `src/job/ingest/ingest.ts`, immediately after
-      `upsertHeroes` at line 52, by the mechanism `src/job/db.ts:connect()`
-      already uses for `schema.sql` — `Bun.file(...).text()` through
-      `sql.unsafe(...).simple()`.
-- [ ] 1.5 Lower-case every alias in the seed, and assert it (ZOMBIES 7) —
+      `upsertHeroes` at line 52, reading the file the way
+      `src/job/db.ts:connect()` reads `schema.sql`. Wrap the delete and the
+      insert in an explicit transaction rather than resting on PostgreSQL's
+      implicit one — whether bun's `.simple()` sends the file as one Query
+      message is unverified, and a delete that commits alone empties the
+      table for the export three steps later.
+- [ ] 1.5 Raise on a seeded hero id absent from `heroes`, with the id in the
+      message, rather than letting the foreign key speak for it.
+- [ ] 1.6 Lower-case every alias in the seed, and assert it (ZOMBIES 7) —
       `matchHeroes` lowercases the query and compares against stored text, so
       a capital in the table is a row nothing can ever match.
-- [ ] 1.6 Confirm on a real database that the bundle the export renders now
+- [ ] 1.7 Confirm on a real database that the bundle the export renders now
       carries non-empty `aliases`, and record the count against the 0 of 127
       the proposal measured.
 
@@ -52,10 +60,8 @@ Closes `hero-reference/an-alias-removed-from-the-file`,
 `hero-reference/a-seed-that-fails-part-way`.
 
 No production code beyond what step 1 lands: the seed is a `DELETE` followed
-by an `INSERT` from the start. This step proves the two properties that
-choice was made for, and the rollback one rests on a claim about the driver
-rather than about our own code — that a multi-statement simple query runs in
-one implicit transaction — which is exactly why it is tested and not trusted.
+by an `INSERT` inside an explicit transaction from the start. This step
+proves the two properties that choice was made for.
 
 - [ ] 2.1 Test that an alias absent from the file is absent from the table
       after the next run, starting from a table that holds it (ZOMBIES 11).
@@ -77,8 +83,13 @@ Closes `snapshot-export/a-hero-with-no-alias-of-one-kind`,
       non-string member fails it.
 - [ ] 3.2 Add `abbreviations: string[]` to `HeroEntry` in `src/types.ts`, and
       narrow the doc comment on `aliases` to legacy names.
-- [ ] 3.3 Split the rows by `kind` in `render.ts`'s `entry()` — it already
-      selects the column and discards it at line 192.
+- [ ] 3.3 Carry `kind` out of the database and split on it. `render.ts:79`
+      selects `hero_id, alias` and nothing else, and `AliasRow` at line 47
+      declares those two — so `kind` is not loaded at all, and `entry()`
+      cannot split rows it never received. Add the column to the query and to
+      `AliasRow` first, then split in `entry()` at line 192. (An earlier
+      draft of this task said the column was already selected and discarded;
+      it was read off the schema rather than off the query.)
 - [ ] 3.4 Extend the export's runtime assertion over `SnapshotBundle` to both
       arrays, and to a member that is not a string — `contract.ts:71` already
       declares `aliases: texts`, so this is that line twice.
@@ -131,29 +142,36 @@ Closes `hero-picker/the-three-kinds-are-ordered-against-each-other`,
 - [ ] 4.5 Check `matchHeroes` still returns `HeroEntry[]` (ZOMBIES 23) — the
       rank orders the list and never reaches the picker's contract. A
       regression guard closing no criterion, for the reason 1.2 gives.
-- [ ] 4.6 Settle the stale-bundle case (ZOMBIES 25): a payload cached before
-      this change carries no `abbreviations`, and spreading `undefined` in
-      `matchHeroes` throws. Establish which it is — the client validates a
-      fetched snapshot and the served bundle is revalidated by ETag, so a
-      stale payload may already be unreachable — and read `src/app/storage.ts`
-      to find out rather than adding a guard against a case that cannot
-      arise.
-- [ ] 4.7 Re-read `search.ts`'s header comment: it explains why the first
+- [ ] 4.6 Re-read `search.ts`'s header comment: it explains why the first
       match is positional and why the picker needs no scoring. Ranking is a
       bucket, not a score, so the comment stays true — confirm that rather
       than assume it.
 
-## 5. Closing the change
+## 5. The picker survives a bundle cached before the split
 
-- [ ] 5.1 Update `PLAN.md`'s queue in the pull request that merges the last
+Closes `hero-picker/a-bundle-cached-before-abbreviations-existed`.
+
+The case is settled, not open: `src/app/snapshot.ts` caches the last good
+payload under `CACHE_KEY` and reads it back when the fetch fails, and its
+`isHeroEntry` checks `id` and `name` alone — so a pre-change payload passes
+validation and reaches `matchHeroes` without `abbreviations`. ETag
+revalidation does not reach localStorage.
+
+- [ ] 5.1 Write the failing case first: `matchHeroes` over a hero entry with
+      no `abbreviations` key returns it on a name match instead of throwing.
+- [ ] 5.2 Read both alias arrays as `?? []` in `matchHeroes`.
+
+## 6. Closing the change
+
+- [ ] 6.1 Update `PLAN.md`'s queue in the pull request that merges the last
       step, not afterwards — including the hero-tile lettering entry, whose
       "a partial source already exists ... for 33 of the 128" now describes
       the fixture alone and no longer the published bundle.
-- [ ] 5.2 Amend `hero-picker`'s `## Purpose`, which reads "how its search
+- [ ] 6.2 Amend `hero-picker`'s `## Purpose`, which reads "how its search
       matches names and aliases" and now leaves out abbreviations. A Purpose
       is prose rather than a requirement, so no delta carries it: it is
       edited when the delta is synced, or it drifts from the requirement
       directly below it.
-- [ ] 5.3 Add the e2e bullet (ZOMBIES 26) to the backlog `PLAN.md` owns: a
+- [ ] 6.3 Add the e2e bullet (ZOMBIES 26) to the backlog `PLAN.md` owns: a
       player opens the picker, types `wk`, and Wraith King is selectable.
-- [ ] 5.4 Run the pre-PR sequence per `docs/review-toolkit.md` on every step.
+- [ ] 6.4 Run the pre-PR sequence per `docs/review-toolkit.md` on every step.

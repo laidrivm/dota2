@@ -70,12 +70,15 @@ The table holds a few hundred rows, is referenced by nothing, and is rebuilt
 in milliseconds, so the usual reason to prefer an incremental upsert does not
 apply.
 
-Atomicity comes free from the mechanism already chosen: a multi-statement
-simple query is executed by PostgreSQL inside one implicit transaction unless
-the string carries its own transaction control. The seed therefore carries no
-`BEGIN`/`COMMIT` and gets the rollback anyway. This is the one decision here
-resting on a claim about the driver rather than about our own code, so the
-spec's *A seed that fails part way* scenario tests it rather than trusting it.
+The transaction is explicit. PostgreSQL runs a multi-statement simple query
+in one implicit transaction, and it is tempting to take the rollback from
+that for free — but whether bun's `.simple()` sends the file as one Query
+message or splits it is a property of the driver, and a delete that commits
+before a failing insert empties the table for every consumer. An explicit
+transaction costs one wrapper and rests on nothing unverified, which is the
+trade `docs/verification.md` settles. Which API expresses it — `sql.begin`
+or a `BEGIN`/`COMMIT` the file carries — is an apply-time choice; the
+requirement is only that the delete and the insert commit together.
 
 ### Two arrays, not one array of objects
 
@@ -96,6 +99,24 @@ field it has to inspect.
 `aliases` narrows in meaning from "every alias" to "legacy names". Nothing
 outside this repository reads the bundle, and the export and the client ship
 together, so the narrowing costs a fixture regeneration and nothing else.
+
+The exact response shape, which `docs/feature-workflow.md` asks a design to
+fix for any endpoint it changes — the hero entry of `/snapshot.json`, with
+only the two keys this change touches spelled out:
+
+```json
+{
+  "id": 12,
+  "name": "Phantom Lancer",
+  "aliases": ["azwraith"],
+  "abbreviations": ["pl"]
+}
+```
+
+Both keys are always present and both are arrays of strings; a hero with no
+alias of a kind carries `[]`, never `null` and never a missing key, which is
+`docs/api-design.md`'s "every contract key is always present" applied to an
+array. No other key of the entry changes.
 
 ### Ranking is a bucket, not a score
 
@@ -118,11 +139,17 @@ in one glance.
 - **A hand-maintained list ages.** New heroes arrive with no alias and
   nothing reports it. → Out of scope to automate, but the seed is one file to
   open, and a hero with no alias is searchable by name as before.
-- **Bundle contract change in flight.** A client holding a cached bundle
-  without `abbreviations` meets a build expecting one. → `search.ts` reads
-  the field defensively for one release, or the cache is keyed by
-  `snapshotId`, which it already is; the served bundle is revalidated by
-  ETag per `snapshot-export`.
+- **A bundle cached before the split reaches the new picker.** Measured, not
+  supposed: `src/app/snapshot.ts` caches the last good payload under
+  `CACHE_KEY = "snapshot.bundle"` and reads it back whenever the fetch fails,
+  and its `isHeroEntry` checks `id` and `name` alone — so a payload stored
+  before this change passes `isBundle` and reaches `matchHeroes` with no
+  `abbreviations`, where spreading `undefined` throws. The ETag revalidation
+  `snapshot-export` specifies does not touch localStorage, so an earlier
+  draft of this file was wrong to lean on it. → `matchHeroes` reads both
+  alias arrays as `?? []`, which makes the whole class disappear in one
+  expression and is fixed by a criterion of its own rather than left to an
+  implementer to notice.
 - **`DELETE` then `INSERT` on every run.** A run that fails mid-seed leaves
   the table as it was, but a run that succeeds rewrites rows nothing changed.
   → The table is small and nothing reads it between the two statements.
