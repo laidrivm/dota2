@@ -1,307 +1,388 @@
 STRATZ GraphQL — draft-relevant surface, introspected 2026-08-29.
-Names, arguments and result types only; descriptions are in the API console.
-Regenerate the full 513-type schema with the curl command in
-stratz-graphql-2026-08-29.md, then explore it with query-schema.py.
 
-DotaQuery  (OBJECT)
-    match(id: Long) -> MatchType
-    matches(ids: Long) -> MatchType
-    player(steamAccountId: Long) -> PlayerType
-    players(steamAccountIds: Long) -> PlayerType
-    team(teamId: Int) -> TeamType
-    teams(teamIds: Int) -> TeamType
-    league(id: Int) -> LeagueType
-    leagues(request: LeagueRequestType) -> LeagueType
-    guild(id: Int) -> GuildType
-    yogurt() -> YogurtQuery
-    plus() -> PlusQuery
-    stratz() -> StratzQuery
-    heroStats() -> HeroStatsQuery
-    constants() -> ConstantQuery
-    leaderboard() -> LeaderboardQuery
-    live() -> LiveQuery
-    vendor() -> VendorQuery
+Regenerate: fetch the full introspection response with the curl command in
+stratz-graphql-2026-08-29.md, then
 
-HeroStatsQuery  (OBJECT)
-    stats(heroIds: Short, week: Long, bracketBasicIds: RankBracketBasicEnum, positionIds: MatchPlayerPositionType, groupByTime: Boolean, groupByPosition: Boolean, groupByBracket: Boolean, minTime: Int, maxTime: Int) -> HeroPositionTimeDetailType
-    matchUp(heroId: Short, heroIds: Short, week: Long, bracketBasicIds: RankBracketBasicEnum, orderBy: Byte, matchLimit: Int, skip: Int, take: Int) -> HeroDryadType
-    itemFullPurchase(heroId: Short, week: Long, bracketBasicIds: RankBracketBasicEnum, positionIds: MatchPlayerPositionType, minTime: Int, maxTime: Int, matchLimit: Int) -> HeroItemPurchaseType
-    itemStartingPurchase(heroId: Short, week: Long, bracketBasicIds: RankBracketBasicEnum, positionIds: MatchPlayerPositionType) -> HeroItemStartingPurchaseType
-    itemBootPurchase(heroId: Short, week: Long, bracketBasicIds: RankBracketBasicEnum, positionIds: MatchPlayerPositionType) -> HeroItemBootPurchaseType
-    itemNeutral(heroId: Short, week: Long, bracketBasicIds: RankBracketBasicEnum, positionIds: MatchPlayerPositionType) -> HeroNeutralItemType
-    laneOutcome(heroId: Short, isWith: Boolean, week: Long, bracketBasicIds: RankBracketBasicEnum, positionIds: MatchPlayerPositionType) -> HeroLaneOutcomeType
-    heroVsHeroMatchup(heroId: Short, week: Long, bracketBasicIds: RankBracketBasicEnum, matchLimit: Int, skip: Int, take: Int) -> HeroMatchupType
-    talent(heroId: Short, week: Long, bracketBasicIds: RankBracketBasicEnum, positionIds: MatchPlayerPositionType) -> HeroAbilityTalentType
-    winHour(heroIds: Short, take: Int, skip: Int, bracketIds: RankBracket, positionIds: MatchPlayerPositionType, regionIds: BasicRegionType, gameModeIds: GameModeEnumType, groupBy: FilterHeroWinRequestGroupBy) -> HeroWinHourType
-    winDay(heroIds: Short, take: Int, skip: Int, bracketIds: RankBracket, positionIds: MatchPlayerPositionType, regionIds: BasicRegionType, gameModeIds: GameModeEnumType, groupBy: FilterHeroWinRequestGroupBy) -> HeroWinDayType
-    winWeek(heroIds: Short, take: Int, skip: Int, bracketIds: RankBracket, positionIds: MatchPlayerPositionType, regionIds: BasicRegionType, gameModeIds: GameModeEnumType, groupBy: FilterHeroWinRequestGroupBy) -> HeroWinWeekType
-    winMonth(heroIds: Short, take: Int, skip: Int, bracketIds: RankBracket, positionIds: MatchPlayerPositionType, regionIds: BasicRegionType, gameModeIds: GameModeEnumType, groupBy: FilterHeroWinRequestGroupBy) -> HeroWinMonthType
-    winGameVersion(heroIds: Short, take: Int, skip: Int, bracketIds: RankBracket, positionIds: MatchPlayerPositionType, regionIds: BasicRegionType, gameModeIds: GameModeEnumType, groupBy: FilterHeroWinRequestGroupBy) -> HeroWinGameVersionType
-    guide(heroId: Short, withHeroId: Short, againstHeroId: Short, isPro: Boolean, positionId: MatchPlayerPositionType, itemId: Short, neutralItemId: Short, take: Int, skip: Int) -> HeroGuideListType
-    rampages(request: FilterHeroRampageType) -> HeroRampageObjectType
-    abilityMinLevel(heroId: Short, week: Long, bracketBasicIds: RankBracketBasicEnum, positionIds: MatchPlayerPositionType) -> HeroAbilityMinType
-    abilityMaxLevel(heroId: Short, week: Long, bracketBasicIds: RankBracketBasicEnum, positionIds: MatchPlayerPositionType) -> HeroAbilityMaxType
-    banDay(heroId: Short, day: Int, bracketBasicIds: RankBracketBasicEnum, take: Int, skip: Int, groupByDay: Boolean, groupByRank: Boolean) -> HeroBanType
+  python3 docs/research/query-schema.py <schema.json> \
+    DotaQuery HeroStatsQuery HeroLaneOutcomeType HeroDryadType HeroWinDayType \
+    HeroBanType MatchType MatchPlayerType MatchStatsPickBanType \
+    MatchStatsLaneReportType PlayerMatchesRequestType LeaderboardQuery \
+    SteamAccountSeasonActiveLeaderboardType \
+    SteamAccountSeasonActiveLeaderboardRankType \
+    FilterSeasonLeaderboardRequestType RankBracket RankBracketBasicEnum \
+    MatchPlayerPositionType LeaderboardDivision FilterHeroWinRequestGroupBy \
+    GameModeEnumType LobbyTypeEnum MatchLaneType LaneOutcomeEnums \
+    MatchPlayerRoleType
 
-HeroLaneOutcomeType  (OBJECT)
-    heroId1() -> Int
-    week() -> Int
-    bracketBasicIds() -> RankBracketBasicEnum
-    position() -> MatchPlayerPositionType
-    matchCount() -> Long
-    drawCount() -> Long
-    winCount() -> Long
-    lossCount() -> Long
-    stompWinCount() -> Long
-    stompLossCount() -> Long
-    matchWinCount() -> Long
-    csCount() -> Long
-    heroId2() -> Short
-
-HeroDryadType  (OBJECT)
-    heroId() -> Short
-    with() -> HeroStatsHeroDryadType
-    matchCountWith() -> Long
-    vs() -> HeroStatsHeroDryadType
-    matchCountVs() -> Long
-
-HeroWinDayType  (OBJECT)
-    day() -> Long
-    heroId() -> Short
-    winCount() -> Int
-    matchCount() -> Int
-
-HeroBanType  (OBJECT)
-    heroId() -> Short
-    day() -> Int
-    bracketBasicIds() -> RankBracketBasicEnum
-    matchCount() -> Long
-    winCount() -> Long
-
-MatchType  (OBJECT)
-    id() -> Long
-    didRadiantWin() -> Boolean
-    durationSeconds() -> Int
-    startDateTime() -> Long
-    endDateTime() -> Long
-    towerStatusRadiant() -> Int
-    towerStatusDire() -> Int
-    barracksStatusRadiant() -> Short
-    barracksStatusDire() -> Short
-    clusterId() -> Int
-    firstBloodTime() -> Int
-    lobbyType() -> LobbyTypeEnum
-    numHumanPlayers() -> Int
-    gameMode() -> GameModeEnumType
-    replaySalt() -> Long
-    isStats() -> Boolean
-    tournamentId() -> Int
-    tournamentRound() -> Short
-    actualRank() -> Short
-    averageRank() -> Short
-    averageImp() -> Short
-    parsedDateTime() -> Long
-    statsDateTime() -> Long
-    leagueId() -> Int
-    league() -> LeagueType
-    radiantTeamId() -> Int
-    radiantTeam() -> TeamType
-    direTeamId() -> Int
-    direTeam() -> TeamType
-    seriesId() -> Long
-    series() -> SeriesType
-    gameVersionId() -> Short
-    regionId() -> Byte
-    sequenceNum() -> Long
-    rank() -> Int
-    bracket() -> Byte
-    analysisOutcome() -> MatchAnalysisOutcomeType
-    predictedOutcomeWeight() -> Byte
-    players(steamAccountId: Long) -> MatchPlayerType
-    radiantNetworthLeads() -> Int
-    radiantExperienceLeads() -> Int
-    radiantKills() -> Int
-    direKills() -> Int
-    pickBans() -> MatchStatsPickBanType
-    towerStatus() -> MatchStatsTowerReportType
-    laneReport() -> MatchStatsLaneReportType
-    winRates() -> Decimal
-    predictedWinRates() -> Decimal
-    chatEvents() -> MatchStatsChatEventType
-    towerDeaths() -> MatchStatsTowerDeathType
-    playbackData() -> MatchPlaybackDataType
-    spectators() -> MatchPlayerSpectatorType
-    bottomLaneOutcome() -> LaneOutcomeEnums
-    midLaneOutcome() -> LaneOutcomeEnums
-    topLaneOutcome() -> LaneOutcomeEnums
-    didRequestDownload() -> Boolean
-
-MatchPlayerType  (OBJECT)
-    matchId() -> Long
-    match() -> MatchType
-    playerSlot() -> Byte
-    steamAccountId() -> Long
-    steamAccount() -> SteamAccountType
-    isRadiant() -> Boolean
-    isVictory() -> Boolean
-    heroId() -> Short
-    gameVersionId() -> Short
-    hero() -> HeroType
-    kills() -> Byte
-    deaths() -> Byte
-    assists() -> Byte
-    leaverStatus() -> LeaverStatusEnum
-    numLastHits() -> Short
-    numDenies() -> Short
-    goldPerMinute() -> Short
-    networth() -> Int
-    experiencePerMinute() -> Short
-    level() -> Byte
-    gold() -> Int
-    goldSpent() -> Int
-    heroDamage() -> Int
-    towerDamage() -> Int
-    heroHealing() -> Int
-    partyId() -> Byte
-    isRandom() -> Boolean
-    lane() -> MatchLaneType
-    position() -> MatchPlayerPositionType
-    streakPrediction() -> Short
-    intentionalFeeding() -> Boolean
-    role() -> MatchPlayerRoleType
-    roleBasic() -> MatchPlayerRoleType
-    imp() -> Short
-    award() -> MatchPlayerAward
-    item0Id() -> Short
-    item1Id() -> Short
-    item2Id() -> Short
-    item3Id() -> Short
-    item4Id() -> Short
-    item5Id() -> Short
-    backpack0Id() -> Short
-    backpack1Id() -> Short
-    backpack2Id() -> Short
-    neutral0Id() -> Short
-    behavior() -> Short
-    stats() -> MatchPlayerStatsType
-    playbackData() -> MatchPlayerPlaybackDataType
-    heroAverage() -> HeroPositionTimeDetailType
-    additionalUnit() -> MatchPlayerAdditionalUnitType
-    dotaPlus() -> HeroDotaPlusLeaderboardRankType
-    abilities(gameVerionId: Int) -> PlayerAbilityType
-    invisibleSeconds() -> Int
-    dotaPlusHeroXp() -> Int
-    variant() -> Byte
-
-MatchStatsPickBanType  (OBJECT)
-    isPick() -> Boolean
-    heroId() -> Short
-    order() -> Int
-    bannedHeroId() -> Short
-    isRadiant() -> Boolean
-    playerIndex() -> Int
-    wasBannedSuccessfully() -> Boolean
-    isCaptain() -> Boolean
-    baseWinRate() -> Byte
-    adjustedWinRate() -> Byte
-    letter() -> Int
-
-MatchStatsLaneReportType  (OBJECT)
-    radiant() -> MatchStatsLaneReportFactionObjectType
-    dire() -> MatchStatsLaneReportFactionObjectType
-
-PlayerMatchesRequestType  (INPUT_OBJECT)
-    matchIds: Long
-    leagueId: Int
-    leagueIds: Int
-    seriesId: Long
-    teamId: Int
-    teamIdSteamAccount: Int
-    isParsed: Boolean
-    startDateTime: Long
-    endDateTime: Long
-    gameModeIds: Byte
-    lobbyTypeIds: Byte
-    gameVersionIds: Int
-    regionIds: Int
-    rankIds: Int
-    bracketIds: Int
-    isStats: Boolean
-    heroIds: Short
-    laneIds: Int
-    roleIds: Int
-    positionIds: MatchPlayerPositionType
-    awardIds: Int
-    isParty: Boolean
-    hasAward: Boolean
-    withFriendSteamAccountIds: Long
-    withEnemySteamAccountIds: Long
-    withFriendHeroIds: Int
-    withEnemyHeroIds: Int
-    isVictory: Boolean
-    isRadiant: Boolean
-    minGameVersionId: Int
-    maxGameVersionId: Int
-    minImp: Int
-    maxImp: Int
-    playerList: FindMatchPlayerList
-    take: Int
-    skip: Int
-    after: Long
-    before: Long
-    orderBy: FindMatchPlayerOrderBy
-
-LeaderboardQuery  (OBJECT)
-    season(request: FilterSeasonLeaderboardRequestType) -> SteamAccountSeasonActiveLeaderboardType
-    dotaPlus(heroId: Short, orderBy: FilterLeaderboardOrder, level: Byte, skip: Int, take: Int) -> PlayerHeroDotaPlusLeaderboardRankResponseType
-    dotaPlusWeek() -> DotaPlusWeekType
-    dotaPlusTopLevels() -> HeroDotaPlusLeaderboardRankTopType
-    battlePass(eventId: Byte, countryCode: String, levels: Int) -> PlayerBattlePassResponseType
-    battlePassGroupBy(groupBy: PlayerBattlePassGroupByEnum, playerCountAt: Int, eventId: Byte, countryCode: String) -> PlayerBattlePassGroupByType
-    coaching(levels: Int) -> PlayerCoachingLeaderboardResponseType
-    guild(request: FilterLeaderboardGuildRequestType) -> GuildType
-    hero(request: FilterLeaderboardHeroRequestType) -> PlayerLeaderBoardByHeroType
-
-SteamAccountSeasonActiveLeaderboardType  (OBJECT)
-    playerCount() -> Int
-    players(skip: Long, take: Long) -> SteamAccountSeasonActiveLeaderboardRankType
-    countryData() -> SteamAccountSeasonActiveLeaderboardCountryDataType
-    positionData() -> SteamAccountSeasonActiveLeaderboardPositionDataType
-    teamData() -> TeamType
-    teamIdData() -> Int
-
-SteamAccountSeasonActiveLeaderboardRankType  (OBJECT)
-    steamAccountId() -> Long
-    steamAccount() -> SteamAccountType
-    avgImp() -> Short
-    divisionId() -> LeaderboardDivision
-    lastUpdateDateTime() -> Long
-    matchCount() -> Short
-    position() -> MatchPlayerPositionType
-    positionValue() -> Byte
-    rank() -> Short
-    rankShift() -> Short
-    topHeroOne() -> Short
-    topHeroTwo() -> Short
-    topHeroThree() -> Short
-    winRate() -> Byte
-
-FilterSeasonLeaderboardRequestType  (INPUT_OBJECT)
-    query: String
-    leaderBoardDivision: LeaderboardDivision
-    heroId: Short
-    position: MatchPlayerPositionType
-    countryCode: String
-    teamId: Int
-
---- enums ---
-RankBracket: UNCALIBRATED HERALD GUARDIAN CRUSADER ARCHON LEGEND ANCIENT DIVINE IMMORTAL
-RankBracketBasicEnum: UNCALIBRATED HERALD_GUARDIAN CRUSADER_ARCHON LEGEND_ANCIENT DIVINE_IMMORTAL FILTERED ALL
-MatchPlayerPositionType: POSITION_1 POSITION_2 POSITION_3 POSITION_4 POSITION_5 UNKNOWN FILTERED ALL
-LeaderboardDivision: AMERICAS SE_ASIA EUROPE CHINA
-FilterHeroWinRequestGroupBy: HERO_ID ALL HERO_ID_DURATION_MINUTES TIME HERO_ID_POSITION_BRACKET
-GameModeEnumType: NONE ALL_PICK CAPTAINS_MODE RANDOM_DRAFT SINGLE_DRAFT ALL_RANDOM INTRO THE_DIRETIDE REVERSE_CAPTAINS_MODE THE_GREEVILING TUTORIAL MID_ONLY LEAST_PLAYED NEW_PLAYER_POOL COMPENDIUM_MATCHMAKING CUSTOM CAPTAINS_DRAFT BALANCED_DRAFT ABILITY_DRAFT EVENT ALL_RANDOM_DEATH_MATCH SOLO_MID ALL_PICK_RANKED TURBO MUTATION UNKNOWN
-LobbyTypeEnum: UNRANKED PRACTICE TOURNAMENT TUTORIAL COOP_VS_BOTS TEAM_MATCH SOLO_QUEUE RANKED SOLO_MID BATTLE_CUP EVENT DIRE_TIDE
-MatchLaneType: ROAMING SAFE_LANE MID_LANE OFF_LANE JUNGLE UNKNOWN
-LaneOutcomeEnums: TIE RADIANT_VICTORY RADIANT_STOMP DIRE_VICTORY DIRE_STOMP
-MatchPlayerRoleType: CORE LIGHT_SUPPORT HARD_SUPPORT UNKNOWN
+== DotaQuery (OBJECT) 
+   match(id: Long!) -> MatchType   Find match details by the match id. id is a required input field.
+   matches(ids: [Long]!) -> [MatchType]   Find match details for each match id. ids is a required input field.
+   player(steamAccountId: Long!) -> PlayerType   Find player details by steam account id. id is a required input field.
+   players(steamAccountIds: [Long]!) -> [PlayerType]   Find player details for each steam account id. ids is a required input field.
+   team(teamId: Int!) -> TeamType   Find player details for each steam account id. ids is a required input field.
+   teams(teamIds: [Int]!) -> [TeamType]   Results in a list of team objects that contain data about them and their players.
+   league(id: Int!) -> LeagueType   Find league details by league Id. Id is a required field.
+   leagues(request: LeagueRequestType!) -> [LeagueType]   Find league details by searching for leagues using a LeagueRequest.
+   guild(id: Int!) -> GuildType   For getting access to one specific Guild which was used at the start of TI10 Compendium.
+   yogurt() -> YogurtQuery   Queries used for Stratz Yogurt - users won't be able to access these calls until they have access to
+   plus() -> PlusQuery   Queries used to populate Stratz Plus.
+   stratz() -> StratzQuery   Stratz specific queries.
+   heroStats() -> HeroStatsQuery   Queries used to gain insights into hero data and statistics.
+   constants() -> ConstantQuery   Queries used to query constants in Dota.
+   leaderboard() -> LeaderboardQuery   Queries used to get leaderboard information.
+   live() -> LiveQuery   Queries used to find live match data.
+   vendor() -> VendorQuery   Queries used by 3rd party applications.
+== HeroStatsQuery (OBJECT) 
+   stats(heroIds: [Short], week: Long, bracketBasicIds: [RankBracketBasicEnum], positionIds: [MatchPlayerPositionType], groupByTime: Boolean, groupByPosition: Boolean, groupByBracket: Boolean, minTime: Int, maxTime: Int) -> [HeroPositionTimeDetailType]   Detailed output of data per minute for each hero.
+   matchUp(heroId: Short, heroIds: [Short], week: Long, bracketBasicIds: [RankBracketBasicEnum], orderBy: Byte, matchLimit: Int, skip: Int, take: Int) -> [HeroDryadType]   Returns back a list of the hero matchups, showing how that hero's win rate is affected with or again
+   itemFullPurchase(heroId: Short!, week: Long, bracketBasicIds: [RankBracketBasicEnum], positionIds: [MatchPlayerPositionType], minTime: Int, maxTime: Int, matchLimit: Int) -> [HeroItemPurchaseType]   Returns the items purchased for the selected hero. Adjusting the time adjusts the purchase amount. S
+   itemStartingPurchase(heroId: Short!, week: Long, bracketBasicIds: [RankBracketBasicEnum], positionIds: [MatchPlayerPositionType]) -> [HeroItemStartingPurchaseType]   This snapshots all items in the inventory of a hero at -00:30.   It tracks if an item was given or p
+   itemBootPurchase(heroId: Short!, week: Long, bracketBasicIds: [RankBracketBasicEnum], positionIds: [MatchPlayerPositionType]) -> [HeroItemBootPurchaseType]   The purchase Item Components for a Hero's Boots.  Tracks things like activations or uses throughout 
+   itemNeutral(heroId: Short!, week: Long, bracketBasicIds: [RankBracketBasicEnum], positionIds: [MatchPlayerPositionType]) -> [HeroNeutralItemType]   The amount of times a Nutreal Item was found and won.
+   laneOutcome(heroId: Short, isWith: Boolean!, week: Long, bracketBasicIds: [RankBracketBasicEnum], positionIds: [MatchPlayerPositionType]) -> [HeroLaneOutcomeType]   Using out formula for determining the outcome of lane, the overall success of that hero in that role
+   heroVsHeroMatchup(heroId: Short!, week: Long, bracketBasicIds: [RankBracketBasicEnum], matchLimit: Int, skip: Int, take: Int) -> HeroMatchupType   This is used on the Hero page to show the comparison of skill with the selected hero with other hero
+   talent(heroId: Short!, week: Long, bracketBasicIds: [RankBracketBasicEnum], positionIds: [MatchPlayerPositionType]) -> [HeroAbilityTalentType]   This is used on the Hero page to show the comparison of all Hero Talents with the selected hero.
+   winHour(heroIds: [Short], take: Int, skip: Int, bracketIds: [RankBracket], positionIds: [MatchPlayerPositionType], regionIds: [BasicRegionType], gameModeIds: [GameModeEnumType], groupBy: FilterHeroWinRequestGroupBy) -> [HeroWinHourType]   Returns the last 12 hours by hour showing the amount of matches and the amount of wins by hero id.
+   winDay(heroIds: [Short], take: Int, skip: Int, bracketIds: [RankBracket], positionIds: [MatchPlayerPositionType], regionIds: [BasicRegionType], gameModeIds: [GameModeEnumType], groupBy: FilterHeroWinRequestGroupBy) -> [HeroWinDayType]   Returns the last 12 days by day showing the amount of matches and the amount of wins by hero id.
+   winWeek(heroIds: [Short], take: Int, skip: Int, bracketIds: [RankBracket], positionIds: [MatchPlayerPositionType], regionIds: [BasicRegionType], gameModeIds: [GameModeEnumType], groupBy: FilterHeroWinRequestGroupBy) -> [HeroWinWeekType]   Returns the last 12 weeks by week showing the amount of matches and the amount of wins by hero id.
+   winMonth(heroIds: [Short], take: Int, skip: Int, bracketIds: [RankBracket], positionIds: [MatchPlayerPositionType], regionIds: [BasicRegionType], gameModeIds: [GameModeEnumType], groupBy: FilterHeroWinRequestGroupBy) -> [HeroWinMonthType]   Returns the data by month showing the amount of matches and the amount of wins by hero id.
+   winGameVersion(heroIds: [Short], take: Int, skip: Int, bracketIds: [RankBracket], positionIds: [MatchPlayerPositionType], regionIds: [BasicRegionType], gameModeIds: [GameModeEnumType], groupBy: FilterHeroWinRequestGroupBy) -> [HeroWinGameVersionType]   Returns the data by game version showing the amount of matches and the amount of wins by hero id.
+   guide(heroId: Short, withHeroId: Short, againstHeroId: Short, isPro: Boolean, positionId: MatchPlayerPositionType, itemId: Short, neutralItemId: Short, take: Int, skip: Int) -> [HeroGuideListType]   
+   rampages(request: FilterHeroRampageType!) -> [HeroRampageObjectType]   
+   abilityMinLevel(heroId: Short!, week: Long, bracketBasicIds: [RankBracketBasicEnum], positionIds: [MatchPlayerPositionType]) -> [HeroAbilityMinType]   This helps determine at what level do you max a skill.
+   abilityMaxLevel(heroId: Short!, week: Long, bracketBasicIds: [RankBracketBasicEnum], positionIds: [MatchPlayerPositionType]) -> [HeroAbilityMaxType]   This helps determine at what level you first level a skill. (Level 1)
+   banDay(heroId: Short!, day: Int, bracketBasicIds: [RankBracketBasicEnum], take: Int, skip: Int, groupByDay: Boolean, groupByRank: Boolean) -> [HeroBanType]   This data for each day where a Hero is actually banned. This does not include data in which a hero w
+== HeroLaneOutcomeType (OBJECT) 
+   heroId1() -> Int!   
+   week() -> Int!   
+   bracketBasicIds() -> RankBracketBasicEnum   
+   position() -> MatchPlayerPositionType   
+   matchCount() -> Long   
+   drawCount() -> Long   
+   winCount() -> Long   
+   lossCount() -> Long   
+   stompWinCount() -> Long   
+   stompLossCount() -> Long   
+   matchWinCount() -> Long   
+   csCount() -> Long   
+   heroId2() -> Short!   
+== HeroDryadType (OBJECT) 
+   heroId() -> Short   
+   with() -> [HeroStatsHeroDryadType]   
+   matchCountWith() -> Long   
+   vs() -> [HeroStatsHeroDryadType]   
+   matchCountVs() -> Long   
+== HeroWinDayType (OBJECT) 
+   day() -> Long!   
+   heroId() -> Short!   
+   winCount() -> Int!   
+   matchCount() -> Int!   
+== HeroBanType (OBJECT) 
+   heroId() -> Short   
+   day() -> Int   
+   bracketBasicIds() -> RankBracketBasicEnum   
+   matchCount() -> Long   
+   winCount() -> Long   
+== MatchType (OBJECT) 
+   id() -> Long   
+   didRadiantWin() -> Boolean   
+   durationSeconds() -> Int   
+   startDateTime() -> Long   
+   endDateTime() -> Long   
+   towerStatusRadiant() -> Int   
+   towerStatusDire() -> Int   
+   barracksStatusRadiant() -> Short   
+   barracksStatusDire() -> Short   
+   clusterId() -> Int   
+   firstBloodTime() -> Int   
+   lobbyType() -> LobbyTypeEnum   
+   numHumanPlayers() -> Int   
+   gameMode() -> GameModeEnumType   
+   replaySalt() -> Long   
+   isStats() -> Boolean   
+   tournamentId() -> Int   
+   tournamentRound() -> Short   
+   actualRank() -> Short   
+   averageRank() -> Short   
+   averageImp() -> Short   
+   parsedDateTime() -> Long   
+   statsDateTime() -> Long   
+   leagueId() -> Int   
+   league() -> LeagueType   
+   radiantTeamId() -> Int   
+   radiantTeam() -> TeamType   
+   direTeamId() -> Int   
+   direTeam() -> TeamType   
+   seriesId() -> Long   
+   series() -> SeriesType   
+   gameVersionId() -> Short   
+   regionId() -> Byte   
+   sequenceNum() -> Long   
+   rank() -> Int   
+   bracket() -> Byte   
+   analysisOutcome() -> MatchAnalysisOutcomeType   
+   predictedOutcomeWeight() -> Byte   
+   players(steamAccountId: Long) -> [MatchPlayerType]   
+   radiantNetworthLeads() -> [Int]   This begins at -60 to 0 seconds (Index 0).
+   radiantExperienceLeads() -> [Int]   This begins at -60 to 0 seconds (Index 0).
+   radiantKills() -> [Int]   This begins at -60 to 0 seconds (Index 0).
+   direKills() -> [Int]   This begins at -60 to 0 seconds (Index 0).
+   pickBans() -> [MatchStatsPickBanType]   This begins at -60 to 0 seconds (Index 0).
+   towerStatus() -> [MatchStatsTowerReportType]   
+   laneReport() -> MatchStatsLaneReportType   
+   winRates() -> [Decimal]   
+   predictedWinRates() -> [Decimal]   
+   chatEvents() -> [MatchStatsChatEventType]   
+   towerDeaths() -> [MatchStatsTowerDeathType]   
+   playbackData() -> MatchPlaybackDataType   
+   spectators() -> [MatchPlayerSpectatorType]   
+   bottomLaneOutcome() -> LaneOutcomeEnums   
+   midLaneOutcome() -> LaneOutcomeEnums   
+   topLaneOutcome() -> LaneOutcomeEnums   
+   didRequestDownload() -> Boolean   
+== MatchPlayerType (OBJECT) 
+   matchId() -> Long   
+   match() -> MatchType   
+   playerSlot() -> Byte   
+   steamAccountId() -> Long   
+   steamAccount() -> SteamAccountType   
+   isRadiant() -> Boolean   
+   isVictory() -> Boolean   
+   heroId() -> Short   
+   gameVersionId() -> Short   
+   hero() -> HeroType   
+   kills() -> Byte   
+   deaths() -> Byte   
+   assists() -> Byte   
+   leaverStatus() -> LeaverStatusEnum   
+   numLastHits() -> Short   
+   numDenies() -> Short   
+   goldPerMinute() -> Short   
+   networth() -> Int   
+   experiencePerMinute() -> Short   
+   level() -> Byte   
+   gold() -> Int   
+   goldSpent() -> Int   
+   heroDamage() -> Int   
+   towerDamage() -> Int   
+   heroHealing() -> Int   
+   partyId() -> Byte   
+   isRandom() -> Boolean   
+   lane() -> MatchLaneType   
+   position() -> MatchPlayerPositionType   
+   streakPrediction() -> Short   
+   intentionalFeeding() -> Boolean   
+   role() -> MatchPlayerRoleType   
+   roleBasic() -> MatchPlayerRoleType   
+   imp() -> Short   
+   award() -> MatchPlayerAward   
+   item0Id() -> Short   
+   item1Id() -> Short   
+   item2Id() -> Short   
+   item3Id() -> Short   
+   item4Id() -> Short   
+   item5Id() -> Short   
+   backpack0Id() -> Short   
+   backpack1Id() -> Short   
+   backpack2Id() -> Short   
+   neutral0Id() -> Short   The item id of the dedicated neutral item slot (7.24 and after). From game versions 7.23 to 7.24, th
+   behavior() -> Short   
+   stats() -> MatchPlayerStatsType   
+   playbackData() -> MatchPlayerPlaybackDataType   
+   heroAverage() -> [HeroPositionTimeDetailType]   Detailed output of data per minute for each hero.
+   additionalUnit() -> MatchPlayerAdditionalUnitType   
+   dotaPlus() -> HeroDotaPlusLeaderboardRankType   Gets the players of Dota which have DotaPlus and have a high level hero.
+   abilities(gameVerionId: Int) -> [PlayerAbilityType]   
+   invisibleSeconds() -> Int   
+   dotaPlusHeroXp() -> Int   
+   variant() -> Byte   
+== MatchStatsPickBanType (OBJECT) 
+   isPick() -> Boolean!   
+   heroId() -> Short   
+   order() -> Int   
+   bannedHeroId() -> Short   
+   isRadiant() -> Boolean   
+   playerIndex() -> Int   
+   wasBannedSuccessfully() -> Boolean   
+   isCaptain() -> Boolean   
+   baseWinRate() -> Byte   
+   adjustedWinRate() -> Byte   
+   letter() -> Int   
+== MatchStatsLaneReportType (OBJECT) 
+   radiant() -> [MatchStatsLaneReportFactionObjectType]   
+   dire() -> [MatchStatsLaneReportFactionObjectType]   
+== PlayerMatchesRequestType (INPUT_OBJECT) 
+   in matchIds: [Long]   An array of Dota match ids to include in this query.
+   in leagueId: Int   A league id to include in this query, excluding all results that do not have this league id.
+   in leagueIds: [Int]   A league id to include in this query, excluding all results that do not have this league id.
+   in seriesId: Long   A series id to include in this query, excluding all results that do not have this series id.
+   in teamId: Int   A team id to include in this query, excluding all results that do not have this team id.
+   in teamIdSteamAccount: Int   When requesting matches with a primary SteamAccountId, this will ensure that player is on specific t
+   in isParsed: Boolean   Whether STRATZ has yet parsed the data of the match or not, represented in a boolean.
+   in startDateTime: Long   The start DateTime of the Dota match(es) to include in this query, represented in unix seconds.
+   in endDateTime: Long   The end DateTime of the Dota match(es) to include in this query, represented in unix seconds.
+   in gameModeIds: [Byte]   An array of game mode ids to include in this query, excluding all results that do not include one of
+   in lobbyTypeIds: [Byte]   An array of lobby type ids to include in this query, excluding all results that do not include one o
+   in gameVersionIds: [Int]   An array of game version ids to include in this query, excluding all results that do not include one
+   in regionIds: [Int]   An array of region ids to include in this query, excluding all results that do not include one of th
+   in rankIds: [Int]   An array of rank ids to include in this query, excluding all results that do not include one of thes
+   in bracketIds: [Int]   An array of rank ids to include in this query, excluding all results that do not include one of thes
+   in isStats: Boolean   STRATZ applys an formula to determine if a game is considered 'real'. We attempt to detect AFKers, l
+   in heroIds: [Short]   An array of hero ids to include in this query, excluding all results that do not include one of thes
+   in laneIds: [Int]   An array of lane ids (enum MatchLaneType) to include in this query, excluding all results that do no
+   in roleIds: [Int]   An array of role ids (enum MatchPlayerRoleType) to include in this query, excluding all results that
+   in positionIds: [MatchPlayerPositionType]   An array of positions ids (enum MatchPlayerPositionType) to include in this query, excluding all res
+   in awardIds: [Int]   An array of award ids to include in this query, excluding all results that do not include one of the
+   in isParty: Boolean   Include all matches that are party games, excluding all others.
+   in hasAward: Boolean   STRATZ gives 3 players in each game an award for playing well. MVP, Top Core, Top Support (enum Matc
+   in withFriendSteamAccountIds: [Long]   An array of steam account ids found on your team to include in this query, excluding all results tha
+   in withEnemySteamAccountIds: [Long]   A steam account id found on the enemy team to include in this query, excluding all results that do n
+   in withFriendHeroIds: [Int]   An array of hero ids found on your team to include in this query, excluding all results that do not 
+   in withEnemyHeroIds: [Int]   An array of hero ids found against your team to include in this query, excluding all results that do
+   in isVictory: Boolean   Whether the match was a victory or not for the specified player.
+   in isRadiant: Boolean   Whether the specified player was on Radiant or not.
+   in minGameVersionId: Int   Requests matches where the match is at least than this input.  See GameVersion API call for a list o
+   in maxGameVersionId: Int   Requests matches where the match is lower than this input.  See GameVersion API call for a list of p
+   in minImp: Int   Player must have at least this IMP for the Match to show.
+   in maxImp: Int   Player must have less than this IMP for the Match to show.
+   in playerList: FindMatchPlayerList   Determines if you want a single player returned, only the player by SteamAccountId, or if you want a
+   in take: Int   The amount of matches to have returned in your query. Max : 
+   in skip: Int   The amount of matches to skip before collecting your query. Hint: Paging
+   in after: Long   Only return matches after this match id. Can be used instead of Skip.
+   in before: Long   Only return matches before this match id. Can be used instead of Skip.
+   in orderBy: FindMatchPlayerOrderBy   In what order the returned data will come in.
+== LeaderboardQuery (OBJECT) 
+   season(request: FilterSeasonLeaderboardRequestType) -> SteamAccountSeasonActiveLeaderboardType   Returns the list of the current season leaderboard.
+   dotaPlus(heroId: Short, orderBy: FilterLeaderboardOrder, level: Byte, skip: Int, take: Int) -> PlayerHeroDotaPlusLeaderboardRankResponseType   Gets the players of Dota which have DotaPlus and have a high level hero.
+   dotaPlusWeek() -> [DotaPlusWeekType]   Show amount of active and expired DotaPlus users by Week
+   dotaPlusTopLevels() -> [HeroDotaPlusLeaderboardRankTopType]   Gets the top player of DotaPlus order by Level and Time Achived.
+   battlePass(eventId: Byte, countryCode: String, levels: [Int]) -> PlayerBattlePassResponseType   Gets the current leaderboard for Battle Pass levels.
+   battlePassGroupBy(groupBy: PlayerBattlePassGroupByEnum!, playerCountAt: Int!, eventId: Byte, countryCode: String) -> [PlayerBattlePassGroupByType]   Gets the current leaderboard for Battle Pass levels.
+   coaching(levels: [Int]) -> PlayerCoachingLeaderboardResponseType   Gets the current leaderboard for all coaches by level.
+   guild(request: FilterLeaderboardGuildRequestType) -> [GuildType]   Gets the current leaderboard for all guilds by points.
+   hero(request: FilterLeaderboardHeroRequestType) -> [PlayerLeaderBoardByHeroType]   Gets the current leaderboard for all players by a specific Hero, order by IMP.
+== SteamAccountSeasonActiveLeaderboardType (OBJECT) 
+   playerCount() -> Int   
+   players(skip: Long, take: Long) -> [SteamAccountSeasonActiveLeaderboardRankType]   
+   countryData() -> [SteamAccountSeasonActiveLeaderboardCountryDataType]   
+   positionData() -> [SteamAccountSeasonActiveLeaderboardPositionDataType]   
+   teamData() -> [TeamType]   
+   teamIdData() -> [Int]   
+== SteamAccountSeasonActiveLeaderboardRankType (OBJECT) 
+   steamAccountId() -> Long   
+   steamAccount() -> SteamAccountType   
+   avgImp() -> Short   
+   divisionId() -> LeaderboardDivision   
+   lastUpdateDateTime() -> Long   
+   matchCount() -> Short   
+   position() -> MatchPlayerPositionType   
+   positionValue() -> Byte   
+   rank() -> Short   
+   rankShift() -> Short   
+   topHeroOne() -> Short   
+   topHeroTwo() -> Short   
+   topHeroThree() -> Short   
+   winRate() -> Byte   
+== FilterSeasonLeaderboardRequestType (INPUT_OBJECT) 
+   in query: String   
+   in leaderBoardDivision: LeaderboardDivision   
+   in heroId: Short   
+   in position: MatchPlayerPositionType   
+   in countryCode: String   
+   in teamId: Int   
+== RankBracket (ENUM) 
+   | UNCALIBRATED
+   | HERALD
+   | GUARDIAN
+   | CRUSADER
+   | ARCHON
+   | LEGEND
+   | ANCIENT
+   | DIVINE
+   | IMMORTAL
+== RankBracketBasicEnum (ENUM) 
+   | UNCALIBRATED
+   | HERALD_GUARDIAN
+   | CRUSADER_ARCHON
+   | LEGEND_ANCIENT
+   | DIVINE_IMMORTAL
+   | FILTERED
+   | ALL
+== MatchPlayerPositionType (ENUM) 
+   | POSITION_1
+   | POSITION_2
+   | POSITION_3
+   | POSITION_4
+   | POSITION_5
+   | UNKNOWN
+   | FILTERED
+   | ALL
+== LeaderboardDivision (ENUM) 
+   | AMERICAS
+   | SE_ASIA
+   | EUROPE
+   | CHINA
+== FilterHeroWinRequestGroupBy (ENUM) 
+   | HERO_ID
+   | ALL
+   | HERO_ID_DURATION_MINUTES
+   | TIME
+   | HERO_ID_POSITION_BRACKET
+== GameModeEnumType (ENUM) 
+   | NONE
+   | ALL_PICK
+   | CAPTAINS_MODE
+   | RANDOM_DRAFT
+   | SINGLE_DRAFT
+   | ALL_RANDOM
+   | INTRO
+   | THE_DIRETIDE
+   | REVERSE_CAPTAINS_MODE
+   | THE_GREEVILING
+   | TUTORIAL
+   | MID_ONLY
+   | LEAST_PLAYED
+   | NEW_PLAYER_POOL
+   | COMPENDIUM_MATCHMAKING
+   | CUSTOM
+   | CAPTAINS_DRAFT
+   | BALANCED_DRAFT
+   | ABILITY_DRAFT
+   | EVENT
+   | ALL_RANDOM_DEATH_MATCH
+   | SOLO_MID
+   | ALL_PICK_RANKED
+   | TURBO
+   | MUTATION
+   | UNKNOWN
+== LobbyTypeEnum (ENUM) 
+   | UNRANKED
+   | PRACTICE
+   | TOURNAMENT
+   | TUTORIAL
+   | COOP_VS_BOTS
+   | TEAM_MATCH
+   | SOLO_QUEUE
+   | RANKED
+   | SOLO_MID
+   | BATTLE_CUP
+   | EVENT
+   | DIRE_TIDE
+== MatchLaneType (ENUM) 
+   | ROAMING
+   | SAFE_LANE
+   | MID_LANE
+   | OFF_LANE
+   | JUNGLE
+   | UNKNOWN
+== LaneOutcomeEnums (ENUM) 
+   | TIE
+   | RADIANT_VICTORY
+   | RADIANT_STOMP
+   | DIRE_VICTORY
+   | DIRE_STOMP
+== MatchPlayerRoleType (ENUM) 
+   | CORE
+   | LIGHT_SUPPORT
+   | HARD_SUPPORT
+   | UNKNOWN
