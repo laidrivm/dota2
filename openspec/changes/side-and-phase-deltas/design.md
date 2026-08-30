@@ -67,7 +67,12 @@ mean hero's Dire delta             −3.61 pp
 the side's own advantage            +4.00 pp   (Radiant 54.00%)
 ```
 
-The three are one fact. *Win probability at full draft* sums `sideDelta` over
+The three are one fact, and the structure predicts it: if Radiant wins R% of
+matches, a hero whose own overall winrate is O wins roughly `O + (R − 50)`
+there, so the mean hero's Radiant delta should come out near `R − 50` — 4.0
+against the 3.72 measured. The sample is thin for a per-hero figure and does
+not need to be otherwise: what it confirms is an identity, and what the pass
+subtracts is whatever the mean turns out to be on the real store. *Win probability at full draft* sums `sideDelta` over
 five allies and subtracts it over five enemies, so it counts that fact ten
 times:
 

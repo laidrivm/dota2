@@ -146,11 +146,13 @@ Closes `snapshot-build/a-side-delta-on-a-hero-that-is-above-average`,
       `NEUTRAL` it subtracts today, and widen `blend.test.ts` (ZOMBIES 20),
       whose cases pin the 50 path and none of which pins that the caller
       passes the right base for the right component.
-- [ ] 4.3 Make `src/types.ts:71` and `:73` true. Both say these deltas are
-      "relative to the hero's overall winrate" and always have; the
-      arithmetic never matched, and nothing noticed because the numbers were
-      zero. The comments do not change — this is the step that stops them
-      being wrong.
+- [ ] 4.3 Rewrite the doc comments at `src/types.ts:71` and `:73`. Both say
+      "relative to the hero's overall winrate", which the arithmetic never
+      matched and which this step makes half-true: step 5 centres the deltas
+      across heroes as well, so a value is what a side or phase is worth to
+      **this hero over and above what it is worth to heroes in general**.
+      Landing this step with the old comment leaves it accurate for one
+      release and wrong after the next, so it is written for both at once.
 - [ ] 4.4 Confirm the components are non-zero for the first time (ZOMBIES
       21): a build over a fixture harvest publishes with `side_measured` and
       `phase_measured` both true and non-zero deltas on hero rows. Record
@@ -162,24 +164,43 @@ Closes `snapshot-build/a-side-delta-on-a-hero-that-is-above-average`,
 Closes `snapshot-build/the-mean-hero-has-no-side-preference`,
 `snapshot-build/a-hero-that-genuinely-prefers-a-side`.
 
-- [ ] 5.1 Write the failing cases first: over a set of heroes the stored side
-      deltas mean 0 for each side; a hero gaining 6 pp on Radiant where the
-      mean hero gains 3.72 stores about 2.3 rather than 6.
-- [ ] 5.2 Subtract the mean over heroes **after** smoothing, per part. The
-      order matters: smoothing shrinks a thin sample towards the base, so
-      centring the raw deltas and centring the smoothed ones are different
-      numbers, and the stored value is the smoothed one.
-- [ ] 5.3 Centre `phase` too, and record in the pull request that it changes
+- [ ] 5.1 Write the failing cases first (ZOMBIES 3, 4, 5, 6, 9, 12): two
+      heroes at +6 and +2 on Radiant centre to +2 and −2; the mean of each
+      part over every hero is 0 afterwards; the five parts are centred
+      independently, one mean across all five being a different and wrong
+      number; centring `side` does not shift `phase`; `meta`, `matchup` and
+      `synergy` are untouched; a component where every hero holds the same
+      delta centres to all zeros.
+- [ ] 5.2 Subtract the mean over heroes **after** smoothing, per part, and
+      pin the order with a case (ZOMBIES 7): a hero at `n_eff = k` beside one
+      at `n_eff = k/9` centres against the mean of their *smoothed* values,
+      and centring before smoothing stores a different number.
+- [ ] 5.3 Handle the two degenerate populations (ZOMBIES 1, 2, 8): a snapshot
+      of one hero centres that hero to 0, the mean being its own value — the
+      pass erases a one-hero component rather than preserving it, and that is
+      the arithmetic, not a bug to work around; a component with no staging
+      rows is skipped entirely, no mean being taken over an empty set; a hero
+      whose zero-match row stored 0 is counted in the mean and moved off 0,
+      its column being a measured 0 rather than an absent one.
+- [ ] 5.4 Widen `build.fixture.ts` (ZOMBIES 13). Its existing inserts into
+      `staging_hero_sides` and `staging_hero_phases` carry one or two heroes,
+      which exercise the pass only degenerately — telling a mean from a value
+      needs three.
+- [ ] 5.5 Centre `phase` too, and record in the pull request that it changes
       no output today — `phaseDelta` is read only at `model.ts:225`, and
       every candidate in a call shares one phase, so a constant common to all
       heroes reorders nothing. It is centred so that two fields of one
       contract carry one definition.
-- [ ] 5.4 Check the win estimate on a full draft before and after. Without
-      this step it reads about 97.5% for a Radiant draft; with it the side
-      contributes nothing until `beta-refit` gives the logistic an intercept.
-- [ ] 5.5 Update `PLAN.md`'s queue in this step's pull request, not
+- [ ] 5.6 Check the win estimate on a full draft before and after (ZOMBIES
+      14, 15). Without this step it reads about 97.5% for a Radiant draft;
+      with it a draft of average heroes carries about 0 from the side, while
+      a draft stacked with heroes that genuinely prefer Radiant still carries
+      a positive one — the pass removes the constant, not the signal.
+- [ ] 5.7 Confirm every centred value stays finite and both fields keep their
+      shapes (ZOMBIES 10, 11), so `contract.ts`'s assertion publishes.
+- [ ] 5.8 Update `PLAN.md`'s queue in this step's pull request, not
       afterwards.
-- [ ] 5.6 Run the pre-PR sequence per `docs/review-toolkit.md` on every
+- [ ] 5.9 Run the pre-PR sequence per `docs/review-toolkit.md` on every
       step, and `bun test` and `bun run test:db` besides. Every step here
       touches the database, and CI runs only the first
       (`.github/workflows/test.yml:110`).
