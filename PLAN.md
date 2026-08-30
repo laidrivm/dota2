@@ -238,6 +238,93 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       user's to apply, in the skills repository rather than here, and its `ref`
       needs the upstream commit in `microsoft/playwright-cli`. It is open
       rather than done: nobody has applied it.
+- [ ] **`hero-aliases-seed`** — proposed,
+      `openspec/changes/hero-aliases-seed/`. The picker's search already
+      matches a legacy Dota 1 name and a community abbreviation; the type,
+      the table, the export and the client are all written and shipped, and
+      nothing fills the table. Measured on the live bundle 2026-08-29: **0 of
+      127 heroes carry a non-empty `aliases`**. A hand-written `.sql` seed,
+      applied after the ingest fills `heroes` rather than on `connect()` —
+      the foreign key would refuse it on a clean database — and replacing the
+      table whole rather than upserting, so a typo removed from the file
+      leaves the table too. Also carries `kind` into the bundle, which
+      `render.ts` drops today, so abbreviations can rank above legacy names.
+      Five steps, so `feat/hero-aliases-seed-1` … `-5`, in order. Depends on
+      nothing; the shortest of this group to ship.
+- [ ] **`candidacy-gate`** — proposed, `openspec/changes/candidacy-gate/`.
+      The picker suggests heroes for roles nobody plays them in, because the
+      only test a candidate faces is `share(h, r) > 0`. Reported from use:
+      Phantom Lancer offered as a top-three offlane pick, its position-3
+      entry carrying `share: 0.0035` with `sufficient: true`. `sufficient`
+      does not catch it and was never meant to — it fires at `n_eff >= 500`
+      and answers "is this winrate believable", not "does anybody pick this
+      hero here". Two steps, so `feat/candidacy-gate-1` and `-2`. Independent
+      of the calibration chain below, and the cheapest fix to the same
+      reported defect `score-calibration` attacks from the other end.
+- [ ] **`letter-patch-detection`** — proposed,
+      `openspec/changes/letter-patch-detection/`. The pipeline believes the
+      game is on 7.41, released 2026-03-24; it has been on 7.41e since 30
+      July, and five letter patches passed unnoticed.
+      `api.opendota.com/api/constants/patch` holds 61 entries and no letter
+      patch at all, which `src/job/ingest/patches.ts:98` already admits. So
+      the blend has run at one boundary since March and its letter-patch
+      parameters have never been exercised, the thirty-day meta window
+      silently spans letter boundaries, and `meta_capped_by_source` is
+      permanently true. Replaces the OpenDota call with Valve's Steam news
+      feed. Four steps, so `feat/letter-patch-detection-1` … `-4`. Carries
+      one acceptance criterion that cannot be verified until the next patch
+      ships, recorded as such.
+- [ ] **`match-harvest`** — proposed, `openspec/changes/match-harvest/`.
+      Nothing in this project has ever measured whether the model is any
+      good, and two of the six components it weighs have been a tautological
+      zero since the pipeline first ran — 0 of 127 heroes carry a non-zero
+      `side` or `phase`, because no pull fills either staging table. This
+      stores finished ranked All Pick drafts with their picks in order, their
+      bans, every player's position and who won.
+      `docs/research/stratz-graphql-2026-08-29.md` establishes the data
+      exists and what it costs. Six steps, so `feat/match-harvest-1` … `-6`.
+      **Head of the calibration chain** — the three entries below and
+      `beta-refit` all read what it stores, so it goes first or none of them
+      can go at all.
+- [ ] **`outcome-calibration`** — proposed,
+      `openspec/changes/outcome-calibration/`. Computes the figure the
+      pipeline has never had: how well the model predicts, against a floor
+      that is not a coin. Measured over 1 788 Divine/Immortal matches on
+      2026-08-30, **Radiant wins 53.36%** (95% CI ±2.32 pp, excluding 50%),
+      so a predictor that ignores the draft and always names Radiant scores
+      0.2489 Brier. Five steps, so `feat/outcome-calibration-1` … `-5`.
+      **Cannot be applied before `match-harvest` is applied and synced** —
+      it reads that change's tables, and its `snapshot-ingest` delta is
+      copied from the version that change leaves behind rather than from
+      `main`, so out of order it silently replaces a five-step requirement
+      with a three-step one.
+- [ ] **`score-calibration`** — proposed,
+      `openspec/changes/score-calibration/`. The suggestion list is close to
+      a ranking of heroes by their own strength, counted twice: every row of
+      the synergy matrix carries a constant offset that is the hero's own
+      strength, and `meta` already carries it once. Measured 2026-08-29 and
+      again on the 30th, agreeing to three decimals — corr(a hero's mean
+      synergy, its own weighted meta) 0.968, so **93.6% of the variance in a
+      hero's synergy row is explained by how good the hero is**. The cause is
+      `blend.ts:120`'s `NEUTRAL = 50`. Centring is applied at the export, so
+      changing one's mind costs an export rather than a re-ingest. Two steps,
+      so `feat/score-calibration-1` and `-2`. **SHOULD NOT be applied before
+      `outcome-calibration`**: it reorders every block and moves the win
+      estimate by tens of points, and applying it while nothing scores the
+      model is trading one unmeasured ranking for another.
+- [ ] **`side-and-phase-deltas`** — proposed,
+      `openspec/changes/side-and-phase-deltas/`. Fills the two staging tables
+      `match-harvest` makes computable, and fixes the base each delta is
+      taken from: against the hero's own overall winrate rather than 50,
+      which is what `src/types.ts:71` has claimed since the contract was
+      written. Then centres the deltas across heroes — without that, a
+      per-hero side delta carries the whole match-level side advantage and
+      *Win probability at full draft* applies it ten times, reading **97.5%
+      for every Radiant draft where the truth is 54.0%**. Five steps, so
+      `feat/side-and-phase-deltas-1` … `-5`. **After `match-harvest`**, whose
+      tables it reads, and after `outcome-calibration` for
+      `score-calibration`'s reason: it moves the score scale with nothing
+      measuring the move.
 - [ ] **`beta-refit`** — proposed, `openspec/changes/beta-refit/`. The win
       estimate's logistic gains a fitted slope and a fitted intercept, the
       second signed by the side. Measured over 1 446 Divine/Immortal matches
