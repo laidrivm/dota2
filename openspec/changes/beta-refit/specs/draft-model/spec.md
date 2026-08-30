@@ -13,7 +13,20 @@ otherwise `output.winEstimate` SHALL be `null`.
 advantage in log-odds. Both SHALL be read from `bundle.calibration` when it
 is present, and from `MODEL_CONSTANTS` when it is not — a bundle published
 before the pair existed is one the client holds in its cache, and the model
-is handed it.
+is handed it. `MODEL_CONSTANTS` SHALL therefore carry `alpha` beside `beta`,
+which it does not today: a requirement naming a fallback that its source of
+truth does not hold is a requirement satisfied by `undefined`.
+
+`Δ` is computed from **my team's** perspective — `src/model.ts` sums the
+allies' terms and subtracts the enemies' — while the pair is fitted over
+`Δ` computed from Radiant's, which is what *A stored draft is scored as a
+Radiant-perspective session* fixes. The two need no conversion, and the
+reason is the antisymmetry below: a Dire draft's `Δ` is the negative of the
+same draft scored as Radiant, so `σ(−α − β·Δ_radiant)` is both `1 − P(Radiant
+wins)` and the serve-time formula at `s = −1`. One fitted pair therefore
+serves both sides. The residual is the same role-inference impurity
+*Antisymmetry* already bounds, and no larger: `α` and `β` inherit it rather
+than adding one.
 
 `s` SHALL be `+1` when `session.side` is `"radiant"`, `−1` when it is
 `"dire"`, and `0` when it is `null`. The intercept is the side's advantage
@@ -42,9 +55,10 @@ advantage to apply.
 #### Scenario: The side carries the intercept's sign
 
 - **WHEN** one full draft is scored with `side: "radiant"` and the same
-  draft with `side: "dire"`, at a bundle whose `α` is non-zero
+  draft with `side: "dire"`, at a bundle whose `α` is greater than 0
 - **THEN** the two `winProbability` values SHALL differ, and the Radiant one
-  SHALL be the larger
+  SHALL be the larger — the ordering follows `α`'s sign, so a negative `α`
+  would reverse it and a zero one would collapse the two
 
 #### Scenario: No side entered
 
@@ -64,7 +78,9 @@ advantage to apply.
 
 #### Scenario: The bundle's slope is the one used
 
-- **WHEN** one draft is scored against two bundles alike in every field but
-  `calibration.beta`
+- **WHEN** one draft whose `Δ` is not 0 is scored against two bundles alike
+  in every field but `calibration.beta`
 - **THEN** the two `winProbability` values SHALL differ, so that a refit
-  reaches the client without a deploy
+  reaches the client without a deploy. `Δ ≠ 0` is required of the case: at
+  `Δ = 0` the slope multiplies nothing and the two bundles agree however far
+  apart their `β` is

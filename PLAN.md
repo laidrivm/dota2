@@ -331,7 +331,7 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       scored through `computeModel` on 2026-08-30, `beta = 0.1` scores 0.4158
       Brier against a 0.2497 floor — worse than a predictor that ignores the
       draft — because `Δ` has a standard deviation of 66 pp and the logistic
-      saturates. Five steps, so `feat/beta-refit-1` … `-5`, in order. Last of
+      saturates. Six steps, so `feat/beta-refit-1` … `-6`, in order. Last of
       the calibration chain: `match-harvest` → `outcome-calibration` →
       `score-calibration` and `side-and-phase-deltas` → this. Fitting before
       the centring lands gives a `β` eight times too small for the scale that
