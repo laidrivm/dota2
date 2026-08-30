@@ -39,9 +39,12 @@ Alongside this file:
   guilds and battle-pass records this project will never read, so only the
   subset is kept. A single-line 732 KB JSON also hangs `biome ci`, which is
   the mechanical reason the raw file is not tracked.
-- `query-schema.py` — dumps one type's fields, arguments and enum values from
-  a full introspection response, for the case the subset does not answer:
+- `query-schema.py` — dumps named types from a full introspection response.
+  It is what produces the `.txt` above, whose header carries the exact
+  argument list, and it answers a type the subset leaves out:
   `python3 docs/research/query-schema.py <schema.json> HeroStatsQuery`
+  It prints only the types it is named, following no reference: a type
+  reached through a field's return type is absent until asked for by name.
 
 ## Quota
 
@@ -180,20 +183,35 @@ MatchType { didRadiantWin, pickBans, players, bracket, ... }
 `leaderboard.season` reports `playerCount: 10043` for EUROPE alone; four
 divisions exist (`AMERICAS`, `SE_ASIA`, `EUROPE`, `CHINA`).
 
-**Leaderboard membership is not a bracket guarantee.** The queries recorded
-here passed no `bracketIds`, and the one match read whole came back at
-`bracket: 8` — one observation, which fixes nothing about the rest. A
-leaderboard player can queue in a party below their own rank, and a harvester
-that assumes the bracket instead of asking for it will quietly mix in
-matches the meta pull's own window excludes. The bracket is a filter to pass,
-not a property to infer: `PlayerMatchesRequestType` takes `bracketIds`, and
-passing `[DIVINE, IMMORTAL]` is what makes the harvest match the
-`bracketIds: [DIVINE, IMMORTAL]` the meta pull already applies. Whether the
-returned matches then carry the bracket asked for is unverified here and
-worth one recorded response before a change rests on it.
+**Leaderboard membership is not a bracket guarantee, and the two endpoints
+spell the bracket differently.** A leaderboard player can queue in a party
+below their own rank, so the bracket is a filter to pass, not a property to
+infer from where the player id came from.
 
-`PlayerMatchesRequestType` additionally offers `rankIds`, `startDateTime`,
-`endDateTime`, `gameModeIds`, `lobbyTypeIds`, `isParsed` and `isStats`.
+The filter is not the one the hero endpoints take. `heroStats.win*` declares
+`bracketIds: [RankBracket]` — the enum, which is why `ingest/meta.ts` passes
+`[DIVINE, IMMORTAL]`. `PlayerMatchesRequestType.bracketIds` is `[Int]`.
+Passing the enum names there is refused outright:
+
+```text
+bracketIds: [DIVINE, IMMORTAL]
+  → In field 'bracketIds': [In element #1: [Expected type 'Int', found DIVINE.]]
+
+bracketIds: [7, 8]   → 5 matches, every one bracket 8
+bracketIds: [8]      → the same 5 matches
+bracketIds: [1]      → no matches
+```
+
+The last line is what makes the filter worth passing rather than merely
+accepted: asking an Immortal player's history for bracket 1 returns nothing,
+so the filter excludes rather than being ignored. The numeric-to-tier mapping
+beyond `8` being the bracket every sampled Immortal match carried is not
+established here — `[7, 8]` returned no seventh-bracket match to confirm what
+`7` means.
+
+`PlayerMatchesRequestType` additionally offers `rankIds` (also `[Int]`),
+`startDateTime`, `endDateTime`, `gameModeIds`, `lobbyTypeIds`, `isParsed` and
+`isStats`.
 
 The filter that returns ranked All Pick pubs:
 `{gameModeIds: [22], lobbyTypeIds: [7]}` → `ALL_PICK_RANKED` / `RANKED`.
