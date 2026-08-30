@@ -19,6 +19,25 @@ about +5 on both sides and the model would weigh its strength twice.
 `src/types.ts` has declared side and phase "relative to the hero's overall
 winrate" since the contract was written.
 
+After smoothing, the build SHALL subtract from each side and phase delta the
+mean of that component's deltas over every hero, taken per part. A hero's
+delta then says how much more or less that side or phase suits **it** than it
+suits heroes in general, and the mean over heroes is 0.
+
+Without that pass the delta carries the whole match-level advantage of the
+side, because that advantage is the reason a hero wins more than its own
+average on it. Measured over 800 Divine and Immortal matches, the mean hero
+gains 3.72 pp on Radiant and loses 3.61 on Dire while the side itself is
+worth 4.00 pp — the same fact, counted once per hero. *Win probability at
+full draft* then sums five allies and subtracts five enemies, so it would
+count it ten times: `5 · 3.72 − 5 · (−3.61) = 36.66` pp, which at the
+model's `beta` reads as a 97.5% chance of winning every draft on Radiant.
+
+Where the advantage goes instead is `beta-refit`'s: the model has no
+intercept, so at `Δ = 0` it must answer 50% where the truth is nearer 54,
+and a logistic fitted with two parameters rather than one is where a
+constant of that shape belongs.
+
 The overall winrate SHALL be taken over the same matches the side or phase
 rows were counted from, so that a difference in population between the
 harvest and the statistics API cancels rather than leaking into the delta.
@@ -48,6 +67,19 @@ once for the whole snapshot instead of hero by hero.
 - **WHEN** a hero's overall winrate over the counted matches is 55 and its
   Radiant winrate is 56, at an `n_eff` far above `k`
 - **THEN** its stored `side_adj_radiant` SHALL approach 1.0, not 6.0
+
+#### Scenario: The mean hero has no side preference
+
+- **WHEN** the stored side deltas are read for every hero
+- **THEN** their mean SHALL be 0 for each side, so that a draft of average
+  heroes carries no side term into the win estimate
+
+#### Scenario: A hero that genuinely prefers a side
+
+- **WHEN** a hero gains 6 pp on Radiant relative to its own overall winrate
+  while the mean hero gains 3.72
+- **THEN** its stored `side_adj_radiant` SHALL carry about 2.3, the part its
+  own preference explains and not the part the side does
 
 #### Scenario: A hero with side rows and no counted matches
 

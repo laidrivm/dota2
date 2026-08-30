@@ -1,6 +1,6 @@
 # side-and-phase-deltas — tasks
 
-Four steps, four pull requests, in this order. Each names the criteria it
+Five steps, five pull requests, in this order. Each names the criteria it
 closes by their `<capability>/<scenario-slug>` identifiers.
 
 **`match-harvest` must be applied first** — every row this change writes is
@@ -156,9 +156,30 @@ Closes `snapshot-build/a-side-delta-on-a-hero-that-is-above-average`,
       `phase_measured` both true and non-zero deltas on hero rows. Record
       the count of non-zero heroes against the 0 of 127 the proposal
       measured.
-- [ ] 4.5 Update `PLAN.md`'s queue in this step's pull request, not
+
+## 5. Centring the deltas across heroes
+
+Closes `snapshot-build/the-mean-hero-has-no-side-preference`,
+`snapshot-build/a-hero-that-genuinely-prefers-a-side`.
+
+- [ ] 5.1 Write the failing cases first: over a set of heroes the stored side
+      deltas mean 0 for each side; a hero gaining 6 pp on Radiant where the
+      mean hero gains 3.72 stores about 2.3 rather than 6.
+- [ ] 5.2 Subtract the mean over heroes **after** smoothing, per part. The
+      order matters: smoothing shrinks a thin sample towards the base, so
+      centring the raw deltas and centring the smoothed ones are different
+      numbers, and the stored value is the smoothed one.
+- [ ] 5.3 Centre `phase` too, and record in the pull request that it changes
+      no output today — `phaseDelta` is read only at `model.ts:225`, and
+      every candidate in a call shares one phase, so a constant common to all
+      heroes reorders nothing. It is centred so that two fields of one
+      contract carry one definition.
+- [ ] 5.4 Check the win estimate on a full draft before and after. Without
+      this step it reads about 97.5% for a Radiant draft; with it the side
+      contributes nothing until `beta-refit` gives the logistic an intercept.
+- [ ] 5.5 Update `PLAN.md`'s queue in this step's pull request, not
       afterwards.
-- [ ] 4.6 Run the pre-PR sequence per `docs/review-toolkit.md` on every
+- [ ] 5.6 Run the pre-PR sequence per `docs/review-toolkit.md` on every
       step, and `bun test` and `bun run test:db` besides. Every step here
       touches the database, and CI runs only the first
       (`.github/workflows/test.yml:110`).

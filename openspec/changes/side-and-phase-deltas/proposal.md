@@ -42,6 +42,11 @@ numbers were zero.
 - A side or phase delta is measured against the hero's own overall winrate
   rather than against 50, which is what `src/types.ts` always claimed and
   what keeps the component from restating `meta`.
+- The deltas are then centred across heroes, so each says how much a side or
+  phase suits that hero rather than how much it suits anybody. Without it the
+  win estimate counts the side's own advantage ten times — five allies plus
+  five enemies — and reads 97.5% for every Radiant draft where the truth is
+  54.0%.
 - `side` and `phase` stop being the components the source is known not to
   measure.
 
@@ -68,6 +73,10 @@ None.
 - **Changing what `meta`, `matchups` or `synergies` are measured against.**
   `meta` against 50 is correct — it is the hero's strength, and 50 is what
   strength is relative to. The pair matrices are `score-calibration`'s.
+- **The side's own advantage.** Centring takes it out of the per-hero delta
+  and this change does not put it back. It belongs to a logistic with an
+  intercept, which the model does not have — at `Δ = 0` it must answer 50%
+  where the measured truth is 54.0% — and fitting one is `beta-refit`'s.
 - **Fitting the weights.** `side` and `phase` weigh 1.0 each and have never
   weighed anything at all; what they are worth is a question for a figure,
   and `outcome-calibration` produces it.

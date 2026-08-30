@@ -50,6 +50,49 @@ from. The harvest is leaderboard-sourced and the meta pull is Divine and
 Immortal, two populations; a within-hero difference taken inside one of them
 cancels the difference rather than carrying it.
 
+### The deltas are centred across heroes, or the side counts ten times
+
+The base change alone is not enough, and the shortfall is the same shape as
+the one `score-calibration` removes from the pair matrices: a quantity common
+to everybody sitting inside each entity separately.
+
+A hero's side delta against its own overall winrate contains the whole
+match-level advantage of that side, because that advantage is *why* the hero
+wins more than its own average there. Measured over 800 Divine and Immortal
+matches, 32 heroes with at least 40 games a side:
+
+```text
+mean hero's Radiant delta          +3.72 pp
+mean hero's Dire delta             −3.61 pp
+the side's own advantage            +4.00 pp   (Radiant 54.00%)
+```
+
+The three are one fact. *Win probability at full draft* sums `sideDelta` over
+five allies and subtracts it over five enemies, so it counts that fact ten
+times:
+
+```text
+5 · (+3.72) − 5 · (−3.61) = +36.66 pp     σ(0.1 · 36.66) = 97.5%
+```
+
+The model would answer 97.5% for every Radiant draft where the truth is 54.0.
+Subtracting the mean over heroes leaves each delta saying what that hero
+prefers, the mean is 0, and ten of them sum to nothing for an average team.
+
+### Both are centred, though only one changes an output today
+
+`sideDelta` is read twice — once per candidate in a suggestion block
+(`model.ts:224`) and five plus five in the win estimate (`273`, `278`).
+`phaseDelta` is read once, in suggestions only (`225`), and
+`const phase = pickPhase(...)` at line 174 gives every candidate in a call
+the same phase. So a constant common to all heroes shifts every candidate
+equally and reorders nothing: **centring phase changes no output.**
+
+It is centred anyway. The two fields share one doc comment in
+`src/types.ts:71`–`73` and one requirement here; two fields of one contract
+under two definitions is what bites the first time somebody adds `phase` to
+the win estimate and finds the trap reopened. The cost is the same pass.
+
 ### Phase is derived the way the model derives it
 
 `src/model.ts:pickPhase` reads the phase off a count: one pick or fewer is
@@ -125,6 +168,11 @@ prevent.
   has a thin sample at that phase. → `k = 500` already smooths a thin sample
   towards the base, and the base is now the hero's own rate, so a thin phase
   reads as "no different from this hero's usual" rather than as "average".
+- **The centring is measured on 800 matches and 32 heroes.** A thin sample
+  for a per-hero figure. → What it fixes does not rest on the sample: ten
+  applications of one match-level fact is structural, and the sample only
+  says how large the fact is. The pass subtracts whatever the mean turns out
+  to be on the real store.
 - **Both this and `score-calibration` move the score scale.** Applied
   together with nothing measuring either, the result is two unattributable
   changes. → The proposal's *Ordering* puts both after
