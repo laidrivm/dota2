@@ -47,27 +47,34 @@ quantity that changes meaning halfway through the store.
 - **THEN** the fit SHALL be taken over all of them, and the count it was
   taken over SHALL be recorded on the run's row
 
+Both scenarios below fix what the **fit returns**, never what the run
+publishes: whether a pair reaches the bundle is decided by *A fit that cannot
+be trusted is refused, not published* alone, and neither sample here meets
+its 2 000-match floor.
+
 #### Scenario: Both parameters, never one
 
 - **WHEN** a fit is taken over ten matches at `Δ = −1` of which five are
   Radiant wins and ten at `Δ = +1` of which eight are
-- **THEN** the recorded pair SHALL be `α = 0.6931`, `β = 0.6931` to four
-  decimals, whose log-likelihood is `−11.9355` against the `−12.9489` of the
-  best fit holding `α` at 0
+- **THEN** it SHALL return `α = 0.6931` and `β = 0.6931` to four decimals,
+  whose log-likelihood is `−11.9355` against the `−12.9489` of the best fit
+  holding `α` at 0
 
 #### Scenario: A sample the slope alone already fits
 
-- **WHEN** a fit is taken over five matches at `Δ = −1` of which one is a
-  Radiant win and ten at `Δ = +1` of which eight are
-- **THEN** the recorded `α` SHALL be 0 and the pair SHALL be published, a
-  maximum-likelihood `α` of 0 being a fitted value rather than an unfitted one
+- **WHEN** a fit is taken over ten matches at `Δ = −1` of which three are
+  Radiant wins and twenty at `Δ = +1` of which fourteen are, a marginal
+  Radiant rate of 56.67%
+- **THEN** it SHALL return `α = 0` and `β = 0.8473`, the two log-likelihoods
+  being equal at `−18.3259` — a maximum-likelihood `α` of 0 is a fitted value
+  rather than an unfitted one
 
 The recorded pair SHALL be the maximum-likelihood pair over the sample, and
 its log-likelihood SHALL therefore never be less than that of any fit holding
 `α` at 0. It is *not* required to be strictly greater, and neither is `α`
 required to be non-zero, because the second scenario is a case where the two
-coincide exactly: the group rates 1/5 and 8/10 are reproduced by `α = 0`,
-`β = ln 4` alone.
+coincide exactly: the group rates 3/10 and 14/20 are reproduced by `α = 0`
+and a slope alone, being symmetric about one half.
 
 Two things this requirement does **not** assert, each because a correct fit
 can violate it:
