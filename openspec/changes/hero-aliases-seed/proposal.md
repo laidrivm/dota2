@@ -19,21 +19,14 @@ it and gets nothing.
 
 ## What Changes
 
-- A tracked seed of English legacy names and abbreviations, applied to
-  `hero_aliases` by the nightly job.
-- The seed is applied after the hero upsert rather than with the schema:
-  `hero_aliases.hero_id` references `heroes`, which the ingest fills, so a
-  seed applied on connect would fail its foreign key on a fresh database
-  before a single hero row existed.
-- The seed replaces the table whole inside one transaction rather than
-  inserting what is missing, so that an alias deleted from the file is
-  deleted from the database.
-- **BREAKING** (bundle contract): the exported hero entry gains
-  `abbreviations`, and `aliases` narrows to legacy names alone. The two
-  mirror the `kind` column the schema already constrains, which the export
-  currently reads and discards.
-- The picker ranks a hero matched by abbreviation above one matched only by a
-  legacy name, and a hero matched by its own name above both.
+- The alias table gains a source: a tracked seed of English legacy names and
+  abbreviations that the nightly job applies. When it runs and what replacing
+  it means are `hero-reference`'s to state.
+- **BREAKING** (bundle contract): the exported hero entry carries the two
+  alias kinds separately, so the client can tell them apart. The exact shape
+  is in `design.md`; what the export must refuse is `snapshot-export`'s.
+- The picker's result order stops being alphabetical alone and starts
+  depending on what matched. The precedence is `hero-picker`'s.
 
 ## Capabilities
 
@@ -78,7 +71,14 @@ rather than a boundary.
   to their `alias` alone and drops `kind`; it splits into two arrays instead.
 - `src/types.ts` — `HeroEntry` gains `abbreviations: string[]`. The model
   never reads either field, so `computeModel` is untouched.
-- `src/app/picker/search.ts` — `matchHeroes` gains a sort key.
+- `src/app/picker/search.ts` — `matchHeroes` gains a sort key, and reads
+  both alias arrays defensively for the bundle cached before the split.
+- `src/app/picker/search.test.ts` — one existing case asserts an order this
+  change inverts, so it is rewritten rather than left to fail.
+- `src/job/db.fixture.ts` — `hero_aliases` joins the sentinel range the test
+  database's cleaner reclaims. Until it does, no suite may write to the table
+  at all: the cleaner's `DELETE FROM heroes` would fail on the foreign key
+  and take every other database suite with it.
 - `src/fixtures/snapshot.json` — regenerated to carry the new field, since
   the export asserts the bundle against `SnapshotBundle` and the fixture is
   what the client is served until a run publishes.
