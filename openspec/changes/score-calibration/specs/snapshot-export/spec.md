@@ -36,10 +36,17 @@ ingest.
 
 #### Scenario: A hero's strength leaves its row
 
-- **WHEN** a hero wins more than average with every ally, so every cell of
-  its raw synergy row carries the same surplus
-- **THEN** its centred row SHALL carry that surplus in no cell, the mean of
-  the centred row being zero up to the grand mean
+- **WHEN** the centred synergy matrix is read
+- **THEN** every row's mean SHALL lie within 0.1 pp of zero, against a raw
+  spread of −5.13 to +4.74 on the live bundle
+
+The bound is not zero and the difference is not rounding. Centring subtracts
+`mean(row a) + mean(row b)` and adds the grand mean, which cancels exactly
+only where every row holds the same set of keys. These do not — a hero has no
+cell with itself, and a pair the build never wrote is absent — so the
+residual is the gap between the mean of a row's own partners and the mean of
+all heroes. Measured, it is at most 0.04 pp; the bound is 0.1 to leave the
+key sets room to change without the criterion moving.
 
 #### Scenario: Antisymmetry survives centring
 
