@@ -6,9 +6,11 @@ no data for; kept because the same questions recur whenever a component is
 added to the formula.
 
 **This is a survey, not a specification.** Every figure below was read from
-the live API on 2026-08-29 under one Immortal-bracket key. Re-check before
-depending on one: the schema moves, and a field populated for one game mode
-is routinely null for another.
+the live API on 2026-08-29 under this project's own key. Where a figure is
+bracket-scoped it says so, and it is scoped because the call passed
+`bracketBasicIds: [DIVINE_IMMORTAL]` — a bracket is a filter passed, never a
+property of the key. Re-check before depending on a figure: the schema moves,
+and a field populated for one game mode is routinely null for another.
 
 ## How this was produced, and how to redo it
 
@@ -176,12 +178,22 @@ MatchType { didRadiantWin, pickBans, players, bracket, ... }
 ```
 
 `leaderboard.season` reports `playerCount: 10043` for EUROPE alone; four
-divisions exist (`AMERICAS`, `SE_ASIA`, `EUROPE`, `CHINA`). Sourcing match
-ids from leaderboard members makes every match Immortal by construction,
-which matches the `bracketIds: [DIVINE, IMMORTAL]` filter the meta pull
-already applies. `PlayerMatchesRequestType` additionally offers `rankIds`,
-`bracketIds`, `startDateTime`, `endDateTime`, `gameModeIds`, `lobbyTypeIds`,
-`isParsed` and `isStats`.
+divisions exist (`AMERICAS`, `SE_ASIA`, `EUROPE`, `CHINA`).
+
+**Leaderboard membership is not a bracket guarantee.** The queries recorded
+here passed no `bracketIds`, and the one match read whole came back at
+`bracket: 8` — one observation, which fixes nothing about the rest. A
+leaderboard player can queue in a party below their own rank, and a harvester
+that assumes the bracket instead of asking for it will quietly mix in
+matches the meta pull's own window excludes. The bracket is a filter to pass,
+not a property to infer: `PlayerMatchesRequestType` takes `bracketIds`, and
+passing `[DIVINE, IMMORTAL]` is what makes the harvest match the
+`bracketIds: [DIVINE, IMMORTAL]` the meta pull already applies. Whether the
+returned matches then carry the bracket asked for is unverified here and
+worth one recorded response before a change rests on it.
+
+`PlayerMatchesRequestType` additionally offers `rankIds`, `startDateTime`,
+`endDateTime`, `gameModeIds`, `lobbyTypeIds`, `isParsed` and `isStats`.
 
 The filter that returns ranked All Pick pubs:
 `{gameModeIds: [22], lobbyTypeIds: [7]}` → `ALL_PICK_RANKED` / `RANKED`.
