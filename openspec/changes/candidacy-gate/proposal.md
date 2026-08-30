@@ -6,9 +6,9 @@ The picker suggests heroes for roles nobody plays them in.
 
 Reported from use: Phantom Lancer offered as a top-three offlane pick. The
 live bundle says why. Its position-3 entry carries `share: 0.0035` — 0.35% of
-its games — with `sufficient: true` and `meta: -0.54`, and the only test a
-candidate faces is `share(h, r) > 0`. Any role a hero has ever been played
-in is a role the picker will recommend.
+its games — with `sufficient: true` and a meta that read −0.54 on one day and
+−0.70 the next, and the only test a candidate faces is `share(h, r) > 0`. Any
+role a hero has ever been played in is a role the picker will recommend.
 
 `sufficient` does not catch it and was never meant to. It fires at
 `n_eff >= 500`, an absolute-sample test that answers "is this winrate worth
@@ -17,10 +17,13 @@ of a popular hero's games clears 500 comfortably. The number is believable;
 the role is not one anybody picks. Two different questions, and the model
 asks only the first.
 
-`meta: -0.54` shows the second cost. Smoothing pulls a thin sample towards
-neutral, so a role the hero genuinely loses reads as very slightly below
-average rather than as the mistake it is — which is small enough to be
-outweighed by any other component.
+That meta shows the second cost. Smoothing pulls a thin sample towards
+neutral, so a role the hero genuinely loses reads as barely below average
+rather than as the mistake it is — small enough to be outweighed by any other
+component. dota2protracker, reading the same STRATZ data at 7000–8500 MMR
+over eight days, shows 22 matches at 41% for that role — a different window
+and bracket from the bundle's, so not a figure to compare against directly,
+but not one a −0.6 describes either.
 
 ## What Changes
 

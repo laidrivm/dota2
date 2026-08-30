@@ -25,28 +25,34 @@ synergy fix, no hiding a hero from the picker, no exception list.
 
 Counting how many positions a threshold removes says nothing about whether
 removing them is right. The figure that decides is how many positions the
-model currently rates *well* are lost. Measured over the live bundle's 507
-sufficient hero-positions:
+model currently rates *well* are lost.
+
+The bundle is rebuilt nightly, so the counts drift. Two readings a day apart,
+over roughly 507 sufficient hero-positions:
 
 ```text
-threshold   removes   of those, meta > 0   best position removed
-     0.5%        26                    0   Phantom Lancer p3, 0.35%, meta −0.54
-     1.0%        78                    1   Spectre p3, 0.81%, meta +2.51
-     1.5%       108                    3
-     2.0%       135                    7
-     3.0%       160                   12   Winter Wyvern p2, 2.25%, meta +4.62
-     5.0%       207                   22   Enigma p2, 3.38%, meta +4.94
+             removed          of those, meta > 0
+threshold    29-08  30-08     29-08  30-08   best removed on 30-08
+     0.5%       26     27         0      0   Lich p2, 0.35%, meta −0.50
+     1.0%       78     80         1      2   Spectre p3, 0.81%, meta +2.72
+     3.0%      160    162        12     11   Winter Wyvern p2, 2.16%, +3.94
+     5.0%      207    208        22     21   Enigma p2, 3.34%, +4.75
 ```
 
-0.5% is the largest threshold that removes no position the model rates above
-neutral, and the best thing it removes is the reported defect itself. At 1%
-Spectre's offlane goes at +2.51 — a real off-role pick, and the kind of
-suggestion this product exists to make.
+The counts move by ones and twos; the property the threshold is chosen on
+does not. At 0.5% both readings remove nothing the model rates above neutral,
+and everything removed sits near −0.5. At 1% Spectre's offlane goes at
++2.51 on one reading and +2.72 on the other — a real off-role pick either
+way, and the kind of suggestion this product exists to make.
+
+Two readings are quoted rather than one because a single day's table cannot
+say whether a count is a fact or a fluctuation, and the decision rests on the
+zero rather than on the twenty-six.
 
 An earlier note in this session proposed 5% on the pair-count reduction
 alone. That reading also claimed the threshold would halve a future
-`laneOutcome` pull; at 0.5% it removes 26 of 507, so it saves nothing, and
-that claim does not survive either.
+`laneOutcome` pull; at 0.5% it removes 26 or 27 of about 507, so it saves
+nothing, and that claim does not survive either.
 
 No hero is left with no eligible role at any threshold up to 15%, so the
 failure mode of a hero disappearing from every block does not arise and needs
@@ -79,11 +85,11 @@ keeps its meaning. The constant joins `MODEL_CONSTANTS`, which
 
 ## Risks / Trade-offs
 
-- **The threshold is fitted to one bundle on one patch.** The table above is
-  a single reading of a single day. → It is a constant in one place with the
-  measurement recorded here, so re-reading it later is re-running one script;
-  and it was chosen at the edge of a flat region rather than at a cliff, so a
-  drifting meta moves it slowly.
+- **The threshold is fitted to one patch.** Two readings a day apart agree on
+  the property it rests on and differ in the counts around it, which is
+  evidence about a day and not about a patch boundary. → It is a constant in
+  one place with both measurements recorded here, and it sits at the edge of
+  a flat region rather than at a cliff, so a drifting meta moves it slowly.
 - **A genuinely new off-role pick is invisible until it passes 0.5%.** A hero
   the meta has just started flexing is suppressed for as long as the share
   takes to arrive. → Accepted: the alternative is suggesting every role
