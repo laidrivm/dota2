@@ -12,7 +12,9 @@ drafts with results, which `match-harvest` stores, and a scorer, which
 `outcome-calibration` writes. Both are proposed and neither is applied, so
 this change is last in that chain rather than first.
 
-No endpoint changes shape. `/snapshot.json` gains one optional object:
+No endpoint loses or renames a field, and no field the client reads today
+changes type or meaning. `/snapshot.json` gains one optional object, which a
+client that does not know it ignores:
 
 ```text
 calibration?: { alpha: number; beta: number }    both finite, log-odds
@@ -146,7 +148,8 @@ defensive habit:
   two consecutive nights would move the client's answers by more than the
   data moved.
 - **Held-out Brier below the base rate.** This is the condition `β = 0.1`
-  fails today, at 0.4158 against 0.2497. A guard that would not have caught
+  fails today at `α = 0`, 0.4158 against 0.2497. A guard that would not have
+  caught
   the defect the change exists to remove is a guard that has not been tested.
 
 A refused fit leaves the previously published pair standing. Falling back to
@@ -160,7 +163,7 @@ Five-fold, no match scored by parameters fitted on it, 1 446 matches:
 ```text
                               live bundle    with score-calibration
 base rate, ignores the draft      0.2497                    0.2497
-the model as it stands            0.4158                    0.2963
+the model as it stands, α = 0     0.4158                    0.2963
 slope fitted, no intercept        0.2493                    0.2475
 slope and intercept fitted        0.2490                    0.2471
 accuracy, slope and intercept     52.77%                    54.43%

@@ -37,8 +37,11 @@ Closes `draft-model/the-side-carries-the-intercept-s-sign`,
 - [ ] 1.1 Write the failing cases first (ZOMBIES 1, 4, 5, 6, 12): `side: null`
       at `Δ = 0` gives exactly 0.5; the same full draft reads higher on
       `"radiant"` than on `"dire"`; a `Δ` of ±200 — the range the live bundle
-      produces — stays strictly inside `(0, 1)` where `β = 0.1` saturates to
-      the endpoints in double precision; `β = 0` leaves `σ(α·s)` alone; a
+      produces — stays strictly inside `(0, 1)` at the fitted `β`, where
+      `β = 0.1` answers `1 − 2.1e-9`. Not the floating-point endpoint: `σ`
+      first returns exactly 1 at `Δ = 370`, so the defect at ±200 is a
+      certainty the data cannot support rather than a value that has lost its
+      distance from 1. `β = 0` leaves `σ(α·s)` alone; a
       bundle with no `calibration` scores from `MODEL_CONSTANTS` and returns
       neither `null` nor `NaN`.
 - [ ] 1.2 Rewrite `model-estimate.test.ts:45`, do not extend it (ZOMBIES 3).
@@ -143,7 +146,13 @@ Closes `outcome-calibration/a-fit-over-the-whole-store`,
 - [ ] 3.4 Add `alpha`, `beta` and the count to the per-run table
       `outcome-calibration` creates in `src/job/schema.sql`, and to its
       reclaim in `src/job/db.fixture.ts`. Read the table as that change left
-      it rather than as this file describes it.
+      it rather than as this file describes it. Add them the way
+      `schema.sql:98-104` adds a column to `snapshots` — `ALTER TABLE … ADD
+      COLUMN IF NOT EXISTS` beside the `CREATE TABLE IF NOT EXISTS`, which
+      that file's own header explains: the schema is applied on every
+      `connect()`, so a table that already exists is upgraded rather than
+      skipped. Editing the `CREATE` alone leaves every existing database
+      without the columns and no error to say so.
 - [ ] 3.5 Fit by maximum likelihood with step control, never a bare
       Newton–Raphson. The unguarded version returned `β = 3543.7` and
       `α = −1961.0` on the very matches this change measured, and it
@@ -172,11 +181,16 @@ Closes `outcome-calibration/a-sample-below-the-floor`,
       reached; a non-finite `α` publishes nothing; `β = −0.01` publishes
       nothing.
 - [ ] 4.2 Assert each condition's own verdict, never publication, wherever
-      the other two are not also satisfied. A `β` of exactly 0 clears this
-      step's interval and then fails the held-out gate — it predicts the base
-      rate for every draft, so its Brier equals the floor rather than falling
-      strictly below it. A case asserting that `β = 0` *publishes* would be
-      asserting the opposite of step 5's criterion.
+      the other two are not also satisfied, and pin `α` in every case that
+      names a `β` — the asserted outcome depends on the pair, never on the
+      slope alone. A `β` of exactly 0 **with `α` at its maximum-likelihood
+      value** clears this step's interval and then fails the held-out gate:
+      the `α`-only model's fitted `σ(α)` is the sample's Radiant rate exactly,
+      so its Brier equals the floor rather than falling strictly below it. At
+      any other `α` it predicts a different constant and the equality does not
+      hold, which is why the case must fix both. A case asserting that
+      `β = 0` *publishes* would be asserting the opposite of step 5's
+      criterion.
 - [ ] 4.3 Record which condition failed, not merely that one did (ZOMBIES
       37). A row saying "refused" cannot tell a thin store on a quiet night
       from a solver that came apart.
@@ -194,7 +208,8 @@ cross-validation that produces a second number. It is also the condition
 - [ ] 5.1 Write the failing cases first (ZOMBIES 32, 33, 36): a held-out
       Brier *equal* to the base rate's refuses, the criterion saying below
       rather than at most; `β = 0.1` on the live bundle's `Δ` distribution
-      fails at 0.4158 against 0.2497, so the guard is exercised against the
+      at `α = 0` — the pair the model carries today — fails at 0.4158 against
+      0.2497, so the guard is exercised against the
       defect the change exists to remove rather than a case invented for it;
       a fold's test rows are absent from its train rows.
 - [ ] 5.2 Partition on `match_id mod 5` and pool the held-out predictions
@@ -224,7 +239,9 @@ Closes `outcome-calibration/the-first-run-with-nothing-published-before`,
 - [ ] 6.3 Widen the model's own coverage for the bundle-carrying-calibration
       case (ZOMBIES 9, 10, 11): `calibration` present with `alpha` missing
       falls back whole rather than applying a fitted `β` beside an `undefined`
-      that arithmetic turns into `NaN`; a `beta` of `NaN` leaks none into
+      that arithmetic turns into `NaN`, and the mirror case with `beta`
+      missing does the same — either half absent means the pair is absent,
+      and neither is ever taken on its own; a `beta` of `NaN` leaks none into
       `winProbability`; `model-estimate.test.ts:126`'s no-NaN guard predates
       the field and is extended to a bundle that carries it.
 - [ ] 6.4 Add a case for `calibration.alpha = 0` reproducing the pre-change
