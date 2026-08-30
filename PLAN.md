@@ -437,6 +437,41 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       the Python source with a regex instead is the thing `CLAUDE.md` forbids
       — a value read from a line that resembles the structure rather than from
       the structure its tool parses.
+- [ ] **Bans move a suggestion by 0.05%, and the weight is the lever.**
+      Reported from use: bans do not change the suggestion scores. Measured on
+      the live bundle — ten bans of the most-contested heroes move the top
+      offlane candidate from 25.3663 to 25.3536, and the block does not
+      reorder. Bans reach a score by one path only, `counterRisk`, whose
+      spread across candidates is 0.3305 pp against a score spread of
+      13.6150 — **2.43% of what separates them** — and whose whole ceiling,
+      banning every hero that counters a candidate, is 0.0532 pp on 25.4.
+
+      Most of that is the defect `score-calibration` already removes, and the
+      evidence is a correlation: uncentred, the count of heroes with
+      `adv > 0` against a candidate correlates **−0.953** with the
+      candidate's own meta, because its column carries minus its own
+      strength — only 5 of 127 heroes "counter" Enigma. Centred, the
+      correlation is −0.199, the count is 58, and the same ten bans move the
+      score 1.47% rather than 0.05%. So this entry is what is left afterwards,
+      not the whole of the report.
+
+      What is left is the weight. `counterRisk` weighs 0.5, fitted against
+      nothing, and no criterion pins it — `draft-model` §*Counter-risk
+      monotonic in bans* fixes the direction only. So it needs no delta spec:
+      `suggestion-calibration` fits it beside the other five.
+
+      The shape was considered and kept. An expectation over the whole pool
+      means one ban removes 1/126 of the mass and moves the term 3.8%, where a
+      top-5 form moves it 11% — and top-3 and top-10 give 11.9% and 8.1%, so
+      what matters is top-k at all rather than which k. Not taken: k is a new
+      unfitted parameter standing in for one unfitted weight, and nothing yet
+      measures whether the result is better. `src/model.ts:185-188` carries
+      the note so a reader meeting the report does not reach for it.
+
+      **`src/model.ts` now sits at exactly its 300-line cap.** That note is
+      what filled the last four lines, and `beta-refit`'s step 1 edits the
+      same file to add the intercept — so that step splits it first, to the
+      cap that will apply rather than the one that does.
 - [ ] **Five sets of letters name more than one hero.** `heroAbbr` in
       `src/app/board/format.ts` takes a display name's first four letters with
       non-letters removed, and over the 128-hero palette that collides five

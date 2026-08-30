@@ -182,6 +182,10 @@ export function computeModel(
 	]);
 
 	// --- §3.2 counter-risk: pop/P̂ over enemy-pick candidates, computed once.
+	// An expectation over the whole pool on purpose: one ban removes 1/126 of
+	// the mass, so it moves the term 3.8% where a top-5 form would move it 11%.
+	// That form is the open alternative and wants its own fitted k; PLAN.md
+	// §*Bans move a suggestion by 0.05%* carries the measurement and the lever.
 	const nOpenEnemy = 5 - enemyHeroes.length;
 	const candPop = bundle.heroes
 		.filter((h) => h.sufficient && !taken.has(h.id))
