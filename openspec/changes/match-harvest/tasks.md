@@ -1,9 +1,11 @@
 # match-harvest — tasks
 
-Seven steps, seven pull requests, in this order — `change-slicing` ships one per
-task group, and the last group is a group. Each names the criteria it closes
-by their `<capability>/<scenario-slug>` identifiers; the last closes none and
-says so, which that capability admits for a step carrying only bookkeeping.
+Six steps, six pull requests, in this order. Each names the criteria it
+closes by their `<capability>/<scenario-slug>` identifiers. There is no
+closing group: `openspec/config.yaml` lets a step close no criterion only
+when it carries infrastructure, and updating `PLAN.md` and running the review
+sequence are neither — so they ride with the step that merges last, where
+they were always going to happen.
 
 The `snapshot-ingest` delta carries five criteria this change does not close
 — `a-run-that-succeeds`, `an-ingest-that-fails`, `a-build-that-fails`,
@@ -159,13 +161,8 @@ Closes `snapshot-ingest/a-harvest-that-fails`,
 - [ ] 6.5 Re-verify `snapshot-ingest/a-run-that-succeeds` (ZOMBIES 30), whose
       text this change rewrites from three steps to four — `run.test.ts:79`
       is the case that carries it and it now has a fourth step to pass.
-
-## 7. Closing the change
-
-Closes no acceptance criterion.
-
-- [ ] 7.1 Update `PLAN.md`'s queue in the pull request that merges the last
-      step, not afterwards.
-- [ ] 7.2 Run the pre-PR sequence per `docs/review-toolkit.md` on every step.
+- [ ] 6.6 Update `PLAN.md`'s queue in this step's pull request, not
+      afterwards.
+- [ ] 6.7 Run the pre-PR sequence per `docs/review-toolkit.md` on every step.
       Steps 1 to 4 all touch the database, so each one's suite must assert it
       ran rather than skipping, and `bun run test:db` is the run that counts.

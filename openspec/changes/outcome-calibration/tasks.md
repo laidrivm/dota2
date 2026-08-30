@@ -1,9 +1,11 @@
 # outcome-calibration — tasks
 
-Six steps, six pull requests, in this order — `change-slicing` ships one
-per task group and the last group is a group. Each names the criteria it
-closes by their `<capability>/<scenario-slug>` identifiers; the last closes
-none and says so.
+Five steps, five pull requests, in this order. Each names the criteria it
+closes by their `<capability>/<scenario-slug>` identifiers. There is no
+closing group: `openspec/config.yaml` lets a step close no criterion only
+when it carries infrastructure, and recording the figures, updating
+`PLAN.md` and running the review sequence are none of that — so they ride
+with the step that merges last, where they were always going to happen.
 
 **This change cannot be applied before `match-harvest` is applied and
 synced.** It reads the tables that change creates, and its `snapshot-ingest`
@@ -130,17 +132,12 @@ Closes `snapshot-ingest/a-scorer-that-fails`.
       name the export as the only standalone mode. `match-harvest` already
       lists three such comments; re-grep rather than trusting that list,
       since this change lands on top of it.
-
-## 6. Closing the change
-
-Closes no acceptance criterion.
-
-- [ ] 6.1 Record the first real figures — model Brier, model accuracy,
+- [ ] 5.5 Record the first real figures — model Brier, model accuracy,
       baseline Brier, baseline accuracy, matches scored — in the pull request
       that merges the last step. They are what the whole change exists to
       produce, and the first ones settle whether `beta-refit` is urgent or
       merely due.
-- [ ] 6.2 Update `PLAN.md`'s queue in the same pull request, not afterwards.
-- [ ] 6.3 Run the pre-PR sequence per `docs/review-toolkit.md` on every step.
+- [ ] 5.6 Update `PLAN.md`'s queue in the same pull request, not afterwards.
+- [ ] 5.7 Run the pre-PR sequence per `docs/review-toolkit.md` on every step.
       Steps 3 to 5 touch the database, so each one's suite must assert it ran
       rather than skipping, and `bun run test:db` is the run that counts.
