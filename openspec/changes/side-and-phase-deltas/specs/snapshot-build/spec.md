@@ -4,10 +4,13 @@
 
 ### Requirement: Smoothing towards neutral by sample size
 
-After blending, the build SHALL store the delta
+After blending, the build SHALL compute the smoothed delta
 `adj = (wr_blend − base) · n_eff / (n_eff + k)` in percentage points, where
 `n_eff = n_new + prior(t)` and `k` is 300 for a hero's meta on a position,
 500 for side and phase, and 400 for matchup and synergy (data-model §4.2).
+For meta, matchup and synergy the smoothed delta is what the build stores.
+For side and phase it is an intermediate, and the centring pass below fixes
+what the column holds.
 
 `base` SHALL be 50 for meta, matchup and synergy, and the hero's own overall
 winrate over the same matches for side and phase. The base is what the delta
@@ -27,10 +30,14 @@ overall winrate from, the build SHALL fail rather than fall back to 50: a
 silent 50 would restore the very double count this base exists to remove,
 and on one hero rather than all of them.
 
-After smoothing, the build SHALL subtract from each side and phase delta the
-mean of that component's deltas over every hero, taken per part. A hero's
-delta then says how much more or less that side or phase suits **it** than it
-suits heroes in general, and the mean over heroes is 0.
+After smoothing, the build SHALL subtract from each side and phase smoothed
+delta the mean of that component's smoothed deltas over every hero, taken per
+part, and store the result. Every hero of the reference carries a row for
+every part whenever the component is measured at all, so a zero-match row's
+smoothed 0 is one of the values the mean is taken over — and the column that
+row writes is that 0 less the mean, not 0. A hero's stored delta then says
+how much more or less that side or phase suits **it** than it suits heroes in
+general, and the mean over heroes is 0.
 
 Without that pass the delta carries the whole match-level advantage of the
 side, because that advantage is the reason a hero wins more than its own
@@ -46,8 +53,9 @@ intercept, so at `Δ = 0` it must answer 50% where the truth is nearer 54,
 and a logistic fitted with two parameters rather than one is where a
 constant of that shape belongs.
 
-A side or phase row carrying zero matches reaches `n_eff = 0` and stores its
-column as 0. That is not the omission the next paragraph describes: omission
+A side or phase row carrying zero matches reaches `n_eff = 0`, so its smoothed
+delta is 0 and its column is written rather than omitted. That is not the
+omission the next paragraph describes: omission
 is for a statistic stored as a row of its own, where a stored 0 and a
 measured neutral are indistinguishable. Side and phase are columns on the
 hero row, so they have no such choice — the column is written, and *An
@@ -66,7 +74,8 @@ once for the whole snapshot instead of hero by hero.
 
 - **WHEN** a hero's overall winrate over the counted matches is 55 and its
   Radiant winrate is 56, at an `n_eff` far above `k`
-- **THEN** its stored `side_adj_radiant` SHALL approach 1.0, not 6.0
+- **THEN** its smoothed Radiant delta SHALL approach 1.0, not 6.0 — what the
+  column holds is that value less the mean over heroes
 
 #### Scenario: The mean hero has no side preference
 
@@ -76,8 +85,9 @@ once for the whole snapshot instead of hero by hero.
 
 #### Scenario: A hero that genuinely prefers a side
 
-- **WHEN** a hero gains 6 pp on Radiant relative to its own overall winrate
-  while the mean hero gains 3.72
+- **WHEN** a hero's smoothed Radiant delta is 6.0 and the mean of the smoothed
+  Radiant deltas over every hero of the reference, zero-match rows counted,
+  is 3.72
 - **THEN** its stored `side_adj_radiant` SHALL carry about 2.3, the part its
   own preference explains and not the part the side does
 
@@ -90,14 +100,15 @@ once for the whole snapshot instead of hero by hero.
 #### Scenario: A zero-match side row
 
 - **WHEN** a hero's side row carries zero matches and its prior has decayed
-- **THEN** its `side_adj` column SHALL be written as 0, the column having no
-  omission to fall back on
+- **THEN** its smoothed delta for that side SHALL be 0 and its `side_adj`
+  column SHALL be written rather than omitted, carrying that 0 less the mean
+  over heroes — a measured 0 the centring pass moves like any other
 
 #### Scenario: A hero with no side preference
 
 - **WHEN** a hero's Radiant and Dire winrates both equal its overall winrate
-- **THEN** both side deltas SHALL be 0 however far its overall winrate is
-  from 50
+- **THEN** both its smoothed side deltas SHALL be 0 however far its overall
+  winrate is from 50
 
 #### Scenario: Sample equal to the constant
 
@@ -109,7 +120,7 @@ once for the whole snapshot instead of hero by hero.
 
 - **WHEN** a hero's side statistic has `n_eff = k` and `wr_blend = 54` and
   the hero's overall winrate over the same matches is 55
-- **THEN** its stored `adj` SHALL equal −0.5, the same inputs answering
+- **THEN** its smoothed `adj` SHALL equal −0.5, the same inputs answering
   differently because the base does
 
 #### Scenario: A sample far below the constant

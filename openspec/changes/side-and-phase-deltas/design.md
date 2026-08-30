@@ -72,9 +72,10 @@ matches, a hero whose own overall winrate is O wins roughly `O + (R − 50)`
 there, so the mean hero's Radiant delta should come out near `R − 50` — 4.0
 against the 3.72 measured. The sample is thin for a per-hero figure and does
 not need to be otherwise: what it confirms is an identity, and what the pass
-subtracts is whatever the mean turns out to be on the real store. *Win probability at full draft* sums `sideDelta` over
-five allies and subtracts it over five enemies, so it counts that fact ten
-times:
+subtracts is whatever the mean turns out to be on the real store.
+
+*Win probability at full draft* sums `sideDelta` over five allies and
+subtracts it over five enemies, so it counts that fact ten times:
 
 ```text
 5 · (+3.72) − 5 · (−3.61) = +36.66 pp     σ(0.1 · 36.66) = 97.5%
