@@ -54,10 +54,12 @@ Three things fall out, and the third is why this form rather than a flat one:
   the side, so `α·s` changes sign alongside `β·Δ` and
   `σ(−α − βΔ) = 1 − σ(α + βΔ)` exactly. A flat `α` would break a criterion
   that has held since the model module was written, and would break it by
-  `2·(σ(α) − 0.5)` — 4.86 pp at the `α` measured here, against a tolerance
+  `2·(σ(α) − 0.5)` — 4.55 pp at the fitted `α` of 0.0910, against a tolerance
   the criterion states as "~1 decimal place", which on a probability in
-  `[0, 1]` is 5 pp. A flat intercept would therefore break an invariant the
-  model rests on and pass the case that guards it, by 0.14 pp.
+  `[0, 1]` is 5 pp — and `toBeCloseTo(…, 1)` at
+  `model-estimate.test.ts:75` is exactly that bound. A flat intercept would
+  therefore break an invariant the model rests on and pass the case that
+  guards it, by 0.45 pp.
 
 ### The pair lives in the bundle, not in `MODEL_CONSTANTS`
 
@@ -181,7 +183,7 @@ Two readings, and the second is the uncomfortable one:
   European season leaderboard's top 200. → The store `match-harvest` builds
   is the same population, so the fit and the serve match. What it does not
   support is a claim about lower brackets, and nothing here makes one.
-- **`α` measured 0.0972 here and the Radiant rate measured 51.80%, against
+- **`α` fitted at 0.0910 here and the Radiant rate measured 51.80%, against
   53.36% over `outcome-calibration`'s 1 788 matches.** The two samples
   disagree by 1.6 pp on the quantity `α` is. → Which is why `α` is fitted per
   run rather than pinned once, and why the floor is a match count rather than
