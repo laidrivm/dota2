@@ -360,6 +360,33 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       written three times and executed nowhere. Ships on
       `feat/focus-restore-idiom`; its `design.md` admits abandoning the lift if
       the helper turns out to be a bare `setTimeout` wrapper.
+- [ ] **`lane-synergy-model`** — proposed,
+      `openspec/changes/lane-synergy-model/`. The ally half of the lane pull:
+      who a candidate stands *beside*, where `laning-phase-model` brings in
+      who it stands against. One flag on the same endpoint. Measured on
+      Phantom Lancer at position 1 over twelve weeks, 84 allies at 60 games or
+      more — **corr with the stored synergy +0.182**, lane spread 44.4 pp
+      against the match's 23.0, and 3 239 games a pair, deep because a carry
+      has a support beside it in nearly every game where its opponents split
+      across the pool.
+
+      Symmetric where the opponent half is antisymmetric, so it is stored
+      once. Its smoothing constant comes out 44 under the rule
+      `laning-phase-model` establishes, inside the 17-to-61 that change
+      measured.
+
+      **Costs another 3 600 requests**, taking the run to about 7 700 against
+      a daily ceiling of 15 000 and roughly six hours of pacing — which is why
+      it is separate rather than shipped alongside. Two things it leaves open
+      and says so: whether the ally sample supports a four-week window rather
+      than twelve, which would cost 1 200 instead, and whether `+0.417`
+      against the same pair's match outcome is too much overlap to earn a
+      component at all. `suggestion-calibration` is what answers the second,
+      and a fitted weight near zero is an outcome this change has to be
+      willing to reach.
+
+      After `laning-phase-model`, which every one of its deltas is written
+      against, and therefore after `candidacy-gate` too.
 - [ ] **Ten workflow pins nothing updates.** `bun-version: 1.3.14` stands in
       ten jobs across five workflows, and Dependabot raises none of them: its
       `github-actions` ecosystem updates `uses:` refs only, and its `bun`
