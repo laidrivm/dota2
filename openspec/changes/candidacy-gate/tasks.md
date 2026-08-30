@@ -1,8 +1,10 @@
 # candidacy-gate — tasks
 
-Three steps, three pull requests, in this order — `change-slicing` ships one
-per task group and the last group is a group. Each names the criteria it
-closes; the last closes none and says so.
+Two steps, two pull requests, in this order. Each names the criteria it
+closes. There is no closing group: `openspec/config.yaml` lets a step close
+no criterion only when it carries infrastructure, and reproducing the report,
+updating `PLAN.md` and running the review sequence are none of that — so they
+ride with the step that merges last, where they were always going to happen.
 
 The `draft-model` delta carries two criteria this change does not close —
 `empty-draft-components-model-spec-7-1` and
@@ -69,14 +71,10 @@ Closes `draft-model/the-threshold-does-not-reach-enemy-role-inference`,
 - [ ] 2.4 Re-run the two criteria this requirement already carried, neither
       of which is this change's to close.
 
-## 3. Closing the change
-
-Closes no acceptance criterion.
-
-- [ ] 3.1 Reproduce the report (ZOMBIES 11): Clockwerk at 4, Lich at 5,
+- [ ] 2.5 Reproduce the report (ZOMBIES 11): Clockwerk at 4, Lich at 5,
       Treant and Bane opposite, and check Phantom Lancer is gone from the
       offlane block. Record the block before and after in the pull request —
       it is the one observation a reader can check against the complaint.
-- [ ] 3.2 Update `PLAN.md`'s queue in the pull request that merges the last
-      step, not afterwards.
-- [ ] 3.3 Run the pre-PR sequence per `docs/review-toolkit.md` on every step.
+- [ ] 2.6 Update `PLAN.md`'s queue in this step's pull request, not
+      afterwards.
+- [ ] 2.7 Run the pre-PR sequence per `docs/review-toolkit.md` on both steps.

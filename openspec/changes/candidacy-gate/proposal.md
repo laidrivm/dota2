@@ -43,8 +43,9 @@ None.
 
 ### Modified Capabilities
 
-- `draft-model`: its *Suggestion scoring* requirement fixes the candidate set
-  at `share(h, r) > 0`, which is the whole of the defect.
+- `draft-model`: its *Suggestion scoring* requirement is where the candidate
+  set is fixed, and the candidate set is the whole of the defect. What the
+  test becomes is that requirement's to state.
 
 ## Non-goals
 
