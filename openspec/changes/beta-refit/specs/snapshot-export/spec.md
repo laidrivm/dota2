@@ -1,5 +1,13 @@
 # snapshot-export delta — beta-refit
 
+**This delta is written against the version `hero-aliases-seed` leaves
+behind, not against `main`.** That change modifies the same requirement — it
+carries `kind` into the bundle's aliases — and with no order between two
+changes replacing one requirement, the second to sync drops the first's edit
+and nothing says which. `hero-aliases-seed` is independent and ships in five
+pull requests; this one is last in the calibration chain, so it is the one
+that copies.
+
 ## MODIFIED Requirements
 
 ### Requirement: The exported bundle is what the client accepts

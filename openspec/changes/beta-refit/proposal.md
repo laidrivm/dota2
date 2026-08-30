@@ -64,7 +64,8 @@ slope and intercept fitted      0.2490      52.77%
   intercept is signed by side rather than added flat.
 - `snapshot-export`: *The exported bundle is what the client accepts*
   asserts every declared key at every depth, so a new bundle field is that
-  requirement's.
+  requirement's. **`hero-aliases-seed` modifies the same requirement**, and
+  this delta is copied from the version that change leaves behind.
 
 `snapshot-delivery` is **not** modified, though it looks as though it should
 be: the client caches the last good bundle in `localStorage`, so a bundle
@@ -110,6 +111,10 @@ does is behaviour of the model, and `draft-model` carries it.
   above and `SnapshotBundle`'s new optional field.
 
 ## Ordering
+
+`hero-aliases-seed` must be applied and synced first: its `snapshot-export`
+delta replaces the requirement this one also replaces, and out of order the
+sync keeps one edit and drops the other with nothing saying which.
 
 This change SHOULD NOT be applied before `outcome-calibration`,
 `score-calibration` and `side-and-phase-deltas` are. The first supplies the
