@@ -404,22 +404,26 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       -S` before editing, so this is an overstated clause rather than a broken
       criterion; correcting it is a delta spec, not an edit here.
 - [ ] **The always-on trigger has fired, and by more than it last recorded.**
-      Re-measured on `hero-slug-canon`'s last step: the set is 638 lines
-      against the ~500 `CLAUDE.md` states, where the entry read 613 and 555
-      before that. It reached 633 over that change's four steps and this one
-      brought it back by deleting two settled entries. The sublist figures did
-      not move — Process sits at 24 and Code at 20, so two of the three are at
-      or past the ~20 threshold rather than one.
+      Re-measured on `spec/beta-refit`: the set is **743 lines** against the
+      ~500 `CLAUDE.md` states, where the entry read 638, 613 and 555 before
+      that. Eighty-seven of the last hundred are the queue entries for the
+      seven proposals one session wrote and left out, which is the honest
+      shape of the problem: the trigger is not fired by rules accumulating but
+      by `PLAN.md` recording work, and it will fire again the next time a
+      session proposes anything. The sublist figures did not move — Process
+      sits at 24 and Code at 20, so two of the three are at or past the ~20
+      threshold rather than one.
       `docs/rulebook-growth.md` asks for a promotion rather than a prune, and
       the cluster it named still holds: five Process rules are about what
       counts as evidence — how a gate is probed, when an empty result is an
       absence, where a count comes from, which measurement may be overwritten
       — and `docs/verification.md` already owns exactly that. What no longer
       holds is the conclusion drawn from it: moving those five takes Process
-      to 19 and the set to about 606, so it clears one sublist and leaves the
-      set a hundred lines over. Closing this now needs a decision about where
-      the bulk goes, `PLAN.md` being the larger half at 411 lines, and that is
-      a change rather than an edit here.
+      to 19 and the set to about 711, so it clears one sublist and leaves the
+      set two hundred lines over. Closing this now needs a decision about
+      where the bulk goes, `PLAN.md` being the larger half at 516 lines and
+      growing with every proposal, and that is a change rather than an edit
+      here.
 - [ ] **Nothing checks that `snapshot.json` is what its generator produces.**
       `src/fixtures/generate_fixture.py` writes the committed fixture and no
       test runs it, so an edit to the generator that nobody regenerates is
