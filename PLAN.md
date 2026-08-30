@@ -352,7 +352,8 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       Two figures were measured rather than chosen, and both are in the
       proposal. The window is twelve weeks because the quantity does not
       drift — two independent six-week halves correlate +0.801 with a mean
-      absolute difference of 3.4 pp, across a window containing 7.41e — and
+      absolute difference of 3.4 pp, across a window containing the 7.41e
+      release of 30 July — and
       is bounded by the **major** patch rather than the letter one. The
       smoothing constant is derived as `k = p(1−p)·10⁴ / var_true`, which came
       out 17 to 61 on three cells against the 400 a pair statistic uses,

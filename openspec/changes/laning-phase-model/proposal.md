@@ -43,8 +43,9 @@ a hero actually stood against, not merely on the other side.
   are `snapshot-ingest`'s.
 - The build stores and blends it as a pair statistic like the two it already
   has, and centres it. Why centring is not deferred is `snapshot-build`'s.
-- The bundle carries a third matrix, and the suggestion score a sixth
-  component weighted beside `matchups`.
+- The bundle carries a third matrix, and the suggestion score a **seventh**
+  component weighted beside `matchups` — the six today being `meta`, `side`,
+  `phase`, `synergy`, `matchups` and `counterRisk`.
 
 ## Capabilities
 
@@ -171,6 +172,18 @@ daily ceiling is 15 000. So the cost is about three hours of wall clock, and
 - **The window against a major patch.** Twelve weeks is measured to survive a
   letter patch and nothing here measures a major one. Until something does,
   the window is capped at the major patch's own age.
+
+## How this proposal ships
+
+`design.md` and `tasks.md` are **not** absent — they follow on
+`spec/laning-phase-model-plan`, which opens from `main` once this branch has
+merged. `proposal.md` and the four delta specs are already 536 lines, and
+`docs/git-and-prs.md` fixes what happens at the diff budget's failing
+threshold: the proposal and the deltas on `spec/<slug>`, the design and the
+tasks on `spec/<slug>-plan`. The change directory is therefore incomplete on
+purpose until the second branch lands. The `/zombies` pass over this change
+has already run, and its 38 remaining ideas are what that `tasks.md` derives
+its test tasks from.
 
 ## Ordering
 

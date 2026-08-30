@@ -39,31 +39,61 @@ anything across two different positions.
 Two things this statistic does that the two before it do not, and both are
 because it is thinner and carries more signal per game.
 
-**It is centred where it is stored, not later.** The build SHALL subtract,
-from each lane delta, the mean of that hero's lane deltas at that position
-over its opponents. A stored `winrate − 50` carries the hero's own strength
-into every cell of its row, and `meta` carries that strength already — which
-is the defect `score-calibration` exists to repair in the two matrices that
+**It is centred where it is stored, not later**, and by the antisymmetric
+form. Writing `r(a, p)` for the mean of hero `a`'s lane deltas at position
+`p` over its opponents, the build SHALL store
+
+```text
+lane_adj(a, p, b)  =  raw(a, p, b) − r(a, p) + r(b, q)
+```
+
+where `q` is the position hero `b` was counted at in that lane. Subtracting
+the row mean alone would break the antisymmetry the requirement above fixes:
+the two directions would then sum to `−(r(a,p) + r(b,q))` rather than to 0.
+Measured on a six-hero antisymmetric block, the residual is 8.88 by that form
+and 4.4e-16 by this one — which is the same arithmetic `score-calibration`
+settles for `matchups`, and the same trap `side-and-phase-deltas` fell into
+and had to amend.
+
+WHERE hero `b` has no covered cell at all, `r(b, q)` SHALL be 0 rather than
+omitted. Antisymmetry survives it: both directions then read the same pair of
+means, so the sum is still 0, and the pair is centred on one side only —
+which is stated here rather than discovered from a mirror that will not
+publish.
+
+Why it is centred at all: a stored `winrate − 50` carries the hero's own
+strength into every cell of its row, and `meta` carries that strength already
+— the defect `score-calibration` exists to repair in the two matrices that
 were not centred. A lane delta carries it more heavily, because how well a
 hero stands a lane is a property of the hero: Phantom Lancer at position 1 is
 negative against all nine of its most frequent opponents, −4 to −15 pp.
-Doing it at the source costs the same pass and spares this statistic that
-change.
 
 **Its smoothing constant is derived rather than chosen.** *Smoothing towards
 neutral by sample size* fixes `k` per statistic — 300, 400, 500 — and for
-this one the build SHALL compute
-`k = p(1−p)·10⁴ / var_true`, where `var_true` is the variance of the stored
-deltas less the binomial sampling variance at their own sample sizes. That is
-the shrinkage that is optimal rather than cautious, and it is what makes a
-thin statistic usable: a lane pair reaches 244 games at the median cell over
-twelve weeks, which `k = 400` would shrink to 38% of its size.
+this one the build SHALL compute `k = p(1−p)·10⁴ / var_true`.
+
+`var_true` SHALL be taken over the **centred but unsmoothed** deltas — the
+`lane_adj` above, before the smoothing that `k` is for — less the binomial
+sampling variance at their own sample sizes. Taking it over the smoothed
+values would define `k` in terms of a quantity `k` produced, and the estimate
+would depend on whatever `k` a previous run happened to use.
+
+It SHALL be one value for the whole statistic, computed from every covered
+cell's deltas pooled rather than by averaging the per-cell figures: each
+cell's deltas are already centred on 0, so pooling them is a decomposition
+over one population, where a mean of per-cell `k`s would weight a cell of
+three opponents like one of sixty.
+
+That is the shrinkage that is optimal rather than cautious, and it is what
+makes a thin statistic usable: a lane pair reaches 244 games at the median
+cell over twelve weeks, which `k = 400` would shrink to 38% of its size.
 
 Derived on three cells over twelve weeks it came out 61 at the median cell,
 17 at the busiest and 35 at a third — tens rather than hundreds, because a
 lane delta carries more real signal than a match one. Three cells do not fix
-a constant, so the build SHALL derive it over every cell it holds and record
-both the value and the spread of the per-cell figures, never the mean alone.
+a constant, so the build SHALL record beside the pooled value the spread of
+the same decomposition run per cell — which is what said 17 to 61 — never the
+mean of those, which nothing uses.
 
 #### Scenario: The mean opponent gives no lane advantage
 
@@ -81,9 +111,23 @@ both the value and the spread of the per-cell figures, never the mean alone.
 #### Scenario: The constant is derived, not configured
 
 - **WHEN** a build computes the lane statistic's `k`
-- **THEN** it SHALL compute it from that run's own stored deltas and sample
-  sizes, and SHALL record the value and the spread of the per-cell figures on
-  the snapshot
+- **THEN** it SHALL compute it from that run's own centred unsmoothed deltas
+  and their sample sizes, pooled over every covered cell, and SHALL record
+  that value and the per-cell spread on the snapshot
+
+#### Scenario: The constant does not depend on the last run's
+
+- **WHEN** two builds run over identical staging rows, one starting from a
+  snapshot whose recorded `k` was 17 and the other from one recording 61
+- **THEN** both SHALL derive the same `k`, the variance being taken before
+  smoothing
+
+#### Scenario: Centring keeps the mirror
+
+- **WHEN** a lane pair is centred and both heroes' cells were covered
+- **THEN** `lane_adj(a, p, b)` and `lane_adj(b, q, a)` SHALL still sum to 0
+  within 1e-6 — subtracting the row mean alone leaves 8.88 on a six-hero
+  block where this form leaves 4.4e-16
 
 #### Scenario: A derived constant far from what was measured
 

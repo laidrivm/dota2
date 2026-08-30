@@ -23,8 +23,11 @@ score, with my own role's block first. Each entry SHALL carry the
 per-component breakdown (weights already applied).
 
 The `lane` component SHALL be `Σ_e lanes[h][r][e]` over the entered enemies,
-weighted by `MODEL_CONSTANTS.weights.lane`, and SHALL be 0 where the bundle
-carries no row for `h` at `r`, or none for an enemy within it.
+weighted by `MODEL_CONSTANTS.weights.lane`, where **each absent leaf reads as
+0** rather than removing the term. One enemy the row does not cover
+contributes nothing and leaves every covered enemy's contribution standing;
+the whole component is 0 only when the row is absent, or when no entered
+enemy has a value in it.
 
 It SHALL NOT be weighted through `laneWeights`, which `matchups` is. That
 matrix is a hand-set guess at which roles meet in which lane, and this
@@ -60,6 +63,13 @@ lane delta and the match delta correlate `+0.066`, and the lane spread is
   its share there having been below the pull's floor
 - **THEN** its `lane` component SHALL be 0 and its other components SHALL be
   unchanged — a hero nobody plays there is not thereby a bad laner
+
+#### Scenario: One enemy covered and one not
+
+- **WHEN** a candidate's lane row holds a value for one entered enemy and no
+  key for another
+- **THEN** its `lane` component SHALL be the covered enemy's value times the
+  weight, and SHALL NOT be 0
 
 #### Scenario: A bundle predating the lane matrix
 
