@@ -41,7 +41,18 @@ Closes `snapshot-export/antisymmetry-survives-centring`,
 - [ ] 1.3 Centre `matchups` as `adv[a][b] − r_a + r_b` and `synergies` as
       `syn[a][b] − r_a − r_b + g`, in `render.ts` where both matrices are
       already assembled whole.
-- [ ] 1.4 Re-verify `snapshot-export/a-synergy-stored-once` and
+- [ ] 1.4 Rewrite the doc comments at `src/types.ts:79` and `:82`. The first
+      says "smoothed advantage of hero a over hero b", which after centring
+      is what the cell no longer holds — it holds the part of that advantage
+      neither hero's own strength explains. A comment describing the value a
+      field used to carry is the defect no test sees, and this one is read by
+      everyone who writes against the bundle.
+- [ ] 1.5 Confirm `snapshot-build`'s *Stored pair statistics carry their
+      symmetry* is untouched. It validates `advantage_adj` in
+      `hero_matchups`, which centring never writes to — so the requirement
+      stays true and needs no delta, and this task exists to have checked
+      rather than assumed it.
+- [ ] 1.6 Re-verify `snapshot-export/a-synergy-stored-once` and
       `snapshot-export/a-matchup-s-mirror` against centred values (ZOMBIES
       18). `render-matrix.test.ts:56` asserts antisymmetry on values as
       stored; after centring it holds through different arithmetic, so it
