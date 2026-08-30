@@ -42,27 +42,46 @@ Closes `snapshot-ingest/the-two-tables-the-write-now-covers`,
       counts a side's own earlier picks and not every earlier pick; `wins`
       never exceeds `matches`; the phase column carries `'1'`, `'2'`,
       `'last'`; both tables are replaced in the same transaction as the rest.
-- [ ] 1.2 Derive phase through `pickPhase`'s own rule — count ≤ 1 is `p1`,
+- [ ] 1.2 Emit the zero-match rows in this step, not the next. Step 2 closes
+      the criteria for a hero missing a part, but the write that ships here
+      must already cover them: a step landing rows only where matches exist
+      leaves a build that fails on the first rare hero, and
+      `change-slicing` requires a step to leave the application working when
+      it merges. Step 2 proves the two properties this rule exists for and
+      adds no production code.
+- [ ] 1.3 Derive phase through `pickPhase`'s own rule — count ≤ 1 is `p1`,
       ≤ 3 is `p2`, else `last` — rather than through Dota's real draft
       phases. A different derivation gives the build a `phase` under a
       definition the model does not use, and the two would disagree about
       the same hero in the same match.
-- [ ] 1.3 Mind the three spellings (ZOMBIES 10). `PickPhase` is
+- [ ] 1.4 Mind the three spellings (ZOMBIES 10). `PickPhase` is
       `p1 | p2 | last`, the staging column checks `'1' | '2' | 'last'`, and
       the snapshot columns are `phase_adj_1 | _2 | _last`. Only the middle
       one is enforced by the database.
-- [ ] 1.4 Rewrite the comment at `src/job/ingest/staging.ts:72`. It says the
+- [ ] 1.5 Rewrite the comment at `src/job/ingest/staging.ts:72`. It says the
       two tables "are not touched: side and phase are this change's stated
       non-goals, nothing writes those tables, and there is accordingly
       nothing in them to replace or retain" — every clause of which stops
       being true.
+- [ ] 1.6 Rewrite `src/job/schema.sql:238` — "No pull fills these two: side
+      and phase are this change's stated non-goals" — which stops being true
+      the moment this step lands.
+- [ ] 1.7 Remove the filter at `src/job/ingest/staging.test.ts:169`, not just
+      its comment. The case asserts which staging tables the write covers and
+      **excludes these two from the list before comparing**, so after this
+      change it keeps passing while hiding the two tables the change adds.
+      A stale comment is a defect no test sees; this is a test built not to
+      see one.
 
 ## 2. Every hero or no hero
 
 Closes `snapshot-ingest/a-hero-with-no-match-on-one-side`,
 `snapshot-ingest/a-hero-the-harvest-has-never-seen`.
 
-This step is the one that keeps the build from failing on a quiet night.
+No production code beyond what step 1 lands: the write emits zero-match rows
+from the start, because a step that did not would leave a build failing on
+the first rare hero. This step proves the two properties that choice was
+made for.
 
 - [ ] 2.1 Write the failing cases first (ZOMBIES 2, 12, 13, 14): a hero with
       picks on one side only still gets a zero-match row for the other; a
@@ -70,11 +89,11 @@ This step is the one that keeps the build from failing on a quiet night.
       patch whose picks are all on one side leaves no `dire` row for anyone,
       which publishes; a match with fewer than ten picks contributes to
       neither table.
-- [ ] 2.2 Write rows per hero of `heroes`, never per hero the harvest saw.
-      *An unmeasured component is zero for every hero* fails a build where a
-      component is measured for some heroes and not others, and this change
-      is what makes that case reachable — phase most of all, since some
-      heroes are never among a side's first two picks.
+- [ ] 2.2 Assert the rows are written per hero of `heroes` and never per
+      hero the harvest saw. *An unmeasured component is zero for every hero*
+      fails a build where a component is measured for some heroes and not
+      others, and this change is what makes that case reachable — phase most
+      of all, since some heroes are never among a side's first two picks.
 - [ ] 2.3 Keep the empty-harvest case distinct from the zero-match case. No
       match for the patch means no row at all, so the component reads as
       unmeasured; any match means a row for every hero, so it reads as
