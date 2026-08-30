@@ -1,0 +1,115 @@
+# lane-synergy-model
+
+## Why
+
+`laning-phase-model` brings in who a candidate stands **against**. This
+brings in who it stands **beside**, which is a different statistic reached by
+one flag — `isWith: true` on the same endpoint — and a different question
+from the one `synergies` answers.
+
+Measured on Phantom Lancer at position 1 over twelve weeks, 84 lane allies
+carrying 60 games or more:
+
+```text
+spread            lane 44.4 pp        match 23.0 pp
+corr(lane pp, the synergy stored today)        +0.182
+corr(lane pp, the match pp of the same pair)   +0.417
+games per pair                                  3 239
+```
+
+A correlation of 0.182 with what the bundle already carries is the case for
+the change: the stored synergy is a whole-match figure over every hero that
+was on the team, and this is the two heroes who actually stood in one lane
+for ten minutes. The spread is again about twice as wide.
+
+The samples are deep, and for a structural reason the opponent pull cannot
+share: a carry has one support beside it in nearly every game, where its
+opponents split across the pool. 3 239 games a pair against the 244 a median
+opponent cell reaches.
+
+## What Changes
+
+- The lane pull gains its ally half — the same endpoint, the same window, the
+  flag flipped. What it asks for and what it costs is `snapshot-ingest`'s.
+- The build stores and centres it as `laning-phase-model` established for the
+  opponent half, with one difference: a lane synergy is **symmetric**, so it
+  is stored once rather than in both orders.
+- The bundle carries a fourth matrix and the suggestion score a seventh
+  component.
+
+## Capabilities
+
+### New Capabilities
+
+None.
+
+### Modified Capabilities
+
+Every one of these is a requirement `laning-phase-model` writes, and this
+change amends its own predecessor rather than anything on `main`. **All four
+deltas are written against the version that change leaves behind, and it must
+be applied and synced first** — there is no version of these requirements
+without it.
+
+- `snapshot-ingest`: *Lane outcomes are pulled per hero and position* fixes
+  one pull; this makes it two.
+- `snapshot-build`: *Stored pair statistics carry their symmetry* gains the
+  symmetric case, and *The lane statistic is centred and its constant is
+  derived* covers a second statistic under the same rules.
+- `snapshot-export`: *The lane matrix is expanded per position* gains a
+  sibling for allies.
+- `draft-model`: *Suggestion scoring* gains a seventh component.
+
+## Non-goals
+
+- **Merging the two lane statistics into one.** They are not two halves of a
+  quantity: one is antisymmetric and stored in both orders, the other
+  symmetric and stored once, and their correlations with what the bundle
+  already carries differ — `+0.204` against the stored matchup, `+0.182`
+  against the stored synergy. They are summed as separate components with
+  separate weights.
+- **Replacing `synergies`.** The match synergy answers who wins games
+  together and this answers who wins a lane together; `+0.417` against the
+  same pair's match outcome says they overlap more than the opponent pair
+  does, not that either is redundant.
+- **Fitting the weight.** It enters at 1.0 like the six before it.
+  `suggestion-calibration` fits all of them.
+- **Deriving a second smoothing constant.** The rule
+  `laning-phase-model` establishes — `k = p(1−p)·10⁴ / var_true`, computed
+  per run over the statistic's own deltas — applies unchanged. On this data
+  it comes out 44, inside the 17-to-61 range the opponent half measured.
+
+## Impact
+
+- `src/job/ingest/` — the pull built for opponents runs a second time.
+- `src/job/schema.sql` — a table beside `hero_lanes`, symmetric where that
+  one is antisymmetric.
+- `src/job/build/`, `src/job/export/render.ts`, `src/model.ts`,
+  `src/types.ts` — a fourth matrix and a seventh component, on the paths the
+  opponent half opened.
+- `src/fixtures/snapshot.json` — regenerated.
+- No new dependency and no new endpoint. **3 600 requests, doubling
+  `laning-phase-model`'s pull**: the run reaches about 7 700 against a daily
+  ceiling of 15 000, paced across roughly six hours. That is the cost this
+  change is chiefly about, and the reason it is separate rather than shipped
+  alongside — a six-hour ingest is a decision, not a detail.
+
+## Open Questions
+
+- **Whether the ally sample supports a shorter window.** The opponent pull
+  needs twelve weeks to reach 244 games a pair; the ally pull is at 3 239 on
+  the cell measured, so four weeks may already be deep enough and would cost
+  1 200 requests rather than 3 600. What is not measured is the median ally
+  cell — Phantom Lancer at position 1 is the busiest — so the window is
+  written as twelve and the first step re-measures before committing to it.
+- **Whether `+0.417` is too much overlap to be worth a component.** The
+  opponent half's case rested on `+0.066`. This is a weaker claim of
+  independence, and nothing here scores whether the component helps.
+  `suggestion-calibration` is what answers it, and a fitted weight near zero
+  is the honest outcome this change has to be willing to reach.
+
+## Ordering
+
+After `laning-phase-model`, which every delta here is written against, and
+therefore after `candidacy-gate` too. Like it, this SHOULD NOT land between
+`outcome-calibration` and `suggestion-calibration`.
