@@ -40,6 +40,30 @@ OpenDota served patch detection and nothing else — icons come from
 mentions it. Since the news feed carries majors too, keeping OpenDota beside
 it would be a second source for a job one already does.
 
+### The response shape, and the ordering that inverts with it
+
+```text
+{ "appnews": { "appid": 570, "newsitems": [ {
+    "gid": "…", "title": "7.41d Gameplay Patch", "url": "…",
+    "is_external_url": true, "author": "kyled",
+    "contents": "…", "feedlabel": "Community Announcements",
+    "date": 1780617600, "feedname": "steam_community_announcements",
+    "feed_type": 1, "appid": 570 } , … ] } }
+```
+
+Three things the current parse gets wrong against it. `patches.ts` takes a
+top-level array; this is an envelope, and `newsitems` is the array. It reads
+`entry.date` as a string through `new Date(String(...))`; this is unix
+**seconds**, and reading them as milliseconds dates every patch to 1970
+without failing. And it selects `listed[listed.length - 1]` because
+OpenDota listed oldest first; **Steam lists newest first** — item 0 dated
+2026-08-27 against a last item dated 2024-07-10 — so the same index now
+picks a patch two years stale.
+
+`count` bounds the window rather than paginating: `count=100` reaches back to
+2024-07-10, twenty patches. There is no cursor and none is needed — the run
+is nightly and only ever asks what the newest patch is.
+
 ### The rule is a feed test and a version, not a language model
 
 Measured over 100 posts spanning 2024-07-10 to 2026-08-27:
@@ -85,8 +109,9 @@ and returned a patch five releases old. Nothing failed, so nothing reported.
 A rule matching on the text of a title has the same shape of failure: Valve
 retitles, the request still succeeds, the parse finds nothing, `detected_at`
 stops moving. The only thing that would notice is a count of days since the
-newest held patch. Over the measured window no gap between gameplay patches
-reached ninety days, so a bound has evidence to sit on.
+newest held patch. Over the measured window the gaps between gameplay patches
+run 100, 91, 75, 63, 61, 55 days and down, so a bound has a distribution to
+sit above rather than a guess — 120 days, set in the requirement.
 
 ### Blending at a letter boundary is shipped unverified, deliberately
 
@@ -126,7 +151,6 @@ comparison between parameter sets needs.
 
 ## Open Questions
 
-- The bound the watchdog fires at. Ninety days clears every gap in the
-  measured window with room; a tighter bound catches a break sooner and risks
-  firing during a genuine lull. It is one constant, and the first false alarm
-  is the evidence for moving it.
+- Nothing outstanding. The watchdog's bound was the last open figure and is
+  settled at 120 days in *The run reports how long detection has been
+  silent*, against a measured maximum gap of 100.

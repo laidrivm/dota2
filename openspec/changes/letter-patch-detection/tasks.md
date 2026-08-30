@@ -3,13 +3,24 @@
 Four steps, four pull requests, in this order. Each names the criteria it
 closes by their `<capability>/<scenario-slug>` identifiers.
 
-Three `MODIFIED` deltas carry sixteen criteria this change does not close —
-every scenario the three requirements already had. They are copied whole
+Three `MODIFIED` deltas carry these sixteen criteria, none of which this
+change closes:
+
+  `hero-reference/a-patch-the-table-lacks`, `hero-reference/a-patch-already-recorded`
+  `hero-reference/a-name-with-a-trailing-letter`, `hero-reference/the-current-patch`
+  `hero-reference/the-source-cannot-be-reached`, `hero-reference/the-source-answers-with-nothing-usable`
+  `snapshot-build/reading-wr-old-back-off-a-snapshot`, `snapshot-build/a-major-patch-on-its-first-day`
+  `snapshot-build/a-major-patch-past-its-window`, `snapshot-build/a-letter-patch-past-its-window`
+  `snapshot-build/neither-matches-nor-prior`, `snapshot-build/no-previous-patch-to-blend`
+  `snapshot-export/the-day-a-major-patch-lands`, `snapshot-export/the-window-has-passed`
+  `snapshot-export/an-offset-that-crosses-the-utc-day`, `snapshot-export/a-letter-patch`
+
+They are every scenario the three requirements already had, copied whole
 because a `MODIFIED` delta replaces a requirement rather than patching it,
 and tests on `main` close them. Two change meaning and are re-verified in the
-step that touches them: `hero-reference/a-patch-the-table-lacks`, whose
-source now lists newest-first, and `snapshot-export/a-letter-patch`, which
-now describes a state a run can actually reach.
+step that touches them: `hero-reference/the-current-patch`, whose source now
+lists newest-first, and `snapshot-export/a-letter-patch`, which now describes
+a state a run can actually reach.
 
 ## 1. The source and the rule
 
@@ -81,13 +92,15 @@ Closes `hero-reference/detection-has-gone-quiet`,
       all does not fire, there being no instant to count from.
 - [ ] 3.2 Report whole days since the newest held patch's release instant in
       the run's report, and fail past the bound. The bound is one constant
-      with `design.md`'s ninety-day reading cited, not restated.
+      citing *The run reports how long detection has been silent*, which
+      fixes it at 120 days, rather than restating the number beside it.
 - [ ] 3.3 Re-verify `hero-reference/a-patch-the-table-lacks` and the four
       other carried criteria of that requirement against the new source.
 
 ## 4. The first letter blend
 
-Closes `snapshot-build/a-letter-patch-on-its-first-day`.
+Closes `snapshot-build/a-letter-patch-on-its-first-day`,
+`snapshot-export/a-letter-patch-whose-prior-still-weighs`.
 
 **This step's criterion cannot be observed on production data until the next
 patch lands.** 7.41e is 31 days old and `prior(31)` is 0 whatever the
@@ -95,27 +108,31 @@ parameters, so a run today shows nothing whichever way the branch behaves.
 The criterion is met by a test over a constructed patch pair; what waits is
 the observation, and that is stated here rather than discovered later.
 
-- [ ] 4.1 Write the failing cases first over a constructed pair (ZOMBIES 21,
-      22, 23, 24): a build on a letter patch's release day weighs its
-      predecessor at `k0 = 3000`; `t = 6` still weighs and `t = 7` does not;
+- [ ] 4.1 Write the failing case first over a constructed pair (ZOMBIES 21):
+      a build on a letter patch's release day weighs its predecessor at
+      `k0 = 3000`. This is the criterion this step closes.
+- [ ] 4.2 Guard the parameters around it (ZOMBIES 22, 23, 24), closing no
+      criterion of their own: `t = 6` still weighs and `t = 7` does not;
       `t = 2` gives half `k0`, the half-life being 2 days against a major's
       1; a letter patch whose predecessor is a major blends against that
-      major.
-- [ ] 4.2 Change no blend code. `snapshot-build` has fixed these parameters
+      major. They pin the curve the one new criterion runs on, and inventing
+      criteria for them would add constraints to a requirement this change
+      does not otherwise alter.
+- [ ] 4.3 Change no blend code. `snapshot-build` has fixed these parameters
       all along and `blend.ts` implements them; this step is the first thing
       to reach the branch, not a new branch.
-- [ ] 4.3 Assert the flag and the blend have parted (ZOMBIES 25): a letter
+- [ ] 4.4 Assert the flag and the blend have parted (ZOMBIES 25): a letter
       patch inside its own `t_max` carries `stabilizing: false` while its
       prior still weighs. The two windows coincided only while every detected
       patch was major, and `snapshot-export`'s delta says so.
-- [ ] 4.4 Record, in this step's pull request, that the first-day blend is
+- [ ] 4.5 Record, in this step's pull request, that the first-day blend is
       unobserved in production and which patch will first exercise it.
-- [ ] 4.5 Confirm the bundle now reports the patch being played (ZOMBIES 20):
+- [ ] 4.6 Confirm the bundle now reports the patch being played (ZOMBIES 20):
       a run over a recorded copy of the real feed yields `7.41e` released
       2026-07-30, against the `7.41` of 2026-03-24 it reports today.
-- [ ] 4.6 Update `PLAN.md`'s queue in this step's pull request, not
+- [ ] 4.7 Update `PLAN.md`'s queue in this step's pull request, not
       afterwards.
-- [ ] 4.7 Run the pre-PR sequence per `docs/review-toolkit.md` on every step.
+- [ ] 4.8 Run the pre-PR sequence per `docs/review-toolkit.md` on every step.
       Steps 1 to 4 all touch the database, so each one's suite must assert it
       ran rather than skipping; `patches` is reclaimed by the sentinel
       `patch_id LIKE 'z9.%'`, which every constructed patch must use.
