@@ -24,15 +24,13 @@ advantages the model actually produces into claims no evidence supports:
 
 ## What Changes
 
-- A fifth step in the nightly job scores every full draft the harvest stored
-  against the current bundle, using `computeModel` unchanged.
-- Each run records its Brier score, its accuracy, and the same two figures for
-  the always-Radiant baseline, against the snapshot that produced them — one
-  row per run, not one per match: a prediction is a pure function of a stored
-  draft and a bundle, so storing it would be storing a derivation.
-- The scorer is invocable on its own, because re-scoring costs no request to
-  the statistics API at all — which is what makes trying a calibration variant
-  against the same matches practical.
+- The stored drafts gain a reader. What it turns each one into and what it
+  refuses is `outcome-calibration`'s to state.
+- The pipeline gains a figure about itself, and the floor that figure is
+  compared against. Which figures, and what the floor is taken from, are that
+  capability's too.
+- The nightly job gains a fifth step and a second step invocable on its own.
+  Where it sits and what its failure costs are `snapshot-ingest`'s.
 
 ## Capabilities
 

@@ -10,6 +10,10 @@ Every number below was measured on 2026-08-30 against 1 788 unique
 Divine/Immortal ranked All Pick matches drawn from the European leaderboard,
 of which 1 512 carried ten picks with STRATZ's own per-pick rates attached.
 
+No endpoint is affected by this change. Nothing it writes is served, and
+`/snapshot.json` is rendered by the export three steps earlier and untouched
+here — so `docs/api-design.md`'s response-shape rules have nothing to bind.
+
 ## Goals / Non-Goals
 
 **Goals:** a Brier score, an accuracy, and the always-Radiant baseline for

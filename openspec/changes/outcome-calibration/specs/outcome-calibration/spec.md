@@ -42,10 +42,21 @@ which is what the store holds and what `Session.bans` declares.
 
 ### Requirement: A run records the model's score and the baseline it must beat
 
-Each scoring run SHALL record, against the snapshot whose bundle produced the
-estimates: how many matches it scored, how many it could not, the model's
-Brier score, the model's accuracy, and the Brier score and accuracy of the
-always-Radiant baseline over the same matches.
+Each scoring run SHALL record exactly one row, against the snapshot whose
+bundle produced the estimates: how many matches it scored, how many it could
+not, the model's Brier score, the model's accuracy, and the Brier score and
+accuracy of the always-Radiant baseline over the same matches. It SHALL NOT
+store a per-match prediction — a prediction is a pure function of a stored
+draft and a bundle, so a table of them would hold a derivation of two things
+the database already has.
+
+Brier SHALL be the mean of `(p − outcome)²` over the scored matches, where
+`outcome` is 1 when Radiant won and 0 otherwise. Accuracy SHALL be the share
+of scored matches where `p > 0.5` and Radiant won, or `p ≤ 0.5` and Radiant
+lost: a probability of exactly `0.5` counts as predicting Dire. The tie has
+to fall somewhere and nothing distinguishes the two directions, so it is
+fixed here rather than left to whichever comparison an implementation
+reaches for.
 
 Brier SHALL be the deciding figure and accuracy SHALL be recorded beside it.
 Accuracy cannot see the failure this project already has: over 1 788 measured
@@ -59,6 +70,16 @@ with the meta, the bracket or the region would otherwise leave the model
 compared against a floor from another population; taking it from the same
 matches also makes the floor the best a constant predictor could do, which is
 the conservative direction.
+
+#### Scenario: A probability of exactly one half
+
+- **WHEN** the model returns `winProbability` of exactly `0.5` for a match
+- **THEN** accuracy SHALL count it correct only where Radiant lost
+
+#### Scenario: One row per run and no per-match row
+
+- **WHEN** a run scores a thousand matches
+- **THEN** it SHALL write one row of figures and no row per match
 
 #### Scenario: The baseline comes from the matches scored
 
