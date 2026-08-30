@@ -1,7 +1,11 @@
 # side-and-phase-deltas — tasks
 
 Five steps, five pull requests, in this order. Each names the criteria it
-closes by their `<capability>/<scenario-slug>` identifiers.
+closes by their `<capability>/<scenario-slug>` identifiers. There is no
+closing group: `openspec/config.yaml` lets a step close no criterion only when
+it carries infrastructure, and updating `PLAN.md` and running the review
+sequence are none of that — so 5.8 and 5.9 cite no criterion and ride with the
+step that merges last.
 
 **`match-harvest` must be applied first** — every row this change writes is
 counted from `harvest_matches` and `harvest_picks`. And like
