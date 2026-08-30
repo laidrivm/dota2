@@ -23,7 +23,7 @@ The snapshot row — the database's, not the bundle's — gains three columns
 beside those it already carries for a build's own parameters: the pooled `k`,
 and the smallest and largest of the same decomposition run per cell. A range
 rather than a variance, because what it answers is "did the cells disagree
-more than the 17-to-61 three real ones did", and that is a comparison of
+more than the 11-to-37 three real ones did", and that is a comparison of
 bounds. None of the three reaches the client.
 
 ## Goals / Non-Goals
@@ -127,15 +127,17 @@ the constant:
 
 ```text
 cell                     pairs   n/pair   sd obs   noise   sd true    k
-Nyx Assassin at 3           94      323      7.5     3.9       6.4   61
-Pudge at 2                 106      678     12.9     4.4      12.2   17
-Juggernaut at 1            125     5264      8.7     2.1       8.4   35
+Nyx Assassin at 3           94      323      7.5     3.3       6.7   37
+Pudge at 2                 106      678     12.9     3.7      12.4   11
+Juggernaut at 1            125     5264      8.7     1.8       8.5   24
 ```
 
 Tens rather than the 400 a pair statistic uses, because a lane delta carries
 more real signal per game — the 32.6 pp spread arriving as a constant.
 Spearman–Brown on the split-half correlation corroborates: `2(0.801)/1.801 =
-0.889` against the 0.80 the decomposition gives at the same depth.
+0.889` against the 0.87 the decomposition gives at the same depth — an
+agreement the wrong noise model was hiding, since it put that figure at
+0.80.
 
 ### The row mean is recomputed every run
 
@@ -182,7 +184,7 @@ failure as the reason its exemption list is written as a list of what is
   median cell is thinner and the derived `k` is what carries it; what the
   proposal claims is that the signal exists and is orthogonal, not that it is
   32 pp everywhere.
-- **`k` varies 17 to 61 across three cells.** → One constant is what the
+- **`k` varies 11 to 37 across three cells.** → One constant is what the
   build's shape allows, and the pooled derivation is the defensible way to
   pick it. The per-cell spread is recorded so that a run whose cells disagree
   more than these did is visible rather than averaged away.

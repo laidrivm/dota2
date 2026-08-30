@@ -154,7 +154,7 @@ as a constant. At `k = 40` a median pair keeps 0.89 of its delta where
 
 Two independent readings agree: Spearman–Brown on the split-half correlation
 gives a reliability of `2(0.801)/1.801 = 0.889` at twelve weeks, against the
-0.80 the variance decomposition gives at the same depth.
+0.87 the variance decomposition gives at the same depth.
 
 **What the window costs.** 300 cells at `share >= 5%` times twelve weeks is
 3 600 requests on top of today's 516. The hourly ceiling of 1 500 does not
@@ -165,7 +165,7 @@ daily ceiling is 15 000. So the cost is about three hours of wall clock, and
 
 ## Open Questions
 
-- **`k` varies by cell — 17 to 61 across three.** A single constant is what
+- **`k` varies by cell — 11 to 37 across three.** A single constant is what
   the build's shape allows and ~40 is the middle of them, but three cells do
   not fix it. It is re-derived over every cell during implementation, and the
   step that does it records the spread rather than the mean alone.
