@@ -49,8 +49,9 @@ position filters. Both directions are stored, as they are for opponents.
   for the opponent half — both directions from their own pulls, centred by the
   row mean, its constant derived. The one difference is what the two
   directions mean, and it is smaller than it looks.
-- The bundle carries a fourth matrix and the suggestion score a seventh
-  component.
+- The bundle carries a fourth matrix and the suggestion score an **eighth**
+  component — the seven before it being `meta`, `side`, `phase`, `synergy`,
+  `matchups`, `counterRisk` and `laning-phase-model`'s `lane`.
 
 ## Capabilities
 
@@ -75,7 +76,7 @@ without it.
   measurements, and this half is no different.
 - `snapshot-export`: *The lane matrix is expanded per position* gains a
   sibling for allies.
-- `draft-model`: *Suggestion scoring* gains a seventh component.
+- `draft-model`: *Suggestion scoring* gains an eighth component.
 
 ## Non-goals
 
@@ -89,17 +90,19 @@ without it.
   does, not that either is redundant.
 - **Fitting the weight.** It enters at 1.0 like the six before it.
   `suggestion-calibration` fits all of them.
-- **Deriving a second smoothing constant.** The rule
-  `laning-phase-model` establishes — `k = p(1−p)·10⁴ / var_true`, computed
-  per run over the statistic's own deltas — applies unchanged. On this data
-  it comes out 44, inside the 17-to-61 range the opponent half measured.
+- **Deriving a second smoothing constant.** The rule `laning-phase-model`
+  establishes — `k = (mean per-game variance) / var_true`, computed per run
+  over a statistic's own centred unsmoothed deltas — applies unchanged. On
+  this data it comes out **29**, inside the 11-to-37 the opponent half
+  measured. Draws are 28.9% of ally lane games, so the Bernoulli variance
+  that change had to correct would have read 44 here.
 
 ## Impact
 
 - `src/job/ingest/` — the pull built for opponents runs a second time.
 - `src/job/schema.sql` — a table beside `hero_lanes`, keyed the same way.
 - `src/job/build/`, `src/job/export/render.ts`, `src/model.ts`,
-  `src/types.ts` — a fourth matrix and a seventh component, on the paths the
+  `src/types.ts` — a fourth matrix and an eighth component, on the paths the
   opponent half opened.
 - `src/fixtures/snapshot.json` — regenerated.
 - No new dependency and no new endpoint. **3 600 requests, doubling
