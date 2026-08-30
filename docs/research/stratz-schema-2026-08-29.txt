@@ -1,12 +1,16 @@
 STRATZ GraphQL — draft-relevant surface, introspected 2026-08-29.
 
+Type references carry their wrappers: `[X]` is a list, `X!` is non-null.
+Descriptions are cut at 100 characters and marked `…` where they were cut;
+the API console holds the full prose.
+
 Regenerate: fetch the full introspection response with the curl command in
 stratz-graphql-2026-08-29.md, then
 
   python3 docs/research/query-schema.py <schema.json> \
     DotaQuery HeroStatsQuery HeroLaneOutcomeType HeroDryadType HeroWinDayType \
-    HeroBanType MatchType MatchPlayerType MatchStatsPickBanType \
-    MatchStatsLaneReportType PlayerMatchesRequestType LeaderboardQuery \
+    HeroBanType PlayerType PlayerMatchesRequestType MatchType MatchPlayerType \
+    MatchStatsPickBanType MatchStatsLaneReportType LeaderboardQuery \
     SteamAccountSeasonActiveLeaderboardType \
     SteamAccountSeasonActiveLeaderboardRankType \
     FilterSeasonLeaderboardRequestType RankBracket RankBracketBasicEnum \
@@ -24,7 +28,7 @@ stratz-graphql-2026-08-29.md, then
    league(id: Int!) -> LeagueType   Find league details by league Id. Id is a required field.
    leagues(request: LeagueRequestType!) -> [LeagueType]   Find league details by searching for leagues using a LeagueRequest.
    guild(id: Int!) -> GuildType   For getting access to one specific Guild which was used at the start of TI10 Compendium.
-   yogurt() -> YogurtQuery   Queries used for Stratz Yogurt - users won't be able to access these calls until they have access to
+   yogurt() -> YogurtQuery   Queries used for Stratz Yogurt - users won't be able to access these calls until they have access to…
    plus() -> PlusQuery   Queries used to populate Stratz Plus.
    stratz() -> StratzQuery   Stratz specific queries.
    heroStats() -> HeroStatsQuery   Queries used to gain insights into hero data and statistics.
@@ -34,13 +38,13 @@ stratz-graphql-2026-08-29.md, then
    vendor() -> VendorQuery   Queries used by 3rd party applications.
 == HeroStatsQuery (OBJECT) 
    stats(heroIds: [Short], week: Long, bracketBasicIds: [RankBracketBasicEnum], positionIds: [MatchPlayerPositionType], groupByTime: Boolean, groupByPosition: Boolean, groupByBracket: Boolean, minTime: Int, maxTime: Int) -> [HeroPositionTimeDetailType]   Detailed output of data per minute for each hero.
-   matchUp(heroId: Short, heroIds: [Short], week: Long, bracketBasicIds: [RankBracketBasicEnum], orderBy: Byte, matchLimit: Int, skip: Int, take: Int) -> [HeroDryadType]   Returns back a list of the hero matchups, showing how that hero's win rate is affected with or again
-   itemFullPurchase(heroId: Short!, week: Long, bracketBasicIds: [RankBracketBasicEnum], positionIds: [MatchPlayerPositionType], minTime: Int, maxTime: Int, matchLimit: Int) -> [HeroItemPurchaseType]   Returns the items purchased for the selected hero. Adjusting the time adjusts the purchase amount. S
-   itemStartingPurchase(heroId: Short!, week: Long, bracketBasicIds: [RankBracketBasicEnum], positionIds: [MatchPlayerPositionType]) -> [HeroItemStartingPurchaseType]   This snapshots all items in the inventory of a hero at -00:30.   It tracks if an item was given or p
-   itemBootPurchase(heroId: Short!, week: Long, bracketBasicIds: [RankBracketBasicEnum], positionIds: [MatchPlayerPositionType]) -> [HeroItemBootPurchaseType]   The purchase Item Components for a Hero's Boots.  Tracks things like activations or uses throughout 
+   matchUp(heroId: Short, heroIds: [Short], week: Long, bracketBasicIds: [RankBracketBasicEnum], orderBy: Byte, matchLimit: Int, skip: Int, take: Int) -> [HeroDryadType]   Returns back a list of the hero matchups, showing how that hero's win rate is affected with or again…
+   itemFullPurchase(heroId: Short!, week: Long, bracketBasicIds: [RankBracketBasicEnum], positionIds: [MatchPlayerPositionType], minTime: Int, maxTime: Int, matchLimit: Int) -> [HeroItemPurchaseType]   Returns the items purchased for the selected hero. Adjusting the time adjusts the purchase amount. S…
+   itemStartingPurchase(heroId: Short!, week: Long, bracketBasicIds: [RankBracketBasicEnum], positionIds: [MatchPlayerPositionType]) -> [HeroItemStartingPurchaseType]   This snapshots all items in the inventory of a hero at -00:30. It tracks if an item was given or pur…
+   itemBootPurchase(heroId: Short!, week: Long, bracketBasicIds: [RankBracketBasicEnum], positionIds: [MatchPlayerPositionType]) -> [HeroItemBootPurchaseType]   The purchase Item Components for a Hero's Boots. Tracks things like activations or uses throughout t…
    itemNeutral(heroId: Short!, week: Long, bracketBasicIds: [RankBracketBasicEnum], positionIds: [MatchPlayerPositionType]) -> [HeroNeutralItemType]   The amount of times a Nutreal Item was found and won.
-   laneOutcome(heroId: Short, isWith: Boolean!, week: Long, bracketBasicIds: [RankBracketBasicEnum], positionIds: [MatchPlayerPositionType]) -> [HeroLaneOutcomeType]   Using out formula for determining the outcome of lane, the overall success of that hero in that role
-   heroVsHeroMatchup(heroId: Short!, week: Long, bracketBasicIds: [RankBracketBasicEnum], matchLimit: Int, skip: Int, take: Int) -> HeroMatchupType   This is used on the Hero page to show the comparison of skill with the selected hero with other hero
+   laneOutcome(heroId: Short, isWith: Boolean!, week: Long, bracketBasicIds: [RankBracketBasicEnum], positionIds: [MatchPlayerPositionType]) -> [HeroLaneOutcomeType]   Using out formula for determining the outcome of lane, the overall success of that hero in that role…
+   heroVsHeroMatchup(heroId: Short!, week: Long, bracketBasicIds: [RankBracketBasicEnum], matchLimit: Int, skip: Int, take: Int) -> HeroMatchupType   This is used on the Hero page to show the comparison of skill with the selected hero with other hero…
    talent(heroId: Short!, week: Long, bracketBasicIds: [RankBracketBasicEnum], positionIds: [MatchPlayerPositionType]) -> [HeroAbilityTalentType]   This is used on the Hero page to show the comparison of all Hero Talents with the selected hero.
    winHour(heroIds: [Short], take: Int, skip: Int, bracketIds: [RankBracket], positionIds: [MatchPlayerPositionType], regionIds: [BasicRegionType], gameModeIds: [GameModeEnumType], groupBy: FilterHeroWinRequestGroupBy) -> [HeroWinHourType]   Returns the last 12 hours by hour showing the amount of matches and the amount of wins by hero id.
    winDay(heroIds: [Short], take: Int, skip: Int, bracketIds: [RankBracket], positionIds: [MatchPlayerPositionType], regionIds: [BasicRegionType], gameModeIds: [GameModeEnumType], groupBy: FilterHeroWinRequestGroupBy) -> [HeroWinDayType]   Returns the last 12 days by day showing the amount of matches and the amount of wins by hero id.
@@ -51,7 +55,7 @@ stratz-graphql-2026-08-29.md, then
    rampages(request: FilterHeroRampageType!) -> [HeroRampageObjectType]   
    abilityMinLevel(heroId: Short!, week: Long, bracketBasicIds: [RankBracketBasicEnum], positionIds: [MatchPlayerPositionType]) -> [HeroAbilityMinType]   This helps determine at what level do you max a skill.
    abilityMaxLevel(heroId: Short!, week: Long, bracketBasicIds: [RankBracketBasicEnum], positionIds: [MatchPlayerPositionType]) -> [HeroAbilityMaxType]   This helps determine at what level you first level a skill. (Level 1)
-   banDay(heroId: Short!, day: Int, bracketBasicIds: [RankBracketBasicEnum], take: Int, skip: Int, groupByDay: Boolean, groupByRank: Boolean) -> [HeroBanType]   This data for each day where a Hero is actually banned. This does not include data in which a hero w
+   banDay(heroId: Short!, day: Int, bracketBasicIds: [RankBracketBasicEnum], take: Int, skip: Int, groupByDay: Boolean, groupByRank: Boolean) -> [HeroBanType]   This data for each day where a Hero is actually banned. This does not include data in which a hero w…
 == HeroLaneOutcomeType (OBJECT) 
    heroId1() -> Int!   
    week() -> Int!   
@@ -83,6 +87,74 @@ stratz-graphql-2026-08-29.md, then
    bracketBasicIds() -> RankBracketBasicEnum   
    matchCount() -> Long   
    winCount() -> Long   
+== PlayerType (OBJECT) 
+   steamAccountId() -> Long   
+   identity() -> CaptainJackIdentityPublicProfileType   
+   steamAccount() -> SteamAccountType   
+   matchCount() -> Int   
+   winCount() -> Int   
+   imp() -> Int   
+   firstMatchDate() -> Long   
+   lastMatchDate() -> Long   
+   lastMatchRegionId() -> Byte   
+   ranks(seasonRankIds: [Byte]) -> [SteamAccountSeasonRankType]   
+   leaderboardRanks(skip: Int, take: Int) -> [SteamAccountSeasonLeaderBoardRankType]   
+   badges() -> [PlayerBadgeType]   
+   names(skip: Int, take: Int) -> [SteamAccountNameType]   
+   behaviorScore() -> Short   
+   team() -> SteamAccountTeamMemberType   
+   guildMember() -> GuildMemberType   
+   activity() -> PlayerActivitySummaryType   
+   isFollowed() -> Boolean   
+   simpleSummary() -> PlayerCardHoverType   
+   performance() -> PlayerPerformanceType   
+   heroPerformance(heroId: Short!, request: PlayerHeroPerformanceMatchesRequestType!) -> PlayerPerformanceType   
+   heroesPerformance(request: PlayerHeroPerformanceMatchesRequestType, take: Int, skip: Int) -> [PlayerHeroesPerformanceType]   Returns a list of all heroes played by the steam account id and contains data about the average perf…
+   matches(request: PlayerMatchesRequestType!) -> [MatchType]   Find match details by steam account id. steamAccountId is a required input field.
+   matchesGroupBy(request: PlayerMatchesGroupByRequestType!) -> [MatchGroupByType]   Find match details by steam account id. The return is modified to group the data by the GroupBy para…
+   dotaPlus() -> [HeroDotaPlusLeaderboardRankType]   Gets the players of Dota which have DotaPlus and have a high level hero.
+   heroStreaks(request: PlayerMatchesRequestType) -> [PlayerHeroPerformanceLongestStreakType]   A list of the current Streak and the Longest Streak for each Hero by a Player.
+   feats(take: Int, skip: Int) -> [FeatType]   A list of the high achivement skills by a Player.
+== PlayerMatchesRequestType (INPUT_OBJECT) 
+   in matchIds: [Long]   An array of Dota match ids to include in this query.
+   in leagueId: Int   A league id to include in this query, excluding all results that do not have this league id.
+   in leagueIds: [Int]   A league id to include in this query, excluding all results that do not have this league id.
+   in seriesId: Long   A series id to include in this query, excluding all results that do not have this series id.
+   in teamId: Int   A team id to include in this query, excluding all results that do not have this team id.
+   in teamIdSteamAccount: Int   When requesting matches with a primary SteamAccountId, this will ensure that player is on specific t…
+   in isParsed: Boolean   Whether STRATZ has yet parsed the data of the match or not, represented in a boolean.
+   in startDateTime: Long   The start DateTime of the Dota match(es) to include in this query, represented in unix seconds.
+   in endDateTime: Long   The end DateTime of the Dota match(es) to include in this query, represented in unix seconds.
+   in gameModeIds: [Byte]   An array of game mode ids to include in this query, excluding all results that do not include one of…
+   in lobbyTypeIds: [Byte]   An array of lobby type ids to include in this query, excluding all results that do not include one o…
+   in gameVersionIds: [Int]   An array of game version ids to include in this query, excluding all results that do not include one…
+   in regionIds: [Int]   An array of region ids to include in this query, excluding all results that do not include one of th…
+   in rankIds: [Int]   An array of rank ids to include in this query, excluding all results that do not include one of thes…
+   in bracketIds: [Int]   An array of rank ids to include in this query, excluding all results that do not include one of thes…
+   in isStats: Boolean   STRATZ applys an formula to determine if a game is considered 'real'. We attempt to detect AFKers, l…
+   in heroIds: [Short]   An array of hero ids to include in this query, excluding all results that do not include one of thes…
+   in laneIds: [Int]   An array of lane ids (enum MatchLaneType) to include in this query, excluding all results that do no…
+   in roleIds: [Int]   An array of role ids (enum MatchPlayerRoleType) to include in this query, excluding all results that…
+   in positionIds: [MatchPlayerPositionType]   An array of positions ids (enum MatchPlayerPositionType) to include in this query, excluding all res…
+   in awardIds: [Int]   An array of award ids to include in this query, excluding all results that do not include one of the…
+   in isParty: Boolean   Include all matches that are party games, excluding all others.
+   in hasAward: Boolean   STRATZ gives 3 players in each game an award for playing well. MVP, Top Core, Top Support (enum Matc…
+   in withFriendSteamAccountIds: [Long]   An array of steam account ids found on your team to include in this query, excluding all results tha…
+   in withEnemySteamAccountIds: [Long]   A steam account id found on the enemy team to include in this query, excluding all results that do n…
+   in withFriendHeroIds: [Int]   An array of hero ids found on your team to include in this query, excluding all results that do not …
+   in withEnemyHeroIds: [Int]   An array of hero ids found against your team to include in this query, excluding all results that do…
+   in isVictory: Boolean   Whether the match was a victory or not for the specified player.
+   in isRadiant: Boolean   Whether the specified player was on Radiant or not.
+   in minGameVersionId: Int   Requests matches where the match is at least than this input. See GameVersion API call for a list of…
+   in maxGameVersionId: Int   Requests matches where the match is lower than this input. See GameVersion API call for a list of pa…
+   in minImp: Int   Player must have at least this IMP for the Match to show.
+   in maxImp: Int   Player must have less than this IMP for the Match to show.
+   in playerList: FindMatchPlayerList   Determines if you want a single player returned, only the player by SteamAccountId, or if you want a…
+   in take: Int   The amount of matches to have returned in your query. Max :
+   in skip: Int   The amount of matches to skip before collecting your query. Hint: Paging
+   in after: Long   Only return matches after this match id. Can be used instead of Skip.
+   in before: Long   Only return matches before this match id. Can be used instead of Skip.
+   in orderBy: FindMatchPlayerOrderBy   In what order the returned data will come in.
 == MatchType (OBJECT) 
    id() -> Long   
    didRadiantWin() -> Boolean   
@@ -185,7 +257,7 @@ stratz-graphql-2026-08-29.md, then
    backpack0Id() -> Short   
    backpack1Id() -> Short   
    backpack2Id() -> Short   
-   neutral0Id() -> Short   The item id of the dedicated neutral item slot (7.24 and after). From game versions 7.23 to 7.24, th
+   neutral0Id() -> Short   The item id of the dedicated neutral item slot (7.24 and after). From game versions 7.23 to 7.24, th…
    behavior() -> Short   
    stats() -> MatchPlayerStatsType   
    playbackData() -> MatchPlayerPlaybackDataType   
@@ -211,46 +283,6 @@ stratz-graphql-2026-08-29.md, then
 == MatchStatsLaneReportType (OBJECT) 
    radiant() -> [MatchStatsLaneReportFactionObjectType]   
    dire() -> [MatchStatsLaneReportFactionObjectType]   
-== PlayerMatchesRequestType (INPUT_OBJECT) 
-   in matchIds: [Long]   An array of Dota match ids to include in this query.
-   in leagueId: Int   A league id to include in this query, excluding all results that do not have this league id.
-   in leagueIds: [Int]   A league id to include in this query, excluding all results that do not have this league id.
-   in seriesId: Long   A series id to include in this query, excluding all results that do not have this series id.
-   in teamId: Int   A team id to include in this query, excluding all results that do not have this team id.
-   in teamIdSteamAccount: Int   When requesting matches with a primary SteamAccountId, this will ensure that player is on specific t
-   in isParsed: Boolean   Whether STRATZ has yet parsed the data of the match or not, represented in a boolean.
-   in startDateTime: Long   The start DateTime of the Dota match(es) to include in this query, represented in unix seconds.
-   in endDateTime: Long   The end DateTime of the Dota match(es) to include in this query, represented in unix seconds.
-   in gameModeIds: [Byte]   An array of game mode ids to include in this query, excluding all results that do not include one of
-   in lobbyTypeIds: [Byte]   An array of lobby type ids to include in this query, excluding all results that do not include one o
-   in gameVersionIds: [Int]   An array of game version ids to include in this query, excluding all results that do not include one
-   in regionIds: [Int]   An array of region ids to include in this query, excluding all results that do not include one of th
-   in rankIds: [Int]   An array of rank ids to include in this query, excluding all results that do not include one of thes
-   in bracketIds: [Int]   An array of rank ids to include in this query, excluding all results that do not include one of thes
-   in isStats: Boolean   STRATZ applys an formula to determine if a game is considered 'real'. We attempt to detect AFKers, l
-   in heroIds: [Short]   An array of hero ids to include in this query, excluding all results that do not include one of thes
-   in laneIds: [Int]   An array of lane ids (enum MatchLaneType) to include in this query, excluding all results that do no
-   in roleIds: [Int]   An array of role ids (enum MatchPlayerRoleType) to include in this query, excluding all results that
-   in positionIds: [MatchPlayerPositionType]   An array of positions ids (enum MatchPlayerPositionType) to include in this query, excluding all res
-   in awardIds: [Int]   An array of award ids to include in this query, excluding all results that do not include one of the
-   in isParty: Boolean   Include all matches that are party games, excluding all others.
-   in hasAward: Boolean   STRATZ gives 3 players in each game an award for playing well. MVP, Top Core, Top Support (enum Matc
-   in withFriendSteamAccountIds: [Long]   An array of steam account ids found on your team to include in this query, excluding all results tha
-   in withEnemySteamAccountIds: [Long]   A steam account id found on the enemy team to include in this query, excluding all results that do n
-   in withFriendHeroIds: [Int]   An array of hero ids found on your team to include in this query, excluding all results that do not 
-   in withEnemyHeroIds: [Int]   An array of hero ids found against your team to include in this query, excluding all results that do
-   in isVictory: Boolean   Whether the match was a victory or not for the specified player.
-   in isRadiant: Boolean   Whether the specified player was on Radiant or not.
-   in minGameVersionId: Int   Requests matches where the match is at least than this input.  See GameVersion API call for a list o
-   in maxGameVersionId: Int   Requests matches where the match is lower than this input.  See GameVersion API call for a list of p
-   in minImp: Int   Player must have at least this IMP for the Match to show.
-   in maxImp: Int   Player must have less than this IMP for the Match to show.
-   in playerList: FindMatchPlayerList   Determines if you want a single player returned, only the player by SteamAccountId, or if you want a
-   in take: Int   The amount of matches to have returned in your query. Max : 
-   in skip: Int   The amount of matches to skip before collecting your query. Hint: Paging
-   in after: Long   Only return matches after this match id. Can be used instead of Skip.
-   in before: Long   Only return matches before this match id. Can be used instead of Skip.
-   in orderBy: FindMatchPlayerOrderBy   In what order the returned data will come in.
 == LeaderboardQuery (OBJECT) 
    season(request: FilterSeasonLeaderboardRequestType) -> SteamAccountSeasonActiveLeaderboardType   Returns the list of the current season leaderboard.
    dotaPlus(heroId: Short, orderBy: FilterLeaderboardOrder, level: Byte, skip: Int, take: Int) -> PlayerHeroDotaPlusLeaderboardRankResponseType   Gets the players of Dota which have DotaPlus and have a high level hero.
