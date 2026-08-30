@@ -238,6 +238,20 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       user's to apply, in the skills repository rather than here, and its `ref`
       needs the upstream commit in `microsoft/playwright-cli`. It is open
       rather than done: nobody has applied it.
+- [ ] **`beta-refit`** — proposed, `openspec/changes/beta-refit/`. The win
+      estimate's logistic gains a fitted slope and a fitted intercept, the
+      second signed by the side. Measured over 1 446 Divine/Immortal matches
+      scored through `computeModel` on 2026-08-30, `beta = 0.1` scores 0.4158
+      Brier against a 0.2497 floor — worse than a predictor that ignores the
+      draft — because `Δ` has a standard deviation of 66 pp and the logistic
+      saturates. Five steps, so `feat/beta-refit-1` … `-5`, in order. Last of
+      the calibration chain: `match-harvest` → `outcome-calibration` →
+      `score-calibration` and `side-and-phase-deltas` → this. Fitting before
+      the centring lands gives a `β` eight times too small for the scale that
+      replaces it. Proposed over two pull requests at the diff budget's
+      instruction — `spec/beta-refit` carries `proposal.md` and the three
+      delta specs, `spec/beta-refit-plan` carries `design.md` and `tasks.md`
+      and opens from `main` once the first has merged.
 - [ ] **`scan-lift`** — proposed, `openspec/changes/scan-lift/`. One
       left-to-right source scanner in three copies, two of them blind in ways
       their own specifications forbid. Ships on `feat/scan-lift`; it also
