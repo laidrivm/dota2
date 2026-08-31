@@ -41,8 +41,13 @@ entry, a hook or a CI check leaves this file the way it would leave
   one command; what it saves is the user's push being refused for a state
   they did not create.
 - Recover a refused push by merging the remote tip, never by forcing — but
-  read `git log HEAD..origin/<branch>` before choosing how. `-s ours` is
-  right only where every commit that listing names is one this branch already
+  `git fetch` first, then read `git log HEAD..origin/<branch>` before
+  choosing how. `origin/<branch>` is a local ref that answers from the last
+  fetch, and a refused push is proof the remote moved past it, so reading it
+  unrefreshed answers the question with the state that caused the refusal.
+
+  `-s ours` is right only where every commit that listing names is one this
+  branch already
   supersedes, its content carried by the rewrite; then the merge records what
   is true and leaves every file where it was. Where the listing names a
   commit nobody here wrote — a teammate's, or the user's own fix — `-s ours`
