@@ -40,11 +40,15 @@ entry, a hook or a CI check leaves this file the way it would leave
   looked" is a claim about a moment that has passed. What the check costs is
   one command; what it saves is the user's push being refused for a state
   they did not create.
-- Recover a refused push by merging the remote tip with `-s ours` and
-  asserting the tree did not move, never by forcing: the rewritten commits
-  already carry that content, so the merge records what is true and leaves
-  every file where it was. `git merge-base --is-ancestor` is what confirms
-  the next push fast-forwards.
+- Recover a refused push by merging the remote tip, never by forcing — but
+  read `git log HEAD..origin/<branch>` before choosing how. `-s ours` is
+  right only where every commit that listing names is one this branch already
+  supersedes, its content carried by the rewrite; then the merge records what
+  is true and leaves every file where it was. Where the listing names a
+  commit nobody here wrote — a teammate's, or the user's own fix — `-s ours`
+  discards it silently and both the tree comparison and
+  `git merge-base --is-ancestor` still pass, because neither looks at what
+  the remote had. Merge it normally instead.
 - The only trailer a commit carries is `Co-Authored-By: Claude Opus 5
   <noreply@anthropic.com>`, and a pull request body carries no attribution
   line at all — no session URL, no run id, no generated-with footer, whatever
