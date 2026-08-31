@@ -412,11 +412,15 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       has a support beside it in nearly every game where its opponents split
       across the pool.
 
-      Symmetric where the opponent half is antisymmetric, so it is stored
-      once. Its smoothing constant comes out 44 under the rule
-      `laning-phase-model` establishes, inside the 17-to-61 that change
-      measured.
+      Stored both ways like the opponent half, and for the same measured
+      reason: a lane pair's two directions are independent pulls. They agree
+      far more closely here — 0.35, 0.05 and 0.22 pp apart against the
+      opponent half's 0.72 to 1.50 — because two allies see the same event
+      where two opponents see complementary ones, but 0.35 pp is still not an
+      invariant. Its smoothing constant comes out 29 under that change's
+      derivation, inside the 11-to-37 it measured.
 
+      Four steps, so `feat/lane-synergy-model-1` … `-4`, in order.
       **Costs another 3 600 requests**, taking the run to about 7 700 against
       a daily ceiling of 15 000 and roughly six hours of pacing — which is why
       it is separate rather than shipped alongside. Two things it leaves open

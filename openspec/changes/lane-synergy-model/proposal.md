@@ -88,7 +88,7 @@ without it.
   together and this answers who wins a lane together; `+0.417` against the
   same pair's match outcome says they overlap more than the opponent pair
   does, not that either is redundant.
-- **Fitting the weight.** It enters at 1.0 like the six before it.
+- **Fitting the weight.** It enters at 1.0 like the seven before it.
   `suggestion-calibration` fits all of them.
 - **Deriving a second smoothing constant.** The rule `laning-phase-model`
   establishes — `k = (mean per-game variance) / var_true`, computed per run
@@ -124,6 +124,18 @@ without it.
   independence, and nothing here scores whether the component helps.
   `suggestion-calibration` is what answers it, and a fitted weight near zero
   is the honest outcome this change has to be willing to reach.
+
+## How this proposal ships
+
+`design.md` and `tasks.md` are **not** absent — they follow on
+`spec/lane-synergy-model-plan`, which opens from `main` once this branch has
+merged. The four artefacts together are over the diff budget's failing
+threshold, and `docs/git-and-prs.md` fixes what happens then: the proposal
+and the delta specs on `spec/<slug>`, the design and the tasks on
+`spec/<slug>-plan`. The change directory is therefore incomplete on purpose
+until the second branch lands. The `/zombies` pass has already run over this
+change, and its 32 ideas are what that `tasks.md` derives its test tasks
+from.
 
 ## Ordering
 
