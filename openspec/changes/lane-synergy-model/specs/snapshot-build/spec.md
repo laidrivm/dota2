@@ -79,13 +79,21 @@ draws are 28.9% of ally lane games, and assuming Bernoulli would read this
 statistic's constant as 44 where it is 29.
 
 Every denominator here is a divisor a thin store can empty, and the
-`var_true` check below runs after all of them. So before dividing, the build
-SHALL require of a statistic that it holds at least two rows and that every
-row's `matchCount` is at least one; WHERE either fails, that statistic has no
-constant and the build SHALL fail rather than publish a non-finite one. The
-ingest requirement admits exactly this state — a run cut short by the daily
-window leaves the ally statistic as staging had it, which may be nothing at
-all.
+`var_true` check below runs after all of them. So the build SHALL settle each
+statistic before dividing, and absence is not malformation:
+
+- **No rows at all** — a statistic is unmeasured. No constant is derived, the
+  export emits its root empty, and *An unmeasured component is zero for every
+  hero* decides the rest. The build SHALL NOT fail: the ingest requirement
+  admits this state deliberately, a run cut short by the daily window leaving
+  the ally statistic as staging had it, and failing on it would hold back the
+  half that is whole for the sake of the half that is not.
+- **Exactly one pooled row** — a variance over one observation is a division
+  by `N − 1` of zero. The statistic is treated as unmeasured on the same
+  terms, one row saying no more than none.
+- **A row whose `matchCount` is 0** — the ingest never writes one, so a row
+  that counts nothing is a defect rather than a thin sample, and the build
+  SHALL fail rather than divide by it.
 
 The two constants SHALL be derived and recorded separately. On the data
 measured they are close — 29 for allies against 11 to 37 for opponents — and
@@ -146,8 +154,9 @@ that is a fact about this patch rather than a licence to share one.
 
 - **IF** a statistic holds no row, or exactly one, as a run cut short before
   its pull completed leaves it
-- **THEN** the build SHALL fail rather than divide by `N − 1` of zero, and
-  SHALL name which statistic was short
+- **THEN** it SHALL be recorded as unmeasured with no constant, the build
+  SHALL publish, and it SHALL NOT divide by `N − 1` of zero — the other
+  statistic keeping its own constant
 
 #### Scenario: A row counting no match
 

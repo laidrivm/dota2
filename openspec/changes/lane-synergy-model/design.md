@@ -7,6 +7,13 @@ derived constant, the third-level contract check and the seventh component.
 This change flips one flag and reuses every one of them. What is worth
 designing is only where the second statistic is not the first.
 
+An `isWith: true` response carries the same fields an `isWith: false` one
+does — `heroId1`, `heroId2`, `position`, the five verdict counts summing to
+`matchCount`, and `matchWinCount` — so the fold, the centring and the
+derivation are the predecessor's unchanged. Measured on both, not assumed
+from the flag's name. An empty response is a cell with no rows, which the
+build treats as unmeasured rather than as a failure.
+
 `/snapshot.json` gains a second root of the shape the first established:
 
 ```text

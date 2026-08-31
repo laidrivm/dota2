@@ -47,7 +47,7 @@ does not carry.
 
 Four more of that change's scenarios are **renamed** rather than carried,
 each widening from one lane statistic to either. Their new identifiers are
-among the nine closed below, and the two deltas that rename them carry the
+among the eleven closed below, and the two deltas that rename them carry the
 before-and-after so no citation of the old slug goes quietly unresolved.
 
 Two carried scenarios change meaning rather than staying still: the share
@@ -85,7 +85,9 @@ Closes `snapshot-ingest/one-request-per-cell-and-side`,
       rather than 3 600 and take an hour off the run. Nothing has measured
       the median ally cell. If four weeks suffices there, this step says so
       and the window becomes a question for its own change rather than a
-      number carried by inertia.
+      number carried by inertia. Closes no criterion: the window is fixed by
+      a requirement this change inherits, and measuring whether it should be
+      is not the same as changing it.
 
 ## 2. A constant for each statistic
 
@@ -192,8 +194,11 @@ Closes `draft-model/the-two-lane-components-read-opposite-halves-of-the-board`,
       say what the run now costs: 7 200 requests against ~516, six hours
       against the under-one-hour it took before either lane change.
 - [ ] 5.8 Update `PLAN.md`'s queue in this step's pull request, not
-      afterwards.
+      afterwards. Closes no criterion, on the terms the preamble states.
 - [ ] 5.9 Run the pre-PR sequence per `docs/review-toolkit.md` on every step,
-      and `bun test` and `bun run test:db` besides. Steps 1 to 4 touch the
-      database, and CI runs only the first
-      (`.github/workflows/test.yml:110`).
+      and `bun test` and `bun run test:db` besides. Closes no criterion.
+      Steps 1 to 4 touch the database, and CI runs only `bun test`
+      (`.github/workflows/test.yml:110`) — so `test:db` skipping there is a
+      standing gap this change reports rather than one it creates, and
+      `CLAUDE.md`'s rule about a suite that skips where CI owns it is what
+      would close it, in a change of its own.
