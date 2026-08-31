@@ -19,9 +19,10 @@ score, with my own role's block first. Each entry SHALL carry the
 per-component breakdown (weights already applied).
 
 The `laneSynergy` component SHALL be `Σ_a laneAllies[h][r][a]` over the
-**allies already picked**, weighted by
-`MODEL_CONSTANTS.weights.laneSynergy`, where each absent leaf reads as 0
-rather than removing the term. It is 0 when the row is absent, or when no
+**allies already picked**, weighted by the resolved set's `laneSynergy` —
+the bundle's where it carries one and `MODEL_CONSTANTS.weights.laneSynergy`
+only where it does not — with each absent leaf reading as 0 rather than
+removing the term. It is 0 when the row is absent, or when no
 picked ally appears in it.
 
 Over allies and not over enemies, which is what distinguishes it from `lane`:
