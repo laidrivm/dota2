@@ -3,6 +3,22 @@
 **Written against the version `beta-refit` leaves behind.** That change
 creates both requirements below; there is no version of either on `main`.
 
+## RENAMED Requirements
+
+- FROM: `### Requirement: The logistic's two parameters are fitted over the store`
+- TO: `### Requirement: The logistic's parameters are fitted over the store`
+
+The heading counted the parameters and this change adds more, so the count
+goes. Renamed rather than edited inside the MODIFIED block below, because a
+`MODIFIED` delta matches the live requirement by its heading: changed there
+and nowhere else, the sync would look for a heading no spec holds.
+
+The `FROM:` line runs one column past this file's wrap and stays on one line
+anyway — the parser reads only a list item's first line, so wrapping it
+truncated the heading to `…are fitted over` and the rename would have matched
+nothing. Nothing in the repository enforces the wrap and `docs/` already
+carries an 87-column line; the parser is the harder constraint.
+
 ## MODIFIED Requirements
 
 ### Requirement: The logistic's parameters are fitted over the store
@@ -68,6 +84,13 @@ Radiant-perspective session* fixes, so every `cᵢ` and `didRadiantWin` are read
 from one side throughout and the fitted `α` is the Radiant advantage rather
 than a quantity that changes meaning halfway through the store.
 
+Two of the scenarios below fix what the **fit returns**, never what the run
+publishes: whether anything reaches the bundle is decided by *A fit that
+cannot be trusted is refused, not published* alone. Prose is kept above the
+first scenario rather than between two, because the parser reads a paragraph
+after a scenario as part of it — `beta-refit`'s version of this requirement
+has it between, and this replaces that version.
+
 #### Scenario: A fit over the whole store
 
 - **WHEN** a run scores the matches its own night added and the store holds
@@ -89,10 +112,6 @@ than a quantity that changes meaning halfway through the store.
 - **THEN** each SHALL be computed from its own definition, and none SHALL be
   taken as `Δ` less the others — a residual carries the enemy role inference
   into whichever component is computed last
-
-Both scenarios below fix what the **fit returns**, never what the run
-publishes: whether anything reaches the bundle is decided by *A fit that
-cannot be trusted is refused, not published* alone.
 
 #### Scenario: Both parameters, never one
 
@@ -116,7 +135,7 @@ cannot be trusted is refused, not published* alone.
 ### Requirement: Suggestion weights are fitted over a replayed draft
 
 The four components that never reach `Δ` SHALL be fitted over stored drafts
-**replayed pick by pick**: at each pick the store records, the run SHALL
+replayed **pick by pick**: at each pick the store records, the run SHALL
 build the session as it stood before that pick and score the hero actually
 taken, so that a component defined over open slots has open slots to be
 defined over.
