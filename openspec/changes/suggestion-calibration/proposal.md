@@ -53,10 +53,15 @@ the layer under it, and nothing has ever measured one.
   them by better numbers.
 - **Adding or removing a component.** A weight fitted to zero is the honest
   way to retire one, and it is a reading rather than an edit.
-- **Refitting `α` and `β`.** They are `beta-refit`'s, and they are fitted
-  over `Δ`. Fitting the weights changes `Δ`, so the two are fitted together
-  or the second invalidates the first — which is a sequencing requirement,
-  not a claim on that change's parameters.
+- **Leaving `α` and `β` alone.** Neither survives this change untouched, and
+  saying otherwise would be the contradiction rather than the courtesy. `α`
+  is fitted here, in the same likelihood, because it and the coefficients are
+  one estimate: fitting them separately puts whatever the intercept should
+  carry into whichever coefficient is fitted first. And `β` **ceases to
+  exist**: it is the one slope over `Δ`, and `Δ` is what this change opens
+  into its parts, so `β·Δ` becomes `Σ wᵢ·cᵢ` with no scalar left over. What
+  `beta-refit` establishes and this keeps is the machinery — the likelihood,
+  the refusals, the held-out partition — not the two numbers.
 
 ## What is measurable today, and what is not
 
@@ -104,6 +109,16 @@ change has to establish before it can claim to have fitted anything.
 - `src/job/` — the fitting run gains coefficients and a replay.
 - `src/fixtures/snapshot.json` — regenerated.
 - No new dependency and no new endpoint: every input is already stored.
+
+## How this proposal ships
+
+`design.md` and `tasks.md` follow on `spec/suggestion-calibration-plan`,
+which opens from `main` once this branch has merged. The four artefacts
+together are over the diff budget's failing threshold, and
+`docs/git-and-prs.md` fixes what happens then. The change directory is
+incomplete on purpose until the second branch lands; the `/zombies` pass has
+already run, and its 38 ideas are what that `tasks.md` derives its test tasks
+from.
 
 ## Ordering
 

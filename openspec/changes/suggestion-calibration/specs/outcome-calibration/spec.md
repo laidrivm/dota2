@@ -43,7 +43,8 @@ component is computed last, and the coefficient fitted for it is then a
 coefficient for two things.
 
 A component whose column has no variance over the scored matches SHALL be
-recorded as unfitted, its hand-set weight kept, and the run SHALL NOT fail:
+recorded as unfitted with its hand-set weight kept, and the fit SHALL NOT
+fail — publication remaining the refusal requirement's to decide:
 `side` is exactly this today, 0 of 127 heroes carrying a non-zero side delta,
 so its term is identically 0 and its coefficient is unidentifiable rather
 than merely thin. It becomes fittable when `side-and-phase-deltas` lands, and
@@ -84,12 +85,18 @@ Radiant-perspective session* fixes, so every `cᵢ` and `didRadiantWin` are read
 from one side throughout and the fitted `α` is the Radiant advantage rather
 than a quantity that changes meaning halfway through the store.
 
-Two of the scenarios below fix what the **fit returns**, never what the run
-publishes: whether anything reaches the bundle is decided by *A fit that
-cannot be trusted is refused, not published* alone. Prose is kept above the
-first scenario rather than between two, because the parser reads a paragraph
-after a scenario as part of it — `beta-refit`'s version of this requirement
-has it between, and this replaces that version.
+The last two scenarios below are `beta-refit`'s, carried whole, and they
+read under this requirement as the **one-component case**: where a fit has
+a single column, the coefficient vector is a scalar and `Σ wᵢ·cᵢ` is `β·Δ`
+once more. They are kept because that case is the one whose arithmetic was
+worked out by hand, and it still has to hold.
+
+Two of them fix what the **fit returns**, never what the run publishes:
+whether anything reaches the bundle is decided by *A fit that cannot be
+trusted is refused, not published* alone. Prose is kept above the first
+scenario rather than between two, because the parser reads a paragraph after
+a scenario as part of it — `beta-refit`'s version of this requirement has it
+between, and this replaces that version.
 
 #### Scenario: A fit over the whole store
 
@@ -102,9 +109,11 @@ has it between, and this replaces that version.
 
 - **WHEN** every scored draft carries the same value for one component, as
   `side` does at 0 today
-- **THEN** that component SHALL be recorded as unfitted with its hand-set
-  weight kept, the others SHALL be fitted over the remaining columns, and the
-  run SHALL publish
+- **THEN** the fit SHALL return that component as unfitted with its hand-set
+  weight kept and the others fitted over the remaining columns, and SHALL NOT
+  fail — whether the set then reaches the bundle is *A weight fit that cannot
+  be trusted is refused*'s alone, and a set carrying an unfitted component
+  still has to clear it
 
 #### Scenario: Each component measured, none derived
 
@@ -147,6 +156,15 @@ implying otherwise: what it can establish is whether a component's score at
 pick time carries information about the result, not how much of the result
 that pick caused.
 
+Every row a replay produces SHALL inherit the fold of the match it came from,
+so that a match's ten picks fall on one side of the held-out partition
+together. Split row by row they would land on both, and the fit would be
+scored on an outcome it had already seen ten times — the Brier reading
+better than the model is. *A fit that cannot be trusted is refused, not
+published* fixes the partition as `match_id mod 5`, which is already
+match-level; this says the replay's rows take their match's value rather than
+one of their own.
+
 A replay SHALL use the pick order the store holds and the bundle the run is
 scoring against, never the bundle in force when the match was played. The
 second would be a different question — how good the advice was at the time —
@@ -158,6 +176,13 @@ and no stored bundle answers it.
 - **THEN** the session scored SHALL hold that side's two earlier picks and no
   later one, and `counterRisk` SHALL be non-zero, the enemy having slots
   still open
+
+#### Scenario: One match's picks share a fold
+
+- **WHEN** a match's ten replayed picks are partitioned
+- **THEN** all ten SHALL fall in the same fold, and none of the fitted
+  coefficients SHALL have been fitted on a row whose match also appears in
+  the held-out set
 
 #### Scenario: The replay uses the current bundle
 
