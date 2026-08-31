@@ -59,9 +59,12 @@ the layer under it, and nothing has ever measured one.
   one estimate: fitting them separately puts whatever the intercept should
   carry into whichever coefficient is fitted first. And `β` **ceases to
   exist**: it is the one slope over `Δ`, and `Δ` is what this change opens
-  into its parts, so `β·Δ` becomes `Σ wᵢ·cᵢ` with no scalar left over. What
-  `beta-refit` establishes and this keeps is the machinery — the likelihood,
-  the refusals, the held-out partition — not the two numbers.
+  into its parts, so `β·Δ` becomes `Σ wᵢ·cᵢ` with no scalar left over. A run's
+  row carries `α` and the vector `w`, and no `beta` column survives beside
+  them — not even as an alias for the one-component case, where `w` simply
+  has one element. What `beta-refit` establishes and this keeps is the
+  machinery — the likelihood, the refusals, the held-out partition — not the
+  two numbers.
 
 ## What is measurable today, and what is not
 

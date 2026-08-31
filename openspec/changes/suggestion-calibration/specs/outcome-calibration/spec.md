@@ -64,17 +64,25 @@ three fittable columns are near enough orthogonal for a fit to separate them
 question is well posed rather than merely well intentioned.
 
 The fit SHALL run over every scorable match the store holds, not over the
-matches the run's own night added. Bootstrapped over 1 446 scored matches,
-the 5th-to-95th-percentile band on `β` narrows with the sample and does so
+matches the run's own night added. `beta-refit` bootstrapped the single
+slope over 1 446 scored matches, and its band narrows with the sample
 slowly:
 
 ```text
-n        β median   β 5–95%           spread
+n        median     5–95%             spread
 200      0.0168     0.0022–0.0329     ±92%
 400      0.0154     0.0075–0.0274     ±65%
 800      0.0154     0.0108–0.0241     ±43%
 1 446    0.0161     0.0120–0.0215     ±30%
 ```
+
+Those figures are a **floor** for this requirement rather than its
+expectation: they were measured fitting one coefficient, and this fits
+several from the same matches. Splitting one sample's information across
+more parameters widens every band, so a spread of ±30% at 1 446 is the best
+case a many-coefficient fit could inherit and not what it will show. Nothing
+here has measured what it does show, and the run's own record of the sample
+size is what makes that readable.
 
 `α` is the steady one, sitting between 0.090 and 0.100 at every size. The
 coefficients are what the sample buys, and a night's matches do not buy them
@@ -85,11 +93,12 @@ Radiant-perspective session* fixes, so every `cᵢ` and `didRadiantWin` are read
 from one side throughout and the fitted `α` is the Radiant advantage rather
 than a quantity that changes meaning halfway through the store.
 
-The last two scenarios below are `beta-refit`'s, carried whole, and they
-read under this requirement as the **one-component case**: where a fit has
-a single column, the coefficient vector is a scalar and `Σ wᵢ·cᵢ` is `β·Δ`
-once more. They are kept because that case is the one whose arithmetic was
-worked out by hand, and it still has to hold.
+The parameters this requirement fits are `α` and the vector `w`, and **there
+is no `β`**: a run's row carries the vector, never a scalar slope beside it.
+The last two scenarios below are `beta-refit`'s arithmetic, carried because
+it was worked out by hand and still has to hold, restated over the
+one-component case — one column, so `w` has one element, which is the number
+that change called `β`. The name goes and the value does not.
 
 Two of them fix what the **fit returns**, never what the run publishes:
 whether anything reaches the bundle is decided by *A fit that cannot be
@@ -126,18 +135,18 @@ between, and this replaces that version.
 
 - **WHEN** a fit is taken over ten matches at `Δ = −1` of which five are
   Radiant wins and ten at `Δ = +1` of which eight are
-- **THEN** it SHALL return `α = 0.6931` and `β = 0.6931` to four decimals,
-  whose log-likelihood is `−11.9355` against the `−12.9489` of the best fit
-  holding `α` at 0
+- **THEN** it SHALL return `α = 0.6931` and a one-element `w` of `0.6931` to
+  four decimals, whose log-likelihood is `−11.9355` against the `−12.9489` of
+  the best fit holding `α` at 0
 
 #### Scenario: A sample the slope alone already fits
 
 - **WHEN** a fit is taken over ten matches at `Δ = −1` of which three are
   Radiant wins and twenty at `Δ = +1` of which fourteen are, a marginal
   Radiant rate of 56.67%
-- **THEN** it SHALL return `α = 0` and `β = 0.8473`, the two log-likelihoods
-  being equal at `−18.3259` — a maximum-likelihood `α` of 0 is a fitted value
-  rather than an unfitted one
+- **THEN** it SHALL return `α = 0` and a one-element `w` of `0.8473`, the two
+  log-likelihoods being equal at `−18.3259` — a maximum-likelihood `α` of 0 is
+  a fitted value rather than an unfitted one
 
 ## ADDED Requirements
 
