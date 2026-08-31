@@ -70,9 +70,22 @@ synergy               0.233       —         —      0.234
 matchups             −0.018       —     0.234          —
 ```
 
-Pairwise |r| at most 0.234. A fit separates them; the question is well posed
-rather than merely well intentioned. `side`'s row is empty because its column
-is constant, which is the paragraph above.
+Pairwise |r| at most 0.234 — but pairwise correlation is not what decides
+separability. Three columns can each correlate weakly with the others and
+still be nearly dependent, one of them close to the sum of two. The measure
+that sees it is the conditioning of the whole design:
+
+```text
+eigenvalues of the correlation matrix   1.321   1.018   0.660
+condition number  κ = λmax/λmin         2.00
+VIF   meta 1.064    synergy 1.125    matchups 1.064
+```
+
+A `κ` of 2 and a worst VIF of 1.125 are as well posed as this kind of data
+gets — the conventional VIF alarm is 5. So the fit separates them, and the
+requirement's refusal is stated in VIF rather than in pairwise `r`, because
+the second would pass a store the first catches. `side`'s row is empty
+because its column is constant, which is the paragraph above.
 
 Worth naming what this measurement is not: it was taken with `matchups`
 carrying the enemy-meta residual, because the model infers enemy roles inside

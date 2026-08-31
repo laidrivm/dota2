@@ -73,11 +73,13 @@ scoring.
       a store of identical drafts — leaves the whole set unfitted rather than
       reaching the singular matrix 3.4 refuses, since a constant column is
       caught before the solver sees it.
-- [ ] 1.6 Pin the fixture against the measured shape (ZOMBIES 13): the three
-      fittable columns over it correlate no more than the 0.234 measured on
-      1 469 real drafts. A fixture that drifts into collinearity makes the
-      separability this change rests on untestable, and nothing else would
-      notice.
+- [ ] 1.6 Pin the fixture against the measured shape (ZOMBIES 13) by a
+      conditioning measure, not by pairwise correlation: no column's variance
+      inflation factor above 5, against the 1.125 the worst of them shows on
+      1 469 real drafts. Pairwise `|r|` cannot see a column that is nearly the
+      sum of two others while correlating weakly with each, and a fixture that
+      drifts there makes the separability this change rests on untestable
+      while every pairwise figure still looks fine.
 - [ ] 1.7 Assert the dependency on `side-and-phase-deltas`, closing no
       criterion: until it lands `side` exercises only the unfitted path, so
       the fitted path for that column has no case until then and this step
@@ -92,10 +94,14 @@ Both are `beta-refit`'s arithmetic restated over a one-element vector. The
 numbers are unchanged and the symbol is not, so the cases asserting `β` are
 re-pointed rather than rewritten from scratch.
 
-- [ ] 2.1 Re-point both cases at `w` (ZOMBIES 3): ten matches at `Δ = ∓1` with
-      five and eight wins return `α = 0.6931` and a one-element `w` of
-      `0.6931`; five at `Δ = −1` with one win beside ten at `+1` with eight
-      return `α = 0` and `w` of `0.8473`, the two log-likelihoods equal.
+- [ ] 2.1 Re-point both cases at `w` (ZOMBIES 3), taking each sample from the
+      requirement rather than from memory: ten matches at `Δ = ∓1` with five
+      and eight wins return `α = 0.6931` and a one-element `w` of `0.6931`;
+      **ten** at `Δ = −1` with three wins beside **twenty** at `+1` with
+      fourteen return `α = 0` and `w` of `0.8473`, the two log-likelihoods
+      equal at `−18.3259`. The five-and-ten sample that reads `w = ln 4` is
+      the one `beta-refit` replaced, for putting a coefficient outside the
+      bound its own refusal fixes.
 - [ ] 2.2 Fit `α` and the vector in one likelihood, never in two passes
       (ZOMBIES 5). Fitting `α` first puts whatever the intercept should carry
       into whichever coefficient is fitted next; a case where adding one match
@@ -131,8 +137,12 @@ Closes
       coefficient refuses too, and the design says why — a component the model
       sums is one it believes helps, so a fitted negative is a finding about
       the component rather than a weight to ship.
-- [ ] 3.4 Refuse a singular design matrix rather than returning what the
-      solver invented (ZOMBIES 11), and refuse naming the weight fit rather
+- [ ] 3.4 Refuse an **ill-conditioned** design, not merely a singular one
+      (ZOMBIES 11): any column's VIF at or above 5 refuses, where exact
+      singularity is the limiting case the solver would have caught anyway.
+      Measured on real drafts the worst VIF is 1.125 and `κ` is 2.00, so the
+      threshold sits far above what the data does and fires on a store that
+      has genuinely lost a dimension. Refuse naming the weight fit rather
       than "the calibration" (ZOMBIES 12) — two fits now run and a row saying
       neither is a row nobody can act on.
 
@@ -202,20 +212,29 @@ Closes `draft-model/the-bundle-s-weights-are-the-ones-used`,
       `MODEL_CONSTANTS.weights.laneSynergy` directly, two paragraphs from the
       sentence saying the bundle overrides — a published bundle would have
       been ignored for exactly that one component.
-- [ ] 6.3 Give `contract.ts` its second optional key, after `calibration`
-      (ZOMBIES 35). The optional-key concept `beta-refit` adds is what this
-      reuses; a second hand-rolled branch is a second thing to keep true.
-- [ ] 6.4 Re-verify the nine carried `draft-model` scenarios rather than
+- [ ] 6.3 Register `weights` in **`BUNDLE`, in `CHECKED_ABOVE`, and as
+      optional** — three edits, not one (ZOMBIES 35). `contract.ts:104-132`
+      sends every root outside `CHECKED_ABOVE` through the hero-keyed
+      validator, so `weights` holding `meta` and `counterRisk` would be
+      refused for keys that are not decimal integer strings, and a valid
+      bundle would fail to publish. The optional-key concept is `beta-refit`'s
+      and is reused rather than rebuilt; the two list entries are what
+      `calibration` needed too and what an "add an optional key" reading
+      misses.
+- [ ] 6.4 Assert the eight leaves are finite and that there are exactly eight
+      (ZOMBIES 36), which the matrix validator would have done for a matrix
+      and does not do for a flat record.
+- [ ] 6.5 Re-verify the nine carried `draft-model` scenarios rather than
       assuming them — *Empty draft components* now runs with weights that may
       not be 1.0, so a case asserting a component is exactly 0 has to be 0
       because the sum is empty rather than because the weight was one.
-- [ ] 6.5 Re-run Stryker (ZOMBIES 38). Its floor is scoped to `src/model.ts`,
+- [ ] 6.6 Re-run Stryker (ZOMBIES 38). Its floor is scoped to `src/model.ts`,
       which `laning-phase-model` splits; this adds to whatever that left.
-- [ ] 6.6 Record the suggestion block before and after on one real draft, and
+- [ ] 6.7 Record the suggestion block before and after on one real draft, and
       the fitted set beside the hand-set one. Closes no criterion.
-- [ ] 6.7 Update `PLAN.md`'s queue in this step's pull request, not
+- [ ] 6.8 Update `PLAN.md`'s queue in this step's pull request, not
       afterwards. Closes no criterion.
-- [ ] 6.8 Run the pre-PR sequence per `docs/review-toolkit.md` on every step,
+- [ ] 6.9 Run the pre-PR sequence per `docs/review-toolkit.md` on every step,
       and `bun test` and `bun run test:db` besides. Closes no criterion.
       Steps 1 to 5 touch the database, and CI runs only `bun test`
       (`.github/workflows/test.yml:110`).
