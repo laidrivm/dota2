@@ -56,7 +56,7 @@ scoring.
       inside `computeModel`, so a residual carries that inference into
       whichever column is computed last — which is how the proposal's own
       measurement had to read `matchups`, and why the requirement forbids it.
-- [ ] 1.3 Distinguish a fitted zero from an unfittable column (ZOMBIES 8).
+- [ ] 1.3 Distinguish a fitted zero from an unfittable column (ZOMBIES 8, 9).
       A coefficient the fit drove to 0 publishes as 0 and is recorded fitted;
       a column with no variance publishes its hand-set weight and is recorded
       unfitted. The two look identical in the published set and must not in
@@ -66,7 +66,19 @@ scoring.
       eight numbers and the model cannot tell which were fitted, which is the
       point — a scoring rule that behaved differently for an unfitted weight
       would need the run's row at scoring time.
-- [ ] 1.5 Assert the dependency on `side-and-phase-deltas`, closing no
+- [ ] 1.5 Cover the two degenerate stores, closing no criterion beyond those
+      above (ZOMBIES 1, 2): a store with no scorable match derives nothing and
+      publishes, which `beta-refit`'s own empty case already fixes and this
+      inherits rather than restates; every fittable column constant at once —
+      a store of identical drafts — leaves the whole set unfitted rather than
+      reaching the singular matrix 3.4 refuses, since a constant column is
+      caught before the solver sees it.
+- [ ] 1.6 Pin the fixture against the measured shape (ZOMBIES 13): the three
+      fittable columns over it correlate no more than the 0.234 measured on
+      1 469 real drafts. A fixture that drifts into collinearity makes the
+      separability this change rests on untestable, and nothing else would
+      notice.
+- [ ] 1.7 Assert the dependency on `side-and-phase-deltas`, closing no
       criterion: until it lands `side` exercises only the unfitted path, so
       the fitted path for that column has no case until then and this step
       says which of its assertions are dark.
