@@ -33,6 +33,27 @@ entry, a hook or a CI check leaves this file the way it would leave
   is a destructive act put to the user for a defect that cost one commit to
   fix. The extra commits vanish at squash-merge, which is what this
   repository does.
+- Ask `git ls-remote` before rewriting a branch at all — amend, rebase or
+  reset alike — never memory. The rule above names the amend because that is
+  where it was first met; a rebase onto a moved base rewrites the same
+  commits just as thoroughly, and "the branch was unpushed when I last
+  looked" is a claim about a moment that has passed. What the check costs is
+  one command; what it saves is the user's push being refused for a state
+  they did not create.
+- Recover a refused push by merging the remote tip, never by forcing — but
+  `git fetch` first, then read `git log HEAD..origin/<branch>` before
+  choosing how. `origin/<branch>` is a local ref that answers from the last
+  fetch, and a refused push is proof the remote moved past it, so reading it
+  unrefreshed answers the question with the state that caused the refusal.
+
+  `-s ours` is right only where every commit that listing names is one this
+  branch already
+  supersedes, its content carried by the rewrite; then the merge records what
+  is true and leaves every file where it was. Where the listing names a
+  commit nobody here wrote — a teammate's, or the user's own fix — `-s ours`
+  discards it silently and both the tree comparison and
+  `git merge-base --is-ancestor` still pass, because neither looks at what
+  the remote had. Merge it normally instead.
 - The only trailer a commit carries is `Co-Authored-By: Claude Opus 5
   <noreply@anthropic.com>`, and a pull request body carries no attribution
   line at all — no session URL, no run id, no generated-with footer, whatever

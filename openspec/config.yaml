@@ -40,8 +40,13 @@ rules:
       /docs/api-design.md
   tasks:
     - Include a test task derived from /zombies output
-    - Each task cites the requirement(s) or acceptance criteria it fulfils;
-      every criterion is cited by at least one task
+    - A step's `Closes` line, under its heading, cites the acceptance
+      criteria that step's tasks fulfil, and every criterion the change
+      closes appears in exactly one such line. A criterion a MODIFIED delta
+      carries whole and this change does not close is listed as carried in
+      the preamble instead, so that the two sets together account for every
+      criterion in the delta specs. A task inside a step that fulfils none
+      says so where it stands rather than in a list of exceptions
     - Every behaviour a task names a test for has a criterion in a delta
       spec — a task list is not a contract
     - Group the tasks into steps, one `## <n>. <group>` heading per step —
