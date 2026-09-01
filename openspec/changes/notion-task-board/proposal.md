@@ -34,6 +34,11 @@ the wrong instrument for a status. Nothing reads a queue entry to check it.
   `scripts/board-state.ts`, which reads no network and asks no service. The
   other five are moved by whoever does the work, in the turn the work moves.
 - The board is read through a **saved board view**, never through SQL.
+- A card carries what blocks it, so that a session choosing work does not take
+  a task whose predecessor has not landed. The edge is **derived like the
+  three statuses**, from a new `after:` list in each change's `.openspec.yaml`
+  — not hand-set on the board, which would be a second copy of what
+  `## Ordering` already says and would drift the way the queue did.
 - The eleven `tasks.md` files carrying a step that updates `PLAN.md`'s queue
   are retargeted, so no unapplied change is left pointing at a queue that is
   gone.
@@ -111,7 +116,13 @@ are the reason it is not worth deriving everything.
   here, so it gains the second remedy and the test that picks between them:
   extraction moves what a session reads on demand, relocation moves what a
   session **writes** — a status, which no file is the right instrument for.
-- `scripts/board-state.ts` — new, plus its test. Filesystem in, statuses out.
+- `scripts/board-state.ts` — new, plus its test. Filesystem in, statuses and
+  blocking edges out.
+- `openspec/changes/*/.openspec.yaml` — six of them gain an `after:` list,
+  which is where the six proposals that name a predecessor put the fact
+  their `## Ordering` states in prose. Probed rather than assumed: `openspec
+  validate` reports a change carrying the extra key as valid and `openspec
+  status` reads it unchanged.
 - `CLAUDE.md` §*Maintenance & growth* — the sentence naming what the set
   holds, and the rule that sends a status to `PLAN.md`.
 - `docs/feature-workflow.md` — *Maintain `PLAN.md`* becomes an obligation to
