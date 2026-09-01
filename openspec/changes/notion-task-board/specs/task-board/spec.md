@@ -102,6 +102,72 @@ pull request to its change.
 - **THEN** it SHALL produce its full output, every status coming from the
   file tree
 
+### Requirement: A card names what blocks it, derived from the tree
+
+A card SHALL name the tasks that must land before it can be taken up, and
+`scripts/board-state.ts` SHALL derive that set from an `after:` list in each
+change's `.openspec.yaml` — never from the board, and never from the prose of
+a proposal's `## Ordering`.
+
+A change's `after:` list SHALL name the slugs its `## Ordering` section
+argues for, and that section SHALL keep the argument: the list is the fact and
+the prose is the reason, so a reader asking *why* this order is not sent to a
+YAML file and a session asking *what is takeable* is not sent to sixteen
+proposals.
+
+A card whose `after:` names a slug that is not `done` SHALL be reported as
+blocked, and a session choosing work SHALL NOT take it. Blocked SHALL be
+**computed at the time of asking** rather than stored on the card: it is a
+fact about what has landed, so a card that holds it goes stale the moment its
+predecessor is archived, and nothing points at the staleness. What is stored
+is the `after:` list, which changes only when the ordering argument does.
+
+This is worth deriving where `implementing` was not, and the difference is
+that a key exists. `## Ordering` names its predecessors as slugs, and a slug
+is exactly what identifies a change directory; the pull-request derivation
+failed because nothing joined a pull request to its change. Prose is still
+not the source — *after `laning-phase-model`*, *`candidacy-gate` must be
+applied and synced first*, and *SHOULD NOT be applied before
+`outcome-calibration`* are three phrasings of one relation and one of them is
+a negation, so the list is written rather than parsed out.
+
+Measured on the prose as it stands. Six of the seventeen changes have a
+predecessor, and taking every change slug an `## Ordering` section mentions
+gets the predecessor set right for two of them. For the other four it adds
+slugs that are not dependencies — a section argues about the changes around
+it, not only the ones before it — and for two of those four the added slug is
+a **successor** read as a predecessor: `laning-phase-model`'s section names
+`suggestion-calibration`, which comes after it, and `lane-synergy-model`'s
+does the same. An edge derived backwards blocks a task on work that is
+waiting for it.
+
+#### Scenario: A change whose predecessor has not landed
+
+- **WHEN** a card's `after:` names a slug whose derived status is not `done`
+- **THEN** the card SHALL be reported as blocked by that slug, and a session
+  choosing work SHALL pass over it
+
+#### Scenario: A change whose predecessors have all landed
+
+- **WHEN** every slug in a card's `after:` is `done`
+- **THEN** the card SHALL be reported as takeable, and the `after:` list SHALL
+  NOT be emptied — what unblocked it stays readable
+
+#### Scenario: A change with no ordering constraint
+
+- **WHEN** a change's `.openspec.yaml` carries no `after:` key, as eleven of
+  the seventeen do
+- **THEN** it SHALL be reported as takeable, and the absent key SHALL NOT be
+  read as an unmeasured or malformed one
+
+#### Scenario: An `after:` naming a slug that does not exist
+
+- **WHEN** an `after:` list names a slug with no directory under
+  `openspec/changes/` and none under `openspec/changes/archive/`
+- **THEN** the derivation SHALL fail naming the slug and the file, rather than
+  treating the unresolvable name as landed — a typo that reads as `done`
+  unblocks a task nothing has unblocked
+
 ### Requirement: The board is read through a saved view
 
 A session SHALL read the board through a saved board view, grouped by status,
