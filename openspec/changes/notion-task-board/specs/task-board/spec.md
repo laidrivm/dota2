@@ -36,6 +36,25 @@ makes it work rather than an opinion.
 - **THEN** the card body SHALL be the record, and no file in the repository
   SHALL be expected to hold it
 
+A card SHALL keep its identity across that boundary. WHEN a directory is
+created for a card that had none, the **same card** SHALL gain the pointer and
+lose its body, rather than a second card being made beside it. What the body
+held has by then been written into `proposal.md`, so keeping it leaves two
+accounts of one thing with only one of them reviewed — which is the duplication
+this requirement exists to prevent, arriving by the one route the rest of it
+does not close.
+
+Every card that is not `done` crosses this boundary eventually: eighteen of
+the thirty-four entries this change moves are findings with no directory, and
+each becomes a change or is dropped.
+
+#### Scenario: A finding that becomes a change
+
+- **WHEN** `openspec/changes/<slug>/` is created for a card that carried its
+  record in its body
+- **THEN** that card SHALL gain the path as its pointer and its body SHALL be
+  emptied in the same turn, and no second card SHALL be created for the change
+
 #### Scenario: A card and the tree disagreeing
 
 - **WHEN** a card's status and the file tree disagree about a derived status
@@ -47,27 +66,41 @@ makes it work rather than an opinion.
 A card SHALL hold exactly one of eight statuses: `suggested`, `exploring`,
 `proposing`, `ready`, `implementing`, `reviewing`, `archiving`, `done`.
 
-The eight SHALL be the **options** of the board's status property, and the
-saved view SHALL group by option. A Notion status property also carries three
-groups that cannot be removed — read off the live `D2ASS` property, they are
-`to_do`, `in_progress` and `complete` — and each option sits in one of them:
+The eight SHALL be the **options** of the board's status property, named
+exactly as listed above, and the saved view SHALL group by option. What a card
+carries and what anything in this repository names is an option's **name**:
+the live property's table surface types the column as `one of ["Not started",
+"In progress", "Done"]`, so a name is what a read returns and a write sets.
+
+Notion also gives a status property a fixed set of **group keys**, which
+options are filed under and which cannot be added to or removed. Read off the
+live `D2ASS` property rather than assumed, the rendering exposes five —
+`to_do`, `in_progress`, `complete`, `current` and `future` — of which the last
+two hold nothing. Each of the eight options sits under one key:
 
 ```text
 to_do         suggested, ready       nobody has started
 in_progress   exploring, proposing, implementing, reviewing, archiving
 complete      done
+current, future   empty, as they are on the property today
 ```
 
-The distinction is not cosmetic. Grouping the view by **group** rather than by
-option collapses eight columns into three and loses every distinction the
-board exists to make: `ready` and `suggested` become one column, and so do
-`proposing` and `reviewing`. The mapping above exists because the groups
-cannot be deleted, not because anything reads them.
+A group key is not an option name and not an option identifier. The live
+property gives each option a `collectionPropertyOption://` URL, which is its
+stable identity; that URL is an identifier for private content and SHALL NOT
+be written into this repository, which refers to an option by name and to a
+group by the key above.
 
-`ready` sits in `to_do` rather than `in_progress` because it means the
+The grouping distinction is not cosmetic. Grouping the view by **group** rather
+than by option collapses eight columns into three and loses every distinction
+the board exists to make: `ready` and `suggested` become one column, and so do
+`proposing` and `reviewing`. The mapping above exists because the keys are
+fixed, not because anything reads them.
+
+`ready` sits under `to_do` rather than `in_progress` because it means the
 proposal has landed and nobody has picked the work up — the same condition
-`suggested` describes at an earlier stage. `exploring` sits in `in_progress`
-because somebody is doing something.
+`suggested` describes at an earlier stage. `exploring` sits under
+`in_progress` because somebody is doing something.
 
 `scripts/board-state.ts` SHALL derive three of them from the file tree alone
 — `proposing`, `ready` and `done` — reading no network and consulting no
