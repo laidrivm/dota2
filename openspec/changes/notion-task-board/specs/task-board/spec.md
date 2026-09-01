@@ -47,6 +47,28 @@ makes it work rather than an opinion.
 A card SHALL hold exactly one of eight statuses: `suggested`, `exploring`,
 `proposing`, `ready`, `implementing`, `reviewing`, `archiving`, `done`.
 
+The eight SHALL be the **options** of the board's status property, and the
+saved view SHALL group by option. A Notion status property also carries three
+groups that cannot be removed — read off the live `D2ASS` property, they are
+`to_do`, `in_progress` and `complete` — and each option sits in one of them:
+
+```text
+to_do         suggested, ready       nobody has started
+in_progress   exploring, proposing, implementing, reviewing, archiving
+complete      done
+```
+
+The distinction is not cosmetic. Grouping the view by **group** rather than by
+option collapses eight columns into three and loses every distinction the
+board exists to make: `ready` and `suggested` become one column, and so do
+`proposing` and `reviewing`. The mapping above exists because the groups
+cannot be deleted, not because anything reads them.
+
+`ready` sits in `to_do` rather than `in_progress` because it means the
+proposal has landed and nobody has picked the work up — the same condition
+`suggested` describes at an earlier stage. `exploring` sits in `in_progress`
+because somebody is doing something.
+
 `scripts/board-state.ts` SHALL derive three of them from the file tree alone
 — `proposing`, `ready` and `done` — reading no network and consulting no
 service, so that its whole behaviour is exercisable from a fabricated
@@ -99,8 +121,9 @@ pull request to its change.
 
 - **WHEN** `scripts/board-state.ts` runs with no network route and no
   connector attached
-- **THEN** it SHALL produce its full output, every status coming from the
-  file tree
+- **THEN** it SHALL produce its full output — the three derived statuses and
+  the blocking edges, and none of the five it never reports — every value in
+  it coming from the file tree
 
 ### Requirement: A card names what blocks it, derived from the tree
 
@@ -170,8 +193,18 @@ waiting for it.
 
 ### Requirement: The board is read through a saved view
 
-A session SHALL read the board through a saved board view, grouped by status,
-and SHALL NOT read it with a SQL query against the data source.
+A session SHALL read the board through one named saved view — a board grouped
+by status option, and the only view any instruction sends a session to — and
+SHALL NOT read the data source with a SQL query. Where a question the view
+cannot express is asked once, the session MAY issue that query and SHALL say
+in the same turn that it spent the metered path and why; asked twice, it is a
+view.
+
+The view SHALL be identified by its name rather than by a URL pasted into an
+instruction, and a session that cannot find a view by that name SHALL say the
+view is missing rather than fall back to a query. This repository is public
+and the board is not, so a view URL is an identifier for private content and
+does not belong in a tracked file; the name does.
 
 This is a quota, not a preference. On this workspace's plan `query_data_sources`
 is limited: view mode carries no tool-specific quota on any plan, while SQL
@@ -186,12 +219,18 @@ for the exceptional one.
 - **THEN** it SHALL query the saved board view, and the view's grouping SHALL
   be what supplies the statuses rather than a filter written at the call site
 
-#### Scenario: A question the view does not answer
+#### Scenario: A question the view does not answer, asked twice
 
-- **WHEN** an answer needs a query the saved view cannot express
-- **THEN** a further view SHALL be saved for it rather than a SQL query
-  issued, unless the question is asked once — a one-off SHALL say in the turn
-  that it spent the metered path and why
+- **WHEN** a question the saved view cannot express is asked a second time
+- **THEN** a further view SHALL be saved for it rather than the SQL query
+  repeated
+
+#### Scenario: The named view is missing
+
+- **WHEN** no view of that name exists on the board
+- **THEN** the session SHALL report the view as missing and SHALL NOT read the
+  data source with a query instead — a silent fallback spends the metered path
+  on the routine case, which is what the requirement exists to prevent
 
 ### Requirement: A stage that completes moves its card in the same turn
 

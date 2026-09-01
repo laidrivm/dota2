@@ -26,10 +26,12 @@ the wrong instrument for a status. Nothing reads a queue entry to check it.
   the Notion workspace, which becomes where a task's status is recorded and
   read. `PLAN.md` keeps the standing constraints, the requirement sources and
   the growth protocol — what it holds that is not a status.
-- A card carries a status out of eight, a pointer to where its content lives,
-  and nothing else. **The board holds no content the repository holds**: a
+- A card carries a title, a status out of eight, and a pointer to where its
+  content lives. **The board holds no content the repository holds**: a
   proposed change's substance stays in `openspec/changes/<slug>/`, an
   archived one's in `openspec/changes/archive/`, and the card points at it.
+  A card whose subject has no directory anywhere is the exception the rule
+  implies — there the body is the record, because nothing else holds it.
 - Three of the eight statuses are **derived** from the file tree by
   `scripts/board-state.ts`, which reads no network and asks no service. The
   other five are moved by whoever does the work, in the turn the work moves.
