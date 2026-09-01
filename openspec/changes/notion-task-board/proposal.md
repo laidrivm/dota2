@@ -143,10 +143,13 @@ are the reason it is not worth deriving everything.
   session with no connector attached can read the tree and the archive, and
   cannot read the eighteen findings that live only on the board. There is no
   recorded history of a card's edits beyond what Notion itself keeps.
-- **Whether a subagent can reach the connector is unverified.** The
-  multi-agent case rests on it and this change does not establish it; the
-  design records it as the question to settle before the board is relied on
-  for work split across agents.
+- **A subagent reaches the connector, but not without asking.** Probed
+  read-only: a spawned agent fetched both the workspace identity and the
+  `D2ASS` data source. The connector's tools were **not in its starting tool
+  list** — they arrived as deferred names and became callable only after it
+  searched for them, so an agent that does not know to load them reports the
+  board as unreachable rather than as unloaded. Whatever instruction sends an
+  agent to the board has to name the tools it must load first.
 
 ## Ordering
 
