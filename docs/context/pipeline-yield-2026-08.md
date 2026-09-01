@@ -1439,3 +1439,47 @@ one-colour palette reports its closest pair as `Infinity` — was a real thing
 the CLI printed, and step 3's later `coderabbit` run then found that the same
 path silently emptied the token file. The two together are the only reason an
 empty mirror is refused rather than destructive.
+
+## 2026-08-30 — the proposal run: PRs #238–#252
+
+Recorded on 2026-09-01, after the fact. **The per-skill gate lines for this
+day are not recoverable.** The session was compacted and its transcript is
+gone; what survives is the git history and a summary that records findings
+without their gate states. Rather than reconstruct counts from commit
+messages — which would put invented numbers into a ledger whose whole value is
+that its numbers are real — this entry records what can be attested and marks
+the rest lost.
+
+Attested from the tree and the pull requests:
+
+- 15 pull requests merged: #238 (STRATZ survey), #239–#242, #244–#249,
+  #250–#252, plus #243. Eleven are propose-stage; two are `-plan` halves of a
+  split proposal (#249, #252); two are chores.
+- `beta-refit` and `laning-phase-model` each shipped as two pull requests, the
+  diff budget's failing threshold having forced the split.
+- #247 (`side-and-phase-centring`) exists because a measurement during #246
+  falsified the change it was reviewing: the antisymmetric centring form was
+  written without the `+ r(b,q)` term, leaving an 8.88 residual on a six-hero
+  block where the correct form leaves 4.4e-16.
+
+- Gate data: **lost, not zero.** Do not read this entry as a session where no
+  review ran.
+
+## 2026-08-31 — spec/lane-synergy-model and spec/suggestion-calibration (PRs #253, #254, #256, #257)
+
+Gate lines partially recoverable; counts below are only those explicitly
+recorded at the time.
+
+- zombies: OPEN — 38 ideas on `suggestion-calibration`, 4 of them uncited by
+  any task until the audit caught it
+- triage: PASS — run on both `spec/lane-synergy-model` and
+  `spec/suggestion-calibration`, groups read
+- grep: found a `MODIFIED` delta about to delete five carried criteria at sync
+- coderabbit: run on all four pull requests; per-run counts not recorded
+- Not recorded: warm, first-five, review-order, coderabbit-local
+
+**Both gates were run only after the user asked whether they had been.** On
+`laning-phase-model` and again on the `-plan` branch the answer was no, and
+both times running them found a real defect — the five-criterion deletion
+above, and four uncited zombies ideas. A gate skipped silently is the failure
+mode this ledger exists to make visible.
