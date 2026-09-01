@@ -13,10 +13,12 @@ rewritten.
 - grep: 2 sites found, 2 acted on — `docs/rulebook-growth.md`, whose protocol
   as written forbids what this change does, and `PLAN.md`'s own opening
   sentence
-- coderabbit-local: BLOCKED — review did not return. Two runs, ~40 minutes
-  total, neither leaving `connecting_to_review_service`; `coderabbit doctor`
-  passed 9/9 both times including backend and WebSocket reachability, so the
-  service was not taking the job. **0 findings, and that is not a clean pass.**
+- coderabbit-local: BLOCKED — review refused: timed out. 0 findings. Two runs;
+  the first was killed at 10 minutes still on `connecting_to_review_service`,
+  the second ran hours and ended `{"type":"error","errorType":"timeout",
+  "recoverable":false}` having emitted no other event. `coderabbit doctor`
+  passed 9/9 both times, backend and WebSocket reachability included, so the
+  service was reachable and simply never took the job.
 - coderabbit: PASS — 5 findings, 5 acted on (all 🟠 Major, all applied under
   the project's apply-without-asking policy)
 - coderabbit: PASS — 2 findings, 2 acted on (re-review after the fix push)
@@ -45,3 +47,10 @@ it had not seen.
 the hour**, on a branch that had already passed triage and a grep sweep.
 Neither of those gates reads a specification for internal consistency, and
 nothing in the sequence does except the bot.
+
+**`coderabbit review` exits 0 on a non-recoverable timeout.** The run that
+produced no review at all returned the same status as one that reviews
+cleanly, and the only thing separating them is an `error` event in the
+`--agent` stream. Anything deciding this gate on the exit status — a hook, a
+driving agent, a CI step — reads a review that never happened as a pass. Read
+the stream, not the status.
