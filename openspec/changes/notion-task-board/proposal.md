@@ -100,9 +100,17 @@ are the reason it is not worth deriving everything.
 
 ## Impact
 
-- `PLAN.md` — loses the Queue section, 532 lines. The always-on set falls
-  from 851 to about **325**, which is under the trigger with room for the
-  growth that has fired it four times.
+- `PLAN.md` — loses the Queue section, 532 lines, and the opening sentence
+  that names the queue as what the file holds. The always-on set falls from
+  851 to about **325**, which is under the trigger with room for the growth
+  that has fired it four times.
+- `docs/rulebook-growth.md` §*An always-on file past its trigger* — it states
+  the one remedy a fired trigger has, *move whole sections to
+  `docs/<topic>.md`*, and this change takes a whole section somewhere that is
+  not a doc and not in the tree. As written the protocol forbids what happens
+  here, so it gains the second remedy and the test that picks between them:
+  extraction moves what a session reads on demand, relocation moves what a
+  session **writes** — a status, which no file is the right instrument for.
 - `scripts/board-state.ts` — new, plus its test. Filesystem in, statuses out.
 - `CLAUDE.md` §*Maintenance & growth* — the sentence naming what the set
   holds, and the rule that sends a status to `PLAN.md`.
