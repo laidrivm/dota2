@@ -62,3 +62,7 @@ What counts as evidence for a claim, and what a claim may rest on.
   the same nothing.
 - Take a count of a file the edit writing it changes after that edit, never
   before.
+- Measure the mechanism an option rests on before putting the option to the
+  user.
+- Re-measure a figure at the moment it enters an artefact, never copy it from
+  earlier output.
