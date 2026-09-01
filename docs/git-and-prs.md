@@ -116,8 +116,8 @@ they route through `CLAUDE.md`'s fix & capture loop like every other rule.
   `origin/main`.
 - Rebase a branch whose base was amended with `git rebase --onto <new base>
   <old base> <branch>`, never `git rebase <new base>`.
-- Commit the work before a probe whose undo is `git checkout <path>`,
-  `git reset --hard`, or `git stash drop`.
+- Commit the work before a probe whose undo touches the stash or the working
+  tree — `git checkout <path>`, `git reset --hard`, `git stash`.
 - Never move the working tree off a branch whose work is unpushed — cut the
   next branch in a worktree instead.
 - Stage explicit paths in a worktree you scaffolded, and wherever the tree
