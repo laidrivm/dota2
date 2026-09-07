@@ -22,11 +22,11 @@
 	},
 	"devDependencies": {
 		"@axe-core/playwright": "4.13.0",
-		"@biomejs/biome": "2.5.10",
+		"@biomejs/biome": "2.5.12",
 		"@playwright/test": "1.62.1",
 		"@stryker-mutator/core": "10.0.0",
 		"@types/bun": "1.4.0",
-		"simple-git-hooks": "2.13.1",
+		"simple-git-hooks": "2.14.0",
 		"typescript": "7.0.2"
 	},
 	"dependencies": {
