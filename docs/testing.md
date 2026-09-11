@@ -27,6 +27,9 @@ single-source rule this file inherits.
   run, rather than pausing for a selection; give it a number only alongside the
   criterion fixing the behaviour it names, and write it under an existing
   criterion when it is that criterion applied to another case.
+- Where a failing test breaks a rule this rulebook already states, satisfy that
+  rule; never leave the breach standing behind a fix that only stops it
+  failing.
 - There is no DOM test environment and no `happy-dom` dependency: pure modules
   get `bun:test`, and anything that needs a document is an e2e test.
 - Scaffolding tests are welcome but mortal: you may write throwaway tests
