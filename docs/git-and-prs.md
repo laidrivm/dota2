@@ -105,9 +105,14 @@ they route through `CLAUDE.md`'s fix & capture loop like every other rule.
   `core.hooksPath` override; run it or ask.
 - Never chain a commit onto a check in one command — the check runs, prints,
   and does not stop it; read its result first.
-- Treat an edit to `simple-git-hooks` in `package.json` as a gate change: it
-  enters the OpenSpec cycle, which `docs/feature-workflow.md` already requires
-  of one and this names the file it arrives as.
+- Treat an edit to the `simple-git-hooks` *block* in `package.json` as a gate
+  change: it enters the OpenSpec cycle, which `docs/feature-workflow.md`
+  already requires of one and this names the file it arrives as. Raising the
+  package's own version is not one — verify the installed hook bodies still
+  match the block instead.
+- Move every site that restates a dependency's version on the branch that
+  bumps it, before it is pushed — a tool's own `$schema` included, which its
+  linter may report as information and still pass.
 - Fetch the base before branching from it or measuring against it, and run the
   typecheck and the suite on it before the branch — a commit made through a
   web UI never ran the pre-push hook, and a gate that names no base reports a
