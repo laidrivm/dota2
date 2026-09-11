@@ -90,6 +90,22 @@ describe("a version naming a set rather than a version", () => {
 		]);
 	});
 
+	test("is named once per version, not once per manifest", () => {
+		// Every other case here asserts a one-element list, which a scan keeping
+		// the last match rather than collecting them would satisfy.
+		const fields = {
+			dependencies: { qs: "^6.16.0" },
+			overrides: { "fast-uri": "~3.1.7" },
+		};
+
+		const found = problems(manifest(fields));
+
+		expect(found).toEqual([
+			"package.json: dependencies.qs is ^6.16.0, not one version",
+			"package.json: overrides.fast-uri is ~3.1.7, not one version",
+		]);
+	});
+
 	test("is named in a field this scan was never told about", () => {
 		// The property the exemption list buys: `peerDependencies` is nowhere in
 		// this file, and a range in it is still caught.
@@ -117,6 +133,17 @@ describe("a value this scan has nothing to say about", () => {
 		};
 
 		expect(problems(manifest(fields))).toEqual([]);
+	});
+
+	test("a null passes rather than ending the scan", () => {
+		// `typeof null` is `"object"` and `Object.entries(null)` throws, so the
+		// guard against it is the difference between a clean manifest and a
+		// check that cannot report on one.
+		const fields = { dependencies: { qs: null, preact: "^10.29.8" } };
+
+		expect(problems(manifest(fields))).toEqual([
+			"package.json: dependencies.preact is ^10.29.8, not one version",
+		]);
 	});
 
 	test("a word carrying an x passes", () => {
