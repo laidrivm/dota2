@@ -598,6 +598,14 @@ Kept because no single file in the tree is where a reader would look for them.
   gets write access to a hardening-focused repository. The trade is no
   dependency dashboard and no lockfile maintenance; the nightly `bun audit`
   covers the latter.
+- **Two `overrides` nothing raises** — `qs` and `fast-uri` reach this tree only
+  under `@stryker-mutator/core`, the first because `typed-rest-client` pins it
+  exactly and the second because `ajv` asks a range nothing had re-resolved.
+  Dependabot's `bun` ecosystem reads `dependencies` and `devDependencies`, so
+  neither value is raised by anything: the nightly `bun audit` is what says one
+  has aged into an advisory's range — as `qs` did, at the 6.15.3 it was pinned
+  to for the previous advisory — and raising it is a hand edit prompted by that
+  job. Exact, as `bunfig.toml`'s `exact = true` requires of this manifest.
 - **Docker on a VPS** — the deployment target.
 - **The design project's swatch pages are derived, not authored.**
   `guidelines/colors-hero-palette.html` and `guidelines/component-hero-tile.html`
