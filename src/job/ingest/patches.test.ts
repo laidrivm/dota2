@@ -2,18 +2,9 @@
  * What the run dates itself by: the patch the source lists, the patch the
  * table already holds, and the ways the source can leave a run with neither.
  */
-import {
-	afterAll,
-	afterEach,
-	beforeEach,
-	describe,
-	expect,
-	jest,
-	test,
-} from "bun:test";
+import { afterEach, beforeEach, describe, expect, jest, test } from "bun:test";
 import type { SQL } from "bun";
 import { cleaner, requiresDatabase, url } from "../db.fixture.ts";
-import { connect } from "../db.ts";
 import { detectPatch } from "./patches.ts";
 import { json, settle, stalls, stub } from "./stratz.fixture.ts";
 
@@ -164,33 +155,18 @@ describe("a patch list carrying nothing usable", () => {
 });
 
 describe.skipIf(url === undefined)("the patch a run is dated by", () => {
-	const clean = cleaner();
-
 	/**
-	 * The version numbers below are real ones, because detection parses them —
-	 * so they fall outside the `z9.` range `db.fixture.ts`'s cleaner reclaims
-	 * and no later suite would remove them. This file empties what it wrote
-	 * instead, on its own connection rather than the pool `clean` opens, so it
-	 * does not depend on running before the `afterAll` that closes that pool.
+	 * A connection over a `patches` table holding nothing.
+	 *
+	 * The names below are sentinel ones, inside the `z9.` range the shared
+	 * cleaner reclaims, because nothing detection does reads a version as a
+	 * number: the name is held verbatim, and the only thing parsed out of it is
+	 * whether it ends in a letter. Real ones bought nothing for that and cost
+	 * the whole table — no `WHERE` can name this file's rows, and a delete that
+	 * wide fails under the foreign keys of whatever snapshot and staging rows
+	 * the file before it left standing.
 	 */
-	afterAll(async () => {
-		const sql = await connect(url);
-		await sql`DELETE FROM patches`;
-		await sql.close();
-	});
-
-	/**
-	 * A connection over a `patches` table holding nothing — the shared cleaner
-	 * first, because the delete below is the whole table rather than this file's
-	 * rows: a sentinel patch an earlier suite left still carries the snapshot
-	 * and staging rows whose foreign keys that delete then fails under, and
-	 * which file ran last decides whether it does.
-	 */
-	const empty = async () => {
-		const sql = await clean();
-		await sql`DELETE FROM patches`;
-		return sql;
-	};
+	const empty = cleaner();
 
 	/** Every patch held, oldest release first. */
 	const held = async (sql: SQL) =>
@@ -206,10 +182,10 @@ describe.skipIf(url === undefined)("the patch a run is dated by", () => {
 	test("a first run inserts the patch the source lists [39]", async () => {
 		const sql = await empty();
 
-		const current = await detect(sql, [{ name: "7.41", date: RELEASED }]);
+		const current = await detect(sql, [{ name: "z9.51", date: RELEASED }]);
 
-		expect(current.patchId).toBe("7.41");
-		expect(await held(sql)).toEqual(["7.41"]);
+		expect(current.patchId).toBe("z9.51");
+		expect(await held(sql)).toEqual(["z9.51"]);
 	});
 
 	// spec: hero-reference/a-patch-the-table-lacks
@@ -220,27 +196,27 @@ describe.skipIf(url === undefined)("the patch a run is dated by", () => {
 		const sql = await empty();
 
 		const current = await detect(sql, [
-			{ name: "7.40", date: "2025-12-16T00:00:00.000Z" },
-			{ name: "7.41", date: RELEASED },
+			{ name: "z9.50", date: "2025-12-16T00:00:00.000Z" },
+			{ name: "z9.51", date: RELEASED },
 		]);
 
-		expect(current.patchId).toBe("7.41");
-		expect(await held(sql)).toEqual(["7.41"]);
+		expect(current.patchId).toBe("z9.51");
+		expect(await held(sql)).toEqual(["z9.51"]);
 	});
 
 	// spec: hero-reference/a-patch-the-table-lacks
 	test("it is held at the release instant, not the run instant [40]", async () => {
 		const sql = await empty();
 
-		const current = await detect(sql, [{ name: "7.41", date: RELEASED }]);
+		const current = await detect(sql, [{ name: "z9.51", date: RELEASED }]);
 
 		expect(current.detectedAt.toISOString()).toBe(RELEASED);
 	});
 
 	// spec: hero-reference/a-name-with-a-trailing-letter
 	test.each([
-		["7.41", true, "7.41"],
-		["7.41b", false, "7.41"],
+		["z9.51", true, "z9.51"],
+		["z9.51b", false, "z9.51"],
 	])("%s is held under its base version [42]", async (name, major, base) => {
 		const sql = await empty();
 
@@ -252,10 +228,10 @@ describe.skipIf(url === undefined)("the patch a run is dated by", () => {
 	// spec: hero-reference/a-patch-already-recorded
 	test("a second run leaves the instant the first one wrote [43]", async () => {
 		const sql = await empty();
-		await detect(sql, [{ name: "7.41", date: RELEASED }]);
+		await detect(sql, [{ name: "z9.51", date: RELEASED }]);
 
 		const current = await detect(sql, [
-			{ name: "7.41", date: "2026-08-19T00:00:00.000Z" },
+			{ name: "z9.51", date: "2026-08-19T00:00:00.000Z" },
 		]);
 
 		expect(current.detectedAt.toISOString()).toBe(RELEASED);
@@ -264,14 +240,14 @@ describe.skipIf(url === undefined)("the patch a run is dated by", () => {
 	// spec: hero-reference/the-current-patch
 	test("a release listed ahead of the run is held, not current [41]", async () => {
 		const sql = await empty();
-		await detect(sql, [{ name: "7.41", date: RELEASED }]);
+		await detect(sql, [{ name: "z9.51", date: RELEASED }]);
 
 		const current = await detect(sql, [
-			{ name: "7.42", date: "2026-09-01T00:00:00.000Z" },
+			{ name: "z9.52", date: "2026-09-01T00:00:00.000Z" },
 		]);
 
-		expect(current.patchId).toBe("7.41");
-		expect(await held(sql)).toEqual(["7.41", "7.42"]);
+		expect(current.patchId).toBe("z9.51");
+		expect(await held(sql)).toEqual(["z9.51", "z9.52"]);
 	});
 
 	// spec: hero-reference/the-current-patch
@@ -281,10 +257,10 @@ describe.skipIf(url === undefined)("the patch a run is dated by", () => {
 		const sql = await empty();
 
 		const current = await detect(sql, [
-			{ name: "7.41", date: RUN_AT.toISOString() },
+			{ name: "z9.51", date: RUN_AT.toISOString() },
 		]);
 
-		expect(current.patchId).toBe("7.41");
+		expect(current.patchId).toBe("z9.51");
 	});
 
 	// spec: hero-reference/the-current-patch
@@ -292,9 +268,9 @@ describe.skipIf(url === undefined)("the patch a run is dated by", () => {
 		const sql = await empty();
 
 		const failed = await failure(
-			detect(sql, [{ name: "7.41", date: RELEASED }], new Date("2026-01-01")),
+			detect(sql, [{ name: "z9.51", date: RELEASED }], new Date("2026-01-01")),
 		);
 
-		expect(failed).toMatch(/7\.41/);
+		expect(failed).toMatch(/z9\.51/);
 	});
 });
