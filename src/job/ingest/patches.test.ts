@@ -12,7 +12,7 @@ import {
 	test,
 } from "bun:test";
 import type { SQL } from "bun";
-import { opener, requiresDatabase, url } from "../db.fixture.ts";
+import { cleaner, requiresDatabase, url } from "../db.fixture.ts";
 import { connect } from "../db.ts";
 import { detectPatch } from "./patches.ts";
 import { json, settle, stalls, stub } from "./stratz.fixture.ts";
@@ -164,14 +164,14 @@ describe("a patch list carrying nothing usable", () => {
 });
 
 describe.skipIf(url === undefined)("the patch a run is dated by", () => {
-	const open = opener();
+	const clean = cleaner();
 
 	/**
 	 * The version numbers below are real ones, because detection parses them —
 	 * so they fall outside the `z9.` range `db.fixture.ts`'s cleaner reclaims
 	 * and no later suite would remove them. This file empties what it wrote
-	 * instead. Its own connection, rather than `open`, so it does not depend on
-	 * running before the `afterAll` that closes the pool.
+	 * instead, on its own connection rather than the pool `clean` opens, so it
+	 * does not depend on running before the `afterAll` that closes that pool.
 	 */
 	afterAll(async () => {
 		const sql = await connect(url);
@@ -179,9 +179,15 @@ describe.skipIf(url === undefined)("the patch a run is dated by", () => {
 		await sql.close();
 	});
 
-	/** A connection over a `patches` table holding nothing. */
+	/**
+	 * A connection over a `patches` table holding nothing — the shared cleaner
+	 * first, because the delete below is the whole table rather than this file's
+	 * rows: a sentinel patch an earlier suite left still carries the snapshot
+	 * and staging rows whose foreign keys that delete then fails under, and
+	 * which file ran last decides whether it does.
+	 */
 	const empty = async () => {
-		const sql = await open();
+		const sql = await clean();
 		await sql`DELETE FROM patches`;
 		return sql;
 	};
