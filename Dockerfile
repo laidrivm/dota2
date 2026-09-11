@@ -3,7 +3,7 @@
 # would repeat the whole dependency install to change a command — and would
 # then have to be built, pushed, pinned and rolled back in step with the first.
 #
-# The base is pinned by digest rather than by `1.3.14-alpine` alone: a tag is
+# The base is pinned by digest rather than by its `-alpine` tag alone: a tag is
 # mutable, so a rebuild of an unchanged commit can otherwise produce a
 # different image. The digest is the multi-platform index's rather than one
 # platform's manifest, because the VPS is amd64 and a developer's machine may
