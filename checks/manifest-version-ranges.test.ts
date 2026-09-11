@@ -25,14 +25,19 @@ const root = join(import.meta.dir, "..");
 const EXEMPT = new Set(["scripts", "simple-git-hooks"]);
 
 /**
- * What makes a spec admit more than the one version it names: a caret or
- * tilde, a comparator, a disjunction, or a wildcard standing where a number
- * belongs. Anchored where anchoring is what distinguishes them — a `<` in the
- * middle of a value is not a comparator — and a wildcard is read as one only
- * on its own or after the digits it widens, so a path such as `./index.x.ts`
- * in a field this scan also walks is not mistaken for `6.x`.
+ * Every way a spec names more than the one version it appears to: a widening
+ * operator or comparator, a disjunction, a wildcard, a partial version — `6`
+ * is every 6 and `6.16` every 6.16, which is the form that reads least like a
+ * range and is the widest of them — and a hyphen span.
+ *
+ * Written as what a range is rather than as what a version is, because the
+ * scan walks every field and most of them hold neither: `"module"`, `"d2ass"`
+ * and `"./index.x.ts"` all have to pass, and a pattern asking what a version
+ * looks like has to tell them apart from one. The cost is that a date would
+ * read as a span; no field here holds one, and the report names the field.
  */
-const RANGE = /^[\^~<>=]|\|\||^[x*]$|^\d+(\.\d+)*\.[x*]$/i;
+const RANGE =
+	/^[\^~<>=]|\|\||^[x*]$|^\d+(\.\d+)?$|^\d+(\.\d+)*\.[x*]$|^\d[\d.]*\s*-\s*\d/i;
 
 /** Every version in `manifest` that names a set, and an empty list when none. */
 export function problems(manifest: string): string[] {
@@ -58,7 +63,11 @@ export function problems(manifest: string): string[] {
 	return found;
 }
 
-/** A manifest holding `fields`, with the ones every real one carries. */
+/**
+ * A manifest holding `fields`, with the ones every real one carries — this
+ * repository's own name among them, which carries a digit and so is what every
+ * case below also asserts is not read as a version.
+ */
 const manifest = (fields: Record<string, unknown>) =>
 	JSON.stringify({ name: "d2ass", private: true, type: "module", ...fields });
 
@@ -70,6 +79,9 @@ describe("a version naming a set rather than a version", () => {
 		["a disjunction", "6.16.0 || 6.17.0"],
 		["a minor wildcard", "6.x"],
 		["a bare wildcard", "*"],
+		["a hyphen span", "6.16.0 - 6.17.0"],
+		["a major on its own", "6"],
+		["a major and minor", "6.16"],
 	])("%s is named, with the field it sits in", (_, spec) => {
 		const found = problems(manifest({ dependencies: { qs: spec } }));
 
@@ -119,11 +131,15 @@ describe("a version naming a set rather than a version", () => {
 });
 
 describe("a value this scan has nothing to say about", () => {
-	test("an exact version passes", () => {
-		const fields = { dependencies: { preact: "10.29.8" } };
-
-		expect(problems(manifest(fields))).toEqual([]);
-	});
+	test.each(["10.29.8", "1.2.3-beta.1", "1.2.3+build.5"])(
+		"the exact version %s passes",
+		(spec) => {
+			// A prerelease is still one version, and it carries the hyphen a span
+			// is written with — which is why the span is recognised by the digit
+			// after that hyphen rather than by the hyphen alone.
+			expect(problems(manifest({ dependencies: { qs: spec } }))).toEqual([]);
+		},
+	);
 
 	test("a command carrying an operator passes, being exempt", () => {
 		// Every shell operator this rejects in a version is ordinary in a script,
