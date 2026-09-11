@@ -26,12 +26,13 @@ const EXEMPT = new Set(["scripts", "simple-git-hooks"]);
 
 /**
  * What makes a spec admit more than the one version it names: a caret or
- * tilde, a comparator, a disjunction, or a wildcard in a position a number
- * belongs in. Anchored where anchoring is what distinguishes them — a `<` in
- * the middle of a value is not a comparator, and an `x` inside a word is not a
- * wildcard.
+ * tilde, a comparator, a disjunction, or a wildcard standing where a number
+ * belongs. Anchored where anchoring is what distinguishes them — a `<` in the
+ * middle of a value is not a comparator — and a wildcard is read as one only
+ * on its own or after the digits it widens, so a path such as `./index.x.ts`
+ * in a field this scan also walks is not mistaken for `6.x`.
  */
-const RANGE = /^[\^~<>=]|\|\||(^|\.)[x*](\.|$)/i;
+const RANGE = /^[\^~<>=]|\|\||^[x*]$|^\d+(\.\d+)*\.[x*]$/i;
 
 /** Every version in `manifest` that names a set, and an empty list when none. */
 export function problems(manifest: string): string[] {
@@ -146,9 +147,15 @@ describe("a value this scan has nothing to say about", () => {
 		]);
 	});
 
-	test("a word carrying an x passes", () => {
-		// `type` is not a version, and an unanchored wildcard would read one here.
-		expect(problems(manifest({ dependencies: {} }))).toEqual([]);
+	test("a path carrying an x segment passes", () => {
+		// Not every field this scan walks holds a version, and a wildcard read
+		// wherever a dot precedes an `x` would refuse this one.
+		const fields = {
+			main: "./index.x.ts",
+			dependencies: { preact: "10.29.8" },
+		};
+
+		expect(problems(manifest(fields))).toEqual([]);
 	});
 });
 
