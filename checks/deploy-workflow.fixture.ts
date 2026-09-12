@@ -23,6 +23,15 @@ export const CHECKS = {
 };
 
 /**
+ * The two expressions a tag is built from. Escaped in template literals rather
+ * than written plain: `${{` inside a quoted string is a placeholder the linter
+ * warns about, and the warning would be about this file's own text rather than
+ * about the workflow it describes.
+ */
+export const IMAGE = `\${{ env.IMAGE }}`;
+export const SHA = `\${{ github.sha }}`;
+
+/**
  * As much of a workflow's shape as the cases read. `permissions` is typed as a
  * mapping because that is the form this repository writes; GitHub also accepts
  * the `write-all` scalar, which the cases reject rather than read.

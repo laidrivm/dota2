@@ -67,9 +67,10 @@ const froms = (() => {
 // spec: container-image/a-base-image-referenced-by-tag
 describe("every base image is pinned by digest", () => {
 	// Guards the cases below: a file with no `FROM` line satisfies all of them,
-	// and builds nothing.
+	// and builds nothing. The number of stages is fixed by no criterion, so it
+	// is not asserted.
 	test("the Dockerfile declares the stages these cases are about", () => {
-		expect(froms.map((from) => from.line)).toHaveLength(2);
+		expect(froms.length).toBeGreaterThan(0);
 	});
 
 	test.each(froms)("$line", ({ image, isStage }) => {
