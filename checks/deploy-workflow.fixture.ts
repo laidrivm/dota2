@@ -22,6 +22,32 @@ export const CHECKS = {
 	"end-to-end suite": "bunx playwright test",
 };
 
+/**
+ * As much of a workflow's shape as the cases read. `permissions` is typed as a
+ * mapping because that is the form this repository writes; GitHub also accepts
+ * the `write-all` scalar, which the cases reject rather than read.
+ */
+export type Step = {
+	uses?: string;
+	run?: string;
+	env?: Record<string, string>;
+	with?: Record<string, unknown>;
+};
+export type Job = {
+	needs?: string | string[];
+	uses?: string;
+	environment?: string;
+	permissions?: Record<string, string>;
+	steps?: Step[];
+};
+export type Deploy = {
+	on?: Record<string, { branches?: string[] }>;
+	permissions?: Record<string, string>;
+	concurrency?: { group?: string };
+	env?: Record<string, string>;
+	jobs?: Record<string, Job>;
+};
+
 /** Every workflow in the repository, by file name. */
 export function repository(): Record<string, string> {
 	const dir = `${root}/.github/workflows`;
