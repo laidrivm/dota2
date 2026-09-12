@@ -20,7 +20,9 @@ import {
 	CHECKS,
 	type Deploy,
 	deployed,
+	IMAGE,
 	repository,
+	SHA,
 } from "./deploy-workflow.fixture.ts";
 
 const { workflow, readme } = deployed();
@@ -130,14 +132,8 @@ describe("every workflow the deploy calls", () => {
 });
 
 // --- what is pushed, and what the host runs --------------------------------
-// Escaped in template literals rather than written plain: `${{` inside a
-// quoted string is a placeholder the linter warns about, and the warning is
-// about this file's own text rather than about the workflow it reads.
-const IMAGE = `\${{ env.IMAGE }}`;
-const SHA = `\${{ github.sha }}`;
-
 const build = steps("image").find((step) =>
-	step.uses?.startsWith("docker/build-push-action"),
+	step.uses?.startsWith("docker/build-push-action@"),
 );
 
 // spec: deploy-workflow/a-deploy-completes
@@ -150,11 +146,12 @@ test("the build pushes both tags", () => {
 	expect(tags.sort()).toEqual([`${IMAGE}:${SHA}`, `${IMAGE}:latest`].sort());
 });
 
-// The ssh action wherever it sits: position is not what makes it the step that
-// reaches the host, and a checkout added before it would send the three
-// readings below to the wrong step and name the wrong cause when they failed.
+// The ssh action wherever it sits, matched with its `@` so a longer name is not
+// it: position is not what makes a step the one that reaches the host, and a
+// checkout added before it would send the three readings below to the wrong
+// step and fail naming the wrong cause.
 const ssh = steps("host").find((step) =>
-	step.uses?.startsWith("appleboy/ssh-action"),
+	step.uses?.startsWith("appleboy/ssh-action@"),
 );
 
 // spec: deploy-workflow/the-image-the-host-is-running
@@ -226,10 +223,11 @@ const usesLines = workflow
 	.map((line) => line.trim())
 	.filter((line) => line.startsWith("- uses:") || line.startsWith("uses:"));
 
-// Guards the rows below: a scan matching nothing registers no cases at all,
-// and a `test.each` with no rows reports success having checked no pin.
-test("the scan found every `uses:` the workflow writes", () => {
-	expect(usesLines).toHaveLength(8);
+// Guards the rows below: a scan matching nothing registers no cases, and a
+// `test.each` with no rows reports success having checked no pin. How many
+// there are no criterion fixes, so it is not asserted.
+test("the scan found the `uses:` lines it reads", () => {
+	expect(usesLines.length).toBeGreaterThan(0);
 });
 
 // spec: deploy-workflow/an-action-pinned-by-tag
