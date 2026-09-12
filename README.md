@@ -475,9 +475,9 @@ ponytail plugin instead, and is available rather than a gate.
 - Install via `bun add <pkg>` — the exact version gets written
   (`exact = true` in `bunfig.toml`), and only versions at least 3 days
   old resolve (`minimumReleaseAge`). That setting governs what `bun add`
-  writes and nothing else, so `checks/manifest-version-ranges.test.ts` holds
-  the same line over a version typed in by hand — `overrides`, which
-  `bun add` never touches, included.
+  writes and nothing else, so `scripts/manifest-ranges.ts` holds the same
+  line over a version typed in by hand — `overrides`, which `bun add` never
+  touches, included.
 - After an install, check `bun pm untrusted`; trust a package
   (`bun pm trust <pkg>`) only if its build genuinely requires
   lifecycle scripts.
