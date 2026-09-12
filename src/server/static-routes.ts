@@ -5,7 +5,6 @@
  * the HTML entry point (which would pull in the whole bundler).
  */
 
-import { statSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { PUBLISHED } from "../job/export/publish.ts";
 
@@ -113,67 +112,29 @@ const iconRoute =
 	};
 
 /**
- * The validator last computed, and the file state it was computed from.
- *
- * The key is the resolved path, the inode *and* `mtimeNs`, and all three earn
- * their place. The path, because this route has two sources and a key that
- * forgets which one it read hands the previous source's validator to the next.
- * The nanoseconds, because two writes inside one millisecond share a
- * millisecond timestamp — which is why `dist-routes.ts` reads `mtimeNs` for
- * its listing cache as well. The inode is the paragraph below.
- *
- * One slot, because one process serves one publication directory. A second
- * server in the same process — which is what this route's own suite runs —
- * finds a key that does not match and hashes again, so the cache costs
- * accuracy nothing and buys nothing there either.
- *
- * The inode is what says the file behind the name changed, and the timestamp
- * rides beside it rather than carrying that alone. A publication renames a
- * freshly written file over the published name, so every one of them puts a
- * different inode there — measured, five publications and five distinct
- * inodes. The timestamp cannot say as much on its own: two publications inside
- * one of the filesystem's ticks share it, and this cache answered the second
- * with the first one's hash until the inode joined the key. Which is not a
- * hypothetical — CI met it, where a returning client was told the bundle it
- * held was still current and this repository's own filesystem never produced
- * the collision in 200 tries.
- *
- * No case reaches the path's half, and none can: it separates the two sources
- * only where their timestamps coincide to the nanosecond, and `utimesSync`
- * takes milliseconds — so a collision cannot be arranged from here, and
- * waiting for one means waiting for two files written years apart to agree.
- * It stays because what it prevents is a client being told stale bytes are
- * the ones it holds, and it costs a string.
- */
-let taggedFor = "";
-let tag = "";
-
-/**
- * A validator for the bytes at `file`, computed once per publication.
+ * A validator for the bytes at `file`.
  *
  * A hash of the bytes, not of `mtime` and size: those answer *was this file
  * rewritten*, where the client is asking *is this the payload I hold*, and a
  * re-export writing identical content would cost every returning client the
- * whole bundle again. The `stat` is what each request pays; the hash is paid
- * when the file behind the name changes.
+ * whole bundle again.
+ *
+ * Computed per request, with nothing memoised. Measured on the published
+ * bundle — 834 KB — reading and hashing it costs 0.56 ms, against 0.002 ms for
+ * the `stat` a memo would need instead; one request per page load does not buy
+ * back the slot the memo took, and the slot had to be keyed by path, inode and
+ * `mtimeNs` together to be correct. It was keyed by the timestamp alone once,
+ * and CI met the collision: a returning client was told a changed bundle was
+ * the one it held. A hash of the bytes cannot say that whatever the filesystem
+ * does with names and clocks.
+ *
+ * SHA-256 over a wyhash: both are one line, and only one of them makes a
+ * collision something nobody has to reason about.
  */
-async function validator(file: string): Promise<string> {
-	const seen = statSync(file, { bigint: true });
-	const key = `${file}:${seen.ino}:${seen.mtimeNs}`;
-	if (key !== taggedFor) {
-		// The pair is written and read with no `await` between, so two requests
-		// resolving different files cannot hand each other the other's answer:
-		// whichever assigns last returns what it assigned.
-		// SHA-256 over a wyhash: both are one line, and only one of them makes
-		// a collision — a changed bundle a returning client is told it already
-		// holds — something nobody has to reason about.
-		tag = `"${new Bun.CryptoHasher("sha256")
-			.update(await Bun.file(file).bytes())
-			.digest("hex")}"`;
-		taggedFor = key;
-	}
-	return tag;
-}
+const validator = async (file: string): Promise<string> =>
+	`"${new Bun.CryptoHasher("sha256")
+		.update(await Bun.file(file).bytes())
+		.digest("hex")}"`;
 
 /**
  * Whether `If-None-Match` names the validator this URL is offering.
