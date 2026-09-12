@@ -25,7 +25,7 @@ export type HeroRow = {
 	matches: number;
 	contestRate: number;
 };
-export type PairRow = {
+type PairRow = {
 	heroId: number;
 	otherId: number;
 	matches: number;

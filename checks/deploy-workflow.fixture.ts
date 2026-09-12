@@ -7,9 +7,7 @@
  */
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-
-/** The repository root: this file reads artefacts of it, from `checks/`. */
-const root = join(import.meta.dir, "..");
+import { root } from "./root.ts";
 
 /** The workflow whose gate this is. */
 export const DEPLOY = "deploy.yml";

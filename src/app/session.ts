@@ -58,7 +58,7 @@ export function usedAs(session: Session, hero: HeroId): Used {
 }
 
 /** A hero is on the board once — as a ban, on my team, or on theirs. */
-export const isUsed = (session: Session, hero: HeroId): boolean =>
+const isUsed = (session: Session, hero: HeroId): boolean =>
 	usedAs(session, hero) !== null;
 
 /** Which position the picker is being opened for (screens-spec §3). */

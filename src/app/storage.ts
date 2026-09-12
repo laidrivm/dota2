@@ -25,6 +25,27 @@ export function write(key: string, value: string): void {
 	}
 }
 
+/**
+ * The stored value at `key` when it parses and `is` recognises it, and `null`
+ * for every way it may not: nothing stored, storage unreachable, a truncated
+ * or hand-edited payload. Three callers wanted the same four-way answer and
+ * each spelled out its own `try`; the guard stays theirs because only they
+ * know what they are reading back.
+ */
+export function readJson<T>(
+	key: string,
+	is: (value: unknown) => value is T,
+): T | null {
+	const raw = read(key);
+	if (raw === null) return null;
+	try {
+		const parsed: unknown = JSON.parse(raw);
+		return is(parsed) ? parsed : null;
+	} catch {
+		return null;
+	}
+}
+
 export function remove(key: string): void {
 	try {
 		storage()?.removeItem(key);

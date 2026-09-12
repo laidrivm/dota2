@@ -18,9 +18,7 @@ import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { DOCKER_ENV, image, tidy } from "./docker.fixture.ts";
-
-/** The repository root: this file reads artefacts of it, from `checks/`. */
-const root = join(import.meta.dir, "..");
+import { root } from "./root.ts";
 
 /** Fixed, for the reason the image tag is: a name reused is a project replaced. */
 export const PROJECT = "d2ass-checks-compose";

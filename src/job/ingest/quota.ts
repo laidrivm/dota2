@@ -25,7 +25,7 @@
  * repository has never seen is better answered by the run ending when that
  * window reports nothing left than by a guessed length.
  */
-export const WINDOW_MS: Record<string, number> = {
+const WINDOW_MS: Record<string, number> = {
 	second: 1_000,
 	minute: 60_000,
 	hour: 3_600_000,
@@ -68,7 +68,7 @@ export function stated(headers: Headers): Map<string, Ceiling> {
 }
 
 /** What a spent window means: a wait a run outlasts, or the end of the run. */
-export type Verdict = { name: string; span: number; longest: boolean };
+type Verdict = { name: string; span: number; longest: boolean };
 
 /**
  * The window this response reports nothing left in, and whether it is the

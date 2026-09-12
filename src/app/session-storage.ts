@@ -15,7 +15,7 @@ import {
 	type Role,
 	type Session,
 } from "../types.ts";
-import { read, remove, write } from "./storage.ts";
+import { readJson, remove, write } from "./storage.ts";
 
 export const SESSION_KEY = "draft.session";
 export const BACKUP_KEY = "draft.backup";
@@ -61,16 +61,8 @@ function isSession(value: unknown): value is Session {
 }
 
 /** Anything we cannot read back as a v1 session is treated as no session. */
-export function restore(): Session {
-	const raw = read(SESSION_KEY);
-	if (raw === null) return EMPTY_SESSION();
-	try {
-		const parsed: unknown = JSON.parse(raw);
-		return isSession(parsed) ? parsed : EMPTY_SESSION();
-	} catch {
-		return EMPTY_SESSION();
-	}
-}
+export const restore = (): Session =>
+	readJson(SESSION_KEY, isSession) ?? EMPTY_SESSION();
 
 export function persist(session: Session): void {
 	write(SESSION_KEY, JSON.stringify(session));
@@ -82,16 +74,7 @@ export function persist(session: Session): void {
  * back through the same check as the session, because an undo offering a
  * broken draft is worse than no undo.
  */
-export function readBackup(): Session | null {
-	const raw = read(BACKUP_KEY);
-	if (raw === null) return null;
-	try {
-		const parsed: unknown = JSON.parse(raw);
-		return isSession(parsed) ? parsed : null;
-	} catch {
-		return null;
-	}
-}
+export const readBackup = (): Session | null => readJson(BACKUP_KEY, isSession);
 
 export const writeBackup = (session: Session): void =>
 	write(BACKUP_KEY, JSON.stringify(session));

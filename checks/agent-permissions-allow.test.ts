@@ -3,7 +3,8 @@ import { resolve } from "node:path";
 // Imported rather than pattern-matched: bun parses TOML natively, and a
 // regex over the text would read a commented-out key as a live one.
 import bunfig from "../bunfig.toml";
-import { allow, root } from "./agent-permissions.fixture.ts";
+import { allow } from "./agent-permissions.fixture.ts";
+import { root } from "./root.ts";
 
 /**
  * What is pre-approved, and the configuration keys the gates above rest on:

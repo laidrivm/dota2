@@ -207,7 +207,7 @@ export const REPORT = join(root, "reports", "mutation", "mutation.json");
 
 /** The one file Stryker mutates, and so the only one the scan is scoped to. */
 const MODEL_NAME = "src/model.ts";
-export const MODEL = join(root, MODEL_NAME);
+const MODEL = join(root, MODEL_NAME);
 
 if (import.meta.main) {
 	const problems = [

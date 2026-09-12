@@ -23,6 +23,7 @@ import {
 } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
+import { root } from "./root.ts";
 
 /**
  * A value planted in the fabricated `.env` and searched for in the image. The
@@ -35,9 +36,6 @@ import { dirname, join } from "node:path";
  * source rather than on a leak.
  */
 export const SECRET = ["d2ass", "check", "secret", "3f9a1c"].join("-");
-
-/** The repository root: this file reads artefacts of it, from `checks/`. */
-const root = join(import.meta.dir, "..");
 
 /**
  * Files no clone carries and every developer's checkout does, planted so the
