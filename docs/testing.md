@@ -13,6 +13,8 @@ single-source rule this file inherits.
   a new test, break the code it guards and watch it fail. Break the mechanism
   the test names, not the feature it exercises: a second rule reaching the
   same result makes a passing test evidence about nothing.
+- Check a shipped artefact by asserting its own values; fabricate inputs only
+  for a decision rule that ships outside the test exercising it.
 - Assert the attribute or call the code makes, never the behaviour a platform
   states as a hint — a conforming implementation may honour neither.
 - Give a fixture for a symmetry or antisymmetry case inputs that disagree —
