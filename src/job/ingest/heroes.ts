@@ -47,7 +47,7 @@ export type HeroReference = {
 };
 
 /** A hero as the source describes it, and as both later steps need it. */
-export type SourcedHero = HeroReference & MirroredHero;
+type SourcedHero = HeroReference & MirroredHero;
 
 /** The whole reference, or a throw. Nothing partial is returned. */
 export async function readHeroes(query: Query): Promise<SourcedHero[]> {

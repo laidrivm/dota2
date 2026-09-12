@@ -9,10 +9,7 @@
  * rather than a permission list.
  */
 
-import { join } from "node:path";
-
-/** The repository root: this module reads an artefact of it, from `checks/`. */
-export const root = join(import.meta.dir, "..");
+import { root } from "./root.ts";
 
 /**
  * The tracked settings, never `.claude/settings.local.json` — that one is

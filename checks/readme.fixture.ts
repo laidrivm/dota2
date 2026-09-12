@@ -14,9 +14,7 @@
  */
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-
-/** The repository root: this file reads an artefact of it, from `checks/`. */
-const root = join(import.meta.dir, "..");
+import { root } from "./root.ts";
 
 /** The file itself, for the checks that are about its prose. */
 export const README = readFileSync(join(root, "README.md"), "utf8");

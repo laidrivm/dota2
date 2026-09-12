@@ -15,11 +15,8 @@
  */
 import { describe, expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
-import { join } from "node:path";
 import { only } from "./readme.fixture.ts";
-
-/** The repository root: this file reads artefacts of it, from `checks/`. */
-const root = join(import.meta.dir, "..");
+import { root } from "./root.ts";
 
 type Service = {
 	image?: string;

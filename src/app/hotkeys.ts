@@ -17,14 +17,11 @@ import {
 import type { Action, PickTarget } from "./session.ts";
 
 /** The two actions a keystroke can produce. */
-export type Hotkey = Extract<Action, { kind: "side" | "role" }>;
+type Hotkey = Extract<Action, { kind: "side" | "role" }>;
 
 /** Just the parts of a keystroke the hotkey layer reads, so it is testable
  * without a DOM. */
-export type Keystroke = Pick<
-	KeyboardEvent,
-	"key" | "ctrlKey" | "metaKey" | "altKey"
->;
+type Keystroke = Pick<KeyboardEvent, "key" | "ctrlKey" | "metaKey" | "altKey">;
 
 const SIDE_KEYS: Record<string, Side> = { r: "radiant", d: "dire" };
 

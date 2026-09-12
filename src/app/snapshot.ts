@@ -8,7 +8,7 @@
  */
 
 import type { SnapshotBundle } from "../types.ts";
-import { read, write } from "./storage.ts";
+import { readJson, write } from "./storage.ts";
 
 /**
  * The one line Phase 3 changes. Until the pipeline exists, `server.ts`
@@ -83,17 +83,6 @@ async function fetchBundle(): Promise<SnapshotBundle | null> {
 	}
 }
 
-function readCache(): SnapshotBundle | null {
-	const cached = read(CACHE_KEY);
-	if (cached === null) return null;
-	try {
-		const parsed = JSON.parse(cached);
-		return isBundle(parsed) ? parsed : null;
-	} catch {
-		return null;
-	}
-}
-
 /**
  * One fetch per call — the app calls this once at startup, and again only
  * when the user activates retry from the error state.
@@ -104,7 +93,7 @@ export async function loadSnapshot(): Promise<SnapshotBundle | null> {
 		write(CACHE_KEY, JSON.stringify(fetched));
 		return fetched;
 	}
-	return readCache();
+	return readJson(CACHE_KEY, isBundle);
 }
 
 /** `patch 7.41d · snapshot Jul 19` */

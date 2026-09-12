@@ -15,10 +15,7 @@
  */
 import { describe, expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
-import { join } from "node:path";
-
-/** The repository root: this file reads artefacts of it, from `checks/`. */
-const root = join(import.meta.dir, "..");
+import { root } from "./root.ts";
 
 /**
  * A digest reference, anchored at both ends: a guard matching a prefix would

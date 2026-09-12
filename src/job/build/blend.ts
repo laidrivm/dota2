@@ -72,7 +72,7 @@ export const wholeDays = (detectedAt: Date, at: Date): number =>
 	);
 
 /** A blended winrate in percentage points, and the sample behind it. */
-export type Blended = { wrBlend: number; nEff: number };
+type Blended = { wrBlend: number; nEff: number };
 
 /**
  * The current patch's own matches blended with the previous patch's

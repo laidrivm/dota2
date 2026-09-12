@@ -1,10 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import {
-	bashDeny,
-	managers,
-	root,
-	settings,
-} from "./agent-permissions.fixture.ts";
+import { bashDeny, managers, settings } from "./agent-permissions.fixture.ts";
+import { root } from "./root.ts";
 
 /**
  * What the policy refuses outright, and the guard that catches what a

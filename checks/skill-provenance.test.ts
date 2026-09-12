@@ -1,8 +1,5 @@
 import { expect, test } from "bun:test";
-import { join } from "node:path";
-
-/** The repository root: this file reads artefacts of it, from `checks/`. */
-const root = join(import.meta.dir, "..");
+import { root } from "./root.ts";
 
 /**
  * The provenance table pins which shared skills the gates depend on and what

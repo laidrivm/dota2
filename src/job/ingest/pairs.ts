@@ -76,7 +76,7 @@ export type PairCount = {
 };
 
 /** What the pull yields: the two matrices, each holding both directions. */
-export type PairPull = { matchups: PairCount[]; synergies: PairCount[] };
+type PairPull = { matchups: PairCount[]; synergies: PairCount[] };
 
 /**
  * The instant naming a bucket. The `week` argument is a Unix timestamp in

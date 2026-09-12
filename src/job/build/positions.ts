@@ -6,7 +6,7 @@
  */
 
 /** What a share needs from one of a hero's staging position rows. */
-export type PositionPicks = { position: number; matches: number };
+type PositionPicks = { position: number; matches: number };
 
 /**
  * The share of a hero's own picks each position took, over the positions it
