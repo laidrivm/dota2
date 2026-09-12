@@ -31,6 +31,12 @@ const OPENS_VALUE_WORDS = new Set([
 	"throw",
 ]);
 
+/** Where one comment's own text sits, the marker that opened it excluded. */
+type Span = { from: number; to: number; block: boolean };
+
+/** One comment: its text, the line it opens on, and which kind it is. */
+export type Comment = { text: string; line: number; block: boolean };
+
 /**
  * What each language encloses text in, and therefore what this scan erases.
  * Stated here rather than left to a default, because the two mistakes worth
@@ -59,8 +65,10 @@ const SYNTAX = {
  *
  * Not a parser: the only question asked of each character is what encloses it.
  */
-export function blank(source: string, language: keyof typeof SYNTAX): string {
+function walk(source: string, language: keyof typeof SYNTAX) {
 	const { lineComments, regex, templates } = SYNTAX[language];
+	/** Where each comment's own text begins and ends, in source offsets. */
+	const found: Span[] = [];
 	// Indexed by UTF-16 unit, as `source[i]` is, so an astral character does not
 	// shift every offset after it.
 	const out = source.split("");
@@ -147,12 +155,20 @@ export function blank(source: string, language: keyof typeof SYNTAX): string {
 		} else if (lineComments && c === "/" && next === "/") {
 			const start = i;
 			while (i < source.length && source[i] !== "\n") i++;
+			// From after the marker, which is where a directive's own text
+			// starts, and clamped because an unterminated block runs past the end.
+			found.push({ from: start + 2, to: i, block: false });
 			erase(start, i);
 		} else if (c === "/" && next === "*") {
 			const start = i;
 			i += 2;
 			while (i < source.length && !(source[i] === "*" && source[i + 1] === "/"))
 				i++;
+			found.push({
+				from: start + 2,
+				to: Math.min(i, source.length),
+				block: true,
+			});
 			i += 2;
 			erase(start, i);
 		} else if (
@@ -191,5 +207,35 @@ export function blank(source: string, language: keyof typeof SYNTAX): string {
 		}
 	}
 
-	return out.join("");
+	return { out, found };
+}
+
+/**
+ * `source` with everything the scan erases replaced by spaces. The signature
+ * every caller had before the scan also reported what it erased.
+ */
+export const blank = (source: string, language: keyof typeof SYNTAX): string =>
+	walk(source, language).out.join("");
+
+/**
+ * Every comment in `source`, its own text and the line it opens on.
+ *
+ * Read out of the source at the offsets the scan reached rather than out of
+ * the blanked copy, which no longer carries either. One walk answers this and
+ * `blank` both, so a comment inside a regex literal or a template expression
+ * is decided once — which is the hole the line-based scanner this replaces
+ * left, and the reason two of them were being kept in step by hand.
+ */
+export function comments(
+	source: string,
+	language: keyof typeof SYNTAX,
+): Comment[] {
+	// Counted forward from the previous span rather than over the whole prefix
+	// each time: the spans arrive in ascending order, so one pass covers them.
+	let at = 0;
+	let line = 1;
+	return walk(source, language).found.map(({ from, to, block }) => {
+		for (; at < from; at++) if (source[at] === "\n") line++;
+		return { text: source.slice(from, to), line, block };
+	});
 }

@@ -18,12 +18,16 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 
 /**
- * The check's own text, for the cases that stand a copy of it beside a tree
- * of their own rather than running it against this repository.
+ * The check and what it imports, for the cases that stand a copy of it beside
+ * a tree of their own rather than running it against this repository. Keyed by
+ * the name each must be written under, because the copy resolves `./scan.ts`
+ * exactly as the original does.
  */
-export const source = readFileSync(
-	join(import.meta.dir, "mutation-floor.ts"),
-	"utf8",
+export const modules: Record<string, string> = Object.fromEntries(
+	["mutation-floor.ts", "scan.ts"].map((name) => [
+		name,
+		readFileSync(join(import.meta.dir, name), "utf8"),
+	]),
 );
 
 const made: string[] = [];

@@ -10,8 +10,8 @@ import { join } from "node:path";
 import {
 	cleanup,
 	fabricate,
+	modules,
 	report,
-	source,
 } from "./mutation-floor.fixture.ts";
 import {
 	FLOOR,
@@ -214,6 +214,8 @@ describe("the floor changed with no reason given", () => {
 
 	// spec: mutation-floor/the-repository-as-it-stands
 	test("this script's own floor line states a reason", () => {
-		expect(gauge(FLOOR, FLOOR, floorLine(source))).toEqual([]);
+		expect(
+			gauge(FLOOR, FLOOR, floorLine(modules["mutation-floor.ts"] as string)),
+		).toEqual([]);
 	});
 });
