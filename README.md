@@ -142,7 +142,7 @@ rolled forward instead.
 ### Where each value lives
 
 Which of the three homes a value belongs in is decided by what disclosing it
-would grant, and `checks/deploy-workflow-secrets.test.ts` holds that line in
+would grant, and `checks/deploy-workflow.test.ts` holds that line in
 both directions:
 
 - **`deploy.yml`'s `env:`** — the registry, the Docker Hub account and the
