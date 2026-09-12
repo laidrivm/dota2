@@ -18,6 +18,78 @@
 import { lstatSync } from "node:fs";
 import { join } from "node:path";
 
+/**
+ * The other half of the same contract, and in the same module because the
+ * capability is one: `stray` refuses a file placed outside the documented
+ * directories, and what follows refuses a documented directory holding no
+ * file. Neither is a statement about this repository — both answer for a tree
+ * that does not exist yet, which is why their cases fabricate one.
+ */
+/** The heading the section is found under, and the only place it is written. */
+export const HEADING = "## Where each kind of file lives";
+
+/**
+ * Every directory the layout section names, paired with whether its row marks
+ * it reserved. The first backticked span of a row is the directory, the idiom
+ * `readme-map.test.ts` already reads the ownership map with; the header and
+ * separator rows carry none and drop out here.
+ */
+export function rows(
+	markdown: string,
+): { path: string | undefined; reserved: boolean }[] | undefined {
+	// `undefined` where the heading is absent, distinct from a section that is
+	// present and holds no row: the two fail for different reasons and the
+	// heading is matched in one place rather than tested again by the caller.
+	const section = markdown.match(
+		new RegExp(`^${HEADING}$([\\s\\S]*?)(?=\\n#{1,2} |$(?![\\s\\S]))`, "m"),
+	)?.[1];
+	if (section === undefined) return undefined;
+	return section
+		.split("\n")
+		.filter((line) => line.startsWith("|"))
+		.slice(2)
+		.map((line) => ({
+			// `undefined` rather than dropped: a row that stops naming a
+			// directory is the table half-reshaped, and dropping it would leave
+			// the check reading the rows that still parse and reporting nothing.
+			path: line.split("|")[1]?.match(/`([^`]+)`/)?.[1],
+			// The marker is read from the "Holds" cell alone, and only where the
+			// cell opens with it: a directory whose path carries the word, or a
+			// description using it for something else, would otherwise exempt its
+			// own row from the tracking requirement with nobody deciding to.
+			reserved: /^\s*reserved\b/i.test(line.split("|")[2] ?? ""),
+		}));
+}
+
+/**
+ * What the section gets wrong, read against a listing of tracked paths.
+ *
+ * Tracked rather than present on disk: git carries no empty directory, so a
+ * directory that exists only in a working tree is absent from every clone —
+ * the same reason the ownership map is checked this way.
+ */
+export function unbacked(markdown: string, tracked: string[]): string[] {
+	const named = rows(markdown);
+	if (named === undefined)
+		return [`the README carries no "${HEADING}" section`];
+
+	// A reshaped table satisfies every assertion made over its rows by having
+	// none, which is the same vacuous pass as an absent heading by another
+	// route.
+	if (named.length === 0)
+		return [`the "${HEADING}" section names no directory`];
+
+	return named.flatMap(({ path, reserved }) => {
+		if (path === undefined)
+			return [`the "${HEADING}" section has a row naming no directory`];
+		if (reserved) return [];
+		const prefix = path.endsWith("/") ? path : `${path}/`;
+		return tracked.some((file) => file.startsWith(prefix))
+			? []
+			: [`${path}: named in the layout section, tracking nothing`];
+	});
+}
+
 /** Every tracked root file, and why it is at the root. */
 export const EXEMPT: Record<string, string> = {
 	"CLAUDE.md": "always-on agent rules, read at the start of every session",

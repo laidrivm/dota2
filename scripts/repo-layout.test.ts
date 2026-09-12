@@ -17,7 +17,7 @@ import {
 } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
-import { stray } from "./repo-layout.ts";
+import { HEADING, stray, unbacked } from "./repo-layout.ts";
 
 const made: string[] = [];
 
@@ -47,6 +47,13 @@ function fabricate(files: Record<string, string>): string {
 	}
 	git("add", "-A");
 	return dir;
+}
+
+/** The tracked paths of a repository, named from its root. */
+function listing(dir: string): string[] {
+	const ls = Bun.spawnSync(["git", "ls-files", "-z"], { cwd: dir });
+	if (ls.exitCode !== 0) throw new Error(ls.stderr.toString());
+	return ls.stdout.toString().split("\0").filter(Boolean);
 }
 
 /** One exempted root file, so no case below trips the could-not-measure guard. */
@@ -179,5 +186,89 @@ describe("the tree the sweep reads", () => {
 	// spec: repo-layout/the-repository-as-it-stands
 	test("this repository's root is named entirely by the list [14]", () => {
 		expect(stray()).toEqual([]);
+	});
+});
+
+/** A layout section holding one row per argument. */
+const section = (...cells: string[]) =>
+	`# A readme\n\n${HEADING}\n\n| Directory | Holds |\n|---|---|\n${cells
+		.map((cell) => `| ${cell} |\n`)
+		.join("")}`;
+
+// spec: repo-layout/the-section-is-absent
+describe("a README with no layout section", () => {
+	test("fails rather than passing over an absent heading [15]", () => {
+		// The vacuous pass a section-scoped scan gives when its heading is
+		// renamed: no section, no rows, nothing to contradict.
+		expect(unbacked("# A readme\n\n## Something else\n", [])).toHaveLength(1);
+	});
+});
+
+// spec: repo-layout/the-section-names-no-directory
+describe("a layout section naming no directory", () => {
+	test("fails rather than passing on having no rows [16]", () => {
+		const empty = `# A readme\n\n${HEADING}\n\nprose, no table\n`;
+		expect(unbacked(empty, ["src/app/a.ts"])).toHaveLength(1);
+	});
+});
+
+// spec: repo-layout/a-directory-the-section-names
+describe("a directory the section names", () => {
+	test("passes where the repository tracks a file under it [17]", () => {
+		const dir = fabricate({ "src/app/a.ts": "" });
+		expect(unbacked(section("`src/app/` | the client"), listing(dir))).toEqual(
+			[],
+		);
+	});
+
+	test("fails where it tracks nothing, naming the directory [19]", () => {
+		const dir = fabricate({ "src/app/a.ts": "" });
+		const found = unbacked(section("`src/job/` | the job"), listing(dir));
+
+		expect(found).toHaveLength(1);
+		expect(found[0]).toContain("src/job/");
+	});
+
+	test("a directory on disk but tracked by nothing does not satisfy it [20]", () => {
+		// git carries no empty directory, so this is the mechanism rather than a
+		// contrivance: the row is satisfied in the author's working tree and in
+		// no clone.
+		const dir = fabricate({ "src/app/a.ts": "" });
+		mkdirSync(join(dir, "src/job"), { recursive: true });
+
+		expect(
+			unbacked(section("`src/job/` | the job"), listing(dir)),
+		).toHaveLength(1);
+	});
+
+	test("a row that stops naming a directory fails rather than dropping out", () => {
+		// The table half-reshaped: one row keeps its path and one loses it. A
+		// scan that dropped the second would report nothing and read as though
+		// the section were still whole.
+		const dir = fabricate({ "src/app/a.ts": "" });
+		const half = section("`src/app/` | the client", "src/job/ | the job");
+
+		expect(unbacked(half, listing(dir))).toHaveLength(1);
+	});
+
+	test("a prefix match is on the directory, not on the name [19]", () => {
+		// `src/job/` must not be satisfied by `src/jobs-notes.md`, which shares
+		// its first seven characters and lives somewhere else entirely.
+		const dir = fabricate({ "src/jobs-notes.md": "" });
+		expect(
+			unbacked(section("`src/job/` | the job"), listing(dir)),
+		).toHaveLength(1);
+	});
+});
+
+// spec: repo-layout/a-directory-reserved-for-later-work
+describe("a directory reserved for later work", () => {
+	test("is not required to exist [18]", () => {
+		const dir = fabricate({ "src/app/a.ts": "" });
+		const reserved = section(
+			"`src/job/build/` | reserved for `snapshot-build`",
+		);
+
+		expect(unbacked(reserved, listing(dir))).toEqual([]);
 	});
 });
