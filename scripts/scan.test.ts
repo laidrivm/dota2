@@ -17,6 +17,8 @@ describe("scanning TypeScript", () => {
 		["a regex after return", "function f() { return /MARK/; }"],
 		["a regex after an arrow", "const f = () => /MARK/;"],
 		["a regex after typeof", "const a = typeof /MARK/;"],
+		// `of` is the keyword here, so what follows it is a value.
+		["a regex after the for-of binding", "for (const x of /MARK/) {}"],
 	])("erases %s", (_, source) => expect(kept(source, "ts")).toBe(false));
 
 	test.each([
@@ -29,6 +31,14 @@ describe("scanning TypeScript", () => {
 		// otherwise swallow the rest of the file and take the scan silent with it.
 		["code after a quote left open on its line", "const a = 'x\nMARK;"],
 		["code after a comment that names a quote", "// it's fine\nMARK;"],
+		// `of` is an identifier here, so the `/` is a division. Read as a regex
+		// it would run to the next `/` — the block comment's own opener — and
+		// take the directive inside it with it.
+		["code after a division by a name called `of`", "const a = of / 2; MARK;"],
+		[
+			"code after a block comment that follows a division by `of`",
+			"const a = of / 2; /* hidden */ const MARK = 1;",
+		],
 	])("keeps %s", (_, source) => expect(kept(source, "ts")).toBe(true));
 
 	test("preserves offsets, so a match reads back out of the source", () => {
