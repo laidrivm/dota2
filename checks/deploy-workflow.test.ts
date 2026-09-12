@@ -16,30 +16,14 @@
  * `-context` and `deployment-shared-files`.
  */
 import { describe, expect, test } from "bun:test";
-import { CHECKS, deployed, repository } from "./deploy-workflow.fixture.ts";
+import {
+	CHECKS,
+	type Deploy,
+	deployed,
+	repository,
+} from "./deploy-workflow.fixture.ts";
 
 const { workflow, readme } = deployed();
-
-type Step = {
-	uses?: string;
-	run?: string;
-	env?: Record<string, string>;
-	with?: Record<string, unknown>;
-};
-type Job = {
-	needs?: string | string[];
-	uses?: string;
-	environment?: string;
-	permissions?: Record<string, string>;
-	steps?: Step[];
-};
-type Deploy = {
-	on?: Record<string, { branches?: string[] }>;
-	permissions?: Record<string, string>;
-	concurrency?: { group?: string };
-	env?: Record<string, string>;
-	jobs?: Record<string, Job>;
-};
 
 const deploy = Bun.YAML.parse(workflow) as Deploy;
 const jobs = deploy.jobs ?? {};
@@ -146,7 +130,6 @@ describe("every workflow the deploy calls", () => {
 });
 
 // --- what is pushed, and what the host runs --------------------------------
-
 // Escaped in template literals rather than written plain: `${{` inside a
 // quoted string is a placeholder the linter warns about, and the warning is
 // about this file's own text rather than about the workflow it reads.
@@ -167,14 +150,20 @@ test("the build pushes both tags", () => {
 	expect(tags.sort()).toEqual([`${IMAGE}:${SHA}`, `${IMAGE}:latest`].sort());
 });
 
+// The ssh action wherever it sits: position is not what makes it the step that
+// reaches the host, and a checkout added before it would send the three
+// readings below to the wrong step and name the wrong cause when they failed.
+const ssh = steps("host").find((step) =>
+	step.uses?.startsWith("appleboy/ssh-action"),
+);
+
 // spec: deploy-workflow/the-image-the-host-is-running
 test("the host is handed the commit's tag, never `latest`", () => {
-	const reference = steps("host")[0]?.env?.D2ASS_IMAGE;
-	expect(reference).toBe(`${IMAGE}:${SHA}`);
+	expect(ssh?.env?.D2ASS_IMAGE).toBe(`${IMAGE}:${SHA}`);
 	// The value the compose project resolves has to reach the machine as well
 	// as be set: an `env:` the action does not forward is a variable the script
 	// never sees.
-	expect(steps("host")[0]?.with?.envs).toBe("D2ASS_IMAGE");
+	expect(ssh?.with?.envs).toBe("D2ASS_IMAGE");
 });
 
 /**
@@ -205,7 +194,7 @@ test("the README names the rollback in a single passage", () => {
 
 // --- the host script -------------------------------------------------------
 
-const script = String(steps("host")[0]?.with?.script ?? "")
+const script = String(ssh?.with?.script ?? "")
 	.split("\n")
 	.map((line) => line.trim())
 	.filter(Boolean);
@@ -237,6 +226,12 @@ const usesLines = workflow
 	.map((line) => line.trim())
 	.filter((line) => line.startsWith("- uses:") || line.startsWith("uses:"));
 
+// Guards the rows below: a scan matching nothing registers no cases at all,
+// and a `test.each` with no rows reports success having checked no pin.
+test("the scan found every `uses:` the workflow writes", () => {
+	expect(usesLines).toHaveLength(8);
+});
+
 // spec: deploy-workflow/an-action-pinned-by-tag
 // spec: deploy-workflow/a-pin-with-no-version-beside-it
 test.each(usesLines)(
@@ -251,9 +246,16 @@ test.each(usesLines)(
 // spec: deploy-workflow/the-permissions-the-workflow-takes
 test("the workflow declares its permissions and no job widens them", () => {
 	expect(deploy.permissions).toEqual({ contents: "read" });
-	for (const job of Object.values(jobs))
-		for (const scope of Object.values(job.permissions ?? {}))
+	for (const job of Object.values(jobs)) {
+		const declared = job.permissions;
+		if (declared === undefined) continue;
+		// `permissions: write-all` is a scalar rather than a mapping, and its
+		// scopes read as single characters — none of them `write`, so the loop
+		// below would pass a job holding every scope at write.
+		expect(typeof declared).toBe("object");
+		for (const scope of Object.values(declared))
 			expect(scope).not.toBe("write");
+	}
 });
 
 // spec: deploy-workflow/an-event-value-reaching-a-shell
@@ -278,7 +280,7 @@ test("the registry, the image and the container reference are in the open", () =
 
 // spec: deploy-workflow/the-host-s-address-in-a-public-repository
 test("the host, port and user reach the action from secrets", () => {
-	const connection = steps("host")[0]?.with ?? {};
+	const connection = ssh?.with ?? {};
 	for (const key of ["host", "port", "username", "key"])
 		expect(String(connection[key] ?? "")).toMatch(/^\$\{\{ secrets\.\w+ \}\}$/);
 });
