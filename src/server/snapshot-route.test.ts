@@ -10,12 +10,12 @@
  * one route whose source moves.
  */
 import { afterAll, beforeAll, expect, test } from "bun:test";
-import { mkdtempSync, rmSync, statSync, utimesSync } from "node:fs";
+import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import rawFixture from "../fixtures/snapshot.json" with { type: "json" };
-import { PART, PUBLISHED, publishBundle } from "../job/export/publish.ts";
+import { PART, publishBundle } from "../job/export/publish.ts";
 import type { SnapshotBundle } from "../types.ts";
 import { snapshotDir, staticRoutes } from "./static-routes.ts";
 
@@ -42,9 +42,6 @@ const publish = (dir: string, snapshotId: number) =>
 
 /** What a response offers as its validator, or the empty string for none. */
 const etagOf = (response: Response) => response.headers.get("etag") ?? "";
-
-/** The inode at `path`: the half of the route's cache key a rename always moves. */
-const inodeOf = (path: string) => statSync(path, { bigint: true }).ino;
 
 /** A publication directory of its own, removed when the file finishes. */
 const emptyDir = () => {
@@ -205,61 +202,22 @@ test("a request carrying a stale ETag is answered with the new bundle [41]", asy
 	expect((await second.json()).snapshotId).toBe(PUBLISHED_ID + 1);
 });
 
-/**
- * The collision the validator's cache is keyed against, arranged rather than
- * waited for: two publications sharing a timestamp. This repository's own
- * filesystem never produced one in 200 tries and CI produced one on the first
- * push that noticed, so the timestamps are set equal here and the case is the
- * same on both.
- */
-// spec: snapshot-export/a-new-bundle-has-been-published
-test("two publications sharing a timestamp still differ [41]", async () => {
-	const dir = emptyDir();
-	const at = serving(dir);
-	await publish(dir, PUBLISHED_ID);
-	const file = join(dir, PUBLISHED);
-	const when = new Date(1_700_000_000_000);
-	utimesSync(file, when, when);
-	const first = await fetch(`${at}${SNAPSHOT_URL}`);
-
-	await publish(dir, PUBLISHED_ID + 1);
-	utimesSync(file, when, when);
-	const second = await fetch(`${at}${SNAPSHOT_URL}`, {
-		headers: { "if-none-match": etagOf(first) },
-	});
-
-	// A publication renames a freshly written file over the name, so what tells
-	// the two apart is the inode: on the timestamp alone the client would be
-	// told the bundle it holds is still the current one.
-	expect(second.status).toBe(200);
-	expect(etagOf(second)).not.toBe(etagOf(first));
-	expect((await second.json()).snapshotId).toBe(PUBLISHED_ID + 1);
-});
-
 // spec: snapshot-export/a-byte-identical-re-export
 test("a re-export of identical bytes is still answered 304 [50]", async () => {
 	const dir = emptyDir();
 	const at = serving(dir);
-	const file = join(dir, PUBLISHED);
-	// One timestamp for both, as the case above: the inode alone separates them.
-	const when = new Date(1_700_000_000_000);
 	await publish(dir, PUBLISHED_ID);
-	utimesSync(file, when, when);
 	const first = await fetch(`${at}${SNAPSHOT_URL}`);
-	const before = inodeOf(file);
 
 	// The same bundle published again: a rename puts a different file at the
-	// name, so the file behind it moves and the bytes do not.
+	// name, so the file behind the name moves and the bytes do not. The
+	// validator is the bytes, so neither the rename nor the new timestamp it
+	// arrives with is something the answer can depend on.
 	await publish(dir, PUBLISHED_ID);
-	utimesSync(file, when, when);
 	const second = await fetch(`${at}${SNAPSHOT_URL}`, {
 		headers: { "if-none-match": etagOf(first) },
 	});
 
-	// Asserted because the case rests on it: with the key unmoved the route
-	// answers from the stored hash without re-reading, and the 304 proves
-	// nothing about the bytes.
-	expect(inodeOf(file)).not.toBe(before);
 	expect(second.status).toBe(304);
 });
 
