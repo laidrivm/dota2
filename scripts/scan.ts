@@ -50,6 +50,20 @@ const SYNTAX = {
 } as const;
 
 /**
+ * Whether a word that may open a value is doing so here.
+ *
+ * Only `of` is in doubt: every other word in the list is reserved, where `of`
+ * is a keyword in `for (x of …)` and a name anywhere else — and this
+ * repository declares parameters called `of`. As a keyword it follows the
+ * binding, so the token before it is an identifier or the `]` or `}` closing a
+ * destructuring pattern; as a name it follows an operator, and `of / 2` is a
+ * division the scan would otherwise read as a regex literal, swallowing
+ * whatever `/` came next along with it.
+ */
+const contextual = (word: string, before: string) =>
+	word !== "of" || /^[A-Za-z_$\]}]/.test(before);
+
+/**
  * `source` with its comments, strings and — where the language has them —
  * template text and regex literals replaced by spaces, so what is left at a
  * given offset is code and nothing else. Lengths and newlines are preserved,
@@ -83,7 +97,15 @@ function walk(source: string, language: keyof typeof SYNTAX) {
 	// expression is being read. An empty stack is ordinary code.
 	const open: (number | null)[] = [];
 	let span = 0; // where the template text being blanked started
+	// The last two tokens, not one: `of` is a keyword in `for (x of …)` and an
+	// ordinary identifier everywhere else, and only the token before it tells
+	// the two apart. `note` is what keeps the pair in step.
 	let previous = "";
+	let before = "";
+	const note = (token: string) => {
+		before = previous;
+		previous = token;
+	};
 	let i = 0;
 
 	const word = (at: number) => {
@@ -105,12 +127,12 @@ function walk(source: string, language: keyof typeof SYNTAX) {
 				erase(span, i);
 				open.pop();
 				i++;
-				previous = "`";
+				note("`");
 			} else if (c === "$" && next === "{") {
 				erase(span, i);
 				open[open.length - 1] = 0;
 				i += 2;
-				previous = "{";
+				note("{");
 			} else {
 				i++;
 			}
@@ -133,7 +155,7 @@ function walk(source: string, language: keyof typeof SYNTAX) {
 			}
 			if (source[i] === c) i++;
 			erase(start, i);
-			previous = c;
+			note(c);
 		} else if (c === "`" && templates) {
 			open.push(null);
 			span = i + 1;
@@ -146,11 +168,11 @@ function walk(source: string, language: keyof typeof SYNTAX) {
 			i++;
 		} else if (c === "{" && open.length > 0 && open.at(-1) !== null) {
 			open[open.length - 1] = (open.at(-1) as number) + 1;
-			previous = c;
+			note(c);
 			i++;
 		} else if (c === "}" && open.length > 0 && open.at(-1) !== null) {
 			open[open.length - 1] = (open.at(-1) as number) - 1;
-			previous = c;
+			note(c);
 			i++;
 		} else if (lineComments && c === "/" && next === "/") {
 			const start = i;
@@ -176,7 +198,7 @@ function walk(source: string, language: keyof typeof SYNTAX) {
 			regex &&
 			(previous === "" ||
 				OPENS_VALUE.includes(previous) ||
-				OPENS_VALUE_WORDS.has(previous))
+				(OPENS_VALUE_WORDS.has(previous) && contextual(previous, before)))
 		) {
 			const start = i;
 			i++;
@@ -196,13 +218,13 @@ function walk(source: string, language: keyof typeof SYNTAX) {
 			}
 			if (source[i] === "/") i++;
 			erase(start, i);
-			previous = "/";
+			note("/");
 		} else if (/[A-Za-z_$]/.test(c)) {
 			const found = word(i);
-			previous = found;
+			note(found);
 			i += found.length;
 		} else {
-			if (c.trim() !== "") previous = c;
+			if (c.trim() !== "") note(c);
 			i++;
 		}
 	}

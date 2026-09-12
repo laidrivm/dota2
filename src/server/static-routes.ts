@@ -112,7 +112,7 @@ const iconRoute =
 	};
 
 /**
- * A validator for the bytes at `file`.
+ * A validator for `bytes`.
  *
  * A hash of the bytes, not of `mtime` and size: those answer *was this file
  * rewritten*, where the client is asking *is this the payload I hold*, and a
@@ -130,11 +130,13 @@ const iconRoute =
  *
  * SHA-256 over a wyhash: both are one line, and only one of them makes a
  * collision something nobody has to reason about.
+ *
+ * Takes the bytes rather than the path, because the caller has to hold them:
+ * a validator computed from one read and a body left to a second is a body
+ * the validator may not describe.
  */
-const validator = async (file: string): Promise<string> =>
-	`"${new Bun.CryptoHasher("sha256")
-		.update(await Bun.file(file).bytes())
-		.digest("hex")}"`;
+const validator = (bytes: Uint8Array): string =>
+	`"${new Bun.CryptoHasher("sha256").update(bytes).digest("hex")}"`;
 
 /**
  * Whether `If-None-Match` names the validator this URL is offering.
@@ -172,7 +174,13 @@ const snapshotRoute =
 	async (request: Request): Promise<Response> => {
 		const bundle = fileURLToPath(new URL(PUBLISHED, dir));
 		const file = (await Bun.file(bundle).exists()) ? bundle : snapshotFile;
-		const etag = await validator(file);
+		// Read once, and the same bytes answer both halves. `Bun.file` reads the
+		// path when the response is sent, not when it is constructed, so a
+		// publication landing between the two — and one lands by renaming a new
+		// file over this name — would send the new bundle under the old one's
+		// validator, and the client would cache it under a tag it does not have.
+		const bytes = await Bun.file(file).bytes();
+		const etag = validator(bytes);
 		if (revalidates(request.headers.get("if-none-match"), etag))
 			// The validator and the freshness rule, and no `content-type`: a
 			// 304 describes what the client already holds, and repeating the
@@ -182,7 +190,7 @@ const snapshotRoute =
 				status: 304,
 				headers: { "cache-control": "no-cache", etag },
 			});
-		return new Response(Bun.file(file), {
+		return new Response(bytes, {
 			headers: {
 				"content-type": "application/json; charset=utf-8",
 				"cache-control": "no-cache",
