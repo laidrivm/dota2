@@ -21,17 +21,22 @@ What counts as evidence for a claim, and what a claim may rest on.
   before writing it into an artefact — a plan is not an implementation, so a
   mechanism named from priors reads exactly like one that was tried; report
   which parts failed verification and what replaces them.
-- Never infer a permission outcome from a command that succeeded — an
-  approved prompt and an unprompted call are indistinguishable from inside
-  the session.
+- Never infer a permission outcome from a command that succeeded, and never
+  report what a prompt did — report what the call returned; an approved prompt
+  and an unprompted call are indistinguishable from inside the session.
 - Verify a permissions change only in a session started after it — a session
   holds the permission set it loaded at startup, while a hook is re-read from
   the settings file per tool call and is observable at once.
+- Probe a gate by refusing it, with an input the session has not already
+  cleared — an approval and an absent prompt reach you as the same successful
+  result, and an approval outlives the mode that granted it.
 - Record the cause a measurement establishes, not the one it merely permits —
   name the alternatives ruled out.
 - Name what a measurement was taken over beside its number, and cite it for
   nothing else.
 - Re-run the failure probe that justified an assertion after rewriting it.
+- Re-run the older probe before overwriting a recorded measurement your new
+  one contradicts.
 - Verify what a thing does against the thing, never against what governs it —
   a git hook is what `.git/hooks/` holds, not what `package.json` declares,
   and a module checks what its code checks, not what its specification
@@ -47,6 +52,9 @@ What counts as evidence for a claim, and what a claim may rest on.
   the event that must move it.
 - Exercise a compatibility statement against the state it was written for,
   never only the state it is a no-op in.
+- Exercise a pre-written decision rule, or a condition you have written, only
+  against a case that could have produced the opposite outcome — for a
+  condition, name that case before writing it.
 - Before editing an artefact to match an observed state, confirm the state is
   the intended one.
 - Probe one mutation of shared state per run, never a sequence of them.
@@ -57,11 +65,20 @@ What counts as evidence for a claim, and what a claim may rest on.
 - Pin the environment a case needs in order to discriminate, and assert the pin
   took — a case that fails only under some clocks or locales passes under the
   one CI runs.
+- Run a case about a UTC reading in a non-UTC zone, set before the code under
+  test reads one — in UTC a local calendar and the UTC timeline answer alike.
 - Read a listing to its end before concluding a row is absent — a window
   bounded by `head`, `tail` or a line range and a row that is not there print
   the same nothing.
+- Treat an empty result as evidence of absence only after the same query has
+  returned a non-empty one, and run it over `openspec/changes/**` as well as
+  the tree — a query never run, a broken one and a true absence print the same
+  nothing.
 - Take a count of a file the edit writing it changes after that edit, never
   before.
+- Take a count from the authoritative list — found by the token every member
+  must carry, never one they merely tend to share — and reconcile it against
+  any count the source states itself.
 - Measure the mechanism an option rests on before putting the option to the
   user.
 - Re-measure a figure at the moment it enters an artefact, never copy it from
