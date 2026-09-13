@@ -71,9 +71,9 @@ What counts as evidence for a claim, and what a claim may rest on.
   bounded by `head`, `tail` or a line range and a row that is not there print
   the same nothing.
 - Treat an empty result as evidence of absence only after the same query has
-  returned a non-empty one, and run it over `openspec/changes/**` as well as
-  the tree — a query never run, a broken one and a true absence print the same
-  nothing.
+  returned a non-empty one over the same scope, `openspec/changes/**` included
+  — a query never run, a misspelled pathspec and a true absence all print the
+  same nothing, and git exits zero for all three.
 - Take a count of a file the edit writing it changes after that edit, never
   before.
 - Take a count from the authoritative list — found by the token every member
