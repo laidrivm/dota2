@@ -161,7 +161,8 @@ Rules about how work is carried out here. They do not age with the code.
   result, and an approval outlives the mode that granted it.
 - Never report what a permission prompt did; report what the call returned.
 - Treat an empty result as evidence of absence only after the same query has
-  returned a non-empty one — a broken query and a true absence print the same
+  returned a non-empty one, and run it over `openspec/changes/**` as well as
+  the tree — a query never run, a broken one and a true absence print the same
   nothing.
 - Take a count from the authoritative list — found by the token every member
   must carry, never one they merely tend to share — and reconcile it against
