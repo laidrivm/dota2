@@ -382,19 +382,32 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       figure; this generalises the same machinery to six, and follows the
       whole calibration chain.
 - [ ] **`scan-lift`** — proposed, `openspec/changes/scan-lift/`. One
-      left-to-right source scanner in three copies, two of them blind in ways
-      their own specifications forbid. Ships on `feat/scan-lift`; it also
-      writes the rule of two into `CLAUDE.md`'s Code list, which
-      `reviewable-diff-gates` deferred and no artefact has carried since.
+      left-to-right source scanner, in two copies now rather than the three the
+      proposal counts: tasks 1.2 and 1.4 shipped outside the change in
+      `14fc537`, which gave `scripts/scan.ts` its `comments` export and moved
+      `scripts/mutation-floor.ts` onto it. What is left is
+      `scripts/spec-coverage.ts`, whose per-line strip still stops at an
+      escaped quote, task 1.3's direct coverage of the new export — today it
+      is exercised only through `exemptions()` — and task 1.7's deletion of
+      `scripts/mutation-floor-exemptions.test.ts`. The boxes stay unticked:
+      a box is ticked in the pull request that implements it. Ships on
+      `feat/scan-lift`; it also writes the rule of two into `CLAUDE.md`'s Code
+      list, which `reviewable-diff-gates` deferred and no artefact has carried
+      since. Settle against `drop-mutation-exemptions` first, which removes the
+      `comments` export on the premise that it has one consumer.
 - [ ] **`tracked-file-sweep`** — proposed,
       `openspec/changes/tracked-file-sweep/`. The listing every check reads the
       tree through — `git ls-files` over the whole tree, not a pathspec query —
       stood in seven copies when this was proposed, two of them already
-      drifted. Eleven now, re-counted at the archive of `repo-layout`, which
-      repaired `readme-map.test.ts`'s copy and added four sites in three files:
+      drifted. Eleven at the archive of `repo-layout`, which repaired
+      `readme-map.test.ts`'s copy and added four sites in three files:
       `scripts/repo-layout.ts`, `checks/readme-layout.test.ts`, and both halves
       of `checks/tracked-tree.test.ts`, whose second half is the unanchored
-      counter-example and is the one copy the lift must leave alone. Two task
+      counter-example and is the one copy the lift must leave alone. Twelve
+      now: `scripts/repo-layout.test.ts` gained one in `6ff126d`. A thirteenth
+      site, `checks/docker-context.fixture.ts`, asks a different question —
+      `--cached --others --exclude-standard` lists the untracked too — so the
+      lift decides whether it belongs rather than inheriting it. Two task
       groups, so `feat/tracked-file-sweep-1` then `-2`.
 - [ ] **`focus-restore-idiom`** — proposed,
       `openspec/changes/focus-restore-idiom/`. Two controls restore focus after
