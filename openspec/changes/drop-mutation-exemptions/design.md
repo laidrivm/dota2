@@ -9,9 +9,9 @@ comment, one missing `next-line`, and one carrying no reason.
 The second job has never had an input. `src/model.ts` carries no directive,
 and `git log` shows none has ever been written. The machinery around it is
 `exemptions()` and its two patterns in the check, the whole of
-`scripts/mutation-floor-exemptions.test.ts`, one case in
-`scripts/mutation-floor-cli.test.ts`, and `comments()` in `scripts/scan.ts`,
-which exists for this caller alone.
+`scripts/mutation-floor-exemptions.test.ts`, and one case in
+`scripts/mutation-floor-cli.test.ts`. `comments()` in `scripts/scan.ts` is not
+part of it: this is its first caller, not its only one.
 
 ## Goals / Non-Goals
 
@@ -30,8 +30,9 @@ which exists for this caller alone.
   and where line coverage does not: every branch is reachable by a test that
   asserts nothing about the number it produced.
 - Changing `FLOOR = 66`, the mutators Stryker runs, or the scope it runs over.
-- Touching `blank()` in `scripts/scan.ts`, which `src/app/module-classes.test.ts`
-  reads.
+- Touching `scripts/scan.ts` at all. `blank()` is read by
+  `src/app/module-classes.test.ts` and `comments()` by `scan-lift`'s switch of
+  `scripts/spec-coverage.ts`; this change only stops importing the second.
 
 ## Decisions
 
@@ -49,15 +50,25 @@ Alternative considered: keep `exemptions()` and delete only its test. Rejected
 — a rule nothing exercises is worse than no rule, and the rule is the part
 with no input.
 
-**`comments()` goes with it rather than waiting for a second caller.** It was
+**`comments()` stays; this change removes its import, not the export.** It was
 lifted out of this check two branches ago so that one scanner served both
-callers; with this caller gone it has none, and a scanner nobody runs is a
-scanner nobody notices is wrong. `blank()` keeps the left-to-right walk, which
-was always its own.
+callers, and the second caller is named: `scan-lift` switches
+`scripts/spec-coverage.ts` onto it to close a defect in that file's own
+per-line strip, which drops every `// spec:` citation below an escaped quote —
+reproduced against a fabricated repository, with the control that has no
+escaped quote citing normally.
 
-Alternative considered: keep `comments()` for the next consumer. Rejected —
-there is no next consumer named, and the walk it reports from is still there
-to report from on the day one appears.
+An earlier draft of this design removed it, on the ground that there was no
+next consumer named. There was; the draft did not grep the sibling changes
+`docs/feature-workflow.md` requires grepping, and `scan-lift` had carried that
+consumer in the queue since before this change was proposed. Removing and
+restoring the export is the only outcome that reasoning could have produced.
+
+What survives the correction is the shape of the worry: between this change and
+`scan-lift`, `comments()` has no caller, and a scanner nobody runs is a scanner
+nobody notices is wrong. `scan-lift` answers it by covering the export in
+`scripts/scan.test.ts` directly rather than through a caller, which is work it
+owns whichever of the two lands first.
 
 **The requirement is removed, not relaxed.** Leaving it while deleting its
 checks would leave four scenarios cited by nothing, which raises the uncited
@@ -76,6 +87,8 @@ would be a measurement recording that we stopped measuring.
   one.** → It is honoured correctly, which is Stryker's contract; what is lost
   is this repository's preference for one spelling. No mutant is admitted that
   Stryker would not have admitted.
-- **A future consumer of `comments()` has to restore it.** → The span
-  bookkeeping is ten lines over a walk that stays, and this change is in the
-  archive to read.
+- **`comments()` sits uncalled until `scan-lift` lands, and an uncalled
+  scanner rots.** → `scan-lift` covers it in `scripts/scan.test.ts` on its own
+  terms, so it is exercised by cases rather than by a caller. Landing that
+  change first closes the window entirely; landing this one first leaves the
+  export covered but unused, which is the weaker of the two and named as one.

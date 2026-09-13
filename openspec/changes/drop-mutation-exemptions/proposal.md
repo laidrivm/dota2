@@ -36,9 +36,10 @@ stops being a thing this repository re-checks.
   `MODEL_NAME` lose their last readers and go with them; a renamed
   `src/model.ts` still fails loudly, through `stryker run` having nothing to
   mutate and through `survivors()` refusing a report with no mutants.
-- Remove `comments()` from `scripts/scan.ts`, which loses its only consumer.
-  `blank()` stays: `src/app/module-classes.test.ts` reads it, and the
-  left-to-right scan the two shared is what `blank()` was already doing.
+- Leave `scripts/scan.ts` whole. `comments()` loses this consumer and keeps
+  another: `scan-lift` switches `scripts/spec-coverage.ts` onto it, to close a
+  defect in that file's own scanner that reproduces today. This change removes
+  the import, not the export.
 - **BREAKING for authors, not for callers**: a `// Stryker disable` directive
   written from here on is honoured by Stryker and checked by nothing. A
   mistyped one is caught when the floor is lowered to record its gain, not at
@@ -70,9 +71,9 @@ None.
 - `scripts/mutation-floor-cli.test.ts` — loses three cases.
 - `scripts/mutation-floor.fixture.ts` — its `modules` map exists so the
   command-line cases can stand a copy of the check beside a tree of their own;
-  with `./scan.ts` no longer imported it holds one file again.
-- `scripts/scan.ts` — loses `comments()` and the span bookkeeping that fed it.
-- `scripts/scan.test.ts` — unchanged; its cases are all `blank()`'s.
+  with `./scan.ts` no longer imported it holds the check and `./root.ts`.
+- `scripts/scan.ts`, `scripts/scan.test.ts` — unchanged. `comments()` stays
+  for the consumer `scan-lift` names.
 - `openspec/specs/mutation-floor/spec.md` — one requirement removed.
 - `docs/testing.md` §The mutation floor — the four bullets describing the
   directive's accepted form go with it.
