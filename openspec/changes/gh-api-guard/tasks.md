@@ -89,6 +89,7 @@ and no criterion in any capability states what a doc sentence says.
       `scripts/command-guard.test.ts` against the 300-line cap and record both
       numbers, whether or not either is over; the test file stood at 214 and
       the guard at 246 when this was proposed
+      (*change-slicing/a-file-over-the-cap*)
 - [ ] 3.5 Grep the four places that restate a decision — the change's sibling
       artefacts, `openspec/specs/**`, `PLAN.md` and the README ownership map —
       for a sentence saying the guard blocks three `gh` writes, and reconcile
