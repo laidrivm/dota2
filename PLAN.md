@@ -558,8 +558,13 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
 
       **`src/model.ts` now sits at exactly its 300-line cap.** That note is
       what filled the last four lines, and `beta-refit`'s step 1 edits the
-      same file to add the intercept — so that step splits it first, to the
-      cap that will apply rather than the one that does.
+      same file to add the intercept — so it must split first, to the cap that
+      will apply rather than the one that does. `beta-refit` does not carry
+      that step: none of its tasks names a split, so one is added to it before
+      it is applied. Nor is the split free — `openspec/specs/mutation-floor`
+      fixes the scope at one source file and one command, so whichever half
+      leaves `src/model.ts` leaves Stryker's reach with it. That is the
+      requirement's question, not the cap's.
 - [ ] **Five sets of letters name more than one hero.** `heroAbbr` in
       `src/app/board/format.ts` takes a display name's first four letters with
       non-letters removed, and over the 128-hero palette that collides five
