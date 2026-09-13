@@ -8,11 +8,12 @@
       rest on that half — the malformed directive, the same comment in another
       file, and the absent model — and the `files` argument of its `cli`
       helper if nothing else passes one
-- [ ] 1.4 Return `scripts/mutation-floor.fixture.ts`'s `modules` map to the one
-      file the check now is, and confirm the command-line cases still stand a
-      runnable copy
-- [ ] 1.5 Remove `comments()`, the `Comment` and `Span` types and the span
-      bookkeeping from `scripts/scan.ts`, leaving `blank()` and its walk
+- [ ] 1.4 Drop `./scan.ts` from `scripts/mutation-floor.fixture.ts`'s
+      `modules` map, leaving the check and `./root.ts` — what the check still
+      imports — and confirm the command-line cases still stand a runnable copy
+- [ ] 1.5 Leave `scripts/scan.ts` untouched, and confirm it: `comments()` and
+      its span bookkeeping stay for `scan-lift`'s consumer, so `git diff` names
+      neither that file nor `scripts/scan.test.ts`
 
 ## 2. Move the requirement and the prose with it
 

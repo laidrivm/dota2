@@ -382,19 +382,20 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       figure; this generalises the same machinery to six, and follows the
       whole calibration chain.
 - [ ] **`scan-lift`** — proposed, `openspec/changes/scan-lift/`. One
-      left-to-right source scanner, in two copies now rather than the three the
-      proposal counts: tasks 1.2 and 1.4 shipped outside the change in
-      `14fc537`, which gave `scripts/scan.ts` its `comments` export and moved
-      `scripts/mutation-floor.ts` onto it. What is left is
-      `scripts/spec-coverage.ts`, whose per-line strip still stops at an
-      escaped quote, task 1.3's direct coverage of the new export — today it
-      is exercised only through `exemptions()` — and task 1.7's deletion of
-      `scripts/mutation-floor-exemptions.test.ts`. The boxes stay unticked:
-      a box is ticked in the pull request that implements it. Ships on
-      `feat/scan-lift`; it also writes the rule of two into `CLAUDE.md`'s Code
-      list, which `reviewable-diff-gates` deferred and no artefact has carried
-      since. Settle against `drop-mutation-exemptions` first, which removes the
-      `comments` export on the premise that it has one consumer.
+      left-to-right source scanner in two copies; the second is
+      `scripts/spec-coverage.ts`, whose per-line strip stops at an escaped
+      quote and silently drops every citation below it. Narrowed to that half:
+      it had a `MODIFIED` delta on the same `mutation-floor` requirement
+      `drop-mutation-exemptions` removes, and that delta, its tasks and the
+      deletion of `scripts/mutation-floor-exemptions.test.ts` went to that
+      change. What shipped early stays unticked because a box is ticked in the
+      pull request that implements it — `14fc537` gave `scripts/scan.ts` its
+      `comments` export and moved `scripts/mutation-floor.ts` onto it, and both
+      are preconditions in the revised tasks rather than steps. Ships on
+      `feat/scan-lift`, before `drop-mutation-exemptions` for preference: its
+      direct coverage of `comments` is what stops that export sitting uncalled
+      in between. It also writes the rule of two into `CLAUDE.md`'s Code list,
+      which `reviewable-diff-gates` deferred and no artefact has carried since.
 - [ ] **`tracked-file-sweep`** — proposed,
       `openspec/changes/tracked-file-sweep/`. The listing every check reads the
       tree through — `git ls-files` over the whole tree, not a pathspec query —
