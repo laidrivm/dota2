@@ -43,17 +43,21 @@ than an opinion.
 - **THEN** the card body SHALL be the record, and no file in the repository
   SHALL be expected to hold it
 
-A card SHALL keep its identity across that boundary. WHEN a directory is
-created for a card that had none, the **same card** SHALL gain the pointer and
-lose its body, rather than a second card being made beside it. What the body
+A card SHALL keep its identity across that boundary, WHERE the card's owning
+tree is this repository. WHEN a directory is created here for such a card that
+had none, the **same card** SHALL gain the pointer and lose its body, rather
+than a second card being made beside it. What the body
 held has by then been written into `proposal.md`, so keeping it leaves two
 accounts of one thing with only one of them reviewed — which is the duplication
 this requirement exists to prevent, arriving by the one route the rest of it
 does not close.
 
-Every card that is not `done` crosses this boundary eventually: sixteen of
-the thirty-five entries this change moves are findings with no directory, and
-each becomes a change or is dropped.
+Every `D2ASS` card that is not `done` crosses this boundary eventually:
+sixteen of the thirty-five entries this change moves are findings with no
+directory, and each becomes a change or is dropped. A card on `Harness` or
+`mellon` SHALL NOT be required to cross it — their trees are not here, so the
+directory that would supply the pointer can never appear, and a rule waiting
+for it would hold every such card permanently in breach.
 
 #### Scenario: A finding that becomes a change
 
@@ -209,9 +213,10 @@ pull request to its change.
 
 - **WHEN** a slug has no directory under `openspec/changes/` and none under
   `openspec/changes/archive/`
-- **THEN** the output SHALL distinguish it from a slug at `suggested`, a
-  status the script never derives — the two are the same claim only if the
-  output cannot say "nothing is known here"
+- **THEN** the output SHALL carry no entry for that slug at all, and SHALL NOT
+  carry one whose status is `null`, `unknown` or `suggested` — an absent key
+  is the only shape a caller cannot mistake for a derived value, and
+  `suggested` is a status the script never derives
 
 #### Scenario: An archived change
 
@@ -417,13 +422,20 @@ than a pointer to a file that is gone.
 - **THEN** `PLAN.md` §*Requirement sources* SHALL name that card instead of
   the path, and the path SHALL NOT survive anywhere as a live citation
 
+A brief's card SHALL be titled with the brief's filename — `tasks/task-1.md`
+and not *Task 1 — bun supply chain* — because that filename is the only key
+any surviving citation carries. A brief card's pointer is empty, its body
+being the record, so nothing else on the card could join a cited path to it,
+and a title chosen for readability would leave the four citations resolving
+to nothing.
+
 #### Scenario: An archived change citing a brief by path
 
 - **WHEN** an archived change names `tasks/task-1.md`, `tasks/task-7.md` or
   `tasks/task-8.md`, as four archived artefacts do
-- **THEN** the archived change SHALL NOT be edited, and the citation SHALL
-  resolve to the brief's card — the archive records what was proposed at the
-  time, and a path it named is a fact about that time
+- **THEN** the archived change SHALL NOT be edited, and the cited path SHALL
+  be the title of exactly one card — the archive records what was proposed at
+  the time, and a path it named is a fact about that time
 
 #### Scenario: The directory's row in the ownership map
 
