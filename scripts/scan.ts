@@ -1,8 +1,8 @@
 /**
  * The one left-to-right scan of a source file. `blank` returns it with
- * everything that is not code blanked out, so a pattern found in the result is
- * one the language actually evaluates; `comments` returns what that same walk
- * passed over.
+ * everything that is not code replaced by spaces, so a pattern found in the
+ * result is one the language reads as code rather than as text; `comments`
+ * returns what that same walk passed over.
  *
  * Its own module rather than a helper inside a caller, so a caller erasing
  * comments and a caller reading them decide a regex literal or a template
