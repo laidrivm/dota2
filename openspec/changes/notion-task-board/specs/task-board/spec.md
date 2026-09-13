@@ -18,6 +18,21 @@ card is not what the saved view exists to spare a session. Neither live board
 carries such a property today — `Name`, `Status` and `Assign` are the whole
 schema of both — so it is added before the first card is written.
 
+The property SHALL be named `Pointer`, SHALL be of Notion's `rich_text` type,
+and SHALL hold a repository-relative path with a trailing slash —
+`openspec/changes/<slug>/` or `openspec/changes/archive/<date>-<slug>/` —
+and the empty string where the card has no directory. Every board SHALL use
+that name and that type, so one instruction reads all of them.
+
+`rich_text` rather than `url`, because a repository-relative path is not a
+URL: a `url` property holding one either renders a broken link or forces an
+absolute address that pins the card to a host and a default branch name,
+both facts about today rather than about the change. Not a `relation`, which
+joins rows across a boundary the blocking requirement below closes. The empty
+string rather than an unset property, because a card whose body is the record
+is a state this capability provides for, and an unset property is
+indistinguishable from one nobody has filled in yet.
+
 The prohibition is the requirement's substance rather than its caveat. The
 queue this board replaces held a thirteen-line prose entry for each of
 nineteen changes whose `proposal.md`, `design.md`, `tasks.md` and delta specs
@@ -135,8 +150,15 @@ What `status` would have bought is Notion's fixed group keys, and nothing in
 this contract reads them. What it costs is that the board's columns are its
 options directly, with no second grouping level to choose wrongly.
 
-The eight SHALL be the same eight on every board, so the five that `D2ASS`
-and `Harness` lacked are added to each and a third time when `mellon` exists.
+The eight SHALL be the **complete** option list of that property, not an
+addition to it: on every board the property SHALL be set in one operation to
+exactly these eight, and any option a board carried before — `Not started`,
+`In progress` and `Done` on both of the boards that exist — SHALL cease to
+exist. Adding five beside the three would leave eleven, of which three are
+statuses no requirement here names and a reconciliation would never correct.
+
+The same setting applies to `mellon` when that board is provisioned, so that
+a board created later is not a board with a different vocabulary.
 A board whose options differ is a board whose view cannot be read by the
 instruction that reads the others, and the routing rule would then have to
 carry a per-board vocabulary as well as a per-board address.

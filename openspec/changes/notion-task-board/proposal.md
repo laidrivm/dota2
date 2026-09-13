@@ -50,6 +50,11 @@ the wrong instrument for a status. Nothing reads a queue entry to check it.
   archived one's in `openspec/changes/archive/`, and the card points at it.
   A card whose subject has no directory anywhere is the exception the rule
   implies — there the body is the record, because nothing else holds it.
+  That exception is temporary for a `D2ASS` card: every one of them is
+  eventually proposed as a change, at which point the card gains the pointer
+  and loses the body, or is dropped. A card on a board whose tree is not this
+  repository never crosses that boundary, because the directory that would
+  supply its pointer cannot appear here.
 - Three of the eight statuses are **derived** from the file tree by
   `scripts/board-state.ts`, which reads no network and asks no service. The
   other five are moved by whoever does the work, in the turn the work moves.
@@ -134,8 +139,8 @@ nowhere else. These are the verdicts of running it:
 ```text
 status         verdict
 proposing      1/1, and silent on the 19 that are complete
-ready          19/19 correct
-done           30/30 correct
+ready          19/19 of the directories expected ready
+done           30/30 of the archived changes
 
 suggested      not derivable — nothing in the tree records a finding
 exploring      not derivable — /opsx:explore leaves no trace
@@ -169,12 +174,11 @@ rows            0                          0
 Three things follow. The saved-view requirement is already satisfiable — a
 view of that name exists on both, grouped as the requirement asks, so nothing
 is created and the name is what an instruction carries. The `Status` property
-is **replaced** rather than extended: one statement sets the whole option
-list, so `Not started`, `In progress` and `Done` cease to exist and the eight
-are what remains, on each board and on `mellon` when it is provisioned.
-Calling that "adding five" would be wrong about the mechanism and silent
-about the three. And there is no column for the pointer on either, so one is
-added before a card is written.
+carries three options that are not any of the eight, which is why the delta
+states the vocabulary as a replacement rather than an addition — the
+migration rule and the option names are its to fix, not this file's. And
+there is no column for the pointer on either, so one is added before a card
+is written, to the name and type the delta fixes.
 
 Both boards being empty, the migration starts from nothing and conflicts
 with nothing.
