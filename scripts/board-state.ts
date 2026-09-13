@@ -141,7 +141,11 @@ export function boardState(tree: string): State {
 	// root in a function whose whole point is to answer for a fabricated one.
 	const changes = join(tree, "openspec/changes");
 	const problems: string[] = [];
-	const status: Record<string, Status> = {};
+	// Prototype-free, because every key below is a directory name off the
+	// filesystem: `status["__proto__"] = "ready"` on a plain object calls the
+	// inherited setter, stores nothing, and drops that slug in silence. The
+	// same reason `Object.hasOwn` reads them a few lines down.
+	const status: Record<string, Status> = Object.create(null);
 
 	const unapplied = subdirs(changes).filter((name) => name !== "archive");
 	for (const slug of unapplied) {
@@ -166,7 +170,7 @@ export function boardState(tree: string): State {
 		status[slug] = "done";
 	}
 
-	const edges: Record<string, Edges> = {};
+	const edges: Record<string, Edges> = Object.create(null);
 	for (const slug of unapplied) {
 		const named = `openspec/changes/${slug}/.openspec.yaml`;
 		const after = declared(
