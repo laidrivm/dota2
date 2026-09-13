@@ -38,7 +38,7 @@ status, is never finished, and is read by a session that is not looking for
 work; a task has a status, is finished exactly once, and is read by a session
 that is choosing what to do. The first belongs in a file the session already
 reads. The second was in that file because there was nowhere else, and it is
-what took the always-on set to 851 lines against a ~500 trigger.
+what took the always-on set to 899 lines against a ~500 trigger.
 
 `CLAUDE.md`'s *Docs describe current state only* applies to `PLAN.md` as it
 does to every other artefact.
@@ -63,6 +63,14 @@ does to every other artefact.
 - **WHEN** every task drawn from a listed requirement source is done
 - **THEN** the source leaves the list
 
+#### Scenario: A source that is itself a task
+
+- **WHEN** a listed source is a path to a task brief, as `tasks/task-5.md` is
+- **THEN** it SHALL be replaced by that brief's card, the brief being a task
+  with a status rather than a body of requirements — a source the list names
+  by a path that no longer exists sends the next session to nothing, and the
+  card is the only copy left
+
 #### Scenario: A standing constraint that stops applying
 
 - **WHEN** a kept constraint is overtaken — the dependency is dropped, the
@@ -74,7 +82,7 @@ does to every other artefact.
 #### Scenario: A finding with no change of its own
 
 - **WHEN** a review or a session surfaces work that has no change directory —
-  as eighteen of the thirty-four entries this change moves do not
+  as sixteen of the thirty-five entries this change moves do not
 - **THEN** it becomes a card at `suggested`, and `PLAN.md` records nothing:
   the board is where a task with no artefact in the tree is held, which is
   the case the tree cannot serve
