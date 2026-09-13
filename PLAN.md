@@ -483,6 +483,20 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       version the ten jobs still carry. It is the one site of the version that
       something updates, so a check written for this entry has to tell the two
       kinds apart rather than count them together.
+
+      **The drift has since cost a merge.** `@types/bun` stands at 1.4.0 and
+      this machine's binary at 1.4.2, where `bun update` has gained the alias
+      `bun up`; the ten jobs still run 1.3.14, where no such command exists.
+      Two cases in `checks/agent-permissions-prompts.test.ts` read the
+      installed binary and so demand opposite permission lists — the alias case
+      requires `Bash(bun up *)` on 1.4.2, the top-level-form case refuses it on
+      1.3.14 with `Script not found "up"`. Adding the entry turned one case red
+      in three CI jobs and was reverted in `1ba2b46`; the local suite is red on
+      the other case until the versions agree. So the remedy is no longer only
+      a comment or a reconciling check: the pins have to move, and moving them
+      puts an unexercised bun under the database and container jobs — which is
+      what makes it a branch of its own rather than a line at the end of
+      someone else's.
 - [ ] **A captured rule is sent to the costliest of its two homes.**
       `openspec/specs/local-review-loop/spec.md` §*A justification survives
       only when it is a convention* says a skipped Minor becomes a rule in
