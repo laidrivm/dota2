@@ -109,51 +109,46 @@ SHALL be split into the cards each board owns rather than mirrored.
 A card SHALL hold exactly one of eight statuses: `suggested`, `exploring`,
 `proposing`, `ready`, `implementing`, `reviewing`, `archiving`, `done`.
 
-The eight SHALL be the **options** of each board's status property, named
-exactly as listed above, and each saved view SHALL group by option. What a
-card carries and what anything in this repository names is an option's
-**name**: the live property's table surface types the column as `one of
-["Not started", "In progress", "Done"]`, so a name is what a read returns and
-a write sets.
+The eight SHALL be the **options** of each board's `Status` property, named
+exactly as listed above, and that property SHALL be of Notion's `select`
+type rather than its `status` type. What a card carries and what anything in
+this repository names is an option's **name**, which is what a read returns
+and a write sets. An option additionally carries a
+`collectionPropertyOption://` URL, which is its stable identity and is an
+identifier for private content: it SHALL NOT be written into this public
+repository, which refers to an option by name only.
 
-The eight SHALL be the same eight on every board. `D2ASS` and `Harness` carry
-the identical three options today — `Not started`, `In progress`, `Done`,
-under the identical group keys — so the five that are added are added twice
-now and a third time when `mellon` exists. A board whose options differ is a
-board whose view cannot be read by the instruction that reads the others, and
-the routing rule would then have to carry a per-board vocabulary as well as a
-per-board address.
+`select` rather than `status` is forced rather than preferred. Measured
+against the live connector, a `status` property takes no option list through
+the DDL surface — `ALTER COLUMN "Status" SET STATUS('suggested':gray, …)`
+fails validation at the character after `SET STATUS`, the type being terminal
+in that grammar — while the identical eight options on a `select` are
+accepted in one statement. Keeping `status` would make the vocabulary a
+manual precondition on every board, which an apply stage can verify by
+reading but never perform.
 
-Notion also gives a status property a fixed set of **group keys**, which
-options are filed under and which cannot be added to or removed. Read off the
-live properties rather than assumed — both boards render identically — the
-rendering exposes five: `to_do`, `in_progress`, `complete`, `current` and
-`future`, of which the last two hold nothing. Each of the eight options sits
-under one key:
+What `status` would have bought is Notion's fixed group keys, and nothing in
+this contract reads them. What it costs is that the board's columns are its
+options directly, with no second grouping level to choose wrongly.
 
-```text
-to_do         suggested, ready       nobody has started
-in_progress   exploring, proposing, implementing, reviewing, archiving
-complete      done
-current, future   empty, as they are on the property today
-```
+The eight SHALL be the same eight on every board, so the five that `D2ASS`
+and `Harness` lacked are added to each and a third time when `mellon` exists.
+A board whose options differ is a board whose view cannot be read by the
+instruction that reads the others, and the routing rule would then have to
+carry a per-board vocabulary as well as a per-board address.
 
-A group key is not an option name and not an option identifier. The live
-property gives each option a `collectionPropertyOption://` URL, which is its
-stable identity; that URL is an identifier for private content and SHALL NOT
-be written into this repository, which refers to an option by name and to a
-group by the key above.
+A board's view MAY hide a column whose status holds no card, and this SHALL
+NOT be read as the status being absent. The vocabulary is fixed here, in a
+file in the repository, and never learned from the view — which is what makes
+the hidden column harmless: a status with no cards has no work in it, and a
+session reads the view to find work.
 
-The grouping distinction is not cosmetic. Grouping the view by **group** rather
-than by option collapses eight columns into three and loses every distinction
-the board exists to make: `ready` and `suggested` become one column, and so do
-`proposing` and `reviewing`. The mapping above exists because the keys are
-fixed, not because anything reads them.
+#### Scenario: A status holding no cards
 
-`ready` sits under `to_do` rather than `in_progress` because it means the
-proposal has landed and nobody has picked the work up — the same condition
-`suggested` describes at an earlier stage. `exploring` sits under
-`in_progress` because somebody is doing something.
+- **WHEN** a board's view shows fewer than eight columns because some
+  statuses hold no card
+- **THEN** the missing statuses SHALL still be writable by name, and the
+  view SHALL NOT be treated as the list of statuses that exist
 
 Derivation SHALL apply to `D2ASS` alone. It is the only board whose tree is
 this repository, so `scripts/board-state.ts` SHALL report nothing for a card
@@ -201,6 +196,22 @@ pull request to its change.
 - **WHEN** a directory holds `proposal.md` and delta specs but no `tasks.md`,
   as a split proposal's first branch leaves it
 - **THEN** the derived status SHALL be `proposing`, and SHALL NOT be `ready`
+
+#### Scenario: A change directory whose specs/ is empty
+
+- **WHEN** a directory holds all three markdown artefacts and a `specs/`
+  directory containing no delta spec
+- **THEN** the derived status SHALL be `proposing` — the artefact is the
+  delta, not the directory that would hold one, and a change with nothing to
+  sync is not ready to apply
+
+#### Scenario: A slug reported at no status at all
+
+- **WHEN** a slug has no directory under `openspec/changes/` and none under
+  `openspec/changes/archive/`
+- **THEN** the output SHALL distinguish it from a slug at `suggested`, a
+  status the script never derives — the two are the same claim only if the
+  output cannot say "nothing is known here"
 
 #### Scenario: An archived change
 
@@ -304,18 +315,34 @@ waiting for it.
   treating the unresolvable name as landed — a typo that reads as `done`
   unblocks a task nothing has unblocked
 
+#### Scenario: An `after:` that is not a list
+
+- **WHEN** an `after:` key holds a bare string rather than a list of slugs
+- **THEN** the derivation SHALL fail naming the file, and SHALL NOT iterate
+  the string — YAML admits the scalar silently, and a per-character walk
+  yields slugs that resolve to nothing, which the scenario above then
+  reports as a typo in a file whose real defect is its shape
+
 ### Requirement: The board is read through a saved view
 
 A session SHALL read a board through one named saved view — a board grouped
-by status option, and the only view any instruction sends a session to — and
+by `Status`, and the only view any instruction sends a session to — and
 SHALL NOT read the data source with a SQL query.
 
 The view SHALL NOT be created by this change where one already serves. Read
 off both live databases: each carries a saved view named `Board view`, of
-type `board`, grouped by `Status` with `groupBy: option` — which is what this
-requirement asks for, down to the grouping mode the next paragraphs turn on.
-What is added to them is the status options and the pointer property, not a
-view. Where a question the view
+type `board`, grouped by `Status`. What is added to a board is the status
+options and the pointer property, not a view.
+
+A view SHALL follow its grouping property through a type change rather than
+being rebuilt after one. Measured on `D2ASS`: converting `Status` from
+Notion's `status` type to its `select` type moved the view's own
+`propertyType` with it and left view-mode reads working. Two defaults
+arrived with the conversion — empty groups hidden, and a manual column order
+— and neither is settable through the connector, the view DSL having no
+directive for either. Both are accepted: the requirement above fixes what a
+session reads the view *for*, and neither an absent empty column nor a column
+order bears on it. Where a question the view
 cannot express is asked once, the session MAY issue that query and SHALL say
 in the same turn that it spent the metered path and why; asked twice, it is a
 view.
