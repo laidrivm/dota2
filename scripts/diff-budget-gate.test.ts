@@ -8,6 +8,7 @@ import {
 	repo,
 	script,
 } from "./diff-budget.fixture.ts";
+import { root } from "./root.ts";
 
 /**
  * The verdict rather than the count: the `oversize:` marker that turns a FAIL
@@ -167,7 +168,7 @@ test("an unrelated base exits non-zero — no merge base to measure from", () =>
 // since changed — a marker added after the last push is never read.
 test("the workflow re-runs when the pull request body is edited", async () => {
 	const workflow = await Bun.file(
-		`${import.meta.dir}/../.github/workflows/diff-budget.yml`,
+		`${root}/.github/workflows/diff-budget.yml`,
 	).text();
 	const types = (
 		Bun.YAML.parse(workflow) as { on: { pull_request: { types: string[] } } }

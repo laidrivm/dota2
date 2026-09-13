@@ -5,13 +5,13 @@
  * `spec-coverage-floor.test.ts`.
  */
 import { afterAll, describe, expect, test } from "bun:test";
+import { root } from "./root.ts";
 import {
 	cited,
 	cleanup,
 	fabricate,
 	ids,
 	problems,
-	repo,
 	spec,
 	world,
 } from "./spec-coverage.fixture.ts";
@@ -34,7 +34,7 @@ describe("an identifier is derived from a heading", () => {
 	});
 
 	test("punctuation and a section mark collapse to single hyphens", () => {
-		expect(ids(counted(repo))).toContain(
+		expect(ids(counted(root))).toContain(
 			"draft-model/insufficient-hero-picked-model-spec-7-5",
 		);
 	});

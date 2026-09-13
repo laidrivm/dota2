@@ -14,6 +14,7 @@ import { describe, expect, test } from "bun:test";
 import { readdirSync } from "node:fs";
 import { join } from "node:path";
 import config from "../stryker.config.json";
+import { root } from "./root.ts";
 
 /** The operand of `bun test …`, which Stryker hands to Bun as a path filter. */
 const filter = config.commandRunner.command.replace(/^bun test /, "");
@@ -24,7 +25,7 @@ const filter = config.commandRunner.command.replace(/^bun test /, "");
  * command at the repository root and a test need not, and eleven of these sit
  * under `src/app`, where a scan of `src` alone never reaches them.
  */
-const tests = readdirSync(join(import.meta.dir, "..", "src"), {
+const tests = readdirSync(join(root, "src"), {
 	recursive: true,
 })
 	.map((name) => `src/${name}`)

@@ -7,8 +7,8 @@
  * one such pin in the shape the script's `sed` matches.
  */
 import { expect, test } from "bun:test";
+import { root } from "./root.ts";
 
-const root = `${import.meta.dir}/..`;
 const workflow = await Bun.file(`${root}/.github/workflows/test.yml`).text();
 const script = await Bun.file(`${root}/scripts/test-db.sh`).text();
 

@@ -6,13 +6,8 @@
 import { afterAll, describe, expect, test } from "bun:test";
 import { mkdirSync, renameSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import {
-	cleanup,
-	fabricate,
-	problems,
-	repo,
-	spec,
-} from "./spec-coverage.fixture.ts";
+import { root } from "./root.ts";
+import { cleanup, fabricate, problems, spec } from "./spec-coverage.fixture.ts";
 import { check, DECLARATION, FLOOR, gauge, uncited } from "./spec-coverage.ts";
 
 afterAll(cleanup);
@@ -140,7 +135,7 @@ describe("a criterion admitted as untestable", () => {
 });
 
 describe("the repository as it stands", () => {
-	const here = check(repo);
+	const here = check(root);
 
 	test("nothing is cited wrongly", () => {
 		expect(here.problems).toEqual([]);
@@ -148,7 +143,7 @@ describe("the repository as it stands", () => {
 
 	// spec: spec-test-traceability/the-repository-as-it-stands
 	test("the count of uncited criteria sits exactly on the floor", () => {
-		expect(gauge(uncited(repo), FLOOR, DECLARATION)).toEqual([]);
+		expect(gauge(uncited(root), FLOOR, DECLARATION)).toEqual([]);
 	});
 
 	test("the sweep read criteria and test files rather than nothing", () => {

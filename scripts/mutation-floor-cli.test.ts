@@ -97,6 +97,9 @@ describe("the check resolves its report from the repository root", () => {
 			],
 			{ cwd: import.meta.dir },
 		);
+		// Derived here rather than taken from `./root.ts`, which is what the
+		// code under test resolves through: an expectation reading that module
+		// would move with a defect in it and report the same pass.
 		expect(run.stdout.toString().trim()).toBe(
 			join(import.meta.dir, "..", "reports", "mutation", "mutation.json"),
 		);

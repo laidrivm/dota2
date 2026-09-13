@@ -25,9 +25,6 @@ import { dirname, join } from "node:path";
 import { check } from "./spec-coverage.ts";
 import type { Criterion } from "./spec-criteria.ts";
 
-/** This repository, from any of the test files that live beside this one. */
-export const repo = join(import.meta.dir, "..");
-
 const made: string[] = [];
 
 /** Removes every repository fabricated so far. */
