@@ -195,6 +195,17 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       because a phase that long is where this failure costs most — it is what
       stranded four commits on 2026-08-19; the proposal records what was
       measured.
+- [ ] **`gh-api-guard`** — proposed, `openspec/changes/gh-api-guard/`. The
+      prohibition on publishing under the user's name is matched by subcommand
+      name — `gh pr comment` and its two siblings — and `gh api` reaches the
+      same endpoints naming no subcommand. Probed on `82948be` with the three
+      named writes as controls: all three block, and four `gh api` spellings of
+      the same acts pass, a `bash -c` wrapper among them. The guard learns to
+      block a `gh api` call that cannot be shown to be a read, where a read is
+      what `gh api --help` says it is. Three task groups, so
+      `feat/gh-api-guard-1` … `-3`, in order; group 3 narrows the prose and
+      re-measures the probe. Reads stay: the `coderabbit` skill reads a pull
+      request's comments and reviews through this command.
 - [ ] **`pre-pr-sequence-gate`** — proposed,
       `openspec/changes/pre-pr-sequence-gate/`. A `Stop` hook refuses to end a
       turn that committed while a task group stands complete and the message
