@@ -1,11 +1,13 @@
 /**
- * Blanks out everything in a source file that is not code, so a pattern found
- * in the result is one the language actually evaluates.
+ * The one left-to-right scan of a source file. `blank` returns it with
+ * everything that is not code blanked out, so a pattern found in the result is
+ * one the language actually evaluates; `comments` returns what that same walk
+ * passed over.
  *
- * Its own module rather than a helper inside its caller, so `mutation-floor.ts`
- * has something to switch to: it carries a scanner of the same shape, and
- * `PLAN.md` records both the hole left in it and that this family of bugs
- * produced five of them in one session.
+ * Its own module rather than a helper inside a caller, so a caller erasing
+ * comments and a caller reading them decide a regex literal or a template
+ * expression once instead of being kept in step by hand. `PLAN.md`'s
+ * `scan-lift` entry records the copy still outstanding.
  */
 
 /**
