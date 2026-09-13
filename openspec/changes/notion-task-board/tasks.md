@@ -17,12 +17,22 @@ Steps 1 to 6 are additive: the boards gain what nothing reads yet and
 
 Closes: *There are three boards and a card goes to one of them*
 
-- [ ] 1.1 Bring each board's `Status` to the eight `select` options, reading
-      the live schema first and applying only the difference — `D2ASS` was
-      converted during design and `Harness` was not, so a step that assumes
-      both start equal fails on the one already done
-- [ ] 1.2 Add the `Pointer` rich-text property to both boards
-- [ ] 1.3 Record `mellon` in the routing rule's home without creating the
+- [ ] 1.1 Set each board's `Status` in one statement to exactly the eight
+      `select` options — the statement replaces the list rather than
+      extending it, so it is idempotent on `D2ASS`, converted during design,
+      and complete on `Harness`, which still carries the original three
+- [ ] 1.2 Add the `Pointer` `rich_text` property to both boards, then
+      **measure how it encodes a path and an empty value**: write one
+      throwaway card with a path, write one with no pointer, read both back
+      through the saved view, and delete them. The delta defers this on
+      purpose — Notion's REST surface takes `rich_text` as an array of
+      objects and nothing has exercised this connector's write path — and
+      this task is the only thing that closes it. Do it here, on boards that
+      still hold nothing: the same mistake found at step 4 is thirty cards to
+      rewrite
+- [ ] 1.3 Record the measured encoding where steps 4, 5 and 6 read it, so
+      three steps do not each re-derive it from one card
+- [ ] 1.4 Record `mellon` in the routing rule's home without creating the
       board — the project does not exist, and an empty third board is a
       thing to keep in step with two others for no reader
 
@@ -87,7 +97,10 @@ Closes: *The board is read through a saved view*
 
 Closes: *Each task brief becomes one card and the directory goes*
 
-- [ ] 6.1 Create nine cards, one per brief, routed by the owning repository
+- [ ] 6.1 Create nine cards, one per brief, routed by the owning repository,
+      each **titled with the brief's filename** — `tasks/task-1.md`, not a
+      readable paraphrase: the filename is the only key the four surviving
+      archived citations carry, and a brief card's pointer is empty
 - [ ] 6.2 Build each body from the brief's `Status: DONE` block where there
       is one, and from its scope for `tasks/task-5.md`, which is still open
 - [ ] 6.3 Delete `tasks/` and its `README.md` ownership row in the same

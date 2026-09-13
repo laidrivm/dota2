@@ -63,7 +63,10 @@ ALTER COLUMN "Status" SET SELECT('suggested':gray, 'exploring':purple,
   'reviewing':pink, 'archiving':brown, 'done':green)
 ```
 
-`Harness` is untouched and gets the same statement in the migration.
+`Harness` is untouched and gets the same statement in the migration. The
+statement **replaces** the option list rather than extending it — the three
+options a board carried before cease to exist — which is why running it a
+second time on `D2ASS` changes nothing rather than producing eleven options.
 
 **Why this is smaller, not merely scriptable.** The `task-board` delta
 carries a section on Notion's fixed group keys — the `to_do`/`in_progress`/
@@ -115,7 +118,18 @@ failure to configure.
 ### The pointer is a `rich_text` property named `Pointer`
 
 A card's pointer is a repository-relative path — `openspec/changes/<slug>/`
-— for every card whose subject has a directory, and empty for the rest.
+— for every card whose subject has a directory, and reads as empty rather
+than as absent for the rest.
+
+**The wire encoding of those two states is not settled and is the first thing
+step 1 measures.** Notion's REST surface takes a `rich_text` value as an array
+of rich-text objects rather than a scalar, and no write through this
+project's connector has been made either way, so neither "the empty string"
+nor `rich_text: []` is a measurement. The delta states the observable and
+defers the encoding on purpose; what settles it is one card written and read
+back, on a board that is still empty. Getting this wrong the other way has
+already cost this change once — the eight status options were assumed
+settable and were not.
 
 **Not `url`.** A repository-relative path is not a URL, and a `url` property
 that holds one either renders a broken link or forces an absolute
@@ -198,9 +212,14 @@ six of the nine are scaffolding work.
 - **The conversion is not reversible to the original three options.** →
   Both boards held zero rows when it ran, so nothing lost a value. Reverting
   would mean re-adding three options by hand, and nothing wants them back.
-- **`D2ASS` is already converted and `Harness` is not.** → The migration's
-  first step is written to be idempotent: it reads each board's schema and
-  applies only what is missing, rather than assuming both start equal.
+- **`D2ASS` is already converted and `Harness` is not.** → The option
+  statement replaces the whole list, so running it on both is idempotent on
+  the one already done rather than additive. The step does not have to branch
+  on which board is in which state.
+- **The pointer's encoding is unmeasured when step 1 begins.** → It is
+  measured there, before any card is written, on boards that still hold
+  nothing. A wrong guess discovered at step 4 would mean rewriting thirty
+  cards; discovered at step 1 it costs one.
 
 ## Migration Plan
 
@@ -243,3 +262,9 @@ re-derivable from the tree at any time.
    say what happens to the pointer when the slug starts addressing a
    directory in a repository this one cannot read. `archive-digest` does not
    answer it either.
+3. **How does `rich_text` encode a path and an empty value through this
+   connector?** Deliberately open, and the only one of the three with an
+   owner: task 1.2 settles it before a card is written. It is listed here
+   rather than treated as settled because the delta declines to fix an
+   encoding nobody has exercised, and a reader of this document should not
+   conclude from the `Pointer` decision above that the wire shape is known.
