@@ -24,7 +24,7 @@ import { join } from "node:path";
  * exactly as the original does.
  */
 export const modules: Record<string, string> = Object.fromEntries(
-	["mutation-floor.ts", "scan.ts"].map((name) => [
+	["mutation-floor.ts", "root.ts", "scan.ts"].map((name) => [
 		name,
 		readFileSync(join(import.meta.dir, name), "utf8"),
 	]),

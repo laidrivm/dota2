@@ -9,9 +9,9 @@ import {
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { type Finding, scan } from "./no-suppressions.ts";
+import { root } from "./root.ts";
 
 const script = `${import.meta.dir}/no-suppressions.ts`;
-const repo = join(import.meta.dir, "..");
 const made: string[] = [];
 
 afterAll(() => {
@@ -189,10 +189,10 @@ describe("a tree the check cannot read straight through", () => {
 
 describe("the repository as it stands", () => {
 	test("passes with the empty allowlist", () => {
-		expect(scan(repo)).toEqual([]);
+		expect(scan(root)).toEqual([]);
 	});
 
 	test("the command exits 0", () => {
-		expect(Bun.spawnSync(["bun", script], { cwd: repo }).exitCode).toBe(0);
+		expect(Bun.spawnSync(["bun", script], { cwd: root }).exitCode).toBe(0);
 	});
 });

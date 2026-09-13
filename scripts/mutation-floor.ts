@@ -11,6 +11,7 @@
  */
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { root } from "./root.ts";
 import { comments } from "./scan.ts";
 
 /** Statuses meaning the tests let the mutant through. */
@@ -196,8 +197,6 @@ export function exemptions(source: string): string[] {
 	}
 	return problems;
 }
-
-const root = join(import.meta.dir, "..");
 
 /**
  * Resolved from this file rather than from the working directory, so the check
