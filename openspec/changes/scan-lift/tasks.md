@@ -10,6 +10,8 @@ steps.
 
 ## 1. One scan, two views
 
+Closes `spec-test-traceability/a-citation-below-an-escaped-quote`.
+
 - [ ] 1.1 Add the failing case first, against `scripts/spec-coverage.ts` as it
       stands, and record that it fails. A test file holding `const s = "he said
       \"/*\"";` and a `// spec:` citation below it, asserting the citation is
