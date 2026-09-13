@@ -389,10 +389,10 @@ one.
 
 ## E2E smoke suite
 
-`bunx playwright test` — Chromium only. The runner starts `bun run dev`
-itself and, outside CI, reuses an instance already listening on the dev
-server's port (`BUN_PORT`/`PORT`, else 3000 — the same precedence `Bun.serve`
-uses, so both sides agree).
+`bunx --no-install playwright test` — Chromium only. The runner starts
+`bun run dev` itself and, outside CI, reuses an instance already listening on
+the dev server's port (`BUN_PORT`/`PORT`, else 3000 — the same precedence
+`Bun.serve` uses, so both sides agree).
 `--repeat-each=3` is the flake gate a change has to clear before CI sees it.
 
 Three specs, covering the paths `bun test` cannot reach without a DOM.
