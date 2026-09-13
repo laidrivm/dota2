@@ -4,25 +4,32 @@ New capability. No version of it exists on the default branch.
 
 ## ADDED Requirements
 
-### Requirement: The board records a task's status and nothing the tree holds
+### Requirement: A board records a task's status and nothing the tree holds
 
-The project SHALL keep one board — the `D2ASS` database in the Notion
-workspace — on which every task not yet finished, and every change already
-archived, has exactly one card. A card SHALL carry its status, a title, and a
-pointer to where its content lives, and SHALL NOT carry a copy of anything
-the repository holds.
+The project SHALL keep its tasks on boards in the Notion workspace, on which
+every task not yet finished, and every change already archived, has exactly
+one card. A card SHALL carry its status, a title, and a pointer to where its
+content lives, and SHALL NOT carry a copy of anything the repository holds.
+
+The pointer SHALL be a **property** of the card rather than a line of its
+body. A property is what a view can display and a query can filter on; a line
+of prose is neither, and a pointer that cannot be read without opening the
+card is not what the saved view exists to spare a session. Neither live board
+carries such a property today — `Name`, `Status` and `Assign` are the whole
+schema of both — so it is added before the first card is written.
 
 The prohibition is the requirement's substance rather than its caveat. The
 queue this board replaces held a thirteen-line prose entry for each of
-sixteen changes whose `proposal.md`, `design.md`, `tasks.md` and delta specs
-were already in the tree — 216 lines restating what a directory beside them
-said better. Two of those entries were wrong within a week of being written.
-A second copy is checked by nothing.
+nineteen changes whose `proposal.md`, `design.md`, `tasks.md` and delta specs
+were already in the tree — restating what a directory beside them said better.
+Two of those entries were wrong within a week of being written. A second copy
+is checked by nothing.
 
 Where a card's subject has a directory, the pointer SHALL be that path. Where
-it has none — a finding not yet proposed — the card body is the record, and it
-SHALL hold what a proposal would need: what was observed, where, and what
-makes it work rather than an opinion.
+it has none — a finding not yet proposed, or a task brief that predates the
+change directories — the card body is the record, and it SHALL hold what a
+proposal would need: what was observed, where, and what makes it work rather
+than an opinion.
 
 #### Scenario: A card for a change that exists in the tree
 
@@ -44,8 +51,8 @@ accounts of one thing with only one of them reviewed — which is the duplicatio
 this requirement exists to prevent, arriving by the one route the rest of it
 does not close.
 
-Every card that is not `done` crosses this boundary eventually: eighteen of
-the thirty-four entries this change moves are findings with no directory, and
+Every card that is not `done` crosses this boundary eventually: sixteen of
+the thirty-five entries this change moves are findings with no directory, and
 each becomes a change or is dropped.
 
 #### Scenario: A finding that becomes a change
@@ -61,22 +68,68 @@ each becomes a change or is dropped.
 - **THEN** the tree SHALL be taken as right and the card corrected, the board
   being authoritative only for what the tree cannot express
 
+### Requirement: There are three boards and a card goes to one of them
+
+The workspace SHALL hold three boards — `D2ASS` for this repository's product
+work, `Harness` for the work on the agent scaffolding, and `mellon` for the
+second project that will sit on that scaffolding — and every card SHALL sit
+on the board of the repository that owns its work.
+
+The scaffolding is to leave for a repository of its own, and `mellon` is a
+repository this one does not contain. So the three boards are not three views
+of one project: they are three trees, only one of which is readable from
+here. That is what makes the routing rule load-bearing rather than tidy — a
+session that cannot find a card has to know which board to look at second,
+and the rule is what tells it, in place of searching all three.
+
+A card SHALL NOT be duplicated across boards, and work that would sit on two
+SHALL be split into the cards each board owns rather than mirrored.
+
+#### Scenario: Work on this repository's product
+
+- **WHEN** a card names work whose files are under `src/`, `e2e/` or this
+  repository's specs for the product
+- **THEN** it SHALL sit on `D2ASS`
+
+#### Scenario: Work on the agent scaffolding
+
+- **WHEN** a card names work on the rulebook, the review toolkit, the gates,
+  the skills or the workflow
+- **THEN** it SHALL sit on `Harness`, whether or not that work is still
+  carried out in this repository
+
+#### Scenario: A card whose board holds no tree here
+
+- **WHEN** a session reads a card on `Harness` or `mellon`
+- **THEN** it SHALL treat the card as the whole record, and SHALL NOT report
+  the absence of a matching directory in this repository as a discrepancy
+
 ### Requirement: Three statuses are derived and five are moved by hand
 
 A card SHALL hold exactly one of eight statuses: `suggested`, `exploring`,
 `proposing`, `ready`, `implementing`, `reviewing`, `archiving`, `done`.
 
-The eight SHALL be the **options** of the board's status property, named
-exactly as listed above, and the saved view SHALL group by option. What a card
-carries and what anything in this repository names is an option's **name**:
-the live property's table surface types the column as `one of ["Not started",
-"In progress", "Done"]`, so a name is what a read returns and a write sets.
+The eight SHALL be the **options** of each board's status property, named
+exactly as listed above, and each saved view SHALL group by option. What a
+card carries and what anything in this repository names is an option's
+**name**: the live property's table surface types the column as `one of
+["Not started", "In progress", "Done"]`, so a name is what a read returns and
+a write sets.
+
+The eight SHALL be the same eight on every board. `D2ASS` and `Harness` carry
+the identical three options today — `Not started`, `In progress`, `Done`,
+under the identical group keys — so the five that are added are added twice
+now and a third time when `mellon` exists. A board whose options differ is a
+board whose view cannot be read by the instruction that reads the others, and
+the routing rule would then have to carry a per-board vocabulary as well as a
+per-board address.
 
 Notion also gives a status property a fixed set of **group keys**, which
 options are filed under and which cannot be added to or removed. Read off the
-live `D2ASS` property rather than assumed, the rendering exposes five —
-`to_do`, `in_progress`, `complete`, `current` and `future` — of which the last
-two hold nothing. Each of the eight options sits under one key:
+live properties rather than assumed — both boards render identically — the
+rendering exposes five: `to_do`, `in_progress`, `complete`, `current` and
+`future`, of which the last two hold nothing. Each of the eight options sits
+under one key:
 
 ```text
 to_do         suggested, ready       nobody has started
@@ -102,7 +155,20 @@ proposal has landed and nobody has picked the work up — the same condition
 `suggested` describes at an earlier stage. `exploring` sits under
 `in_progress` because somebody is doing something.
 
-`scripts/board-state.ts` SHALL derive three of them from the file tree alone
+Derivation SHALL apply to `D2ASS` alone. It is the only board whose tree is
+this repository, so `scripts/board-state.ts` SHALL report nothing for a card
+on `Harness` or `mellon` and a reconciliation SHALL leave those cards
+untouched — on the same terms it leaves the five hand-moved statuses, and for
+the same reason: what would decide them is not readable from here. Every card
+on those two boards is therefore hand-moved, whatever its status.
+
+The distinction is not that the other boards are less important. It is that a
+derivation reading this file tree can only be right about this repository,
+and a derivation that runs anyway would report `suggested` for every card on
+a board whose work is proceeding elsewhere — a wrong answer delivered with
+the same confidence as the 30/30 one.
+
+`scripts/board-state.ts` SHALL derive three statuses from the file tree alone
 — `proposing`, `ready` and `done` — reading no network and consulting no
 service, so that its whole behaviour is exercisable from a fabricated
 directory:
@@ -158,12 +224,26 @@ pull request to its change.
   the blocking edges, and none of the five it never reports — every value in
   it coming from the file tree
 
+#### Scenario: A card on a board whose tree is elsewhere
+
+- **WHEN** a card sits on `Harness` or `mellon` at any status
+- **THEN** `scripts/board-state.ts` SHALL report nothing for it, and SHALL
+  NOT report it as a card the tree is missing a directory for
+
 ### Requirement: A card names what blocks it, derived from the tree
 
 A card SHALL name the tasks that must land before it can be taken up, and
 `scripts/board-state.ts` SHALL derive that set from an `after:` list in each
 change's `.openspec.yaml` — never from the board, and never from the prose of
 a proposal's `## Ordering`.
+
+An `after:` edge SHALL NOT cross a board. A slug identifies a change
+directory in *this* repository, and nothing identifies one in the repository
+`Harness` is leaving for or in `mellon`'s — the same absent key that stops
+the middle statuses deriving. A dependency that genuinely crosses repositories
+SHALL be written in the depending card's body as prose, where its being
+unchecked is visible, rather than as an `after:` entry the derivation would
+have to resolve and could not.
 
 A change's `after:` list SHALL name the slugs its `## Ordering` section
 argues for, and that section SHALL keep the argument: the list is the fact and
@@ -226,9 +306,16 @@ waiting for it.
 
 ### Requirement: The board is read through a saved view
 
-A session SHALL read the board through one named saved view — a board grouped
+A session SHALL read a board through one named saved view — a board grouped
 by status option, and the only view any instruction sends a session to — and
-SHALL NOT read the data source with a SQL query. Where a question the view
+SHALL NOT read the data source with a SQL query.
+
+The view SHALL NOT be created by this change where one already serves. Read
+off both live databases: each carries a saved view named `Board view`, of
+type `board`, grouped by `Status` with `groupBy: option` — which is what this
+requirement asks for, down to the grouping mode the next paragraphs turn on.
+What is added to them is the status options and the pointer property, not a
+view. Where a question the view
 cannot express is asked once, the session MAY issue that query and SHALL say
 in the same turn that it spent the metered path and why; asked twice, it is a
 view.
@@ -264,6 +351,59 @@ for the exceptional one.
 - **THEN** the session SHALL report the view as missing and SHALL NOT read the
   data source with a query instead — a silent fallback spends the metered path
   on the routine case, which is what the requirement exists to prevent
+
+### Requirement: Each task brief becomes one card and the directory goes
+
+Each of the nine briefs under `tasks/` SHALL become exactly one card, and
+`tasks/` SHALL leave the tree. No brief has a change directory anywhere —
+they predate OpenSpec in this repository — so each card is the case this
+capability already provides for, where the body is the record and no file is
+expected to hold it.
+
+One card each, rather than one card for the six that are done. `PLAN.md`
+collapses tasks 1, 2, 3, 6, 8 and 9 into a single line today, and that line
+is why what each of them decided is unreadable without opening six files that
+are about to stop existing. A card per brief is what makes *task 6 chose
+`biome check --staged` without `--write`* answerable, where a card per line
+of `PLAN.md` would record only that six tasks finished.
+
+A brief's card SHALL carry what the brief recorded — what the task was, and
+where its decisions are live now. Five of the nine already state that in a
+`> **Status: DONE.**` block naming the live configuration; that block is what
+the body is built from, not the brief's full text, which is a plan for work
+that is finished.
+
+`tasks/task-5.md` is the one still open. Its card SHALL replace it as the
+requirement source `PLAN.md` names, and SHALL hold the brief's scope rather
+than a pointer to a file that is gone.
+
+#### Scenario: A brief that is done
+
+- **WHEN** a brief carries a `Status: DONE` block naming the live
+  configuration its work produced
+- **THEN** its card SHALL be `done` and its body SHALL carry that block,
+  and SHALL NOT carry the brief's plan of steps
+
+#### Scenario: The brief still open
+
+- **WHEN** the card for `tasks/task-5.md` is created
+- **THEN** `PLAN.md` §*Requirement sources* SHALL name that card instead of
+  the path, and the path SHALL NOT survive anywhere as a live citation
+
+#### Scenario: An archived change citing a brief by path
+
+- **WHEN** an archived change names `tasks/task-1.md`, `tasks/task-7.md` or
+  `tasks/task-8.md`, as four archived artefacts do
+- **THEN** the archived change SHALL NOT be edited, and the citation SHALL
+  resolve to the brief's card — the archive records what was proposed at the
+  time, and a path it named is a fact about that time
+
+#### Scenario: The directory's row in the ownership map
+
+- **WHEN** `tasks/` holds no tracked file
+- **THEN** its row SHALL leave the `README.md` ownership map, because
+  `scripts/repo-layout.ts` refuses a documented directory holding none — a
+  stale row here fails a check rather than merely reading wrong
 
 ### Requirement: A stage that completes moves its card in the same turn
 

@@ -2,30 +2,48 @@
 
 ## Why
 
-The always-on set is **851 lines** against the ~500 `context-budget` fixes —
-`CLAUDE.md` 227 plus `PLAN.md` 624 — and 532 of `PLAN.md`'s 624 are the queue
+The always-on set is **899 lines** against the ~500 `context-budget` fixes —
+`CLAUDE.md` 208 plus `PLAN.md` 691 — and 591 of `PLAN.md`'s 691 are the queue
 and the log of what is done. The trigger has now fired four times, and each
 time the cause was the same: `PLAN.md` recorded work. It is not rules
-accumulating, so pruning rules cannot reach it. Promoting the five
-verification rules `docs/rulebook-growth.md` names (−12), deleting the Done
-section the archive already records (−72) and collapsing every proposed
-change's entry to one line (−200) together leave the set at **567**. The
-arithmetic does not close while the queue lives in a file read at every
-session start.
+accumulating, so pruning rules cannot reach it — measured again twelve days
+after this proposal was first written, the set had grown 48 lines while
+`CLAUDE.md` itself shrank by 19. Promoting the five verification rules
+`docs/rulebook-growth.md` names (−12), deleting the Done section the archive
+already records (−72) and collapsing every proposed change's entry to one
+line (−200) together leave the set at **615**. The arithmetic does not close
+while the queue lives in a file read at every session start.
 
 Size is the visible half. The other half is that the queue drifts, twice in
 the week this was written: the `suggestion-calibration` entry still reads
 **not yet proposed** with its proposal merged, and the entry recording the
-trigger says **743** against a measured 851. Both for one reason — a status
+trigger says **743** against a measured 899. Both for one reason — a status
 had to be remembered and typed by whoever finished the work, and a file is
 the wrong instrument for a status. Nothing reads a queue entry to check it.
 
 ## What Changes
 
-- The open queue and the done log leave `PLAN.md` for the `D2ASS` database in
-  the Notion workspace, which becomes where a task's status is recorded and
-  read. `PLAN.md` keeps the standing constraints, the requirement sources and
-  the growth protocol — what it holds that is not a status.
+- The open queue and the done log leave `PLAN.md` for the boards in the Notion
+  workspace, which become where a task's status is recorded and read.
+  `PLAN.md` keeps the standing constraints, the requirement sources and the
+  growth protocol — what it holds that is not a status.
+- **There are three boards, not one.** `D2ASS` holds this repository's product
+  work, `Harness` the work on the agent scaffolding, which is to leave for a
+  repository of its own, and `mellon` a second project that will sit on that
+  same scaffolding. A card goes to the board of the repository that owns the
+  work. The two that are not this repository's are named here rather than
+  discovered per card, because the routing rule is what decides where a card
+  is looked for when it is not on the board somebody expected.
+- **Derivation is scoped to `D2ASS`.** It is the only board whose tree is this
+  repository, so `scripts/board-state.ts` reports the three derived statuses
+  for its cards and nothing at all for the other two, whose cards move by hand
+  entirely. An `after:` edge therefore never crosses a board: a slug addresses
+  a change directory in *this* repository, and nothing addresses one
+  elsewhere — the same absent key that stops the middle statuses deriving.
+- A card carries its pointer in a **property**, not in its body. Neither live
+  board has such a column: `Name`, `Status` and `Assign` are the whole schema
+  of both, read off the live databases, so the requirement below has nowhere
+  to land until one is added.
 - A card carries a title, a status out of eight, and a pointer to where its
   content lives. **The board holds no content the repository holds**: a
   proposed change's substance stays in `openspec/changes/<slug>/`, an
@@ -44,6 +62,14 @@ the wrong instrument for a status. Nothing reads a queue entry to check it.
 - The eleven `tasks.md` files carrying a step that updates `PLAN.md`'s queue
   are retargeted, so no unapplied change is left pointing at a queue that is
   gone.
+- The nine briefs under `tasks/` become nine cards, one each, and the
+  directory leaves the tree. None of them has a change directory anywhere —
+  they predate OpenSpec in this repository — so every one is the case the
+  contract already describes, where the card body is the record. `PLAN.md`
+  collapses six of them into a single line today, which is why they are
+  counted here rather than read out of the queue. `tasks/task-5.md`, the one
+  still open, stops being a requirement source in `PLAN.md`; its card becomes
+  the source.
 
 ## Capabilities
 
@@ -79,18 +105,35 @@ the wrong instrument for a status. Nothing reads a queue entry to check it.
 - **Making the board authoritative over anything the repository holds.**
   Where the two disagree about a derived status, the tree is right and the
   card is corrected.
+- **Moving `openspec/changes/archive/` or `spec-inbox/`.** Both go to Notion,
+  and neither goes here. The line is whether the thing has a status: a task
+  has one and becomes a card, and reference prose has none and becomes a
+  page. The archive is also what the `done` derivation reads, so taking it
+  out of the tree costs the one rule that is 30/30 correct and has to buy
+  that back with a digest — an argument this change does not need to make in
+  order to close the budget. `archive-digest` carries both.
+- **Gating the always-on budget mechanically.** The ~500 trigger is asserted
+  as text in `checks/rulebook.test.ts` and measured by nothing, in a
+  repository that gates diff size, file size, mutants and criterion
+  coverage. That gate lands after this change and after `archive-digest`,
+  so that it is green when it arrives rather than red on the day it is
+  written.
+- **Populating the boards that are not this repository's.** `Harness` and
+  `mellon` are named so the routing rule is complete; the cards this change
+  creates on them are the ones `PLAN.md` is holding today, and no work is
+  done to fill them from anywhere else.
 
 ## What derives, measured
 
-Run against the tree as it stands, all sixteen unapplied changes and all
+Run against the tree as it stands, all twenty unapplied changes and all
 thirty archived ones:
 
 ```text
 status         what makes it true                              verdict
 proposing      openspec/changes/<slug>/ exists, incomplete     1/1, and silent
-                                                               on the 16 that
+                                                               on the 19 that
                                                                are complete
-ready          the directory is complete, no step applied      16/16 correct
+ready          the directory is complete, no step applied      19/19 correct
 done           openspec/changes/archive/<date>-<slug>/ exists  30/30 correct
 
 suggested      nothing in the tree — the card is the record    not derivable
@@ -101,16 +144,45 @@ archiving      ——                                          ——  14/30 wro
 ```
 
 The two at the top of the second block are the reason the board is worth
-having at all: eighteen of the thirty-four open entries are findings with no
+having at all: sixteen of the thirty-five open entries are findings with no
 change directory, and the tree has nowhere to put them. The three below them
 are the reason it is not worth deriving everything.
 
+The `ready` count is 19 of 20 rather than 20 of 20 because the twentieth is
+this change, which is incomplete on purpose — so the one case `proposing`
+fires on is the only one available to fire on, and the rule is exercised
+rather than merely unrefuted.
+
+## What the boards hold today
+
+Read off both live databases rather than assumed:
+
+```text
+                D2ASS                      Harness
+schema          Name, Status, Assign       Name, Status, Assign
+Status options  Not started | In progress | Done      (3, not 8)
+saved view      "Board view", grouped by option, on both
+rows            0                          0
+```
+
+Three things follow. The saved-view requirement is already satisfiable —
+a view of that name exists on both, grouped by option as the requirement
+asks, so nothing is created and the name is what an instruction carries.
+The status property needs five options added on each, which is the untested
+assumption this change rests on and which its design stage settles. And
+there is no column for the pointer on either, so one is added before a card
+is written.
+
+Both boards being empty, the migration starts from nothing and conflicts
+with nothing.
+
 ## Impact
 
-- `PLAN.md` — loses the Queue section, 532 lines, and the opening sentence
-  that names the queue as what the file holds. The always-on set falls from
-  851 to about **325**, which is under the trigger with room for the growth
-  that has fired it four times.
+- `PLAN.md` — loses the Queue section, 591 lines, the opening sentence that
+  names the queue as what the file holds, and the `tasks/task-5.md` entry
+  under Requirement sources. The always-on set falls from 899 to about
+  **308**, which is under the trigger with room for the growth that has fired
+  it four times.
 - `docs/rulebook-growth.md` §*An always-on file past its trigger* — it states
   the one remedy a fired trigger has, *move whole sections to
   `docs/<topic>.md`*, and this change takes a whole section somewhere that is
@@ -132,6 +204,11 @@ are the reason it is not worth deriving everything.
   is grepped in.
 - `README.md` ownership map and `scripts/repo-layout.ts` — both describe
   `PLAN.md` as the queue.
+- `tasks/` — the directory and its nine files leave, and with them the
+  `README.md` ownership row naming it. The row goes *because* the directory
+  does: `scripts/repo-layout.ts` refuses a documented directory holding no
+  tracked file, so a row left behind fails the layout check rather than
+  merely reading stale.
 - Eleven `tasks.md` files under `openspec/changes/` — one step each.
 - No new dependency, no new secret, no new environment variable. The project
   keeps its single runtime dependency.
@@ -143,8 +220,19 @@ are the reason it is not worth deriving everything.
   being visible to them. The archive still records everything that shipped.
 - **The queue stops being readable offline and stops being in git.** A
   session with no connector attached can read the tree and the archive, and
-  cannot read the eighteen findings that live only on the board. There is no
-  recorded history of a card's edits beyond what Notion itself keeps.
+  cannot read the sixteen findings that live only on the board. There is no
+  recorded history of a card's edits beyond what Notion itself keeps, which
+  is accepted: what a card holds is a status, and a status has no text worth
+  reviewing a diff of.
+- **Nine briefs stop being greppable, and four archived citations go stale.**
+  Counted: `tasks/task-7.md` is named in `archive/2026-08-27-deploy-pipeline`
+  twice, `tasks/task-8.md` in `archive/2026-08-01-always-on-context-budget`
+  once, `tasks/task-1.md` in `archive/2026-07-27-agent-permissions-gaps`
+  once. An archived change is never edited to keep a citation current, so all
+  four are left standing and resolve to a card instead of a path — which is
+  what the card's body being the record is for. One live citation is not
+  archived and is corrected: `docs/context/pipeline-yield-2026-07.md` names
+  `tasks/task-8.md`.
 - **A subagent reaches the connector, but not without asking.** Probed
   read-only: a spawned agent fetched both the workspace identity and the
   `D2ASS` data source. The connector's tools were **not in its starting tool
@@ -160,6 +248,22 @@ Independent of the calibration chain and of every change in
 matter. It should land before them rather than after, because each of those
 eleven steps updates a queue that would otherwise have to be updated and then
 removed.
+
+It is first of three that together take the prose tied to features and tasks
+out of the tree:
+
+```text
+1. notion-task-board   what has a status becomes a card
+2. archive-digest      what has none becomes a page, and the digest left
+                       behind is what keeps `done` deriving
+3. the budget gate     measures the set once there is nothing left to move
+```
+
+`archive-digest` comes after because it needs a board to point its pages at
+and the routing rule to know which one. The gate comes last because a gate
+written while the set is 899 against a trigger of ~500 is red on the day it
+lands and stays red for two changes, and a gate that is expected to be red
+is not read.
 
 ## How this proposal ships
 
