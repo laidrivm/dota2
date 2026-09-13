@@ -104,8 +104,6 @@ describes is rewritten, the rule is a candidate for deletion.
 - Inline a single-caller helper only after grepping for the logic it duplicates
   elsewhere, and keep one whose comment documents a decision its call site would
   bury.
-- `src/model.ts` and `src/types.ts` never import from `src/app/**`, type-only
-  imports included.
 - Gate a side effect on the reducer's result, not on the action that asked
   for it.
 - A default action bound to a key applies to the first *enabled* candidate,
@@ -156,27 +154,9 @@ Rules about how work is carried out here. They do not age with the code.
 - Build the environment a spawned command runs under from what the case needs,
   and start it in a directory holding no `.env` — bun fills a variable the case
   left out from the `.env` where the process starts.
-- Probe a gate by refusing it, with an input the session has not already
-  cleared — an approval and an absent prompt reach you as the same successful
-  result, and an approval outlives the mode that granted it.
-- Never report what a permission prompt did; report what the call returned.
-- Treat an empty result as evidence of absence only after the same query has
-  returned a non-empty one, and run it over `openspec/changes/**` as well as
-  the tree — a query never run, a broken one and a true absence print the same
-  nothing.
-- Take a count from the authoritative list — found by the token every member
-  must carry, never one they merely tend to share — and reconcile it against
-  any count the source states itself.
-- Re-run the older probe before overwriting a recorded measurement your new
-  one contradicts.
 - Restore a file a probe edited from a copy taken before it, never with `git
   checkout` — which discards every uncommitted change in that file, not the
   probe alone.
-- Exercise a pre-written decision rule, or a condition you have written, only
-  against a case that could have produced the opposite outcome — for a
-  condition, name that case before writing it.
-- Run a case about a UTC reading in a non-UTC zone, set before the code under
-  test reads one — in UTC a local calendar and the UTC timeline answer alike.
 - A rules or docs edit that no artefact of the change under way asks for goes
   in its own commit.
 - Take the queue's next entry in its stated order, and name every entry
