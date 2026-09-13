@@ -40,19 +40,21 @@ Closes: *There are three boards and a card goes to one of them*
 
 Closes: *Three statuses are derived and five are moved by hand*
 
-- [ ] 2.1 Write `scripts/board-state.ts`: filesystem in, JSON out, no
+- [x] 2.1 Write `scripts/board-state.ts`: filesystem in, JSON out, no
       network and no connector
-- [ ] 2.2 Tests first, from the ZOMBIES run, against a fabricated tree —
+- [x] 2.2 Tests first, from the ZOMBIES run, against a fabricated tree —
       empty `openspec/changes/`; complete directory to `ready`; directory
       missing `tasks.md` to `proposing`; directory whose `specs/` is empty to
       `proposing`; slug in both `changes/` and `archive/` to `done`; a slug
       the tree cannot see distinguished from `suggested`; the output carrying
       no key for any of the five hand-moved statuses; a full run with no
       network route
-- [ ] 2.3 Assert no `collectionPropertyOption://`, board URL or view URL
+- [x] 2.3 Assert no `collectionPropertyOption://`, board URL or view URL
       reaches the output — this repository is public
-- [ ] 2.4 Run it over the tree as it stands and check it against the figures
-      the proposal states: thirty `done`, nineteen `ready`, one `proposing`
+- [x] 2.4 Run it over the tree as it stands and check it against the figures
+      the proposal states: thirty `done`, twenty `ready`, no `proposing` —
+      nineteen and one until this change's own directory completed, which the
+      proposal's §*What derives, measured* now records
 
 ## 3. Blocking edges
 

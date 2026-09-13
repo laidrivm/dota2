@@ -135,8 +135,8 @@ nowhere else. These are the verdicts of running it:
 
 ```text
 status         verdict
-proposing      1/1, and silent on the 19 that are complete
-ready          19/19 of the directories expected ready
+proposing      nothing left to fire on, and silent on all 20
+ready          20/20 of the directories expected ready
 done           30/30 of the archived changes
 
 suggested      not derivable — nothing in the tree records a finding
@@ -151,10 +151,14 @@ having at all: sixteen of the thirty-five open entries are findings with no
 change directory, and the tree has nowhere to put them. The three below them
 are the reason it is not worth deriving everything.
 
-The `ready` count is 19 of 20 rather than 20 of 20 because the twentieth is
-this change, which is incomplete on purpose — so the one case `proposing`
-fires on is the only one available to fire on, and the rule is exercised
-rather than merely unrefuted.
+The `ready` count was 19 of 20 while this change's own directory was
+incomplete on purpose, which made it the one case `proposing` had to fire on.
+Both of its proposal branches have since merged, so the directory is complete,
+the count is 20 of 20, and no directory in this repository derives `proposing`
+today. The rule is exercised where its other cases already are — against the
+fabricated tree in `scripts/board-state.test.ts`, which is the only place a
+directory can be held half-written without a change being held open to hold
+it.
 
 ## What the boards hold today
 
