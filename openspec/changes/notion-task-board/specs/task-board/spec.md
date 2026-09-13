@@ -18,18 +18,27 @@ card is not what the saved view exists to spare a session. Neither live board
 carries such a property today — `Name`, `Status` and `Assign` are the whole
 schema of both — so it is added before the first card is written.
 
-The property SHALL be named `Pointer`, SHALL be of Notion's `rich_text` type,
-and SHALL hold a repository-relative path with a trailing slash —
-`openspec/changes/<slug>/` or `openspec/changes/archive/<date>-<slug>/` —
-and the empty string where the card has no directory. Every board SHALL use
-that name and that type, so one instruction reads all of them.
+The property SHALL be named `Pointer` and SHALL be of Notion's `rich_text`
+type, on every board, so that one instruction reads all of them. Its value
+SHALL be a repository-relative path with a trailing slash —
+`openspec/changes/<slug>/` or `openspec/changes/archive/<date>-<slug>/` — and
+SHALL read as empty, rather than as absent, where the card has no directory.
+
+How `rich_text` encodes those two states on the wire is not fixed here and
+SHALL be measured before the first card is written, because it has not been:
+Notion's REST surface takes a `rich_text` value as an array of rich-text
+objects rather than a scalar, and no write through this project's connector
+has been made to see what that surface accepts. A requirement naming an
+encoding nobody has exercised is the kind this capability has already paid
+for once, in the status property whose options turned out not to be settable
+at all.
 
 `rich_text` rather than `url`, because a repository-relative path is not a
 URL: a `url` property holding one either renders a broken link or forces an
 absolute address that pins the card to a host and a default branch name,
 both facts about today rather than about the change. Not a `relation`, which
-joins rows across a boundary the blocking requirement below closes. The empty
-string rather than an unset property, because a card whose body is the record
+joins rows across a boundary the blocking requirement below closes. Empty
+rather than absent, because a card whose body is the record
 is a state this capability provides for, and an unset property is
 indistinguishable from one nobody has filled in yet.
 

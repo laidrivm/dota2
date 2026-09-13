@@ -50,11 +50,6 @@ the wrong instrument for a status. Nothing reads a queue entry to check it.
   archived one's in `openspec/changes/archive/`, and the card points at it.
   A card whose subject has no directory anywhere is the exception the rule
   implies — there the body is the record, because nothing else holds it.
-  That exception is temporary for a `D2ASS` card: every one of them is
-  eventually proposed as a change, at which point the card gains the pointer
-  and loses the body, or is dropped. A card on a board whose tree is not this
-  repository never crosses that boundary, because the directory that would
-  supply its pointer cannot appear here.
 - Three of the eight statuses are **derived** from the file tree by
   `scripts/board-state.ts`, which reads no network and asks no service. The
   other five are moved by whoever does the work, in the turn the work moves.
@@ -81,7 +76,9 @@ the wrong instrument for a status. Nothing reads a queue entry to check it.
 ### Added Capabilities
 
 - `task-board`: what the board records, which statuses derive from the tree
-  and which do not, how a session reads it, and what a card may not hold.
+  and which do not, how a session reads it, what a card may not hold, and the
+  lifecycle a card follows from a body-only record to a pointer — including
+  which boards that lifecycle applies to.
 
 ### Modified Capabilities
 
