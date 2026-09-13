@@ -34,14 +34,13 @@ describe("the output names no board", () => {
 describe("the derivation reaches no network", () => {
 	const source = readFileSync(join(root, "scripts/board-state.ts"), "utf8");
 
-	// `from` optional: `import "node:net";` imports for effect alone and names
-	// no binding, so a form requiring `from` reads a module reaching the
-	// network as no import at all — which is the one direction this case must
-	// not miss.
+	// Bun's own transpiler rather than a pattern over the source: it reports a
+	// bare `import "node:net";`, a wrapped import list and a dynamic
+	// `import()` alike, and every one of those is a module a pattern anchored
+	// to one line would read as no import at all — which is the one direction
+	// this case must not miss.
 	const imports = (text: string) =>
-		[...text.matchAll(/^import\s(?:.*?\sfrom\s)?"(.+)";$/gm)].flatMap(
-			(match) => match[1] ?? [],
-		);
+		new Bun.Transpiler({ loader: "ts" }).scan(text).imports.map((i) => i.path);
 
 	test("the module imports the filesystem, the path join, the root and nothing else", () => {
 		const imported = imports(source);

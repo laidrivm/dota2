@@ -213,3 +213,23 @@ describe("a sweep over a whole tree", () => {
 		for (const slug of archives) expect(status[slug]).toBe("done");
 	});
 });
+
+describe("a change whose .openspec.yaml is not a mapping", () => {
+	test("a bare scalar document fails naming the file", () => {
+		// Not the same as `after:` holding a scalar, which is step 3's case: the
+		// whole document is one here, so every key reads `undefined` and the
+		// file would otherwise pass as declaring no predecessor at all.
+		const tree = fabricate(complete("score-calibration", "just a string\n"));
+		expect(() => boardState(tree)).toThrow(/is not a mapping of keys/);
+	});
+
+	test("a sequence document fails naming the file", () => {
+		const tree = fabricate(complete("score-calibration", "- one\n- two\n"));
+		expect(() => boardState(tree)).toThrow(/is not a mapping of keys/);
+	});
+
+	test("an empty document declares no predecessor rather than failing", () => {
+		const tree = fabricate(complete("score-calibration", ""));
+		expect(boardState(tree).status["score-calibration"]).toBe("ready");
+	});
+});
