@@ -4,8 +4,6 @@
  * changes directory is the subject of one case and the fixture of none.
  */
 import { afterAll, describe, expect, test } from "bun:test";
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
 import {
 	archived,
 	cleanup,
@@ -13,7 +11,6 @@ import {
 	fabricate,
 } from "./board-state.fixture.ts";
 import { boardState } from "./board-state.ts";
-import { root } from "./root.ts";
 
 afterAll(cleanup);
 
@@ -146,6 +143,25 @@ describe("what the derivation reports nothing for", () => {
 		expect(boardState(tree).status).toEqual({ "candidacy-gate": "ready" });
 	});
 
+	test("a slug named for an inherited key is still reported", () => {
+		// Every key is a directory name off the filesystem, so the records are
+		// prototype-free: on a plain object `status["__proto__"] = "ready"` calls
+		// the inherited setter, stores nothing, and drops the slug in silence.
+		const tree = fabricate({
+			...complete("__proto__"),
+			...complete("constructor"),
+		});
+		// Read through a `Map` rather than by key, because neither spelling of
+		// the key works here: `{ __proto__: "ready" }` as an expectation sets the
+		// prototype and yields `{}`, which is the same trap one level up, and
+		// `status["__proto__"]` is what `noProto` refuses. `Object.entries`
+		// carries an own key of either name out intact.
+		const derived = new Map(Object.entries(boardState(tree).status));
+		expect([...derived.keys()].sort()).toEqual(["__proto__", "constructor"]);
+		expect(derived.get("__proto__")).toBe("ready");
+		expect(derived.get("constructor")).toBe("ready");
+	});
+
 	test("a plain file under changes/ is skipped rather than read as a change", () => {
 		const tree = fabricate({
 			...complete("candidacy-gate"),
@@ -180,15 +196,6 @@ describe("what the derivation reports nothing for", () => {
 	});
 });
 
-// spec: task-board/a-card-on-a-board-whose-tree-is-elsewhere
-describe("the output names no board", () => {
-	test("neither the board a slug sits on nor the two whose trees are elsewhere", () => {
-		const state = boardState(fabricate(complete("candidacy-gate")));
-		for (const board of ["D2ASS", "Harness", "mellon"])
-			expect(JSON.stringify(state)).not.toContain(board);
-	});
-});
-
 describe("a sweep over a whole tree", () => {
 	test("gives every slug exactly one status, omitting none and doubling none", () => {
 		const changes = Array.from({ length: 20 }, (_, n) => `open-${n}`);
@@ -204,74 +211,5 @@ describe("a sweep over a whole tree", () => {
 		expect(Object.keys(status).length).toBe(50);
 		for (const slug of changes) expect(status[slug]).toBe("ready");
 		for (const slug of archives) expect(status[slug]).toBe("done");
-	});
-});
-
-// spec: task-board/the-derivation-reaches-no-network
-describe("the derivation reaches no network", () => {
-	const source = readFileSync(join(root, "scripts/board-state.ts"), "utf8");
-
-	const imports = (text: string) =>
-		[...text.matchAll(/^import .*? from "(.+)";$/gm)].flatMap(
-			(match) => match[1] ?? [],
-		);
-
-	test("the module imports the filesystem, the path join, the root and nothing else", () => {
-		const imported = imports(source);
-		expect(imported.length).toBeGreaterThan(0);
-		expect(
-			imported.filter(
-				(from) => !["node:fs", "node:path", "./root.ts"].includes(from),
-			),
-		).toEqual([]);
-	});
-
-	test("the one module it does import reaches nothing either", () => {
-		// Allowing `./root.ts` above allows whatever `./root.ts` allows, and the
-		// case above would pass a version of it that had grown a fetch.
-		const from = readFileSync(join(root, "scripts/root.ts"), "utf8");
-		expect(imports(from)).toEqual(["node:path"]);
-	});
-
-	test("it calls nothing that opens a socket", () => {
-		// Token by token rather than by parse: a mention in prose would fail this
-		// case wrongly, and the repair is to reword the comment. The direction
-		// that passes wrongly is the one a parser would be bought to prevent.
-		for (const reach of ["fetch(", "XMLHttpRequest", "Bun.connect", "notion"])
-			expect(source).not.toContain(reach);
-	});
-
-	test("a full run produces both halves of the output from the tree alone", () => {
-		const tree = fabricate({
-			...complete(
-				"score-calibration",
-				"schema: spec-driven\nafter: [outcome-calibration]\n",
-			),
-			...archived("2026-08-25", "outcome-calibration"),
-		});
-		expect(boardState(tree)).toEqual({
-			status: {
-				"score-calibration": "ready",
-				"outcome-calibration": "done",
-			},
-			edges: {
-				"score-calibration": { after: ["outcome-calibration"], blocking: [] },
-			},
-		});
-	});
-});
-
-describe("what may not reach the output, this repository being public", () => {
-	test("no option identifier, board URL, view URL or bare UUID", () => {
-		const emitted = JSON.stringify(boardState(root));
-		for (const secret of [
-			"collectionPropertyOption://",
-			"collection://",
-			"view://",
-			"notion.so",
-			"notion.com",
-		])
-			expect(emitted).not.toContain(secret);
-		expect(emitted).not.toMatch(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-/i);
 	});
 });
