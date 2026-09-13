@@ -41,6 +41,7 @@ describe("every manifest-mutating invocation prompts", () => {
 			"Bash(bun r *)",
 			"Bash(bun uninstall *)",
 			"Bash(bun update *)",
+			"Bash(bun up *)",
 			"Bash(bun patch *)",
 			"Bash(bun patch-commit *)",
 			"Bash(bun pm pkg *)",
