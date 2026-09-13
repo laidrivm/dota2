@@ -128,19 +128,20 @@ the wrong instrument for a status. Nothing reads a queue entry to check it.
 Run against the tree as it stands, all twenty unapplied changes and all
 thirty archived ones:
 
-```text
-status         what makes it true                              verdict
-proposing      openspec/changes/<slug>/ exists, incomplete     1/1, and silent
-                                                               on the 19 that
-                                                               are complete
-ready          the directory is complete, no step applied      19/19 correct
-done           openspec/changes/archive/<date>-<slug>/ exists  30/30 correct
+What makes each of the three true is stated in the `task-board` delta and
+nowhere else. These are the verdicts of running it:
 
-suggested      nothing in the tree — the card is the record    not derivable
-exploring      nothing in the tree — /opsx:explore leaves none not derivable
-implementing   —— no key joins a pull request to its change ——  14/30 wrong
-reviewing      ——                                          ——  14/30 wrong
-archiving      ——                                          ——  14/30 wrong
+```text
+status         verdict
+proposing      1/1, and silent on the 19 that are complete
+ready          19/19 correct
+done           30/30 correct
+
+suggested      not derivable — nothing in the tree records a finding
+exploring      not derivable — /opsx:explore leaves no trace
+implementing   14/30 wrong — no key joins a pull request to its change
+reviewing      14/30 wrong — likewise
+archiving      14/30 wrong — likewise
 ```
 
 The two at the top of the second block are the reason the board is worth
@@ -165,13 +166,15 @@ saved view      "Board view", grouped by option, on both
 rows            0                          0
 ```
 
-Three things follow. The saved-view requirement is already satisfiable —
-a view of that name exists on both, grouped by option as the requirement
-asks, so nothing is created and the name is what an instruction carries.
-The status property needs five options added on each, which is the untested
-assumption this change rests on and which its design stage settles. And
-there is no column for the pointer on either, so one is added before a card
-is written.
+Three things follow. The saved-view requirement is already satisfiable — a
+view of that name exists on both, grouped as the requirement asks, so nothing
+is created and the name is what an instruction carries. The `Status` property
+is **replaced** rather than extended: one statement sets the whole option
+list, so `Not started`, `In progress` and `Done` cease to exist and the eight
+are what remains, on each board and on `mellon` when it is provisioned.
+Calling that "adding five" would be wrong about the mechanism and silent
+about the three. And there is no column for the pointer on either, so one is
+added before a card is written.
 
 Both boards being empty, the migration starts from nothing and conflicts
 with nothing.
