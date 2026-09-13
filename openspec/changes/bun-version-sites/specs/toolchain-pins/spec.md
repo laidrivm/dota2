@@ -13,6 +13,15 @@ in `Dockerfile`, and `@types/bun` in `package.json`. A workflow job added
 later is therefore covered by existing, which a count is not — the figure in
 `PLAN.md` read eight, then nine, then ten, each re-counted by hand.
 
+Every site SHALL state an exact version. `oven-sh/setup-bun` also accepts
+`latest`, `canary` and a semver range, and offers a `bun-version-file` input
+that reads `package.json`, `.bun-version` or `.tool-versions`; with no version
+at all it resolves `packageManager` or `engines.bun` from `package.json` before
+falling back to `latest`. Each of those is a selector resolved when the job
+runs, so the version a reader can obtain from the tree is not the version the
+job used — and a site whose version cannot be read cannot be shown to agree
+with another. The check SHALL fail on one, naming the site and the selector.
+
 The check SHALL NOT state which version is correct. What it owns is agreement;
 which bun to run is a decision, and the check exists so that the decision
 reaches every site rather than most of them.
@@ -38,8 +47,16 @@ reaches every site rather than most of them.
 
 - **WHEN** a workflow gains a job that installs bun and states no
   `bun-version`
-- **THEN** the check fails, because a job taking whatever bun the runner
-  defaults to is a site that agrees with nothing
+- **THEN** the check fails, because the action resolves the version when the
+  job runs — from `package.json` or, failing that, to `latest` — and the tree
+  states nothing to compare
+
+#### Scenario: A selector that is not an exact version
+
+- **WHEN** a `bun-version` reads `latest`, `canary` or a range such as
+  `1.4.x`, or the job states `bun-version-file` instead
+- **THEN** the check fails, naming the site and the selector, because what it
+  resolves to is decided at run time and not in the tree
 
 #### Scenario: Every site agreeing
 

@@ -4,9 +4,15 @@ Three steps, so this change ships as three pull requests on
 `feat/bun-version-sites-1`, `-2` and `-3`, in that order.
 
 The `agent-permissions` delta modifies one requirement whole and so carries
-eight criteria this change does not close — every scenario of that requirement
-but *An alias outside the install family*, which step 3 closes. They describe
-the gated surface, which no task here touches.
+eight criteria this change does not close, listed here so that the two sets
+account for every criterion in the deltas:
+`a-broader-local-allow-entry-suppresses-the-prompt`, `adding-a-dependency`,
+`the-same-command-through-its-alias`, `removing-a-dependency`,
+`a-subcommand-that-edits-the-manifest-directly`,
+`trusteddependencies-is-never-granted-silently`,
+`a-read-only-sibling-is-not-captured` and
+`settings-carry-no-unreachable-ask-rule`. They describe the gated surface,
+which no task here touches.
 
 ## 1. The three kinds of site, read and compared
 
@@ -37,11 +43,17 @@ Closes `toolchain-pins/a-workflow-input-left-behind`,
 ## 2. The edges the walk must not skip
 
 Closes `toolchain-pins/a-job-added-without-a-version`,
+`toolchain-pins/a-selector-that-is-not-an-exact-version`,
 `toolchain-pins/every-site-agreeing`.
 
-- [ ] 2.1 Write the failing case first: a workflow job that uses
-      `oven-sh/setup-bun` and states no `bun-version`
-      (*a-job-added-without-a-version*)
+- [ ] 2.1 Write the failing cases first: a workflow job that uses
+      `oven-sh/setup-bun` and states no `bun-version`, and one that states
+      `latest`, `canary`, a range and `bun-version-file` in turn. Read the
+      accepted forms off the action rather than from priors — it takes all
+      four, and with none it resolves `packageManager` or `engines.bun` from
+      `package.json` before falling back to `latest`
+      (*a-job-added-without-a-version*,
+      *a-selector-that-is-not-an-exact-version*)
 - [ ] 2.2 Walk every workflow file, every job and every step, failing on a
       `setup-bun` step with no version rather than skipping it. Scope the walk
       by what it exempts, per `CLAUDE.md`, and name the exemption in the code
