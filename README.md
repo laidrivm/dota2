@@ -395,8 +395,9 @@ the dev server's port (`BUN_PORT`/`PORT`, else 3000 — the same precedence
 `Bun.serve` uses, so both sides agree).
 `--repeat-each=3` is the flake gate a change has to clear before CI sees it.
 The browser is not a dependency `bun install` brings: fetch it once with
-`bunx --no-install playwright install chromium`. Playwright's own error asks
-for it through `npx`, which this repository denies.
+`bunx --no-install playwright install chromium`. Playwright's own error names
+`npx` instead — the npm-family spelling this project does not use, and one
+`.claude/settings.json` denies the agent outright.
 
 Three specs, covering the paths `bun test` cannot reach without a DOM.
 
