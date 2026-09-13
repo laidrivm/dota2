@@ -109,6 +109,19 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
 
 ### Open
 
+- [ ] **The queue moves to Notion** — `openspec/changes/notion-task-board/`,
+      ready, nine steps and 33 tasks. This queue, the Done log above and the
+      nine `tasks/` briefs become cards on the `D2ASS` and `Harness` boards;
+      `PLAN.md` keeps the standing constraints and the requirement sources.
+      **Step 7 deletes this whole Queue section**, which is how the always-on
+      set gets back under its trigger — the arithmetic is in the proposal —
+      so an entry added here lives until that step and no further. Take it
+      before the eleven changes whose `tasks.md` carries a step updating this
+      queue, each of which would otherwise update a queue that is going.
+      Apply-stage context the artefacts do not hold — the ZOMBIES report task
+      2.2 delegates to, the routing of all 35 entries below, two gaps in the
+      merged `tasks.md` — is in `docs/context/notion-board-apply-2026-09.md`,
+      passed in by hand and loaded by nothing.
 - [ ] **Task 5** — error tracking (precondition: the product is deployed).
       Carries the snapshot job's failure alert, which `deploy-pipeline` moved
       here on finding it in no step and no acceptance criterion of
