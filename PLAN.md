@@ -458,7 +458,15 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
 
       After `laning-phase-model`, which every one of its deltas is written
       against, and therefore after `candidacy-gate` too.
-- [ ] **Ten workflow pins nothing updates.** `bun-version: 1.3.14` stands in
+- [ ] **Ten workflow pins nothing updates.** Now proposed as
+      `bun-version-sites`, `openspec/changes/bun-version-sites/`, whose step 3
+      deletes this entry: the reconciling check the argument below asks for,
+      reading the sites through the parser each tool uses rather than counting
+      them, plus the alias clause the same incident left behind in
+      `agent-permissions`. Three task groups, so `feat/bun-version-sites-1` …
+      `-3`, in order. The version reads `1.4.2` at every site today, so the
+      check lands green and its failing cases are fabricated. What follows is
+      the record that produced it. `bun-version: 1.3.14` stood in
       ten jobs across five workflows, and Dependabot raises none of them: its
       `github-actions` ecosystem updates `uses:` refs only, and its `bun`
       ecosystem updates `@types/bun` in `package.json` — which carries that
