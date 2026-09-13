@@ -484,19 +484,25 @@ change decided lives in its archived proposal under `openspec/changes/archive/`.
       something updates, so a check written for this entry has to tell the two
       kinds apart rather than count them together.
 
-      **The drift has since cost a merge.** `@types/bun` stands at 1.4.0 and
-      this machine's binary at 1.4.2, where `bun update` has gained the alias
-      `bun up`; the ten jobs still run 1.3.14, where no such command exists.
-      Two cases in `checks/agent-permissions-prompts.test.ts` read the
-      installed binary and so demand opposite permission lists — the alias case
-      requires `Bash(bun up *)` on 1.4.2, the top-level-form case refuses it on
-      1.3.14 with `Script not found "up"`. Adding the entry turned one case red
-      in three CI jobs and was reverted in `1ba2b46`; the local suite is red on
-      the other case until the versions agree. So the remedy is no longer only
-      a comment or a reconciling check: the pins have to move, and moving them
-      puts an unexercised bun under the database and container jobs — which is
-      what makes it a branch of its own rather than a line at the end of
-      someone else's.
+      **The drift cost a merge, and the versions have since been levelled.**
+      `@types/bun` had reached 1.4.0 and this machine's binary 1.4.2, where
+      `bun update` carries the alias `bun up`, while the ten jobs ran 1.3.14,
+      where no such command exists. Two cases in
+      `checks/agent-permissions-prompts.test.ts` read the installed binary and
+      so demanded opposite permission lists; adding the entry turned one red in
+      three CI jobs. `dbb3be4` put every site on 1.4.2 and `46fa93c` gated the
+      alias, exercised against a real Postgres and the container images first.
+      What is *not* closed is this entry: nothing raises the ten pins, so the
+      next release leaves them behind exactly as this one did, and a comment
+      per site or a reconciling check is still what closes it.
+
+      One thing the levelling surfaced, for whoever writes that check:
+      `openspec/specs/agent-permissions` §*Every manifest-mutating invocation
+      prompts* is normative in its first sentence — every form that changes the
+      dependency record — and its enumeration afterwards promises aliases only
+      for the install family, where the test demands them for every gated
+      command. The policy is not in breach; the description is behind the
+      check, and tightening it is a delta.
 - [ ] **A captured rule is sent to the costliest of its two homes.**
       `openspec/specs/local-review-loop/spec.md` §*A justification survives
       only when it is a convention* says a skipped Minor becomes a rule in
