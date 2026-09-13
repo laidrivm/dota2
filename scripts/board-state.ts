@@ -72,7 +72,18 @@ function declared(path: string, named: string, problems: string[]): string[] {
 		problems.push(`${named}: not YAML — ${String(error)}`);
 		return [];
 	}
-	const after = (parsed as Record<string, unknown> | null)?.after;
+	// An empty document parses to nothing, which is a file declaring no
+	// predecessor rather than a defect; eleven of the seventeen are that.
+	if (parsed === null || parsed === undefined) return [];
+	// Everything else has to be a mapping before `after` can be read off it. A
+	// scalar or a sequence at the root answers `undefined` to any key, so
+	// reading one would report a malformed file takeable — the one bad shape
+	// this function would otherwise pass in silence.
+	if (typeof parsed !== "object" || Array.isArray(parsed)) {
+		problems.push(`${named}: the document is not a mapping of keys`);
+		return [];
+	}
+	const after = (parsed as Record<string, unknown>).after;
 	if (after === undefined || after === null) return [];
 	// Reported by shape rather than iterated: YAML admits `after: a-slug`
 	// silently, and a per-character walk yields slugs resolving to nothing,
