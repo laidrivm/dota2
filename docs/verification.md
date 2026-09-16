@@ -83,3 +83,9 @@ What counts as evidence for a claim, and what a claim may rest on.
   user.
 - Re-measure a figure at the moment it enters an artefact, never copy it from
   earlier output.
+- Read a streamed gate's verdict from its terminal event, never from the
+  findings that reached you before it — a run that died mid-stream has
+  reported findings and reached no conclusion.
+- Confirm which commits a merge landed before building the next branch on the
+  base — a merge can stop short of the branch's tip, and the next branch
+  inherits the gap in silence.

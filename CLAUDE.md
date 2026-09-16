@@ -135,6 +135,9 @@ describes is rewritten, the rule is a candidate for deletion.
   obvious implementation, or a precondition the code does not check — and
   re-read that comment when the code under it moves: one naming a check the
   code no longer makes is a defect no test sees.
+- Derive a case's subject inside the case, never in the describe body — a
+  throw while the block is collected removes its cases and reports the smaller
+  count as a pass.
 - Await a rejection from a driver's query object through `then(ok, err)`,
   never `expect().rejects`, which hangs on a thenable instead of failing.
 - Give a test hook that spawns synchronously an explicit timeout — bun cannot
@@ -159,8 +162,9 @@ Rules about how work is carried out here. They do not age with the code.
   and start it in a directory holding no `.env` — bun fills a variable the case
   left out from the `.env` where the process starts.
 - Restore a file a probe edited from a copy taken before it, never with `git
-  checkout` — which discards every uncommitted change in that file, not the
-  probe alone.
+  checkout` or `git stash` — the first discards every uncommitted change in
+  that file rather than the probe alone, and the second unstages what the
+  index was holding.
 - A rules or docs edit that no artefact of the change under way asks for goes
   in its own commit.
 - Take the queue's next entry in the order its board view shows, and name
