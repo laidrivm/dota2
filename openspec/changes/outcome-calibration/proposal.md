@@ -87,3 +87,14 @@ advantages the model actually produces into claims no evidence supports:
   of `match-harvest`'s modification of the same one.
 - No new dependency, and no request to the statistics API: everything this
   step reads is already in the database.
+
+## Ordering
+
+**Cannot be applied before `match-harvest` is applied and synced.** It reads
+that change's tables, and its `snapshot-ingest` delta is copied from the
+version that change leaves behind rather than from the one on the default
+branch — so out of order the sync silently replaces a five-step requirement
+with a three-step one.
+
+Head of nothing else: `score-calibration`, `side-and-phase-deltas` and
+`beta-refit` each say for themselves that they follow this one.

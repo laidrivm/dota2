@@ -61,7 +61,12 @@ Closes: *Three statuses are derived and five are moved by hand*
 Closes: *A card names what blocks it, derived from the tree*
 
 - [x] 3.1 Add `after:` to the six `.openspec.yaml` files whose `## Ordering`
-      names a predecessor, leaving the prose argument where it stands
+      names a predecessor, leaving the prose argument where it stands —
+      **seven**, not six: `outcome-calibration` carries no `## Ordering`
+      section, so the scan that counted six could not reach it, and its
+      dependency on `match-harvest` is the hardest of the set. Its argument
+      stood only in the `PLAN.md` entry that step 5 turns into a card with an
+      empty body, so the section it never had is written now
 - [x] 3.2 Derive the blocked set, computing it at the time of asking rather
       than storing it on a card
 - [x] 3.3 Tests: a predecessor not `done` reports blocked; every predecessor

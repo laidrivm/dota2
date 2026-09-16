@@ -97,7 +97,34 @@ because a later re-derivation would otherwise reach the mention list again:
   routed into added requirements **so that neither change has to wait for the
   other**. Both mentions argue against the edge the table would have drawn.
 
-Derived afterwards: no cycle, every named slug resolves, and all six are
+### A seventh, which the scan could not have found
+
+`outcome-calibration` carries no `## Ordering` section at all, so a scan of
+those sections was never going to reach it — and it has the hardest
+dependency of the seven. `PLAN.md`'s entry states it flatly: *cannot be
+applied before `match-harvest` is applied and synced*, because its
+`snapshot-ingest` delta is copied from the version that change leaves behind,
+so out of order the sync replaces a five-step requirement with a three-step
+one. That is the same failure `laning-phase-model` names against
+`candidacy-gate`, and the one edge whose absence a session would pay for.
+
+It mattered that this was caught before step 5 landed: the `PLAN.md` entry
+holding the argument becomes a card with a pointer and an **empty body**,
+because the change has a directory and a card restates nothing a directory
+holds. The argument therefore had to reach that directory, and
+`outcome-calibration` gains the `## Ordering` section it never had.
+
+Adding it repairs the chain transitively rather than only its own edge:
+`score-calibration` reaches `match-harvest` through it, and so do `beta-refit`
+and `suggestion-calibration`. Seven files, not six.
+
+**The reading to carry forward:** the scan was for `## Ordering` sections, and
+a change with no such section is invisible to it however hard its dependency.
+Scanning for the dependency instead — *cannot be applied before*, *must be
+applied*, *applied and synced* — over `PLAN.md` and every proposal is what
+found this one.
+
+Derived afterwards: no cycle, every named slug resolves, and all seven are
 blocked today because nothing in the chain is archived yet.
 
 ## Step 5 — the routing of the thirty-five open entries
