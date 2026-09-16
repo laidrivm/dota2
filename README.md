@@ -15,7 +15,6 @@
 | `docs/rulebook-growth.md` | what a fired maintenance trigger asks for: how a rule leaves a sublist, how a section leaves an always-on file | when a rule or a section is added, promoted or deleted |
 | `docs/research/*` | dated surveys of an external source — what it offers, measured, and when it was read | before a change rests on what that source publishes |
 | `PLAN.md` | the open queue, its sources, and the standing constraints | every session |
-| `tasks/*.md` | infra task specs — scope, steps, acceptance criteria | when a task starts |
 | `spec-inbox/` | raw product specs not yet in the repo — contents gitignored, its README tracked | when a task cites one |
 | `openspec/specs/*/spec.md` | what each shipped capability must do (EARS) | when changing behaviour it covers |
 | `openspec/config.yaml` → `context:` | architecture choices (SSE, BFF, cache, N+1) | on artifact generation |
@@ -64,9 +63,9 @@ path that is itself the file. And `icons/` and `snapshot/` are where the job
 writes at runtime — the mirrored hero images, and the bundle the export
 publishes; both are gitignored, so no clone has either until a run fills it.
 
-The table covers the directories that hold code, and leaves out four that
-hold something else: `docs/`, `openspec/` and `tasks/`, whose contents the
-knowledge ownership map above assigns, and `spec-inbox/`, whose contents are
+The table covers the directories that hold code, and leaves out three that
+hold something else: `docs/` and `openspec/`, whose contents the knowledge
+ownership map above assigns, and `spec-inbox/`, whose contents are
 gitignored. `.github/` and `.claude/` are configuration read from where the
 tools expect it. The client's own internal layout — `src/app/board/`,
 `src/app/picker/`, the stylesheets and their tokens — is left out too: the

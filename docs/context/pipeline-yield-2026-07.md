@@ -57,7 +57,7 @@
 
 - zombies (propose): PASS — 2 gaps, 2 dispositioned (both folded into tasks 2.1)
 - triage: **left OPEN** — 4 groups, 0 high-risk, 1 Medium never read. The gate was never closed and no `BLOCKED` was written; recorded as it ended.
-- grep (documentation-branch gate): 3 sites found and turned into a task — `README.md`'s ownership row, `spec-inbox/README.md`, `tasks/task-8.md`
+- grep (documentation-branch gate): 3 sites found and turned into a task — `README.md`'s ownership row, `spec-inbox/README.md`, and the brief that was `tasks/task-8.md`, now the `tasks/task-8.md` card on `Harness`
 - coderabbit-local: PASS — 7 findings, 7 dispositioned (6 applied, 1 rejected: an in-repo dismissal ledger is a declared non-goal)
 - coderabbit (PR #39): PASS — 2 findings, 2 applied
 - coderabbit (PR #39, after merge of a second change into the branch): PASS — 4 findings, 4 dispositioned (2 applied, 2 already fixed)
