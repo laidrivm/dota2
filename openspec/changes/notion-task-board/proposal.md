@@ -147,8 +147,8 @@ archiving      14/30 wrong — likewise
 ```
 
 The two at the top of the second block are the reason the board is worth
-having at all: seventeen of the thirty-seven open entries are findings with
-no change directory, and the tree has nowhere to put them. The three below them
+having at all: seventeen of the thirty-seven open entries have no change
+directory, and the tree has nowhere to put them. The three below them
 are the reason it is not worth deriving everything.
 
 The `ready` count was 19 of 20 while this change's own directory was
