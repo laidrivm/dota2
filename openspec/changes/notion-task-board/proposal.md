@@ -186,11 +186,15 @@ with nothing.
 
 ## Impact
 
-- `PLAN.md` — loses the Queue section, 591 lines, the opening sentence that
-  names the queue as what the file holds, and the `tasks/task-5.md` entry
-  under Requirement sources. The always-on set falls from 899 to about
-  **308**, which is under the trigger with room for the growth that has fired
-  it four times.
+- `PLAN.md` — loses the Queue section, the opening sentence that names the
+  queue as what the file holds, and the `tasks/task-5.md` entry under
+  Requirement sources. Measured when it ran: the section was 604 lines rather
+  than the 591 estimated here, having grown by this change's own entry, and
+  `PLAN.md` went 704 → 122 while `CLAUDE.md` went 208 → 212, the four lines
+  being the sentence that says where the queue is now. The always-on set
+  falls from **912 to 334** — where this file predicted 899 to about 308,
+  both figures taken before that entry was added — which is under the trigger
+  with room for the growth that has fired it four times.
 - `docs/rulebook-growth.md` §*An always-on file past its trigger* — it states
   the one remedy a fired trigger has, *move whole sections to
   `docs/<topic>.md`*, and this change takes a whole section somewhere that is
