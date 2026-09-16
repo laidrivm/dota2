@@ -104,16 +104,21 @@ Closes: *The board is read through a saved view*
 
 Closes: *Each task brief becomes one card and the directory goes*
 
-- [ ] 6.1 Create nine cards, one per brief, routed by the owning repository,
+- [x] 6.1 Create nine cards, one per brief, routed by the owning repository,
       each **titled with the brief's filename** — `tasks/task-1.md`, not a
       readable paraphrase: the filename is the only key the four surviving
       archived citations carry, and a brief card's pointer is empty
-- [ ] 6.2 Build each body from the brief's `Status: DONE` block where there
+- [x] 6.2 Build each body from the brief's `Status: DONE` block where there
       is one, and from its scope for `tasks/task-5.md`, which is still open
-- [ ] 6.3 Delete `tasks/` and its `README.md` ownership row in the same
+- [x] 6.3 Delete `tasks/` and its `README.md` ownership row in the same
       commit — `scripts/repo-layout.ts` fails on a documented directory
-      holding no tracked file, which is what makes the pair atomic
-- [ ] 6.4 Correct the one live citation, in
+      holding no tracked file, which is what makes the pair atomic. Three
+      sites rather than the pair: the check that actually fails is
+      `checks/readme-layout.test.ts`, whose `UNPLACED` list exempts `tasks/`
+      from placement and refuses an exemption naming nothing tracked, and
+      `README.md` also counts the directory in the prose under its layout
+      table
+- [x] 6.4 Correct the one live citation, in
       `docs/context/pipeline-yield-2026-07.md`, and leave the four archived
       ones standing
 
