@@ -25,13 +25,16 @@ SHALL be a repository-relative path with a trailing slash —
 SHALL read as empty, rather than as absent, where the card has no directory.
 
 How `rich_text` encodes those two states on the wire is not fixed here and
-SHALL be measured before the first card is written, because it has not been:
-Notion's REST surface takes a `rich_text` value as an array of rich-text
-objects rather than a scalar, and no write through this project's connector
-has been made to see what that surface accepts. A requirement naming an
-encoding nobody has exercised is the kind this capability has already paid
-for once, in the status property whose options turned out not to be settable
-at all.
+SHALL be measured before the first card is written. It was unmeasured when
+this requirement was written — Notion's REST surface takes a `rich_text`
+value as an array of rich-text objects rather than a scalar, and no write
+through this project's connector had been made to see what that surface
+accepts — and what the measurement found belongs wherever the run that made
+it recorded it, never here. A requirement naming an encoding nobody has
+exercised is the kind this capability has already paid for once, in the
+status property whose options turned out not to be settable at all; a
+requirement naming one somebody has is wrong the day the connector changes
+its surface.
 
 `rich_text` rather than `url`, because a repository-relative path is not a
 URL: a `url` property holding one either renders a broken link or forces an
@@ -98,10 +101,17 @@ for it would hold every such card permanently in breach.
 
 ### Requirement: There are three boards and a card goes to one of them
 
-The workspace SHALL hold three boards — `D2ASS` for this repository's product
-work, `Harness` for the work on the agent scaffolding, and `mellon` for the
-second project that will sit on that scaffolding — and every card SHALL sit
-on the board of the repository that owns its work.
+The routing rule SHALL name three boards — `D2ASS` for this repository's
+product work, `Harness` for the work on the agent scaffolding, and `mellon`
+for the second project that will sit on that scaffolding — and every card
+SHALL sit on the board of the repository that owns its work.
+
+A board SHALL exist for each of those repositories that exists, and SHALL NOT
+be created before one does: `D2ASS` and `Harness` today, `mellon`'s on the day
+that repository is. The rule names the third anyway, because naming is what
+makes it complete — an empty board kept in step with two others serves no
+reader, where a rule that stops at two leaves a session with nowhere to look
+second.
 
 The scaffolding is to leave for a repository of its own, and `mellon` is a
 repository this one does not contain. So the three boards are not three views
