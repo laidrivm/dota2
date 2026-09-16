@@ -161,7 +161,7 @@ describe("this repository's own ordering", () => {
 				]);
 	});
 
-	test("six changes declare a predecessor and the rest declare none", () => {
+	test("seven changes declare a predecessor and the rest declare none", () => {
 		const declaring = Object.entries(boardState(root).edges)
 			.filter(([, { after }]) => after.length > 0)
 			.map(([slug]) => slug)
@@ -170,6 +170,7 @@ describe("this repository's own ordering", () => {
 			"beta-refit",
 			"lane-synergy-model",
 			"laning-phase-model",
+			"outcome-calibration",
 			"score-calibration",
 			"side-and-phase-deltas",
 			"suggestion-calibration",
