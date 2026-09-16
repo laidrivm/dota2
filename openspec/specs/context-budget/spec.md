@@ -37,32 +37,52 @@ extraction a real remedy rather than a move of the same cost to another name.
 - **THEN** the budget falls by the extracted lines, because the doc is read
   only when the work touches its topic
 
-### Requirement: PLAN.md holds the open queue and the standing constraints
+### Requirement: PLAN.md holds the standing constraints and the sources
 
 `PLAN.md` SHALL carry only what a future session needs in order not to reopen
-settled work: the queue of tasks not yet done, the sources whose work is still
-open, and the constraints that remain in force. A completed queue entry SHALL
-be reduced to its outcome and a pointer to its archived change, and SHALL NOT
-carry the narrative of how it was implemented — `CLAUDE.md`'s *Docs describe
-current state only* applies to `PLAN.md` as it does to every other artefact.
+settled work **and that is not a status**: the sources whose work is still
+open, and the constraints that remain in force. The queue of tasks not yet
+done SHALL live on the board `task-board` specifies, and `PLAN.md` SHALL
+carry a pointer to it rather than a copy of any part of it.
+
+The split is by what the thing is, not by how much of it there is. A standing
+constraint — Preact, camelCase in every payload, Docker on a VPS — has no
+status, is never finished, and is read by a session that is not looking for
+work; a task has a status, is finished exactly once, and is read by a session
+that is choosing what to do. The first belongs in a file the session already
+reads. The second was in that file because there was nowhere else, and it is
+what took the always-on set to 899 lines against a ~500 trigger.
+
+`CLAUDE.md`'s *Docs describe current state only* applies to `PLAN.md` as it
+does to every other artefact.
 
 #### Scenario: A completed stage
 
 - **WHEN** a change is merged and archived
-- **THEN** `PLAN.md` names it, its outcome and its archive path in one entry,
-  and the corrections found during its apply run are not restated
+- **THEN** its card reaches `done` and `PLAN.md` gains nothing — the archive
+  path is what the card points at, and the narrative of how it was
+  implemented is written nowhere
 
 #### Scenario: A constraint with no single owning line
 
 - **WHEN** the constraint is a project-wide choice such as Preact, camelCase in
   every JSON payload, or Docker on a VPS
 - **THEN** it stays in `PLAN.md`, because no file in the tree is the place a
-  reader would look for it
+  reader would look for it, and it reaches no board — it is not a task and has
+  no status to move
 
 #### Scenario: A source whose work is closed
 
 - **WHEN** every task drawn from a listed requirement source is done
 - **THEN** the source leaves the list
+
+#### Scenario: A source that is itself a task
+
+- **WHEN** a listed source is a path to a task brief, as `tasks/task-5.md` is
+- **THEN** it SHALL be replaced by that brief's card, the brief being a task
+  with a status rather than a body of requirements — a source the list names
+  by a path that no longer exists sends the next session to nothing, and the
+  card is the only copy left
 
 #### Scenario: A standing constraint that stops applying
 
@@ -72,27 +92,48 @@ current state only* applies to `PLAN.md` as it does to every other artefact.
   terms as a stale rule in `CLAUDE.md`: a constraint nobody honours costs trust
   in the ones beside it
 
-### Requirement: An entry leaves PLAN.md by one of three routes
+#### Scenario: A finding with no change of its own
 
-WHEN an entry under "Accepted decisions" is reviewed against this
-specification, it SHALL take exactly one of three dispositions, tested **in
-this order**, and the review SHALL record which:
+- **WHEN** a review or a session surfaces work that has no change directory —
+  as seventeen of the thirty-seven entries this change moves do not
+- **THEN** it becomes a card at `suggested`, and `PLAN.md` records nothing:
+  the board is where a task with no artefact in the tree is held, which is
+  the case the tree cannot serve
 
-1. **Moved to the code** — the fact is a fence at a specific line: a deliberate
+
+### Requirement: An entry leaves PLAN.md by one of four routes
+
+WHEN an entry in `PLAN.md` is reviewed against this specification, it SHALL
+take exactly one of four dispositions, tested **in this order**, and the
+review SHALL record which:
+
+1. **Moved to the board** — the entry is a task: something that will be
+   finished, and whose being finished is a fact somebody will want to read. It
+   becomes a card at the status `task-board` derives or, where nothing in the
+   tree derives it, at `suggested`.
+2. **Moved to the code** — the fact is a fence at a specific line: a deliberate
    departure from the obvious implementation, or a precondition the code does
    not check. It becomes a comment there, unless one already stands.
-2. **Deleted** — the fact is already in `openspec/changes/archive/**`, verified
+3. **Deleted** — the fact is already in `openspec/changes/archive/**`, verified
    by reading that change rather than by assuming the archive holds it.
-3. **Kept** — the fact is a standing constraint that no single site owns.
+4. **Kept** — the fact is a standing constraint that no single site owns.
 
-The order matters because an entry can satisfy more than one test. A fence that
-the archive also records is still a fence: deleting it on the archive's
-strength leaves the line it governs unmarked, and the archive is not read when
-someone edits that line.
+The order matters because an entry can satisfy more than one test, and the new
+first route is where most of them now stop. A fence that the archive also
+records is still a fence: deleting it on the archive's strength leaves the line
+it governs unmarked, and the archive is not read when someone edits that line.
 
 An archived change SHALL NOT be edited to receive an evicted entry; the archive
 records what was proposed and applied, and a decision missing from it is
 written where it is enforced instead.
+
+#### Scenario: An entry that is a task and also a fence
+
+- **WHEN** an entry names work still to do and also records what must stay
+  true at a line of code
+- **THEN** it becomes a card **and** a comment, the routes being tested in
+  order rather than chosen between — a card nobody has taken up leaves the
+  line unmarked exactly as deletion would
 
 #### Scenario: A decision the archive already records
 
@@ -114,6 +155,7 @@ written where it is enforced instead.
   snapshot URL all do
 - **THEN** the `PLAN.md` entry is deleted rather than copied, because the
   duplicate is the one in `PLAN.md`
+
 
 ### Requirement: A fence stands where it is stepped on
 

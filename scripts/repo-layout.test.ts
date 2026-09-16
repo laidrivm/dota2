@@ -213,6 +213,7 @@ describe("a layout section naming no directory", () => {
 });
 
 // spec: repo-layout/a-directory-the-section-names
+// spec: task-board/the-directory-s-row-in-the-ownership-map
 describe("a directory the section names", () => {
 	test("passes where the repository tracks a file under it [17]", () => {
 		const dir = fabricate({ "src/app/a.ts": "" });
