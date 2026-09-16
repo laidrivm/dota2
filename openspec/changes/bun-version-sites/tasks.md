@@ -100,7 +100,7 @@ Closes `toolchain-pins/the-workflow-inputs-are-the-pins-with-no-updater`,
 - [ ] 3.6 Measure every capped file this change touched and record the
       numbers, whether or not any is over
       (*change-slicing/a-file-over-the-cap*)
-- [ ] 3.7 Grep the four places that restate a decision — the change's sibling
+- [ ] 3.7 Search the four places that restate a decision — the change's sibling
       artefacts, `openspec/specs/**`, the cards on the boards and the README
       ownership map —
       for a sentence naming the count of workflow pins, and reconcile each

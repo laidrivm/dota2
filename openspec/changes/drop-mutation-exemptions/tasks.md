@@ -25,10 +25,12 @@
       describe the directive's accepted form, its `all` refusal, its comment
       spelling and the one-mutator rule; leave the floor's own bullets and the
       `reports/mutation/` deletion note
-- [ ] 2.3 Grep the four places `docs/feature-workflow.md` names — this
-      change's sibling artefacts, `openspec/specs/**`, the cards on the boards
-      and the README ownership map — for a sentence naming the exemption
-      check, and correct or delete what no longer reads true.
+- [ ] 2.3 Search the four places `docs/feature-workflow.md` names for a
+      sentence naming the exemption check, and correct or delete what no
+      longer reads true. Three are grepped — this change's sibling artefacts,
+      `openspec/specs/**` and the README ownership map — and the fourth, the
+      cards, is read through the saved `Board view`, a board being no part of
+      this tree.
       `openspec/specs/mutation-floor/` is the likeliest of the four to hold
       one, being where the check is specified
 

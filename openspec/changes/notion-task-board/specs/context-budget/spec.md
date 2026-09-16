@@ -108,7 +108,7 @@ other.
 4. **Kept** — the fact is a standing constraint that no single site owns.
 
 The order matters because an entry can satisfy more than one test, and the new
-first route is where most of them now stop. A fence that the archive also
+first route is the only one that applies to most of them. A fence that the archive also
 records is still a fence: deleting it on the archive's strength leaves the line
 it governs unmarked, and the archive is not read when someone edits that line.
 
