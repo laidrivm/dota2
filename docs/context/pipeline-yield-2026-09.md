@@ -54,3 +54,36 @@ cleanly, and the only thing separating them is an `error` event in the
 `--agent` stream. Anything deciding this gate on the exit status — a hook, a
 driving agent, a CI step — reads a review that never happened as a pass. Read
 the stream, not the status.
+
+## 2026-09-16 — notion-task-board, applied across five branches, synced and archived
+
+- diff-budget: WARN 563 / PASS 498 / WARN 703 / WARN 799 / PASS 317 / WARN 672 / PASS 0 / PASS 245 — 8 runs, 2 re-cuts forced. One branch measured 2538 against a failing threshold of 800 and became five; branch 1 then went 701 → 857 when the ZOMBIES cases landed and split again at the seam `tasks.md` already drew.
+- zombies: PASS — 10 gaps, 10 acted on (step 2); PASS — 4 gaps, 4 acted on (step 3); PASS — 3 gaps, 3 acted on (step 7)
+- grep (documentation-branch gate): PASS — 1 site, 0 sites, 3 sites across three branches — 4 findings, 4 acted on
+- triage: PASS — 1 Medium, 1 High, 1 Medium, 1 High + 1 Medium, 2 Medium, 1 High + 2 Medium across six branches — 3 findings, 3 acted on
+- coderabbit-local: PASS 4/4 then 7/7 then BLOCKED on a service timeout; PASS 2/2 then 1/1; BLOCKED on timeout then PASS 0 findings run retrospectively from the merge base; PASS 1/1; timed out after 3 findings, 3 acted on; PASS 3/3 then 2/2 — 23 findings, 23 dispositioned
+- coderabbit (PR #277): PASS — 4 findings, 3 applied, 1 rejected (its routing reading was inverted: it argued D2ASS from the change *not* touching workflows, where D2ASS is defined positively by `src/`, `e2e/` and product specs)
+- coderabbit (PR #278): PASS — 2 findings, 1 applied, 1 already fixed on an unpushed commit
+- Not run: warm (no dependency manifest changed on any of the seven branches), ponytail-review, preflight, code-review, security-review
+- Not run and owed: zombies against `glob-row-example`'s proposal text, which `docs/feature-workflow.md` Stage 1 requires before a proposal is finalised. The proposal was written and committed without it.
+
+Two things this session puts on the record rather than in a gate line.
+
+**`/triage` returned three findings in six runs**, against a contract that says
+it "returns no findings by design" and a ledger where it has mostly returned
+none: the missing `outcome-calibration` → `match-harvest` edge, which no
+`## Ordering` scan could have found because that change has no such section;
+an obligation naming three of eight statuses and pointing at no vocabulary for
+the other five; and the reconciliation of 36 leaving queue entries against the
+cards meant to replace them. All three came from *reading the High group*
+rather than from the map, which is what the gate asks for and what makes the
+difference between it yielding and not.
+
+**`/coderabbit-local` timed out on four of eleven runs** — twice on the same
+branch, and twice leaving a branch handed to the user on a gate that never
+closed. One was recovered by re-running against the merge base after the fact
+(`--base 33abde3`), which returned 0 findings; the other was superseded by the
+PR bot's completed review of the same diff. A timeout emits findings and then
+dies without a `complete` event, so a gate read from the findings alone
+reports PASS on a review that reached no conclusion — which is what happened
+once here before it was corrected.
