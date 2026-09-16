@@ -141,7 +141,7 @@ describe("a change that is not yet complete", () => {
 });
 
 describe("this repository's own ordering", () => {
-	// Every case above fabricates its tree, so a typo in one of the six
+	// Every case above fabricates its tree, so a typo in one of the seven
 	// `.openspec.yaml` files this repository actually carries is caught by
 	// nothing here — it would surface as an unrelated case throwing somewhere
 	// else, which is the shape of a failure nobody reads.
