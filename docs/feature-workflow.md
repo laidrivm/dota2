@@ -105,12 +105,13 @@ outgrew: they age with the workflow rather than with the code, and a reader
 looking for them is already here.
 
 - When a statement changes — a rule, a recorded decision, or one artefact of
-  a change under review — grep the four places that restate one before
+  a change under review — search the four places that restate one before
   calling the change done: the change's own sibling artefacts,
   `openspec/specs/**`, the cards on the boards, and the README ownership map.
-  Search the wording of the claim being replaced, never the wording replacing
-  it, and reconcile each site in the same change or name the change that
-  will. `PLAN.md` left this list when the queue did: what it holds now is the
+  Three are files and are grepped; the fourth is read through the saved
+  `Board view`, a board being no part of this tree. Search the wording of the
+  claim being replaced, never the wording replacing it, and reconcile each
+  site in the same change or name the change that will. `PLAN.md` left this list when the queue did: what it holds now is the
   standing constraints, which no change restates.
 - Copy a `MODIFIED` requirement whole from the live spec before editing it.
 - Move the card in the same turn the stage moves. When a proposal merges, a
