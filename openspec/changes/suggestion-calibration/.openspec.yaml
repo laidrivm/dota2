@@ -1,2 +1,7 @@
 schema: spec-driven
 created: 2026-08-31
+after:
+  - beta-refit
+  - lane-synergy-model
+  - laning-phase-model
+  - side-and-phase-deltas

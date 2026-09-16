@@ -1,2 +1,7 @@
 schema: spec-driven
 created: 2026-08-30
+after:
+  - hero-aliases-seed
+  - outcome-calibration
+  - score-calibration
+  - side-and-phase-deltas

@@ -1,2 +1,5 @@
 schema: spec-driven
 created: 2026-08-30
+after:
+  - candidacy-gate
+  - laning-phase-model
