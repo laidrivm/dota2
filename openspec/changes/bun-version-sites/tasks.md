@@ -64,8 +64,11 @@ Closes `toolchain-pins/a-job-added-without-a-version`,
       version years old and expecting a pass — a check that quietly demanded
       the newest would fail here and would be a different requirement
       (*every-site-agreeing*)
-- [ ] 2.4 Confirm the count in `PLAN.md` is now read from nowhere: the check
-      names no figure, and its cases assert sites rather than how many
+- [ ] 2.4 Confirm the count is now read from nowhere: the check names no
+      figure, and its cases assert sites rather than how many. It was
+      `PLAN.md`'s entry that carried it; that entry is the `bun-version-sites`
+      card on `Harness`, which points at this directory and restates nothing,
+      so `## Why` above is the only copy left
 
 ## 3. Which pins have an updater, and the alias clause the check outgrew
 
@@ -91,12 +94,13 @@ Closes `toolchain-pins/the-workflow-inputs-are-the-pins-with-no-updater`,
       `checks/agent-permissions-prompts.test.ts` already reads the alias of
       every gated command, so this step changes a description and not a
       boundary (*an-alias-outside-the-install-family*)
-- [ ] 3.5 Delete the `PLAN.md` entry *Ten workflow pins nothing updates*: what
-      it asked for is this check, and an entry whose work has shipped leaves
-      the queue
+- [ ] 3.5 Move the `bun-version-sites` card on `Harness` — the entry *Ten
+      workflow pins nothing updates* became it — to `done`: what it asked for
+      is this check
 - [ ] 3.6 Measure every capped file this change touched and record the
       numbers, whether or not any is over
       (*change-slicing/a-file-over-the-cap*)
 - [ ] 3.7 Grep the four places that restate a decision — the change's sibling
-      artefacts, `openspec/specs/**`, `PLAN.md` and the README ownership map —
+      artefacts, `openspec/specs/**`, the cards on the boards and the README
+      ownership map —
       for a sentence naming the count of workflow pins, and reconcile each

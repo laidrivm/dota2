@@ -3,7 +3,7 @@
 Five steps, five pull requests, in this order. Each names the criteria it
 closes by their `<capability>/<scenario-slug>` identifiers. There is no
 closing group: `openspec/config.yaml` lets a step close no criterion only when
-it carries infrastructure, and updating `PLAN.md` and running the review
+it carries infrastructure, and moving the card and running the review
 sequence are none of that — so 5.8 and 5.9 cite no criterion and ride with the
 step that merges last.
 
@@ -202,8 +202,9 @@ Closes `snapshot-build/the-mean-hero-has-no-side-preference`,
       a positive one — the pass removes the constant, not the signal.
 - [ ] 5.7 Confirm every centred value stays finite and both fields keep their
       shapes (ZOMBIES 10, 11), so `contract.ts`'s assertion publishes.
-- [ ] 5.8 Update `PLAN.md`'s queue in this step's pull request, not
-      afterwards.
+- [ ] 5.8 Move the change's card on its board to the status this step
+      reaches, in the same turn rather than afterwards — `PLAN.md` holds
+      no queue.
 - [ ] 5.9 Run the pre-PR sequence per `docs/review-toolkit.md` on every
       step, and `bun test` and `bun run test:db` besides. Every step here
       touches the database, and CI runs only the first

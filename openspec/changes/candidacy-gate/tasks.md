@@ -3,7 +3,7 @@
 Two steps, two pull requests, in this order. Each names the criteria it
 closes. There is no closing group: `openspec/config.yaml` lets a step close
 no criterion only when it carries infrastructure, and reproducing the report,
-updating `PLAN.md` and running the review sequence are none of that — so they
+moving the card and running the review sequence are none of that — so they
 ride with the step that merges last, where they were always going to happen.
 
 The `draft-model` delta carries two criteria this change does not close —
@@ -75,6 +75,7 @@ Closes `draft-model/the-threshold-does-not-reach-enemy-role-inference`,
       Treant and Bane opposite, and check Phantom Lancer is gone from the
       offlane block. Record the block before and after in the pull request —
       it is the one observation a reader can check against the complaint.
-- [ ] 2.6 Update `PLAN.md`'s queue in this step's pull request, not
-      afterwards.
+- [ ] 2.6 Move the change's card on its board to the status this step
+      reaches, in the same turn rather than afterwards — `PLAN.md` holds
+      no queue.
 - [ ] 2.7 Run the pre-PR sequence per `docs/review-toolkit.md` on both steps.

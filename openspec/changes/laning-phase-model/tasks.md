@@ -8,7 +8,7 @@ when it carries infrastructure, and every step here closes at least one.
 Several individual tasks close none, and each says so where it stands rather
 than here — 1.5 guards an assumption about the endpoint, 2.3, 5.4, 10.4 and
 10.5 record a measurement in the pull request, 3.3 and 7.3 refuse a shape,
-and 10.3 re-runs a floor another capability owns. Updating `PLAN.md` and
+and 10.3 re-runs a floor another capability owns. Moving the card and
 running the review sequence are the last two, and they ride with the step
 that merges last.
 
@@ -244,7 +244,8 @@ Closes `draft-model/a-bundle-predating-the-lane-matrix`,
 - [ ] 10.3 Re-run Stryker (ZOMBIES 40). `openspec/specs/mutation-floor/`
       scopes it to `src/model.ts`, 9.1 splits that file, and the floor applies
       to whatever it becomes. Whether one configuration per file still scales
-      is `PLAN.md`'s open entry and not this change's to settle — but leaving
+      is the `Mutation testing's scope predates the job tree` card on
+      `Harness`, and not this change's to settle — but leaving
       the floor unmet is not an option it has either.
 - [ ] 10.4 Record the suggestion block before and after on one real draft, so
       the change's effect on ordering is written down while the weight is
@@ -252,8 +253,9 @@ Closes `draft-model/a-bundle-predating-the-lane-matrix`,
 - [ ] 10.5 Say in the pull request what the run now costs: 3 600 requests
       added to ~516, and about three hours against the under-one-hour the run
       takes today.
-- [ ] 10.6 Update `PLAN.md`'s queue in this step's pull request, not
-      afterwards.
+- [ ] 10.6 Move the change's card on its board to the status this step
+      reaches, in the same turn rather than afterwards — `PLAN.md` holds
+      no queue.
 - [ ] 10.7 Run the pre-PR sequence per `docs/review-toolkit.md` on every step,
       and `bun test` and `bun run test:db` besides. Steps 1 to 8 touch the
       database, and CI runs only the first
