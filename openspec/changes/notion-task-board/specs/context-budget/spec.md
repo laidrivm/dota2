@@ -82,7 +82,7 @@ does to every other artefact.
 #### Scenario: A finding with no change of its own
 
 - **WHEN** a review or a session surfaces work that has no change directory —
-  as sixteen of the thirty-five entries this change moves do not
+  as seventeen of the thirty-seven entries this change moves do not
 - **THEN** it becomes a card at `suggested`, and `PLAN.md` records nothing:
   the board is where a task with no artefact in the tree is held, which is
   the case the tree cannot serve

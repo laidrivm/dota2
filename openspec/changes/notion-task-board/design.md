@@ -180,15 +180,21 @@ fabricated directory, which is how its test is written.
 
 ### Routing the cards that exist today
 
-The rule is the owning repository. Applied to the thirty-five open entries
-by reading their subjects:
+The rule is the owning repository. Applied to the open entries by reading
+their subjects:
 
 ```text
 D2ASS    21   draft model and calibration chain, board and picker,
               snapshot build and ingest, hero data, deploy
-Harness  14   rulebook and captured rules, review toolkit and the bot,
+Harness  16   rulebook and captured rules, review toolkit and the bot,
               commit and diff gates, workflow pins, skills, repo layout
 ```
+
+Thirty-five when this was written and thirty-seven when step 5 ran, both
+additions falling to `Harness`: `PLAN.md` gained this change's own entry, and
+`drop-mutation-exemptions` turned out to be a change directory the queue never
+gave a bullet of its own — which the derivation reports and nothing else does,
+so the board owes it a card the queue could not have supplied.
 
 Four are genuinely borderline and are named so the apply stage does not
 re-argue them silently: **Task 5** (error tracking is infrastructure, but
@@ -232,7 +238,7 @@ boards disagreeing invisibly.
 3. **Cards from the archive** — thirty at `done`, pointer set, bodies empty.
    First because their status is the one that derives 30/30, so a mistake
    here is visible immediately.
-4. **Cards from the open queue** — thirty-five, routed 21/14, each at the
+4. **Cards from the open queue** — thirty-seven, routed 21/16, each at the
    status the script derives or at `suggested` where it derives none.
 5. **Cards from the briefs** — nine, bodies carrying the `Status: DONE`
    block where there is one.
@@ -263,8 +269,9 @@ re-derivable from the tree at any time.
    directory in a repository this one cannot read. `archive-digest` does not
    answer it either.
 3. **How does `rich_text` encode a path and an empty value through this
-   connector?** Deliberately open, and the only one of the three with an
-   owner: task 1.2 settles it before a card is written. It is listed here
-   rather than treated as settled because the delta declines to fix an
-   encoding nobody has exercised, and a reader of this document should not
-   conclude from the `Pointer` decision above that the wire shape is known.
+   connector?** Settled by task 1.2, which is the owner this question was
+   given: measured on 2026-09-14 and recorded in
+   `docs/context/notion-board-apply-2026-09.md` §*The `Pointer` encoding,
+   measured by task 1.2*, which is where steps 4, 5 and 6 read it. It stays
+   listed because the delta still declines to fix an encoding in the spec,
+   and the measurement lives outside this document rather than in it.
