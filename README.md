@@ -14,7 +14,7 @@
 | `docs/verification.md` | what counts as evidence for a claim | before a claim or a decision rests on one |
 | `docs/rulebook-growth.md` | what a fired maintenance trigger asks for: how a rule leaves a sublist, how a section leaves an always-on file | when a rule or a section is added, promoted or deleted |
 | `docs/research/*` | dated surveys of an external source — what it offers, measured, and when it was read | before a change rests on what that source publishes |
-| `PLAN.md` | the open queue, its sources, and the standing constraints | every session |
+| `PLAN.md` | the requirement sources, the standing constraints, and which board holds the queue | every session |
 | `spec-inbox/` | raw product specs not yet in the repo — contents gitignored, its README tracked | when a task cites one |
 | `openspec/specs/*/spec.md` | what each shipped capability must do (EARS) | when changing behaviour it covers |
 | `openspec/config.yaml` → `context:` | architecture choices (SSE, BFF, cache, N+1) | on artifact generation |

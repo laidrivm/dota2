@@ -93,7 +93,7 @@ export function unbacked(markdown: string, tracked: string[]): string[] {
 /** Every tracked root file, and why it is at the root. */
 export const EXEMPT: Record<string, string> = {
 	"CLAUDE.md": "always-on agent rules, read at the start of every session",
-	"PLAN.md": "always-on queue, read at the start of every session",
+	"PLAN.md": "always-on sources and constraints, read at every session start",
 	"README.md": "the front door, where a reader arrives before any directory",
 	"index.html": "the bundler entry point `bun build ./index.html` expects here",
 	"package.json": "the manifest bun resolves from the root and nowhere else",

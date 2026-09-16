@@ -126,14 +126,23 @@ Closes: *Each task brief becomes one card and the directory goes*
 
 Closes: *PLAN.md holds the standing constraints and the sources*
 
-- [ ] 7.1 Delete the `## Queue` section, 591 lines, and the opening sentence
-      naming the queue as what the file holds
-- [ ] 7.2 Replace the `tasks/task-5.md` requirement source with its card
-- [ ] 7.3 Add the pointer to the boards, by name and not by URL
-- [ ] 7.4 Measure the always-on set and record the figure: 899 before, about
-      308 after
-- [ ] 7.5 Test that `PLAN.md` holds no `## Queue` heading and no
-      `tasks/task-5.md` citation
+- [x] 7.1 Delete the `## Queue` section, 591 lines, and the opening sentence
+      naming the queue as what the file holds — 604 lines when it ran, the
+      section having grown by this change's own entry, and the growth
+      protocol's *What lives here* and *What evicts an entry* name the queue
+      too
+- [x] 7.2 Replace the `tasks/task-5.md` requirement source with its card
+- [x] 7.3 Add the pointer to the boards, by name and not by URL
+- [x] 7.4 Measure the always-on set and record the figure: **912 before, 334
+      after** — `PLAN.md` 704 → 122 and `CLAUDE.md` 208 → 212, the four lines
+      being 8.3's sentence saying where the queue is now. 899 and about 308
+      were taken before `PLAN.md` gained this change's own entry; recorded in
+      the proposal's `## Impact`
+- [x] 7.5 Test that `PLAN.md` holds no `## Queue` heading and no
+      `tasks/task-5.md` citation — `checks/plan-sources.test.ts`. The path may
+      not survive as a *citation*, and the card it is replaced by is titled
+      with that same filename, so the case asserts the one mention names a
+      card and that git tracks no such file
 
 ## 8. The sites that restate what moved
 
@@ -145,8 +154,12 @@ Closes: *An entry leaves PLAN.md by one of four routes*
       gains relocation as a second remedy beside extraction, and the test
       that picks between them — as written it states extraction as the only
       remedy a fired trigger has, which forbids what this change does
-- [ ] 8.3 `CLAUDE.md` §*Maintenance & growth*, `README.md`'s ownership map
-      and `scripts/repo-layout.ts` — each names `PLAN.md` as the queue
+- [x] 8.3 `CLAUDE.md` §*Maintenance & growth*, `README.md`'s ownership map
+      and `scripts/repo-layout.ts` — each names `PLAN.md` as the queue. Two
+      sites in `CLAUDE.md` rather than one: the section names the extraction
+      protocol, and the Process rule *Take the queue's next entry* names the
+      queue itself. Taken with step 7 rather than with the rest of step 8, so
+      that the claim and its removal land in the same pull request
 - [ ] 8.4 Grep the wording of each claim being replaced, not the wording
       replacing it, and reconcile every site this step did not anticipate
 

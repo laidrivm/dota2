@@ -88,8 +88,12 @@ pays it alone. It fires when the set passes ~500 lines, when one sublist below
 passes ~20 rules, or when rules from this file's middle are observably being
 ignored — `openspec/specs/context-budget/` and `openspec/specs/agent-rulebook/`
 fix those two figures. What a fired trigger asks for — promotion, deletion, the
-protocol for extracting a section, and where a session save-point lives — is in
+protocol for extracting a section or relocating one off the tree, and where a
+session save-point lives — is in
 [docs/rulebook-growth.md](docs/rulebook-growth.md).
+
+`PLAN.md` holds the sources and the standing constraints and no longer the
+queue: a task with a status is a card on one of the three boards it names.
 
 ### Rules
 
@@ -159,8 +163,8 @@ Rules about how work is carried out here. They do not age with the code.
   probe alone.
 - A rules or docs edit that no artefact of the change under way asks for goes
   in its own commit.
-- Take the queue's next entry in its stated order, and name every entry
-  stepped over and why.
+- Take the queue's next entry in the order its board view shows, and name
+  every entry stepped over and why.
 - Before syncing a `MODIFIED` delta, check it carries every scenario the live
   requirement has — the replacement is whole-requirement.
 - Never silence a linter or type-checker finding by disabling its rule in
