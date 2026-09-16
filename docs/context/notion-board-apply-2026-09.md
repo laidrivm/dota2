@@ -218,3 +218,21 @@ leave the two figures disagreeing silently.
 the design stage's probe, not by step 1 — and no `Pointer` property. Both
 boards hold zero cards. `Harness` is untouched: `Name`, `Status` with the
 original three options, `Assign`. `mellon` does not exist.
+
+## A title that looks like a hostname is autolinked
+
+Measured 2026-09-16, on the nine brief cards step 6 titles with their
+filename. The connector wrote `tasks/task-6.md` with a link annotation on the
+`task-6.md` span — `.md` reads as a top-level domain — so a read back through
+the saved view renders `tasks/[task-6.md](http://task-6.md)`.
+
+The card's plain-text title is exactly `tasks/task-6.md`, character for
+character, so the criterion holds: the cited path is the title of exactly one
+card and a search for it matches. What is wrong is the annotation alone,
+pointing at a host that does not exist. Escaping the dot on write does not
+remove it, and nothing in the contract reads it; stripping it is one click per
+card in the Notion UI.
+
+Worth carrying forward for `archive-digest`, which titles pages the same way:
+a title that parses as a hostname comes back as a link, and the check that it
+is right is the plain text rather than what the view renders.
