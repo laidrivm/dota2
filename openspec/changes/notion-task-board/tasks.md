@@ -60,11 +60,11 @@ Closes: *Three statuses are derived and five are moved by hand*
 
 Closes: *A card names what blocks it, derived from the tree*
 
-- [ ] 3.1 Add `after:` to the six `.openspec.yaml` files whose `## Ordering`
+- [x] 3.1 Add `after:` to the six `.openspec.yaml` files whose `## Ordering`
       names a predecessor, leaving the prose argument where it stands
-- [ ] 3.2 Derive the blocked set, computing it at the time of asking rather
+- [x] 3.2 Derive the blocked set, computing it at the time of asking rather
       than storing it on a card
-- [ ] 3.3 Tests: a predecessor not `done` reports blocked; every predecessor
+- [x] 3.3 Tests: a predecessor not `done` reports blocked; every predecessor
       `done` reports takeable with the `after:` list intact; an absent
       `after:` reports takeable; an `after:` naming a slug that exists
       nowhere fails naming slug and file; an `after:` holding a bare string

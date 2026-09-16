@@ -67,6 +67,39 @@ blocks a task on the work waiting for it.
 So the table is a reading list, not an answer: it says which six proposals to
 open and argues nothing. Write each `after:` from the prose.
 
+### What the prose gave, written 2026-09-14
+
+```text
+beta-refit              hero-aliases-seed, outcome-calibration,
+                        score-calibration, side-and-phase-deltas
+lane-synergy-model      candidacy-gate, laning-phase-model
+laning-phase-model      candidacy-gate
+score-calibration       outcome-calibration
+side-and-phase-deltas   match-harvest, outcome-calibration
+suggestion-calibration  beta-refit, lane-synergy-model, laning-phase-model,
+                        side-and-phase-deltas
+```
+
+Two readings decided the four columns that shrank, and both are worth naming
+because a later re-derivation would otherwise reach the mention list again:
+
+- **A window is not an edge.** `laning-phase-model` and `lane-synergy-model`
+  each say they SHOULD NOT land *between* `outcome-calibration` and
+  `suggestion-calibration`. That forbids an interval; it does not say which
+  side of it they take, and `outcome-calibration` is a predecessor on neither
+  reading. `suggestion-calibration` names both of them in its own `after:`, so
+  the interval is closed from the other end, where the fact belongs. The
+  argument stays in both `## Ordering` sections, which is where a reader asking
+  *why* is sent.
+- **A comparison is not a dependency.** `side-and-phase-deltas` says *like
+  `score-calibration` it moves the score scale*, and `laning-phase-model` says
+  its collisions with `side-and-phase-deltas` and `score-calibration` were
+  routed into added requirements **so that neither change has to wait for the
+  other**. Both mentions argue against the edge the table would have drawn.
+
+Derived afterwards: no cycle, every named slug resolves, and all six are
+blocked today because nothing in the chain is archived yet.
+
 ## Step 5 — the routing of the thirty-five open entries
 
 `design.md` states the split as 21 to `D2ASS` and 14 to `Harness` and names
