@@ -38,8 +38,13 @@
       `module-classes.test.ts` all pass, and the count of files drops by one
 - [ ] 3.2 `bun run typecheck` and `bun run lint` clean, no unused import left
       behind by the deletions
-- [ ] 3.3 `scripts/spec-coverage-floor.test.ts` passes with `FLOOR` still 385 —
-      the four scenarios left the specs rather than the citations
+- [ ] 3.3 `scripts/spec-coverage-floor.test.ts` passes with `FLOOR`
+      unchanged at whatever `scripts/spec-coverage.ts` reads when this runs —
+      the four scenarios left the specs rather than the citations, so the
+      count falls with the floor's denominator and the gauge does not move.
+      Not a figure: the floor was 385 when this was written and 402 once
+      `notion-task-board` synced, and naming one would fail this step for the
+      wrong reason
 - [ ] 3.4 Run the real gate end to end: `rm -rf reports/mutation`,
       `bunx --no-install stryker run`, `bun scripts/mutation-floor.ts` — it
       exits 0 against `FLOOR = 66`

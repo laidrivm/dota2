@@ -62,7 +62,9 @@ None.
   line it occupies* is removed, with its four scenarios. What Stryker does
   with a directive is Stryker's; what this repository checks is the count and
   its floor. Removing the requirement rather than leaving its scenarios
-  uncited is what keeps `scripts/spec-coverage.ts`'s `FLOOR` at 385.
+  uncited is what leaves `scripts/spec-coverage.ts`'s `FLOOR` where it
+  stands — that file fixes the figure, and this change moves neither it nor
+  the gauge.
 
 ## Impact
 

@@ -20,8 +20,11 @@ part of it: this is its first caller, not its only one.
 - Delete the second job and everything reachable only from it.
 - Leave the first job — the count, the floor, the reason its line carries —
   reading exactly as it does now.
-- Keep `scripts/spec-coverage.ts`'s `FLOOR` at 385 by removing the requirement
-  rather than orphaning its scenarios.
+- Leave `scripts/spec-coverage.ts`'s `FLOOR` where it stands by removing the
+  requirement rather than orphaning its scenarios. The figure is that file's
+  to state and it moves without this change — 385 when this was written, 402
+  once `notion-task-board` synced — so what this fixes is that it does not
+  move *here*.
 
 **Non-Goals:**
 
