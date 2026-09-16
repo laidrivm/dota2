@@ -76,9 +76,9 @@ accounts of one thing with only one of them reviewed — which is the duplicatio
 this requirement exists to prevent, arriving by the one route the rest of it
 does not close.
 
-Every `D2ASS` card that is not `done` crosses this boundary eventually:
-sixteen of the thirty-five entries this change moves are findings with no
-directory, and each becomes a change or is dropped. A card on `Harness` or
+Every `D2ASS` card that is not `done` crosses this boundary eventually: nine
+of the twenty-one entries this change moves to that board are findings with
+no directory, and each becomes a change or is dropped. A card on `Harness` or
 `mellon` SHALL NOT be required to cross it — their trees are not here, so the
 directory that would supply the pointer can never appear, and a rule waiting
 for it would hold every such card permanently in breach.

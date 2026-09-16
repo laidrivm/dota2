@@ -164,6 +164,34 @@ backlog went to `D2ASS`, `scan-lift` and the build's unstated behaviours to
 scratch is what this table exists to prevent, because `design.md` asserts a
 count that a different reading would contradict.
 
+### What step 5 actually wrote, 2026-09-14
+
+Thirty-seven cards, 21 to `D2ASS` and 16 to `Harness`. The table above is
+unchanged and settled all thirty-five of its entries; the two beyond it are
+both `Harness`, and neither was a re-reading:
+
+- **`notion-task-board` itself.** `PLAN.md`'s Open section gained its entry in
+  `4a6c92f`, after the count in `design.md` was taken. Its card is at
+  `implementing` rather than the `ready` the tree derives — `implementing` is
+  one of the five the tree cannot see, and *A status the tree cannot see* is
+  the specific rule where *A card and the tree disagreeing* is the general one.
+- **`drop-mutation-exemptions`.** A change directory with no bullet of its own;
+  `PLAN.md` named it only inside the `scan-lift` entry. The derivation reports
+  it `ready` and the queue never did, so a board built from `PLAN.md` alone
+  would have been one card short of its own contract on the day it was made.
+  This is the case worth carrying forward: **the card set is every task, not
+  every queue entry**, and the two sources have to be unioned.
+
+Twenty carry a `Pointer`, seventeen carry a body. Read back through both
+`Board view`s: 31 rows on `D2ASS`, 36 on `Harness`, every `Pointer` either a
+path or `""`.
+
+One entry resolved by its headline rather than by a cited path:
+`suggestion-calibration` still read *not yet proposed* with its directory in
+the tree — the drift the proposal was written after, met while applying the
+change that fixes it. Resolving entries by path alone gives that change two
+cards.
+
 ## Step 6 — the briefs, and a hole in task 6.2
 
 Task 6.2 says to build each card's body from the brief's `Status: DONE` block
@@ -201,6 +229,36 @@ a Playwright layer, so it is arguable either way and neither count is wrong.
 Take seven and two, or take six and three and correct `design.md`; do not
 leave the two figures disagreeing silently.
 
+## The `Pointer` encoding, measured by task 1.2
+
+Run on `D2ASS` on 2026-09-14, on a board still holding nothing: two throwaway
+cards written through the connector, both read back through the `Board view`
+saved view. This is what steps 4, 5 and 6 write and read, and none of them
+re-derives it.
+
+```text
+write a path    "Pointer": "openspec/changes/probe-slug/"
+                a plain string in the properties map — the connector takes
+                SQLite values, not the REST surface's array of rich-text
+                objects
+write empty     omit the key entirely
+read back       "Pointer": "openspec/changes/probe-slug/"
+                "Pointer": ""
+```
+
+So the empty state the delta requires — *reads as empty rather than as
+absent* — is what omitting the property already produces: the view returns
+`""` for the card that was never given one, and there is no second value to
+write for it. Setting `null` was not exercised and nothing needs it.
+
+**The connector has no page-delete.** `create_pages`, `update_page`,
+`move_pages` and `duplicate_page` are the whole page surface; nothing bins a
+row. The two probes were moved to the workspace level instead, which empties
+the board — the state step 4 counts from — and leaves two private pages named
+`ProbePointerPath` and `ProbePointerEmpty` for the Notion UI to delete. The
+same limit applies to the 76 cards steps 4 to 6 wrote: a wrong card is
+corrected in place, never removed.
+
 ## What is already recorded elsewhere, and needs no repeating
 
 - The eleven `tasks.md` files carrying a `PLAN.md` queue step, and the prose
@@ -209,8 +267,9 @@ leave the two figures disagreeing silently.
 - Every probe this change rests on — `openspec archive` accepting `after:`,
   `STATUS` refusing an option list where `SELECT` accepts one, the saved view
   following the property through the conversion: `design.md` §*Decisions*.
-- That the `rich_text` wire encoding is unmeasured: the delta says so and
-  task 1.2 owns it.
+- That the `rich_text` wire encoding was unmeasured when this note was
+  written: the delta says so and task 1.2 owned it. The section above is the
+  measurement it asked for.
 
 ## State of the boards when the apply run starts
 
@@ -218,6 +277,14 @@ leave the two figures disagreeing silently.
 the design stage's probe, not by step 1 — and no `Pointer` property. Both
 boards hold zero cards. `Harness` is untouched: `Name`, `Status` with the
 original three options, `Assign`. `mellon` does not exist.
+
+What step 1 left: both boards carry the eight `select` options and a
+`Pointer` of type `rich_text`, and both still hold zero cards. `mellon` still
+does not exist, and step 1 deliberately did not create it — the routing rule
+names three boards and only two have a project behind them, so a session
+finding two is reading the rule correctly rather than finding a breach. The
+board is made when `mellon`'s repository is, with the same one statement
+task 1.1 ran on the other two.
 
 ## A title that looks like a hostname is autolinked
 
