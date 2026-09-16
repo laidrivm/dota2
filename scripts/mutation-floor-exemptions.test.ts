@@ -1,7 +1,8 @@
 /**
  * Which disable comments Stryker honours, and therefore which lines the check
  * must see as exempted. This file leaves with the scanner it exercises when
- * `mutation-floor.ts` switches to `scripts/scan.ts` — `PLAN.md` owns that lift.
+ * `mutation-floor.ts` switches to `scripts/scan.ts` — `scan-lift` owns that
+ * lift, and is a card on `Harness`.
  */
 import { afterAll, describe, expect, test } from "bun:test";
 import { cleanup } from "./mutation-floor.fixture.ts";

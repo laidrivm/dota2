@@ -107,13 +107,31 @@ looking for them is already here.
 - When a statement changes — a rule, a recorded decision, or one artefact of
   a change under review — grep the four places that restate one before
   calling the change done: the change's own sibling artefacts,
-  `openspec/specs/**`, `PLAN.md`, and the README ownership map. Search the
-  wording of the claim being replaced, never the wording replacing it, and
-  reconcile each site in the same change or name the change that will.
+  `openspec/specs/**`, the cards on the boards, and the README ownership map.
+  Search the wording of the claim being replaced, never the wording replacing
+  it, and reconcile each site in the same change or name the change that
+  will. `PLAN.md` left this list when the queue did: what it holds now is the
+  standing constraints, which no change restates.
 - Copy a `MODIFIED` requirement whole from the live spec before editing it.
-- Maintain `PLAN.md`: read it at session start; update its queue, statuses
-  and decisions in the same turn a task or stage completes. A step's box is
-  ticked in the pull request that implements it, never in a commit after the
-  merge.
+- Move the card in the same turn the stage moves. When a proposal merges, a
+  step's branch opens, a pull request opens or merges, or a change is
+  archived, the task's card reaches the status that stage means **before the
+  work is reported as done** — not afterwards, and not at the end of the
+  session. A step's box is ticked in the pull request that implements it,
+  never in a commit after the merge.
+
+  Three of the eight statuses a reconciliation can repair, because
+  `scripts/board-state.ts` derives them from the tree: `proposing`, `ready`,
+  `done`, and only on `D2ASS`. The other five, and every card on `Harness` or
+  `mellon`, are honoured rather than mechanised — this bullet is the whole of
+  what holds them, which is why it is stated as an obligation rather than as a
+  convention.
+
+  A reconciliation that finds a card disagreeing with the tree **reports what
+  it corrected**; it does not repair silently. A silent repair leaves nobody
+  aware the obligation was missed, which is the failure this replaced
+  `PLAN.md` after — twice in one week: an entry read *not yet proposed* with
+  its proposal merged, and the entry recording the always-on measurement read
+  743 against a measured 899.
 - Open every markdown file with a level-1 heading — OpenSpec's `design.md`
   and delta-spec templates start at `##`, so the title is yours to add.

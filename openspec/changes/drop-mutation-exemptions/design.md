@@ -61,7 +61,7 @@ escaped quote citing normally.
 An earlier draft of this design removed it, on the ground that there was no
 next consumer named. There was; the draft did not grep the sibling changes
 `docs/feature-workflow.md` requires grepping, and `scan-lift` had carried that
-consumer in the queue since before this change was proposed. Removing and
+consumer since before this change was proposed. Removing and
 restoring the export is the only outcome that reasoning could have produced.
 
 What survives the correction is the shape of the worry: between this change and

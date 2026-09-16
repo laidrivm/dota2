@@ -20,7 +20,8 @@ const PNG = Buffer.from(
  * A hero's image path, read from the snapshot this page will load. Never
  * assembled from the name: the slug is the ingest's — `Zeus` is `zuus.png` and
  * `Queen of Pain` is `queenofpain.png` — and whose spelling is canonical is
- * `PLAN.md`'s open question, not this suite's to answer.
+ * `hero-slug-canon`'s question rather than this suite's — that change is
+ * archived, and its card points at where it settled it.
  */
 export async function iconPath(page: Page, name: string): Promise<string> {
 	const bundle = (await (await page.request.get("/snapshot.json")).json()) as {
