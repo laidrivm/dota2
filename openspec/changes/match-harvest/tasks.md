@@ -3,7 +3,7 @@
 Six steps, six pull requests, in this order. Each names the criteria it
 closes by their `<capability>/<scenario-slug>` identifiers. There is no
 closing group: `openspec/config.yaml` lets a step close no criterion only
-when it carries infrastructure, and updating `PLAN.md` and running the review
+when it carries infrastructure, and moving the card and running the review
 sequence are neither — so they ride with the step that merges last, where
 they were always going to happen.
 
@@ -161,8 +161,9 @@ Closes `snapshot-ingest/a-harvest-that-fails`,
 - [ ] 6.5 Re-verify `snapshot-ingest/a-run-that-succeeds` (ZOMBIES 30), whose
       text this change rewrites from three steps to four — `run.test.ts:79`
       is the case that carries it and it now has a fourth step to pass.
-- [ ] 6.6 Update `PLAN.md`'s queue in this step's pull request, not
-      afterwards.
+- [ ] 6.6 Move the change's card on its board to the status this step
+      reaches, in the same turn rather than afterwards — `PLAN.md` holds
+      no queue.
 - [ ] 6.7 Run the pre-PR sequence per `docs/review-toolkit.md` on every step.
       Steps 1 to 4 all touch the database, so each one's suite must assert it
       ran rather than skipping, and `bun run test:db` is the run that counts.

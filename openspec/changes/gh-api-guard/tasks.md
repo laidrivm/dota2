@@ -91,6 +91,7 @@ and no criterion in any capability states what a doc sentence says.
       the guard at 246 when this was proposed
       (*change-slicing/a-file-over-the-cap*)
 - [ ] 3.5 Grep the four places that restate a decision — the change's sibling
-      artefacts, `openspec/specs/**`, `PLAN.md` and the README ownership map —
+      artefacts, `openspec/specs/**`, the cards on the boards and the README
+      ownership map —
       for a sentence saying the guard blocks three `gh` writes, and reconcile
       each or name the change that will

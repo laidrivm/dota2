@@ -232,8 +232,9 @@ Closes `draft-model/the-bundle-s-weights-are-the-ones-used`,
       which `laning-phase-model` splits; this adds to whatever that left.
 - [ ] 6.7 Record the suggestion block before and after on one real draft, and
       the fitted set beside the hand-set one. Closes no criterion.
-- [ ] 6.8 Update `PLAN.md`'s queue in this step's pull request, not
-      afterwards. Closes no criterion.
+- [ ] 6.8 Move the change's card on its board to the status this step
+      reaches, in the same turn rather than afterwards — `PLAN.md` holds
+      no queue. Closes no criterion.
 - [ ] 6.9 Run the pre-PR sequence per `docs/review-toolkit.md` on every step,
       and `bun test` and `bun run test:db` besides. Closes no criterion.
       Steps 1 to 5 touch the database, and CI runs only `bun test`

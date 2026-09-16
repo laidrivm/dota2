@@ -25,8 +25,9 @@
       describe the directive's accepted form, its `all` refusal, its comment
       spelling and the one-mutator rule; leave the floor's own bullets and the
       `reports/mutation/` deletion note
-- [ ] 2.3 Check `README.md` and `PLAN.md` for a sentence that names the
-      exemption check, and correct or delete what no longer reads true
+- [ ] 2.3 Check `README.md`, `PLAN.md` and the cards on the boards for a
+      sentence that names the exemption check, and correct or delete what no
+      longer reads true
 
 ## 3. Prove the gate still holds
 

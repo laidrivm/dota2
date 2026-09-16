@@ -4,7 +4,7 @@ Two steps, two pull requests, in this order. Each names the criteria it
 closes by their `<capability>/<scenario-slug>` identifiers. There is no
 closing group: `openspec/config.yaml` lets a step close no criterion only
 when it carries infrastructure, and confirming the defect is gone, recording
-the estimate's movement and updating `PLAN.md` are none of that — so they
+the estimate's movement and moving the card are none of that — so they
 ride with the step that merges last.
 
 **This change SHOULD NOT be applied before `outcome-calibration` is.** The
@@ -91,8 +91,9 @@ Closes `snapshot-export/the-database-is-not-rewritten`.
       Δ −14.79 pp to +6.21, 18.6% to 65.0% — as a number in the pull request
       rather than a claim about it. Nothing here says which is right, and
       that is `outcome-calibration`'s.
-- [ ] 2.7 Update `PLAN.md`'s queue in this step's pull request, not
-      afterwards.
+- [ ] 2.7 Move the change's card on its board to the status this step
+      reaches, in the same turn rather than afterwards — `PLAN.md` holds
+      no queue.
 - [ ] 2.8 Run the pre-PR sequence per `docs/review-toolkit.md` on every step,
       and `bun test` and `bun run test:db` besides. The sequence names neither
       and CI runs only `bun test` (`.github/workflows/test.yml:110`), so the

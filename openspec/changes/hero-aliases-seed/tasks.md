@@ -3,7 +3,7 @@
 Five steps, five pull requests, in this order. Each names the criteria it
 closes by their `<capability>/<scenario-slug>` identifiers. There is no
 closing group: `openspec/config.yaml` lets a step close no criterion only when
-it carries infrastructure, and amending a Purpose, updating `PLAN.md` and
+it carries infrastructure, and amending a Purpose, moving the card and
 running the review sequence are none of that — so 5.3 to 5.6 cite no criterion
 and ride with the step that merges last.
 
@@ -164,15 +164,18 @@ revalidation does not reach localStorage.
 - [ ] 5.1 Write the failing case first: `matchHeroes` over a hero entry with
       no `abbreviations` key returns it on a name match instead of throwing.
 - [ ] 5.2 Read both alias arrays as `?? []` in `matchHeroes`.
-- [ ] 5.3 Update `PLAN.md`'s queue in this step's pull request, not
-      afterwards — including the hero-tile lettering entry, whose "a partial
-      source already exists ... for 33 of the 128" now describes the fixture
-      alone and no longer the published bundle.
+- [ ] 5.3 Move the change's card on its board to the status this step
+      reaches, in the same turn rather than afterwards — `PLAN.md` holds
+      no queue. Correct the `Five sets of letters name more than one hero`
+      card on `D2ASS` in the same turn: its "a partial source already exists
+      ... for 33 of the 128" now describes the fixture alone and no longer
+      the published bundle.
 - [ ] 5.4 Amend `hero-picker`'s `## Purpose`, which reads "how its search
       matches names and aliases" and now leaves out abbreviations. A Purpose
       is prose rather than a requirement, so no delta carries it: it is
       edited when the delta is synced, or it drifts from the requirement
       directly below it.
-- [ ] 5.5 Add the e2e bullet (ZOMBIES 26) to the backlog `PLAN.md` owns: a
+- [ ] 5.5 Add the e2e bullet (ZOMBIES 26) to the body of the `The e2e
+      backlog` card on `D2ASS`, which is where that backlog lives now: a
       player opens the picker, types `wk`, and Wraith King is selectable.
 - [ ] 5.6 Run the pre-PR sequence per `docs/review-toolkit.md` on every step.

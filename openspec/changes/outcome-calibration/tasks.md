@@ -3,8 +3,8 @@
 Five steps, five pull requests, in this order. Each names the criteria it
 closes by their `<capability>/<scenario-slug>` identifiers. There is no
 closing group: `openspec/config.yaml` lets a step close no criterion only
-when it carries infrastructure, and recording the figures, updating
-`PLAN.md` and running the review sequence are none of that — so they ride
+when it carries infrastructure, and recording the figures, moving the card
+and running the review sequence are none of that — so they ride
 with the step that merges last, where they were always going to happen.
 
 **This change cannot be applied before `match-harvest` is applied and
@@ -137,7 +137,9 @@ Closes `snapshot-ingest/a-scorer-that-fails`.
       that merges the last step. They are what the whole change exists to
       produce, and the first ones settle whether `beta-refit` is urgent or
       merely due.
-- [ ] 5.6 Update `PLAN.md`'s queue in the same pull request, not afterwards.
+- [ ] 5.6 Move the change's card on its board to the status this step
+      reaches, in the same turn rather than afterwards — `PLAN.md` holds
+      no queue.
 - [ ] 5.7 Run the pre-PR sequence per `docs/review-toolkit.md` on every step.
       Steps 3 to 5 touch the database, so each one's suite must assert it ran
       rather than skipping, and `bun run test:db` is the run that counts.

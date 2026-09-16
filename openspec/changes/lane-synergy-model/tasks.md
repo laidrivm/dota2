@@ -4,7 +4,7 @@ Six steps, six pull requests, in this order. Each names the criteria it
 closes by their `<capability>/<scenario-slug>` identifiers. There is no
 closing group: `openspec/config.yaml` lets a *step* close no criterion only
 when it carries infrastructure, and every step here closes at least one.
-Individual tasks that close none say so where they stand; updating `PLAN.md`
+Individual tasks that close none say so where they stand; moving the card
 and running the review sequence are 6.9 and 6.10, riding with the step that
 merges last.
 
@@ -222,8 +222,9 @@ Closes `draft-model/the-two-lane-components-read-opposite-halves-of-the-board`,
 - [ ] 6.8 Record the suggestion block before and after on one real draft, and
       say what the run now costs: 7 200 requests against ~516, six hours
       against the under-one-hour it took before either lane change.
-- [ ] 6.9 Update `PLAN.md`'s queue in this step's pull request, not
-      afterwards. Closes no criterion, on the terms the preamble states.
+- [ ] 6.9 Move the change's card on its board to the status this step
+      reaches, in the same turn rather than afterwards — `PLAN.md` holds
+      no queue. Closes no criterion, on the terms the preamble states.
 - [ ] 6.10 Run the pre-PR sequence per `docs/review-toolkit.md` on every step,
       and `bun test` and `bun run test:db` besides. Closes no criterion.
       Steps 1 to 4 touch the database, and CI runs only `bun test`

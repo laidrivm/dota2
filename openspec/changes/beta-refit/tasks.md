@@ -3,7 +3,7 @@
 Six steps, six pull requests, in this order. Each names the criteria it
 closes by their `<capability>/<scenario-slug>` identifiers. There is no
 closing group: `openspec/config.yaml` lets a step close no criterion only when
-it carries infrastructure, and updating `PLAN.md` and running the review
+it carries infrastructure, and moving the card and running the review
 sequence are none of that — so 6.6 and 6.7 cite no criterion and ride with the
 step that merges last.
 
@@ -267,8 +267,9 @@ Closes `outcome-calibration/the-first-run-with-nothing-published-before`,
       measurement was one bracket, one region and one fortnight; the store is
       the same population but larger, and a first run that lands far from
       these is evidence about the sample rather than about the code.
-- [ ] 6.6 Update `PLAN.md`'s queue in this step's pull request, not
-      afterwards.
+- [ ] 6.6 Move the change's card on its board to the status this step
+      reaches, in the same turn rather than afterwards — `PLAN.md` holds
+      no queue.
 - [ ] 6.7 Run the pre-PR sequence per `docs/review-toolkit.md` on every step,
       and `bun test` and `bun run test:db` besides. Steps 3 to 6 touch the
       database, and CI runs only the first
