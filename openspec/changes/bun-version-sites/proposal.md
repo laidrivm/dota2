@@ -83,8 +83,9 @@ from.
 - `checks/` — one new check and its cases.
 - `openspec/specs/agent-permissions/spec.md` — one requirement modified, a
   clause widened; no scenario's behaviour changes.
-- `PLAN.md` — the entry *Ten workflow pins nothing updates* is what this
-  closes, and leaves the queue when it does.
+- The `bun-version-sites` card on `Harness` — the `PLAN.md` entry *Ten
+  workflow pins nothing updates* became it — is what this closes, and reaches
+  `done` when it does.
 - No workflow, dependency or runtime change: every site already reads 1.4.2,
   so the check passes on the tree it lands in and its failing case is
   fabricated.

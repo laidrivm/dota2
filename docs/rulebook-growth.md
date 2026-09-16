@@ -30,6 +30,17 @@ beyond the fix & capture loop. When it outgrows itself, split by this protocol:
 - **Move whole sections only** (e.g. "API design", "E2E") to
   `docs/<topic>.md`, leaving one line in `CLAUDE.md`: the section's scope + the
   link. Never split one topic across two homes.
+- **Extraction is not the only remedy; relocation is the other**, and what
+  picks between them is whether the section is read or written. Extraction
+  moves what a session **reads** on demand — a rule, a contract, a protocol —
+  and its new home is a file in this tree indexed from `CLAUDE.md`. Relocation
+  moves what a session **writes**: a status, which no file is the right
+  instrument for, because a file records it only if somebody remembers to type
+  it and nothing reads it back to check. Its new home is outside the tree
+  entirely — the boards `PLAN.md` points at — and the section leaves rather
+  than shrinking. Test it by asking what the section's lines are for: if the
+  answer is *so that a later session knows where this stands*, no `docs/` file
+  fixes it, and extracting it only moves the same drift one hop away.
 - **`CLAUDE.md` is the only index**: every extracted doc is linked from there,
   and docs do not link to each other — everything is one hop from that file.
 - **Extracted docs inherit the constitution**: the rule quality bar, the

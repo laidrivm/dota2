@@ -63,7 +63,7 @@ function cite(path: string, text: string) {
 	// stray `/*`, `open` sticks true, and every citation below is dropped. The
 	// count then rises and the floor fails, naming a breach rather than this.
 	// The fix is to lift the scanner out of `mutation-floor.ts` — the rule of
-	// two in `PLAN.md` — not to patch the expression below.
+	// two the `scan-lift` card carries — not to patch the expression below.
 	let open = false;
 	const enclosed = lines.map((line) => {
 		const was = open;
