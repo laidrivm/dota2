@@ -90,8 +90,11 @@ does to every other artefact.
 ### Requirement: An entry leaves PLAN.md by one of four routes
 
 WHEN an entry in `PLAN.md` is reviewed against this specification, it SHALL
-take exactly one of four dispositions, tested **in this order**, and the
-review SHALL record which:
+take every disposition that applies to it, of four, tested **in this order**,
+and the review SHALL record which. Most entries take one; an entry that is
+both a task and a fence takes two, because the card and the comment are read
+by different people at different moments and neither stands in for the
+other.
 
 1. **Moved to the board** — the entry is a task: something that will be
    finished, and whose being finished is a fact somebody will want to read. It
