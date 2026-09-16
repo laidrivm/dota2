@@ -74,6 +74,7 @@ describe("PLAN.md after the queue left it", () => {
 	});
 
 	// spec: context-budget/a-source-that-is-itself-a-task
+	// spec: task-board/the-brief-still-open
 	test("names the brief that is a task as a card, the path being gone", () => {
 		const cited = plan
 			.split("\n")
