@@ -32,7 +32,12 @@ describe("the output names no board", () => {
 
 // spec: task-board/the-derivation-reaches-no-network
 describe("the derivation reaches no network", () => {
-	const source = readFileSync(join(root, "scripts/board-state.ts"), "utf8");
+	// Read inside each case rather than here: a throw while this block is
+	// collected takes its cases out of the run entirely, and bun reports the
+	// smaller number as a pass — so renaming the module would silence the
+	// cases that guard it instead of failing them.
+	const source = () =>
+		readFileSync(join(root, "scripts/board-state.ts"), "utf8");
 
 	// Bun's own transpiler rather than a pattern over the source: it reports a
 	// bare `import "node:net";`, a wrapped import list and a dynamic
@@ -43,7 +48,7 @@ describe("the derivation reaches no network", () => {
 		new Bun.Transpiler({ loader: "ts" }).scan(text).imports.map((i) => i.path);
 
 	test("the module imports the filesystem, the path join, the root and nothing else", () => {
-		const imported = imports(source);
+		const imported = imports(source());
 		expect(imported.length).toBeGreaterThan(0);
 		expect(
 			imported.filter(
@@ -69,7 +74,7 @@ describe("the derivation reaches no network", () => {
 			/Bun\s*\.\s*connect/,
 			/notion/i,
 		])
-			expect(source).not.toMatch(reach);
+			expect(source()).not.toMatch(reach);
 	});
 
 	test("a full run produces both halves of the output from the tree alone", () => {
