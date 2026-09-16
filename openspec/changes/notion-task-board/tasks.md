@@ -19,8 +19,9 @@ Closes: *There are three boards and a card goes to one of them*
 
 - [x] 1.1 Set each board's `Status` in one statement to exactly the eight
       `select` options — the statement replaces the list rather than
-      extending it, so it is idempotent on `D2ASS`, converted during design,
-      and complete on `Harness`, which still carries the original three
+      extending it, so it was idempotent on `D2ASS`, converted during design,
+      and complete on `Harness`, which carried the original three until it
+      ran. Both boards carry the eight, read back off each schema
 - [x] 1.2 Add the `Pointer` `rich_text` property to both boards, then
       **measure how it encodes a path and an empty value**: write one
       throwaway card with a path, write one with no pointer, read both back
