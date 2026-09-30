@@ -24,6 +24,8 @@ What counts as evidence for a claim, and what a claim may rest on.
 - Never infer a permission outcome from a command that succeeded, and never
   report what a prompt did — report what the call returned; an approved prompt
   and an unprompted call are indistinguishable from inside the session.
+- Read a permission outcome from the whole precedence chain — deny, then ask,
+  then allow, across every scope — never from one grant or one entry.
 - Verify a permissions change only in a session started after it — a session
   holds the permission set it loaded at startup, while a hook is re-read from
   the settings file per tool call and is observable at once.
