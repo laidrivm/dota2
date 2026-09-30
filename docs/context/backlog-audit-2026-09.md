@@ -216,12 +216,13 @@ re-opened from the same priors.
 
 ## Where we stopped
 
-- The Notion connector disconnected mid-session, so no card was written.
-  `claude mcp add --transport http notion https://mcp.notion.com/mcp` was run
-  and is in `~/.claude.json` for this project, but MCP servers register at
-  session start, so it takes effect only after a restart, and the HTTP
-  transport needs an OAuth sign-in on first connect. An older Notion entry was
-  already configured, so check `/mcp` for a duplicate.
+- **The cards are written** (2026-09-30, the following session, after the
+  re-added connector's OAuth sign-in): items 1–8 are cards on `Harness` under
+  the headings above, statuses as stated, `Pointer` read back as empty. Item 9
+  is **not** a card of its own — one task has one card — its text was appended
+  to the existing `D2ASS` card `tasks/task-5.md`, which moved to `exploring`.
+  The rtk and webhook open questions below went into cards 7 and 8; the
+  `AGENTS.md` one stays here, uncarded, as stated. Do not write these again.
 - Three `/opsx:explore` runs were requested and none started: cards 8, 9 and 7,
   in that order of preference — 8 first, because it is the one that unblocks
   card 1.
