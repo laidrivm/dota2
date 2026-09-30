@@ -87,3 +87,26 @@ PR bot's completed review of the same diff. A timeout emits findings and then
 dies without a `complete` event, so a gate read from the findings alone
 reports PASS on a review that reached no conclusion — which is what happened
 once here before it was corrected.
+
+## 2026-09-30 — chore/session-yield-2026-09-30 (audit only, no code changed)
+
+- Not run: diff-budget, zombies, warm, triage, coderabbit-local, coderabbit,
+  ponytail-review, preflight, code-review, security-review — every one of them.
+  No code, spec or config changed this session: the work was reading the tree
+  and both boards to sort an older proposal list into shipped, ruled out and
+  open. The only files written are this ledger and
+  `docs/context/backlog-audit-2026-09.md`, and the pre-PR sequence runs on the
+  branch that carries them, not inside the session that wrote them.
+
+The entry exists for the zero, and for one thing the zero hides.
+
+**The branch in hand was merged, and nothing said so.** The session started on
+`chore/session-yield-2026-09-16` (PR #281, merged 2026-09-16) and the tree was
+found on `dependabot/docker_compose/images-782ade76a5` (PR #283, merged) —
+`merge-base --is-ancestor HEAD origin/main` returns `NO` and the branch is two
+behind, the PRs having closed by squash. A wrap-up committed to the branch in
+hand, as `docs/git-and-prs.md` directs, would have been stranded. It was caught
+by running the check that rule names, before the first write; `merged-branch-guard`
+is the change that would have caught it mechanically and is still `ready`. The
+count of times that guard's absence has cost something is now two — 2026-08-19,
+four commits, and this near miss.
