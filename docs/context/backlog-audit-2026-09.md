@@ -41,7 +41,7 @@ fixes that a board is named, never linked, this repository being public.
 - **`ship`'s `allowed-tools` as a policy conflict** — it is not one. Its
   `Bash(gh pr:*)` grant is already answered by the tracked `deny` entries for
   `gh pr comment`, `gh pr review` and `gh issue comment`, and by
-  `scripts/command-guard.ts`'s `GH_WRITES`. Deny is evaluated before allow and
+  `scripts/command-guard.ts:122`'s `GH_WRITES`. Deny is evaluated before allow and
   merges across scopes. This was asserted as a conflict earlier in the session
   and withdrawn on checking; the real conflicts are in §*Open* item 1.
 - **A Sentry MCP connector as an argument when choosing a tracker** — no such
@@ -134,9 +134,9 @@ requirement". Two edits: a row in the map, and README's number replaced by a
 citation of it.
 
 The four other sites naming these values are legitimate and stay —
-`checks/agent-permissions-allow.test.ts` pins `259200` because pinning is what
-a check is for; `openspec/specs/agent-permissions/spec.md` holds the keys as
-criteria; `scripts/manifest-ranges.ts` cites the policy without the number;
+`checks/agent-permissions-allow.test.ts:88` pins `259200` because pinning is
+what a check is for; `openspec/specs/agent-permissions/spec.md` holds the keys
+as criteria; `scripts/manifest-ranges.ts:4` cites the policy without the number;
 `PLAN.md` cites `exact = true` for the `overrides` constraint.
 
 ### 6. A conversation rule sits in `openspec/config.yaml`'s artefact-form list
