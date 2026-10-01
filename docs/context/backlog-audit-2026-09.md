@@ -107,8 +107,9 @@ needing an upstream commit.
 42 `allow` entries have grown back since
 `2026-08-09-tracked-permission-policy` moved the stable set into
 `.claude/settings.json`. Nothing measures it:
-`checks/agent-permissions.fixture.ts` reads the tracked settings only and says
-so in a comment, guarding against a check passing on a stale or local slice.
+`checks/agent-permissions.fixture.ts:18` reads the tracked settings only and
+says so in a comment (`:15`), guarding against a check passing on a stale or
+local slice.
 Three kinds are in it — stable grants that belong in the tracked file
 (`git diff`, `git push`, `git checkout`, `git pull`, `git symbolic-ref`,
 `gh pr`, `docker buildx`); one-offs that belong nowhere
@@ -202,11 +203,11 @@ re-opened from the same priors.
 ## Mechanics worth not re-deriving
 
 - `checks/skill-provenance.test.ts` derives which skills owe a Provenance row
-  from `docs/review-toolkit.md` §*The pre-PR sequence* and `CLAUDE.md`
-  §*Rules*, never from `.claude/skills/`. Adding a symlink obliges nothing;
-  naming the skill in the doc is what makes the row mandatory.
-- `checks/agent-permissions.fixture.ts` reads the tracked settings only, on
-  purpose. `.claude/settings.local.json` is measured by nothing.
+  from `docs/review-toolkit.md` §*The pre-PR sequence* (`:30`) and `CLAUDE.md`
+  §*Rules* (`:40`), never from `.claude/skills/`. Adding a symlink obliges
+  nothing; naming the skill in the doc is what makes the row mandatory.
+- `checks/agent-permissions.fixture.ts:18` reads the tracked settings only, on
+  purpose (`:15`). `.claude/settings.local.json` is measured by nothing.
 - Both boards live under one parent page in the Notion workspace, each with a
   single saved `Board view` grouped by `Status` with empty groups hidden.
   Schema on both: `Name` (title), `Status` (select, the eight names
