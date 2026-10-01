@@ -107,6 +107,7 @@ found on `dependabot/docker_compose/images-782ade76a5` (PR #283, merged) —
 behind, the PRs having closed by squash. A wrap-up committed to the branch in
 hand, as `docs/git-and-prs.md` directs, would have been stranded. It was caught
 by running the check that rule names, before the first write; `merged-branch-guard`
-is the change that would have caught it mechanically and is still `ready`. The
+is the change proposed to catch it mechanically, and is still only `ready` —
+fully proposed, none of its ten tasks applied. The
 count of times that guard's absence has cost something is now two — 2026-08-19,
 four commits, and this near miss.
