@@ -228,7 +228,10 @@ re-opened from the same priors.
   is explored** (2026-10-01): its findings are in its own card, now titled
   without "— survey first" and back at `suggested`, and its building work
   moved to two new `Harness` cards, *Agent identity — a GitHub App for d2ass*
-  and *Orchestrator on a dedicated VPS*. Card 9 is next, then 7.
+  and *Orchestrator on a dedicated VPS*. **Card 9 is explored** too
+  (2026-10-01): no error tracker; the `tasks/task-5.md` card becomes the
+  proposal for a scheduled freshness probe of the public bundle, and three
+  cards split out of it — two on `D2ASS`, one on `Harness`. Card 7 is next.
 
 ## Open questions
 
