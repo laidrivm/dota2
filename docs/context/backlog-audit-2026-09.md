@@ -223,9 +223,12 @@ re-opened from the same priors.
   to the existing `D2ASS` card `tasks/task-5.md`, which moved to `exploring`.
   The rtk and webhook open questions below went into cards 7 and 8; the
   `AGENTS.md` one stays here, uncarded, as stated. Do not write these again.
-- Three `/opsx:explore` runs were requested and none started: cards 8, 9 and 7,
-  in that order of preference — 8 first, because it is the one that unblocks
-  card 1.
+- Three `/opsx:explore` runs were requested: cards 8, 9 and 7, in that order
+  of preference — 8 first, because it is the one that unblocks card 1. **Card 8
+  is explored** (2026-10-01): its findings are in its own card, now titled
+  without "— survey first" and back at `suggested`, and its building work
+  moved to two new `Harness` cards, *Agent identity — a GitHub App for d2ass*
+  and *Orchestrator on a dedicated VPS*. Card 9 is next, then 7.
 
 ## Open questions
 
