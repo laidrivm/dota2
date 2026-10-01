@@ -234,7 +234,9 @@ re-opened from the same priors.
   cards split out of it — two on `D2ASS`, one on `Harness`. **Card 7 is
   explored** as well (2026-10-01): the survey is
   `docs/research/rtk-2026-10-01.md`, verdict "not now"; its card keeps its
-  status at the user's request. All three requested explores are done.
+  status at the user's request, and one `Harness` card split out of it,
+  *Wire TypeScript 7's own language server into sessions*. All three
+  requested explores are done.
 
 ## Open questions
 
@@ -244,10 +246,10 @@ re-opened from the same priors.
   opposite of what `openspec/specs/context-budget/` measures for. The user
   runs no other agent that reads `AGENTS.md`. Unmeasured, and the item is
   neither carded nor dropped until it is.
-- **Can rtk's `exclude_commands` exclude `git diff` without also excluding
-  `git status`?** The whole decision in card 7 turns on it, and it does not
-  follow from the tool's README. Read once inside a session and recorded in no
-  file, which `docs/verification.md` does not accept as evidence.
-- **Can a webhook reach a local session at all?** Card 8's mechanism question:
-  a webhook arrives at a server, and the session holding the checked-out
-  branch is on this machine.
+- ~~Can rtk's `exclude_commands` exclude `git diff` without also excluding
+  `git status`?~~ **Answered 2026-10-01 from rtk's source: yes** — see
+  `docs/research/rtk-2026-10-01.md`.
+- ~~Can a webhook reach a local session at all?~~ **Made moot 2026-10-01:**
+  the explore of card 8 moved the agent off this machine — the event starts
+  a session on a dedicated host, recorded on *Orchestrator on a dedicated
+  VPS*.
