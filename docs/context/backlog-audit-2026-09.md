@@ -51,6 +51,19 @@ fixes that a board is named, never linked, this repository being public.
 - **Deriving the five hand-moved board statuses** — measured and refused
   already; `openspec/specs/task-board/spec.md` records that a branch-name
   derivation gets fourteen of thirty archived changes wrong.
+- **ESON and honey** — weighed in the same earlier session as rtk: ESON a
+  format for passing context between agents, honey a cap on generation
+  volume. Both optimise token cost, and none of the problems on the list at
+  the time — unreadable diffs, 700-line files, unverifiable gates, tests that
+  would pass against a broken implementation — is a cost problem. "Not
+  instead", not adopted, and not carded; reopen only on a question that is
+  about cost. (Recorded 2026-10-01; neither had been written down before.)
+- **Symlinking `AGENTS.md` to `CLAUDE.md`** — answered from Claude Code's
+  memory documentation on 2026-10-01: with a `CLAUDE.md` present, Claude Code
+  reads `CLAUDE.md` only by default, and even its read-both mode skips an
+  `AGENTS.md` it has already loaded through a symlink or an import — so the
+  feared double load does not happen. Dropped anyway: no agent the user runs
+  reads `AGENTS.md`, so the link would serve nobody.
 
 ## Open — one heading per card that was to be written
 
@@ -241,12 +254,9 @@ re-opened from the same priors.
 
 ## Open questions
 
-- **Does Claude Code's `AGENTS.md` support read that file in addition to
-  `CLAUDE.md`?** If it does, the long-standing idea of symlinking one to the
-  other makes the same text always-on twice, which inverts the item and is the
-  opposite of what `openspec/specs/context-budget/` measures for. The user
-  runs no other agent that reads `AGENTS.md`. Unmeasured, and the item is
-  neither carded nor dropped until it is.
+- ~~Does Claude Code's `AGENTS.md` support read that file in addition to
+  `CLAUDE.md`?~~ **Answered 2026-10-01: no double load** — see §*Ruled out*,
+  where the symlink idea is now dropped.
 - ~~Can rtk's `exclude_commands` exclude `git diff` without also excluding
   `git status`?~~ **Answered 2026-10-01 from rtk's source: yes** — see
   `docs/research/rtk-2026-10-01.md`.
