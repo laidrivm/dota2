@@ -231,7 +231,10 @@ re-opened from the same priors.
   and *Orchestrator on a dedicated VPS*. **Card 9 is explored** too
   (2026-10-01): no error tracker; the `tasks/task-5.md` card becomes the
   proposal for a scheduled freshness probe of the public bundle, and three
-  cards split out of it — two on `D2ASS`, one on `Harness`. Card 7 is next.
+  cards split out of it — two on `D2ASS`, one on `Harness`. **Card 7 is
+  explored** as well (2026-10-01): the survey is
+  `docs/research/rtk-2026-10-01.md`, verdict "not now"; its card keeps its
+  status at the user's request. All three requested explores are done.
 
 ## Open questions
 
