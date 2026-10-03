@@ -18,6 +18,9 @@ completes, name the next step and the exact command.
 - New feature work starts with `/opsx:propose` (or `/opsx:explore` first if
   the idea is vague). If the user starts describing a feature in free text,
   suggest routing it through propose instead of implementing directly.
+  `/opsx:propose` drafts every artefact in one pass; where the user wants to
+  review each artefact before the next is written, use `/opsx:new` and then
+  `/opsx:continue` once per artefact (`/opsx:ff` writes the rest in one go).
 - During proposal, ask the questions a spec review would ask: unclear
   requirements, consequences of design choices, what happens on failure.
   For any endpoint, fix the exact response shape in design.md per the
@@ -87,9 +90,10 @@ completes, name the next step and the exact command.
 
 ## Stage 4 — Archive
 
-- After the change's last step is merged and verified, prompt the user to run
-  `/opsx:archive` so the change lands in the project history. Work is not
-  finished until it's archived.
+- After the change's last step is merged and verified, run `/opsx:verify`
+  against the change's artefacts and settle what it reports, then prompt the
+  user to run `/opsx:archive` so the change lands in the project history.
+  Work is not finished until it's archived.
 - Single-source rule: agent rules and contract rules live in `CLAUDE.md`
   and the docs it indexes; architecture defaults live in the `context:`
   field of `openspec/config.yaml`. Neither restates the other, and no
