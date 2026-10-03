@@ -75,7 +75,8 @@ Rule quality bar — a rule must be:
 - **Checkable**: pass/fail is obvious from reading a diff.
   Good: "Invalidate previously issued OTP codes when generating a new one."
   Bad: "Be careful with auth logic."
-- **One line**, imperative mood, no rationale (rationale lives in git blame).
+- **One line**, imperative mood; give the reason after a dash only where the
+  rule alone would be misapplied.
 - **Non-duplicate**: before adding, re-read the list; if a similar rule
   exists, tighten that rule instead of appending a variant.
 
@@ -92,8 +93,8 @@ protocol for extracting a section or relocating one off the tree, and where a
 session save-point lives — is in
 [docs/rulebook-growth.md](docs/rulebook-growth.md).
 
-`PLAN.md` holds the sources and the standing constraints and no longer the
-queue: a task with a status is a card on one of the three boards it names.
+`PLAN.md` holds the sources and the standing constraints; a task with a status
+is a card on one of the three boards it names.
 
 ### Rules
 
