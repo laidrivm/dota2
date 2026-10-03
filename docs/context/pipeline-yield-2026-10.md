@@ -30,3 +30,34 @@ cause" was applied across one file, not across the branch. One of its claims
 is itself wrong — it puts `compile_exclude_patterns` at line 1445 of rtk
 `v0.50.0`, where the source read at that tag has it at 1540. The three stay
 undispositioned until `/coderabbit 285` runs.
+
+## 2026-10-03 — chore/prompt-audit-2026-10-03, chore/openspec-1-14 (merged as PRs #288, #287)
+
+- prompt-audit (`/doctor prompt-audit`): 57 findings over the configuration
+  that loads into sessions (36 dated-text, 21 configuration-file), 30 acted on
+  across this repository, the skills repository and `~/.claude/skills`; the
+  opsx and vendored playwright-cli findings were left as shipped
+- diff-budget: FAIL 2225 → re-cut → PASS 14 (prompt-audit); FAIL 2211
+  (openspec-1-14, merged under `oversize:` by the owner's exemption); PASS 16
+  after one more commit — 0 findings
+- triage: OPEN → PASS — 1 group, 0 high-risk, 1 Medium read, 0 findings
+  (prompt-audit)
+- coderabbit-local: PASS — 0 findings (prompt-audit)
+- triage: OPEN → PASS — 2 groups, 1 high-risk read, 0 findings (openspec-1-14)
+- coderabbit-local: BLOCKED — review refused, "Review failed: Unknown error"
+  twice on the 2211-line diff (openspec-1-14)
+- coderabbit-local: PASS — 0 findings (prompt-audit, after the rule removal)
+- coderabbit: OPEN → PASS — 11 findings, 11 dispositioned (0 fixed, 3 Major
+  rejected with the owner's agreement, 8 skipped) (PR #287)
+- Not run: zombies, warm (no manifest changed — the OpenSpec upgrade is a
+  global install outside every manifest), ponytail-review, preflight,
+  code-review, security-review, first-five, review-order, coderabbit on PR #288
+
+**Every PR finding sat in generated text.** All eleven on PR #287 were in
+`.claude/commands/opsx/*.md`, which `openspec update` rewrites whole, so none
+could be fixed here. Excluding the path in `.coderabbit.yaml` changes a gate and
+is undecided.
+
+**One finding is still open.** CodeRabbit posted one Minor on PR #288
+(`CLAUDE.md:211`: bare `npm init` maps to `bun init`, only `npm init <initializer>`
+to `bun create`) and the PR merged without `/coderabbit 288`.
