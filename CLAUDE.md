@@ -195,6 +195,8 @@ Rules about how work is carried out here. They do not age with the code.
   repeats at every number in its series.
 - Apply a rule the branch adds to the artefacts the branch already carries,
   before it is pushed.
+- Commit an edit in a repo another session works in before handing the turn
+  back — its `git add -A` takes whatever the tree holds.
 
 #### Safety
 
@@ -214,3 +216,6 @@ not age with the code.
   write which tool updates the pin, or that nothing does.
 - Gate a suite that runs destructive SQL on a variable saying the database is
   disposable, never on the connection string alone.
+- After a generator runs, compare the directories it writes against a listing
+  taken before it, ignored ones included — `git status` hides what
+  `.gitignore` covers.
