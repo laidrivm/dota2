@@ -4,9 +4,11 @@ Three steps, three pull requests, in this order. Each names the criteria it
 closes by their `<capability>/<scenario-slug>` identifiers.
 
 The `MODIFIED` deltas carry these eleven criteria, which this change does not
-close. Several change only a status name or a count in their wording, and the
-tests on `main` that close them are updated in step 1 without changing what
-they assert:
+close. Most change only a status name or a count in their wording.
+`a-status-the-tree-cannot-see` and `a-card-and-the-tree-disagreeing` are also
+reworded so a derived status reads as a floor, which is what the script has
+always computed: it reads no card. The tests on `main` that close them are
+updated in step 1 without changing what they assert:
 
   `task-board/a-status-holding-no-cards`
   `task-board/a-change-directory-missing-an-artefact`
@@ -84,8 +86,10 @@ Closes `task-board/a-card-for-a-change-that-exists-in-the-tree`,
 - [ ] 2.3 Do the same for every `Harness` card short of `done`.
 - [ ] 2.4 Read `Board view` on both boards, and open five cards on each,
       chosen across columns. Confirm each against
-      *a-card-short-of-done*: title, summary length, links. Report any
-      card left unchanged and why.
+      *a-card-short-of-done*: title, summary length, links. Confirm too that
+      every card whose change has a directory carries it in `Pointer`, and
+      every archived card its archive path, which `Done`'s sort reads in
+      step 3. Report any card left unchanged and why.
 - [ ] 2.5 Move this change's card in the same turn.
 - [ ] 2.6 Run the pre-PR sequence per `docs/review-toolkit.md`.
 

@@ -110,6 +110,11 @@ proposed    openspec/changes/<slug>/ holds proposal, design, tasks and specs/
 proposing   openspec/changes/<slug>/ exists and is missing one of them
 ```
 
+A derived status is a floor, not a value. `proposed` holds for a change from
+the merge of its proposal until its archive, so a card at `applying`,
+`applied` or `archiving` agrees with it, and only a card behind its derived
+status disagrees.
+
 The remaining six SHALL be moved by whoever does the work, in the turn the
 work moves, and `scripts/board-state.ts` SHALL NOT report them. Deriving them
 was measured and refused: applied to the thirty archived changes, a
@@ -160,9 +165,10 @@ pull request to its change.
 
 - **WHEN** a card sits at `idea`, `exploring`, `explored`, `applying`,
   `applied` or `archiving`
-- **THEN** `scripts/board-state.ts` SHALL report nothing for it, and a
-  reconciliation SHALL leave it untouched rather than resetting it to a
-  derived value
+- **THEN** a reconciliation SHALL leave it untouched rather than resetting it
+  to a derived value, and `scripts/board-state.ts` SHALL NOT read the card to
+  decide: it reports a slug from the tree alone, so a change at `applying`
+  still derives `proposed`, the floor its card has already passed
 
 #### Scenario: The derivation reaches no network
 
@@ -273,9 +279,10 @@ for it would hold every such card permanently in breach.
 
 #### Scenario: A card and the tree disagreeing
 
-- **WHEN** a card's status and the file tree disagree about a derived status
+- **WHEN** a card sits behind the status the file tree derives for it
 - **THEN** the tree SHALL be taken as right and the card corrected, the board
-  being authoritative only for what the tree cannot express
+  being authoritative only for what the tree cannot express — a card past the
+  derived status agrees with it and is left alone
 
 ### Requirement: A stage that completes moves its card in the same turn
 
