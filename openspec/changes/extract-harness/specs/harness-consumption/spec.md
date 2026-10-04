@@ -36,10 +36,11 @@ an abbreviated hash or no reference, naming the entry it rejected.
 
 ### Requirement: The skills resolve from the pinned package
 
-Every entry under `.claude/skills/` SHALL be a tracked symbolic link whose
+Every entry git tracks under `.claude/skills/` SHALL be a symbolic link whose
 target is a relative path into the installed harness package, and a check
-SHALL fail on an entry that is not a link, that points anywhere else, or that
-does not resolve after `bun install`, naming the entry.
+SHALL fail on a tracked entry that is not a link, that points anywhere else,
+or that does not resolve after `bun install`, naming the entry. Untracked
+files there, which a clone does not have, are not read.
 
 #### Scenario: A link into the package
 
@@ -86,17 +87,21 @@ the pinned commit or is missing from either side, naming the file.
 ### Requirement: The guard does not lock out a clone that has not installed
 
 WHILE the installed harness package is absent, the Bash `PreToolUse` hook SHALL
-allow `bun install` and SHALL block every other command with a message naming
-`bun install` as what to run, rather than failing every command alike.
+allow `bun install` or `bun i`, with flags but naming no package, and SHALL
+block every other command with a message naming `bun install` as what to run,
+rather than failing every command alike.
 
 #### Scenario: A fresh clone
 
-- **WHEN** a session in a clone with no `node_modules/` runs `bun install`
+- **WHEN** a session in a clone with no `node_modules/` runs `bun install` or
+  `bun install --frozen-lockfile`
 - **THEN** the hook SHALL let it run
 
 #### Scenario: Any other command before the install
 
-- **WHEN** the same session runs any other command, `git status` included
+- **WHEN** the same session runs any other command — `git status`,
+  `bun install <package>`, which mutates the manifest, or an install with
+  another command chained after it
 - **THEN** the hook SHALL block it and its message SHALL name `bun install`
 
 #### Scenario: After the install
