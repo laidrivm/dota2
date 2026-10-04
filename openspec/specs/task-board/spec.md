@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Where a task's status is recorded and read, which of the eight statuses the
+Where a task's status is recorded and read, which of the nine statuses the
 file tree derives and which are moved by hand, how a session reads a board,
 and what a card may not hold. It exists because a status is a fact somebody
 has to remember and type, and a file is the wrong instrument for one: the

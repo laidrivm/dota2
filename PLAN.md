@@ -20,10 +20,10 @@ and never through a SQL query:
 
 Named rather than linked: this repository is public and the boards are not, so
 a board or view URL is an identifier for private content and does not belong in
-a tracked file. `scripts/board-state.ts` derives `proposing`, `ready` and
-`done` for `D2ASS` from the file tree alone, and reports nothing for the other
-five statuses or the other two boards — those move by whoever does the work, in
-the turn the work moves.
+a tracked file. `scripts/board-state.ts` derives `proposing`, `proposed`
+and `done` for `D2ASS` from the file tree alone, and reports nothing for the
+other six statuses or the other two boards — those move by whoever does the
+work, in the turn the work moves.
 
 ## Growth protocol
 
@@ -33,7 +33,7 @@ the turn the work moves.
 - **Where an entry goes**, tested in this order, because an entry can satisfy
   more than one: a task, something that will be finished and whose being
   finished somebody will want to read → a card, at the status the tree derives
-  or at `suggested`; then a fence a reader would otherwise remove → a comment
+  or at `idea`; then a fence a reader would otherwise remove → a comment
   at that line, unless one already stands; then a fact the archive records →
   deleted; then a standing constraint no single site owns → kept below.
 - An archived change is never edited to receive an evicted entry. The archive
