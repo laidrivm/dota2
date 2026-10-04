@@ -61,3 +61,28 @@ is undecided.
 **One finding is still open.** CodeRabbit posted one Minor on PR #288
 (`CLAUDE.md:211`: bare `npm init` maps to `bun init`, only `npm init <initializer>`
 to `bun create`) and the PR merged without `/coderabbit 288`.
+
+## 2026-10-04 — spec/retire-plan-md, spec/board-lifecycle
+
+- zombies: OPEN → PASS — 11 gaps, 11 dispositioned (10 into tasks, 1 already
+  covered by `scripts/repo-layout.test.ts:69`/`:124`) (`retire-plan-md`)
+- zombies: OPEN → PASS — 5 gaps, 5 dispositioned (all into task 1.2)
+  (`board-lifecycle`)
+- coderabbit: OPEN → PASS — 2 findings, 2 dispositioned (1 Major fixed, 1 Major
+  rejected with the owner's agreement) (PR #292)
+- Not run: triage, warm (no manifest changed), coderabbit-local,
+  ponytail-review, preflight, code-review, security-review, first-five,
+  review-order, coderabbit on PR #290 and PR #291
+
+**The fixed Major was a defect copied from the live spec.** `task-board`
+promised that `scripts/board-state.ts` reports nothing for a card at a
+hand-moved status, but the script reads no card and derives `ready` for any
+complete directory. The `MODIFIED` delta renamed the values and re-asserted
+the claim; `docs/feature-workflow.md` now asks for a carried scenario to be
+read against its code first.
+
+**The rejected Major needed the boards, which the bot cannot see.** It asked
+for a `Pointer` property and its writes; both boards have carried one since
+`notion-task-board`.
+
+**PR #290's Minors were skipped by the owner without `/coderabbit 290`.**
