@@ -100,8 +100,9 @@ it would have told you to re-cut, and a branch never pushed is a branch never
 measured.
 
 A branch of documentation, rules or config runs step 1, then `/triage` alone,
-plus a grep for every site restating what it changes, then one pass of
-`/coderabbit-local` — one, not three.
+plus a grep for every site restating what it changes, plus `bun test` when it
+adds or removes a directory under `openspec/changes/` — a test pins the tree's
+change set — then one pass of `/coderabbit-local` — one, not three.
 
 Your sequence ends there — the PR link is the deliverable. `/coderabbit`
 closes the loop on either, whenever the user chooses to run it.
