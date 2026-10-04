@@ -473,6 +473,19 @@ That supplies every slash command the pre-PR sequence names — `/zombies`,
 diff-budget`, a script in this repository. `/ponytail-review` comes from the
 ponytail plugin instead, and is available rather than a gate.
 
+## The task board
+
+The queue of work is not in this repository. Every task with a status is a
+card on a board in a Notion workspace, and a session reads and moves cards
+through the Notion MCP connector. The application, its tests and its
+deployment need none of it; only the agent workflow does.
+
+- Which boards exist, what a card carries and which statuses it moves
+  through: `openspec/specs/task-board/`.
+- No paid plan is assumed. A session reads a board through its saved view,
+  which carries no plan quota, and never through a SQL query, which Notion
+  meters outside its Business and Enterprise plans.
+
 ## Dependency hygiene
 
 - Install via `bun add <pkg>` — the exact version gets written
