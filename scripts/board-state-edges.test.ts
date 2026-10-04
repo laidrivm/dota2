@@ -36,7 +36,7 @@ describe("a predecessor that has not landed", () => {
 		});
 	});
 
-	test("a predecessor at proposing blocks as one at ready does", () => {
+	test("a predecessor at proposing blocks as one at proposed does", () => {
 		const half = complete("outcome-calibration");
 		delete half["openspec/changes/outcome-calibration/tasks.md"];
 		const tree = fabricate({
@@ -126,8 +126,8 @@ describe("a change that is not yet complete", () => {
 	test("still declares its predecessors and is still blocked by them", () => {
 		// Edges are read from `.openspec.yaml`, which a half-written directory
 		// carries as readily as a finished one — deriving them only for what is
-		// `ready` would leave a proposing change's ordering unreadable exactly
-		// while it is being argued.
+		// `proposed` would leave a proposing change's ordering unreadable
+		// exactly while it is being argued.
 		const half = ordered("laning-phase-model", "[candidacy-gate]");
 		delete half["openspec/changes/laning-phase-model/tasks.md"];
 		const tree = fabricate({ ...half, ...complete("candidacy-gate") });

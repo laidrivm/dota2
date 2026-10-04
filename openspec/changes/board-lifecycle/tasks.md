@@ -35,7 +35,7 @@ Closes `task-board/a-complete-change-directory-no-step-applied`,
       comment's count and list of the statuses never reported: six, `idea`
       through `archiving`. Verify with `bun run typecheck`, which refuses any
       `"ready"` left on a `Status`.
-- [ ] 1.2 Update the cases that assert the old name: `board-state.test.ts`
+- [x] 1.2 Update the cases that assert the old name: `board-state.test.ts`
       `:26-35` (ZOMBIES 1, 2) and `:73-76` (3), `board-state-edges.test.ts`
       `:39` with the comment at `:129` (4), and the fixture at
       `board-state-hygiene.test.ts:90` (5). Keep each `// spec:` citation.

@@ -87,7 +87,7 @@ describe("the derivation reaches no network", () => {
 		});
 		expect(boardState(tree)).toEqual({
 			status: {
-				"score-calibration": "ready",
+				"score-calibration": "proposed",
 				"outcome-calibration": "done",
 			},
 			edges: {
