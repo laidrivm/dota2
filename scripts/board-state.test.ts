@@ -23,15 +23,17 @@ const without = (slug: string, artefact: string) => {
 
 // spec: task-board/a-complete-change-directory-no-step-applied
 describe("a change directory holding all four artefacts", () => {
-	test("derives ready", () => {
+	test("derives proposed", () => {
 		const tree = fabricate(complete("candidacy-gate"));
-		expect(boardState(tree).status).toEqual({ "candidacy-gate": "ready" });
+		expect(boardState(tree).status).toEqual({ "candidacy-gate": "proposed" });
 	});
 
-	test("derives ready with every task box ticked, the boxes being unread", () => {
+	test("derives proposed with every task box ticked, the boxes being unread", () => {
 		const whole = complete("candidacy-gate");
 		whole["openspec/changes/candidacy-gate/tasks.md"] = "- [x] 1.1 done\n";
-		expect(boardState(fabricate(whole)).status["candidacy-gate"]).toBe("ready");
+		expect(boardState(fabricate(whole)).status["candidacy-gate"]).toBe(
+			"proposed",
+		);
 	});
 });
 
@@ -70,10 +72,12 @@ describe("a change directory whose specs/ holds no delta", () => {
 		);
 	});
 
-	test("derives ready from a delta at any depth, the walk being recursive", () => {
+	test("derives proposed from a delta at any depth, the walk being recursive", () => {
 		const whole = without("candidacy-gate", "specs/a-capability/spec.md");
 		whole["openspec/changes/candidacy-gate/specs/a/deeper/spec.md"] = "";
-		expect(boardState(fabricate(whole)).status["candidacy-gate"]).toBe("ready");
+		expect(boardState(fabricate(whole)).status["candidacy-gate"]).toBe(
+			"proposed",
+		);
 	});
 });
 
@@ -99,7 +103,7 @@ describe("a change the archive holds", () => {
 		});
 		expect(boardState(tree).status).toEqual({
 			archive: "done",
-			"archive-preflight": "ready",
+			"archive-preflight": "proposed",
 		});
 	});
 
@@ -140,26 +144,27 @@ describe("what the derivation reports nothing for", () => {
 			...complete("candidacy-gate"),
 			"openspec/changes/archive/": "",
 		});
-		expect(boardState(tree).status).toEqual({ "candidacy-gate": "ready" });
+		expect(boardState(tree).status).toEqual({ "candidacy-gate": "proposed" });
 	});
 
 	test("a slug named for an inherited key is still reported", () => {
 		// Every key is a directory name off the filesystem, so the records are
-		// prototype-free: on a plain object `status["__proto__"] = "ready"` calls
-		// the inherited setter, stores nothing, and drops the slug in silence.
+		// prototype-free: on a plain object `status["__proto__"] = "proposed"`
+		// calls the inherited setter, stores nothing, and drops the slug in
+		// silence.
 		const tree = fabricate({
 			...complete("__proto__"),
 			...complete("constructor"),
 		});
 		// Read through a `Map` rather than by key, because neither spelling of
-		// the key works here: `{ __proto__: "ready" }` as an expectation sets the
-		// prototype and yields `{}`, which is the same trap one level up, and
-		// `status["__proto__"]` is what `noProto` refuses. `Object.entries`
+		// the key works here: `{ __proto__: "proposed" }` as an expectation sets
+		// the prototype and yields `{}`, which is the same trap one level up,
+		// and `status["__proto__"]` is what `noProto` refuses. `Object.entries`
 		// carries an own key of either name out intact.
 		const derived = new Map(Object.entries(boardState(tree).status));
 		expect([...derived.keys()].sort()).toEqual(["__proto__", "constructor"]);
-		expect(derived.get("__proto__")).toBe("ready");
-		expect(derived.get("constructor")).toBe("ready");
+		expect(derived.get("__proto__")).toBe("proposed");
+		expect(derived.get("constructor")).toBe("proposed");
 	});
 
 	test("a plain file under changes/ is skipped rather than read as a change", () => {
@@ -209,7 +214,7 @@ describe("a sweep over a whole tree", () => {
 		);
 		const { status } = boardState(tree);
 		expect(Object.keys(status).length).toBe(50);
-		for (const slug of changes) expect(status[slug]).toBe("ready");
+		for (const slug of changes) expect(status[slug]).toBe("proposed");
 		for (const slug of archives) expect(status[slug]).toBe("done");
 	});
 });
@@ -230,6 +235,6 @@ describe("a change whose .openspec.yaml is not a mapping", () => {
 
 	test("an empty document declares no predecessor rather than failing", () => {
 		const tree = fabricate(complete("score-calibration", ""));
-		expect(boardState(tree).status["score-calibration"]).toBe("ready");
+		expect(boardState(tree).status["score-calibration"]).toBe("proposed");
 	});
 });
