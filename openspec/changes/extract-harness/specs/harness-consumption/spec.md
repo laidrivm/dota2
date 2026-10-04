@@ -63,7 +63,8 @@ files there, which a clone does not have, are not read.
 ### Requirement: The harness rules are a tracked copy of the pinned package
 
 The rules and docs the harness ships for every project SHALL be held in this
-repository as a tracked copy, `CLAUDE.md` SHALL import that copy, and a check
+repository as a tracked copy in the flat `harness/` directory, `CLAUDE.md`
+SHALL import `harness/rules.md` from it, and a check
 SHALL fail when any file of the copy differs from the installed package at
 the pinned commit or is missing from either side, naming the file.
 
@@ -87,8 +88,8 @@ the pinned commit or is missing from either side, naming the file.
 ### Requirement: The guard does not lock out a clone that has not installed
 
 WHILE the installed harness package is absent, the Bash `PreToolUse` hook SHALL
-allow `bun install` or `bun i`, with flags but naming no package, and SHALL
-block every other command with a message naming `bun install` as what to run,
+allow `bun install` or `bun i`, alone or with `--frozen-lockfile` and no
+other argument, and SHALL block every other command with a message naming `bun install` as what to run,
 rather than failing every command alike.
 
 #### Scenario: A fresh clone
@@ -100,7 +101,8 @@ rather than failing every command alike.
 #### Scenario: Any other command before the install
 
 - **WHEN** the same session runs any other command — `git status`,
-  `bun install <package>`, which mutates the manifest, or an install with
+  `bun install <package>`, which mutates the manifest, an install with any
+  other flag such as `--registry <url>` or `--cwd <dir>`, or an install with
   another command chained after it
 - **THEN** the hook SHALL block it and its message SHALL name `bun install`
 

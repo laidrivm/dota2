@@ -23,8 +23,8 @@ none of them, and a commit hash typed into a table stands in for a pin.
   resolve from that pin, in a session, in CI and in a fresh clone after
   `bun install`. The `Provenance` table and the check pinning it are deleted,
   because the lockfile is the pin.
-- The harness rules and docs are also kept as a tracked copy in d2ass,
-  imported by `CLAUDE.md`, and a check fails when the copy differs from the
+- The harness rules and docs are also kept as a tracked copy in d2ass's flat
+  `harness/` directory, `CLAUDE.md` importing `harness/rules.md`, and a check fails when the copy differs from the
   pinned package. The review bot reads files of this repository only, so a
   copy is how it keeps quoting a harness rule, and a pin bump then shows
   which rules changed.

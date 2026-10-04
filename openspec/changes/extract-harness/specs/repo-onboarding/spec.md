@@ -31,5 +31,5 @@ name a linker run from another checkout.
 
 #### Scenario: The retired linker
 
-- **WHEN** the README is searched for `link.sh`
-- **THEN** it SHALL not match
+- **WHEN** `README.md` is searched for `link.sh`
+- **THEN** it SHALL NOT match
