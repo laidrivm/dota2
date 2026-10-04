@@ -117,7 +117,9 @@ looking for them is already here.
   claim being replaced, never the wording replacing it, and reconcile each
   site in the same change or name the change that will. `PLAN.md` left this list when the queue did: what it holds now is the
   standing constraints, which no change restates.
-- Copy a `MODIFIED` requirement whole from the live spec before editing it.
+- Copy a `MODIFIED` requirement whole from the live spec before editing it,
+  and read each scenario it carries against the code that scenario describes
+  before rewording it — the delta re-asserts every line it copies.
 - Move the card in the same turn the stage moves. When a proposal merges, a
   step's branch opens, a pull request opens or merges, or a change is
   archived, the task's card reaches the status that stage means **before the
