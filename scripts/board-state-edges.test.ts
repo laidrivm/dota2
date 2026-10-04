@@ -161,13 +161,14 @@ describe("this repository's own ordering", () => {
 				]);
 	});
 
-	test("seven changes declare a predecessor and the rest declare none", () => {
+	test("eight changes declare a predecessor and the rest declare none", () => {
 		const declaring = Object.entries(boardState(root).edges)
 			.filter(([, { after }]) => after.length > 0)
 			.map(([slug]) => slug)
 			.sort();
 		expect(declaring).toEqual([
 			"beta-refit",
+			"extract-harness",
 			"lane-synergy-model",
 			"laning-phase-model",
 			"outcome-calibration",
