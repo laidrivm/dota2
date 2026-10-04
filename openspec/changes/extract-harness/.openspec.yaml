@@ -1,0 +1,6 @@
+schema: spec-driven
+created: 2026-10-04
+after:
+  - board-lifecycle
+  - retire-plan-md
+retire_capabilities: true
