@@ -30,7 +30,7 @@ verify by a view read.
 Closes `task-board/a-complete-change-directory-no-step-applied`,
 `task-board/a-card-at-a-retired-status`, `task-board/a-proposal-merges`.
 
-- [ ] 1.1 In `scripts/board-state.ts`, rename `Status`'s `"ready"` to
+- [x] 1.1 In `scripts/board-state.ts`, rename `Status`'s `"ready"` to
       `"proposed"` and its two assignments with it. Rewrite the header
       comment's count and list of the statuses never reported: six, `idea`
       through `archiving`. Verify with `bun run typecheck`, which refuses any

@@ -4,17 +4,17 @@
  * so the whole of its behaviour is exercisable from a fabricated directory and
  * an agent is what carries its output to the board.
  *
- * It never reports the five statuses nobody can read from here — `suggested`,
- * `exploring`, `implementing`, `reviewing`, `archiving` — nor anything about a
- * card on a board whose tree is not this repository. A derivation that ran
- * anyway would answer for them with the same confidence as the thirty it is
- * right about.
+ * It never reports the six statuses nobody can read from here — `idea`,
+ * `exploring`, `explored`, `applying`, `applied`, `archiving` — nor anything
+ * about a card on a board whose tree is not this repository. A derivation that
+ * ran anyway would answer for them with the same confidence as the thirty it
+ * is right about.
  */
 import { lstatSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { root } from "./root.ts";
 
-export type Status = "done" | "ready" | "proposing";
+export type Status = "done" | "proposed" | "proposing";
 
 /** What a change declares it comes after, and which of those have not landed. */
 export type Edges = { after: string[]; blocking: string[] };
@@ -153,9 +153,9 @@ export function boardState(tree: string): State {
 	const changes = join(tree, "openspec/changes");
 	const problems: string[] = [];
 	// Prototype-free, because every key below is a directory name off the
-	// filesystem: `status["__proto__"] = "ready"` on a plain object calls the
-	// inherited setter, stores nothing, and drops that slug in silence. The
-	// same reason `Object.hasOwn` reads them a few lines down.
+	// filesystem: `status["__proto__"] = "proposed"` on a plain object calls
+	// the inherited setter, stores nothing, and drops that slug in silence.
+	// The same reason `Object.hasOwn` reads them a few lines down.
 	const status: Record<string, Status> = Object.create(null);
 
 	const unapplied = subdirs(changes).filter((name) => name !== "archive");
@@ -164,7 +164,7 @@ export function boardState(tree: string): State {
 		const whole =
 			ARTEFACTS.every((name) => isFile(join(dir, name))) &&
 			delta(join(dir, "specs"));
-		status[slug] = whole ? "ready" : "proposing";
+		status[slug] = whole ? "proposed" : "proposing";
 	}
 
 	for (const name of subdirs(join(changes, "archive"))) {
