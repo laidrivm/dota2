@@ -117,9 +117,10 @@ Closes `harness-consumption/a-fresh-clone`,
       settings check.
 - [ ] 5.2 Add `checks/harness-consumption.test.ts` with cases citing the three
       criteria. They run the settings hook command in a fabricated clone with
-      and without `node_modules/harness/`. ZOMBIES 25: after install, a
-      commit on `main` is refused with the package guard's message. Verify
-      with `bun test checks/harness-consumption`.
+      and without `node_modules/harness/`, including
+      `bun install --registry <url>` blocked before install. ZOMBIES 25:
+      after install, a commit on `main` is refused with the package guard's
+      message. Verify with `bun test checks/harness-consumption`.
 - [ ] 5.3 Delete `scripts/command-guard*` and `scripts/command-parse*`. Verify
       that `git grep -n "scripts/command-guard"` finds nothing outside
       `openspec/changes/archive/` and `docs/context/`.
