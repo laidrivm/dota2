@@ -7,7 +7,7 @@ See `proposal.md` for why. What shapes the approach:
 - The scaffolding is spread across `CLAUDE.md`, eight indexed docs,
   `.claude/settings.json`, about 8,000 lines of `scripts/` and `checks/`, CI
   workflows, `.coderabbit.yaml`, and nine whole capabilities plus parts of
-  three more. Its skills already live in `laidrivm/skills`, reached through
+  two more. Its skills already live in `laidrivm/skills`, reached through
   gitignored symlinks into a sibling working tree.
 - All three consumers run Bun and TypeScript. Linters differ: d2ass and
   `mellon` use Biome, `laidrivm.com` ESLint and Prettier.
@@ -160,7 +160,7 @@ The `PreToolUse` command in `.claude/settings.json` becomes:
 ```sh
 g="$CLAUDE_PROJECT_DIR/node_modules/harness/bun/command-guard.ts"
 [ -f "$g" ] && exec bun "$g"
-bun -e '<read stdin; allow only "bun install" / "bun i", else print the hint and exit 2>'
+bun -e '<read stdin; allow "bun install" / "bun i", bare or with --frozen-lockfile only; else print the hint and exit 2>'
 ```
 
 The fallback is inline because the harness cannot ship it: it runs when the
