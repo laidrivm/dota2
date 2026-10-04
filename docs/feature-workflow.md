@@ -127,12 +127,12 @@ looking for them is already here.
   session. A step's box is ticked in the pull request that implements it,
   never in a commit after the merge.
 
-  Three of the eight statuses a reconciliation can repair, because
-  `scripts/board-state.ts` derives them from the tree: `proposing`, `ready`,
-  `done`, and only on `D2ASS`. The other five, and every card on `Harness` or
-  `mellon`, are honoured rather than mechanised, and this bullet is the whole
-  of what holds them — which is why it is stated as an obligation rather than
-  as a convention. Which eight, and so which five, is fixed in
+  Three of the nine statuses a reconciliation can repair, because
+  `scripts/board-state.ts` derives them from the tree: `proposing`,
+  `proposed`, `done`, and only on `D2ASS`. The other six, and every card on
+  `Harness` or `mellon`, are honoured rather than mechanised, and this bullet
+  is the whole of what holds them — which is why it is stated as an obligation
+  rather than as a convention. Which nine, and so which six, is fixed in
   `openspec/specs/task-board/` and named nowhere else; a second copy here is
   the drift this change was written after.
 

@@ -41,13 +41,16 @@ Closes `task-board/a-complete-change-directory-no-step-applied`,
       `board-state-hygiene.test.ts:90` (5). Keep each `// spec:` citation.
       Verify `bun test scripts/board-state`, and that
       `grep -n '"ready"' scripts/board-state*.ts` finds nothing.
-- [ ] 1.3 In `docs/feature-workflow.md` §*Across the stages*, rename the
+- [x] 1.3 In `docs/feature-workflow.md` §*Across the stages*, rename the
       derived statuses (`proposing`, `proposed`, `done`), and change every
       count of them to nine and six: *Three of the eight* (`:128`), *The other
-      five* (`:130`), and *Which eight, and so which five* (`:133`). Change `task-board`'s
-      *Purpose* (`openspec/specs/task-board/spec.md`) from eight statuses to
-      nine, the one edit to a live spec the delta cannot carry. Verify by
-      reading both passages back.
+      five* (`:130`), and *Which eight, and so which five* (`:133`). Change
+      `task-board`'s *Purpose* (`openspec/specs/task-board/spec.md`) from
+      eight statuses to nine. Do the same in `PLAN.md`'s board paragraph and
+      growth protocol, and in `context-budget`'s two cards at `suggested`
+      (`openspec/specs/context-budget/spec.md`), which become `idea`: the
+      edits to live specs the delta cannot carry. Verify by reading every
+      passage back.
 - [ ] 1.4 Migrate `D2ASS`, then `Harness`, through the union. Add `idea`,
       `explored`, `proposed`, `applying` and `applied` beside the current
       options. Move every card at `suggested`, `ready`, `implementing` or

@@ -96,7 +96,7 @@ does to every other artefact.
 
 - **WHEN** a review or a session surfaces work that has no change directory —
   as seventeen of the thirty-seven entries this change moves do not
-- **THEN** it becomes a card at `suggested`, and `PLAN.md` records nothing:
+- **THEN** it becomes a card at `idea`, and `PLAN.md` records nothing:
   the board is where a task with no artefact in the tree is held, which is
   the case the tree cannot serve
 
@@ -113,7 +113,7 @@ other.
 1. **Moved to the board** — the entry is a task: something that will be
    finished, and whose being finished is a fact somebody will want to read. It
    becomes a card at the status `task-board` derives or, where nothing in the
-   tree derives it, at `suggested`.
+   tree derives it, at `idea`.
 2. **Moved to the code** — the fact is a fence at a specific line: a deliberate
    departure from the obvious implementation, or a precondition the code does
    not check. It becomes a comment there, unless one already stands.
