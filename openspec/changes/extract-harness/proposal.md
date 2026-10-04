@@ -60,7 +60,8 @@ none of them, and a commit hash typed into a table stands in for a pin.
 ### Modified Capabilities
 
 - `repo-onboarding`: a clone obtains the skills by installing dependencies,
-  not by running a linker from another checkout.
+  not by running a linker from another checkout, and the README links the
+  harness repository where it linked the skills repository.
 - `mutation-floor`: the floor check and the exemption form move to the
   harness. What d2ass mutates stays here.
 - `repo-layout`: the root-resolution requirement moves to the harness with the
