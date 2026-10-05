@@ -104,9 +104,9 @@ completes, name the next step and the exact command.
 ## Across the stages
 
 Discipline every artefact of a change is written under, whichever stage
-produces it. Promoted from `CLAUDE.md`'s Process list, which these five
-outgrew: they age with the workflow rather than with the code, and a reader
-looking for them is already here.
+produces it. Promoted from `CLAUDE.md`'s Process list, which they outgrew:
+they age with the workflow rather than with the code, and a reader looking
+for them is already here.
 
 - When a statement changes — a rule, a recorded decision, or one artefact of
   a change under review — search the four places that restate one before
@@ -155,5 +155,9 @@ looking for them is already here.
   user's drag, and a session reordering it overwrites the only instrument
   they have for ranking a column. `done` is no column of that view — its
   cards are read through the view named `Done`, newest archive first.
+- Let an enumeration be its own count — never state a total in the prose
+  introducing a list, which grows while the total does not. A number and the
+  members it counts in one sentence cannot drift apart unseen; a number in the
+  sentence above a block of them can, and does.
 - Open every markdown file with a level-1 heading — OpenSpec's `design.md`
   and delta-spec templates start at `##`, so the title is yours to add.
