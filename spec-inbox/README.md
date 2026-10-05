@@ -4,8 +4,8 @@ Landing zone for product specs that have not yet entered the repo through
 an OpenSpec artifact or a source file. **Everything here except this file
 is gitignored** — the repo is public, the specs are not.
 
-Contents (dropped here by the user, listed in `PLAN.md` → Requirement
-sources): `user-stories.md`, `model-spec.md`, `data-model.md`,
+Contents (dropped here by the user; the directory is listed in the
+`README.md` ownership map): `user-stories.md`, `model-spec.md`, `data-model.md`,
 `screens-spec.md`, `types.ts`, `fixture-snapshot.json`,
 `generate_fixture.py`.
 

@@ -56,8 +56,8 @@ Closes `hero-reference/valve-s-own-post-names-a-patch`,
       vendor's format rather than describing a patch it has ever served" —
       which was true and is now the opposite of true, and a comment naming a
       case the code no longer faces is the defect no test sees.
-- [ ] 1.7 Read `PLAN.md`'s standing constraint **STRATZ, not OpenDota**
-      against this change. It records why STRATZ won as the *statistics*
+- [ ] 1.7 Read the **STRATZ, not OpenDota** default in
+      `openspec/config.yaml` `context:` against this change. It records why STRATZ won as the *statistics*
       source and stays true, but with the last OpenDota call gone its title
       invites a reader to look for a use that no longer exists. Decide
       whether it is reworded or left, and say which in the pull request.
