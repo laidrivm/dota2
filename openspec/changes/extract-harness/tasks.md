@@ -67,7 +67,7 @@ Closes `repo-onboarding/a-fresh-clone`, `repo-onboarding/the-retired-linker`,
       `.claude/skills/` from `.gitignore`. Verify with
       `git ls-files -s .claude/skills` that every entry has mode `120000`.
       The check that closes the links' criterion arrives in step 7.
-- [ ] 3.2 Rewrite README §*Getting the review skills* around `bun install`, and
+- [x] 3.2 Rewrite README §*Getting the review skills* around `bun install`, and
       make the ownership map's `.claude/skills/` row link to
       `https://github.com/laidrivm/harness`. Add cases to
       `checks/readme-map.test.ts` citing the three `repo-onboarding`

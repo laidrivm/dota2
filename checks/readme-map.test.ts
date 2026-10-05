@@ -95,6 +95,46 @@ test.each(paths)("the map's `%s` is real and shipped", (path) => {
 	);
 });
 
+// spec: repo-onboarding/the-skills-repository-is-referenced
+test("the skills row links the harness and claims nothing about it", () => {
+	const row = rows.find((row) =>
+		row.split("|")[1]?.includes("`.claude/skills/`"),
+	);
+	expect(row).toContain("(https://github.com/laidrivm/harness)");
+	// Visibility is the other repository's to change, so the row may not say.
+	expect(row).not.toMatch(/public|private/i);
+});
+
+/** The README section a clone reads for the skills, whitespace normalised. */
+const skillsSection = (
+	readme.match(/^## Getting the review skills$([\s\S]*?)^## /m)?.[1] ?? ""
+).replace(/\s+/g, " ");
+
+// spec: repo-onboarding/a-fresh-clone
+test.each([
+	"`bun install`",
+	"`/zombies`",
+	"`/warm`",
+	"`/triage`",
+	"`/coderabbit-local`",
+])("the skills section names %s", (name) =>
+	expect(skillsSection).toContain(name),
+);
+
+/** Whether `text` sends a reader to the retired linker. */
+const namesLinker = (text: string) => /link\.sh/.test(text);
+
+// spec: repo-onboarding/the-retired-linker
+test("the README names no linker", () => {
+	expect(namesLinker(readme)).toBe(false);
+});
+
+// spec: repo-onboarding/the-retired-linker
+test("a README naming the linker is caught", () => {
+	// The case above could pass on a search that matches nothing at all.
+	expect(namesLinker("Run `./link.sh all <path-to-d2ass>`.")).toBe(true);
+});
+
 // spec: context-budget/a-second-file-read-every-session
 test("exactly one file is read every session, and it is CLAUDE.md", () => {
 	// Matched loosely, so a reworded or capitalised cell is still caught; an
