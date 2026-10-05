@@ -59,7 +59,7 @@ Closes `task-board/a-complete-change-directory-no-step-applied`,
       `Board view` and confirm no card sits at a retired option. After it,
       read again and confirm every card reads one of the nine and none reads
       empty (*a-card-at-a-retired-status*).
-- [ ] 1.5 Move this change's card on `Harness` to the status this step
+- [x] 1.5 Move this change's card on `Harness` to the status this step
       reaches, under the new names, in the same turn.
 - [ ] 1.6 Run the pre-PR sequence per `docs/review-toolkit.md`, and `bun test`.
 
