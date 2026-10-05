@@ -127,6 +127,14 @@ looking for them is already here.
   session. A step's box is ticked in the pull request that implements it,
   never in a commit after the merge.
 
+  The same turn keeps the card's links and summary, which `task-board`'s
+  *A card can be ranked without opening the repository* fixes. The turn a
+  pull request opens adds its link under the card's `Ссылки` line, with its
+  number and kind (`proposal`, `step 2`, `archive`); the turn a proposal
+  merges adds its `proposal.md` on the default branch; the archive re-points
+  that link to the archived path. An edit to a proposal's *Why* or *What
+  Changes* re-reads the card's summary in that turn.
+
   Three of the nine statuses a reconciliation can repair, because
   `scripts/board-state.ts` derives them from the tree: `proposing`,
   `proposed`, `done`, and only on `D2ASS`. The other six, and every card on

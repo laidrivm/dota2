@@ -69,7 +69,7 @@ Closes `task-board/a-card-for-a-change-that-exists-in-the-tree`,
 `task-board/a-finding-that-becomes-a-change`,
 `task-board/a-card-short-of-done`.
 
-- [ ] 2.1 In `docs/feature-workflow.md`, extend the *Move the card in the same
+- [x] 2.1 In `docs/feature-workflow.md`, extend the *Move the card in the same
       turn* bullet: the turn a pull request opens also adds its link to the
       card, under the `Ссылки` line, with its number and kind; the turn a
       proposal merges adds its `proposal.md` on the default branch; the
