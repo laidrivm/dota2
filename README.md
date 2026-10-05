@@ -15,7 +15,6 @@
 | `docs/rulebook-growth.md` | what a fired maintenance trigger asks for: how a rule leaves a sublist, how a section leaves an always-on file | when a rule or a section is added, promoted or deleted |
 | `docs/design-sync.md` | where the screen design lives, and how its swatch pages derive from the palette | when the palette or the design project is touched |
 | `docs/research/*` | dated surveys of an external source — what it offers, measured, and when it was read | before a change rests on what that source publishes |
-| `PLAN.md` | which boards hold the queue, and the one requirement source still open | every session |
 | `spec-inbox/` | raw product specs not yet in the repo — contents gitignored, its README tracked | when a task cites one |
 | `openspec/specs/*/spec.md` | what each shipped capability must do (EARS) | when changing behaviour it covers |
 | `openspec/config.yaml` → `context:` | architecture choices (SSE, BFF, cache, N+1) | on artifact generation |
