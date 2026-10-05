@@ -30,7 +30,7 @@
 		"typescript": "7.0.2"
 	},
 	"dependencies": {
-		"preact": "10.29.8"
+		"preact": "11.0.0"
 	},
 	"overrides": {
 		"fast-uri": "3.1.8",
