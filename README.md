@@ -10,7 +10,7 @@
 | `docs/testing.md` | what tests assert, how a test cites the criterion it closes, e2e rules | when tests change |
 | `docs/feature-workflow.md` | the four OpenSpec stages and their gates, and the boards that hold the work | on any feature, new tooling, or gate change, and when choosing the next card |
 | `docs/git-and-prs.md` | branch and commit shape, PR description, and the git mechanics that protect the history | before branching, committing or opening a PR |
-| `docs/review-toolkit.md` | which review skill to run, the pre-PR sequence, and the commit each shared-repo gate was verified against | before every PR |
+| `docs/review-toolkit.md` | which review skill to run, and the pre-PR sequence | before every PR |
 | `docs/verification.md` | what counts as evidence for a claim | before a claim or a decision rests on one |
 | `docs/rulebook-growth.md` | what a fired maintenance trigger asks for: how a rule leaves a sublist, how a section leaves an always-on file | when a rule or a section is added, promoted or deleted |
 | `docs/design-sync.md` | where the screen design lives, and how its swatch pages derive from the palette | when the palette or the design project is touched |
