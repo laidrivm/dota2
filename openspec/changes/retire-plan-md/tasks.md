@@ -30,7 +30,7 @@ Closes `context-budget/an-architecture-default`,
 and removing a citation before the file goes would move the uncited floor
 twice.
 
-- [ ] 1.1 Add *STRATZ, not OpenDota* to `openspec/config.yaml` `context:` as
+- [x] 1.1 Add *STRATZ, not OpenDota* to `openspec/config.yaml` `context:` as
       one architecture default: STRATZ carries the lane position
       `hero_position_stats` rests on, and OpenDota does not. Verify with
       `openspec instructions proposal --change retire-plan-md --json`,

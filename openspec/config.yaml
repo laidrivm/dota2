@@ -19,6 +19,9 @@ context: |
     behind a cache, never recomputed per page load.
   - N+1 is a UI defect: eager-load/dataloader hints are part of an
     endpoint's definition and get checked at review.
+  - Statistics come from STRATZ, not OpenDota: STRATZ carries the lane
+    position `hero_position_stats` rests on, and OpenDota does not —
+    `lane_role` exists only on its parsed-match sample.
 rules:
   proposal:
     - Include a "Non-goals" section
