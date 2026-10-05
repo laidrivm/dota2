@@ -19,8 +19,11 @@ a URL, which is an identifier for private content.
 
 The project SHALL keep its tasks on boards in the Notion workspace, on which
 every task not yet finished, and every change already archived, has exactly
-one card. A card SHALL carry its status, a title, and a pointer to where its
-content lives, and SHALL NOT carry a copy of anything the repository holds.
+one card. A card SHALL carry its status, a title, a pointer to where its content
+lives, and a summary, and SHALL NOT carry a copy of anything else the
+repository holds. The summary is the one exception and is bounded: at most 500
+characters, enough to rank a card by and too few to restate a proposal.
+*A card can be ranked without opening the repository* fixes what it says.
 
 The pointer SHALL be a **property** of the card rather than a line of its
 body. A property is what a view can display and a query can filter on; a line
@@ -72,8 +75,8 @@ than an opinion.
 #### Scenario: A card for a change that exists in the tree
 
 - **WHEN** a card names a change with a directory under `openspec/changes/`
-- **THEN** it SHALL carry that path and SHALL NOT restate the change's why,
-  its scope, its measurements or its ordering
+- **THEN** it SHALL carry that path and its summary, and SHALL NOT otherwise
+  restate the change's why, its scope, its measurements or its ordering
 
 #### Scenario: A card for a finding with no change
 
@@ -83,7 +86,8 @@ than an opinion.
 
 A card SHALL keep its identity across that boundary, WHERE the card's owning
 tree is this repository. WHEN a directory is created here for such a card that
-had none, the **same card** SHALL gain the pointer and lose its body, rather
+had none, the **same card** SHALL gain the pointer and lose the record its body held,
+keeping its summary and links, rather
 than a second card being made beside it. What the body
 held has by then been written into `proposal.md`, so keeping it leaves two
 accounts of one thing with only one of them reviewed — which is the duplication
@@ -102,13 +106,14 @@ for it would hold every such card permanently in breach.
 - **WHEN** `openspec/changes/<slug>/` is created for a card that carried its
   record in its body
 - **THEN** that card SHALL gain the path as its pointer and its body SHALL be
-  emptied in the same turn, and no second card SHALL be created for the change
+  cut to its summary and links in the same turn, and no second card SHALL be created for the change
 
 #### Scenario: A card and the tree disagreeing
 
-- **WHEN** a card's status and the file tree disagree about a derived status
+- **WHEN** a card sits behind the status the file tree derives for it
 - **THEN** the tree SHALL be taken as right and the card corrected, the board
-  being authoritative only for what the tree cannot express
+  being authoritative only for what the tree cannot express — a card past the
+  derived status agrees with it and is left alone
 
 ### Requirement: There are three boards and a card goes to one of them
 
@@ -153,12 +158,27 @@ SHALL be split into the cards each board owns rather than mirrored.
 - **THEN** it SHALL treat the card as the whole record, and SHALL NOT report
   the absence of a matching directory in this repository as a discrepancy
 
-### Requirement: Three statuses are derived and five are moved by hand
+### Requirement: Three statuses are derived and six are moved by hand
 
-A card SHALL hold exactly one of eight statuses: `suggested`, `exploring`,
-`proposing`, `ready`, `implementing`, `reviewing`, `archiving`, `done`.
+A card SHALL hold exactly one of nine statuses, one per handover between
+OpenSpec stages:
 
-The eight SHALL be the **options** of each board's `Status` property, named
+- `idea` — entered for a later explore;
+- `exploring` — a session has started exploring and has not gathered the
+  context yet;
+- `explored` — the context is gathered, and saved where a proposal will need
+  it;
+- `proposing` — a session is writing the proposal, through its review and
+  merge;
+- `proposed` — the proposal is merged, and a session may take it to apply
+  from a cleared context;
+- `applying` — a session is applying it, through review, until its last
+  pull request merges;
+- `applied` — the change is merged and waits to be archived;
+- `archiving` — a session is running the archive;
+- `done` — archived; the change has been through the whole cycle.
+
+The nine SHALL be the **options** of each board's `Status` property, named
 exactly as listed above, and that property SHALL be of Notion's `select`
 type rather than its `status` type. What a card carries and what anything in
 this repository names is an option's **name**, which is what a read returns
@@ -180,12 +200,16 @@ What `status` would have bought is Notion's fixed group keys, and nothing in
 this contract reads them. What it costs is that the board's columns are its
 options directly, with no second grouping level to choose wrongly.
 
-The eight SHALL be the **complete** option list of that property, not an
-addition to it: on every board the property SHALL be set in one operation to
-exactly these eight, and any option a board carried before — `Not started`,
-`In progress` and `Done` on both of the boards that exist — SHALL cease to
-exist. Adding five beside the three would leave eleven, of which three are
-statuses no requirement here names and a reconciliation would never correct.
+The nine SHALL be the **complete** option list of that property, not an
+addition to it: on every board the property SHALL be set to exactly these
+nine, and any option a board carried before SHALL cease to exist. An option
+kept beside them would be a status no requirement here names and a
+reconciliation would never correct.
+
+No card SHALL lose its status when the list changes. A card at a retired
+option SHALL be carried to its successor before that option goes: `suggested`
+to `idea`, `ready` to `proposed`, and `implementing` and `reviewing` to
+`applying`.
 
 The same setting applies to `mellon` when that board is provisioned, so that
 a board created later is not a board with a different vocabulary.
@@ -199,9 +223,16 @@ file in the repository, and never learned from the view — which is what makes
 the hidden column harmless: a status with no cards has no work in it, and a
 session reads the view to find work.
 
+#### Scenario: A card at a retired status
+
+- **WHEN** the option list is replaced while a card sits at `suggested`,
+  `ready`, `implementing` or `reviewing`
+- **THEN** that card SHALL read its successor afterwards, and no card on
+  either board SHALL read empty
+
 #### Scenario: A status holding no cards
 
-- **WHEN** a board's view shows fewer than eight columns because some
+- **WHEN** a board's view shows fewer than nine columns because some
   statuses hold no card
 - **THEN** the missing statuses SHALL still be writable by name, and the
   view SHALL NOT be treated as the list of statuses that exist
@@ -209,28 +240,33 @@ session reads the view to find work.
 Derivation SHALL apply to `D2ASS` alone. It is the only board whose tree is
 this repository, so `scripts/board-state.ts` SHALL report nothing for a card
 on `Harness` or `mellon` and a reconciliation SHALL leave those cards
-untouched — on the same terms it leaves the five hand-moved statuses, and for
+untouched — on the same terms it leaves the six hand-moved statuses, and for
 the same reason: what would decide them is not readable from here. Every card
 on those two boards is therefore hand-moved, whatever its status.
 
 The distinction is not that the other boards are less important. It is that a
 derivation reading this file tree can only be right about this repository,
-and a derivation that runs anyway would report `suggested` for every card on
+and a derivation that runs anyway would report `idea` for every card on
 a board whose work is proceeding elsewhere — a wrong answer delivered with
 the same confidence as the 30/30 one.
 
 `scripts/board-state.ts` SHALL derive three statuses from the file tree alone
-— `proposing`, `ready` and `done` — reading no network and consulting no
+— `proposing`, `proposed` and `done` — reading no network and consulting no
 service, so that its whole behaviour is exercisable from a fabricated
 directory:
 
 ```text
 done        openspec/changes/archive/<date>-<slug>/ exists
-ready       openspec/changes/<slug>/ holds proposal, design, tasks and specs/
+proposed    openspec/changes/<slug>/ holds proposal, design, tasks and specs/
 proposing   openspec/changes/<slug>/ exists and is missing one of them
 ```
 
-The remaining five SHALL be moved by whoever does the work, in the turn the
+A derived status is a floor, not a value. `proposed` holds for a change from
+the merge of its proposal until its archive, so a card at `applying`,
+`applied` or `archiving` agrees with it, and only a card behind its derived
+status disagrees.
+
+The remaining six SHALL be moved by whoever does the work, in the turn the
 work moves, and `scripts/board-state.ts` SHALL NOT report them. Deriving them
 was measured and refused: applied to the thirty archived changes, a
 branch-name derivation gets fourteen wrong. Nine of those changes have no
@@ -245,13 +281,13 @@ pull request to its change.
 
 - **WHEN** a directory under `openspec/changes/` holds `proposal.md`,
   `design.md`, `tasks.md` and a `specs/` directory
-- **THEN** the derived status SHALL be `ready`
+- **THEN** the derived status SHALL be `proposed`
 
 #### Scenario: A change directory missing an artefact
 
 - **WHEN** a directory holds `proposal.md` and delta specs but no `tasks.md`,
   as a split proposal's first branch leaves it
-- **THEN** the derived status SHALL be `proposing`, and SHALL NOT be `ready`
+- **THEN** the derived status SHALL be `proposing`, and SHALL NOT be `proposed`
 
 #### Scenario: A change directory whose specs/ is empty
 
@@ -266,9 +302,9 @@ pull request to its change.
 - **WHEN** a slug has no directory under `openspec/changes/` and none under
   `openspec/changes/archive/`
 - **THEN** the output SHALL carry no entry for that slug at all, and SHALL NOT
-  carry one whose status is `null`, `unknown` or `suggested` — an absent key
+  carry one whose status is `null`, `unknown` or `idea` — an absent key
   is the only shape a caller cannot mistake for a derived value, and
-  `suggested` is a status the script never derives
+  `idea` is a status the script never derives
 
 #### Scenario: An archived change
 
@@ -278,18 +314,19 @@ pull request to its change.
 
 #### Scenario: A status the tree cannot see
 
-- **WHEN** a card sits at `implementing`, `reviewing`, `archiving`,
-  `suggested` or `exploring`
-- **THEN** `scripts/board-state.ts` SHALL report nothing for it, and a
-  reconciliation SHALL leave it untouched rather than resetting it to a
-  derived value
+- **WHEN** a card sits at `idea`, `exploring`, `explored`, `applying`,
+  `applied` or `archiving`
+- **THEN** a reconciliation SHALL leave it untouched rather than resetting it
+  to a derived value, and `scripts/board-state.ts` SHALL NOT read the card to
+  decide: it reports a slug from the tree alone, so a change at `applying`
+  still derives `proposed`, the floor its card has already passed
 
 #### Scenario: The derivation reaches no network
 
 - **WHEN** `scripts/board-state.ts` runs with no network route and no
   connector attached
 - **THEN** it SHALL produce its full output — the three derived statuses and
-  the blocking edges, and none of the five it never reports — every value in
+  the blocking edges, and none of the six it never reports — every value in
   it coming from the file tree
 
 #### Scenario: A card on a board whose tree is elsewhere
@@ -382,14 +419,18 @@ waiting for it.
 
 ### Requirement: The board is read through a saved view
 
-A session SHALL read a board through one named saved view — a board grouped
-by `Status`, and the only view any instruction sends a session to — and
-SHALL NOT read the data source with a SQL query.
+A session SHALL read a board through a named saved view — `Board view`, a
+board grouped by `Status`, for what is open, and `Done` for what is archived
+— and SHALL NOT read the data source with a SQL query. No instruction SHALL
+send a session to a view this capability does not name; a further view saved
+for a question the named ones cannot express is named here in the change that
+saves it, as `Done` is.
 
-The view SHALL NOT be created by this change where one already serves. Read
-off both live databases: each carries a saved view named `Board view`, of
-type `board`, grouped by `Status`. What is added to a board is the status
-options and the pointer property, not a view.
+A view SHALL NOT be created where one of that name already serves. Read off
+both live databases: each carries a saved view named `Board view`, of type
+`board`, grouped by `Status`. `Done` is saved beside it because no view
+answered what it answers, which is the clause below rather than an exception
+to it.
 
 A view SHALL follow its grouping property through a type change rather than
 being rebuilt after one. Measured on `D2ASS`: converting `Status` from
@@ -509,13 +550,13 @@ entry recording the always-on measurement read 743 against a measured 851.
 Moving the obligation to a board does not by itself fix that, and this
 requirement is the part that has to be honoured rather than the part that is
 mechanised — the three derived statuses are the ones a reconciliation can
-repair, and these five are not.
+repair, and these six are not.
 
 #### Scenario: A proposal merges
 
 - **WHEN** a change's `spec/<slug>` pull request merges and its directory
   becomes complete
-- **THEN** the card SHALL read `ready` in that same turn, and a later
+- **THEN** the card SHALL read `proposed` in that same turn, and a later
   reconciliation SHALL find nothing to correct
 
 #### Scenario: A stage moved and not recorded
@@ -524,3 +565,40 @@ repair, and these five are not.
   the tree
 - **THEN** it SHALL be corrected and the correction SHALL be reported, a
   silent repair leaving nobody aware the obligation was missed
+
+### Requirement: A card can be ranked without opening the repository
+
+Every card short of `done` SHALL carry an English title saying what the change
+does, never its slug, and a body opening with a summary in Russian of at most
+500 characters: what changes, why, and how large it is. The body SHALL end
+with links on GitHub to the change's `proposal.md` once merged and to every
+pull request it opens, each added in the turn that pull request opens. At
+archive, the `proposal.md` link SHALL follow the file to its archived path.
+
+#### Scenario: A card short of done
+
+- **WHEN** the user reads a card at any status before `done`
+- **THEN** its title says what the change does, its body opens with a Russian
+  summary of at most 500 characters, and every pull request the change has
+  opened is linked under it
+
+### Requirement: A column is a queue the user orders
+
+A session SHALL read cards in the order `Board view` returns — one manual
+order per board, each column its slice for one status — and SHALL take the
+first card in its column that is not blocked. The user's drag sets that
+order; a session SHALL NOT reorder cards. `done` SHALL NOT be a column of
+`Board view`: its cards SHALL be read through a view named `Done`, latest
+archived first.
+
+#### Scenario: A card the user dragged up
+
+- **WHEN** the user drags a card above others in its column
+- **THEN** `Board view` returns it before them, and a session choosing work
+  from that column takes it first unless it is blocked
+
+#### Scenario: A card reaching done
+
+- **WHEN** a card's status becomes `done`
+- **THEN** `Board view` no longer shows it, and `Done` lists it above every
+  card archived before it
