@@ -486,11 +486,11 @@ capability already provides for, where the body is the record and no file is
 expected to hold it.
 
 One card each, rather than one card for the six that are done. `PLAN.md`
-collapses tasks 1, 2, 3, 6, 8 and 9 into a single line today, and that line
-is why what each of them decided is unreadable without opening six files that
-are about to stop existing. A card per brief is what makes *task 6 chose
+collapsed tasks 1, 2, 3, 6, 8 and 9 into a single line, and that line was
+why what each of them decided was unreadable without opening six files that
+were about to stop existing. A card per brief is what makes *task 6 chose
 `biome check --staged` without `--write`* answerable, where a card per line
-of `PLAN.md` would record only that six tasks finished.
+of `PLAN.md` would have recorded only that six tasks finished.
 
 A brief's card SHALL carry what the brief recorded — what the task was, and
 where its decisions are live now. Five of the nine already state that in a
@@ -498,9 +498,9 @@ where its decisions are live now. Five of the nine already state that in a
 the body is built from, not the brief's full text, which is a plan for work
 that is finished.
 
-`tasks/task-5.md` is the one still open. Its card SHALL replace it as the
-requirement source `PLAN.md` names, and SHALL hold the brief's scope rather
-than a pointer to a file that is gone.
+`tasks/task-5.md` is the one still open. Its card SHALL hold the brief's scope
+rather than a pointer to a file that is gone, and is found on `D2ASS` like any
+other card rather than through a list of sources.
 
 #### Scenario: A brief that is done
 
@@ -512,8 +512,8 @@ than a pointer to a file that is gone.
 #### Scenario: The brief still open
 
 - **WHEN** the card for `tasks/task-5.md` is created
-- **THEN** `PLAN.md` §*Requirement sources* SHALL name that card instead of
-  the path, and the path SHALL NOT survive anywhere as a live citation
+- **THEN** the card SHALL hold the brief's scope, and the path SHALL NOT
+  survive anywhere as a live citation
 
 A brief's card SHALL be titled with the brief's filename — `tasks/task-1.md`
 and not *Task 1 — bun supply chain* — because that filename is the only key
@@ -602,3 +602,19 @@ archived first.
 - **WHEN** a card's status becomes `done`
 - **THEN** `Board view` no longer shows it, and `Done` lists it above every
   card archived before it
+
+### Requirement: The boards are named where a session chooses its next task
+
+`docs/feature-workflow.md` SHALL name the three boards, the work each one
+takes, and the saved view a session reads them through, each by its name. It
+SHALL carry no board URL, view URL or Notion identifier, because this
+repository is public and the boards are not. No file read at every session
+start SHALL be needed to find a board.
+
+#### Scenario: The workflow doc names the boards by name alone
+
+- **WHEN** the check reads `docs/feature-workflow.md`
+- **THEN** it finds `D2ASS`, `Harness`, `mellon` and `Board view`, and fails
+  naming whichever is missing
+- **AND** it fails on a Notion URL, a `collection://`, `view://` or
+  `collectionPropertyOption://` reference, or a UUID in either case
