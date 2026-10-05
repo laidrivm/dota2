@@ -131,10 +131,10 @@ Closes `task-board/the-workflow-doc-names-the-boards-by-name-alone`,
       comment's clause naming that file to name
       `checks/workflow-boards.test.ts`. Re-measure again at archive, once
       sync removes and adds `context-budget` criteria.
-- [ ] 2.9 `git grep -n PLAN.md`, excluding `openspec/changes/archive/`,
+- [x] 2.9 `git grep -n PLAN.md`, excluding `openspec/changes/archive/`,
       `docs/context/` and this change, and confirm every hit is a past-tense
       record that 2.7 left on purpose.
-- [ ] 2.10 Move the change's card on `Harness` to the status this step
+- [x] 2.10 Move the change's card on `Harness` to the status this step
       reaches, in the same turn.
 - [ ] 2.11 Run the pre-PR sequence per `docs/review-toolkit.md`, and
       `bun test`.
