@@ -136,5 +136,5 @@ Closes `task-board/the-workflow-doc-names-the-boards-by-name-alone`,
       record that 2.7 left on purpose.
 - [x] 2.10 Move the change's card on `Harness` to the status this step
       reaches, in the same turn.
-- [ ] 2.11 Run the pre-PR sequence per `docs/review-toolkit.md`, and
+- [x] 2.11 Run the pre-PR sequence per `docs/review-toolkit.md`, and
       `bun test`.
