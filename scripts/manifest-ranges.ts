@@ -61,9 +61,10 @@ const HARNESS_PIN = /^github:laidrivm\/harness#[0-9a-f]{40}$/;
 export function ranges(manifest: string): string[] {
 	const found: string[] = [];
 
-	const walk = (value: unknown, path: string) => {
+	const walk = (value: unknown, path: string, key: string) => {
 		if (typeof value === "string") {
-			if (path.endsWith(".harness")) {
+			// The key, not the path's tail: `my.harness` is a package of its own.
+			if (key === "harness" && path !== key) {
 				if (!HARNESS_PIN.test(value))
 					found.push(
 						`package.json: ${path} is ${value}, not github:laidrivm/harness#<40-hex commit>`,
@@ -75,13 +76,13 @@ export function ranges(manifest: string): string[] {
 		// `null` first: it is an object to `typeof`, and `Object.entries` throws
 		// on it rather than returning nothing.
 		if (value === null || typeof value !== "object") return;
-		for (const [key, inner] of Object.entries(value))
-			walk(inner, `${path}.${key}`);
+		for (const [name, inner] of Object.entries(value))
+			walk(inner, `${path}.${name}`, name);
 	};
 
 	const parsed = JSON.parse(manifest) as Record<string, unknown>;
 	for (const [key, value] of Object.entries(parsed))
-		if (!EXEMPT.has(key)) walk(value, key);
+		if (!EXEMPT.has(key)) walk(value, key, key);
 
 	return found;
 }

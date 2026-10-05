@@ -143,6 +143,38 @@ describe("a Git specifier", () => {
 		]);
 	});
 
+	// spec: harness-consumption/a-non-harness-git-specifier
+	test("a hosted prefix other than github is named", () => {
+		const found = ranges(
+			manifest({ dependencies: { lodash: "gitlab:lodash/lodash" } }),
+		);
+
+		expect(found).toEqual([
+			"package.json: dependencies.lodash is gitlab:lodash/lodash, not one version",
+		]);
+	});
+
+	// spec: harness-consumption/a-non-harness-git-specifier
+	test("beside the pinned harness, only the other entry is named", () => {
+		const fields = {
+			dependencies: {
+				harness: `github:laidrivm/harness#${commit}`,
+				lodash: "github:lodash/lodash#main",
+			},
+		};
+
+		expect(ranges(manifest(fields))).toEqual([
+			"package.json: dependencies.lodash is github:lodash/lodash#main, not one version",
+		]);
+	});
+
+	test("a package whose name ends in .harness is not the harness entry", () => {
+		// Read by the key, not the path's tail, which this name shares.
+		const fields = { dependencies: { "my.harness": "1.0.0" } };
+
+		expect(ranges(manifest(fields))).toEqual([]);
+	});
+
 	test("a path with a slash passes", () => {
 		// The bare shorthand's shape, which is why the shorthand without a
 		// reference is the one Git form this scan lets through.
