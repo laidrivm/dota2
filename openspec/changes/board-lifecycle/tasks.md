@@ -94,7 +94,7 @@ Closes `task-board/a-card-for-a-change-that-exists-in-the-tree`,
       every archived card its archive path, which `Done`'s sort reads in
       step 3. Report any card left unchanged and why.
 - [x] 2.5 Move this change's card in the same turn.
-- [ ] 2.6 Run the pre-PR sequence per `docs/review-toolkit.md`.
+- [x] 2.6 Run the pre-PR sequence per `docs/review-toolkit.md`.
 
 ## 3. Columns as queues, done as a stack
 
