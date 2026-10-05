@@ -86,3 +86,45 @@ for a `Pointer` property and its writes; both boards have carried one since
 `notion-task-board`.
 
 **PR #290's Minors were skipped by the owner without `/coderabbit 290`.**
+
+## 2026-10-05 — feat/board-lifecycle-3, chore/archive-board-lifecycle (merged as PRs #300, #301)
+
+- triage: OPEN → PASS — 3 groups, 1 medium read (`feat/board-lifecycle-3`)
+- coderabbit-local: PASS — 0 findings, over a diff three commits stale
+  (`feat/board-lifecycle-3`)
+- coderabbit-local: OPEN → PASS — 3 findings, 3 dispositioned (1 Minor fixed,
+  1 Minor rejected, 1 Minor skipped) (`feat/board-lifecycle-3`, re-run over the
+  final diff)
+- coderabbit: OPEN → PASS — 3 findings, 3 dispositioned (1 Minor fixed, 1 Minor
+  rejected, 1 Minor skipped) (PR #300)
+- zombies: OPEN → BLOCKED — 2 gaps, both carried to a `Harness` card rather than
+  into the branch (`chore/archive-board-lifecycle`)
+- triage: OPEN → PASS — 3 groups, 2 medium read (`chore/archive-board-lifecycle`)
+- coderabbit-local: stopped before it returned, at the owner's instruction
+  (`chore/archive-board-lifecycle`)
+- coderabbit: PASS — 1 finding, 1 dispositioned (1 Major fixed) (PR #301)
+- Not run: warm (no manifest changed), ponytail-review, preflight, code-review,
+  security-review, first-five, review-order
+
+**A stale local review reads exactly like a clean one.** The first
+`coderabbit-local` ran in a background agent launched before the branch's last
+three commits, and reported `PASS — no findings` over the three files it had
+seen while the branch changed five. The re-run over the final diff returned
+three findings. Nothing in the gate line tells the two apart, and the
+`reviewedFiles` list is the only thing that does — which is why the re-run was
+asked for it explicitly.
+
+**The session's only Major came from the cloud review, on the branch whose
+local one never finished.** `/coderabbit-local` on
+`chore/archive-board-lifecycle` was stopped at the owner's instruction, and
+`/coderabbit` on PR #301 then found that `task-board`'s *A status the tree
+cannot see* scoped by an enumeration of six statuses where the floor two
+paragraphs above it scopes by position: a card at `idea` with a complete
+directory was both to be corrected and to be left alone. `CLAUDE.md` already
+forbids that shape — *scope a scan by what it exempts, never by an enumeration
+of what it covers* — and nobody had held the spec to its own rule.
+
+**Both `zombies` gaps left the branch instead of entering it.** They were about
+`biome.json`'s `$schema` drifting from the version the manifest pins, which no
+test watches; the branch under way was an archive, so they became the `Harness`
+card *Pin biome's $schema to the version the manifest names*.
