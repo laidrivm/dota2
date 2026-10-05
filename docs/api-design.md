@@ -17,7 +17,9 @@ The API is a product; its consumer is a TypeScript frontend. Contract rules
 - Every contract key is always present; an absent value is `null`. No
   dynamic or conditional keys.
 - camelCase everywhere in JSON — including error bodies and pagination
-  metadata.
+  metadata. Postgres columns are the one exception and stay `snake_case`,
+  because an unquoted identifier folds to lowercase; the exporter renames at
+  that boundary.
 - An ID an endpoint accepts or a consumer resolves is a UUIDv7 — never an
   incremental integer, no ulid/uuid packages — and the server mints its own
   with `Bun.randomUUIDv7()` (time-sortable) rather than a package. An ID that

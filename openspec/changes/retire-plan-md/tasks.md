@@ -44,7 +44,7 @@ twice.
       `.github/workflows/audit.yml` reports one. Verify
       `bun test checks/container-image` still passes, since it reads this
       file.
-- [ ] 1.3 In `docs/api-design.md`, beside the camelCase bullet, add the one
+- [x] 1.3 In `docs/api-design.md`, beside the camelCase bullet, add the one
       exception: Postgres columns stay `snake_case`, because an unquoted
       identifier folds to lowercase, and the exporter renames at that
       boundary. Verify by reading the passage back.
