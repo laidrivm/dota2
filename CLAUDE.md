@@ -32,8 +32,8 @@ see [docs/review-toolkit.md](docs/review-toolkit.md).
 
 ## Feature workflow (spec-driven, OpenSpec)
 
-The four OpenSpec stages, what gates each one, and the discipline every
-change artefact is written under — see
+The four OpenSpec stages, what gates each one, the discipline every change
+artefact is written under, and the boards that hold every task — see
 [docs/feature-workflow.md](docs/feature-workflow.md).
 
 ## Testing
@@ -87,19 +87,15 @@ Rule quality bar — a rule must be:
 
 ### Maintenance & growth
 
-The always-on set is this file plus `PLAN.md`, the two read at the start of
-every session; the trigger is read against their combined line count, because
-what a session pays is what it must read before it starts and neither file
-pays it alone. It fires when the set passes ~500 lines, when one sublist below
-passes ~20 rules, or when rules from this file's middle are observably being
-ignored — `openspec/specs/context-budget/` and `openspec/specs/agent-rulebook/`
-fix those two figures. What a fired trigger asks for — promotion, deletion, the
-protocol for extracting a section or relocating one off the tree, and where a
-session save-point lives — is in
-[docs/rulebook-growth.md](docs/rulebook-growth.md).
-
-`PLAN.md` names the three boards and the one source still feeding the work; a
-task with a status is a card on one of those boards.
+This file is the only one read at the start of every session; a doc it indexes
+is read on demand and costs nothing until then. The trigger fires when this
+file passes ~350 lines, when one sublist below passes ~20 rules, or when rules
+from this file's middle are observably being ignored —
+`openspec/specs/context-budget/` and `openspec/specs/agent-rulebook/` fix those
+two figures. What a fired trigger asks for — promotion, deletion, the protocol
+for extracting a section or relocating one off the tree, and where a session
+save-point lives — is in [docs/rulebook-growth.md](docs/rulebook-growth.md),
+and never a second always-on file.
 
 ### Rules
 
