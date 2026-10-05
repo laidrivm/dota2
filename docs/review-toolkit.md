@@ -3,9 +3,9 @@
 Indexed from `CLAUDE.md`, which holds the rule quality bar and the
 single-source rule this file inherits.
 
-Review skills live in `.claude/skills/` (symlinked from the shared skills
-repo — edit them there, not here); `/ponytail-review` comes from the ponytail
-plugin.
+Review skills live in `.claude/skills/`, symlinked into the harness package
+`bun.lock` pins — edit them in the harness repository, not here;
+`/ponytail-review` comes from the ponytail plugin.
 
 Show a review skill's report, then act on it in the same turn: apply the
 findings that hold against the current code, and say which you skip and why.
@@ -106,35 +106,3 @@ change set — then one pass of `/coderabbit-local` — one, not three.
 
 Your sequence ends there — the PR link is the deliverable. `/coderabbit`
 closes the loop on either, whenever the user chooses to run it.
-
-## Provenance
-
-A symlink points at a working tree, not at a commit: whatever is checked out
-in the [skills repo](https://github.com/laidrivm/skills) when a session starts
-is the gate that runs. Each row below records the commit at which that gate's
-contract, as described above, was last read against its `SKILL.md`. A newer
-commit upstream is not a defect — it is a re-verification the next branch
-touching that gate owes.
-
-`archived` marks a skill symlinked into `.claude/skills/` that no gate here
-depends on. It carries no commit because nothing would notice if it changed,
-and the row exists so that an unused skill can be told from a dependency
-nobody recorded.
-
-| Skill | Verified against |
-|-------|------------------|
-| `coderabbit` | `9adc5c6` |
-| `coderabbit-local` | `759f15e` |
-| `playwright-cli` | `759f15e` |
-| `triage` | `759f15e` |
-| `warm` | `759f15e` |
-| `zombies` | `759f15e` |
-| `checklist` | archived |
-| `first-five` | archived |
-| `preflight` | archived |
-| `review-order` | archived |
-| `session-wrapup` | archived |
-
-`playwright-cli` is a gate through a `CLAUDE.md` rule rather than through the
-sequence above. `/ponytail-review` has no row: it comes from the ponytail
-plugin, not from that repository.
