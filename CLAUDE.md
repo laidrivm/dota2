@@ -41,6 +41,11 @@ change artefact is written under — see
 What a test must assert, how `/zombies` findings route, and the e2e
 rules — see [docs/testing.md](docs/testing.md).
 
+## Design sync
+
+The design project and the swatch pages derived from the palette — see
+[docs/design-sync.md](docs/design-sync.md).
+
 ## Lessons learned (fix & capture)
 
 ### The loop — agent responsibilities

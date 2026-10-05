@@ -48,7 +48,7 @@ twice.
       exception: Postgres columns stay `snake_case`, because an unquoted
       identifier folds to lowercase, and the exporter renames at that
       boundary. Verify by reading the passage back.
-- [ ] 1.4 Create `docs/design-sync.md`, opening with a level-1 heading: the
+- [x] 1.4 Create `docs/design-sync.md`, opening with a level-1 heading: the
       private claude.ai/design project *Draft board screen design*, reached
       through `DesignSync`, and the derivation of its two swatch pages from
       `src/app/styles/tokens/colors.css`, carried over from `PLAN.md` whole.
