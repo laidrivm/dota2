@@ -96,7 +96,7 @@ Closes `task-board/the-workflow-doc-names-the-boards-by-name-alone`,
       queue-heading, sections and task-5-line cases, and with them the
       `context-budget/a-source-that-is-itself-a-task` citation. Verify every
       test by full describe path.
-- [ ] 2.3 In `checks/readme-map.test.ts`, assert that the rows whose *Read*
+- [x] 2.3 In `checks/readme-map.test.ts`, assert that the rows whose *Read*
       cell matches `/every session/i` are exactly `["CLAUDE.md"]`, citing
       `context-budget/a-second-file-read-every-session`. This covers one row
       (ZOMBIES 7), a second row (8), a reworded or capitalised cell (9) and
