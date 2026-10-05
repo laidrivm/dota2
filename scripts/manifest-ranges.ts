@@ -39,13 +39,36 @@ const EXEMPT = new Set(["scripts", "simple-git-hooks"]);
 const RANGE =
 	/^[\^~<>=]|\|\||^[x*]$|^\d+(\.\d+)?$|^\d+(\.\d+)*\.[x*]$|^\d[\d.]*\s*-\s*\d/i;
 
+/**
+ * A spec naming a Git repository, which names whatever its reference points at
+ * when it is installed — a set, pinned or not, as a range is.
+ *
+ * ponytail: the bare `owner/repo` shorthand, which bun and npm both read as
+ * GitHub, passes. Without a `#` it has the shape of a path, and this scan reads
+ * every field — `src/model.ts` must pass. A complete check would read
+ * `bun.lock`, where every Git dependency is written out whole.
+ */
+const GIT =
+	/^(github|gitlab|bitbucket|gist|git(\+[a-z]+)?):|^git@|\.git(#.*)?$|^[a-z0-9][\w.-]*\/[\w.-]+#/i;
+
+/**
+ * The one Git spec admitted, and for the `harness` entry alone: a full commit
+ * hash, which `bun.lock` records and nothing can move under it.
+ */
+const HARNESS_PIN = /^github:laidrivm\/harness#[0-9a-f]{40}$/;
+
 /** Every version in `manifest` that names a set, and an empty list when none. */
 export function ranges(manifest: string): string[] {
 	const found: string[] = [];
 
 	const walk = (value: unknown, path: string) => {
 		if (typeof value === "string") {
-			if (RANGE.test(value))
+			if (path.endsWith(".harness")) {
+				if (!HARNESS_PIN.test(value))
+					found.push(
+						`package.json: ${path} is ${value}, not github:laidrivm/harness#<40-hex commit>`,
+					);
+			} else if (RANGE.test(value) || GIT.test(value))
 				found.push(`package.json: ${path} is ${value}, not one version`);
 			return;
 		}

@@ -76,6 +76,80 @@ describe("a version naming a set rather than a version", () => {
 	});
 });
 
+describe("a Git specifier", () => {
+	const commit = "0123456789abcdef0123456789abcdef01234567";
+
+	// spec: harness-consumption/pinned-to-a-commit
+	test("the harness pinned to a full commit passes", () => {
+		const fields = {
+			dependencies: { harness: `github:laidrivm/harness#${commit}` },
+		};
+
+		expect(ranges(manifest(fields))).toEqual([]);
+	});
+
+	// spec: harness-consumption/pinned-to-a-commit
+	test("a manifest with no harness entry passes", () => {
+		// The pin is admitted, not demanded: a manifest from before the harness
+		// was added names no entry for this rule to read.
+		const fields = { dependencies: { preact: "10.29.8" } };
+
+		expect(ranges(manifest(fields))).toEqual([]);
+	});
+
+	// spec: harness-consumption/pinned-to-something-that-moves
+	test.each([
+		["a 39-character hash", `#${commit.slice(1)}`],
+		["a 41-character hash", `#${commit}0`],
+		["an upper-case hash", `#${commit.toUpperCase()}`],
+		["a branch", "#main"],
+		["a tag", "#v1.0.0"],
+		["no reference", ""],
+	])("the harness pinned to %s is named", (_, reference) => {
+		const spec = `github:laidrivm/harness${reference}`;
+
+		const found = ranges(manifest({ dependencies: { harness: spec } }));
+
+		expect(found).toEqual([
+			`package.json: dependencies.harness is ${spec}, not github:laidrivm/harness#<40-hex commit>`,
+		]);
+	});
+
+	// spec: harness-consumption/pinned-to-something-that-moves
+	test("the harness by bare shorthand is named", () => {
+		// The one entry the shorthand cannot hide in: it is read by its key, and
+		// every value but the pin fails there.
+		const found = ranges(
+			manifest({ dependencies: { harness: "laidrivm/harness" } }),
+		);
+
+		expect(found).toEqual([
+			"package.json: dependencies.harness is laidrivm/harness, not github:laidrivm/harness#<40-hex commit>",
+		]);
+	});
+
+	// spec: harness-consumption/a-non-harness-git-specifier
+	test.each([
+		["pinned to a commit", `github:lodash/lodash#${commit}`],
+		["on a branch", "github:lodash/lodash#main"],
+		["over git+https", "git+https://github.com/lodash/lodash.git"],
+		["over ssh", "git@github.com:lodash/lodash.git"],
+		["by shorthand with a reference", `lodash/lodash#${commit}`],
+	])("another dependency %s is named as a range is", (_, spec) => {
+		const found = ranges(manifest({ dependencies: { lodash: spec } }));
+
+		expect(found).toEqual([
+			`package.json: dependencies.lodash is ${spec}, not one version`,
+		]);
+	});
+
+	test("a path with a slash passes", () => {
+		// The bare shorthand's shape, which is why the shorthand without a
+		// reference is the one Git form this scan lets through.
+		expect(ranges(manifest({ module: "src/model.ts" }))).toEqual([]);
+	});
+});
+
 describe("a value this scan has nothing to say about", () => {
 	test.each(["10.29.8", "1.2.3-beta.1", "1.2.3+build.5"])(
 		"the exact version %s passes",
