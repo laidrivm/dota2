@@ -111,7 +111,7 @@ Closes `task-board/a-card-the-user-dragged-up`,
       `done` and sorted by `Pointer` descending. Read `Done` and confirm the
       newest archive comes first and the brief cards, which have no pointer,
       come last.
-- [ ] 3.3 In `docs/feature-workflow.md`, beside the boards, state that a
+- [x] 3.3 In `docs/feature-workflow.md`, beside the boards, state that a
       session takes the first unblocked card of its column in `Board view`'s
       order and never reorders cards, and that `done` is read through `Done`.
       Verify by reading it back.
