@@ -13,6 +13,7 @@
 | `docs/review-toolkit.md` | which review skill to run, the pre-PR sequence, and the commit each shared-repo gate was verified against | before every PR |
 | `docs/verification.md` | what counts as evidence for a claim | before a claim or a decision rests on one |
 | `docs/rulebook-growth.md` | what a fired maintenance trigger asks for: how a rule leaves a sublist, how a section leaves an always-on file | when a rule or a section is added, promoted or deleted |
+| `docs/design-sync.md` | where the screen design lives, and how its swatch pages derive from the palette | when the palette or the design project is touched |
 | `docs/research/*` | dated surveys of an external source — what it offers, measured, and when it was read | before a change rests on what that source publishes |
 | `PLAN.md` | the requirement sources, the standing constraints, and which boards hold the queue | every session |
 | `spec-inbox/` | raw product specs not yet in the repo — contents gitignored, its README tracked | when a task cites one |
