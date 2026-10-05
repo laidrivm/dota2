@@ -55,7 +55,7 @@ twice.
       Add its row to the `README.md` ownership map (*when the palette or the
       design project is touched*) and one index line to `CLAUDE.md`. Verify
       `bun test checks/readme-map.test.ts`.
-- [ ] 1.5 From `PLAN.md`, delete *Growth protocol*, *Standing constraints* and
+- [x] 1.5 From `PLAN.md`, delete *Growth protocol*, *Standing constraints* and
       the `spec-inbox/` and design-project lines of *Requirement sources*.
       Reduce the preamble to one line saying the file names where the work
       is. Every deleted entry's destination is the design's table, and the
