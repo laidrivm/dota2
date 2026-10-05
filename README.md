@@ -28,7 +28,7 @@
 | `scripts/spec-criteria.ts` | what an acceptance criterion is and how its identifier is derived | when a scenario heading is renamed |
 | `scripts/mutation-floor.ts` | how many mutants survive in `src/model.ts`, and why that floor last moved | when the model's arithmetic or its tests change |
 | `.coderabbit.yaml` | how CodeRabbit reviews this repo | when the bot reviews the wrong things |
-| `.claude/skills/` — symlinks into the [skills repo](https://github.com/laidrivm/skills) | the review skills' own text, which is untracked here | on skill invocation |
+| `.claude/skills/` — symlinks into the installed [harness](https://github.com/laidrivm/harness) package | the review skills' own text, which arrives with `bun install` | on skill invocation |
 
 One fact lives in exactly one file; everything else links to it.
 
@@ -460,13 +460,10 @@ Installed automatically by `bun install` (the `prepare` script runs
 ## Getting the review skills
 
 `CLAUDE.md` requires a review pass before every PR, and the skills that run
-it do not ship here: `.claude/skills/` is gitignored and holds symlinks into
-[laidrivm/skills](https://github.com/laidrivm/skills), so a clone has
-neither. Clone that repo and run, from its root:
-
-```sh
-./link.sh all <path-to-d2ass>
-```
+it arrive with `bun install`: `.claude/skills/` holds tracked symlinks into
+`node_modules/harness/`, the [harness](https://github.com/laidrivm/harness)
+package `bun.lock` pins to a commit. In a fresh clone the links resolve to
+nothing until that install has run.
 
 That supplies every slash command the pre-PR sequence names — `/zombies`,
 `/warm`, `/triage`, `/coderabbit-local`; its first step is `bun run
