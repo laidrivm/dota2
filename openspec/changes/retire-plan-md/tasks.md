@@ -106,7 +106,7 @@ Closes `task-board/the-workflow-doc-names-the-boards-by-name-alone`,
 - [x] 2.4 Delete `PLAN.md`, its `README.md` map row and its key in
       `EXEMPT` (`scripts/repo-layout.ts`). Verify `bun test scripts/repo-layout`
       passes, and fails if the key is left in (`:124`).
-- [ ] 2.5 Rewrite `CLAUDE.md` §*Maintenance & growth*: `CLAUDE.md` is the one
+- [x] 2.5 Rewrite `CLAUDE.md` §*Maintenance & growth*: `CLAUDE.md` is the one
       file read every session, and its trigger is ~350 lines. Delete the
       paragraph on what `PLAN.md` holds, and point the *Feature workflow*
       index line at the boards as well. Verify `wc -l CLAUDE.md` is under 350
