@@ -1,5 +1,8 @@
 version: 2
 
+# Dependabot, not Renovate: it is first-party, so no third-party GitHub App
+# gets write access to this repository. The trade is no dependency dashboard
+# and no lockfile maintenance; the nightly `bun audit` covers the latter.
 updates:
   - package-ecosystem: "github-actions"
     directory: "/"
@@ -14,6 +17,10 @@ updates:
       actions:
         patterns: ["*"]
 
+  # Reads `dependencies` and `devDependencies` only, so nothing here raises the
+  # `overrides` for `qs` and `fast-uri` — both reached only under
+  # `@stryker-mutator/core`. Raise one by hand, exact, when
+  # .github/workflows/audit.yml reports it in an advisory's range.
   - package-ecosystem: "bun"
     directory: "/"
     # Raise the exact pin to the new version (bunfig.toml exact = true).
