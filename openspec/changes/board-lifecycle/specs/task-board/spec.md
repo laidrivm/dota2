@@ -284,6 +284,64 @@ for it would hold every such card permanently in breach.
   being authoritative only for what the tree cannot express — a card past the
   derived status agrees with it and is left alone
 
+### Requirement: The board is read through a saved view
+
+A session SHALL read a board through a named saved view — `Board view`, a
+board grouped by `Status`, for what is open, and `Done` for what is archived
+— and SHALL NOT read the data source with a SQL query. No instruction SHALL
+send a session to a view this capability does not name.
+
+A view SHALL NOT be created where one of that name already serves. Read off
+both live databases: each carries a saved view named `Board view`, of type
+`board`, grouped by `Status`. `Done` is saved beside it because no view
+answered what it answers, which is the clause below rather than an exception
+to it.
+
+A view SHALL follow its grouping property through a type change rather than
+being rebuilt after one. Measured on `D2ASS`: converting `Status` from
+Notion's `status` type to its `select` type moved the view's own
+`propertyType` with it and left view-mode reads working. Two defaults
+arrived with the conversion — empty groups hidden, and a manual column order
+— and neither is settable through the connector, the view DSL having no
+directive for either. Both are accepted: the requirement above fixes what a
+session reads the view *for*, and neither an absent empty column nor a column
+order bears on it. Where a question the view
+cannot express is asked once, the session MAY issue that query and SHALL say
+in the same turn that it spent the metered path and why; asked twice, it is a
+view.
+
+The view SHALL be identified by its name rather than by a URL pasted into an
+instruction, and a session that cannot find a view by that name SHALL say the
+view is missing rather than fall back to a query. This repository is public
+and the board is not, so a view URL is an identifier for private content and
+does not belong in a tracked file; the name does.
+
+This is a quota, not a preference. On this workspace's plan `query_data_sources`
+is limited: view mode carries no tool-specific quota on any plan, while SQL
+mode draws on a shared workspace usage limit and cannot span data sources.
+Reading the queue is the one operation every session performs, so putting it
+on the metered path spends the limit on the routine case and leaves nothing
+for the exceptional one.
+
+#### Scenario: A session starting work
+
+- **WHEN** a session needs to know what is open and at what status
+- **THEN** it SHALL query the saved board view, and the view's grouping SHALL
+  be what supplies the statuses rather than a filter written at the call site
+
+#### Scenario: A question the view does not answer, asked twice
+
+- **WHEN** a question the saved view cannot express is asked a second time
+- **THEN** a further view SHALL be saved for it rather than the SQL query
+  repeated
+
+#### Scenario: The named view is missing
+
+- **WHEN** no view of that name exists on the board
+- **THEN** the session SHALL report the view as missing and SHALL NOT read the
+  data source with a query instead — a silent fallback spends the metered path
+  on the routine case, which is what the requirement exists to prevent
+
 ### Requirement: A stage that completes moves its card in the same turn
 
 WHEN a task changes stage — a proposal merges, a step's branch opens, a pull

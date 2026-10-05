@@ -56,7 +56,7 @@ None.
 
 ## Impact
 
-- `openspec/specs/task-board/spec.md`: three requirements modified, one of
+- `openspec/specs/task-board/spec.md`: four requirements modified, one of
   them renamed, and two added.
 - `scripts/board-state.ts` and its tests: `ready` becomes `proposed`.
 - `docs/feature-workflow.md`: the derived-status line.

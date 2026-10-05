@@ -3,7 +3,7 @@
 Three steps, three pull requests, in this order. Each names the criteria it
 closes by their `<capability>/<scenario-slug>` identifiers.
 
-The `MODIFIED` deltas carry these eleven criteria, which this change does not
+The `MODIFIED` deltas carry these fourteen criteria, which this change does not
 close. Most change only a status name or a count in their wording.
 `a-status-the-tree-cannot-see` and `a-card-and-the-tree-disagreeing` are also
 reworded so a derived status reads as a floor, which is what the script has
@@ -20,6 +20,14 @@ updated in step 1 without changing what they assert:
   `task-board/a-card-for-a-finding-with-no-change`
   `task-board/a-card-and-the-tree-disagreeing`
   `task-board/a-stage-moved-and-not-recorded`
+
+The last three arrive with step 3, which saves a second view and so outgrows
+the clause calling `Board view` the only one an instruction names. They are
+re-asserted word for word, and no test on `main` closes any of them:
+
+  `task-board/a-session-starting-work`
+  `task-board/a-question-the-view-does-not-answer-asked-twice`
+  `task-board/the-named-view-is-missing`
 
 ZOMBIES items are numbered as in the proposal-stage report. All five are in
 step 1. Nothing on a board is testable from the suite, so the board-side tasks
