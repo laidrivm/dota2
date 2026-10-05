@@ -67,6 +67,9 @@ The STRATZ wording question stays with `letter-patch-detection` 1.7.
 
 - [A session started before the merge keeps `PLAN.md` in context] → It
   happens once per session. The next session reads only `CLAUDE.md`.
+- [The moved test is not read as a rename] → Met in step 2: 2.2 rewrote
+  nearly every case, so git paired no rename even at 30% similarity, and the
+  diff gate counted both sides. It passed at 310 lines all the same.
 - [The uncited-criteria floor in `scripts/spec-coverage.ts` moves] →
   Re-measure it, and write the reason on the floor's line, as
   `docs/testing.md` requires.
