@@ -5,6 +5,7 @@
     "": {
       "name": "d2ass",
       "dependencies": {
+        "harness": "github:laidrivm/harness#cfa83682583d5ea54f8fc4b163f08d02632578aa",
         "preact": "11.0.0",
       },
       "devDependencies": {
@@ -298,6 +299,8 @@
     "get-stream": ["get-stream@9.0.1", "", { "dependencies": { "@sec-ant/readable-stream": "^0.4.1", "is-stream": "^4.0.1" } }, "sha512-kVCxPF3vQM/N0B1PmoqVUqgHP+EeVjmZSQn+1oCRPxd2P21P2F19lIgbR3HBosbB1PUhOAoctJnfEn2GbN2eZA=="],
 
     "gopd": ["gopd@1.2.0", "", {}, "sha512-ZUKRh6/kUFoAiTAtTYPZJ3hw9wNxx+BIBOijnlG9PnrJsCcSjs1wyyD6vJpaYtgnzDrKYRSqf3OO6Rfa93xsRg=="],
+
+    "harness": ["harness@github:laidrivm/harness#cfa8368", {}, "laidrivm-harness-cfa8368", "sha512-yYOo/5s3y4SxCQ1AgtQ42FuMABjIgAXsv/8CnS6PU2Q012dhr08/o0LVTCnl8Ghex5is4HV4SrEmgIGoXADUwg=="],
 
     "has-symbols": ["has-symbols@1.1.0", "", {}, "sha512-1cDNdwJ2Jaohmb3sg4OmKaMBwuC48sYni5HUw2DvsC8LjGTLK9h+eb1X6RyuOHe4hT0ULCW68iomhjUoKUqlPQ=="],
 

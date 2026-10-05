@@ -52,7 +52,7 @@ Closes `harness-consumption/pinned-to-a-commit`,
       characters rejected), 4 (upper-case hex rejected), 5 (`#main`),
       6 (no reference), 7 (tag-shaped), 8 (another Git specifier). Verify
       with `bun test scripts/manifest-ranges`.
-- [ ] 2.2 `bun add github:laidrivm/harness#<step-1 merge commit>`, after the
+- [x] 2.2 `bun add github:laidrivm/harness#<step-1 merge commit>`, after the
       user approves the prompt. Verify with `bun run lint` and
       `bun scripts/manifest-ranges.ts`, which must both pass, and confirm that
       `bun.lock` records the same commit.
