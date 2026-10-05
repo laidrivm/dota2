@@ -196,6 +196,9 @@ Rules about how work is carried out here. They do not age with the code.
   before it is pushed.
 - Commit an edit in a repo another session works in before handing the turn
   back — its `git add -A` takes whatever the tree holds.
+- Re-measure a count gate in the commit that moves its count, whichever task
+  the list files the re-measure under — a commit between the two is red on the
+  default branch.
 
 #### Safety
 
