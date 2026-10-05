@@ -115,7 +115,9 @@ for them is already here.
   Three are files and are grepped; the fourth is read through the saved
   `Board view`, a board being no part of this tree. Search the wording of the
   claim being replaced, never the wording replacing it, and reconcile each
-  site in the same change or name the change that will.
+  site in the step that makes it false or name the change that will — a later
+  step of the same change leaves it false on the default branch until it
+  merges.
 - Copy a `MODIFIED` requirement whole from the live spec before editing it,
   and read each scenario it carries against the code that scenario describes
   before rewording it — the delta re-asserts every line it copies.
