@@ -54,8 +54,8 @@ Closes `harness-consumption/pinned-to-a-commit`,
       with `bun test scripts/manifest-ranges`.
 - [x] 2.2 `bun add github:laidrivm/harness#<step-1 merge commit>`, after the
       user approves the prompt. Verify with `bun run lint` and
-      `bun scripts/manifest-ranges.ts`, which must both pass, and confirm that
-      `bun.lock` records the same commit.
+      `bun test checks/manifest-version-ranges`, which must both pass, and
+      confirm that `bun.lock` records the same commit.
 
 ## 3. Skills from the package (d2ass)
 
