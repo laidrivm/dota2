@@ -111,7 +111,7 @@ Closes `task-board/the-workflow-doc-names-the-boards-by-name-alone`,
       paragraph on what `PLAN.md` holds, and point the *Feature workflow*
       index line at the boards as well. Verify `wc -l CLAUDE.md` is under 350
       and `grep PLAN.md CLAUDE.md` finds nothing.
-- [ ] 2.6 Re-point `docs/rulebook-growth.md:40` (*the boards `PLAN.md` points
+- [x] 2.6 Re-point `docs/rulebook-growth.md:40` (*the boards `PLAN.md` points
       at*) and `spec-inbox/README.md:7` (*listed in `PLAN.md`*) to
       `docs/feature-workflow.md` and the `README.md` map respectively.
 - [ ] 2.7 Re-point the open changes' instructions: the eleven
