@@ -128,3 +128,36 @@ of what it covers* — and nobody had held the spec to its own rule.
 `biome.json`'s `$schema` drifting from the version the manifest pins, which no
 test watches; the branch under way was an archive, so they became the `Harness`
 card *Pin biome's $schema to the version the manifest names*.
+
+## 2026-10-05 — feat/retire-plan-md-1, feat/retire-plan-md-2, chore/archive-retire-plan-md (merged as PRs #303, #304, #305)
+
+- triage (feat/retire-plan-md-1): PASS — 3 groups, 0 high-risk, 2 Medium read, 0 findings
+- coderabbit-local (feat/retire-plan-md-1): PASS — 1 finding, 1 acted on
+- zombies (feat/retire-plan-md-2): OPEN → PASS — 2 gaps, 2 acted on
+- triage (feat/retire-plan-md-2): PASS — 4 groups, 0 high-risk, 2 Medium read, 0 findings
+- coderabbit-local (feat/retire-plan-md-2): PASS — 0 findings
+- opsx:verify: 0 critical, 1 warning, 2 suggestions — 3 acted on
+- triage (chore/archive-retire-plan-md): PASS — 3 groups, 0 high-risk, 1 Medium read, 0 findings
+- coderabbit-local (chore/archive-retire-plan-md): did not return before the
+  merge — 1 finding seen, 0 acted on (skipped: the proposal's non-goal on
+  Purpose sections)
+- Not run: warm (no manifest changed), coderabbit (PR #303's comments were read
+  through `gh`, the skill was not invoked), ponytail-review, preflight,
+  code-review, security-review, first-five, review-order
+
+**The finding the local pass missed was a claim about another tool.**
+`/coderabbit-local` on step 1 passed the Dependabot comment's "reads
+`dependencies` and `devDependencies` only"; the cloud review on PR #303 caught
+it against dependabot-core's bun parser, which also reads
+`optionalDependencies` and the lockfile. Fixed on step 2 after reading the
+parser at `9cc93f41038a`.
+
+**`zombies` found what the proposal-stage list could not.** Both gaps were
+created by the implementation: the board names already recurred in the card
+bullet, so deleting the new list passed every name case, and the ~350 trigger
+was stated with nothing checking it.
+
+**`triage` returned no findings by design, and its grep did the work.** The
+grep after step 1's map found five sites the step had made false — `CLAUDE.md`,
+the `PLAN.md` map row, `docs/feature-workflow.md`, `spec-inbox/README.md` and
+`letter-patch-detection` 1.7 — which the task list had filed under step 2.
