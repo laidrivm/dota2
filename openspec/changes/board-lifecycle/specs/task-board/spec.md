@@ -289,7 +289,9 @@ for it would hold every such card permanently in breach.
 A session SHALL read a board through a named saved view — `Board view`, a
 board grouped by `Status`, for what is open, and `Done` for what is archived
 — and SHALL NOT read the data source with a SQL query. No instruction SHALL
-send a session to a view this capability does not name.
+send a session to a view this capability does not name; a further view saved
+for a question the named ones cannot express is named here in the change that
+saves it, as `Done` is.
 
 A view SHALL NOT be created where one of that name already serves. Read off
 both live databases: each carries a saved view named `Board view`, of type
