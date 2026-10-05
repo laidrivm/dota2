@@ -45,7 +45,7 @@ Closes `harness-consumption/pinned-to-a-commit`,
 `harness-consumption/pinned-to-something-that-moves`,
 `harness-consumption/a-non-harness-git-specifier`.
 
-- [ ] 2.1 Teach `scripts/manifest-ranges.ts` to admit
+- [x] 2.1 Teach `scripts/manifest-ranges.ts` to admit
       `github:laidrivm/harness#<40 lowercase hex>` for the `harness` entry
       alone. Add cases to `scripts/manifest-ranges.test.ts` citing the three
       criteria: ZOMBIES 1 (no harness entry passes), 2 and 3 (39 and 41
