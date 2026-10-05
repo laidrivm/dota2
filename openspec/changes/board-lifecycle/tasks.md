@@ -51,7 +51,7 @@ Closes `task-board/a-complete-change-directory-no-step-applied`,
       (`openspec/specs/context-budget/spec.md`), which become `idea`: the
       edits to live specs the delta cannot carry. Verify by reading every
       passage back.
-- [ ] 1.4 Migrate `D2ASS`, then `Harness`, through the union. Add `idea`,
+- [x] 1.4 Migrate `D2ASS`, then `Harness`, through the union. Add `idea`,
       `explored`, `proposed`, `applying` and `applied` beside the current
       options. Move every card at `suggested`, `ready`, `implementing` or
       `reviewing` to `idea`, `proposed` or `applying`. Only then set the
