@@ -140,6 +140,11 @@ for them is already here.
   that link to the archived path. An edit to a proposal's *Why* or *What
   Changes* re-reads the card's summary in that turn.
 
+  Write every repository path in a card's body inside backticks. Notion turns
+  a bare `CLAUDE.md` into a link to a host of that name, so a card meant to
+  cite a file in this tree ships a dead external link instead — and the card
+  is read through the board, where no gate here can see it.
+
   Three of the nine statuses a reconciliation can repair, because
   `scripts/board-state.ts` derives them from the tree: `proposing`,
   `proposed`, `done`, and only on `D2ASS`. The other six, and every card on
