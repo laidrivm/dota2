@@ -61,7 +61,7 @@ twice.
       is. Every deleted entry's destination is the design's table, and the
       deletions rest on the evidence column, re-read at its paths now rather
       than trusted.
-- [ ] 1.6 In `checks/plan-sources.test.ts`, delete the case asserting the
+- [x] 1.6 In `checks/plan-sources.test.ts`, delete the case asserting the
       constraints themselves, and drop `## Standing constraints` from the
       headings case. Neither carries a citation. Verify the file passes and
       lists its remaining tests by full describe path.
