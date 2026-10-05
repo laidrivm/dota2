@@ -65,7 +65,7 @@ twice.
       constraints themselves, and drop `## Standing constraints` from the
       headings case. Neither carries a citation. Verify the file passes and
       lists its remaining tests by full describe path.
-- [ ] 1.7 Move the change's card on `Harness` to the status this step
+- [x] 1.7 Move the change's card on `Harness` to the status this step
       reaches, in the same turn.
 - [ ] 1.8 Run the pre-PR sequence per `docs/review-toolkit.md`, and
       `bun test`.
