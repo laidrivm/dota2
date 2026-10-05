@@ -175,15 +175,15 @@ describe("what the derivation reports nothing for", () => {
 		expect(Object.keys(boardState(tree).status)).toEqual(["candidacy-gate"]);
 	});
 
-	test("a slug the tree cannot see carries no key, rather than suggested", () => {
+	test("a slug the tree cannot see carries no key, rather than idea", () => {
 		const state = boardState(fabricate(complete("candidacy-gate")));
 		expect(Object.hasOwn(state.status, "a-finding-nobody-proposed")).toBe(
 			false,
 		);
-		expect(Object.values(state.status)).not.toContain("suggested");
+		expect(Object.values(state.status)).not.toContain("idea");
 	});
 
-	test("no key carries any of the five statuses moved by hand", () => {
+	test("no key carries any of the six statuses moved by hand", () => {
 		const state = boardState(
 			fabricate({
 				...complete("candidacy-gate"),
@@ -191,10 +191,11 @@ describe("what the derivation reports nothing for", () => {
 			}),
 		);
 		for (const hand of [
-			"suggested",
+			"idea",
 			"exploring",
-			"implementing",
-			"reviewing",
+			"explored",
+			"applying",
+			"applied",
 			"archiving",
 		])
 			expect(Object.values(state.status)).not.toContain(hand);
