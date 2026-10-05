@@ -106,7 +106,7 @@ Closes `task-board/a-card-the-user-dragged-up`,
       `Board view` and confirm it comes first in that column's slice. If it
       does not, stop and bring the result to the user. The requirement cannot
       be met by anything a session controls.
-- [ ] 3.2 On both boards, add a filter to `Board view` excluding `done`, and
+- [x] 3.2 On both boards, add a filter to `Board view` excluding `done`, and
       create a view named `Done` over the same data source, filtered to
       `done` and sorted by `Pointer` descending. Read `Done` and confirm the
       newest archive comes first and the brief cards, which have no pointer,
