@@ -199,6 +199,9 @@ Rules about how work is carried out here. They do not age with the code.
 - Re-measure a count gate in the commit that moves its count, whichever task
   the list files the re-measure under — a commit between the two is red on the
   default branch.
+- After re-pinning a Git dependency with `bun add`, run `bun install` and
+  confirm the lockfile's workspace block names it once — bun writes the new
+  specifier beside the old.
 
 #### Safety
 
