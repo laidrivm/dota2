@@ -67,7 +67,7 @@ twice.
       lists its remaining tests by full describe path.
 - [x] 1.7 Move the change's card on `Harness` to the status this step
       reaches, in the same turn.
-- [ ] 1.8 Run the pre-PR sequence per `docs/review-toolkit.md`, and
+- [x] 1.8 Run the pre-PR sequence per `docs/review-toolkit.md`, and
       `bun test`.
 
 ## 2. PLAN.md leaves the tree
