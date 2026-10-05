@@ -103,7 +103,7 @@ Closes `task-board/the-workflow-doc-names-the-boards-by-name-alone`,
       none at all (10). Probe it once with a second row added. Restore
       `README.md` from a copy taken before the probe, never with
       `git checkout`.
-- [ ] 2.4 Delete `PLAN.md`, its `README.md` map row and its key in
+- [x] 2.4 Delete `PLAN.md`, its `README.md` map row and its key in
       `EXEMPT` (`scripts/repo-layout.ts`). Verify `bun test scripts/repo-layout`
       passes, and fails if the key is left in (`:124`).
 - [ ] 2.5 Rewrite `CLAUDE.md` §*Maintenance & growth*: `CLAUDE.md` is the one
