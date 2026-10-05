@@ -11,6 +11,9 @@ What counts as evidence for a claim, and what a claim may rest on.
 
 - Name the environment a verification claim ran in — viewport, browser,
   data — not the one it targeted.
+- Measure a claim about the repository against the version it pins, never the
+  one the machine happens to run — the pin is what CI and every clone use,
+  and a tool's surface differs between them.
 - Verify an external contract against its machine-readable artefact —
   schema, reference page, `--help` — never against a prose summary of it or a
   type declaration of it: exercise the call.
