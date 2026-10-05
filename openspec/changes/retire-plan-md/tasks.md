@@ -76,7 +76,7 @@ Closes `task-board/the-workflow-doc-names-the-boards-by-name-alone`,
 `context-budget/the-trigger-fires-on-the-one-file`,
 `context-budget/a-second-file-read-every-session`.
 
-- [ ] 2.1 In `docs/feature-workflow.md` §*Across the stages*, state the three
+- [x] 2.1 In `docs/feature-workflow.md` §*Across the stages*, state the three
       boards and the work each takes, the `Board view` they are read through
       and never by SQL, why they are named rather than linked, and that
       `scripts/board-state.ts` derives three statuses for `D2ASS` alone. Move

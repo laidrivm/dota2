@@ -115,8 +115,7 @@ for them is already here.
   Three are files and are grepped; the fourth is read through the saved
   `Board view`, a board being no part of this tree. Search the wording of the
   claim being replaced, never the wording replacing it, and reconcile each
-  site in the same change or name the change that will. `PLAN.md` left this list when the queue did: what it holds now is the
-  boards' names and one open card, which no change restates.
+  site in the same change or name the change that will.
 - Copy a `MODIFIED` requirement whole from the live spec before editing it,
   and read each scenario it carries against the code that scenario describes
   before rewording it — the delta re-asserts every line it copies.
@@ -160,8 +159,23 @@ for them is already here.
   `PLAN.md` after — twice in one week: an entry read *not yet proposed* with
   its proposal merged, and the entry recording the always-on measurement read
   743 against a measured 899.
+- Every task with a status is a card on one of three boards in the Notion
+  workspace, each taking one kind of work:
+
+  - `D2ASS` — this repository's product work.
+  - `Harness` — the agent scaffolding, which is to leave for a repository of
+    its own. Its cards stay whether or not that work is still carried out here.
+  - `mellon` — the second project that will sit on that scaffolding. The board
+    is made when the repository is.
+
+  A board is read through the saved view named `Board view`, never through a
+  SQL query. The boards are named here rather than linked: this repository is
+  public and they are not, so a board or view URL is an identifier for private
+  content and does not belong in a tracked file. Which statuses
+  `scripts/board-state.ts` derives, and on which board, is the bullet above.
 - Take the first card of its column that is not blocked, in the order
-  `Board view` returns, and never move a card within that order: it is the
+  `Board view` returns, name every card stepped over and why, and never move a
+  card within that order: it is the
   user's drag, and a session reordering it overwrites the only instrument
   they have for ranking a column. `done` is no column of that view — its
   cards are read through the view named `Done`, newest archive first.

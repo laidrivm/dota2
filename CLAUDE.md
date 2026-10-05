@@ -173,8 +173,6 @@ Rules about how work is carried out here. They do not age with the code.
   index was holding.
 - A rules or docs edit that no artefact of the change under way asks for goes
   in its own commit.
-- Take the queue's next entry in the order its board view shows, and name
-  every entry stepped over and why.
 - Never silence a linter or type-checker finding by disabling its rule in
   configuration; fix the code or ask the user to approve a suppression.
 - All repo artefacts — docs, plans, specs, code comments, commit messages —
