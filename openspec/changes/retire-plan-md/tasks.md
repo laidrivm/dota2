@@ -35,7 +35,7 @@ twice.
       `hero_position_stats` rests on, and OpenDota does not. Verify with
       `openspec instructions proposal --change retire-plan-md --json`,
       whose `context` shows the bullet.
-- [ ] 1.2 In `.github/dependabot.yml`, comment above `updates:` why it is
+- [x] 1.2 In `.github/dependabot.yml`, comment above `updates:` why it is
       Dependabot and not Renovate (no third-party App with write access; no
       dashboard or lockfile maintenance, which the nightly `bun audit`
       covers). Comment at the `bun` entry that it reads `dependencies` and
