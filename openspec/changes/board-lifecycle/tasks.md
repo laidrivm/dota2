@@ -93,7 +93,7 @@ Closes `task-board/a-card-for-a-change-that-exists-in-the-tree`,
       every card whose change has a directory carries it in `Pointer`, and
       every archived card its archive path, which `Done`'s sort reads in
       step 3. Report any card left unchanged and why.
-- [ ] 2.5 Move this change's card in the same turn.
+- [x] 2.5 Move this change's card in the same turn.
 - [ ] 2.6 Run the pre-PR sequence per `docs/review-toolkit.md`.
 
 ## 3. Columns as queues, done as a stack
