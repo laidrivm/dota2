@@ -48,10 +48,16 @@ describe("the extensions this repository carries", () => {
 		const root = Bun.spawnSync(["git", "rev-parse", "--show-toplevel"])
 			.stdout.toString()
 			.replace(/\n$/, "");
-		const tracked = Bun.spawnSync(["git", "ls-files", "-z"], { cwd: root })
+		// Regular files only, by the mode the index records, as `oversize` reads
+		// them: a symlink (`120000`) or a gitlink has no lines to cap, and the
+		// skill links would otherwise each rule as a kind of its own name.
+		const tracked = Bun.spawnSync(["git", "ls-files", "-s", "-z"], {
+			cwd: root,
+		})
 			.stdout.toString()
 			.split("\0")
-			.filter(Boolean);
+			.filter((entry) => /^100(644|755) /.test(entry))
+			.map((entry) => entry.slice(entry.indexOf("\t") + 1));
 		const extensions = [...new Set(tracked.map(extension))].sort();
 		// `.example` is ruled uncapped: an environment template is read by
 		// variable name rather than by line, as `.json` and `.toml` are.

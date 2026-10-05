@@ -1,5 +1,4 @@
 .DS_Store
-.claude/skills/
 # No trailing slash, unlike every other directory entry here, and not a slip:
 # a pattern ending in `/` matches a directory and nothing else. A worktree has
 # no modules of its own, so `node_modules` gets symlinked in for the git hooks

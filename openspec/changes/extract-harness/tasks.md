@@ -62,7 +62,7 @@ Closes `harness-consumption/pinned-to-a-commit`,
 Closes `repo-onboarding/a-fresh-clone`, `repo-onboarding/the-retired-linker`,
 `repo-onboarding/the-skills-repository-is-referenced`.
 
-- [ ] 3.1 Replace the eleven ignored links with tracked relative links to
+- [x] 3.1 Replace the eleven ignored links with tracked relative links to
       `../../node_modules/harness/core/skills/<name>`, and drop
       `.claude/skills/` from `.gitignore`. Verify with
       `git ls-files -s .claude/skills` that every entry has mode `120000`.
