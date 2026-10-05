@@ -101,7 +101,7 @@ Closes `task-board/a-card-for-a-change-that-exists-in-the-tree`,
 Closes `task-board/a-card-the-user-dragged-up`,
 `task-board/a-card-reaching-done`.
 
-- [ ] 3.1 Measure the drag before anything rests on it. Ask the user to drag
+- [x] 3.1 Measure the drag before anything rests on it. Ask the user to drag
       one named card to the top of its column on `D2ASS`, then read
       `Board view` and confirm it comes first in that column's slice. If it
       does not, stop and bring the result to the user. The requirement cannot
