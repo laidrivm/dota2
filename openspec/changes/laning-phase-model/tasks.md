@@ -254,8 +254,7 @@ Closes `draft-model/a-bundle-predating-the-lane-matrix`,
       added to ~516, and about three hours against the under-one-hour the run
       takes today.
 - [ ] 10.6 Move the change's card on its board to the status this step
-      reaches, in the same turn rather than afterwards — `PLAN.md` holds
-      no queue.
+      reaches, in the same turn rather than afterwards.
 - [ ] 10.7 Run the pre-PR sequence per `docs/review-toolkit.md` on every step,
       and `bun test` and `bun run test:db` besides. Steps 1 to 8 touch the
       database, and CI runs only the first

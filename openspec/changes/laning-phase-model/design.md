@@ -194,8 +194,9 @@ failure as the reason its exemption list is written as a list of what is
   lands second inherits a split file rather than doing it twice.
 - **Stryker's floor is scoped to `src/model.ts`.** → A split makes that
   scope a question `openspec/specs/mutation-floor/` answers by requiring a
-  second configuration rather than a widened glob, which `PLAN.md` already
-  carries as an open entry. This change does not settle it; it does have to
+  second configuration rather than a widened glob, which the *Decide how
+  mutation testing scales to the eleven job modules* card on `Harness` already
+  carries. This change does not settle it; it does have to
   leave the floor met on whatever `src/model.ts` becomes.
 
 ## Open Questions

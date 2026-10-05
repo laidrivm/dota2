@@ -223,8 +223,8 @@ Closes `draft-model/the-two-lane-components-read-opposite-halves-of-the-board`,
       say what the run now costs: 7 200 requests against ~516, six hours
       against the under-one-hour it took before either lane change.
 - [ ] 6.9 Move the change's card on its board to the status this step
-      reaches, in the same turn rather than afterwards — `PLAN.md` holds
-      no queue. Closes no criterion, on the terms the preamble states.
+      reaches, in the same turn rather than afterwards.
+      Closes no criterion, on the terms the preamble states.
 - [ ] 6.10 Run the pre-PR sequence per `docs/review-toolkit.md` on every step,
       and `bun test` and `bun run test:db` besides. Closes no criterion.
       Steps 1 to 4 touch the database, and CI runs only `bun test`

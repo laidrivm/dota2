@@ -138,8 +138,7 @@ Closes `snapshot-ingest/a-scorer-that-fails`.
       produce, and the first ones settle whether `beta-refit` is urgent or
       merely due.
 - [ ] 5.6 Move the change's card on its board to the status this step
-      reaches, in the same turn rather than afterwards — `PLAN.md` holds
-      no queue.
+      reaches, in the same turn rather than afterwards.
 - [ ] 5.7 Run the pre-PR sequence per `docs/review-toolkit.md` on every step.
       Steps 3 to 5 touch the database, so each one's suite must assert it ran
       rather than skipping, and `bun run test:db` is the run that counts.

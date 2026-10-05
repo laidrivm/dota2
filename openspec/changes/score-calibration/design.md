@@ -136,8 +136,8 @@ differ by a constant factor.
   −0.199. → The direction is what
   `draft-model` §*Counter-risk monotonic in bans* fixes, and it is unchanged;
   the magnitude is the 0.5 weight, which no criterion pins and
-  `suggestion-calibration` fits. `PLAN.md` §*Bans move a suggestion by 0.05%*
-  carries the measurement.
+  `suggestion-calibration` fits. The *Let bans move suggestions by fitting the
+  counterRisk weight* card on `D2ASS` carries the measurement.
 - **The fixture is regenerated, and the model's suite reads it.** Cases
   written against the old numbers may move. → They are read and re-fitted in
   the step that regenerates, rather than the regeneration being a separate

@@ -162,8 +162,7 @@ Closes `snapshot-ingest/a-harvest-that-fails`,
       text this change rewrites from three steps to four — `run.test.ts:79`
       is the case that carries it and it now has a fourth step to pass.
 - [ ] 6.6 Move the change's card on its board to the status this step
-      reaches, in the same turn rather than afterwards — `PLAN.md` holds
-      no queue.
+      reaches, in the same turn rather than afterwards.
 - [ ] 6.7 Run the pre-PR sequence per `docs/review-toolkit.md` on every step.
       Steps 1 to 4 all touch the database, so each one's suite must assert it
       ran rather than skipping, and `bun run test:db` is the run that counts.

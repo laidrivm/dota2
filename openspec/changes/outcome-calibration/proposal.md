@@ -70,7 +70,7 @@ advantages the model actually produces into claims no evidence supports:
   figure moves and nobody can say which half moved; not worth having before
   there is a first figure at all.
 - **Alerting on a bad figure.** Recording it is this change's; noticing is
-  `PLAN.md`'s open error-tracking task.
+  the error-tracking task, the `tasks/task-5.md` card on `D2ASS`.
 
 ## Impact
 
