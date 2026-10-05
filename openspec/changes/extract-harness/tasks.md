@@ -26,16 +26,16 @@ task that writes one names its number.
 
 Closes none — infrastructure in another repository.
 
-- [ ] 1.1 Rename `laidrivm/skills` to `laidrivm/harness` on GitHub and verify
+- [x] 1.1 Rename `laidrivm/skills` to `laidrivm/harness` on GitHub and verify
       `gh repo view laidrivm/skills` resolves to the new name.
-- [ ] 1.2 Move every skill to `core/skills/<name>/` with `git mv`. Update
+- [x] 1.2 Move every skill to `core/skills/<name>/` with `git mv`. Update
       `link.sh` to read from `core/skills/` and re-link d2ass with it. Verify
       that a fresh d2ass session still lists `/triage`, `/warm` and `/zombies`.
-- [ ] 1.3 Add `package.json` (`"name": "harness"`, `"private": true`, no
+- [x] 1.3 Add `package.json` (`"name": "harness"`, `"private": true`, no
       `scripts`, no dependencies) and verify with
       `bun pm pack --dry-run` from the harness root that no lifecycle script
       is declared.
-- [ ] 1.4 Rewrite the README's layout, linking and provenance sections for
+- [x] 1.4 Rewrite the README's layout, linking and provenance sections for
       `core/`, and verify that every path the README names exists with
       `git ls-files`.
 
