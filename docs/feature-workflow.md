@@ -121,11 +121,16 @@ for them is already here.
   and read each scenario it carries against the code that scenario describes
   before rewording it — the delta re-asserts every line it copies.
 - Move the card in the same turn the stage moves. When a proposal merges, a
-  step's branch opens, a pull request opens or merges, or a change is
-  archived, the task's card reaches the status that stage means **before the
-  work is reported as done** — not afterwards, and not at the end of the
-  session. A step's box is ticked in the pull request that implements it,
-  never in a commit after the merge.
+  step's branch opens, a pull request opens or merges, an archive begins, or a
+  change is archived, the task's card reaches the status that stage means
+  **before the work is reported as done** — not afterwards, and not at the
+  end of the session. A step's box is ticked in the pull request that
+  implements it, never in a commit after the merge.
+
+  There is a trigger above for each status a session moves by hand. A list
+  naming the finished archive and not the running one sends a card from
+  `applied` straight to `done`, which is how this bullet itself came to skip
+  `archiving`.
 
   The same turn keeps the card's links and summary, which `task-board`'s
   *A card can be ranked without opening the repository* fixes. The turn a
