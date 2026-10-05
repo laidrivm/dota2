@@ -125,7 +125,7 @@ Closes `task-board/the-workflow-doc-names-the-boards-by-name-alone`,
       The past-tense records in `bun-version-sites`, `focus-restore-idiom` and
       `tracked-file-sweep` stay. Assert the clause's match count before
       scripting it, and read each changed passage back.
-- [ ] 2.8 Run `bun test scripts/spec-coverage` and set `FLOOR` in
+- [x] 2.8 Run `bun test scripts/spec-coverage` and set `FLOOR` in
       `scripts/spec-coverage.ts` to the measured count, with the reason: one
       citation left with `checks/plan-sources.test.ts`. Rewrite the floor
       comment's clause naming that file to name
