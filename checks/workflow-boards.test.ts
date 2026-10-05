@@ -27,6 +27,15 @@ describe("the workflow doc names the boards by name alone", () => {
 		},
 	);
 
+	// The names alone recur in the card bullet, so a doc that lost the list
+	// would still carry all three; each must head a line saying its work.
+	test.each(["D2ASS", "Harness", "mellon"])(
+		"lists %s with the work it takes",
+		async (board) => {
+			expect(await doc()).toMatch(new RegExp(`^\\s*- \`${board}\` — \\S`, "m"));
+		},
+	);
+
 	test.each([
 		"notion.so",
 		"notion.com",

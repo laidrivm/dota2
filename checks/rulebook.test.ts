@@ -92,3 +92,10 @@ test("the maintenance trigger counts a sublist, not the list", () => {
 		"the other two sublists are not counted against it",
 	);
 });
+
+// spec: context-budget/the-trigger-fires-on-the-one-file
+test("the trigger is this file's own line count, at ~350", () => {
+	const section = flat(slice("Maintenance & growth"));
+	expect(section).toContain("only one read at the start of every session");
+	expect(section).toContain("this file passes ~350 lines");
+});
