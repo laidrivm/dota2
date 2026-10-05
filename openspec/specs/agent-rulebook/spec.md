@@ -84,14 +84,15 @@ and is not a home a prohibition can be stated from.
 ### Requirement: The pre-PR sequence has one home
 
 `docs/review-toolkit.md` SHALL be the only place stating the pre-PR gate
-sequence. `PLAN.md` SHALL NOT restate it. Other documents MAY reference the
-sequence by name and link, which is not a restatement.
+sequence. Other documents MAY reference the sequence by name and link, which
+is not a restatement.
 
 #### Scenario: The duplicate is removed
 
-- **WHEN** `PLAN.md` carries a "Gates (reminder)" section listing the same
-  sequence
-- **THEN** the section is deleted, and nothing replaces it
+- **WHEN** another document carries a list of the same sequence, as `PLAN.md`
+  once did under "Gates (reminder)"
+- **THEN** the list is deleted, and at most a reference by name and link
+  replaces it
 
 #### Scenario: A reference is kept
 
