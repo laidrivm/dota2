@@ -76,7 +76,7 @@ Closes `task-board/a-card-for-a-change-that-exists-in-the-tree`,
       archive re-points that link to the archived path; an edit to a
       proposal's *Why* or *What Changes* re-reads the card's summary. Verify
       by reading the bullet back.
-- [ ] 2.2 Backfill every `D2ASS` card short of `done`. Write an English title
+- [x] 2.2 Backfill every `D2ASS` card short of `done`. Write an English title
       saying what it does: a slug title is replaced, a finding's sentence
       title is kept if it already says what changes, and a brief's title keeps
       its filename as prefix. Open the body with a Russian summary of at most
