@@ -104,7 +104,7 @@ completes, name the next step and the exact command.
 ## Across the stages
 
 Discipline every artefact of a change is written under, whichever stage
-produces it. Promoted from `CLAUDE.md`'s Process list, which these four
+produces it. Promoted from `CLAUDE.md`'s Process list, which these five
 outgrew: they age with the workflow rather than with the code, and a reader
 looking for them is already here.
 
@@ -150,5 +150,10 @@ looking for them is already here.
   `PLAN.md` after — twice in one week: an entry read *not yet proposed* with
   its proposal merged, and the entry recording the always-on measurement read
   743 against a measured 899.
+- Take the first card of its column that is not blocked, in the order
+  `Board view` returns, and never move a card within that order: it is the
+  user's drag, and a session reordering it overwrites the only instrument
+  they have for ranking a column. `done` is no column of that view — its
+  cards are read through the view named `Done`, newest archive first.
 - Open every markdown file with a level-1 heading — OpenSpec's `design.md`
   and delta-spec templates start at `##`, so the title is yours to add.
