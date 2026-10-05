@@ -203,8 +203,7 @@ Closes `snapshot-build/the-mean-hero-has-no-side-preference`,
 - [ ] 5.7 Confirm every centred value stays finite and both fields keep their
       shapes (ZOMBIES 10, 11), so `contract.ts`'s assertion publishes.
 - [ ] 5.8 Move the change's card on its board to the status this step
-      reaches, in the same turn rather than afterwards — `PLAN.md` holds
-      no queue.
+      reaches, in the same turn rather than afterwards.
 - [ ] 5.9 Run the pre-PR sequence per `docs/review-toolkit.md` on every
       step, and `bun test` and `bun run test:db` besides. Every step here
       touches the database, and CI runs only the first

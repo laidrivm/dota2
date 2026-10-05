@@ -84,9 +84,9 @@ rather than a boundary.
   what the client is served until a run publishes.
 - No new dependency, no new table, no schema migration: `hero_aliases` and
   its `kind` constraint already exist.
-- `PLAN.md`'s open entry on hero-tile lettering collisions rests on the
-  fixture's aliases being "a partial source ... for 33 of the 128". This
-  change does not settle that entry, and does not change what the fixture
+- The *Five sets of letters name more than one hero* card on `D2ASS` rests on
+  the fixture's aliases being "a partial source ... for 33 of the 128". This
+  change does not settle that card, and does not change what the fixture
   carries — but it makes the same data real in the published bundle, which is
-  the source that entry would have to draw on. The entry is reconciled in the
+  the source that card would have to draw on. The card is reconciled in the
   step that merges last, not silently left reading as though nothing moved.

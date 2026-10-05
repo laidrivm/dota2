@@ -62,9 +62,9 @@ Closes `spec-test-traceability/a-citation-below-an-escaped-quote`.
       the direction: the existing one is *Before inlining a single-caller
       helper, grep for the logic it duplicates elsewhere*, which is the
       opposite direction and stays. Check the always-on budget after adding it:
-      `CLAUDE.md` plus `PLAN.md` against ~500 lines, and the Code sublist
-      against ~20 rules, which it sits on (*context-budget/The trigger is read
-      against the sum* — this change's own criterion is closed elsewhere, and
+      `CLAUDE.md` against ~350 lines, and the Code sublist against ~20 rules,
+      which it sits on (*context-budget/The trigger fires on the one file* —
+      this change's own criterion is closed elsewhere, and
       citing it here would be false)
 - [ ] 1.8 Confirm `src/app/module-classes.test.ts` is untouched by this change
       and passes — it is `blank`'s only production caller and therefore the

@@ -70,7 +70,8 @@ the harvest is what that change has nothing to read without.
   response and is null in four of six matches sampled. It is a post-game
   judgement of a player, not an input to a draft.
 - **Alerting.** A harvest that fails is reported where a failed pull already
-  is; routing that anywhere is `PLAN.md`'s open error-tracking task.
+  is; routing that anywhere is the error-tracking task, the `tasks/task-5.md`
+  card on `D2ASS`.
 
 ## Impact
 
@@ -85,6 +86,7 @@ the harvest is what that change has nothing to read without.
   pacing rather than adding to it.
 - `src/job/run.ts` — a fourth step and a fourth failure to report.
 - `openspec/specs/snapshot-ingest/spec.md` — one requirement modified.
-- `PLAN.md` — its queue, in the pull request that merges the last step.
+- The change's card, in the turn the pull request that merges the last step
+  merges.
 - No new dependency. No change to `src/model.ts`, `src/types.ts`, the bundle,
   or anything the client fetches: nothing this change writes is served.

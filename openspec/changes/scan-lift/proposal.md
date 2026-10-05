@@ -39,8 +39,8 @@ is work here. `spec-coverage.ts` is the caller that has not switched.
   change once proposed to make visible has no reader left. That change owns
   `scripts/mutation-floor-exemptions.test.ts` and the grammar with it.
 - **The other two rule-of-two candidates.** The tracked-file sweep and the
-  focus-restore idiom are their own changes, each with its own `PLAN.md` entry
-  carrying its own count; they share the rule this one writes down and nothing
+  focus-restore idiom are their own changes, each with its own card carrying
+  its own count; they share the rule this one writes down and nothing
   else.
 - **Making `scan.ts` a parser.** It answers one question per character — what
   encloses it — and `comments` answers it for comments rather than for code. A

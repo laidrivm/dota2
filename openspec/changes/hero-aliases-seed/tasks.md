@@ -165,8 +165,8 @@ revalidation does not reach localStorage.
       no `abbreviations` key returns it on a name match instead of throwing.
 - [ ] 5.2 Read both alias arrays as `?? []` in `matchHeroes`.
 - [ ] 5.3 Move the change's card on its board to the status this step
-      reaches, in the same turn rather than afterwards — `PLAN.md` holds
-      no queue. Correct the `Five sets of letters name more than one hero`
+      reaches, in the same turn rather than afterwards.
+      Correct the `Five sets of letters name more than one hero`
       card on `D2ASS` in the same turn: its "a partial source already exists
       ... for 33 of the 128" now describes the fixture alone and no longer
       the published bundle.

@@ -114,7 +114,7 @@ Closes `task-board/the-workflow-doc-names-the-boards-by-name-alone`,
 - [x] 2.6 Re-point `docs/rulebook-growth.md:40` (*the boards `PLAN.md` points
       at*) and `spec-inbox/README.md:7` (*listed in `PLAN.md`*) to
       `docs/feature-workflow.md` and the `README.md` map respectively.
-- [ ] 2.7 Re-point the open changes' instructions: the eleven
+- [x] 2.7 Re-point the open changes' instructions: the eleven
       `` `PLAN.md` holds no queue `` clauses lose that clause.
       `letter-patch-detection` 1.7 reads the constraint in
       `openspec/config.yaml` `context:`. The present-tense citations in

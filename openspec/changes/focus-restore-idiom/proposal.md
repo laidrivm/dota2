@@ -45,7 +45,7 @@ for what was measured.
 ## Non-goals
 
 - **Unifying the two finders.** They search different things for different
-  reasons. `PLAN.md` is explicit that what lifts is the idiom taking a finder,
+  reasons. `PLAN.md` was explicit that what lifts is the idiom taking a finder,
   not the strategy.
 - **The rule of two itself.** `scan-lift` writes that rule into `CLAUDE.md`.
 - **Changing where focus lands** in either path. `hero-picker` §*Focus after

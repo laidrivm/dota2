@@ -92,8 +92,7 @@ Closes `snapshot-export/the-database-is-not-rewritten`.
       rather than a claim about it. Nothing here says which is right, and
       that is `outcome-calibration`'s.
 - [ ] 2.7 Move the change's card on its board to the status this step
-      reaches, in the same turn rather than afterwards — `PLAN.md` holds
-      no queue.
+      reaches, in the same turn rather than afterwards.
 - [ ] 2.8 Run the pre-PR sequence per `docs/review-toolkit.md` on every step,
       and `bun test` and `bun run test:db` besides. The sequence names neither
       and CI runs only `bun test` (`.github/workflows/test.yml:110`), so the
