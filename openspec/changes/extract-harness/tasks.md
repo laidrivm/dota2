@@ -73,7 +73,7 @@ Closes `repo-onboarding/a-fresh-clone`, `repo-onboarding/the-retired-linker`,
       `checks/readme-map.test.ts` citing the three `repo-onboarding`
       criteria, including ZOMBIES 32 (a README naming `link.sh` fails).
       Verify with `bun test checks/readme`.
-- [x] 3.3Delete `docs/review-toolkit.md` §*Provenance* and
+- [x] 3.3 Delete `docs/review-toolkit.md` §*Provenance* and
       `checks/skill-provenance.test.ts`. Verify that
       `git grep -n "Verified against"` finds nothing outside `openspec/` and
       `docs/context/`.
