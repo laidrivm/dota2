@@ -124,4 +124,4 @@ Closes `task-board/a-card-the-user-dragged-up`,
       order and never reorders cards, and that `done` is read through `Done`.
       Verify by reading it back.
 - [x] 3.4 Move this change's card in the same turn.
-- [ ] 3.5 Run the pre-PR sequence per `docs/review-toolkit.md`.
+- [x] 3.5 Run the pre-PR sequence per `docs/review-toolkit.md`.
