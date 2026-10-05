@@ -98,8 +98,8 @@ protocol for extracting a section or relocating one off the tree, and where a
 session save-point lives — is in
 [docs/rulebook-growth.md](docs/rulebook-growth.md).
 
-`PLAN.md` holds the sources and the standing constraints; a task with a status
-is a card on one of the three boards it names.
+`PLAN.md` names the three boards and the one source still feeding the work; a
+task with a status is a card on one of those boards.
 
 ### Rules
 

@@ -116,7 +116,7 @@ for them is already here.
   `Board view`, a board being no part of this tree. Search the wording of the
   claim being replaced, never the wording replacing it, and reconcile each
   site in the same change or name the change that will. `PLAN.md` left this list when the queue did: what it holds now is the
-  standing constraints, which no change restates.
+  boards' names and one open card, which no change restates.
 - Copy a `MODIFIED` requirement whole from the live spec before editing it,
   and read each scenario it carries against the code that scenario describes
   before rewording it — the delta re-asserts every line it copies.
