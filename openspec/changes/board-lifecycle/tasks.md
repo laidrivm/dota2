@@ -61,7 +61,7 @@ Closes `task-board/a-complete-change-directory-no-step-applied`,
       empty (*a-card-at-a-retired-status*).
 - [x] 1.5 Move this change's card on `Harness` to the status this step
       reaches, under the new names, in the same turn.
-- [ ] 1.6 Run the pre-PR sequence per `docs/review-toolkit.md`, and `bun test`.
+- [x] 1.6 Run the pre-PR sequence per `docs/review-toolkit.md`, and `bun test`.
 
 ## 2. Cards a person can rank
 
