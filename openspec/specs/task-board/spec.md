@@ -314,8 +314,8 @@ pull request to its change.
 
 #### Scenario: A status the tree cannot see
 
-- **WHEN** a card sits at `idea`, `exploring`, `explored`, `applying`,
-  `applied` or `archiving`
+- **WHEN** a card sits at a status the derivation never reports, at or beyond
+  the floor the tree derives for that slug
 - **THEN** a reconciliation SHALL leave it untouched rather than resetting it
   to a derived value, and `scripts/board-state.ts` SHALL NOT read the card to
   decide: it reports a slug from the tree alone, so a change at `applying`
