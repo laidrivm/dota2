@@ -43,10 +43,11 @@ const RANGE =
  * A spec naming a Git repository, which names whatever its reference points at
  * when it is installed — a set, pinned or not, as a range is.
  *
- * ponytail: the bare `owner/repo` shorthand, which bun and npm both read as
- * GitHub, passes. Without a `#` it has the shape of a path, and this scan reads
- * every field — `src/model.ts` must pass. A complete check would read
- * `bun.lock`, where every Git dependency is written out whole.
+ * ponytail: two forms pass. The bare `owner/repo` shorthand, which bun and npm
+ * both read as GitHub, has the shape of a path without a `#`, and this scan
+ * reads every field — `src/model.ts` must pass. An HTTPS tarball URL has the
+ * shape of `homepage` or `repository.url`. A complete check would read
+ * `bun.lock`, where every dependency's source is written out whole.
  */
 const GIT =
 	/^(github|gitlab|bitbucket|gist|git(\+[a-z]+)?):|^git@|\.git(#.*)?$|^[a-z0-9][\w.-]*\/[\w.-]+#/i;
