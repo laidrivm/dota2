@@ -1,7 +1,7 @@
 /**
- * What `PLAN.md` may hold now that the queue does not live in it: the sources
- * still feeding the work and the constraints still in force, and a pointer to
- * the boards that is a name rather than a URL.
+ * What `PLAN.md` may hold now that the queue and the standing constraints do
+ * not live in it: the source still feeding the work, and a pointer to the
+ * boards that is a name rather than a URL.
  *
  * Its own file rather than a case in `rulebook.test.ts`, which is about the
  * partition of `CLAUDE.md`'s rules list. Both halves of the always-on set are
@@ -32,25 +32,12 @@ describe("PLAN.md after the queue left it", () => {
 			expect(plan).toContain(board);
 	});
 
-	// The four cases below this block assert what the file may not hold, and an
+	// The cases below this block assert what the file may not hold, and an
 	// emptied `PLAN.md` satisfies every one of them. What follows is the half
-	// the requirement keeps: the sources still feeding the work, and the
-	// constraints no single site owns.
-	test("keeps the sections the requirement says it holds", () => {
-		for (const heading of [
-			"## Where the work is",
-			"## Requirement sources",
-			"## Standing constraints",
-		])
+	// it keeps: where the work is, and the source still feeding it.
+	test("keeps the sections it still holds", () => {
+		for (const heading of ["## Where the work is", "## Requirement sources"])
 			expect(plan).toContain(heading);
-	});
-
-	test("keeps the standing constraints themselves, not only their heading", () => {
-		const kept = plan.slice(plan.indexOf("## Standing constraints"));
-		// Three the proposal names as the shape of a constraint — a project-wide
-		// choice with no status, which is what distinguishes one from a task.
-		for (const constraint of ["Preact", "camelCase", "Docker on a VPS"])
-			expect(kept).toContain(constraint);
 	});
 
 	// The routing rule sends a session to a board; the view is how it reads one
