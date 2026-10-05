@@ -18,9 +18,9 @@ updates:
       actions:
         patterns: ["*"]
 
-  # Reads `dependencies` and `devDependencies` only, so nothing here raises the
-  # `overrides` for `qs` and `fast-uri` — both reached only under
-  # `@stryker-mutator/core`. Raise one by hand, exact, when
+  # Parses the manifest's dependency sections and the lockfile but never
+  # `overrides`, so nothing here raises the ones for `qs` and `fast-uri` — both
+  # reached only under `@stryker-mutator/core`. Raise one by hand, exact, when
   # .github/workflows/audit.yml reports it in an advisory's range.
   - package-ecosystem: "bun"
     directory: "/"
