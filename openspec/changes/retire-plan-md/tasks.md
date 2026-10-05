@@ -84,7 +84,7 @@ Closes `task-board/the-workflow-doc-names-the-boards-by-name-alone`,
       shows…* rule into the same section. Delete the sentence at `:118` that
       says what `PLAN.md` holds now. Add *when choosing the next task* to that
       doc's `README.md` map row.
-- [ ] 2.2 `git mv checks/plan-sources.test.ts checks/workflow-boards.test.ts`
+- [x] 2.2 `git mv checks/plan-sources.test.ts checks/workflow-boards.test.ts`
       and re-aim it at `docs/feature-workflow.md`, citing
       `task-board/the-workflow-doc-names-the-boards-by-name-alone`.
       Read the doc inside each case, never in the describe body (ZOMBIES 1).
