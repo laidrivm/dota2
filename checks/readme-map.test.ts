@@ -94,3 +94,13 @@ test.each(paths)("the map's `%s` is real and shipped", (path) => {
 		true,
 	);
 });
+
+// spec: context-budget/a-second-file-read-every-session
+test("exactly one file is read every session, and it is CLAUDE.md", () => {
+	// Matched loosely, so a reworded or capitalised cell is still caught; an
+	// empty result fails too, since `CLAUDE.md` must name itself there.
+	const always = rows
+		.filter((row) => /every session/i.test(row.split("|")[3] ?? ""))
+		.map((row) => row.split("|")[1]?.match(/`([^`]+)`/)?.[1]);
+	expect(always).toEqual(["CLAUDE.md"]);
+});
