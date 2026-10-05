@@ -86,7 +86,7 @@ Closes `task-board/a-card-for-a-change-that-exists-in-the-tree`,
       `gh pr list --state all --search <slug>` for pull requests, and
       `proposal.md` on `main` for a merged proposal. Measure each summary's
       length before writing it.
-- [ ] 2.3 Do the same for every `Harness` card short of `done`.
+- [x] 2.3 Do the same for every `Harness` card short of `done`.
 - [ ] 2.4 Read `Board view` on both boards, and open five cards on each,
       chosen across columns. Confirm each against
       *a-card-short-of-done*: title, summary length, links. Confirm too that
