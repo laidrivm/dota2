@@ -18,6 +18,13 @@ describes a state of the repository that stopped being true, which
 Now, because the row was deleted three days ago and the next reader of that
 requirement has no way to tell a stale trigger from a live one.
 
+The same requirement has since gone stale a second time. Its **A gitignored
+row** scenario fires when *the map names `.claude/skills/`, which `.gitignore`
+covers*, and `extract-harness` made the skill links tracked: the row is still
+in the map, but `.gitignore` no longer covers it. The class has now bitten
+twice in one requirement, and both bites sit in the block this change
+replaces whole.
+
 ## What Changes
 
 - The scenario's trigger becomes the **shape** of a row rather than one row's
@@ -27,18 +34,21 @@ requirement has no way to tell a stale trigger from a live one.
 - The illustration is `docs/research/*`, which is live today. It is an
   illustration and not the trigger, so the scenario survives that row being
   deleted in turn — which is the whole of what went wrong here.
+- **A gitignored row** takes the same shape: a row whose path `.gitignore`
+  covers. No row of today's map is one, so it names no illustration, and says
+  which row it used to name.
 
 ## Capabilities
 
 ### Modified Capabilities
 
 - `repo-onboarding`: *Every path the map names is real and shipped* keeps its
-  behaviour and its other six scenarios; the **A glob row** scenario's `WHEN`
-  stops naming a row that no longer exists.
+  behaviour and its other five scenarios; the **A glob row** and **A
+  gitignored row** scenarios' `WHEN` stop naming rows that no longer fit them.
 
 ## Impact
 
-- `openspec/specs/repo-onboarding/spec.md` — one scenario's `WHEN` clause. No
+- `openspec/specs/repo-onboarding/spec.md` — two scenarios' `WHEN` clauses. No
   requirement text changes, no scenario is added or removed.
 - `checks/readme-map.test.ts` — unchanged. It never named `tasks/*.md`: it
   reads the live map and resolves whatever rows it finds, so nothing in it
@@ -48,12 +58,12 @@ requirement has no way to tell a stale trigger from a live one.
 
 ## Non-goals
 
-- **Rewriting the requirement's other five row-naming scenarios.** They name
-  `docs/testing.md`, `spec-inbox/`, `openspec/config.yaml` → `context:` and
-  `.claude/skills/`, all of which are live. They carry the same latent defect
-  — a concrete path in a trigger goes stale when a change deletes it — and
-  none of them has gone stale. Fixing a class that has bitten once, at the one
-  site where it bit, is the smaller change; the reasoning is recorded in
+- **Rewriting the requirement's other row-naming scenarios.** They name
+  `docs/testing.md`, `spec-inbox/` and `openspec/config.yaml` → `context:`, all
+  of which are live and still fit them. They carry the same latent defect — a
+  concrete path in a trigger goes stale when a change moves it — and none of
+  them has gone stale. Fixing a class at the sites where it bit is the smaller
+  change; the reasoning is recorded in
   `design.md` so the next occurrence is recognised rather than re-derived.
 - **A gate that would have caught this.** What would catch it is a check that
   every backticked path in a spec's scenarios resolves in the tree, and that is

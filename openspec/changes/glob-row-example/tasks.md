@@ -1,9 +1,10 @@
 # glob-row-example — tasks
 
-One acceptance criterion is in scope, the only one this change touches:
-`repo-onboarding/a-glob-row`. It is closed by nothing new — the case that
-already exercises it is `checks/readme-map.test.ts`, which resolves every row
-of the live map and named no path before this change or after it.
+Two acceptance criteria are in scope, the only ones this change touches:
+`repo-onboarding/a-glob-row` and `repo-onboarding/a-gitignored-row`. They are
+closed by nothing new — the case that already exercises both is
+`checks/readme-map.test.ts`, which resolves every row of the live map and
+named no path before this change or after it.
 
 One task group, so this ships whole on `feat/glob-row-example` rather than as
 a numbered step.
@@ -17,12 +18,15 @@ Closes: *Every path the map names is real and shipped*
       all seven scenarios the live requirement has — the replacement is
       whole-requirement, so one omitted is one deleted
 - [ ] 1.2 Confirm the only difference between the live requirement before and
-      after is the `WHEN` line of **A glob row** and the paragraph under it:
-      diff the two blocks rather than reading them, since six of the seven
-      scenarios are meant to be byte-identical
+      after is the `WHEN` lines of **A glob row** and **A gitignored row** and
+      the paragraph under each: diff the two blocks rather than reading them,
+      since five of the seven scenarios are meant to be byte-identical
 - [ ] 1.3 Check the illustration is a row the map actually has —
       `docs/research/*` at the time of writing — by reading it out of
-      `README.md`'s map rather than out of this change's prose
+      `README.md`'s map rather than out of this change's prose, and that no
+      row is gitignored, through `git check-ignore` as
+      `checks/readme-map.test.ts` runs it — if one has become so, it is the
+      illustration **A gitignored row** now lacks
 - [ ] 1.4 `bun test checks/readme-map.test.ts` passes unchanged, and no case
       in it mentions `tasks/*.md` or `docs/research/*`: the scenario is read
       by people and resolved by nothing, which is what makes this a wording
