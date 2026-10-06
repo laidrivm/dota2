@@ -10,7 +10,7 @@ import {
 } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { pin, run } from "harness/bun/check.ts";
+import { pin, run, workflows } from "harness/bun/check.ts";
 import { ranges } from "harness/bun/manifest-ranges.ts";
 import { root } from "./root.ts";
 
@@ -248,4 +248,32 @@ describe("CI runs the gates from the pin", () => {
 			expect(gates).toBeGreaterThan(0);
 		},
 	);
+});
+
+describe("a second checkout of the harness", () => {
+	// spec: harness-consumption/a-second-checkout
+	test("a workflow checking out the harness repository is named", () => {
+		const dir = mkdtempSync(join(tmpdir(), "harness-consumption-"));
+		made.push(dir);
+		git(dir, "init", "-q");
+		mkdirSync(join(dir, ".github/workflows"), { recursive: true });
+		writeFileSync(
+			join(dir, ".github/workflows/ci.yml"),
+			[
+				"on: push",
+				"jobs:",
+				"  test:",
+				"    runs-on: ubuntu-latest",
+				"    steps:",
+				"      - uses: actions/checkout@v4",
+				"        with:",
+				"          repository: laidrivm/harness",
+				"",
+			].join("\n"),
+		);
+		git(dir, "add", ".github");
+		expect(workflows(dir)).toEqual([
+			".github/workflows/ci.yml: job test checks out laidrivm/harness",
+		]);
+	});
 });
