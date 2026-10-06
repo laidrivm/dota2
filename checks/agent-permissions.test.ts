@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
+import { BOOTSTRAP } from "harness/bun/bootstrap.ts";
 import { bashDeny, managers, settings } from "./agent-permissions.fixture.ts";
-import { root } from "./root.ts";
 
 /**
  * What the policy refuses outright, and the guard that catches what a
@@ -67,22 +67,11 @@ describe("the command guard is registered", () => {
 		expect(hook?.if).toBeUndefined();
 	});
 
-	test("it runs the tracked script under bun", () => {
-		// Pinned whole rather than by loose matches, which
-		// `bun "…/command-guard.ts"; true || exit 2` would satisfy while never
-		// blocking anything. The `|| exit 2` matters because a guard that
-		// cannot launch — bun absent, the path unresolved — exits 1, which
-		// Claude Code treats as non-blocking and runs the command anyway.
-		const path = "scripts/command-guard.ts";
-		expect(hook?.command).toBe(
-			`bun "\${CLAUDE_PROJECT_DIR}/${path}" || exit 2`,
-		);
-		const tracked = Bun.spawnSync(
-			["git", "ls-files", "--error-unmatch", path],
-			{
-				cwd: root,
-			},
-		);
-		expect(tracked.exitCode).toBe(0);
+	test("it runs the harness's bootstrap text", () => {
+		// Pinned whole rather than by loose matches, which a command running
+		// the guard and then `true` would satisfy while never blocking
+		// anything. The text is the package's own, which every consumer
+		// carries character for character.
+		expect(hook?.command).toBe(BOOTSTRAP);
 	});
 });
