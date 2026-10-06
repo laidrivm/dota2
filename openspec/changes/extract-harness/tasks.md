@@ -194,6 +194,11 @@ Closes none — infrastructure in another repository.
 - [ ] 8.5 Add the harness's own `CLAUDE.md`, importing `core/rules.md`, and
       verify that a session opened in the harness repository reads the rules
       (ask it to quote the first Process rule).
+- [ ] 8.6 Make the guard's two "HEAD is on main" refusals say that every
+      directory the line may run in is checked, so a `cd` into a feature
+      checkout from one on `main` is refused too, and name `git -C <path>` as
+      the spelling that commits or pushes there. Verify with a case in
+      `bun/command-guard.test.ts` asserting the reason names `git -C`.
 
 ## 9. The rules copy (d2ass)
 
