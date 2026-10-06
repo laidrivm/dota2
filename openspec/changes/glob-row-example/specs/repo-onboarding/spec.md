@@ -1,7 +1,7 @@
 # repo-onboarding delta — glob-row-example
 
-The requirement is copied whole from the live spec and one scenario's `WHEN`
-is edited; the other six and the requirement's own text are untouched, which a
+The requirement is copied whole from the live spec and two scenarios' `WHEN`
+are edited; the other five and the requirement's own text are untouched, which a
 `MODIFIED` replacement requires and a reader of the diff should be able to see
 at a glance.
 
@@ -44,8 +44,13 @@ The row above illustrates the shape and the scenario survives its deletion.
 
 #### Scenario: A gitignored row
 
-- **WHEN** the map names `.claude/skills/`, which `.gitignore` covers
+- **WHEN** a row's path is one `.gitignore` covers
 - **THEN** the row is not asserted to exist, since a clone does not have it
+
+No row of today's map is gitignored: `.claude/skills/`, the one this scenario
+used to name, became tracked links into the harness package. The trigger is
+the shape for the reason **A glob row** gives, and with no live row to
+illustrate it, it names none.
 
 #### Scenario: The table shape changes
 

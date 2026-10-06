@@ -14,8 +14,8 @@ Everything below marked *measured* was run against this tree on 2026-09-16.
 
 **Goals:**
 
-- Stop the scenario firing on a condition the repository cannot meet.
-- Leave the requirement's behaviour, and the other six scenarios, exactly as
+- Stop the two scenarios naming rows that no longer fit them.
+- Leave the requirement's behaviour, and the other five scenarios, exactly as
   they are.
 
 **Non-Goals:**
@@ -49,9 +49,25 @@ find this scenario by the same accident that found it this time. The trigger
 carrying the shape is what makes the scenario survive its own example.
 
 **Alternative rejected: drop the example entirely.** *WHEN a row's path
-carries a glob* is complete on its own, but the other six scenarios in this
-requirement all name something concrete, and a lone abstract one reads as an
-oversight rather than as a decision.
+carries a glob* is complete on its own, but the requirement's other
+row-naming scenarios all name something concrete, and a lone abstract one
+reads as an oversight rather than as a decision.
+
+### A gitignored row has no illustration, and says so
+
+`extract-harness` turned `.claude/skills/` into tracked links, so the row
+**A gitignored row** named is still in the map but no longer gitignored.
+**Measured** off the map at this change's revision, through `git check-ignore`
+as `checks/readme-map.test.ts` runs it: no row's path is covered by
+`.gitignore`. `spec-inbox/` matches only under `--no-index`; its tracked
+`README.md` keeps it a row the test asserts. The trigger takes the shape for the same reason as the glob
+row's — *a row's path is one `.gitignore` covers* — and there is no live row
+to illustrate it.
+
+**Alternative rejected: name a hypothetical row.** A path no row has would be
+the stale trigger this change removes, written in advance. The paragraph
+under the scenario names the row it used to name instead, so a reader sees the
+abstraction is a decision and not an omission.
 
 ### The delta is `MODIFIED`, carrying all seven scenarios
 
@@ -66,9 +82,10 @@ against the live seven before the delta was called done.
   correctly when it does, because nothing turns on it. That is the difference
   the change is buying; the residue is a sentence naming a row that once
   existed, which is a smaller defect than a trigger that cannot fire.
-- **The other five concrete triggers carry the same latent defect.** →
+- **The other three concrete triggers carry the same latent defect.** →
   Accepted and recorded rather than fixed. None has gone stale, and the
-  proposal says why fixing the class at one site is the smaller change.
+  proposal says why fixing the class at the sites where it bit is the smaller
+  change.
 
 ## Migration Plan
 
@@ -77,6 +94,6 @@ that `git revert` does not cover.
 
 ## Open Questions
 
-None. The requirement is unchanged, the check is unchanged, and the only
-judgement — shape in the trigger, row as illustration — is argued above with
-both alternatives named.
+None. The requirement is unchanged, the check is unchanged, and the two
+judgements — shape in the trigger, row as illustration; no illustration where
+no row fits — are argued above with their alternatives named.
