@@ -19,9 +19,15 @@ knowledge_base:
     # docs/context/, holds session save-points that must never be loaded
     # automatically. filePatterns has no negation syntax, so widening the
     # glob would pull them in with no way to exclude them.
+    # "harness/*.md" is the tracked copy of the pinned harness's rules and
+    # docs, which /CLAUDE.md imports: the bot reads no file outside this
+    # repository, so without it every harness rule leaves its context. Flat
+    # for the same reason as docs/: sync.ts writes it flat, and a glob wider
+    # than the copy would read whatever else came to sit under it.
     filePatterns:
       - "**/CLAUDE.md"
       - "docs/*.md"
+      - "harness/*.md"
   mcp:
     # Pinned by decision for the same reason as learnings.scope above, from
     # the other direction: the "auto" default *disables* MCP for public
@@ -143,8 +149,9 @@ reviews:
     # general review-instruction key to hang these on instead.
     - path: "**"
       instructions: |
-        When a defect violates a rule in /CLAUDE.md, quote that rule beside
-        the finding. When a defect is covered by no rule and its shape
+        When a defect violates a rule in /CLAUDE.md or in the harness rules
+        it imports from /harness/rules.md, quote that rule beside the
+        finding. When a defect is covered by no rule and its shape
         could recur, say so — the fix-and-capture loop decides whether it
         becomes one, and it is fed by the user and the local skills today.
 

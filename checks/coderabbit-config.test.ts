@@ -3,7 +3,10 @@ import { readFileSync } from "node:fs";
 import { root } from "./root.ts";
 
 type Config = {
-	knowledge_base: { mcp: { usage: string } };
+	knowledge_base: {
+		mcp: { usage: string };
+		code_guidelines: { filePatterns: string[] };
+	};
 	reviews: {
 		related_issues: boolean;
 		related_prs: boolean;
@@ -115,4 +118,18 @@ test("no entry is scoped to src/, which does not hold this repo's code", () => {
 	// a src/ scope silently exempts the rest.
 	const paths = config.reviews.path_instructions.map((e) => e.path);
 	expect(paths).not.toContain("src/**");
+});
+
+// spec: review-bot-config/a-harness-rule-arrives-with-a-pin-bump
+test("the harness copy is read as guidelines, flat as sync writes it", () => {
+	const patterns = config.knowledge_base.code_guidelines.filePatterns;
+	expect(patterns).toContain("harness/*.md");
+	expect(patterns).not.toContain("harness/**/*.md");
+});
+
+// spec: review-bot-config/a-harness-rule-violated
+test("the unscoped entry has the bot quote a harness rule too", () => {
+	expect(entry("**")).toMatch(
+		/harness rules it imports from \/harness\/rules\.md/,
+	);
 });
