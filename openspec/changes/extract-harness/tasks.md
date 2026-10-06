@@ -254,11 +254,11 @@ Closes `review-bot-config/a-harness-rule-arrives-with-a-pin-bump`,
 
 Closes none — infrastructure in another repository.
 
-- [ ] 11.1 Run `openspec init` in the harness. Copy nine of the ten moving
+- [x] 11.1 Run `openspec init` in the harness. Copy nine of the ten moving
       capabilities — `skill-provenance` is not re-created, per `proposal.md`
       — `mutation-floor`'s moving requirements, and the seven moving changes
       verbatim. Verify with `openspec validate --all` there.
-- [ ] 11.2 Point the moved tests' `// spec:` citations at the harness's specs,
+- [x] 11.2 Point the moved tests' `// spec:` citations at the harness's specs,
       and verify that the harness's `spec-coverage` reports a floor no higher
       than d2ass's share of it before the move, plus only the criteria a
       consumer's tree alone can meet, each named in the PR.
