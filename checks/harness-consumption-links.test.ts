@@ -15,14 +15,21 @@ afterAll(() => {
 	for (const dir of made) rmSync(dir, { recursive: true, force: true });
 });
 
+/** `git` in `cwd`, failing with git's own reason rather than returning. */
+function git(cwd: string, ...args: string[]): void {
+	const run = Bun.spawnSync(["git", ...args], { cwd });
+	if (run.exitCode !== 0)
+		throw new Error(`git ${args.join(" ")}: ${run.stderr.toString()}`);
+}
+
 /** A repository tracking one skill link, `name`, pointing at `target`. */
 function tracking(name: string, target: string): string {
 	const dir = mkdtempSync(join(tmpdir(), "harness-links-"));
 	made.push(dir);
-	Bun.spawnSync(["git", "init", "-q"], { cwd: dir });
+	git(dir, "init", "-q");
 	mkdirSync(join(dir, ".claude/skills"), { recursive: true });
 	symlinkSync(target, join(dir, ".claude/skills", name));
-	Bun.spawnSync(["git", "add", ".claude/skills"], { cwd: dir });
+	git(dir, "add", ".claude/skills");
 	return dir;
 }
 

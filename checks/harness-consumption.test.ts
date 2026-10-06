@@ -28,6 +28,13 @@ afterAll(() => {
 	for (const dir of made) rmSync(dir, { recursive: true, force: true });
 });
 
+/** `git` in `cwd`, failing with git's own reason rather than returning. */
+function git(cwd: string, ...args: string[]): void {
+	const run = Bun.spawnSync(["git", ...args], { cwd });
+	if (run.exitCode !== 0)
+		throw new Error(`git ${args.join(" ")}: ${run.stderr.toString()}`);
+}
+
 /**
  * A clone on `main`, with the installed harness linked in when asked. Built
  * under the system temp directory, which holds no `.env` for bun to read.
@@ -35,7 +42,7 @@ afterAll(() => {
 function clone(installed: boolean): string {
 	const dir = mkdtempSync(join(tmpdir(), "harness-consumption-"));
 	made.push(dir);
-	Bun.spawnSync(["git", "init", "-q", "-b", "main"], { cwd: dir });
+	git(dir, "init", "-q", "-b", "main");
 	if (installed) {
 		mkdirSync(join(dir, "node_modules"));
 		symlinkSync(
@@ -112,7 +119,7 @@ describe("after the harness is installed", () => {
 function mutationVerdict(surviving: number) {
 	const dir = mkdtempSync(join(tmpdir(), "harness-consumption-"));
 	made.push(dir);
-	Bun.spawnSync(["git", "init", "-q"], { cwd: dir });
+	git(dir, "init", "-q");
 	mkdirSync(join(dir, "src"));
 	writeFileSync(join(dir, "src/model.ts"), "export const x = 1;\n");
 	mkdirSync(join(dir, "reports/mutation"), { recursive: true });
