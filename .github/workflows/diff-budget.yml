@@ -26,6 +26,12 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
+      # The script ships in the harness package and reads its exclusions from
+      # package.json with bun, so both are installed first.
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: 1.4.2
+      - run: bun install --frozen-lockfile
       # The base is passed as a commit, not as `origin/<ref>`: the checked-out
       # merge commit has the base as an ancestor, so the SHA resolves without
       # depending on which remote-tracking refs the checkout happened to fetch.
@@ -36,4 +42,4 @@ jobs:
       - env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
           PR_BODY: ${{ github.event.pull_request.body }}
-        run: bash scripts/diff-budget.sh "$BASE_SHA"
+        run: bash node_modules/harness/bun/diff-budget.sh "$BASE_SHA"
