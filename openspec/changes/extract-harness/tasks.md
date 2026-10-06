@@ -82,27 +82,27 @@ Closes `repo-onboarding/a-fresh-clone`, `repo-onboarding/the-retired-linker`,
 
 Closes none — infrastructure in another repository.
 
-- [ ] 4.1 Copy into `bun/` verbatim, with `git log` provenance in the commit
+- [x] 4.1 Copy into `bun/` verbatim, with `git log` provenance in the commit
       body: `command-guard`, `command-parse`, `scan`, `diff-budget`,
       `file-size`, `no-suppressions`, `manifest-ranges`, `spec-coverage`,
       `spec-criteria`, `mutation-floor`, `repo-layout`, `board-state`,
       `check-yaml`, `root`, and their tests and fixtures. Verify with
       `bun test` in the harness, which passes unchanged before 4.2.
-- [ ] 4.2 Read every d2ass value from the consumer's `package.json`
+- [x] 4.2 Read every d2ass value from the consumer's `package.json`
       `"harness"` key (`design.md` D4) and fail naming any key that is
       absent. Add ZOMBIES 26 (missing `mutationFloor`) and 27 (missing
       `rootFiles`). Verify with `bun test`.
-- [ ] 4.3 Add `bun/check.ts`, the consumer entry point (D5). It runs the pin,
+- [x] 4.3 Add `bun/check.ts`, the consumer entry point (D5). It runs the pin,
       skill-link, workflow and gate checks over the working directory's
       tree. Tests: ZOMBIES 9–13 (links), 29–31 (workflows). Verify with
       `bun test bun/check`.
-- [ ] 4.4 Add the canonical bootstrap text (D6) and a test that runs it
+- [x] 4.4 Add the canonical bootstrap text (D6) and a test that runs it
       against fabricated hook input with no package installed: ZOMBIES
       19–24. Move the `agent-permissions` settings check here, asserting
       the bootstrap text exactly. Verify with `bun test`.
-- [ ] 4.5 Delete `link.sh` and its README section. Nothing links through it
+- [x] 4.5 Delete `link.sh` and its README section. Nothing links through it
       after step 3. Verify that `git grep link.sh` is empty.
-- [ ] 4.6 Add a CI workflow that runs `bun test` on push and pull request, and
+- [x] 4.6 Add a CI workflow that runs `bun test` on push and pull request, and
       verify it goes green on the step's PR.
 
 ## 5. The guard from the package (d2ass)
