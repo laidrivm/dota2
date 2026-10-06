@@ -47,7 +47,8 @@ for what was measured.
 - **Unifying the two finders.** They search different things for different
   reasons. `PLAN.md` was explicit that what lifts is the idiom taking a finder,
   not the strategy.
-- **The rule of two itself.** `scan-lift` writes that rule into `CLAUDE.md`.
+- **The rule of two itself.** `scan-lift`, now in `laidrivm/harness`, writes
+  that rule into the harness rules.
 - **Changing where focus lands** in either path. `hero-picker` §*Focus after
   the pick* and `draft-board` §*Focus survives the removal* both stand
   unchanged, and their e2e tests are the control.
