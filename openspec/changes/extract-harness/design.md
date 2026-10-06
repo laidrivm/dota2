@@ -6,8 +6,8 @@ See `proposal.md` for why. What shapes the approach:
 
 - The scaffolding is spread across `CLAUDE.md`, eight indexed docs,
   `.claude/settings.json`, about 8,000 lines of `scripts/` and `checks/`, CI
-  workflows, `.coderabbit.yaml`, and nine whole capabilities plus parts of
-  two more. Its skills already live in `laidrivm/skills`, reached through
+  workflows, `.coderabbit.yaml`, and ten whole capabilities plus part of
+  one more. Its skills already live in `laidrivm/skills`, reached through
   gitignored symlinks into a sibling working tree.
 - All three consumers run Bun and TypeScript. Linters differ: d2ass and
   `mellon` use Biome, `laidrivm.com` ESLint and Prettier.
@@ -196,7 +196,7 @@ native `<select>`*), the example moves with it unchanged, per the second goal.
 
 Specs are not edited by hand. The capabilities that move are removed by this
 change's REMOVED deltas when it is archived, and `retire_capabilities: true`
-deletes the nine emptied main specs. The harness repository receives verbatim
+deletes the ten emptied main specs. The harness repository receives verbatim
 copies in a step before that, so for a while both repositories hold them.
 The harness copy is the one that changes.
 

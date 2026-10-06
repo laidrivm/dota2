@@ -132,6 +132,12 @@ them in its own source.
 - **THEN** no file SHALL match — the moved specs, changes and docs may still
   name d2ass, and are outside what this scenario searches
 
+#### Scenario: The repository as it stands
+
+- **WHEN** the package's checks run over this tree — `check.ts`, and the
+  README layout check over its section
+- **THEN** neither SHALL report a problem
+
 ### Requirement: CI runs the gates from the same pin
 
 Every workflow that runs a harness gate SHALL run it from the package

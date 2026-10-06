@@ -5,8 +5,8 @@
 The agent scaffolding was built inside d2ass and is about to serve two more
 projects, `mellon` and `laidrivm.com`. Today none of it can reach them. The
 rules sit in d2ass's `CLAUDE.md` and `docs/`, the hook and the gates in its
-`scripts/` and `checks/`, and nine of its thirty capabilities, with parts of
-two more, describe the scaffolding rather than the product. The skills reach d2ass only through
+`scripts/` and `checks/`, and ten of its thirty capabilities, with part of
+one more, describe the scaffolding rather than the product. The skills reach d2ass only through
 gitignored symlinks into a working tree, so a clone, CI and the review bot see
 none of them, and a commit hash typed into a table stands in for a pin.
 
@@ -33,8 +33,8 @@ none of them, and a commit hash typed into a table stands in for a pin.
   its product capabilities, and the values its gates are run with (what is
   mutated and the floor, which root files are allowed, the suppression
   allowlist). The scripts that read those values move; the values do not.
-- Every harness artefact moves except the archive: the nine capabilities below
-  and parts of two more, `docs/` other than d2ass's own, the scripts and checks
+- Every harness artefact moves except the archive: the ten capabilities below
+  and part of one more, `docs/` other than d2ass's own, the scripts and checks
   of the scaffolding, and the active changes that modify a capability that
   moves. `glob-row-example`, which modifies only `repo-onboarding`, stays, and
   its card moves from `Harness` to `D2ASS`.
@@ -64,15 +64,16 @@ none of them, and a commit hash typed into a table stands in for a pin.
   harness repository where it linked the skills repository.
 - `mutation-floor`: the floor check and the exemption form move to the
   harness. What d2ass mutates stays here.
-- `repo-layout`: the root-resolution requirement moves to the harness with the
-  checks that rely on it. The root exemptions and the README section stay.
 - `review-bot-config`: the bot reads the harness rules from their tracked copy
   and quotes them as it quotes `CLAUDE.md`'s.
 - Moved whole to the harness, every requirement removed here:
   `agent-permissions`, `agent-rulebook`, `change-slicing`, `commit-gates`,
-  `context-budget`, `local-review-loop`, `skill-provenance`,
+  `context-budget`, `local-review-loop`, `repo-layout`, `skill-provenance`,
   `spec-test-traceability`, `task-board`. `skill-provenance` is not
-  re-created there: the lockfile replaces it.
+  re-created there: the lockfile replaces it. `repo-layout`'s requirements
+  each describe a check whose code and tests move; the files d2ass allows at
+  its root stay as a value `harness-consumption` keeps, and its README keeps
+  its section.
 
 ## Non-goals
 

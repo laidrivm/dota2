@@ -129,7 +129,8 @@ Closes `harness-consumption/a-fresh-clone`,
 
 Closes `harness-consumption/raising-the-mutation-floor`,
 `harness-consumption/a-d2ass-value-in-a-gate`,
-`harness-consumption/a-workflow-running-a-gate`.
+`harness-consumption/a-workflow-running-a-gate`,
+`harness-consumption/the-repository-as-it-stands`.
 
 - [ ] 6.1 Move the d2ass values into `package.json` `"harness"`: the
       mutation module and floor, the root files with their reasons, the
@@ -148,9 +149,21 @@ Closes `harness-consumption/raising-the-mutation-floor`,
 - [ ] 6.4 Delete the moved scripts and checks: the step 4.1 list less the
       guard, plus `checks/agent-permissions*`, `checks/commit-gates.test.ts`,
       `checks/rulebook.test.ts`, `checks/tracked-tree.test.ts` and
-      `checks/manifest-version-ranges.test.ts`. Verify that `bun test` passes
-      and that `bun run harness:check` reports the uncited-criteria floor
-      unchanged. The PR body carries
+      `checks/manifest-version-ranges.test.ts`. Keep `scripts/root.ts`, which
+      `scripts/test-db.test.ts` imports, and
+      `scripts/mutation-floor-config.test.ts`, which tests d2ass's own Stryker
+      configuration and has no copy in the package. Point
+      `checks/readme-layout.test.ts` and `src/app/module-classes.test.ts` at
+      the package's modules. Before deleting, add cases to
+      `checks/harness-consumption.test.ts` re-citing what stays here and only
+      a deleted test cited: the three `pinned-*` criteria, run through the
+      package's pin check over this manifest and a fabricated one,
+      `mutation-floor/a-mutant-the-tests-assert-against`, and
+      `harness-consumption/the-repository-as-it-stands`. Verify that
+      `bun test` and `bun run harness:check` pass, with
+      `harness.uncitedFloor` raised in the deleting commit by exactly the
+      criteria of capabilities leaving at the archive whose tests moved, and
+      its `why` saying so. The PR body carries
       `oversize: deletes code moved verbatim to laidrivm/harness@<sha>` if
       it crosses 800 lines.
 
@@ -244,9 +257,9 @@ Closes `review-bot-config/a-harness-rule-arrives-with-a-pin-bump`,
 
 Closes none — infrastructure in another repository.
 
-- [ ] 11.1 Run `openspec init` in the harness. Copy the nine moving
-      capabilities, `mutation-floor`'s and `repo-layout`'s moving
-      requirements, and the seven moving changes verbatim. Verify with
+- [ ] 11.1 Run `openspec init` in the harness. Copy the ten moving
+      capabilities, `mutation-floor`'s moving requirements, and the seven
+      moving changes verbatim. Verify with
       `openspec validate --all` there.
 - [ ] 11.2 Point the moved tests' `// spec:` citations at the harness's specs,
       and verify that the harness's `spec-coverage` reports a floor no higher
@@ -272,6 +285,8 @@ Closes none — removals, board and memory.
       Leave `d2ass-vps-access`, and remove the e2e lesson once 9.2 holds it.
       Rewrite `MEMORY.md` to match. Verify that every deleted file's lesson
       can be found by grep in its new home.
-- [ ] 12.5 Run the archive's sync preview and confirm that the nine
+- [ ] 12.5 Run the archive's sync preview and confirm that the ten
       capabilities retire cleanly (`design.md` Risks, stray prose). Verify
-      that the preview reports no `content the merge cannot name`.
+      that the preview reports no `content the merge cannot name`. The
+      archive commit lowers `harness.uncitedFloor` by the uncited criteria
+      the REMOVED deltas take with them, re-measured in that commit.
