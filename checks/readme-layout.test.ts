@@ -25,6 +25,8 @@ function listing(dir: string): string[] {
  */
 const UNPLACED: Record<string, string> = {
 	"docs/": "prose, whose owner the knowledge ownership map above assigns",
+	"harness/":
+		"the pinned harness's rules and docs, written by its sync.ts — never edited here",
 	"openspec/": "the workflow's own change artefacts and shipped specs",
 	"spec-inbox/": "raw product specs — contents gitignored, its README tracked",
 	".github/": "CI workflows and Dependabot, read by GitHub from this path",
