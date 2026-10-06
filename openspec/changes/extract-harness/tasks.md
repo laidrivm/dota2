@@ -173,8 +173,9 @@ Closes `harness-consumption/a-link-into-the-package`,
 `harness-consumption/a-link-into-another-checkout`,
 `harness-consumption/a-link-the-package-no-longer-carries`.
 
-- [x] 7.1 Add cases to `checks/harness-consumption.test.ts` citing the three
-      criteria. The first runs the package's exported link check over this
+- [x] 7.1 Add cases to `checks/harness-consumption-links.test.ts`, split from
+      `checks/harness-consumption.test.ts` ahead of its 300-line cap, citing
+      the three criteria. The first runs the package's exported link check over this
       tree. The other two run it on a fabricated tree (a link to a sibling
       checkout, a link the package lacks) and assert the named failure.
       Verify with `bun test checks/harness-consumption`.
