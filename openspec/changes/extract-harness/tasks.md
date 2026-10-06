@@ -111,17 +111,17 @@ Closes `harness-consumption/a-fresh-clone`,
 `harness-consumption/any-other-command-before-the-install`,
 `harness-consumption/after-the-install`.
 
-- [ ] 5.1 Bump the pin to step 4's merge commit and replace the `PreToolUse`
+- [x] 5.1 Bump the pin to step 4's merge commit and replace the `PreToolUse`
       command in `.claude/settings.json` with the bootstrap text from 4.4.
       Verify that `bun node_modules/harness/bun/check.ts` passes the
       settings check.
-- [ ] 5.2 Add `checks/harness-consumption.test.ts` with cases citing the three
+- [x] 5.2 Add `checks/harness-consumption.test.ts` with cases citing the three
       criteria. They run the settings hook command in a fabricated clone with
       and without `node_modules/harness/`, including
       `bun install --registry <url>` blocked before install. ZOMBIES 25:
       after install, a commit on `main` is refused with the package guard's
       message. Verify with `bun test checks/harness-consumption`.
-- [ ] 5.3 Delete `scripts/command-guard*` and `scripts/command-parse*`. Verify
+- [x] 5.3 Delete `scripts/command-guard*` and `scripts/command-parse*`. Verify
       that `git grep -n "scripts/command-guard"` finds nothing outside
       `openspec/changes/archive/` and `docs/context/`.
 
