@@ -132,21 +132,21 @@ Closes `harness-consumption/raising-the-mutation-floor`,
 `harness-consumption/a-workflow-running-a-gate`,
 `harness-consumption/the-repository-as-it-stands`.
 
-- [ ] 6.1 Move the d2ass values into `package.json` `"harness"`: the
+- [x] 6.1 Move the d2ass values into `package.json` `"harness"`: the
       mutation module and floor, the root files with their reasons, the
       suppression allowlist, the diff-budget exclusions. Verify that
       `bun node_modules/harness/bun/check.ts` passes on the tree.
-- [ ] 6.2 Point `package.json` scripts, the `pre-push` hook,
+- [x] 6.2 Point `package.json` scripts, the `pre-push` hook,
       `diff-budget.yml`, `lint.yml` and `mutation.yml` at
       `node_modules/harness/bun/`, and add `harness:check` where the moved
       checks ran. Verify with `actionlint` and a green CI run on the PR.
-- [ ] 6.3 Add cases to `checks/harness-consumption.test.ts` citing the three
+- [x] 6.3 Add cases to `checks/harness-consumption.test.ts` citing the three
       criteria. ZOMBIES 28: changing the floor in a fabricated consumer's
       `package.json` flips the verdict. A search of the installed gates'
       non-test source finds no `src/model.ts` or
       `src/fixtures/snapshot.json`. Every workflow gate path is under
       `node_modules/harness/`. Verify with `bun test checks/harness-consumption`.
-- [ ] 6.4 Delete the moved scripts and checks: the step 4.1 list less the
+- [x] 6.4 Delete the moved scripts and checks: the step 4.1 list less the
       guard, plus `checks/agent-permissions*`, `checks/commit-gates.test.ts`,
       `checks/rulebook.test.ts`, `checks/tracked-tree.test.ts` and
       `checks/manifest-version-ranges.test.ts`. Keep `scripts/root.ts`, which
