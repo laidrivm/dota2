@@ -10,6 +10,8 @@ import {
 } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { pin, run } from "harness/bun/check.ts";
+import { ranges } from "harness/bun/manifest-ranges.ts";
 import { root } from "./root.ts";
 
 /**
@@ -154,7 +156,10 @@ const runs = (workflow: string): string[][] => {
 };
 
 describe("the values the gates run with", () => {
+	// The killed mutant beside the survivor is what a floor of one holds, so
+	// the first verdict also shows a killed mutant counting nothing.
 	// spec: harness-consumption/raising-the-mutation-floor
+	// mutation-floor/a-mutant-the-tests-assert-against
 	test("the floor in this repository's package.json decides the verdict", () => {
 		expect(mutationVerdict(1)).toBe(0);
 		expect(mutationVerdict(2)).not.toBe(0);
@@ -168,6 +173,43 @@ describe("the values the gates run with", () => {
 			expect(naming.map(({ name }) => name)).toEqual([]);
 		},
 	);
+
+	// spec: harness-consumption/the-repository-as-it-stands
+	test("this tree passes every check the package runs over it", () => {
+		expect(run(root)).toEqual([]);
+	});
+});
+
+/** A manifest naming `dependencies` alone, as the pin check reads one. */
+const manifest = (dependencies: Record<string, string>) =>
+	JSON.stringify({ dependencies }, null, "\t");
+
+const HASH = "0123456789abcdef0123456789abcdef01234567";
+
+describe("the harness pin", () => {
+	// spec: harness-consumption/pinned-to-a-commit
+	test("this manifest's pin passes the package's check", () => {
+		expect(pin(root)).toEqual([]);
+	});
+
+	// spec: harness-consumption/pinned-to-something-that-moves
+	test.each(["#main", "#v1.0.0", `#${HASH.slice(0, 39)}`, ""])(
+		"a harness reference of %p is refused by name",
+		(reference) => {
+			const spec = `github:laidrivm/harness${reference}`;
+			expect(ranges(manifest({ harness: spec })).join("\n")).toContain(
+				"dependencies.harness",
+			);
+		},
+	);
+
+	// spec: harness-consumption/a-non-harness-git-specifier
+	test("another dependency pinned to a commit is refused", () => {
+		const spec = `github:someone/other#${HASH}`;
+		expect(ranges(manifest({ other: spec })).join("\n")).toContain(
+			"dependencies.other",
+		);
+	});
 });
 
 /** A `bun run <name>` resolved to the command the manifest gives it. */

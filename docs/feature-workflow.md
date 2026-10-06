@@ -146,8 +146,8 @@ for them is already here.
   cite a file in this tree ships a dead external link instead — and the card
   is read through the board, where no gate here can see it.
 
-  Three of the nine statuses a reconciliation can repair, because
-  `scripts/board-state.ts` derives them from the tree: `proposing`,
+  Three of the nine statuses a reconciliation can repair, because the
+  harness's `board-state.ts` derives them from the tree: `proposing`,
   `proposed`, `done`, and only on `D2ASS`. The other six, and every card on
   `Harness` or `mellon`, are honoured rather than mechanised, and this bullet
   is the whole of what holds them — which is why it is stated as an obligation
@@ -173,8 +173,8 @@ for them is already here.
   A board is read through the saved view named `Board view`, never through a
   SQL query. The boards are named here rather than linked: this repository is
   public and they are not, so a board or view URL is an identifier for private
-  content and does not belong in a tracked file. Which statuses
-  `scripts/board-state.ts` derives, and on which board, is the bullet above.
+  content and does not belong in a tracked file. Which statuses the
+  harness's `board-state.ts` derives, and on which board, is the bullet above.
 - Take the first card of its column that is not blocked, in the order
   `Board view` returns, name every card stepped over and why, and never move a
   card within that order: it is the

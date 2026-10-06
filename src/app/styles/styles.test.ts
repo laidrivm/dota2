@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { relativeLuminance } from "../board/format.ts";
 
 // The listing is taken at the repository root, never at `cwd`, the shape
-// `scripts/no-suppressions.ts` uses: `git ls-files` run in a subdirectory
+// `harness/bun/no-suppressions.ts` uses: `git ls-files` run in a subdirectory
 // reports only what is under it and names it relative to it. Tracked files
 // rather than a filesystem glob, which would walk `node_modules` and admit
 // whatever is untracked in a working tree.

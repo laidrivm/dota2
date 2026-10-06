@@ -20,11 +20,7 @@
 | `openspec/config.yaml` → `context:` | architecture choices (SSE, BFF, cache, N+1) | on artifact generation |
 | `openspec/config.yaml` → `rules:` | artifact shape requirements (referencing CLAUDE.md) | on artifact generation |
 | `.claude/settings.json` | the agent's permission policy — what is denied, what prompts, what is pre-approved, which hooks run | before granting a tool call |
-| `scripts/no-suppressions.ts` | which linter and type-checker suppressions are approved, and how many | when a suppression is unavoidable |
-| `scripts/file-size.ts` | how long a file of each type may be, and which types are capped at all | when a file grows past its cap |
-| `scripts/spec-coverage.ts` | how many acceptance criteria no test cites, and why that floor last moved | when a criterion or the test citing it changes |
-| `scripts/spec-criteria.ts` | what an acceptance criterion is and how its identifier is derived | when a scenario heading is renamed |
-| `scripts/mutation-floor.ts` | how many mutants survive in `src/model.ts`, and why that floor last moved | when the model's arithmetic or its tests change |
+| `package.json` → `harness` | the values the harness gates run with here — approved suppressions, the mutation and uncited-criteria floors and why each last moved, the root files, the diff-budget exclusions | when a gate refuses a value |
 | `.coderabbit.yaml` | how CodeRabbit reviews this repo | when the bot reviews the wrong things |
 | `.claude/skills/` — symlinks into the installed [harness](https://github.com/laidrivm/harness) package | the review skills' own text, which arrives with `bun install` | on skill invocation |
 
@@ -73,9 +69,10 @@ Both of those lists are checked rather than merely written down.
 `checks/readme-layout.test.ts` refuses a tracked file whose directory neither
 appears in the table nor is exempted with a reason, so a new `src/worker/`
 fails until somebody decides which it is. Every tracked file left at the
-repository root is named in `scripts/repo-layout.ts` the same way. Both are
-scoped by what they exempt rather than by what they cover, because a list of
-what is covered passes in silence on the first thing nobody thought of.
+repository root is named in `package.json`'s `harness.rootFiles` the same
+way. Both are scoped by what they exempt rather than by what they cover,
+because a list of what is covered passes in silence on the first thing nobody
+thought of.
 
 ## Running it
 
@@ -486,9 +483,9 @@ deployment need none of it; only the agent workflow does.
 - Install via `bun add <pkg>` — the exact version gets written
   (`exact = true` in `bunfig.toml`), and only versions at least 3 days
   old resolve (`minimumReleaseAge`). That setting governs what `bun add`
-  writes and nothing else, so `scripts/manifest-ranges.ts` holds the same
-  line over a version typed in by hand — `overrides`, which `bun add` never
-  touches, included.
+  writes and nothing else, so the harness's `manifest-ranges.ts` holds the
+  same line over a version typed in by hand — `overrides`, which `bun add`
+  never touches, included.
 - After an install, check `bun pm untrusted`; trust a package
   (`bun pm trust <pkg>`) only if its build genuinely requires
   lifecycle scripts.

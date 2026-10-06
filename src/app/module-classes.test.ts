@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { lstatSync, readFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
-import { blank } from "../../scripts/scan.ts";
+import { blank } from "harness/bun/scan.ts";
 
 const TSX = new Bun.Transpiler({ loader: "tsx" });
 
@@ -19,7 +19,7 @@ const TSX = new Bun.Transpiler({ loader: "tsx" });
  */
 
 // The listing is taken at the repository root, never at `cwd`, the shape
-// `scripts/no-suppressions.ts` uses: `git ls-files` run in a subdirectory
+// `harness/bun/no-suppressions.ts` uses: `git ls-files` run in a subdirectory
 // reports only what is under it and names it relative to it.
 const top = Bun.spawnSync(["git", "rev-parse", "--show-toplevel"]);
 if (top.exitCode !== 0) throw new Error(top.stderr.toString());
@@ -214,8 +214,8 @@ describe("the classes a file reads", () => {
 		expect(reads(at, source)).toEqual([[module, "name"]]);
 	});
 
-	// What the scan erases is `scripts/scan.test.ts`'s; this is only that a
-	// binding named in something erased is not a read.
+	// What the scan erases is the harness's `scan.test.ts`'s; this is only that
+	// a binding named in something erased is not a read.
 	test("ignores a name in a comment", () =>
 		expect(names("// s.name")).toEqual([]));
 
@@ -241,7 +241,7 @@ describe("class names read off a CSS module", () => {
 	// The other direction. A module's own descendant selectors are not reads —
 	// `.chip input` and `.snapshotError p` name one class between them — so
 	// `defined` yielding a name is not evidence anything reads it. Keyed by
-	// `<module> <name>`, the shape `scripts/no-suppressions.ts` keys its own
+	// `<module> <name>`, the shape `harness/bun/no-suppressions.ts` keys its own
 	// pairs by: two modules may each define a class of the same name.
 	const wasRead = new Set(
 		readers.flatMap(([, names]) => names.map((pair) => pair.join(" "))),

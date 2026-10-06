@@ -3,12 +3,12 @@
  * this repository tracks something under, and every tracked file sits under a
  * directory it names.
  *
- * The rule both halves rest on is `scripts/repo-layout.ts`'s, where it sits
- * beside the root-file half of the same contract and is exercised against
+ * The rule both halves rest on is the harness's `repo-layout.ts`'s, where it
+ * sits beside the root-file half of the same contract and is exercised against
  * trees fabricated for the purpose. This file asserts the one tree that ships.
  */
 import { describe, expect, test } from "bun:test";
-import { rows, unbacked } from "../scripts/repo-layout.ts";
+import { rows, unbacked } from "harness/bun/repo-layout.ts";
 
 /** The tracked paths of a repository, named from its root. */
 function listing(dir: string): string[] {
@@ -49,10 +49,11 @@ describe("the README as it stands", () => {
 		cwd: import.meta.dir,
 	});
 	if (top.exitCode !== 0) throw new Error(top.stderr.toString());
-	// Only the terminator git adds, not `trim()`: `scripts/repo-layout.ts`
+	// Only the terminator git adds, not `trim()`: the harness's `repo-layout.ts`
 	// records why, and the two are halves of one capability.
 	const root = top.stdout.toString().replace(/\n$/, "");
 
+	// spec: harness-consumption/the-repository-as-it-stands
 	test("its layout section names only directories the repository has", async () => {
 		const readme = await Bun.file(`${root}/README.md`).text();
 		expect(unbacked(readme, listing(root))).toEqual([]);
@@ -70,13 +71,13 @@ describe("the README as it stands", () => {
 
 	test("every tracked file sits under a directory the section names", async () => {
 		// Scoped by what it exempts rather than by the directories it covers,
-		// which is `scripts/repo-layout.ts`'s departure and the same reasoning:
-		// an enumeration of what is covered passes in silence on the first
-		// directory nobody thought of, and `src/worker/` would never have to be
-		// documented at all.
+		// which is the harness's `repo-layout.ts`'s departure and the same
+		// reasoning: an enumeration of what is covered passes in silence on the
+		// first directory nobody thought of, and `src/worker/` would never have
+		// to be documented at all.
 		const named = new Set(await placed());
 		const strays = listing(root).filter((path) => {
-			// A file at the root is `scripts/repo-layout.ts`'s business.
+			// A file at the root is the harness's `repo-layout.ts`'s business.
 			if (!path.includes("/")) return false;
 			const dir = path.slice(0, path.lastIndexOf("/") + 1);
 			// The file's own directory, matched exactly rather than by prefix:

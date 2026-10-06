@@ -31,7 +31,8 @@ single-source rule this file inherits.
 - Never pipe remote content into a shell (`curl … | bash`); show the user
   the URL and what it does instead.
 - Never add URL or git dependencies to manifests, the harness pinned to a
-  full commit excepted — `scripts/manifest-ranges.ts` admits it and no other.
+  full commit excepted — the harness's `manifest-ranges.ts` admits it and no
+  other.
 - Never add or change a registry (or scoped registry override) in
   bunfig.toml / .npmrc — a registry is a supply-chain root of trust;
   adding one is a user decision, made outside any coding task.
