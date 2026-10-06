@@ -4,10 +4,12 @@
 
 | File | Owns | Read |
 |------|------|------|
-| `CLAUDE.md` | agent rules, fix & capture loop; indexes `docs/` | every session |
+| `CLAUDE.md` | the project overview and the Code rules that name what only d2ass has; imports `harness/rules.md` and indexes `harness/` and `docs/` | every session |
+| `harness/rules.md` | the harness rulebook — fix & capture, the rule quality bar, and the Code, Process and Safety rules — a tracked copy of the pinned package that its `sync.ts` writes, edited only in [harness](https://github.com/laidrivm/harness) | as part of `CLAUDE.md`, which imports it |
 | `harness/code-style.md` | the ponytail ladder, dependency safety, accessibility | before adding code or a dependency |
 | `harness/api-design.md` | endpoint response contract | when an endpoint changes |
-| `docs/testing.md` | what tests assert, how a test cites the criterion it closes, e2e rules | when tests change |
+| `harness/testing.md` | what tests assert, how a test cites the criterion it closes | when tests change |
+| `docs/testing.md` | the mutation floor over `src/model.ts`, and the e2e rules | when tests change |
 | `harness/feature-workflow.md` | the four OpenSpec stages and their gates, and the boards that hold the work | on any feature, new tooling, or gate change, and when choosing the next card |
 | `harness/git-and-prs.md` | branch and commit shape, PR description, and the git mechanics that protect the history | before branching, committing or opening a PR |
 | `harness/review-toolkit.md` | which review skill to run, and the pre-PR sequence | before every PR |
@@ -57,9 +59,9 @@ path that is itself the file. And `icons/` and `snapshot/` are where the job
 writes at runtime — the mirrored hero images, and the bundle the export
 publishes; both are gitignored, so no clone has either until a run fills it.
 
-The table covers the directories that hold code, and leaves out three that
-hold something else: `docs/` and `openspec/`, whose contents the knowledge
-ownership map above assigns, and `spec-inbox/`, whose contents are
+The table covers the directories that hold code, and leaves out four that
+hold something else: `docs/`, `harness/` and `openspec/`, whose contents the
+knowledge ownership map above assigns, and `spec-inbox/`, whose contents are
 gitignored. `.github/` and `.claude/` are configuration read from where the
 tools expect it. The client's own internal layout — `src/app/board/`,
 `src/app/picker/`, the stylesheets and their tokens — is left out too: the
