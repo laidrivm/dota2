@@ -59,9 +59,11 @@ harness/
   core/
     rules.md          the loop, the quality bar, Process and Safety rules,
                       the Code rules that name nothing only d2ass has
-    docs/             verification, git-and-prs, review-toolkit,
+    <doc>.md          verification, git-and-prs, review-toolkit,
                       feature-workflow, rulebook-growth, code-style,
-                      api-design, testing (the parts true of any project)
+                      api-design, testing (the parts true of any project),
+                      flat beside rules.md as the consumer's copy holds
+                      them, so a link between the two resolves in both
     skills/<name>/    every skill, as today
   bun/                command-guard, command-parse, scan, diff-budget,
                       file-size, no-suppressions, manifest-ranges,
@@ -101,8 +103,9 @@ does.
 
 ### D3. The rules reach the session and the bot through a tracked copy
 
-`bun node_modules/harness/bun/sync.ts` writes `core/rules.md` and `core/docs/*`
-flat into a tracked `harness/` directory at d2ass's root. `CLAUDE.md` opens
+`bun node_modules/harness/bun/sync.ts` writes `core/rules.md` and the docs
+beside it in `core/`, laid out as they lie, into a tracked `harness/`
+directory at d2ass's root. `CLAUDE.md` opens
 with `@harness/rules.md` and links the docs at `harness/<doc>.md`. The
 consumer check compares the copy with the installed package byte for byte.
 
@@ -231,11 +234,11 @@ Each d2ass step pins the harness commit the step before it merged:
  5  d2ass    hook switched to the package, with the inline bootstrap
  6  d2ass    gates, CI and pre-push switched; values into package.json
  7  d2ass    the skill links' contract
- 8  harness  core/rules.md, core/docs, sync.ts, the harness's own CLAUDE.md
+ 8  harness  core/rules.md and the docs beside it, sync.ts, the harness's own CLAUDE.md
  9  d2ass    harness/ copy, CLAUDE.md reduced, docs removed
 10  d2ass    .coderabbit.yaml reads the copy; no second checkout
 11  harness  openspec/ with the moved specs and changes
-12  d2ass    moved changes deleted, card moved, memory routed
+12  d2ass    moved changes deleted, card moved
 ```
 
 The d2ass steps are cut at one to three criteria each, which is why the
@@ -276,6 +279,4 @@ cross 800.
 The twelve steps in D11, each a pull request. A d2ass step depends only on harness
 commits already merged, so any step can be reverted alone. Reverting a d2ass
 step restores its files from `main` and keeps the older pin. Reverting a
-harness step is invisible to d2ass until d2ass bumps the pin. Memory routing
-happens outside both repositories and is reversible from the files it reads,
-which step 9 deletes only after the new homes are written.
+harness step is invisible to d2ass until d2ass bumps the pin.

@@ -192,23 +192,19 @@ Closes none — infrastructure in another repository.
       text.
 - [ ] 8.2 Copy `verification`, `git-and-prs`, `review-toolkit`,
       `feature-workflow`, `rulebook-growth`, `code-style` and `api-design` to
-      `core/docs/` verbatim, and the non-d2ass part of `testing` by D8. Verify
+      `core/`, beside `core/rules.md`, verbatim, and the non-d2ass part of
+      `testing` by D8. Verify
       with `git diff --no-index` against d2ass's copies, which must show only
       the `testing.md` cut.
-- [ ] 8.3 Add the four process rules routed from memory
-      (`fix-where-ci-caught-it`, `read-the-artefact-a-design-describes`,
-      `non-interactive-path-first`, `notion-500-reconnect`) to `core/rules.md`
-      or the doc whose subject each is. Each must meet the rule quality bar.
-      Verify by reading each against the bar in the PR description.
-- [ ] 8.4 Add `bun/sync.ts`, which writes `core/rules.md` and `core/docs/*`
-      flat into a consumer's `harness/`, and its check in `check.ts`. Tests:
+- [ ] 8.3 Add `bun/sync.ts`, which writes `core/rules.md` and the docs beside
+      it in `core/` into a consumer's `harness/`, and its check in `check.ts`. Tests:
       ZOMBIES 14 (identical passes), 15 (three diffs all named), 16
       (missing from the copy), 17 (extra in the copy), 18 (one-byte
       difference). Verify with `bun test bun/sync`.
-- [ ] 8.5 Add the harness's own `CLAUDE.md`, importing `core/rules.md`, and
+- [ ] 8.4 Add the harness's own `CLAUDE.md`, importing `core/rules.md`, and
       verify that a session opened in the harness repository reads the rules
       (ask it to quote the first Process rule).
-- [ ] 8.6 Make the guard's two "HEAD is on main" refusals say that every
+- [ ] 8.5 Make the guard's two "HEAD is on main" refusals say that every
       directory the line may run in is checked, so a `cd` into a feature
       checkout from one on `main` is refused too, and name `git -C <path>` as
       the spelling that commits or pushes there. Verify with a case in
@@ -226,7 +222,7 @@ Closes `harness-consumption/a-copy-in-step-with-the-pin`,
 - [ ] 9.2 Reduce `CLAUDE.md` to d2ass's own: the overview, the `Code` rules
       that stay, and `@harness/rules.md` with links to `harness/<doc>.md`.
       Delete the moved docs from `docs/`, and keep a d2ass `docs/testing.md`
-      holding the database suites and the e2e mechanics routed from memory.
+      holding the database suites and the e2e mechanics.
       Verify that `git grep -n "docs/\(verification\|git-and-prs\|review-toolkit\|feature-workflow\|rulebook-growth\|code-style\|api-design\)\.md"`
       finds nothing outside the archive, `docs/context/` and the moving
       changes.
@@ -268,7 +264,7 @@ Closes none — infrastructure in another repository.
 
 ## 12. Hand over (d2ass)
 
-Closes none — removals, board and memory.
+Closes none — removals and board.
 
 - [ ] 12.1 Delete the seven moved change directories. Verify that
       `openspec list` no longer shows them and that
@@ -280,13 +276,7 @@ Closes none — removals, board and memory.
       the REMOVED deltas level through `/opsx:update`, so that a change
       applied in the meantime strands nothing. Verify with
       `openspec validate extract-harness`.
-- [ ] 12.4 Route memory per `proposal.md` §Impact: write
-      `~/.claude/CLAUDE.md` from the nine conversation lessons, and delete
-      the nine, the four now in harness rules and the six already stated.
-      Leave `d2ass-vps-access`, and remove the e2e lesson once 9.2 holds it.
-      Rewrite `MEMORY.md` to match. Verify that every deleted file's lesson
-      can be found by grep in its new home.
-- [ ] 12.5 Run the archive's sync preview and confirm that the ten
+- [ ] 12.4 Run the archive's sync preview and confirm that the ten
       capabilities retire cleanly (`design.md` Risks, stray prose). Verify
       that the preview reports no `content the merge cannot name`. The
       archive commit lowers `harness.uncitedFloor` by the uncited criteria
