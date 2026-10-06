@@ -192,11 +192,12 @@ describe("the pre-push gates", () => {
 		["biome", "bun run lint"],
 		["the YAML syntax check", "bun run lint:yaml"],
 		["the suppression scan", "bun run lint:suppressions"],
+		["the harness checks", "bun run harness:check"],
 		["the type check", "bun run typecheck"],
 		["the suite", "bun test"],
 		["Stryker", "bunx --no-install stryker run"],
-		["the mutation floor", "bun scripts/mutation-floor.ts"],
-		["the diff budget", "scripts/diff-budget.sh"],
+		["the mutation floor", "bun node_modules/harness/bun/mutation-floor.ts"],
+		["the diff budget", "node_modules/harness/bun/diff-budget.sh"],
 		["the secret scan over what it pushes", 'gitleaks git . --log-opts="'],
 	])("the hook runs %s", (_label, command) => {
 		// Membership, which no behavioural case above covers: each of those

@@ -53,10 +53,14 @@ jobs:
       - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
         with:
           bun-version: 1.4.2
-      # check-yaml.ts only imports the "bun" builtin — no install needed.
+      # The script ships in the harness package, so it is installed first.
+      - run: bun install --frozen-lockfile
       - run: bun run lint:yaml
 
-  suppressions:
+  # Every check the harness owes this repository — the suppression scan, the
+  # root layout, file sizes, citations and their floor, the pin, the skill
+  # links, the workflows and the agent settings — from the pinned package.
+  harness:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -65,9 +69,8 @@ jobs:
       - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
         with:
           bun-version: 1.4.2
-      # no-suppressions.ts imports node builtins and reads git — no install
-      # needed.
-      - run: bun run lint:suppressions
+      - run: bun install --frozen-lockfile
+      - run: bun run harness:check
 
   actionlint:
     runs-on: ubuntu-latest

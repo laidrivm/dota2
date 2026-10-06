@@ -33,4 +33,4 @@ jobs:
       # Three commands, not one: a crashed Stryker fails the job through the
       # shell, so the check never has to tell that apart from an exceeded floor.
       - run: bunx --no-install stryker run
-      - run: bun scripts/mutation-floor.ts
+      - run: bun node_modules/harness/bun/mutation-floor.ts
