@@ -239,13 +239,13 @@ Closes `review-bot-config/a-harness-rule-arrives-with-a-pin-bump`,
 `review-bot-config/a-harness-rule-violated`,
 `harness-consumption/a-second-checkout`.
 
-- [ ] 10.1 Add `harness/*.md` to `knowledge_base.code_guidelines.filePatterns`
+- [x] 10.1 Add `harness/*.md` to `knowledge_base.code_guidelines.filePatterns`
       with its reason beside it, and widen the rules-list instruction to the
       harness rules. Add cases to `checks/coderabbit-config.test.ts` citing
       both criteria: ZOMBIES 34 (`harness/*.md` present), 33
       (`harness/**/*.md` absent). Verify with
       `bun test checks/coderabbit-config`.
-- [ ] 10.2 Add a case to `checks/harness-consumption.test.ts` citing
+- [x] 10.2 Add a case to `checks/harness-consumption.test.ts` citing
       `a-second-checkout`. It runs the package's workflow check on a
       fabricated workflow that checks out `laidrivm/harness` and asserts the
       failure names it. Verify with `bun test checks/harness-consumption`.
