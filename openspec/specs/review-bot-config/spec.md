@@ -168,7 +168,7 @@ states the old thing produced findings on three consecutive pull requests, and
 widening the prose rule that forbids it did not stop the fourth.
 
 No local skill reads a delta spec, and a proposal opens as its own pull request
-here, so this is the one review that happens where `docs/feature-workflow.md`
+here, so this is the one review that happens where `harness/feature-workflow.md`
 says a fix is still cheap.
 
 #### Scenario: A criterion written with an adjective
