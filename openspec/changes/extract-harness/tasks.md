@@ -290,7 +290,7 @@ Closes none — removals and board.
       `hero-reference`, and the existing `review-bot-config` delta, name
       `harness/<doc>.md` where they name a moved `docs/<doc>.md`. Verify with
       `openspec validate extract-harness`.
-- [ ] 12.4 Run the archive's sync preview and confirm that the ten
+- [x] 12.4 Run the archive's sync preview and confirm that the ten
       capabilities retire cleanly (`design.md` Risks, stray prose). Verify
       that the preview reports no `content the merge cannot name`. The
       archive commit lowers `harness.uncitedFloor` by the uncited criteria
