@@ -216,21 +216,21 @@ Closes `harness-consumption/a-copy-in-step-with-the-pin`,
 `harness-consumption/a-copy-edited-by-hand`,
 `harness-consumption/a-pin-bumped-without-refreshing-the-copy`.
 
-- [ ] 9.1 Bump the pin to step 8's merge commit, run
+- [x] 9.1 Bump the pin to step 8's merge commit, run
       `bun node_modules/harness/bun/sync.ts`, and commit `harness/`. Verify
       that `bun run harness:check` passes.
-- [ ] 9.2 Reduce `CLAUDE.md` to d2ass's own: the overview, the `Code` rules
+- [x] 9.2 Reduce `CLAUDE.md` to d2ass's own: the overview, the `Code` rules
       that stay, and `@harness/rules.md` with links to `harness/<doc>.md`.
       Delete the moved docs from `docs/`, and keep a d2ass `docs/testing.md`
       holding the database suites and the e2e mechanics.
       Verify that `git grep -n "docs/\(verification\|git-and-prs\|review-toolkit\|feature-workflow\|rulebook-growth\|code-style\|api-design\)\.md"`
       finds nothing outside the archive, `docs/context/` and the moving
       changes.
-- [ ] 9.3 Add cases to `checks/harness-consumption.test.ts` citing the three
+- [x] 9.3 Add cases to `checks/harness-consumption.test.ts` citing the three
       criteria, run over a fabricated consumer: the copy as synced, a copy
       with one edited byte, and a pin bumped with the copy left stale.
       Verify with `bun test checks/harness-consumption`.
-- [ ] 9.4 Update the README ownership map and §*Where files live* for
+- [x] 9.4 Update the README ownership map and §*Where files live* for
       `harness/`, and verify with `bun test checks/readme`.
 
 ## 10. Review and CI config point at the package (d2ass)
