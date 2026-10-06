@@ -41,11 +41,6 @@ none of them, and a commit hash typed into a table stands in for a pin.
   The archive stays as the record of what was decided here.
 - The `Harness` board's cards point into the harness repository once it holds
   their changes.
-- Session memory is redistributed (outside this repository, listed under
-  Impact): lessons about working with the user go to the user-level
-  `~/.claude/CLAUDE.md`, process lessons become harness rules, lessons a rule
-  already states are deleted, and the one d2ass mechanic worth keeping goes to
-  `docs/testing.md`.
 - Strictness stays as it is in d2ass, and it is the same for every consumer.
   No gate gains an option to be switched off.
 
@@ -107,17 +102,6 @@ none of them, and a commit hash typed into a table stands in for a pin.
   `.claude/skills/` (tracked links in place of ignored ones), `.github/workflows/`,
   `README.md`, `.coderabbit.yaml` (where its guidelines are read from).
 - **Boards:** `Harness` cards re-pointed; one card moved to `D2ASS`.
-- **Outside any repository:** `~/.claude/CLAUDE.md` created, and the d2ass
-  memory directory pruned to what is routed nowhere else. The routing:
-
-  | Memory | Goes to |
-  |---|---|
-  | `user-language-and-style`, `a-count-is-not-a-report`, `an-accepted-risk-is-named-once`, `ask-where-a-visualisation-lands`, `defect-first-then-the-map`, `explain-the-mechanic-inside-the-question`, `paste-safe-commands`, `agent-spawning-probes-go-to-the-user`, `mcp-server-needs-a-new-session` | `~/.claude/CLAUDE.md` |
-  | `fix-where-ci-caught-it`, `read-the-artefact-a-design-describes`, `non-interactive-path-first`, `notion-500-reconnect` | harness rules |
-  | `commit-trailer-overrides-harness`, `announced-gates-are-obligations`, `a-skill-report-is-mine-to-process`, `review-finding-approval-direction`, `new-rules-bind-my-own-artefacts`, `skills-list-is-not-the-roster` | deleted, a moved doc or rule already states each |
-  | `d2ass-e2e-probe-mechanics` | `docs/testing.md` §E2E |
-  | `d2ass-vps-access` | stays in memory: it names a host this public tree must not |
-
 - **Dependencies:** one added, the harness itself, from GitHub at a commit.
 - **Runtime:** nothing the app serves changes.
 - **Card:** `Harness`.
