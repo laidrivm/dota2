@@ -222,7 +222,7 @@ Closes `harness-consumption/a-copy-in-step-with-the-pin`,
 - [x] 9.2 Reduce `CLAUDE.md` to d2ass's own: the overview, the `Code` rules
       that stay, and `@harness/rules.md` with links to `harness/<doc>.md`.
       Delete the moved docs from `docs/`, and keep a d2ass `docs/testing.md`
-      holding the database suites and the e2e mechanics.
+      holding the mutation floor and the e2e mechanics.
       Verify that `git grep -n "docs/\(verification\|git-and-prs\|review-toolkit\|feature-workflow\|rulebook-growth\|code-style\|api-design\)\.md"`
       finds nothing outside the archive, `docs/context/` and the moving
       changes.

@@ -189,7 +189,7 @@ product. Everything else moves. Applied to `CLAUDE.md`'s `Code` list, these
 stay: the reducer side effect, the first enabled candidate, focus restore, the
 document-listener ref, `Math.fround` and the sentinel ranges. The scanner,
 test-hook, `fileURLToPath` and prose-wrap rules move. `docs/testing.md` splits
-the same way. Its d2ass parts (the database suites, the e2e mechanics) stay in
+the same way. Its d2ass parts (the mutation floor, the e2e mechanics) stay in
 a d2ass `docs/testing.md`, and the rest moves.
 
 Where a moved doc illustrates with a d2ass example (*Proposal 2b shipped a
