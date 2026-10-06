@@ -254,13 +254,14 @@ Closes `review-bot-config/a-harness-rule-arrives-with-a-pin-bump`,
 
 Closes none — infrastructure in another repository.
 
-- [ ] 11.1 Run `openspec init` in the harness. Copy the ten moving
-      capabilities, `mutation-floor`'s moving requirements, and the seven
-      moving changes verbatim. Verify with
-      `openspec validate --all` there.
+- [ ] 11.1 Run `openspec init` in the harness. Copy nine of the ten moving
+      capabilities — `skill-provenance` is not re-created, per `proposal.md`
+      — `mutation-floor`'s moving requirements, and the seven moving changes
+      verbatim. Verify with `openspec validate --all` there.
 - [ ] 11.2 Point the moved tests' `// spec:` citations at the harness's specs,
       and verify that the harness's `spec-coverage` reports a floor no higher
-      than d2ass's share of it before the move.
+      than d2ass's share of it before the move, plus only the criteria a
+      consumer's tree alone can meet, each named in the PR.
 
 ## 12. Hand over (d2ass)
 
@@ -274,10 +275,15 @@ Closes none — removals and board.
       it through each board's `Board view`.
 - [ ] 12.3 Re-read every moving capability's live requirement list and bring
       the REMOVED deltas level through `/opsx:update`, so that a change
-      applied in the meantime strands nothing. Verify with
+      applied in the meantime strands nothing. Bring the staying
+      capabilities level with the docs that moved too: a MODIFIED delta for
+      `hero-reference`, and the existing `review-bot-config` delta, name
+      `harness/<doc>.md` where they name a moved `docs/<doc>.md`. Verify with
       `openspec validate extract-harness`.
 - [ ] 12.4 Run the archive's sync preview and confirm that the ten
       capabilities retire cleanly (`design.md` Risks, stray prose). Verify
       that the preview reports no `content the merge cannot name`. The
       archive commit lowers `harness.uncitedFloor` by the uncited criteria
-      the REMOVED deltas take with them, re-measured in that commit.
+      the REMOVED deltas take with them, re-measured in that commit, and
+      drops every d2ass test's citation of a criterion they take away — the
+      tests stay as checks of this tree.
