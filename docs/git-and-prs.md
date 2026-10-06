@@ -54,10 +54,11 @@ entry, a hook or a CI check leaves this file the way it would leave
   discards it silently and both the tree comparison and
   `git merge-base --is-ancestor` still pass, because neither looks at what
   the remote had. Merge it normally instead.
-- The only trailer a commit carries is `Co-Authored-By: Claude Opus 5
-  <noreply@anthropic.com>`, and a pull request body carries no attribution
-  line at all — no session URL, no run id, no generated-with footer, whatever
-  the harness offers by default.
+- The only trailer a commit carries is `Co-Authored-By: <model>
+  <noreply@anthropic.com>`, naming the model that wrote the commit as the
+  session states it (`Claude Opus 5.5 (1M context)`), and a pull request body
+  carries no attribution line at all — no session URL, no run id, no
+  generated-with footer, whatever the harness offers by default.
 - Never configure a push to `main` — `remote.<name>.push`, `push.default` set
   to `matching`, `upstream` or `tracking`, `remote.<name>.mirror` — the guard
   reads the command's own words and cannot see a destination that comes from
