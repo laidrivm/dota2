@@ -9,15 +9,25 @@ names as here. Each d2ass step names the criteria it closes by their
 change's criteria: its tests cite the harness's own specs once step 11 has
 put them there.
 
-The `MODIFIED` deltas carry these five criteria, which this change does not
-close. Their wording is unchanged and the tests on `main` that close them
-stay:
+The `MODIFIED` deltas carry these fifteen criteria, which this change does
+not close. Their wording is unchanged — the two requirements 12.3 adds change
+a doc's path and nothing else — and the tests on `main` that close them stay:
 
   `review-bot-config/a-context-save-point-exists`
   `review-bot-config/an-indexed-doc-is-added`
   `review-bot-config/a-defect-an-existing-rule-covers`
   `review-bot-config/a-rule-violated-outside-typescript`
   `review-bot-config/a-defect-no-rule-covers`
+  `review-bot-config/a-criterion-written-with-an-adjective`
+  `review-bot-config/a-criterion-no-task-closes`
+  `review-bot-config/a-proposal-without-non-goals`
+  `review-bot-config/a-spec-corrected-without-its-proposal`
+  `review-bot-config/a-count-that-disagrees-between-artefacts`
+  `review-bot-config/an-archived-change`
+  `hero-reference/a-mirrored-image`
+  `hero-reference/a-name-the-mirror-does-not-hold`
+  `hero-reference/a-path-that-climbs-out`
+  `hero-reference/a-file-written-after-the-server-started`
 
 ZOMBIES items are numbered as in the proposal-stage report (34 items). Each
 task that writes one names its number.
@@ -267,13 +277,13 @@ Closes none — infrastructure in another repository.
 
 Closes none — removals and board.
 
-- [ ] 12.1 Delete the seven moved change directories. Verify that
+- [x] 12.1 Delete the seven moved change directories. Verify that
       `openspec list` no longer shows them and that
       `bun node_modules/harness/bun/board-state.ts` reports no
       dangling `after:`.
-- [ ] 12.2 Move `glob-row-example`'s card from `Harness` to `D2ASS` and verify
+- [x] 12.2 Move `glob-row-example`'s card from `Harness` to `D2ASS` and verify
       it through each board's `Board view`.
-- [ ] 12.3 Re-read every moving capability's live requirement list and bring
+- [x] 12.3 Re-read every moving capability's live requirement list and bring
       the REMOVED deltas level through `/opsx:update`, so that a change
       applied in the meantime strands nothing. Bring the staying
       capabilities level with the docs that moved too: a MODIFIED delta for

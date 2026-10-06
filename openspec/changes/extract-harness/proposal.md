@@ -60,7 +60,11 @@ none of them, and a commit hash typed into a table stands in for a pin.
 - `mutation-floor`: the floor check and the exemption form move to the
   harness. What d2ass mutates stays here.
 - `review-bot-config`: the bot reads the harness rules from their tracked copy
-  and quotes them as it quotes `CLAUDE.md`'s.
+  and quotes them as it quotes `CLAUDE.md`'s, and the specification review
+  names `harness/feature-workflow.md` where it named the doc under `docs/`.
+- `hero-reference`: the image-serving requirement names
+  `harness/api-design.md` where it named the doc under `docs/`, and nothing
+  else in it changes.
 - Moved whole to the harness, every requirement removed here:
   `agent-permissions`, `agent-rulebook`, `change-slicing`, `commit-gates`,
   `context-budget`, `local-review-loop`, `repo-layout`, `skill-provenance`,

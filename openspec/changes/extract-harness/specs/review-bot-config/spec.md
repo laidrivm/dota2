@@ -63,3 +63,55 @@ every rule violation in a config, a workflow or a document from being named.
 
 - **WHEN** a defect matches no rule and its shape could recur
 - **THEN** the bot says so, so the loop can decide whether it becomes a rule
+
+### Requirement: The specification itself is reviewed
+
+`.coderabbit.yaml` SHALL carry a `path_instructions` entry for
+`openspec/changes/**` telling the bot to check a change's artefacts against
+this project's own authoring rules in `openspec/config.yaml`: acceptance
+criteria in EARS form, measurable values rather than adjectives, a Non-goals
+section present, and every criterion cited by at least one task.
+
+The same entry SHALL tell the bot to check the change's artefacts **against
+each other** — a statement in `proposal.md`, `design.md`, `tasks.md` and the
+delta specs that contradicts its siblings is a finding. This is the half no
+rule holds: a delta spec corrected by a review finding while its proposal still
+states the old thing produced findings on three consecutive pull requests, and
+widening the prose rule that forbids it did not stop the fourth.
+
+No local skill reads a delta spec, and a proposal opens as its own pull request
+here, so this is the one review that happens where `harness/feature-workflow.md`
+says a fix is still cheap.
+
+#### Scenario: A criterion written with an adjective
+
+- **WHEN** a delta spec says a response is "fast" or a file "reasonably small"
+- **THEN** the bot flags it and names the missing measurable value
+
+#### Scenario: A criterion no task closes
+
+- **WHEN** a requirement's scenario is cited by no line of `tasks.md`
+- **THEN** the bot flags it
+
+#### Scenario: A proposal without Non-goals
+
+- **WHEN** `proposal.md` carries no Non-goals section
+- **THEN** the bot flags it
+
+#### Scenario: A spec corrected without its proposal
+
+- **WHEN** a delta spec is changed and `proposal.md` still describes the
+  previous behaviour
+- **THEN** the bot flags the contradiction and names both sites
+
+#### Scenario: A count that disagrees between artefacts
+
+- **WHEN** `proposal.md` says a change adds four entries and `tasks.md` adds
+  three
+- **THEN** the bot flags it
+
+#### Scenario: An archived change
+
+- **WHEN** the diff touches `openspec/changes/archive/**`
+- **THEN** the bot says nothing, because `path_filters` excludes settled
+  history from review
