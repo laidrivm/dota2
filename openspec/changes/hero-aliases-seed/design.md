@@ -76,7 +76,7 @@ that for free — but whether bun's `.simple()` sends the file as one Query
 message or splits it is a property of the driver, and a delete that commits
 before a failing insert empties the table for every consumer. An explicit
 transaction costs one wrapper and rests on nothing unverified, which is the
-trade `docs/verification.md` settles. Which API expresses it — `sql.begin`
+trade `harness/verification.md` settles. Which API expresses it — `sql.begin`
 or a `BEGIN`/`COMMIT` the file carries — is an apply-time choice; the
 requirement is only that the delete and the insert commit together.
 
@@ -100,7 +100,7 @@ field it has to inspect.
 outside this repository reads the bundle, and the export and the client ship
 together, so the narrowing costs a fixture regeneration and nothing else.
 
-The exact response shape, which `docs/feature-workflow.md` asks a design to
+The exact response shape, which `harness/feature-workflow.md` asks a design to
 fix for any endpoint it changes — the hero entry of `/snapshot.json`, with
 only the two keys this change touches spelled out:
 
@@ -115,7 +115,7 @@ only the two keys this change touches spelled out:
 
 Both keys are always present and both are arrays of strings; a hero with no
 alias of a kind carries `[]`, never `null` and never a missing key, which is
-`docs/api-design.md`'s "every contract key is always present" applied to an
+`harness/api-design.md`'s "every contract key is always present" applied to an
 array. No other key of the entry changes.
 
 ### Ranking is a bucket, not a score

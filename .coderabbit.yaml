@@ -79,8 +79,9 @@ reviews:
     # prose over every function would reinstate it by another route.
     - path: "**/*.{ts,tsx}"
       instructions: |
-        Apply the rules from /docs/api-design.md, /docs/testing.md, and the
-        "Accessibility" section of /docs/code-style.md. Flag violations of those
+        Apply the rules from /harness/api-design.md, /harness/testing.md,
+        /docs/testing.md, and the "Accessibility" section of
+        /harness/code-style.md. Flag violations of those
         rules explicitly, quoting the rule. Do not restate general style
         opinions the linters already cover.
 

@@ -77,4 +77,4 @@ Closes `draft-model/the-threshold-does-not-reach-enemy-role-inference`,
       it is the one observation a reader can check against the complaint.
 - [ ] 2.6 Move the change's card on its board to the status this step
       reaches, in the same turn rather than afterwards.
-- [ ] 2.7 Run the pre-PR sequence per `docs/review-toolkit.md` on both steps.
+- [ ] 2.7 Run the pre-PR sequence per `harness/review-toolkit.md` on both steps.

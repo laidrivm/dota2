@@ -139,6 +139,6 @@ Closes `snapshot-ingest/a-scorer-that-fails`.
       merely due.
 - [ ] 5.6 Move the change's card on its board to the status this step
       reaches, in the same turn rather than afterwards.
-- [ ] 5.7 Run the pre-PR sequence per `docs/review-toolkit.md` on every step.
+- [ ] 5.7 Run the pre-PR sequence per `harness/review-toolkit.md` on every step.
       Steps 3 to 5 touch the database, so each one's suite must assert it ran
       rather than skipping, and `bun run test:db` is the run that counts.

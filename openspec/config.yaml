@@ -40,7 +40,7 @@ rules:
       count of them is not what makes a change reviewable
   design:
     - For every endpoint, fix the exact response shape per
-      /docs/api-design.md
+      /harness/api-design.md
   tasks:
     - Include a test task derived from /zombies output
     - A step's `Closes` line, under its heading, cites the acceptance

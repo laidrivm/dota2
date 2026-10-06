@@ -60,7 +60,7 @@ describe.skipIf(url === undefined)("what a rendered bundle looks like", () => {
 		// The instant itself, not a pattern it fits: a shape test passes for
 		// `9999-99-99` and for a timestamp an hour out, and what has to be true
 		// is that this is the build instant, carrying an offset as
-		// `docs/api-design.md` says a timestamp does.
+		// `harness/api-design.md` says a timestamp does.
 		expect(bundle.createdAt).toBe(BUILT_AT.toISOString());
 		// The bare calendar date, which is what the shipped contract holds, and
 		// the date on the UTC timeline: `build.fixture.ts` seeds this patch at

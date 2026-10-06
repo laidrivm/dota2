@@ -269,7 +269,7 @@ Closes `outcome-calibration/the-first-run-with-nothing-published-before`,
       these is evidence about the sample rather than about the code.
 - [ ] 6.6 Move the change's card on its board to the status this step
       reaches, in the same turn rather than afterwards.
-- [ ] 6.7 Run the pre-PR sequence per `docs/review-toolkit.md` on every step,
+- [ ] 6.7 Run the pre-PR sequence per `harness/review-toolkit.md` on every step,
       and `bun test` and `bun run test:db` besides. Steps 3 to 6 touch the
       database, and CI runs only the first
       (`.github/workflows/test.yml:110`).

@@ -27,7 +27,7 @@ Closes: *Every path the map names is real and shipped*
       in it mentions `tasks/*.md` or `docs/research/*`: the scenario is read
       by people and resolved by nothing, which is what makes this a wording
       change
-- [ ] 1.5 Run the pre-PR sequence per `docs/review-toolkit.md`. A branch of
+- [ ] 1.5 Run the pre-PR sequence per `harness/review-toolkit.md`. A branch of
       documentation and specs takes the short one: `bun run diff-budget`,
       `/triage`, the grep for every site restating what changes, then one pass
       of `/coderabbit-local`

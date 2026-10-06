@@ -139,7 +139,7 @@ the observation, and that is stated here rather than discovered later.
       2026-07-30, against the `7.41` of 2026-03-24 it reports today.
 - [ ] 4.7 Move the change's card on its board to the status this step
       reaches, in the same turn rather than afterwards.
-- [ ] 4.8 Run the pre-PR sequence per `docs/review-toolkit.md` on every step.
+- [ ] 4.8 Run the pre-PR sequence per `harness/review-toolkit.md` on every step.
       Steps 1 to 4 all touch the database, so each one's suite must assert it
       ran rather than skipping; `patches` is reclaimed by the sentinel
       `patch_id LIKE 'z9.%'`, which every constructed patch must use.

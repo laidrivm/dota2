@@ -235,7 +235,7 @@ Closes `draft-model/the-bundle-s-weights-are-the-ones-used`,
 - [ ] 6.8 Move the change's card on its board to the status this step
       reaches, in the same turn rather than afterwards.
       Closes no criterion.
-- [ ] 6.9 Run the pre-PR sequence per `docs/review-toolkit.md` on every step,
+- [ ] 6.9 Run the pre-PR sequence per `harness/review-toolkit.md` on every step,
       and `bun test` and `bun run test:db` besides. Closes no criterion.
       Steps 1 to 5 touch the database, and CI runs only `bun test`
       (`.github/workflows/test.yml:110`).

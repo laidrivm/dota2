@@ -130,7 +130,7 @@ without it.
 `design.md` and `tasks.md` are **not** absent — they follow on
 `spec/lane-synergy-model-plan`, which opens from `main` once this branch has
 merged. The four artefacts together are over the diff budget's failing
-threshold, and `docs/git-and-prs.md` fixes what happens then: the proposal
+threshold, and `harness/git-and-prs.md` fixes what happens then: the proposal
 and the delta specs on `spec/<slug>`, the design and the tasks on
 `spec/<slug>-plan`. The change directory is therefore incomplete on purpose
 until the second branch lands. The `/zombies` pass has already run over this

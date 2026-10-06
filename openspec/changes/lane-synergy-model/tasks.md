@@ -225,7 +225,7 @@ Closes `draft-model/the-two-lane-components-read-opposite-halves-of-the-board`,
 - [ ] 6.9 Move the change's card on its board to the status this step
       reaches, in the same turn rather than afterwards.
       Closes no criterion, on the terms the preamble states.
-- [ ] 6.10 Run the pre-PR sequence per `docs/review-toolkit.md` on every step,
+- [ ] 6.10 Run the pre-PR sequence per `harness/review-toolkit.md` on every step,
       and `bun test` and `bun run test:db` besides. Closes no criterion.
       Steps 1 to 4 touch the database, and CI runs only `bun test`
       (`.github/workflows/test.yml:110`) — so `test:db` skipping there is a

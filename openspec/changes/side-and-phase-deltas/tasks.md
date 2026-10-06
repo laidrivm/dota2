@@ -204,7 +204,7 @@ Closes `snapshot-build/the-mean-hero-has-no-side-preference`,
       shapes (ZOMBIES 10, 11), so `contract.ts`'s assertion publishes.
 - [ ] 5.8 Move the change's card on its board to the status this step
       reaches, in the same turn rather than afterwards.
-- [ ] 5.9 Run the pre-PR sequence per `docs/review-toolkit.md` on every
+- [ ] 5.9 Run the pre-PR sequence per `harness/review-toolkit.md` on every
       step, and `bun test` and `bun run test:db` besides. Every step here
       touches the database, and CI runs only the first
       (`.github/workflows/test.yml:110`).

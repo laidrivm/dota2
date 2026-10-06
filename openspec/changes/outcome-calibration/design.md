@@ -12,7 +12,7 @@ of which 1 512 carried ten picks with STRATZ's own per-pick rates attached.
 
 No endpoint is affected by this change. Nothing it writes is served, and
 `/snapshot.json` is rendered by the export three steps earlier and untouched
-here — so `docs/api-design.md`'s response-shape rules have nothing to bind.
+here — so `harness/api-design.md`'s response-shape rules have nothing to bind.
 
 ## Goals / Non-Goals
 

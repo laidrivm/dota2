@@ -51,7 +51,7 @@ CREATE TABLE IF NOT EXISTS patches (
 -- Snapshots (data-model §3.2) -------------------------------------------------
 
 CREATE TABLE IF NOT EXISTS snapshots (
-  -- An incremental integer rather than the UUIDv7 `docs/api-design.md`
+  -- An incremental integer rather than the UUIDv7 `harness/api-design.md`
   -- requires. It travels only inside the bundle: no endpoint accepts it and no
   -- consumer resolves it, the client reading it only to notice that the bundle
   -- changed — which is the exemption that rule states, carried here as it asks.
