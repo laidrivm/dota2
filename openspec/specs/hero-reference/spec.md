@@ -206,7 +206,7 @@ immutable`. The filename carries the hero, and the bytes under a given name
 never change, which is the same reason the font routes are cached forever.
 
 A request naming a file the mirror does not hold SHALL be answered `404` with
-an empty body. There is no error envelope to shape: `docs/api-design.md`'s
+an empty body. There is no error envelope to shape: `harness/api-design.md`'s
 RFC 9457 rule reaches a response that carries a body, and this one carries
 none.
 

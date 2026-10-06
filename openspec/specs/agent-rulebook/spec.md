@@ -83,7 +83,7 @@ and is not a home a prohibition can be stated from.
 
 ### Requirement: The pre-PR sequence has one home
 
-`docs/review-toolkit.md` SHALL be the only place stating the pre-PR gate
+`harness/review-toolkit.md` SHALL be the only place stating the pre-PR gate
 sequence. Other documents MAY reference the sequence by name and link, which
 is not a restatement.
 
@@ -96,7 +96,7 @@ is not a restatement.
 
 #### Scenario: A reference is kept
 
-- **WHEN** `docs/feature-workflow.md` Stage 3 says to run the sequence the
+- **WHEN** `harness/feature-workflow.md` Stage 3 says to run the sequence the
   Review toolkit sets out
 - **THEN** it stays, because it names the owner instead of repeating the list
 

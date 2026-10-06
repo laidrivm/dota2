@@ -605,7 +605,7 @@ archived first.
 
 ### Requirement: The boards are named where a session chooses its next task
 
-`docs/feature-workflow.md` SHALL name the three boards, the work each one
+`harness/feature-workflow.md` SHALL name the three boards, the work each one
 takes, and the saved view a session reads them through, each by its name. It
 SHALL carry no board URL, view URL or Notion identifier, because this
 repository is public and the boards are not. No file read at every session
@@ -613,7 +613,7 @@ start SHALL be needed to find a board.
 
 #### Scenario: The workflow doc names the boards by name alone
 
-- **WHEN** the check reads `docs/feature-workflow.md`
+- **WHEN** the check reads `harness/feature-workflow.md`
 - **THEN** it finds `D2ASS`, `Harness`, `mellon` and `Board view`, and fails
   naming whichever is missing
 - **AND** it fails on a Notion URL, a `collection://`, `view://` or
