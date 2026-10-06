@@ -52,21 +52,22 @@ single-source rule this file inherits.
   a criterion and its citation join the count together at archive.
 - One comment carries any number of identifiers, whitespace-separated or one
   per continuation line, and several tests may cite one criterion.
-- A citation naming no criterion fails `scripts/spec-coverage.test.ts`, and so
-  does one whose slug two scenario headings share — rename a heading rather
-  than guess.
+- A citation naming no criterion fails `bun run harness:check`, and so does
+  one whose slug two scenario headings share — rename a heading rather than
+  guess.
 - Existing tests stay uncited: the count of uncited criteria sits on a floor in
-  that file, and the floor moves only on a line carrying the reason it moved,
-  in either direction.
+  `package.json`'s `harness.uncitedFloor`, and the floor moves only with a
+  `why` carrying the reason it moved, in either direction.
 
 ## The mutation floor
 
-- `scripts/mutation-floor.ts` counts the mutants surviving in `src/model.ts` —
-  those Stryker reports as `Survived` or `NoCoverage` — and compares that count
-  against a floor declared in its own source. A count above the floor fails, and
-  so does one below it: the floor is a measurement, not an upper bound.
-- The floor's line carries a trailing comment giving the reason it holds that
-  value, whichever direction it last moved. A floor with no reason fails.
+- The harness's `mutation-floor.ts` counts the mutants surviving in
+  `src/model.ts` — those Stryker reports as `Survived` or `NoCoverage` — and
+  compares that count against `package.json`'s `harness.mutationFloor`. A count
+  above the floor fails, and so does one below it: the floor is a measurement,
+  not an upper bound.
+- The floor carries a `why` giving the reason it holds that value, whichever
+  direction it last moved. A floor with no reason fails.
 - An equivalent mutant — one no test could kill, because it does not change
   behaviour — is admitted at the line it occupies, with
   `// Stryker disable next-line <Mutator>[,<Mutator>…]: <reason>`. It then
