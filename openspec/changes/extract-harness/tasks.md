@@ -184,27 +184,27 @@ Closes `harness-consumption/a-link-into-the-package`,
 
 Closes none — infrastructure in another repository.
 
-- [ ] 8.1 Write `core/rules.md` from d2ass's `CLAUDE.md` by the partition rule
+- [x] 8.1 Write `core/rules.md` from d2ass's `CLAUDE.md` by the partition rule
       (D8): the loop, the quality bar, maintenance, Process, Safety, and the
       `Code` rules that move. Verify that every rule line of the d2ass
       `CLAUDE.md` at the pinned commit appears exactly once across
       `core/rules.md` and the step 9 `CLAUDE.md`, compared by normalised
       text.
-- [ ] 8.2 Copy `verification`, `git-and-prs`, `review-toolkit`,
+- [x] 8.2 Copy `verification`, `git-and-prs`, `review-toolkit`,
       `feature-workflow`, `rulebook-growth`, `code-style` and `api-design` to
       `core/`, beside `core/rules.md`, verbatim, and the non-d2ass part of
       `testing` by D8. Verify
       with `git diff --no-index` against d2ass's copies, which must show only
       the `testing.md` cut.
-- [ ] 8.3 Add `bun/sync.ts`, which writes `core/rules.md` and the docs beside
+- [x] 8.3 Add `bun/sync.ts`, which writes `core/rules.md` and the docs beside
       it in `core/` into a consumer's `harness/`, and its check in `check.ts`. Tests:
       ZOMBIES 14 (identical passes), 15 (three diffs all named), 16
       (missing from the copy), 17 (extra in the copy), 18 (one-byte
       difference). Verify with `bun test bun/sync`.
-- [ ] 8.4 Add the harness's own `CLAUDE.md`, importing `core/rules.md`, and
+- [x] 8.4 Add the harness's own `CLAUDE.md`, importing `core/rules.md`, and
       verify that a session opened in the harness repository reads the rules
       (ask it to quote the first Process rule).
-- [ ] 8.5 Make the guard's two "HEAD is on main" refusals say that every
+- [x] 8.5 Make the guard's two "HEAD is on main" refusals say that every
       directory the line may run in is checked, so a `cd` into a feature
       checkout from one on `main` is refused too, and name `git -C <path>` as
       the spelling that commits or pushes there. Verify with a case in
