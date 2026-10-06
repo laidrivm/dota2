@@ -4,12 +4,13 @@
 
 What a fresh clone must be told to reach the state `CLAUDE.md` already
 assumes, and which claims `README.md` is allowed to make. It exists because
-the repo's own gates depend on files a clone does not receive — the review
-skills are symlinks into another repository, and `.claude/skills/` is
-gitignored — and because a README that describes somewhere else goes stale
-without anything here changing.
+the repo's own gates depend on files a clone does not receive until it
+installs — the review skills are tracked links into the harness package,
+which resolve only once `bun install` has placed it — and because a README
+that describes somewhere else goes stale without anything here changing.
 
 ## Requirements
+
 ### Requirement: The README states no other repository's mutable properties
 
 `README.md` SHALL NOT describe a property of another repository that can
@@ -18,22 +19,29 @@ such a repository is referenced, the README SHALL link to it instead.
 
 #### Scenario: The skills repository is referenced
 
-- **WHEN** the knowledge ownership map names the skills repository
-- **THEN** the row links to `https://github.com/laidrivm/skills`
+- **WHEN** the knowledge ownership map names the skills repository, renamed
+  `laidrivm/harness`
+- **THEN** the row links to `https://github.com/laidrivm/harness`
 - **AND** carries no claim about whether it is public or private
 
 ### Requirement: A clone is told how to obtain the review skills
 
-`README.md` SHALL name the command that links the shared skills into
-`.claude/skills/`, and SHALL state that `/ponytail-review` comes from the
-ponytail plugin rather than that repository.
+`README.md` SHALL state that the review skills arrive with `bun install`, from
+the harness package the lockfile pins, and SHALL state that `/ponytail-review`
+comes from the ponytail plugin rather than from that package. It SHALL NOT
+name a linker run from another checkout.
 
 #### Scenario: A fresh clone
 
-- **WHEN** a reader clones the repo and finds `.claude/skills/` absent
-- **THEN** the README names `./link.sh all <path-to-d2ass>`, run from the
-  skills repo root
-- **AND** says which of the five commands `CLAUDE.md` requires that supplies
+- **WHEN** a reader clones the repo and finds the links under
+  `.claude/skills/` unresolved
+- **THEN** the README names `bun install` as what resolves them
+- **AND** says which commands of the pre-PR sequence that supplies
+
+#### Scenario: The retired linker
+
+- **WHEN** `README.md` is searched for `link.sh`
+- **THEN** it SHALL NOT match
 
 ### Requirement: The ownership map covers the files that own decisions
 

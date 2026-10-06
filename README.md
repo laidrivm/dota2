@@ -443,10 +443,10 @@ Installed automatically by `bun install` (the `prepare` script runs
   file has format/lint problems. It does **not** autofix (simple-git-hooks
   can't re-stage) — run `bun run lint:fix`, re-stage, commit again.
 - **pre-push** — the CI gates that can refuse a push, about 20 seconds:
-  `openspec/specs/commit-gates/` names them and is the one place that does,
-  so this list is deliberately not repeated here. `actionlint` and
-  `gitleaks` run only if they are on `PATH`; a clone without them still
-  pushes. `bun test` keeps `--pass-with-no-tests`, now vestigial (the suite
+  the harness's `openspec/specs/commit-gates/` names them and is the one
+  place that does, so this list is deliberately not repeated here.
+  `actionlint` and `gitleaks` run only if they are on `PATH`; a clone without
+  them still pushes. `bun test` keeps `--pass-with-no-tests`, now vestigial (the suite
   is non-empty); removing it changes a gate, so it goes through the OpenSpec
   cycle rather than a drive-by edit.
 - Bypassing a hook is governed by `harness/git-and-prs.md`, not here. What this
@@ -475,7 +475,7 @@ through the Notion MCP connector. The application, its tests and its
 deployment need none of it; only the agent workflow does.
 
 - Which boards exist, what a card carries and which statuses it moves
-  through: `openspec/specs/task-board/`.
+  through: the harness's `openspec/specs/task-board/`.
 - No paid plan is assumed. A session reads a board through its saved view,
   which carries no plan quota, and never through a SQL query, which Notion
   meters outside its Business and Enterprise plans.

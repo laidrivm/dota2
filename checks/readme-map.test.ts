@@ -85,7 +85,6 @@ test("a path present but untracked does not satisfy a row", async () => {
 	}
 });
 
-// spec: repo-layout/the-ownership-map-s-paths-from-outside-the-root
 test.each(paths)("the map's `%s` is real and shipped", (path) => {
 	// A gitignored row is absent from a clone by design, so asserting it
 	// would pass here and fail there.
@@ -135,7 +134,6 @@ test("a README naming the linker is caught", () => {
 	expect(namesLinker("Run `./link.sh all <path-to-d2ass>`.")).toBe(true);
 });
 
-// spec: context-budget/a-second-file-read-every-session
 test("exactly one file is read every session, and it is CLAUDE.md", () => {
 	// Matched loosely, so a reworded or capitalised cell is still caught; an
 	// empty result fails too, since `CLAUDE.md` must name itself there.

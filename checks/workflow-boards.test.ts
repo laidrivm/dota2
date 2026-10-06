@@ -17,7 +17,6 @@ const tracked = () => {
 	return ls.stdout.toString().split("\0").filter(Boolean);
 };
 
-// spec: task-board/the-workflow-doc-names-the-boards-by-name-alone
 describe("the workflow doc names the boards by name alone", () => {
 	// One case per name, so a failure says which one went missing.
 	test.each(["D2ASS", "Harness", "mellon", "Board view"])(
@@ -53,7 +52,6 @@ describe("the workflow doc names the boards by name alone", () => {
 	});
 });
 
-// spec: task-board/the-brief-still-open
 test("no path survives under the directory the briefs left", () => {
 	expect(tracked().filter((path) => path.startsWith("tasks/"))).toEqual([]);
 });
