@@ -137,7 +137,7 @@ removes, and it is eight times too small for the scale that replaces it.
 `design.md` and `tasks.md` are **not** absent — they are on
 `spec/beta-refit-plan`, which opens from `main` once this branch has merged.
 The four artefacts together are 828 lines, over the diff budget's failing
-threshold, and `docs/git-and-prs.md` fixes what happens then: `proposal.md`
+threshold, and `harness/git-and-prs.md` fixes what happens then: `proposal.md`
 and the delta specs on `spec/<slug>`, `design.md` and `tasks.md` on
 `spec/<slug>-plan`. This change directory is therefore incomplete on purpose
 until the second branch lands, and complete when it does.

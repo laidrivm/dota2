@@ -118,7 +118,7 @@ change has to establish before it can claim to have fitted anything.
 `design.md` and `tasks.md` follow on `spec/suggestion-calibration-plan`,
 which opens from `main` once this branch has merged. The four artefacts
 together are over the diff budget's failing threshold, and
-`docs/git-and-prs.md` fixes what happens then. The change directory is
+`harness/git-and-prs.md` fixes what happens then. The change directory is
 incomplete on purpose until the second branch lands; the `/zombies` pass has
 already run, and its 38 ideas are what that `tasks.md` derives its test tasks
 from.

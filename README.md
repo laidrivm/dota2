@@ -5,14 +5,14 @@
 | File | Owns | Read |
 |------|------|------|
 | `CLAUDE.md` | agent rules, fix & capture loop; indexes `docs/` | every session |
-| `docs/code-style.md` | the ponytail ladder, dependency safety, accessibility | before adding code or a dependency |
-| `docs/api-design.md` | endpoint response contract | when an endpoint changes |
+| `harness/code-style.md` | the ponytail ladder, dependency safety, accessibility | before adding code or a dependency |
+| `harness/api-design.md` | endpoint response contract | when an endpoint changes |
 | `docs/testing.md` | what tests assert, how a test cites the criterion it closes, e2e rules | when tests change |
-| `docs/feature-workflow.md` | the four OpenSpec stages and their gates, and the boards that hold the work | on any feature, new tooling, or gate change, and when choosing the next card |
-| `docs/git-and-prs.md` | branch and commit shape, PR description, and the git mechanics that protect the history | before branching, committing or opening a PR |
-| `docs/review-toolkit.md` | which review skill to run, and the pre-PR sequence | before every PR |
-| `docs/verification.md` | what counts as evidence for a claim | before a claim or a decision rests on one |
-| `docs/rulebook-growth.md` | what a fired maintenance trigger asks for: how a rule leaves a sublist, how a section leaves an always-on file | when a rule or a section is added, promoted or deleted |
+| `harness/feature-workflow.md` | the four OpenSpec stages and their gates, and the boards that hold the work | on any feature, new tooling, or gate change, and when choosing the next card |
+| `harness/git-and-prs.md` | branch and commit shape, PR description, and the git mechanics that protect the history | before branching, committing or opening a PR |
+| `harness/review-toolkit.md` | which review skill to run, and the pre-PR sequence | before every PR |
+| `harness/verification.md` | what counts as evidence for a claim | before a claim or a decision rests on one |
+| `harness/rulebook-growth.md` | what a fired maintenance trigger asks for: how a rule leaves a sublist, how a section leaves an always-on file | when a rule or a section is added, promoted or deleted |
 | `docs/design-sync.md` | where the screen design lives, and how its swatch pages derive from the palette | when the palette or the design project is touched |
 | `docs/research/*` | dated surveys of an external source — what it offers, measured, and when it was read | before a change rests on what that source publishes |
 | `spec-inbox/` | raw product specs not yet in the repo — contents gitignored, its README tracked | when a task cites one |
@@ -447,7 +447,7 @@ Installed automatically by `bun install` (the `prepare` script runs
   pushes. `bun test` keeps `--pass-with-no-tests`, now vestigial (the suite
   is non-empty); removing it changes a gate, so it goes through the OpenSpec
   cycle rather than a drive-by edit.
-- Bypassing a hook is governed by `docs/git-and-prs.md`, not here. What this
+- Bypassing a hook is governed by `harness/git-and-prs.md`, not here. What this
   file adds is the consequence: CI re-runs everything when a PR is opened or
   updated, plus the browser suite and the coverage report, which the hook does
   not — so a bypass only delays the failure until then.

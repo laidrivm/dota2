@@ -178,7 +178,7 @@ daily ceiling is 15 000. So the cost is about three hours of wall clock, and
 `design.md` and `tasks.md` are **not** absent — they follow on
 `spec/laning-phase-model-plan`, which opens from `main` once this branch has
 merged. `proposal.md` and the four delta specs are already 536 lines, and
-`docs/git-and-prs.md` fixes what happens at the diff budget's failing
+`harness/git-and-prs.md` fixes what happens at the diff budget's failing
 threshold: the proposal and the deltas on `spec/<slug>`, the design and the
 tasks on `spec/<slug>-plan`. The change directory is therefore incomplete on
 purpose until the second branch lands. The `/zombies` pass over this change

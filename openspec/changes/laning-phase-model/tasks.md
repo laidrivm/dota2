@@ -255,7 +255,7 @@ Closes `draft-model/a-bundle-predating-the-lane-matrix`,
       takes today.
 - [ ] 10.6 Move the change's card on its board to the status this step
       reaches, in the same turn rather than afterwards.
-- [ ] 10.7 Run the pre-PR sequence per `docs/review-toolkit.md` on every step,
+- [ ] 10.7 Run the pre-PR sequence per `harness/review-toolkit.md` on every step,
       and `bun test` and `bun run test:db` besides. Steps 1 to 8 touch the
       database, and CI runs only the first
       (`.github/workflows/test.yml:110`).

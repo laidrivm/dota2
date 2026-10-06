@@ -93,7 +93,7 @@ const held = (dir: URL): Set<string> => {
  * what makes the lookup safe — a name that is not in it is answered `404`,
  * so there is no path for a request to traverse out of, encoded or otherwise.
  *
- * `404` carries no body, so `docs/api-design.md`'s RFC 9457 rule has nothing
+ * `404` carries no body, so `harness/api-design.md`'s RFC 9457 rule has nothing
  * to shape: that rule reaches a response that carries one.
  */
 const iconRoute =

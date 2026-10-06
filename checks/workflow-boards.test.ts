@@ -1,5 +1,5 @@
 /**
- * The boards the work sits on are named in `docs/feature-workflow.md`, where a
+ * The boards the work sits on are named in `harness/feature-workflow.md`, where a
  * session chooses its next task — by name, and by nothing that identifies
  * private content, since this repository is public and the boards are not.
  */
@@ -8,7 +8,7 @@ import { root } from "./root.ts";
 
 // Read inside each case, never in the describe body: a throw while the block
 // is collected removes its cases and reports the smaller count as a pass.
-const doc = () => Bun.file(`${root}/docs/feature-workflow.md`).text();
+const doc = () => Bun.file(`${root}/harness/feature-workflow.md`).text();
 
 /** The tracked paths of this repository, named from its root. */
 const tracked = () => {

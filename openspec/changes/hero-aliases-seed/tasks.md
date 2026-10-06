@@ -178,4 +178,4 @@ revalidation does not reach localStorage.
 - [ ] 5.5 Add the e2e bullet (ZOMBIES 26) to the body of the `The e2e
       backlog` card on `D2ASS`, which is where that backlog lives now: a
       player opens the picker, types `wk`, and Wraith King is selectable.
-- [ ] 5.6 Run the pre-PR sequence per `docs/review-toolkit.md` on every step.
+- [ ] 5.6 Run the pre-PR sequence per `harness/review-toolkit.md` on every step.
