@@ -161,3 +161,53 @@ was stated with nothing checking it.
 grep after step 1's map found five sites the step had made false — `CLAUDE.md`,
 the `PLAN.md` map row, `docs/feature-workflow.md`, `spec-inbox/README.md` and
 `letter-patch-detection` 1.7 — which the task list had filed under step 2.
+
+## 2026-10-07 — feat/extract-harness-4 … chore/archive-extract-harness
+
+- coderabbit (harness#3, round 1): PASS — 7 findings, 6 acted on (5 fixed, 1
+  rejected: CRLF already stripped by the regex), 1 skipped to `scan-lift`
+- coderabbit (harness#3, round 2): PASS — 3 findings, 3 acted on (the subshell
+  `cd` Major decided by the user: check every directory a line may run in)
+- zombies (feat/extract-harness-5): PASS — 0 gaps
+- warm (feat/extract-harness-5): PASS — 1 dependency vetted, 0 findings
+- triage (feat/extract-harness-5): PASS — 4 groups, 1 high-risk read, 0 findings
+- coderabbit-local (feat/extract-harness-5): PASS — 0 findings
+- coderabbit-local (chore/co-author-model): PASS — 0 findings
+- zombies (feat/extract-harness-6): PASS — 0 gaps
+- warm (feat/extract-harness-6): PASS — no dependency changed
+- triage (feat/extract-harness-6): PASS — 5 groups, 0 high-risk, 3 Medium read
+- coderabbit-local (feat/extract-harness-6): PASS — 1 finding, 0 acted on
+  (Trivial)
+- coderabbit-local (feat/extract-harness-7): PASS — 1 finding, 1 acted on
+- coderabbit (#312): PASS — 1 finding, 1 acted on
+- coderabbit-local (harness feat/extract-harness-8): PASS — 1 finding, 0 acted
+  on (skipped: verbatim copy)
+- coderabbit (harness#4): PASS — 4 findings, 2 acted on
+- coderabbit-local (feat/extract-harness-9): PASS — 3 findings, 2 acted on
+  later through harness#5 (the copy cannot be edited in place)
+- coderabbit (#313): PASS — 3 findings, 2 acted on, 1 skipped to step 10
+- coderabbit-local (feat/extract-harness-10): PASS — 0 findings
+- coderabbit-local (harness feat/extract-harness-11): OPEN → PASS — 6
+  findings, 5 acted on through `/opsx:update`, 1 Major rejected by the user
+- coderabbit (harness#6): PASS — 27 findings over three reviews, 14 acted on,
+  1 rejected, 12 skipped (stale paths filed as a card, main specs, Trivial)
+- coderabbit-local (feat/extract-harness-12): PASS — 0 findings
+- coderabbit-local (chore/archive-extract-harness): PASS — 1 finding, 1 acted on
+- coderabbit (#316): PASS — 3 findings, 1 acted on, 2 skipped (no defect;
+  handled by `glob-row-example`)
+- Not run: ponytail-review, preflight, code-review, security-review,
+  first-five, review-order, opsx:verify
+
+**The moved changes drew the most findings of the whole change, and they
+were the least-read text in it.** Copied verbatim into the harness, the seven
+changes went through no review on the way in; `coderabbit-local` and the cloud
+review on harness#6 found 5 Majors in them between them — a `gh api graphql`
+refusal that would have broken the `coderabbit` skill's own thread read, a
+`git cherry` verdict blind to merge commits (the harness's own merge style), a
+Stop gate that would refuse nearly every committing turn — none of which any
+earlier review of those changes had raised.
+
+**`warm`, `zombies` and `triage` produced no finding across five steps.** Each
+pre-PR run of the three returned PASS with nothing; every finding of the
+change came from the CodeRabbit passes or from verifying a task's own claim
+(the 6.4 floor, the 11.2 floor, the 12.4 preview).
