@@ -31,7 +31,7 @@
 		"typescript": "7.0.2"
 	},
 	"dependencies": {
-		"harness": "github:laidrivm/harness#bd8c68fe1f30c7f54a5f1c105d09aebbd0a6600e",
+		"harness": "github:laidrivm/harness#6788ccc34ef7dcee654945f8be8cac6e87c62bc9",
 		"preact": "11.0.0"
 	},
 	"overrides": {
