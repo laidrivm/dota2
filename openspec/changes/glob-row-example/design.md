@@ -94,6 +94,7 @@ that `git revert` does not cover.
 
 ## Open Questions
 
-None. The requirement is unchanged, the check is unchanged, and the two
+None. The requirement's behaviour is unchanged — its one new sentence states
+an exemption its own scenario already made — the check is unchanged, and the two
 judgements — shape in the trigger, row as illustration; no illustration where
 no row fits — are argued above with their alternatives named.
