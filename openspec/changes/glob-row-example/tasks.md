@@ -18,8 +18,9 @@ Closes: *Every path the map names is real and shipped*
       all seven scenarios the live requirement has — the replacement is
       whole-requirement, so one omitted is one deleted
 - [ ] 1.2 Confirm the only difference between the live requirement before and
-      after is the `WHEN` lines of **A glob row** and **A gitignored row** and
-      the paragraph under each: diff the two blocks rather than reading them,
+      after is the `WHEN` lines of **A glob row** and **A gitignored row**,
+      the paragraph under each, and the requirement text's one sentence on the
+      exemption: diff the two blocks rather than reading them,
       since five of the seven scenarios are meant to be byte-identical
 - [ ] 1.3 Check the illustration is a row the map actually has —
       `docs/research/*` at the time of writing — by reading it out of

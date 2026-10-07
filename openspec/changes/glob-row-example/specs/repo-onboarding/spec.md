@@ -1,9 +1,10 @@
 # repo-onboarding delta — glob-row-example
 
-The requirement is copied whole from the live spec and two scenarios' `WHEN`
-are edited; the other five and the requirement's own text are untouched, which a
-`MODIFIED` replacement requires and a reader of the diff should be able to see
-at a glance.
+The requirement is copied whole from the live spec. Two scenarios' `WHEN` are
+edited, and the requirement's text gains one sentence stating the exemption
+**A gitignored row** already made, which the text contradicted; the other five
+scenarios are untouched, which a `MODIFIED` replacement requires and a reader
+of the diff should be able to see at a glance.
 
 ## MODIFIED Requirements
 
@@ -13,7 +14,9 @@ The test run SHALL fail when a path named in the ownership map does not
 resolve in the repository. Resolution MUST accept a literal file, a
 directory, and a glob matching at least one file. A path that exists locally
 but is not tracked by git MUST NOT satisfy the check, so the test cannot pass
-on a maintainer's machine and fail in a clone.
+on a maintainer's machine and fail in a clone. A path `.gitignore` covers is
+exempt rather than resolved: a clone does not have it, so the check neither
+asserts nor refuses it.
 
 #### Scenario: A doc is renamed but the map is not
 

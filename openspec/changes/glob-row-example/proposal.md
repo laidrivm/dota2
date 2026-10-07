@@ -48,8 +48,11 @@ replaces whole.
 
 ## Impact
 
-- `openspec/specs/repo-onboarding/spec.md` — two scenarios' `WHEN` clauses. No
-  requirement text changes, no scenario is added or removed.
+- `openspec/specs/repo-onboarding/spec.md` — two scenarios' `WHEN` clauses,
+  and one sentence of requirement text stating the exemption **A gitignored
+  row** already makes: the text said every untracked path fails the check,
+  which the scenario contradicted. No behaviour changes, no scenario is added
+  or removed.
 - `checks/readme-map.test.ts` — unchanged. It never named `tasks/*.md`: it
   reads the live map and resolves whatever rows it finds, so nothing in it
   turns on which row illustrates the criterion.
