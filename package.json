@@ -39,6 +39,7 @@
 		"qs": "6.16.0"
 	},
 	"harness": {
+		"board": "D2ASS",
 		"mutationFloor": {
 			"module": "src/model.ts",
 			"surviving": 66,
