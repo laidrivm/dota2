@@ -32,14 +32,20 @@ jobs:
         with:
           bun-version: 1.4.2
       - run: bun install --frozen-lockfile
-      # The base is passed as a commit, not as `origin/<ref>`: the checked-out
-      # merge commit has the base as an ancestor, so the SHA resolves without
-      # depending on which remote-tracking refs the checkout happened to fetch.
-      # Neither value is interpolated into the script text: the body is read
-      # from the environment, and the SHA is expanded by the shell from an
-      # environment variable into an argument — a pull request body is
-      # attacker-controlled text.
+      # The base is the checked-out merge commit's first parent, not
+      # `pull_request.base.sha`. The checkout is `refs/pull/<n>/merge`, the head
+      # merged into the base branch's current tip, while `base.sha` stays put
+      # when the base branch advances — so measured from it, every commit landed
+      # on the base since would count as this branch's. A checkout with no
+      # second parent is not that merge commit, and its first parent would
+      # measure one commit, so the check fails instead.
+      # The body is not interpolated into the script text: it is
+      # attacker-controlled, so it reaches the shell through the environment.
       - env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
           PR_BODY: ${{ github.event.pull_request.body }}
-        run: bash node_modules/harness/bun/diff-budget.sh "$BASE_SHA"
+        run: |
+          git rev-parse --verify --quiet 'HEAD^2' >/dev/null || {
+            echo "DIFF gate: ERROR — HEAD is not the pull request's merge commit" >&2
+            exit 2
+          }
+          bash node_modules/harness/bun/diff-budget.sh 'HEAD^1'
