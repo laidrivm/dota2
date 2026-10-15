@@ -24,15 +24,15 @@
 	"devDependencies": {
 		"@axe-core/playwright": "4.13.0",
 		"@biomejs/biome": "2.5.15",
-		"@playwright/test": "1.63.0",
+		"@playwright/test": "1.64.0",
 		"@stryker-mutator/core": "10.0.0",
-		"@types/bun": "1.4.2",
+		"@types/bun": "1.4.3",
 		"simple-git-hooks": "2.14.0",
 		"typescript": "7.0.2"
 	},
 	"dependencies": {
 		"harness": "github:laidrivm/harness#dc107b3b6c4625f2e3ad86a5ef363448cee64fcc",
-		"preact": "11.0.0"
+		"preact": "11.0.1"
 	},
 	"overrides": {
 		"fast-uri": "3.1.8",
