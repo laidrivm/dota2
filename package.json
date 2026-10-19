@@ -22,17 +22,17 @@
 		"pre-push": "bun run lint && bun run lint:yaml && bun run lint:suppressions && bun run harness:check && bun run typecheck && bun test --pass-with-no-tests && if command -v actionlint >/dev/null 2>&1; then actionlint -color; fi && if command -v gitleaks >/dev/null 2>&1; then gitleaks git . --log-opts=\"$(git symbolic-ref --quiet --short refs/remotes/origin/HEAD || echo main)..HEAD\" -v --redact --no-banner; fi && rm -rf reports/mutation && bunx --no-install stryker run && bun node_modules/harness/bun/mutation-floor.ts && { bash node_modules/harness/bun/diff-budget.sh || true; }"
 	},
 	"devDependencies": {
-		"@axe-core/playwright": "4.13.0",
+		"@axe-core/playwright": "4.14.0",
 		"@biomejs/biome": "2.5.15",
-		"@playwright/test": "1.63.0",
+		"@playwright/test": "1.64.1",
 		"@stryker-mutator/core": "10.0.0",
-		"@types/bun": "1.4.2",
+		"@types/bun": "1.4.3",
 		"simple-git-hooks": "2.14.0",
 		"typescript": "7.0.2"
 	},
 	"dependencies": {
 		"harness": "github:laidrivm/harness#fa6f4bf971e74e0cb11948e2b891df91948b3e70",
-		"preact": "11.0.0"
+		"preact": "11.0.1"
 	},
 	"overrides": {
 		"fast-uri": "3.1.8",
