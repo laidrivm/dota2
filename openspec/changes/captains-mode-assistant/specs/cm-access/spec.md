@@ -59,10 +59,12 @@ API SHALL never fall back to open access.
 ### Requirement: Wrong passwords are limited
 
 `POST /api/cm/session` with a wrong password SHALL answer 401 `code`
-`"wrong-password"`. WHILE ten wrong passwords have been received within the
-last 15 minutes, every sign-in, a right one included, SHALL answer 429 `code`
-`"too-many-attempts"` with `Retry-After` set to the seconds until the oldest
-of them leaves the window.
+`"wrong-password"`. WHILE ten wrong passwords from any caller have been
+received within the last 15 minutes, every sign-in, a right one included,
+SHALL answer 429 `code` `"too-many-attempts"` with `Retry-After` set to the
+seconds until the oldest leaves the window. The budget is shared: it bounds
+guessing by anyone, and accepts that a stranger can delay new sign-ins by 15
+minutes, since a caller's address behind the proxy cannot be trusted.
 
 #### Scenario: Repeated wrong passwords
 
@@ -70,6 +72,8 @@ of them leaves the window.
   right one
 - **THEN** the first ten SHALL be answered 401 `"wrong-password"` and the
   eleventh 429 `"too-many-attempts"` with a `Retry-After` between 1 and 900
+- **AND** a request carrying a session signed in before the ten SHALL still
+  be answered as signed in
 - **AND WHEN** 15 minutes have passed since the first of them, the right
   password SHALL sign in again
 

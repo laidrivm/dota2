@@ -12,9 +12,10 @@ how the model reads hero strength from it in place of the statistics snapshot.
 
 `POST /api/cm/meta` SHALL accept the body of dota2protracker's meta data
 file for one position at 7000+ MMR, of at most 5 MB. WHEN it holds at least
-50 heroes whose ids the snapshot knows, all at one position `pos 1`–`pos 5`,
-each rating null or within 0–100, the server SHALL store that position,
-replacing its previous upload, and answer 200.
+50 heroes whose ids the snapshot knows and whose rating is not null, all at
+one position `pos 1`–`pos 5`, every rating null or within 0–100 and not all
+of them equal, the server SHALL store that position, replacing its previous
+upload, and answer 200.
 
 #### Scenario: A valid upload for one position
 
@@ -27,7 +28,8 @@ replacing its previous upload, and answer 200.
 #### Scenario: An upload that is not the meta file
 
 - **WHEN** the body is not JSON, is JSON of another page, mixes two
-  positions, carries fewer than 50 known heroes, a rating outside 0–100, or
+  positions, carries fewer than 50 known rated heroes, a rating outside
+  0–100, ratings all equal, or
   exceeds 5 MB
 - **THEN** the response SHALL be 422 with `code` `"not-d2pt-meta"` (413 with
   `"too-large"` for the size), and the stored meta SHALL be unchanged

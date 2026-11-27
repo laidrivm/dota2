@@ -53,9 +53,11 @@ meta of −10 at that position.
 
 #### Scenario: A flexible hero takes the open slot
 
-- **WHEN** the team has picked a hero playable only at position 1 and a hero
-  playable at positions 1 and 3, both stronger at position 1
-- **THEN** the first SHALL be assigned position 1 and the second position 3
+- **WHEN** the team has picked hero A, playable only at position 1 with meta
+  2.0 there, and hero B, playable at position 1 with meta 3.0 and at
+  position 3 with meta 2.5, all weights 1 and no other component non-zero
+- **THEN** A SHALL be assigned position 1 and B position 3, a team value of
+  4.5 against −7.0 for the swap
 
 #### Scenario: The assignment is shown
 
@@ -72,7 +74,8 @@ it is made of. The score SHALL be the evaluation the search reaches after the
 candidate minus the current evaluation; the components SHALL be the
 candidate's own contribution by part plus a `lookahead` part holding the
 rest. A candidate SHALL be untaken, `sufficient`, and able to play a position
-its team still has open.
+still open on the team that would pick it — the drafting team for a pick, the
+other team for a ban.
 
 #### Scenario: Components add up to the score
 
@@ -87,9 +90,10 @@ its team still has open.
 
 ### Requirement: The search looks past the enemy's answer
 
-A candidate's score SHALL be the evaluation the search reaches after it,
-each later step taken by its team to maximise its own value, with the
-remaining picks completed greedily past the search's depth. The search SHALL
+Candidates SHALL be ranked by the evaluation the search reaches after each,
+every later step taken by its team to maximise its own value and the
+remaining picks completed greedily past the search's depth; the score shown
+is that evaluation's gain over the current one. The search SHALL
 deepen one step at a time within a 1500 ms budget and report the depth it
 completed.
 

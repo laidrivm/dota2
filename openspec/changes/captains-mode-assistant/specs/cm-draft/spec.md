@@ -18,7 +18,8 @@ from the response's `code`.
 
 #### Scenario: Signing in from the page
 
-- **WHEN** `/cm` is opened with no session and a wrong password is entered
+- **WHEN** `/cm` is opened with no session, fewer than nine wrong passwords
+  in the sign-in window, and a wrong password is entered
 - **THEN** the form SHALL stay, announce the error through `role="alert"`,
   and keep focus in the password field
 - **AND WHEN** the right password is then entered, the form SHALL be
@@ -41,9 +42,10 @@ been entered.
 
 Each team SHALL have five players, each with a nickname of 1 to 24
 characters, a position 1–5 or unknown, a rank tier from 1 (Herald) to 8
-(Immortal) or unknown, and up to 10 signature heroes. The captain's team
-SHALL hold each position exactly once; the enemy's known positions SHALL be
-distinct.
+(Immortal) or unknown, and up to 10 signature heroes. Each team's known
+positions SHALL be distinct at all times. The captain's roster SHALL count as
+complete once it holds each position exactly once, and the board SHALL say
+when it is not.
 
 #### Scenario: Editing the captain's roster
 
