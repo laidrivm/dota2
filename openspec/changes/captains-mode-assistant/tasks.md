@@ -174,34 +174,36 @@ Closes `cm-model/a-ban-that-would-hand-the-enemy-a-better-pick`,
 
 Closes `cm-meta-import/a-valid-upload-for-one-position`,
 `cm-meta-import/an-upload-that-is-not-the-meta-file`,
-`cm-meta-import/nothing-uploaded-yet`.
+`deployment-topology/the-store-in-the-compose-file`.
 
 - [ ] 11.1 Add `devalue` exact-pinned and run `/warm`; commit a trimmed real
       d2pt data file as `src/fixtures/d2pt-meta-pos3.json`.
-- [ ] 11.2 Failing cases first in `src/server/cm-meta.test.ts` (ZOMBIES 44,
-      45, 46, 47, 48, 49, 50): all five `null` before any upload; 5 MB
-      accepted for parsing and 5 MB + 1 refused 413; 50 known rated heroes
-      accepted, 49 refused, 50 known heroes with null ratings refused;
-      ratings 0, 100, null valid, 100.1 refused, all-equal refused; mixed
-      positions refused with the store unchanged; every hero field present;
-      a write interrupted before its rename leaves the previous upload.
-- [ ] 11.3 Implement `POST` and `GET /api/cm/meta` (design D4, D5) with the
+- [ ] 11.2 Mount the `cm` volume on the application alone, create
+      `/app/cm-data` owned by the runtime user in the `Dockerfile`, and
+      extend `checks/deployment-topology.test.ts` — in this step, so no
+      upload it accepts lives in a container's writable layer.
+- [ ] 11.3 Failing cases first in `src/server/cm-meta.test.ts` (ZOMBIES 45,
+      46, 47, 48, 49, 50): 5 MB accepted for parsing and 5 MB + 1 refused
+      413; 50 known rated heroes accepted, 49 refused, 50 known heroes with
+      null ratings refused; ratings 0, 100, null valid, 100.1 refused,
+      all-equal refused; mixed positions refused with the store unchanged;
+      every hero field present; a write interrupted before its rename leaves
+      the previous upload.
+- [ ] 11.4 Implement `POST` and `GET /api/cm/meta` (design D4, D5) with the
       atomic per-position store under `CM_DATA_DIR`.
 
 ## 12. The model reads the upload
 
-Closes `cm-meta-import/one-position-uploaded`,
-`cm-meta-import/the-page-names-where-its-meta-comes-from`,
-`deployment-topology/the-store-in-the-compose-file`.
+Closes `cm-meta-import/nothing-uploaded-yet`,
+`cm-meta-import/one-position-uploaded`,
+`cm-meta-import/the-page-names-where-its-meta-comes-from`.
 
-- [ ] 12.1 Failing cases first in `src/cm/engine/meta.test.ts` (ZOMBIES 51):
-      position 1 uploaded maps rating 50 to 0 with the std-matched scale and
-      positions 2–5 equal the snapshot's; a null rating makes the hero
-      unplayable there.
+- [ ] 12.1 Failing cases first (ZOMBIES 44, 51): `GET /api/cm/meta` with an
+      empty store answers all five positions `null`, and the page then shows
+      the snapshot as every position's source; position 1 uploaded maps
+      rating 50 to 0 with the std-matched scale and positions 2–5 equal the
+      snapshot's; a null rating makes the hero unplayable there.
 - [ ] 12.2 Implement the mapping (design D9), the page's meta panel with the
       five d2pt links and the multi-file upload, and the fetch of
       `/api/cm/meta` after sign-in.
-- [ ] 12.3 Mount the `cm` volume on the application alone, create
-      `/app/cm-data` owned by the runtime user in the `Dockerfile`, and
-      extend `checks/deployment-topology.test.ts`.
-- [ ] 12.4 Move the D2ASS card to `applied` once this pull request merges.
+- [ ] 12.3 Move the D2ASS card to `applied` once this pull request merges.
