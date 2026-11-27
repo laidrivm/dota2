@@ -83,7 +83,7 @@ Closes `cm-draft/setup-collapses-into-the-board`,
 - [ ] 4.1 Failing cases first in `src/cm/ui/session.test.ts` (ZOMBIES 16, 17,
       21, 22): the `CmSession` reducer — side and pick order independent;
       nickname 24 accepted, 25 and whitespace-only refused; a duplicate
-      position on the captain's team unsets the first; the 10-signature
+      position on either team unsets the first; the 10-signature
       limit; a stored session that fails to parse falls back to empty.
 - [ ] 4.2 Implement the session type and reducer, the setup block and both
       roster panels (signature heroes through the existing picker); the

@@ -245,7 +245,9 @@ mounts. The job never sees the password or the volume.
 
 ## Migration Plan
 
-Before deploying the first step: set `CM_PASSWORD` (12+ characters) in the
-host's `.env`. Without it the CM API answers 503 and nothing else changes.
+Set `CM_PASSWORD` (12+ characters) in the host's `.env` before step 2
+deploys, which is the step that passes it to the application; step 1 deploys
+with the API closed. Without it the CM API answers 503 and nothing else
+changes.
 The `cm` volume is created by compose on first `up`. Rollback is redeploying
 the previous image; the volume is left behind harmlessly.
