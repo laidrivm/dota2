@@ -457,15 +457,18 @@ Installed automatically by `bun install` (the `prepare` script runs
 ## Getting the review skills
 
 `CLAUDE.md` requires a review pass before every PR, and the skills that run
-it arrive with `bun install`: `.claude/skills/` holds tracked symlinks into
+it arrive with `bun install` — run as `bun run deps`, which the bootstrap hook
+names and which prompts no permission: `.claude/skills/` holds tracked symlinks into
 `node_modules/harness/`, the [harness](https://github.com/laidrivm/harness)
 package `bun.lock` pins to a commit. In a fresh clone the links resolve to
 nothing until that install has run.
 
-That supplies every slash command the pre-PR sequence names — `/zombies`,
-`/warm`, `/triage`, `/coderabbit-local`; its first step is `bun run
-diff-budget`, a script in this repository. `/ponytail-review` comes from the
-ponytail plugin instead, and is available rather than a gate.
+That supplies the slash commands the pre-PR sequence names — `/zombies`,
+`/warm`, `/triage` — and `/coderabbit`, which disposes of the bot's findings
+on the pull request; its first step is `bun run diff-budget`, a script in this
+repository, and its last, the local review, is `/code-review`, built into
+Claude Code. `/ponytail-review` comes from the ponytail plugin instead, and is
+available rather than a gate.
 
 ## The task board
 

@@ -77,12 +77,14 @@ function hookOn(dir: string, command: string) {
 
 describe("before the harness is installed", () => {
 	// spec: harness-consumption/a-fresh-clone
-	test.each(["bun install", "bun i", "bun install --frozen-lockfile"])(
-		"%s runs",
-		(command) => {
-			expect(hookOn(clone(false), command).code).toBe(0);
-		},
-	);
+	test.each([
+		"bun install",
+		"bun i",
+		"bun install --frozen-lockfile",
+		"bun run deps",
+	])("%s runs", (command) => {
+		expect(hookOn(clone(false), command).code).toBe(0);
+	});
 
 	// spec: harness-consumption/any-other-command-before-the-install
 	test.each([
@@ -91,10 +93,11 @@ describe("before the harness is installed", () => {
 		"bun install --registry https://registry.example.test",
 		"bun install --cwd elsewhere",
 		"bun install && git status",
+		"bun run deps && git status",
 	])("%s is blocked with the install named", (command) => {
 		const { code, reason } = hookOn(clone(false), command);
 		expect(code).toBe(2);
-		expect(reason).toContain("bun install");
+		expect(reason).toContain("bun run deps");
 	});
 });
 

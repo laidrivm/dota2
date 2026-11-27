@@ -10,17 +10,21 @@ answer.
 ## Unattended or attended
 
 A session is unattended only when the prompt or brief that started it holds
-this line, word for word and on a line of its own:
+this line, word for word and on a line of its own, ignoring whitespace around
+it:
 
 ```text
 This session runs unattended.
 ```
 
-The session looks for that exact line and for nothing else.
+The session looks for that exact sentence alone on its line, and for nothing
+else. An indent that a terminal copy adds, or a carriage return ending the
+line, changes nothing.
 
 - **Declared.** A runner starts a session with `/opsx:apply <slug>` followed
   by the line. At the step "Wait for the user's go-ahead", the session reads
-  the step's `agent` marker and opens the pull request itself.
+  the step's `agent` marker and opens the pull request itself — or, under the
+  board loop, whose runner pushes and opens it, names its title and body.
 - **Not declared.** The prompt reads "Apply it overnight, I'm asleep". The
   line is missing, so the session is attended, whatever the wording suggests.
   At the same step it offers the pull request and waits.
@@ -29,6 +33,24 @@ An attended session follows every step as it is written, and the markers
 change nothing for it. A missing line leads to a stall, never to an act the
 user did not want. An orchestrator copies the line into each worker's brief,
 because a worker cannot see its parent's prompt.
+
+## Routines
+
+Timer and trigger flows, audits and blog reading included, run on the
+orchestrator's VPS; a routine is an option only for a flow with no home
+there. A routine's prompt is two lines: the unattended line above, then one
+call of a skill the repository tracks or its pinned harness ships, with that skill's
+parameters. It holds no step of a procedure. The prompt is stored in
+claude.ai, where nothing reviews it and nothing notices it drift, so the
+steps live in the skill, which changes through a pull request like the rest
+of the tree. A skill installed only on the user's own machine breaks the
+rule: the routine's fresh clone does not hold it. A routine probing whether
+the harness runs in the cloud:
+
+```text
+This session runs unattended.
+/cloud-probe cloud-sessions
+```
 
 ## The classes
 
@@ -48,11 +70,13 @@ answered by a brief that says to explore and propose.
 
 The session takes the step itself, and records in its report or in the pull
 request's body what it did in the user's stead. It opens a pull request when
-every gate line reads `PASS`, with two exceptions:
+every gate line reads `PASS` — under the board loop it pushes nothing and ends
+its final message with a `PR-TITLE:` line and a `PR-BODY:` line, the body
+below it, and the runner opens it — with two exceptions:
 
-- `CODERABBIT-LOCAL` reading `OPEN` only over a 🟠 Major or 🔴 Critical
+- `CODE-REVIEW` reading `OPEN` only over a 🟠 Major or 🔴 Critical
   dismissal it proposes;
-- `CODERABBIT-LOCAL` reading `BLOCKED` only over a 🟠 Major or 🔴 Critical
+- `CODE-REVIEW` reading `BLOCKED` only over a 🟠 Major or 🔴 Critical
   that the third pass left unresolved.
 
 Any other gate line short of `PASS` holds the pull request back. In
@@ -64,7 +88,8 @@ dismissal is proposed or it is unresolved after the third pass. Each entry
 gives the finding's severity, its file and line, and what it says. For a
 proposed dismissal it adds the reason dismissal is proposed; for an
 unresolved finding, that it is still open. A bare count does not do. The
-gate lines stay as the review set them, and the merge stays with the user.
+gate lines stay as they were set — `CODE-REVIEW`'s by the session, since
+`/code-review` prints none — and the merge stays with the user.
 
 ### `card`
 
@@ -80,3 +105,10 @@ The session neither takes the step nor asks for it on a card, because a yes
 there would not let it take the step. It stops the work that needs the step
 and reports `BLOCKED`, naming the step, and the user takes it in a session of
 their own.
+
+A skill whose frontmatter carries `disable-model-invocation` with any value
+other than `false` is a `user` step. The session stops the work that needs
+it and reports `BLOCKED` naming the skill, and never carries out the skill's
+steps by other means. The
+frontmatter and the skill's own `user` marker are the single source of which
+skills these are, so this doc names none.

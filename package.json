@@ -15,7 +15,8 @@
 		"test:coverage": "bun test --coverage",
 		"test:db": "bash scripts/test-db.sh",
 		"test:docker": "bash scripts/test-docker.sh",
-		"prepare": "simple-git-hooks"
+		"prepare": "simple-git-hooks",
+		"deps": "bun install --frozen-lockfile"
 	},
 	"simple-git-hooks": {
 		"pre-commit": "bun run biome check --staged --no-errors-on-unmatched && if command -v gitleaks >/dev/null 2>&1; then gitleaks git --staged -v --redact --no-banner; fi",
@@ -31,12 +32,14 @@
 		"typescript": "7.0.2"
 	},
 	"dependencies": {
-		"harness": "github:laidrivm/harness#fa6f4bf971e74e0cb11948e2b891df91948b3e70",
+		"harness": "github:laidrivm/harness#022196a8c8e2cd05536463f0b878191f6653f5d6",
 		"preact": "11.0.1"
 	},
 	"overrides": {
-		"fast-uri": "3.1.8",
-		"qs": "6.16.0"
+		"fast-uri": "3.1.9",
+		"minimatch": "11.0.9",
+		"qs": "6.16.1",
+		"zod": "4.6.7"
 	},
 	"harness": {
 		"board": "D2ASS",
@@ -73,6 +76,9 @@
 			"*.woff2",
 			"src/fixtures/snapshot.json"
 		],
-		"bumpTest": "bun test"
+		"bumpTest": "bun test",
+		"reviewers": [
+			"CodeRabbit"
+		]
 	}
 }

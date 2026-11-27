@@ -115,7 +115,7 @@ test.each([
 	"`/zombies`",
 	"`/warm`",
 	"`/triage`",
-	"`/coderabbit-local`",
+	"`/code-review`",
 ])("the skills section names %s", (name) =>
 	expect(skillsSection).toContain(name),
 );

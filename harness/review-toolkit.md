@@ -12,8 +12,27 @@ findings that hold against the current code, and say which you skip and why.
 The report alone is never the deliverable — a turn ending on a gate line that
 reads `OPEN` over unapplied fixes is a turn abandoned halfway. Close it, or
 write `BLOCKED` and name what only the user can settle. `OPEN` over a proposed
-Major or Critical dismissal is the exception: that one ends the turn by
-design, because settling it is the user's.
+Major or Critical dismissal is one exception: that one ends the turn by
+design, because settling it is the user's. `/coderabbit`'s `OPEN` over a head
+commit the bot has not reviewed yet is the other: there is nothing to act on
+until the review lands, and the next run picks it up. `/coderabbit` counts a
+head with no findings as reviewed once one of the bot's `CodeRabbit` check runs
+on it concluded `success` with a title not opening `Review skipped`, every one
+of them `completed`, or once its `CodeRabbit` status is `success` with the
+description `Review completed`, the bot's older report; a draft's `success`
+reads `Review skipped: draft pull request`, and marking the pull request ready
+starts the review of its head. A head whose status or check run reads
+`Review skipped…`, or names a rate or usage limit, gets no review on its own —
+stop waiting on it and report it. Where
+such a head is first seen is `finish`'s last line, which names CodeRabbit's
+state of the head it marked ready from the head's check runs: `skipped`,
+`rate limited`, no run, or another. On a skipped head, or one with no run
+after its reads, `finish` posts at most one `@coderabbitai review`. It does
+so only when the pull request's comments hold no `@coderabbitai review` or
+`@coderabbitai full review` since the earlier of the head's committer date
+and its first run, and a fresh read of the runs still says skipped or no run.
+Its line says which it did. A rate-limited head is reported and never retried, since a
+retry spends the same limit.
 
 ## The skills
 
@@ -28,88 +47,206 @@ design, because settling it is the user's.
   findings, every one about shape and none a defect, and three branches it
   read returned nothing at all. Worse, it read an enumeration the `CLAUDE.md`
   scan rule forbids and accepted it, which `/coderabbit` then caught — so the
-  step was not merely quiet but agreeing. `docs/context/pipeline-yield-*.md`
-  holds the counts. Run it when a diff feels overbuilt; nothing waits on it.
+  step was not merely quiet but agreeing. `session-wrapup`'s
+  yield ledger (step 5) records such counts. Run it when a diff feels overbuilt; nothing waits on it.
 - `/triage [base]` — risk-ordered map of the branch diff. Invoke it yourself.
   It returns no findings by design, so acting on it means reading the files it
   ranks High and Medium, reporting the defects they hold, and grepping every
   decision or value the diff changes for the sites that restate it.
-- `/coderabbit-local [base]` — the same review against the working branch,
-  before there is a PR. Invoke it yourself. A finding that survives
-  verification is applied without asking, whatever its severity, overriding the
-  skill's own "No fixes before approval" — the branch is unpushed, so being
-  wrong costs a `git checkout`. Dismissing a 🟠 Major or 🔴 Critical goes the
-  other way: it is put to the user with what the bot missed, and the gate line
-  reads `OPEN` until they settle it, because a wrong dismissal reaches the
-  merge where a wrong fix does not (unattended: card — hand it on with what
-  the bot missed, and list it in the pull request's body as `autonomy.md`'s
+- `/code-review` — Claude's own review of the working branch, before there
+  is a PR: the local review. Invoke it yourself, as `/code-review high
+  <base>...HEAD` from the branch's own worktree, `<base>` being the base the
+  runner measured from — the ref it was given, else what `bun/diff-base.sh`
+  prints — so the review reads the diff the runner measured, in the tree it
+  runs in: the level is named because `/code-review` with none reuses the
+  last one typed, and the range because with no target the skill diffs
+  against an upstream or the local `main`, which in a worktree trails
+  `origin/main`, while a bare ref reads as a branch to review. The skill
+  runs as a fresh subagent in the author's worktree and does not see the
+  author's conversation, so it needs no subagent wrapper: the forked
+  execution the Skill tool reports is no fork of the conversation
+  ([skills](https://code.claude.com/docs/en/skills.md), *Run skills in a
+  subagent*). Pass it
+  nothing else: its arguments that post write under the user's name on a
+  pull request that has none yet, and the one that fixes applies findings
+  before they are verified. It runs only while no pull request is open on the branch, a
+  draft counting as open: a push into an open one skips it while the earlier
+  steps run, because CodeRabbit reviews
+  that head on the pull request — a draft's once it is marked ready — and
+  `/coderabbit` disposes of its findings. Read the pull request's state
+  before the sequence starts, as `git-and-prs.md` has it read before a review
+  pass, and never infer it from what the push carries. A branch whose only
+  pull request was closed unmerged has none open and runs it again; a state
+  the read could not get runs it too, and the report says the state was
+  unread, since a skipped review is the costlier mistake. A review that does
+  not return — a usage limit, an error, a refused call — or whose findings
+  name no file the branch's diff changes (the paths `changedPaths(<base>)` in
+  the runner's `bun/pre-pr-steps.ts` reads: `git diff --name-only -z
+  --no-renames --no-relative <base>...HEAD`),
+  having read another diff or another tree, is reported. On the loop's first
+  pass the push then goes on without the gate rather than blocking the
+  branch: the session writes a `CODE-REVIEW gate:` line whenever a pass
+  returned a review, and none only when no pass did, and a pass that does
+  not return after one that did ends the loop on the line the earlier
+  passes left, which decides the push as any gate line does — a dismissal an earlier pass proposed still reads
+  `OPEN`. One finding on an unchanged file beside findings on changed ones —
+  a caller the change breaks — is kept and verified like the rest, and an
+  empty review proves nothing either way and passes. `/code-review` names no
+  severity, so the session grades each finding 🔵 Trivial, 🟡 Minor, 🟠 Major
+  or 🔴 Critical — the ladder `/coderabbit` reads — while verifying it,
+  disposes of it on that grade, and names the grade beside each finding in
+  its report. A finding that survives verification is applied without
+  asking, whatever its severity — the branch is unpushed, so being wrong
+  costs a `git checkout`. Dismissing a 🟠 Major or 🔴 Critical goes the
+  other way: it is put to the user with what the review missed, and the gate
+  line reads `OPEN` until they settle it, because a wrong dismissal reaches
+  the merge where a wrong fix does not (unattended: card — hand it on with
+  what the review missed, and list it in the pull request's body as `autonomy.md`'s
   `agent` sets out). At most three reviews with fixes between them; stop
   early the moment a review returns nothing above 🟡 Minor, and if Major or
   above survives the third, report it and stop rather than starting a fourth
   (unattended: agent — push and open the pull request, listing the finding
-  as still open).
+  as still open; under the board loop, name the pull request with that
+  listing in its body, and the runner opens it).
   Collect Minor findings across all passes and report them once at the end,
-  each fixed or skipped with its reason. The CLI looks for
-  `.coderabbit.yaml` on its own only while no `--config` is given, and the
-  skill always gives one. So the skill passes the config explicitly, together
-  with the guideline files that the config's `code_guidelines` patterns match.
-  A local review that skips them is a differently aligned reviewer, not a
-  cheaper one.
-- `/coderabbit [pr]` — chews the bot's PR comments. Its
-  `disable-model-invocation` flag reserves it for the user, because the bot's
+  each fixed or skipped with its reason, and the session writes the
+  `CODE-REVIEW gate:` line itself, since the built-in skill prints none: it
+  ends the disposition on `CODE-REVIEW gate: PASS|OPEN|BLOCKED — …`, `OPEN`
+  over a proposed Major or Critical dismissal and `BLOCKED` over a Major or
+  above the third review left; where the findings left fit more than one of
+  those lines, `BLOCKED` wins over `OPEN` and `OPEN` over `PASS`, and the
+  line names every finding behind it. The review reads `CLAUDE.md`
+  and `core/rules.md`, not the docs the rulebook indexes, so a rule kept in
+  one of those is read back by CodeRabbit on the pull request rather than by
+  this review.
+- `/coderabbit [pr]` — chews the bot's PR comments. Run it once the bot has
+  reviewed the head commit, never to wait for that, because the bot's
   review arrives on its own schedule and waiting for it burns a session doing
-  nothing — the cost is the wait, which a synchronous CLI review does not
+  nothing — the cost is the wait, which a synchronous local review does not
   have, and that is the whole difference between this bullet and the one above
-  it. Once a PR is open, say so and stop —
+  it. A run that finds no review of the head commit ends `OPEN` after one
+  read. Once a PR is open, say so and stop —
   do not poll the checks, do not sleep on a timer, do not re-run `gh` to see
-  whether the bot has posted. Once the user does invoke it, dispose of the
-  findings on the same terms as `/coderabbit-local`: any verified finding
-  applied without asking, a Major or Critical dismissal put to the user,
-  Minor read and then fixed or skipped with its reason, overriding the skill's
-  "No fixes before approval". Invoking it is the approval for the fixes — the
-  user is present by definition, and a wrong fix on an open PR costs one more
-  commit on a branch already under review. A merged PR still collects reviews:
-  re-fetch it once after the merge, because a finding posted while it was being
-  merged exists in the API and in no report. The same holds before it: the
-  bot's review lands on its own schedule and can arrive after a local pass has
-  already reported, so treat `Actionable comments posted: N` as what one review
-  posted inline rather than what the pull request holds — a second review, and
-  a collapsed out-of-grid section, are each counted separately.
+  whether the bot has posted. Once the review has landed, dispose of the
+  findings on `/code-review`'s finding-disposal terms alone — not its base,
+  its changed-file check, its grading or its `CODE-REVIEW` gate line, which
+  are the local review's, since CodeRabbit grades its own findings and a
+  Major it raised stays a Major: any verified finding
+  applied without asking, a Major or Critical dismissal put to the user
+  (unattended: card — hand it on with what the bot missed), Minor read and
+  then fixed or skipped with its reason, overriding the skill's "No fixes
+  before approval". This policy is the approval for the fixes, because a
+  wrong fix on an open PR costs one more commit on a branch already under
+  review, where a wrong dismissal reaches the merge. A merged PR still
+  collects reviews: re-fetch it once after the merge, because a finding
+  posted while it was being merged exists in the API and in no report. The
+  same holds before it: the bot's review lands on its own schedule and can
+  arrive after a local pass has already reported, so treat
+  `Actionable comments posted: N` as what one review posted inline rather than
+  what the pull request holds — a second review, and a collapsed out-of-grid
+  section, are each counted separately. A pull request gets fixes for at most
+  three rounds, a round being CodeRabbit's review of one commit: count the
+  distinct commits named by the pull request's reviews whose login is
+  exactly `coderabbitai[bot]`, the reviews the skill keeps, never the App's
+  `laidrivm-harness-agent[bot]`, so a session with no
+  memory of the earlier rounds reaches the same count. A fourth round or later
+  whose review carries a finding the run would apply gets none applied: the
+  run reports each finding left with its severity, file and line, names the
+  cap in the line before its gate line and ends on the skill's own
+  `CODERABBIT gate: BLOCKED — N findings, M undispositioned.`, whose form the
+  skill fixes, because churn past three
+  rounds is a signal to talk (unattended: card — hand the findings left on as
+  one question on the card, which waits behind one already open there as
+  `task-board` sets out; the run posts nothing in the pull request). A
+  fourth round with only findings skipped with a reason is not capped.
+  From the second round on, a 🟡 Minor outside the living docs —
+  `openspec/specs/**`, `CLAUDE.md` and `core/**` — is deferred, not
+  applied: anything under `openspec/changes/**`, code, and every other path.
+  A Minor's round is that of the commit named by the review that posted it,
+  commits ordered by their first CodeRabbit review, never the count when the
+  run starts; a Minor a later review posts again, on the same path and
+  asking the same, keeps its first round, each copy counts in the
+  arithmetic, and their one fix is applied once. Major and above, and the
+  living docs' Minors, are disposed of as in the first round, and the
+  three-round cap still decides whether the run applies anything. The run
+  writes each deferred Minor, with its path, line, severity and what it
+  asks, on the pull request's tail card, `CodeRabbit Minors deferred from
+  <owner>/<repo>#<N>`, filed at `idea` on the board of the repository that
+  would ship the fix — the harness's, for a consumer's `harness/*.md` —
+  once the name is looked up there, so a later session adds to the same
+  card; a Minor the card already holds is not written again. It lists each
+  under Skipped as `deferred to <card>`. The `resolve` command leaves a
+  deferred Minor's thread to the user, so the report names the thread for
+  the user to resolve by hand (unattended: agent — name the thread in the
+  report and go on).
 
 ## The pre-PR sequence
 
-Before every PR that changes code — a feature, a bugfix, a chore alike, and
+Before every PR — a feature, a bugfix, a chore, a proposal alike, and
 whether or not it goes through the OpenSpec stages. Completing a task group
 starts the sequence in the same turn, and `bun/turn-gate.ts` refuses a turn
-that commits a group's last task and ends without the gate lines and the
-runner's record of the commit it ends on, or a `BLOCKED` naming what only the
-user can settle. What it does not see: a pull request that changes code
-outside a task group starts the sequence too. A `/goal` run that reaches its
-round ceiling ends without the refusal, since refusing would only continue
-it. The record proves that step 1 ran at that commit; the other steps' gate
-lines report them, and nothing proves they ran.
+that commits a group's last task and ends while the gate ledger holds no
+passing record of both runner steps for the commit it ends on. It reads no
+text, so neither a gate line nor a `BLOCKED` clears it: a turn blocked on what
+only the user can settle is refused once, and its next stop ends it. What it
+does not see: a pull request that changes code outside a task group starts
+the sequence too. A `/goal` run that reaches its round ceiling ends without
+the refusal, since refusing would only continue it. The runner's records
+prove that the diff budget and the project checks passed at that commit; the
+other steps' gate lines are the report to the model and the human, which no
+hook checks. In the harness's own sessions a hook records each skill call at
+the commit its directory holds, with no tracked file changed (`gate-ledger`,
+*Each skill call is recorded for the commit its directory holds*): that
+proves the skill was called, not that the step was followed. Elsewhere
+nothing proves they ran.
 
-1. The runner, `bun bun/pre-pr.ts` (`bun node_modules/harness/bun/pre-pr.ts`
-   where the harness is installed), first, and again after the sequence's last
-   commit, since its record names the commit it read. It runs the diff budget
-   and records the run; the pre-push hook and CI measure the budget without
-   recording. The budget goes first because over budget says the reviewable
-   unit was cut too wide rather than that the code is wrong — and re-cutting it
-   changes the diff every gate below reads. It reports how many lines the
-   reviewer must read, and names its own thresholds and, where it has one, the
-   remedy in the gate line, so a reader never looks either up here. A gate
-   that reports it could not measure is neither over budget nor within it: it
-   means the base is unresolvable, and in CI it fails the check rather than
-   passing unmeasured.
+Which of the steps below a branch requires is not the agent's call: the
+runner's last line, `PRE-PR steps: <id>, <id>, …`, names them by the skill
+each runs, from the branch's diff against the base the budget measured and
+from its pull request's state, as `pre-pr-runner` (*The runner names the
+steps the branch requires from its diff*) sets out. Once a pull request is
+open, draft or not, it names the project checks alone: that is the least a
+push into it requires, and step 5 says what still runs before one.
+`bun bun/pre-pr.ts --steps [<base>]` prints that line alone, running no step
+and recording nothing, so the list can be read without the checks; like a
+full run's, it reads the committed diff, never uncommitted edits. The steps
+below say why each one exists.
+
+1. The diff budget first, looked at with `bash bun/diff-budget.sh` (`bash
+   node_modules/harness/bun/diff-budget.sh` where the harness is installed),
+   which records nothing. Then the runner, `bun bun/pre-pr.ts` (`bun
+   node_modules/harness/bun/pre-pr.ts`), once, after the sequence's last
+   commit, since its records name the commit it read. It runs the diff budget,
+   then the project checks — the command under `harness.bumpTest` — and
+   records each. Run it in the foreground with a 600000 ms timeout, since the
+   full test run takes minutes, and never with `&`; a call the tool moves to
+   the background at that limit is waited for in the same turn, never started
+   again. The pre-push hook and CI measure the budget without recording; the
+   hook skips its other gates only where `commit-gates` (*The pre-push hook
+   skips the gates a passing run record proved*) says. The budget goes first
+   because over budget says the reviewable unit was cut too wide rather than that the
+   code is wrong — and re-cutting it changes the diff every gate below reads.
+   It reports how many lines the reviewer must read, and names its own
+   thresholds and, where it has one, the remedy in the gate line, so a reader
+   never looks either up here. A gate that reports it could not measure is
+   neither over budget nor within it: it means the base is unresolvable, and
+   in CI it fails the check rather than passing unmeasured.
 2. `/zombies` with **no arguments** — diff mode reads the real code and
    existing tests, cross-checks the implementation against the
    proposal-stage edge-case list, and catches the edges only implementation
    decisions create. Fix what it finds.
-3. `/warm`, only when a dependency manifest changed, having walked the
-   ponytail ladder before ever reaching for a dependency.
+3. `/warm`, when the runner names it, since a new or upgraded dependency is
+   code nobody on the branch wrote, having walked the ponytail ladder before
+   ever reaching for a dependency.
 4. `/triage`, over the final diff, so it maps the diff the reviewer
    will actually see.
-5. `/coderabbit-local` last, then push.
+5. `/code-review` last, as `/code-review high <base>...HEAD` on the terms the
+   `/code-review` bullet sets out, then push — only while no pull request is
+   open on the branch, a draft counting as open: a push into an open one
+   skips it while the earlier steps run, and its report says CodeRabbit
+   reviews the head on the pull request, a draft's once it is marked ready,
+   where `/coderabbit` disposes of the findings; a state the read could not
+   get runs it, and the report says the state was unread.
 
 CI measures the budget on every pull request and the pre-push hook measures it
 last of all, once every gate that can refuse the push has passed. Neither is
@@ -117,10 +254,14 @@ the first reading: a count that arrives with the push arrives after the step
 it would have told you to re-cut, and a branch never pushed is a branch never
 measured.
 
-A branch of documentation, rules or config runs step 1, then `/triage` alone,
-plus a grep for every site restating what it changes, plus `bun test` when it
-adds or removes a directory under `openspec/changes/` — a test pins the tree's
-change set — then one pass of `/coderabbit-local` — one, not three.
+A documentation branch, as the runner classifies one, gets one pass of
+`/code-review high <base>...HEAD` — one, not three — on the terms the
+`/code-review` bullet sets out. That pass, too, runs only while no pull
+request is open on the branch, a draft counting as open: a push
+into an open one skips it while the earlier steps run, and its report says
+CodeRabbit reviews the head on the pull request; a state the read could not
+get runs it, and the report says the state was unread.
 
 Your sequence ends there — the PR link is the deliverable. `/coderabbit`
-closes the loop on either, whenever the user chooses to run it.
+closes the loop on the pull request, once the bot has reviewed the head
+commit.

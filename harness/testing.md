@@ -33,6 +33,10 @@ single-source rule this file inherits.
   their count — a block absorbed into its neighbour runs exactly as many.
 - A suite that may skip locally fails the CI job that owns it when it skips
   there — supply what it needs, and assert it ran.
+- A test that failed and then passed on an unchanged tree is a flaky test,
+  never a green run, and `bun/flake-watch.ts` names one to you as it
+  happens: never re-run a failed run unchanged without first naming the
+  cause you suspect.
 - Route `/zombies` findings by layer: Zero/One/Many/Boundaries/Interface/
   Exceptions → unit or integration tests; Simple scenarios marked
   `(e2e candidate)` → the Playwright smoke suite.
