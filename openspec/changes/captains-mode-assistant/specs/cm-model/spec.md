@@ -35,9 +35,9 @@ and 1 for a player of unknown rank.
 
 #### Scenario: A signature hero outranks an equal one
 
-- **WHEN** two heroes carry identical statistics and the player at the open
-  position has rank 6 in a team of mean rank 5 with the first hero as a
-  signature
+- **WHEN** the step in progress is the captain's team's last pick, two heroes
+  carry identical statistics, and the player at the open position has rank 6
+  in a team of mean rank 5 with the first hero as a signature
 - **THEN** the first hero SHALL rank above the second, its score higher by
   exactly 3.3
 - **AND WHEN** a player is rank 8 in a team whose known ranks average 3,
@@ -68,8 +68,11 @@ meta of −10 at that position.
 For each step the page SHALL list up to five heroes — the candidates the
 search ranks highest for the captain's ban or pick, or on an enemy step the
 heroes it expects the enemy to take — each with its score and the components
-it is made of. A candidate SHALL be untaken, `sufficient`, and able to play a
-position its team still has open.
+it is made of. The score SHALL be the evaluation the search reaches after the
+candidate minus the current evaluation; the components SHALL be the
+candidate's own contribution by part plus a `lookahead` part holding the
+rest. A candidate SHALL be untaken, `sufficient`, and able to play a position
+its team still has open.
 
 #### Scenario: Components add up to the score
 

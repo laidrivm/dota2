@@ -26,10 +26,11 @@ configured password, the server SHALL answer 204 and set a cookie
 
 ### Requirement: The API answers nothing without a valid session
 
-Every `/api/cm/` route other than `POST /api/cm/session` SHALL answer 401
-with `application/problem+json` and `code` `"not-signed-in"` WHEN the
-request carries no `cm_session` cookie, a malformed one, one whose signature
-does not verify, or one past its expiry.
+Every `/api/cm/` path other than `POST /api/cm/session`, unknown paths
+included, SHALL answer 401 with `application/problem+json` and `code`
+`"not-signed-in"` WHEN the request carries no `cm_session` cookie, a
+malformed one, one whose signature does not verify, or one past its expiry.
+Checks run in the order origin, configuration, session, route.
 
 #### Scenario: A request without a valid session
 
