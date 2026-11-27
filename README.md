@@ -457,7 +457,8 @@ Installed automatically by `bun install` (the `prepare` script runs
 ## Getting the review skills
 
 `CLAUDE.md` requires a review pass before every PR, and the skills that run
-it arrive with `bun install`: `.claude/skills/` holds tracked symlinks into
+it arrive with `bun install` — run as `bun run deps`, which the bootstrap hook
+names and which prompts no permission: `.claude/skills/` holds tracked symlinks into
 `node_modules/harness/`, the [harness](https://github.com/laidrivm/harness)
 package `bun.lock` pins to a commit. In a fresh clone the links resolve to
 nothing until that install has run.
