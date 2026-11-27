@@ -35,7 +35,7 @@ Closes: *Every path the map names is real and shipped*
 - [ ] 1.5 Run the pre-PR sequence per `harness/review-toolkit.md`. A branch of
       documentation and specs takes the short one: `bun run diff-budget`,
       `/triage`, the grep for every site restating what changes, then one pass
-      of `/coderabbit-local`
+      of `/code-review high <base>...HEAD`
 - [ ] 1.6 Grep `tasks/*.md` across the live tree before calling it done, and
       expect exactly the hits the archive and this change's own artefacts
       carry — an archived change is never edited, so hits under
