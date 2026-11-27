@@ -48,8 +48,9 @@ and 1 for a player of unknown rank.
 A team's picked heroes SHALL be assigned to its positions — its players'
 known positions held fixed — by the assignment of greatest team value among
 all of them. A hero SHALL count as able to play a position when its snapshot
-share there is at least 0.05; a hero assigned elsewhere SHALL contribute a
-meta of −10 at that position.
+share there is at least 0.05, or, at a position with uploaded meta, when the
+upload rates it there (cm-meta-import); a hero assigned elsewhere SHALL
+contribute a meta of −10 at that position.
 
 #### Scenario: A flexible hero takes the open slot
 
