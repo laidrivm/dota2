@@ -71,8 +71,7 @@ own.
 - **The post-draft report and its chat.** The third delivery.
 - **Fetching dota2protracker from the server.** Its pages sit behind
   Cloudflare's bot check, and a server-side fetch would have to defeat it.
-  The captain's own browser downloads the data instead; the plan's
-  `design.md`, which follows on `spec/captains-mode-assistant-plan`, gives
+  The captain's own browser downloads the data instead; `design.md` gives
   the reasoning.
 - **A phone layout.** The brief settles on desktop only.
 - **Win probability.** The brief drops it for CM.
