@@ -93,6 +93,7 @@ describe("before the harness is installed", () => {
 		"bun install --registry https://registry.example.test",
 		"bun install --cwd elsewhere",
 		"bun install && git status",
+		"bun run deps && git status",
 	])("%s is blocked with the install named", (command) => {
 		const { code, reason } = hookOn(clone(false), command);
 		expect(code).toBe(2);
