@@ -10,6 +10,8 @@ entry, a hook or a CI check leaves this file the way it would leave
   group, in the order the groups appear, on `feat/<proposal-slug>-<step>`. A
   change whose `tasks.md` holds exactly one group is the exception and ships
   whole on `feat/<proposal-slug>` (`fix/`, `chore/` for non-feature work).
+  The unticked tasks of groups whose pull requests merged move into a new
+  last group, which ships as a step of its own, never on a merged branch.
 - A step's prose describes what that step ships — a README line, a script
   comment or a task bullet naming what later steps will add reads exactly like
   one naming what this step does, and a line saying which criteria the step
@@ -61,13 +63,70 @@ entry, a hook or a CI check leaves this file the way it would leave
   <noreply@anthropic.com>`, naming the model that wrote the commit as the
   session states it (`Claude Opus 5.5 (1M context)`), and a pull request body
   carries no attribution line at all — no session URL, no run id, no
-  generated-with footer, whatever the harness offers by default.
+  generated-with footer, whatever the harness offers by default. The tracked
+  `.claude/settings.json` sets `attribution` to `{"pr": "", "sessionUrl":
+  false}`, so Claude Code adds neither the footer nor the session link, and
+  leaves `commit` unset, so it still writes the trailer.
 - Never configure a push to `main` — `remote.<name>.push`, `push.default` set
   to `matching`, `upstream` or `tracking`, `remote.<name>.mirror` — the guard
   reads the command's own words and cannot see a destination that comes from
   configuration.
-- Open PRs ready for review, not as drafts — CodeRabbit's auto-review skips
-  drafts, so a draft is a PR nobody reviews.
+- Always open a PR with the work, in a local session and the board loop
+  alike, as a draft while a question to the user on its card is unanswered,
+  and mark it ready only once the answers settle every item — CodeRabbit's
+  auto-review skips drafts, so no review fires on work an answer may still
+  change. A local session does both with `bun node_modules/harness/bun/work.ts
+  finish --card <id> --title <text> --body-file <path>` (`bun bun/work.ts` in
+  the harness; `--card` alone once a PR is open, and no `--card`, so no
+  question read, for a PR no card stands behind; a cloud session, with no `gh
+  pr`, opens it over `gh api` as the README's *Cloud sessions* says): it
+  refuses without the pre-PR runner's passing records of `HEAD`, pushes while
+  the PR is a draft, opens it as a draft when none is open, and marks it ready
+  unless a question waits on the card — where `harness.reviewers` in the
+  checkout's `package.json` names `CodeRabbit`, only once CodeRabbit's run on
+  the head has completed, 12 reads have found none, or three consecutive reads
+  have failed, and its last line then names CodeRabbit's state
+  of the head; with no such key it waits for no reviewer and asks for none, so
+  a consumer whose CodeRabbit posts a check run adds `"reviewers":
+  ["CodeRabbit"]` under `"harness"` before the pin bump that crosses
+  `finish-named-reviewers`, which an older harness ignores; in the harness's
+  own sessions a hook refuses a hand-run `gh pr create`, and `gh pr ready`
+  without `--undo`. Follow-up on an existing PR starts with `bun
+  node_modules/harness/bun/work.ts draft --pr <n>` (`bun bun/work.ts` in the
+  harness itself), run by the session that hands it over or carries it, which
+  marks it draft and prints its head; the agent runs `finish` only when
+  that work ends — CodeRabbit reviews on the switch to ready, so ready before
+  the push would review the old head and then the new one; with nothing to
+  push, `finish` marks it ready. The pre-push hook refuses a push into an open pull
+  request of the same repository that is not a draft (one from a fork is
+  not read), the user's own push too — run that `work.ts draft --pr <n>`, or
+  the `gh pr ready <n> --undo` the refusal names, first —
+  and a push to GitHub whose pull requests it cannot read. A question to
+  the user on the card keeps it draft regardless, and the CI flow
+  (`bun/ci-run.ts`) holds its pull request the same way, keeping it draft
+  when its session answers `blocked`. Batch every fix into that one final push, and push without waiting for CI. A check that
+  then fails is fixed on the same PR in the next push, which also carries the
+  fixes for any CodeRabbit findings already posted — the CI flow does not
+  wait for the review; the PR is mergeable only once CI is green and
+  CodeRabbit has reviewed its head with every finding dispositioned.
+- In the harness, the ruleset `main` holds a merge to that: `test` and
+  `budget` green from GitHub Actions — a PR at or over the budget's cap
+  passes `budget` only with `oversize: <reason>` in its body, and one that
+  authors a proposal only by being split — and one approval,
+  which CodeRabbit gives once it has reviewed the latest commit and every
+  required thread is resolved; a push dismisses an approval given to an
+  earlier head. The user's admin bypass lifts all of it; an agent identity
+  has none. The bot resolves no thread itself: the thread of a finding
+  `/coderabbit` fixed is resolved by the session with
+  `bun bun/work.ts resolve`, once `finish` has pushed the fix (at once when
+  the fix was already on the head). A thread whose finding is dismissed is
+  resolved by the user, by hand on that thread.
+  `@coderabbitai resolve` resolves every one of the bot's threads, and it and
+  `@coderabbitai approve`, which a PR's author may post, approve without a
+  review of the head — so no agent posts either, nor any other comment as the
+  user, but for the one `@coderabbitai review` that `finish` posts on a head
+  CodeRabbit skipped or left without a run, under the user's standing
+  permission (2026-10-31, widened to a head without a run 2026-11-03).
 - Keep the PR description to what the diff can't say: a link to the
   proposal, the criteria the step closes named by their `### Requirement:`
   headings — or a line saying it closes none — decisions taken, anything the
@@ -86,19 +145,28 @@ entry, a hook or a CI check leaves this file the way it would leave
   yours to decide; a branch that moved under the pass makes the pass's fixes
   duplicates of what is already there; and a tree that has held more than one
   branch this session may not be on the one the last command left it on.
-- Commit a session's wrap-up artefacts — the pipeline-yield ledger, a save
-  point — to the branch in hand, never a branch of their own.
+- Commit a session's save point to the branch in hand, never a branch of its
+  own; on a branch the command guard refuses a commit on, leave it
+  uncommitted and name it in the report. The pipeline-yield ledger never
+  enters git: `session-wrapup` step 5 keeps it outside the tree.
 - Send, reply, comment or review under the user's name only through a call the
-  user approved at its prompt; the `gh` writes stay refused. Never through a
+  user approved at its prompt, or as the one `@coderabbitai review` `finish`
+  posts on a head CodeRabbit skipped or left without a run, which the user
+  granted standing (2026-10-31, 2026-11-03); the `gh` writes stay refused. Never through a
   channel no permission entry reaches — a browser form, a direct HTTP call:
   report what you would have written and let them send it. Opening the pull
   request they asked for is not that, and nor is a question the question gate
   lets through without a prompt (`agent-permissions`, *A question to the user
-  on a board card needs no prompt*).
+  on a board card needs no prompt*). The GitHub App `laidrivm-harness-agent`
+  writes as itself, shown as `laidrivm-harness-agent[bot]`, and only from the
+  board loop's runner or the orchestrator — never from inside a session, which
+  holds no token of the App's (`github-app-identity`).
 - Never re-run a check whose own output already proved it passed and whose
   inputs have not changed since — a later command's success is not that proof.
 - Never wait on a result someone else produces — CI, a review bot, a queue:
-  report where it will appear and end the turn.
+  report where it will appear and end the turn. The one exception is
+  `finish`'s two bounded waits for CodeRabbit's run on the head, before the
+  ready switch and after it (the user's choice, 2026-10-31).
 - This repo is public: before anything is staged or committed, read every new
   file whole, `git diff HEAD` for the rest, and the commit message about to be
   written, looking for capability URLs, internal and account identifiers, and
@@ -114,7 +182,12 @@ they route through `CLAUDE.md`'s fix & capture loop like every other rule.
 
 - Never bypass a git hook with `--no-verify`, `SKIP_SIMPLE_GIT_HOOKS` or a
   `core.hooksPath` override; run it or ask (unattended: user — report the
-  hook's failure as `BLOCKED`, and never ask to bypass it).
+  hook's failure as `BLOCKED`, and never ask to bypass it). The one
+  exception: the board loop's runner on the host pushes from its own push
+  clone, whose `core.hooksPath` names an empty directory, a commit whose
+  passing pre-PR record names its SHA — the tests ran as the session user
+  before the push, and a hook there would run the branch's code as the
+  runner, beside its tokens.
 - Never chain a commit onto a check in one command — the check runs, prints,
   and does not stop it; read its result first.
 - Treat an edit to the `simple-git-hooks` *block* in `package.json` as a gate
@@ -156,7 +229,7 @@ they route through `CLAUDE.md`'s fix & capture loop like every other rule.
 - Stage explicit paths in a worktree you scaffolded, and wherever the tree
   holds more than one commit's work; `git add -A` is for a tree that is exactly
   one, and in a worktree it commits the scaffolding besides.
-- Remove a worktree as soon as its branch is the one to push — a branch checked
+- Remove a worktree once its branch is pushed — a branch checked
   out in one cannot be checked out anywhere else.
 - Never state another repository's mutable properties — visibility, default
   branch, owner — anywhere in this repo; link to it instead.

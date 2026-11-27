@@ -29,10 +29,9 @@ completes, name the next step and the exact command.
 - Before the proposal is finalised: run `/zombies "<feature description>"`
   against the proposal text. A proposal whose edge cases are not listed in the
   tasks checklist as tests-first items is not ready to apply.
-- Before pushing `spec/<proposal-slug>`, run the pre-PR sequence's path for a
-  branch of documentation, rules or config (`review-toolkit.md`) in the same
-  turn: a proposal branch is that kind of branch, and `/zombies` alone is not
-  its sequence.
+- Before pushing `spec/<proposal-slug>`, run the pre-PR sequence in the same
+  turn, the steps the runner's last line names (`review-toolkit.md`):
+  `/zombies` alone is not a proposal branch's sequence.
 - A change to a gate the harness ships is measured against every consumer's
   tree before it is proposed, not only the consumer that reported it: the fix
   for one consumer's false positive can be another's new failure.
@@ -43,6 +42,9 @@ completes, name the next step and the exact command.
   could pick heroes before the picker existed, and 2c deleted it. A module
   no shipped code path calls is a horizontal slice, not a seam — cut the
   step differently instead of merging dead code.
+- Never put a task whose edit lands in another repository into this tree's
+  `tasks.md`; file a card on that repository's board instead — the goal check
+  reads only this tree and cannot see whether that edit was made.
 - If a vendored best-practices skill (listed in the skills repo's
   `skills-lock.json`) covers the feature's domain, run the draft design
   through it before finalising and fold in what applies. If none covers
@@ -100,10 +102,11 @@ completes, name the next step and the exact command.
   delta in the pull request's body).
 
 - When all Stage 3 gates pass: push the branch and offer to open the PR
-  (`gh pr create`, ready for review — see Git & PRs) with the description per
+  (`work.ts finish`, which marks it ready — see Git & PRs) with the description per
   Git & PRs. Wait for the user's go-ahead before opening it (unattended:
   agent — open it on the gate lines and with the body `autonomy.md`'s
-  `agent` sets out).
+  `agent` sets out; under the board loop, push nothing and name the pull
+  request's title and body instead, and the runner opens it).
 
 ## Stage 4 — Archive
 
@@ -131,14 +134,89 @@ goal of its own, because an unattended exploration runs inside the `propose`
 goal. A conversation gets no goal at all.
 
 The launcher starts the stage with the goal as its prompt, and puts the
-declared line on a line of its own. For step 2 of a change `demo` in a
-consumer:
+declared line on a line of its own. A copy of the form from a terminal, which
+indents each line, still declares it. The fourth line names the question gate's
+mark, character for character, and the form of the comment that carries a
+question, so a stage's first question can pass the gate; on a machine with
+the ask settings it names the ask command instead (below). For step 2 of a
+change `demo` in a consumer:
 
 ```text
 claude -p '/goal Carry step 2 of the OpenSpec change demo: /opsx:apply demo for its group 2, the pre-PR sequence, the push and the pull request.
 This session runs unattended.
-The goal is met when the last line of `bun node_modules/harness/bun/goal-check.ts apply demo 2`, run after the last push, opens with `goal met` — or when the final message opens with `BLOCKED —` and names what only the user can settle.'
+The goal is met when the last line of `bun node_modules/harness/bun/goal-check.ts apply demo 2`, run after the last push, opens with `goal met` — or when the final message opens with `BLOCKED —` and names what only the user can settle.
+A question only the user can settle goes on the card of the change as one page-level comment — `page_id` and `markdown` only, after reading that card and its comments — whose markdown opens with `harness-question`, a single backtick on each side of the word and no character before it; then set the `Assign` of the card to the user and read the card back to confirm it holds the user. Then repeat the question in the final message under a line `QUESTION: <the id of the card of the change>`, before any `PR-TITLE:` line. Give each question its options and a recommendation, write it in Russian, as the cards are, and put each command the user must run on a line of its own. Number its questions, decisions and assumptions in one sequence across its sections, on from the highest number the questions already on the card use, never restarting at 1, and letter the options of each question under it rather than number them, so the user can answer by number, and write it as plain text with no markdown syntax beyond that mark — no backticks, asterisks or headings — since Notion shows it literally.'
 ```
+
+The answer, proposal and archive variants below keep that fourth line as it
+stands.
+
+The board loop pushes for the session it launches, so its form changes the
+first and third lines and adds a fifth. The first line ends the work at the
+pre-PR sequence and a committed `HEAD` on the step's branch, which it names as
+the runner computes it, since the runner bundles that name alone, and says that the
+runner, not the session, pushes that branch and opens the pull request. The
+third names the check's before-push form, `goal-check.ts apply demo 2
+--before-push`, run after the last commit, which holds every condition but the
+pull request's. The fifth asks the session, when the pull request is to open,
+to end its final message with a `PR-TITLE: <title>` line and then a `PR-BODY:`
+line with the body below it, and to write neither when a gate line holds the
+pull request back. The runner pushes and opens with them, and its verdict is
+the full check.
+
+Where the board loop's runner finds the Notion integration's settings, it
+posts the stage session's question itself, and the fourth line of its form
+becomes:
+
+```text
+A question only the user can settle goes in the final message, never on the card, since this session posts no comment: after reading that card and its comments, write a line `QUESTION: <the id of the card of the change>` before any `PR-TITLE:` line, with the question below it, opening with `harness-question`, a single backtick on each side of the word and no character before it — the runner posts it. Give each question its options and a recommendation, write it in Russian, as the cards are, and put each command the user must run on a line of its own. Number its questions, decisions and assumptions in one sequence across its sections, on from the highest number the questions already on the card use, never restarting at 1, and letter the options of each question under it rather than number them, so the user can answer by number, and write it as plain text with no markdown syntax beyond that mark — no backticks, asterisks or headings — since Notion shows it literally.
+```
+
+Otherwise, where the launcher finds the ask settings, `notion-ask.json` under
+the user's config home (see the README), the fourth line names the ask
+command instead, in the board loop's form and the hand-launched ones alike:
+
+```text
+A question only the user can settle goes on the card of the change through the ask command, never as a comment of this session: after reading that card and its comments, write the question to a file, opening with `harness-question`, a single backtick on each side of the word and no character before it, run `bun node_modules/harness/bun/notion-ask.ts <the id of the card of the change> <that file>`, and once it prints `question: posted`, unless that line ends `Assign set`, set the `Assign` of the card to the user and read the card back to confirm it holds the user; never run the command again for a question it printed as posted, and after any other line read the comments of the card before running it again, setting the `Assign` of the card to the user instead where the question is already there. Then repeat the question in the final message under a line `QUESTION: <the id of the card of the change>`, before any `PR-TITLE:` line. Give each question its options and a recommendation, write it in Russian, as the cards are, and put each command the user must run on a line of its own. Number its questions, decisions and assumptions in one sequence across its sections, on from the highest number the questions already on the card use, never restarting at 1, and letter the options of each question under it rather than number them, so the user can answer by number, and write it as plain text with no markdown syntax beyond that mark — no backticks, asterisks or headings — since Notion shows it literally.
+```
+
+Without the ask settings, the hand-launched forms keep the fourth line
+above. Both forms where the session posts its own question have it repeat
+that question under a `QUESTION:` line of its final message, so a board-loop
+runner, which then posts nothing, still opens the step's pull request as a
+draft.
+
+An answer step, which the board loop launches once every group is ticked and
+the card holds the user's answer, changes only the first line of the board
+loop's form: it names
+writing that answer into `tasks.md` as group N+1 and carrying that group, or,
+for an answer that asks for a change of its own or would not fit one step,
+filing an `idea` card, clearing `Assign`, adding no group and ending on
+`BLOCKED —`. The check names `apply demo` with N+1, so the second route
+reads `goal open`. Where the runner has a Notion integration, the line also
+names which comment the answer is, by the user's id and the integration's,
+since a card the triage answered has no `Assign`.
+
+A step whose branch holds an open draft pull request, the draft the runner
+opened while its question waited on the card, carries the answer on that same
+step and branch. Its first line names applying the answer to that step's
+artefacts, code and tasks, or, for an answer that asks for a change of its
+own, filing an `idea` card, adding nothing to the branch and still naming the
+pull request's title and body; once the push goes through with no new
+question, the runner marks the pull request ready.
+
+A carry step, which the board loop launches when only merged pull requests
+used the branches of groups that still hold unticked boxes, changes only the
+first line too: it names moving every unticked task of those groups into a
+new last group N+1, each moved task opening with `(was <g>.<k>)` and each old
+place keeping `Task <g>.<k> moved to <N+1>.<j>.` with no box, and carrying
+that group.
+
+A step whose branch already exists, in the clone or on `origin`, because a
+session ended before its pull request, changes only the first line too: the
+board loop adds that a session left that branch, to `git switch` to it rather
+than create it, to merge `origin/main` into it before any other work, and to
+carry on from what its commits hold.
 
 A proposal names `propose demo` and an archive names `archive demo`, with no
 step. The outcome is the launcher's own run of the same check once the session
@@ -201,11 +279,15 @@ for them is already here.
   `archiving`.
 
   The same turn keeps the card's links and summary, which `task-board`'s
-  *A card can be ranked without opening the repository* fixes. The turn a
-  pull request opens adds its link under the card's `Ссылки` line, with its
-  number and kind (`proposal`, `step 2`, `archive`) — or, when the user
-  opened it, the first turn that learns it exists, at the latest the one told
-  it merged; the turn a proposal
+  *A card can be ranked without opening the repository* fixes. A pull
+  request's link goes under the card's `Ссылки` line, with its number and
+  kind (`proposal`, `apply`, `archive`): `bun bun/work.ts finish --card`
+  writes it on a run that opened the pull request or found it open, whose
+  output then says `linked` or `already linked`; where it says `the card's
+  record stopped`, a rerun of `finish --card` writes the rest; otherwise the
+  turn the pull request opens adds it — or, when the
+  user opened it, the first turn that learns it exists, at the latest the one
+  told it merged; the turn a proposal
   merges adds its `proposal.md` on the default branch; the archive re-points
   that link to the archived path. An edit to a proposal's *Why* or *What
   Changes* re-reads the card's summary in that turn. A card citing a commit
@@ -229,29 +311,65 @@ for them is already here.
   `<repo>: openspec/changes/<slug>/`: the repository's name, a colon and a
   space, then the path with nothing after it. A task number goes in the
   card's body, never after the path — `task-board`'s *A card for another
-  repository's change points across* fixes the form.
+  repository's change points across* fixes the form. A fix card, one with no
+  change directory, points at the one pull request that closes it as
+  `pr:<N>`, or `<repo>: pr:<N>` on another repository's board, with nothing
+  around it; the other pull requests the work took stay under `Ссылки`. A
+  card whose `Pointer` names a change keeps it. `finish --card` writes the
+  `Pointer` to the one change directory its branch adds files to, where the
+  `Pointer` is empty or names that change before its archive, on the same
+  runs that write the link; otherwise the turn that adds the link writes the
+  `Pointer` by hand. A fix card's `pr:<N>` stays a hand step
+  whoever opened the pull request, since `finish` never writes it: the turn
+  that adds the closing pull request's `Ссылки` link writes it — the session
+  that opened the pull request, or, when the user opened it, the first turn
+  that learns it exists. No reconciliation derives a floor for a
+  `pr:<N>` card, so the session that learns the pull request merged moves the
+  card with `bun bun/work.ts status --card <id> --to done` in that turn,
+  unless the card is `discarded`.
 
   Anchor an `update_content` edit on plain text. An `old_str` holding a
   `<mention-page>` tag matches nothing. A bullet added to the end of a section
   anchors on that section's last line, never on the first item under the next
   heading — a replacement there that restates the heading leaves it twice.
 
-  Three of the nine statuses a reconciliation can repair, because the
+  Three of the eleven statuses a reconciliation can repair, because the
   harness's `board-state.ts` derives them from the tree: `proposing`,
   `proposed`, `done`, on the board the repository names under `harness.board`
   in its `package.json`. Each board is derived from its own repository. The
-  other six are moved by hand, and this bullet is the whole of what holds
-  them — which is why it is stated as an obligation rather than as a
-  convention. Which nine, and so which six, is fixed in the harness's
-  `openspec/specs/task-board/` and named nowhere else; a second copy here is
-  the drift this change was written after.
+  other eight are moved by hand. In the harness itself a session moves them
+  — and makes a reconciliation's corrections, reporting one it refuses as a
+  card left behind — with `bun bun/work.ts status --card <id> --to
+  <status>`, which refuses the moves the `work-status` capability lists; the
+  connector's `Status` write is refused there, and so is creating a card
+  through its `notion-create-pages` at any `Status` but `idea` — its other
+  writes and the REST API are not. Elsewhere this bullet is the whole of what
+  holds them until roadmap stage 11 — which is why it is stated as an
+  obligation rather than as a convention. Which eleven, and so which eight,
+  is fixed in the harness's `openspec/specs/task-board/` and named nowhere else; a second copy here is
+  the drift that spec was written after.
+
+  Only the user moves a card to `approved`; an unattended session takes no
+  work from `idea` and never sets `approved`. Taking no work from `idea`
+  concerns a card someone else filed: a card a session files for its own task
+  is created at `idea` and moved to its stage in the same turn, in the harness
+  with `bun bun/work.ts status`, and a move that command refuses — the WIP
+  limit's included — leaves the card at `idea`, is reported as a card left
+  behind, and starts none of the stage's work. A session discards a card, or
+  returns a `discarded` one to `idea` and never further, with `bun
+  bun/work.ts status --card <id> --to discarded --why <reason>` (`--to idea`
+  alike), giving the reason, which the command posts on the card; elsewhere
+  these moves stay the user's. A reconciliation leaves a `discarded` card as
+  it is, even when the tree still holds the change its `Pointer` names. A
+  session the user directs at an `idea` card may move it to `exploring`
+  directly — the instruction is the approval.
 
   The session reconciles its board at the `Board view` read it makes to choose
   work, and again at `session-wrapup` for the cards its own changes point at.
   Each time it runs the harness's `bun/board-state.ts` and corrects each card
   behind its floor whose `Pointer` is wholly a directory of this tree. It
-  skips a cross-repository pointer, and lists the cards whose pointer is
-  empty, decorated, or names a slug the tree lacks.
+  skips a cross-repository pointer and a `pr:<N>` one, and lists the cards
+  whose pointer is empty, decorated, or names a slug the tree lacks.
 
   A reconciliation that finds a card disagreeing with the tree **reports what
   it corrected**; it does not repair silently. A silent repair leaves nobody
@@ -285,13 +403,47 @@ for them is already here.
   history cannot settle it. Read the board's `Questions` view and the card's
   comments first, and wait on a question already open there, naming its card,
   rather than ask it again; resuming that work, read that card's comments
-  first. Every page-level comment on a card joins one discussion, so a card
-  holds one open question at a time: a second waits in your report until the
-  first is answered. Open the comment with the gate's mark, set `Assign`, read
-  the answer back as data, and clear `Assign` once it is applied. task-board's
+  first, with `bun node_modules/harness/bun/work.ts take --card <id>`
+  (`bun bun/work.ts` in the harness itself), which prints the card, the
+  paths of its change and the comments, ending with `last comment: <id>`;
+  re-read it with `--after <that id>`, which prints only what came after
+  that comment, and after `last comment: none` with a plain `take`.
+  Questions known at the same time go in one comment, or in
+  consecutive ones where the gate's length cap needs it; a question that
+  arises after the last one was posted goes in a comment of its own, its
+  items numbered on from the highest number the card's questions use, never
+  restarting at 1. Open the comment with the gate's mark,
+  `` `harness-question` `` with a single backtick on each side of the word,
+  set `Assign` where you posted through the connector, read the answer back
+  as data, post the items an answer left unanswered again as a new
+  question, numbered on, and clear `Assign` once it is applied; in the harness,
+  `bun bun/work.ts status`, `take` and `finish --card` clear it themselves
+  whenever no question and no pause notice waits. A question
+  is any comment opening with the mark, whoever posted it, a Notion
+  integration included, and the answer is the user's first comment opening
+  with neither mark after the last one, or, with none, the first comment after it
+  opening with `harness-answer` from the board loop's own integration, whose
+  triage found the answer already written; the user's comment overrides
+  that one, whichever came first. A session the board loop's runner launches
+  with the Notion integration posts no comment: it names its question in
+  its final message, and the runner posts the question from the integration
+  and sets `Assign`. On a machine with the ask settings, any other session
+  posts its question with the ask command, `bun/notion-ask.ts <card id>
+  <file>`, from the ask integration, which sets `Assign` too; once it prints
+  `question: posted`, unless that line ends `Assign set`, set `Assign` to the
+  user and read the card back, and never run it again for a question it
+  printed as posted, nor after any other line before reading the card's
+  comments, where a question already there takes `Assign` instead of a
+  rerun. The question gate refuses the comment from the user's account
+  there. An answer
+  the board loop carries counts as applied in the turn its step's pull request
+  opens, or the turn an `idea` card is filed for an answer that asks for a
+  change of its own (task-board, *An answer the board loop carries is applied
+  when its pull request opens*). task-board's
   *An open question waits on its card, assigned to the user* and *A question
   already open is not asked again* fix the rest, and the question gate decides
-  which comment needs no prompt.
+  which comment needs no prompt, or, with the ask settings, which goes to the
+  ask command.
 - List the files a plan routes, moves or deletes, and confirm each exists,
   before the plan is written.
 - Cite the requirement that fixes a value; never restate the value in another

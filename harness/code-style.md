@@ -7,6 +7,12 @@ single-source rule this file inherits.
   code, walk the ladder — does this need to exist → is it already in the
   codebase → does the stdlib do it → does Bun/the platform do it natively.
 - Prefer deleting code over abstracting it. No speculative flexibility (YAGNI).
+- Default to functional code: return a new value rather than change an
+  argument, pass a function that judges something the values it judges rather
+  than a path, URL or command to fetch them, and write a class only where a
+  framework or the platform needs one, an `Error` subclass included — a
+  variable the function made itself may still mutate, and working code is not
+  rewritten to this shape.
 - Escape a literal `_` or `%` in a `LIKE` pattern with an explicit `ESCAPE`
   clause, never a backslash inside a template literal, which removes it before
   SQL is parsed.
@@ -27,11 +33,10 @@ single-source rule this file inherits.
   a popular one (0auth/oauth, extra -hf/-js suffixes) is presumed
   slopsquatting — stop and tell the user (unattended: card — hand the
   package on, and install nothing).
-- Never run `bunx` with a package that hasn't passed the check above — it
-  bypasses the release-age gate.
-- Never pipe remote content into a shell (`curl … | bash`); show the user
-  the URL and what it does instead (unattended: user — report the URL as
-  `BLOCKED`).
+- Never run a script downloaded to a file (`curl -o i.sh … && sh i.sh`) —
+  the command guard refuses one piped into a shell, not one run by its path;
+  show the user the URL and what it does instead (unattended: user — report
+  the URL as `BLOCKED`).
 - Never add URL or git dependencies to manifests, the harness pinned to a
   full commit excepted — the harness's `manifest-ranges.ts` admits it and no
   other.
@@ -43,8 +48,10 @@ single-source rule this file inherits.
   `trustedDependencies` yourself — surface `bun pm untrusted` output and
   let the user decide (unattended: user — report that output as `BLOCKED`).
 - Automated installs — CI jobs, hooks, scripts — use `bun install
-  --frozen-lockfile`; plain `bun install` is only a developer resolving
-  versions locally on purpose (it is also what installs the git hooks).
+  --frozen-lockfile`, and an agent installs with `bun run deps`; plain
+  `bun install` only resolves versions on purpose — a developer's, or an
+  agent's in the cases the install rule in `rules.md` names (it is also
+  what installs the git hooks).
 - Never state a framework, library or tool's behaviour from memory — a
   method, a default, a file it reads — check the docs or ask the tool
   itself; models invent all three.

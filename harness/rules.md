@@ -5,8 +5,8 @@
 ### The loop — agent responsibilities
 
 Whenever a mistake is confirmed — a bug the user reports, a failed test, a
-review finding (human, /triage, /zombies, /warm, /ponytail-review, or
-CodeRabbit) the user agrees with, or a mistake you catch in your own earlier
+review finding (human, /triage, /zombies, /warm, /ponytail-review,
+/code-review, or CodeRabbit) the user agrees with, or a mistake you catch in your own earlier
 output — do BOTH.
 The same applies to **style preferences**: when the user pauses an apply run
 (or any task) to say "do it this way instead", that correction is a lesson —
@@ -14,10 +14,21 @@ capture it exactly like a bug, so future runs don't repeat the old style:
 
 1. Fix the code.
 2. Capture the lesson, in the same turn, before treating the task as done:
-   - If it's about how code should be written here → propose a one-line rule
-     for the matching sublist of "Rules" below — Code, Process or Safety —
-     and add it after the user confirms (unattended: card — hand the wording
-     on, as for the skills-repo wording below).
+   - Unless it's a one-off (last bullet), first ask whether a mechanism can
+     hold it — a test over the code it is about, or a gate: a `harness:check`
+     check, a hook, a permission entry:
+     - a test the branch can add → add it in the same turn, and write no rule;
+     - a gate change → file a card on the board of the repository that would
+       ship it, and write the rule below as its stop-gap, which leaves under
+       *A mechanised prohibition leaves its prose home* once the gate lands;
+     - none that would not block far more than the rule intends → write the
+       rule below, and tell the user why no mechanism fits (unattended: card —
+       the card carries the reason).
+   - If no test took it and it's about how code should be written here →
+     propose a one-line rule for the matching sublist of "Rules" below —
+     Code, Process or Safety — and add it after the user confirms
+     (unattended: card — hand the wording on, as for the skills-repo
+     wording below).
    - If it's about how reviews should be run → say the fix belongs in the
      corresponding skill in the shared skills repo, and propose the exact
      wording (do not edit the skill from this project).
@@ -59,6 +70,16 @@ What counts as evidence for a claim — environments, external contracts,
 observability, causal claims — see [verification.md](verification.md).
 What a session does at a step that names the user when it runs unattended —
 see [autonomy.md](autonomy.md).
+How a session hands a task to a subagent: start a fresh one, forking only
+when the task needs this session's history, and write its brief into the
+launch prompt, never into git — the task, the clone and branch, the acts
+allowed, the user's words that apply and the report's form, and nothing the
+harness already loads. For a subagent that works on a change or a card, open
+the call's `description` with the slug of the change it carries, or of the
+card where there is none, and name the agent's ID, where the call returns
+one, beside the change's card, or beside that card when there is no change,
+in each report — the description is what the agent list and notifications
+show, and the ID is what `SendMessage` still reaches after a compaction.
 
 #### Code
 
@@ -68,6 +89,10 @@ describes is rewritten, the rule is a candidate for deletion.
 - Inline a single-caller helper only after grepping for the logic it duplicates
   elsewhere, and keep one whose comment documents a decision its call site would
   bury.
+- Write logic a second time only by lifting it into one module both callers
+  import, switching the first caller in the same change — two copies kept in
+  step by hand drift, and the stale one fails silently; a copy that would fail
+  loudly is no exception.
 - A guard against malformed input must cover the whole value, not a prefix —
   anchor both ends or parse it.
 - Read a value a tool consumes from the structure that tool parses, and where it
@@ -92,9 +117,9 @@ describes is rewritten, the rule is a candidate for deletion.
   count as a pass.
 - Await a rejection from a driver's query object through `then(ok, err)`,
   never `expect().rejects`, which hangs on a thenable instead of failing.
-- Give a test hook that spawns synchronously an explicit timeout — bun cannot
-  fire the default one while the call blocks, so the hook overruns and is
-  reported with a time no configured limit explains.
+- Give a test hook or case that spawns synchronously an explicit timeout of
+  three to four times its time measured under load — bun's 5 s default kills
+  the spawn mid-call on a busy machine.
 - Convert a `file:` URL with `fileURLToPath` before handing it to the
   filesystem; never `.pathname`, which stays percent-encoded.
 - Compare prose across a line wrap by normalising whitespace, never by matching
@@ -105,6 +130,13 @@ describes is rewritten, the rule is a candidate for deletion.
   writes, never by a substring a user's own entry can also contain.
 - Pin a name one system looks up in another with a test that reads it where it
   is defined, whenever a missing match reads as nothing to do.
+- Never treat reading extra text as commands as a command scan's safe side —
+  a quote that text leaves open hides what follows; probe a claim about how a
+  shell parses, under dash as well as bash, before a design or an `sh -c`
+  string rests on it.
+- Pin a scan's frame-level state with a case whose newline falls inside the
+  frame — a state the frame's close discards passes every case that closes it
+  first.
 
 #### Process
 
@@ -120,10 +152,15 @@ Rules about how work is carried out here. They do not age with the code.
   are written in British English by default (`behaviour`, `afterwards`);
   identifiers and third-party API names keep whatever spelling they ship with.
 - Script a string replacement only for a pattern repeating across files, assert
-  the match count, and read the changed passage back — a diff stat, a token
-  count and a silent no-op all read as a successful edit.
+  the match count, and read every changed passage back, the editing tool's
+  `replace_all` included — a diff stat, a token count, a silent no-op and a
+  dropped trailing space all read as a successful edit.
 - Edit a file with the editing tool, never a shell heredoc, when its text
   carries a backtick or `${`.
+- Install dependencies with `bun run deps`; type a plain `bun install`, which
+  prompts and rewrites `bun.lock`, only after a re-pin that `git-and-prs.md`
+  asks for, or if `package.json` has uncommitted edits or `bun.lock` lacks
+  the pin.
 - Split a file to the cap that will apply to it, not the one that applies
   today, and re-measure the diff budget afterwards — a split counts its moved
   lines in it twice.
@@ -144,12 +181,35 @@ Rules about how work is carried out here. They do not age with the code.
 - Pass a CI gate the base it measures from as the checked-out merge commit's
   first parent, never `pull_request.base.sha`, which does not follow the base
   branch.
+- Merge `origin/main` into a branch before pushing it whenever main has moved
+  since the branch last merged it — the push hook tests the branch, CI tests
+  its merge with main.
+- Before follow-up on an open pull request starts — a review round, a CI fix,
+  a merge of `main` — whether you hand it to a subagent or carry it yourself,
+  run `bun node_modules/harness/bun/work.ts draft --pr <n>` (`bun bun/work.ts`
+  in the harness itself) and put the head it prints in any brief; name a
+  failed `draft` — a cloud session's fails on a ready one — in the report,
+  and go on with the follow-up.
 - Pass `--full-tree` to a `git ls-tree` whose pathspec names a path from the
   repository root — a working directory below the root resolves it against
   itself and lists nothing.
 - Before a commit, run the build's own scan over every file the commit writes
   that the scan covers, since a fixture in a test can be valid input to the
   scan it tests.
+- Before applying a review finding to a change, grep its `design.md`, where it
+  has one, for a decision the fix reverses, and update that decision in the
+  same commit.
+- Before citing a script's exit code as a check, confirm the script runs that
+  check when invoked — a module with no entry point exits 0 and proves nothing.
+- Resume a subagent only for work on its own open pull request, and hand
+  anything else to a fresh one — a resumed agent carries its whole context
+  into every call.
+- When a third consecutive fix toward one roadmap goal exposes a failure at a
+  different seam, or the goal's section keeps closing cards while its outcome
+  stays where it was, stop fixing and bring the user an architecture review
+  with an alternative (unattended: user — report `BLOCKED`, naming the goal
+  and the seams) — patching each seam in turn is how a dead-end design
+  survives.
 
 #### Safety
 
@@ -162,9 +222,9 @@ not age with the code.
 - Reconcile a vendored skill's `allowed-tools` and `disable-model-invocation`
   against this project's policy before the skill is used.
 - Run every npm-family command the `playwright-cli` skill or its references
-  name through bun instead — `npx` as `bunx`, `npm run` as `bun run`,
-  `npm install -g` as `bun add -g`, `npm init` as `bun create` — since its own
-  are denied here.
+  name through bun instead — `npx` as `bunx --no-install`, `npm run` as
+  `bun run`, `npm install -g` as `bun add -g`, `npm init` as `bun create` —
+  since its own are denied here.
 - Beside a pinned image, binary or digest that no dependency manifest tracks,
   write which tool updates the pin, or that nothing does.
 - Gate a suite that runs destructive SQL on a variable saying the database is
@@ -172,12 +232,22 @@ not age with the code.
 - After a generator runs, compare the directories it writes against a listing
   taken before it, ignored ones included — `git status` hides what
   `.gitignore` covers.
-- Push from a repository's own checkout, never a `git worktree` — a hook there
-  hands the tests it runs an absolute `GIT_DIR`.
 - Delete a branch, local or remote, only when the user asks for it — never
   folded into a command run for another purpose (unattended: user — delete
   nothing, and name the branch in the report).
+- Never signal a process this session did not start through a sender the
+  command guard does not read — a committed script's `process.kill`, a
+  command string a tool runs itself (`watch "kill …"`, `trap 'kill …'
+  EXIT`), a command name built by an expansion (`$k`), `playwright-cli
+  kill-all`, `fuser -k`.
 - Never run an act the command guard or a permission entry refuses or asks
   about — a commit, a push, a `gh` write, a package command, an edit to a gated
   file — through an interpreter (`python3 -c`, `bun -e`, `node -e`) or a
-  throwaway script; both read only the call's own words, so the act walks past.
+  throwaway script, committed or not; the guard refuses only the program text
+  it cannot read, so a committed script carrying the act reads to both checks
+  as an ordinary call and walks past. `bun bun/work.ts finish` is the one
+  script the allow list grants a push, a pull request and a ready, and the
+  one `@coderabbitai review` it posts on a head CodeRabbit skipped or left
+  without a run, and
+  `bun bun/work.ts resolve` the one it grants a review thread's resolve, and
+  `bun bun/work.ts draft` the one it grants a switch to draft.
