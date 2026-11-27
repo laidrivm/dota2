@@ -88,13 +88,15 @@ the pinned commit or is missing from either side, naming the file.
 
 WHILE the installed harness package is absent, the Bash `PreToolUse` hook SHALL
 allow `bun install` or `bun i`, alone or with `--frozen-lockfile` and no
-other argument, and SHALL block every other command with a message naming `bun install` as what to run,
-rather than failing every command alike.
+other argument, and `bun run deps`, and SHALL block every other command with
+a message naming `bun run deps` as what to run, rather than failing every
+command alike. `bun run deps` is what the message names because the `ask`
+entries prompt on a typed `bun install` and not on the script.
 
 #### Scenario: A fresh clone
 
-- **WHEN** a session in a clone with no `node_modules/` runs `bun install` or
-  `bun install --frozen-lockfile`
+- **WHEN** a session in a clone with no `node_modules/` runs `bun install`,
+  `bun install --frozen-lockfile` or `bun run deps`
 - **THEN** the hook SHALL let it run
 
 #### Scenario: Any other command before the install
@@ -103,7 +105,7 @@ rather than failing every command alike.
   `bun install <package>`, which mutates the manifest, an install with any
   other flag such as `--registry <url>` or `--cwd <dir>`, or an install with
   another command chained after it
-- **THEN** the hook SHALL block it and its message SHALL name `bun install`
+- **THEN** the hook SHALL block it and its message SHALL name `bun run deps`
 
 #### Scenario: After the install
 
