@@ -89,3 +89,67 @@ test("each of the captain's picks shows its position and the player holding it",
 	await expect(pick).toHaveCount(1);
 	await expect(pick).toContainText("pos 1 · Carry");
 });
+
+// spec: cm-model/entering-two-steps-quickly
+test("two steps entered 100 ms apart only ever show the ranking of the step in progress", async ({
+	page,
+}) => {
+	await signedInAt(page, "First pick");
+	const first = page
+		.getByRole("region", { name: "Suggested bans, step 1" })
+		.getByRole("button");
+	await expect(first).toHaveCount(5);
+
+	// Every time a ranked list is on screen, note which step it is for and
+	// which step the marker says is in progress at that moment.
+	await page.evaluate(() => {
+		const seen: [string, string][] = [];
+		(window as unknown as { seen: typeof seen }).seen = seen;
+		new MutationObserver(() => {
+			const marker = document.querySelector('[aria-live="polite"]');
+			for (const list of document.querySelectorAll(
+				"ol[aria-label^='Ranked for step ']",
+			))
+				seen.push([
+					list.getAttribute("aria-label") ?? "",
+					marker?.textContent ?? "",
+				]);
+		}).observe(document.body, {
+			subtree: true,
+			childList: true,
+			characterData: true,
+		});
+	});
+	// Step 1 by its suggestion, then 100 ms later step 2 through the picker.
+	await page.evaluate(
+		() =>
+			new Promise<void>((done) => {
+				const buttons = document.querySelectorAll<HTMLButtonElement>(
+					"ol[aria-label^='Ranked for step '] button",
+				);
+				buttons[0]?.click();
+				setTimeout(() => {
+					document
+						.querySelector<HTMLButtonElement>('button[data-pick="cm-step"]')
+						?.click();
+					done();
+				}, 100);
+			}),
+	);
+	await expect(page.getByRole("dialog")).toBeVisible();
+	await page.keyboard.press("Enter");
+	await expect(
+		page
+			.getByRole("region", { name: "Enemy's expected bans, step 3" })
+			.getByRole("listitem"),
+	).not.toHaveCount(0);
+
+	const seen = await page.evaluate(
+		() => (window as unknown as { seen: [string, string][] }).seen,
+	);
+	for (const [list, marker] of seen) {
+		const step = marker.match(/^Step (\d+)/)?.[1];
+		expect(list).toMatch(new RegExp(`step ${step}$`));
+	}
+	expect(seen.some(([list]) => list.endsWith("step 3"))).toBe(true);
+});

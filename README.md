@@ -33,7 +33,7 @@ One fact lives in exactly one file; everything else links to it.
 | Directory | Holds |
 |-----------|-------|
 | `src/app/` | the client: components, their stylesheets, and the state they read |
-| `src/cm/` | the Captains Mode page's entry point, served at `/cm` |
+| `src/cm/` | the Captains Mode page's entry point, served at `/cm`, and the search worker the same bundle runs as |
 | `src/cm/ui/` | the Captains Mode page: its screens, their stylesheets, and its calls to `/api/cm/` |
 | `src/cm/engine/` | the Captains Mode draft rules the page and its search share: the draft order and a team's value |
 | `src/fixtures/` | the snapshot the client is served until the pipeline publishes one |
