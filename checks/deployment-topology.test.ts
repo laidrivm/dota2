@@ -257,3 +257,21 @@ test("the job is not brought up with the project, and the other two restart", ()
 	expect(app.restart).toBe("always");
 	expect(db.restart).toBe("always");
 });
+
+// spec: deployment-topology/the-password-in-the-compose-file
+test("the CM password reaches the application and no other service", () => {
+	expect(app.environment?.CM_PASSWORD).toBe("${CM_PASSWORD}");
+	const others = Object.entries(services).filter(([name]) => name !== "app");
+	for (const [, service] of others)
+		expect(Object.keys(service.environment ?? {})).not.toContain("CM_PASSWORD");
+});
+
+// spec: deployment-topology/the-password-in-the-compose-file
+test(".env.example names the CM password empty and says what unset means", () => {
+	const documented = readFileSync(`${root}/.env.example`, "utf8");
+	expect(documented).toMatch(/^CM_PASSWORD=$/m);
+	const block = documented.slice(0, documented.indexOf("CM_PASSWORD="));
+	const comment = block.slice(block.lastIndexOf("\n\n")).replace(/\s+/g, " ");
+	expect(comment).toMatch(/12 characters/);
+	expect(comment).toMatch(/closed/);
+});

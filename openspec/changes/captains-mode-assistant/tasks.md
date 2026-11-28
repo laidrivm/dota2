@@ -43,7 +43,7 @@ Closes `cm-access/repeated-wrong-passwords`,
 `cm-access/a-request-from-another-origin`,
 `deployment-topology/the-password-in-the-compose-file`.
 
-- [ ] 2.1 Failing cases first (ZOMBIES 4, 5, 9, 10, 14): the tenth wrong
+- [x] 2.1 Failing cases first (ZOMBIES 4, 5, 9, 10, 14): the tenth wrong
       password is 401 and the eleventh 429 with `Retry-After` in 1–900, the
       right password included; a failure exactly 900 s old no longer counts
       (clock injected); a session signed in before the ten stays signed in;
