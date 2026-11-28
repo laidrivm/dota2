@@ -65,7 +65,7 @@ Closes `cm-draft/signing-in-from-the-page`, `cm-access/signing-out`,
 - [ ] 3.1 Add `cm.html` and `src/cm/main.tsx`; the build script and
       `scripts/dev.ts` take both entry points; `distFile` maps `/cm` to
       `cm.html`; `src/server/build.test.ts` asserts both are emitted.
-- [ ] 3.2 Failing cases first (ZOMBIES 15, 24): the form announces a wrong
+- [x] 3.2 Failing cases first (ZOMBIES 15, 24): the form announces a wrong
       password through `role="alert"` and keeps focus; 503 and 429 are shown
       from their `code`; `DELETE /api/cm/session` answers 204 and clears the
       cookie, and sign-in, read, sign-out work in sequence.

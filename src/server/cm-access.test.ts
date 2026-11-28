@@ -178,3 +178,40 @@ describe("no usable password configured", () => {
 		expect(response.status).toBe(204);
 	});
 });
+
+describe("signing out", () => {
+	const signOut = (app: ReturnType<typeof cmApi>, cookie?: string) =>
+		app.request("/api/cm/session", {
+			method: "DELETE",
+			headers: cookie === undefined ? {} : { cookie },
+		});
+
+	// spec: cm-access/signing-out
+	test("sign-out answers 204 and clears the cookie on the same path", async () => {
+		const app = api();
+		const cookie = cookieOf(await signIn(app));
+		const response = await signOut(app, cookie);
+		expect(response.status).toBe(204);
+		const cleared = (response.headers.get("set-cookie") ?? "")
+			.split(";")
+			.map((part) => part.trim());
+		expect(cleared[0]).toBe("cm_session=");
+		expect(cleared).toContain("Max-Age=0");
+		expect(cleared).toContain("Path=/api/cm");
+	});
+
+	// spec: cm-access/signing-out
+	test("sign-in, read, sign-out, read again", async () => {
+		const app = api();
+		const cookie = cookieOf(await signIn(app));
+		expect((await readSession(app, cookie)).status).toBe(200);
+		expect((await signOut(app, cookie)).status).toBe(204);
+		expect((await readSession(app)).status).toBe(401);
+	});
+
+	test("sign-out without a session is 401", async () => {
+		const response = await signOut(api());
+		expect(response.status).toBe(401);
+		expect((await problem(response)).code).toBe("not-signed-in");
+	});
+});
