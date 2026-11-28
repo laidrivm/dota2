@@ -32,6 +32,8 @@
 		"typescript": "7.0.2"
 	},
 	"dependencies": {
+		"@anthropic-ai/sdk": "1.11.0",
+		"devalue": "6.0.3",
 		"harness": "github:laidrivm/harness#022196a8c8e2cd05536463f0b878191f6653f5d6",
 		"hono": "4.13.19",
 		"preact": "11.0.1",
