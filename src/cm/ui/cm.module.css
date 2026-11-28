@@ -74,3 +74,86 @@
 	margin: 0;
 	color: var(--text-3);
 }
+
+/* Setup: the side and the pick order. */
+.setup {
+	display: flex;
+	gap: var(--sp-8);
+	padding: var(--sp-5) 0;
+}
+
+.choice {
+	display: flex;
+	gap: var(--sp-4);
+	margin: 0;
+	padding: 0;
+	border: 0;
+}
+
+.option {
+	display: flex;
+	align-items: center;
+	gap: var(--sp-2);
+}
+
+.step {
+	margin: var(--sp-4) 0;
+	font-size: var(--fs-control);
+	font-weight: 600;
+}
+
+/* Both rosters side by side; desktop only, as the brief settles. */
+.rosters {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: var(--sp-6);
+}
+
+.roster {
+	display: flex;
+	flex-direction: column;
+	gap: var(--sp-3);
+}
+
+.player {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-end;
+	gap: var(--sp-3);
+	margin: 0;
+	padding: var(--sp-3) var(--sp-4);
+	border: 1px solid var(--border-2);
+	border-radius: var(--r-panel);
+	background: var(--bg-1);
+}
+
+.field {
+	display: flex;
+	flex-direction: column;
+	gap: var(--sp-1);
+}
+
+.signatures {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--sp-1);
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.signature {
+	padding: 0;
+	border: 0;
+	background: none;
+	cursor: pointer;
+}
+
+.visuallyHidden {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	clip-path: inset(50%);
+	white-space: nowrap;
+}

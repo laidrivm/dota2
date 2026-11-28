@@ -87,15 +87,15 @@ Closes `cm-draft/setup-collapses-into-the-board`,
 `cm-draft/editing-the-captain-s-roster`,
 `cm-draft/signing-in-from-the-page`.
 
-- [ ] 4.1 Failing cases first in `src/cm/ui/session.test.ts` (ZOMBIES 16, 17,
+- [x] 4.1 Failing cases first in `src/cm/ui/session.test.ts` (ZOMBIES 16, 17,
       21, 22): the `CmSession` reducer — side and pick order independent;
       nickname 24 accepted, 25 and whitespace-only refused; a duplicate
       position on either team unsets the first; the 10-signature
       limit; a stored session that fails to parse falls back to empty.
-- [ ] 4.2 Implement the session type and reducer, the setup block and both
+- [x] 4.2 Implement the session type and reducer, the setup block and both
       roster panels (signature heroes through the existing picker); the
       board appears once side and pick order are set with step 1 marked.
-- [ ] 4.3 E2e: a wrong password on `/cm` is announced and keeps focus, and
+- [x] 4.3 E2e: a wrong password on `/cm` is announced and keeps focus, and
       the right one replaces the form with the setup, on `/cm` and without a
       page load. (Task 4.3's old content moved to 3.4.)
 
@@ -111,6 +111,9 @@ Closes `cm-draft/the-order-from-the-second-pick`,
       step in progress names its team and action accessibly.
 - [ ] 5.2 Implement the order as one data table under `src/cm/engine/`, the
       board's step strip, bans and picks rows, and undo.
+- [ ] 5.3 From step 4 (its diff at the cap): lift `focusAfterPick` into the
+      picker module and focus a signature pick's add control, or its new tile
+      at ten; e2e: the pick shows, its tile removes it, ten disables adding.
 
 ## 6. Keeping the draft
 

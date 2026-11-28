@@ -9,7 +9,7 @@ import { Board } from "./board/board.tsx";
 import header from "./header.module.css";
 import { Header } from "./header.tsx";
 import { closesEditor } from "./hotkeys.ts";
-import { Picker } from "./picker/picker.tsx";
+import { Picker, targetLabel } from "./picker/picker.tsx";
 import {
 	type Action,
 	confirmsReset,
@@ -162,7 +162,7 @@ export function App() {
 			{pickTarget !== null && (
 				<Picker
 					bundle={snapshot}
-					target={pickTarget}
+					label={targetLabel(pickTarget)}
 					usedOf={(hero) => usedAs(session, hero)}
 					onPick={(hero) => {
 						apply(pickAction(pickTarget, hero));
