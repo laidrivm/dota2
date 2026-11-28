@@ -5,9 +5,15 @@
  */
 import { useEffect, useState } from "preact/hooks";
 import type { HeroEntry, SnapshotBundle } from "../../types.ts";
+import { assignTeam, picksOf } from "../engine/draft.ts";
 import { stepAt } from "../engine/order.ts";
 import s from "./cm.module.css";
-import { type CmSession, type Player, RANK_NAMES } from "./session.ts";
+import {
+	type CmSession,
+	draftState,
+	type Player,
+	RANK_NAMES,
+} from "./session.ts";
 
 const REPORT = "/api/cm/report";
 const HISTORY_KEY = "d2ass-cm-report";
@@ -41,11 +47,28 @@ export function draftText(session: CmSession, bundle: SnapshotBundle): string {
 			return `${index + 1}. ${who} — ${what}: ${heroName(byId, hero)}`;
 		})
 		.join("\n");
+	// Who plays what, as the engine places the picks: by known positions and
+	// the heroes' meta at each, so the report need not guess the roles.
+	const state = draftState(session);
+	const lineup = (team: "ours" | "theirs") =>
+		state === null
+			? ""
+			: assignTeam(bundle, picksOf(state)[team], state[team])
+					.sort((a, b) => a.position - b.position)
+					.map((slot) => {
+						const player = session[team].find(
+							(p) => p.position === slot.position,
+						);
+						return `- позиция ${slot.position}: ${heroName(byId, slot.hero)}${player ? ` (${player.nickname})` : ""}`;
+					})
+					.join("\n");
 	return [
 		`Мы играем за ${session.side === "dire" ? "Dire" : "Radiant"}, ${pickOrder === "first" ? "первый" : "второй"} пик.`,
 		`Наша команда:\n${roster(session.ours)}`,
 		`Противник:\n${roster(session.theirs)}`,
 		`Драфт по шагам:\n${steps}`,
+		`Наши герои по позициям:\n${lineup("ours")}`,
+		`Герои противника по позициям (оценка):\n${lineup("theirs")}`,
 	].join("\n\n");
 }
 
