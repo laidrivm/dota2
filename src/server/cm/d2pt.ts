@@ -13,9 +13,11 @@
  * is the label. A file of another page carries no such rows.
  *
  * The decoded value is the caller's, and bounded only by the body's 5 MB: a
- * few bytes decode to a sparse array four billion long, or to nesting deep
- * enough to exhaust a recursive walk. So the walk is iterative, visits only
- * the entries an array actually holds, and stops past `MAX_NODES`.
+ * few bytes decode to a sparse array four billion long, which a walk over its
+ * length would stall the server on. So the walk visits only the entries an
+ * array actually holds, stops past `MAX_NODES`, and is iterative — nesting
+ * deep enough to exhaust a recursive one is refused by devalue first, measured
+ * at about 19,000 levels under Bun, but the walk need not rely on that.
  */
 import { unflatten } from "devalue";
 import type { MetaHero } from "./meta-schema.ts";
@@ -76,7 +78,9 @@ function collect(root: unknown, found: Found): boolean {
 		if (Array.isArray(value)) {
 			// Populated indices only: a hole is not an entry, and a sparse
 			// array's length is not a count of anything.
-			for (const index of Object.keys(value))
+			// Pushed last-first so they pop in document order, which "the
+			// first `patch` string" is read in.
+			for (const index of Object.keys(value).reverse())
 				stack.push([value[Number(index)], inherited]);
 			continue;
 		}
@@ -88,7 +92,8 @@ function collect(root: unknown, found: Found): boolean {
 			found.rows.push({ row: record, position: here });
 			continue;
 		}
-		for (const child of Object.values(record)) stack.push([child, here]);
+		for (const child of Object.values(record).reverse())
+			stack.push([child, here]);
 	}
 	return true;
 }
@@ -157,7 +162,9 @@ export function readMeta(
 			rating: value,
 			tier: typeof row.tier === "string" ? row.tier : null,
 			matches:
-				Number.isInteger(row.matches) && (row.matches as number) >= 0
+				// Safe integers only: the stored file is read back through a schema
+				// that refuses an unsafe one, and would lose the whole position.
+				Number.isSafeInteger(row.matches) && (row.matches as number) >= 0
 					? (row.matches as number)
 					: null,
 			winRate: finite(row.win_rate),

@@ -160,7 +160,8 @@ describe("an upload that is not the meta file leaves the store as it was", () =>
 			"a sparse array four billion long",
 			() => JSON.stringify({ nodes: [{ data: [[-7, 4294967295]] }] }),
 		],
-		["nesting a hundred thousand deep", nested(100_000)],
+		// Refused at the decode: devalue gives up near 19,000 levels under Bun.
+		["nesting too deep to decode", nested(100_000)],
 	])("%s answers 422 not-d2pt-meta", async (_, body) => {
 		const { post, get } = await signedIn();
 		await post(metaFile(rows(ids, 60)));
@@ -256,4 +257,20 @@ test("a statistic the file leaves out is stored as null, not as zero", async () 
 		matches: null,
 		winRate: null,
 	});
+});
+
+test("the patch label is the first in the file, and a count too large to keep is null", async () => {
+	const { post, get } = await signedIn();
+	const heroes = rows(ids, 60).map((row, i) =>
+		i === 0 ? { ...row, matches: 1e20 } : row,
+	);
+	const response = await post(
+		dataFile({ first: { patch: "7.40" }, meta: { patch: "7.41", heroes } }),
+	);
+	expect(await response.json()).toMatchObject({ patch: "7.40" });
+	const { positions } = (await (await get()).json()) as {
+		positions: { "3": { heroes: Record<string, { matches: unknown }> } | null };
+	};
+	// Stored and read back whole, the unsafe count kept as null.
+	expect(positions["3"]?.heroes[String(ids[0])]?.matches).toBeNull();
 });
