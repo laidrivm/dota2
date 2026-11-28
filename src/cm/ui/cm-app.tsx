@@ -15,6 +15,7 @@ import { Rosters } from "./rosters.tsx";
 import { reduce } from "./session.ts";
 import { Setup } from "./setup.tsx";
 import { SignIn } from "./sign-in.tsx";
+import { Suggestions } from "./suggestions.tsx";
 
 /**
  * The signed-in screen: setup until the side and pick order are both set, then
@@ -51,6 +52,7 @@ function Draft() {
 			{ready && (
 				<>
 					<DraftBoard bundle={bundle} session={session} apply={apply} />
+					<Suggestions bundle={bundle} session={session} apply={apply} />
 					<Rosters bundle={bundle} session={session} apply={apply} />
 				</>
 			)}
