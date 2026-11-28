@@ -29,10 +29,12 @@ test("a stored position reads as itself, the others empty", async () => {
 test.each([
 	["a network failure", new TypeError("offline")],
 	["a 401", new Response(null, { status: 401 })],
-	["a body of another shape", Response.json({ nope: 1 })],
-])("%s reads as no meta", async (_, answer) => {
-	expect(await readMeta(answering(answer))).toEqual(NO_META);
-});
+])(
+	"%s reads as nothing read, for the caller to keep what it has",
+	async (_, answer) => {
+		expect(await readMeta(answering(answer))).toBeNull();
+	},
+);
 
 test.each([
 	[

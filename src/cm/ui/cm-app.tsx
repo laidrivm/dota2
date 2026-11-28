@@ -34,7 +34,7 @@ function Draft() {
 
 	useEffect(() => {
 		loadSnapshot().then(setSnapshot);
-		readMeta().then(setMeta);
+		readMeta().then((read) => setMeta(read ?? NO_META));
 	}, []);
 
 	// The snapshot as the model reads it: uploaded positions take their meta
@@ -63,7 +63,12 @@ function Draft() {
 	return (
 		<>
 			<Setup session={session} apply={apply} />
-			<MetaPanel positions={meta} onUploaded={() => readMeta().then(setMeta)} />
+			<MetaPanel
+				positions={meta}
+				// A reread that fails keeps what the panel shows: the upload went
+				// through, and blanking it would read as the meta lost.
+				onUploaded={() => readMeta().then((read) => read && setMeta(read))}
+			/>
 			{ready && (
 				<>
 					<DraftBoard bundle={bundle} session={session} apply={apply} />

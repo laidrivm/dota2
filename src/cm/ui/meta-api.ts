@@ -26,15 +26,18 @@ export const NO_META: MetaPositions = {
 	"5": null,
 };
 
-/** The stored meta, or every position empty when it cannot be read. */
+/**
+ * The stored meta, or `null` when it cannot be read — the caller decides what
+ * that means: nothing yet on the first read, the meta it already shows after.
+ */
 export async function readMeta(
 	fetcher: Fetcher = fetch,
-): Promise<MetaPositions> {
+): Promise<MetaPositions | null> {
 	const response = await call(fetcher, undefined, META);
-	if (response?.status !== 200) return NO_META;
+	if (response?.status !== 200) return null;
 	const body = await response.json().catch(() => null);
 	const positions = body?.positions;
-	if (typeof positions !== "object" || positions === null) return NO_META;
+	if (typeof positions !== "object" || positions === null) return null;
 	return { ...NO_META, ...positions };
 }
 

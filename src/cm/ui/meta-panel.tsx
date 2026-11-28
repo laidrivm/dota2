@@ -29,15 +29,25 @@ export function MetaPanel({
 	const [messages, setMessages] = useState<string[]>([]);
 	const [busy, setBusy] = useState(false);
 
-	const upload = async (files: FileList | null) => {
-		if (files === null || files.length === 0) return;
+	const upload = async (input: HTMLInputElement) => {
+		const files = [...(input.files ?? [])];
+		// Cleared at once, so choosing the same file again is a change again.
+		input.value = "";
+		if (files.length === 0) return;
 		setBusy(true);
 		const said: string[] = [];
-		for (const file of files)
-			said.push(`${file.name}: ${await uploadMeta(await file.text())}`);
-		setMessages(said);
-		setBusy(false);
-		onUploaded();
+		try {
+			for (const file of files) {
+				const text = await file.text().catch(() => null);
+				said.push(
+					`${file.name}: ${text === null ? "That file could not be read." : await uploadMeta(text)}`,
+				);
+			}
+		} finally {
+			setMessages(said);
+			setBusy(false);
+			onUploaded();
+		}
 	};
 
 	return (
@@ -67,7 +77,7 @@ export function MetaPanel({
 					accept="application/json,.json"
 					multiple
 					aria-busy={busy}
-					onChange={(event) => upload(event.currentTarget.files)}
+					onChange={(event) => upload(event.currentTarget)}
 				/>
 			</label>
 			{messages.length > 0 && (
