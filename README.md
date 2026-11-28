@@ -33,6 +33,8 @@ One fact lives in exactly one file; everything else links to it.
 | Directory | Holds |
 |-----------|-------|
 | `src/app/` | the client: components, their stylesheets, and the state they read |
+| `src/cm/` | the Captains Mode page's entry point, served at `/cm` |
+| `src/cm/ui/` | the Captains Mode page: its screens, their stylesheets, and its calls to `/api/cm/` |
 | `src/fixtures/` | the snapshot the client is served until the pipeline publishes one |
 | `src/job/` | the nightly job's shared edge — the database connection and the schema it applies |
 | `src/job/ingest/` | the pulls, the transport that paces them, and the staging write |

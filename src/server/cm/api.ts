@@ -161,5 +161,18 @@ export function cmApi({ password, now = Date.now }: CmOptions) {
 		),
 	);
 
+	// The cookie is stateless, so signing out is the browser forgetting it: the
+	// same name and path, empty and already expired.
+	app.delete("/session", (c) => {
+		setCookie(c, COOKIE, "", {
+			httpOnly: true,
+			secure: true,
+			sameSite: "Strict",
+			path: "/api/cm",
+			maxAge: 0,
+		});
+		return c.body(null, 204);
+	});
+
 	return app;
 }

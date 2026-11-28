@@ -27,7 +27,11 @@ let building: Promise<unknown> = Promise.resolve();
 let emitted = new Set<string>();
 
 const build = () => {
-	building = Bun.build({ entrypoints: [`${root}index.html`], outdir: dist })
+	building = Bun.build({
+		// Both pages, as `bun run build` emits them.
+		entrypoints: [`${root}index.html`, `${root}cm.html`],
+		outdir: dist,
+	})
 		.then(async (result) => {
 			// Every rebuild names its assets by content, so the previous ones
 			// would otherwise pile up for the whole session — and go on being
@@ -58,6 +62,14 @@ const rebuild = () => {
 };
 
 watch(`${root}src`, { recursive: true }, rebuild);
-watch(`${root}index.html`, rebuild);
+// Both entry points, as `build` above bundles them. The root directory rather
+// than the two files: an editor that saves by renaming a new file over the old
+// one leaves a watch on the file itself reporting nothing afterwards.
+const pages = new Set(["index.html", "cm.html"]);
+watch(root, (_, name) => {
+	// A platform may report a change without its file name; that could be a
+	// page, and a rebuild too many costs less than a stale one.
+	if (name === null || pages.has(name)) rebuild();
+});
 
 await import("../src/server/server.ts");
