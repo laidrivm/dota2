@@ -120,24 +120,36 @@ test("two steps entered 100 ms apart only ever show the ranking of the step in p
 			characterData: true,
 		});
 	});
-	// Step 1 by its suggestion, then 100 ms later step 2 through the picker.
-	await page.evaluate(
+	// Step 1 by its suggestion, then 100 ms later step 2 through the picker,
+	// both committed inside the page so no round trip stretches the gap.
+	const gap = await page.evaluate(
 		() =>
-			new Promise<void>((done) => {
-				const buttons = document.querySelectorAll<HTMLButtonElement>(
+			new Promise<number>((done) => {
+				const first = document.querySelector<HTMLButtonElement>(
 					"ol[aria-label^='Ranked for step '] button",
 				);
-				buttons[0]?.click();
+				first?.click();
+				const start = performance.now();
 				setTimeout(() => {
 					document
 						.querySelector<HTMLButtonElement>('button[data-pick="cm-step"]')
 						?.click();
-					done();
+					// The picker renders on the next turn; its first free tile enters
+					// step 2.
+					const pick = () => {
+						const tile = document.querySelector<HTMLButtonElement>(
+							'dialog [aria-disabled="false"]',
+						);
+						if (tile === null) return setTimeout(pick, 0);
+						tile.click();
+						done(performance.now() - start);
+					};
+					pick();
 				}, 100);
 			}),
 	);
-	await expect(page.getByRole("dialog")).toBeVisible();
-	await page.keyboard.press("Enter");
+	expect(gap).toBeGreaterThanOrEqual(100);
+	expect(gap).toBeLessThan(150);
 	await expect(
 		page
 			.getByRole("region", { name: "Enemy's expected bans, step 3" })

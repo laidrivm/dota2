@@ -100,11 +100,21 @@ function useSearch(
 	bundle: SnapshotBundle,
 	state: DraftState | null,
 ): SuggestionsResult | null {
-	const [shown, setShown] = useState<SuggestionsResult | null>(null);
+	// Each result with the draft it was asked for, so one computed for an
+	// earlier draft is never returned — not even in the render before the
+	// effect below runs, which is after paint.
+	const [shown, setShown] = useState<{
+		key: string;
+		result: SuggestionsResult | null;
+	} | null>(null);
 	const client = useRef<SearchClient | null>(null);
+	const asked = useRef<string | null>(null);
 
 	useEffect(() => {
-		const search = new SearchClient(spawnSearch, bundle, setShown);
+		const search = new SearchClient(spawnSearch, bundle, (result) => {
+			// The client hands on the latest request's result alone.
+			if (asked.current !== null) setShown({ key: asked.current, result });
+		});
 		client.current = search;
 		return () => search.dispose();
 	}, [bundle]);
@@ -115,12 +125,12 @@ function useSearch(
 	// depends on.
 	const key = JSON.stringify(state);
 	useEffect(() => {
-		setShown(null);
+		asked.current = key;
 		const draft = JSON.parse(key) as DraftState | null;
 		if (draft !== null) client.current?.request(draft);
 	}, [key]);
 
-	return shown;
+	return shown !== null && shown.key === key ? shown.result : null;
 }
 
 /** The page's own bundle, started again as its search worker. */
