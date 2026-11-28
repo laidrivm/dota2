@@ -124,6 +124,8 @@ test("two steps entered 100 ms apart only ever show the ranking of the step in p
 	// both committed inside the page on a clock the case owns: the gap is
 	// exactly 100 ms of page time, whatever the machine is doing.
 	await page.clock.install();
+	// Paused before the first entry, so no time passes that the case does not run.
+	await page.clock.pauseAt(Date.now() + 1000);
 	const entered = page.evaluate(
 		() =>
 			new Promise<number>((done) => {
@@ -150,9 +152,9 @@ test("two steps entered 100 ms apart only ever show the ranking of the step in p
 				}, 100);
 			}),
 	);
-	await page.clock.runFor(100);
-	// Each turn the picker might take to render is a timer the clock runs.
-	await page.clock.runFor(20);
+	// One run covers the 100 ms and the turns the picker takes to render, each
+	// a timer this clock fires in order; nothing advances it in between.
+	await page.clock.runFor(120);
 	// A turn the picker takes to render is a 1 ms timer on this clock.
 	const gap = await entered;
 	expect(gap).toBeGreaterThanOrEqual(100);
