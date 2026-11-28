@@ -13,6 +13,7 @@ import {
 	laneMatchup,
 	meta,
 	phaseDelta,
+	roleAssignments,
 	share,
 	sideDelta,
 	syn,
@@ -46,29 +47,6 @@ interface EnemyInference {
 	enemies: EnemyMarginal[];
 	/** open[role] = P(role still unoccupied by an enemy). */
 	open: Record<`${Role}`, number>;
-}
-
-/** All injective assignments of `count` enemies to the 5 roles. */
-function roleAssignments(count: number): Role[][] {
-	const out: Role[][] = [];
-	const used = new Set<Role>();
-	const cur: Role[] = [];
-	const recurse = (i: number) => {
-		if (i === count) {
-			out.push([...cur]);
-			return;
-		}
-		for (const r of ROLES) {
-			if (used.has(r)) continue;
-			used.add(r);
-			cur.push(r);
-			recurse(i + 1);
-			cur.pop();
-			used.delete(r);
-		}
-	};
-	recurse(0);
-	return out;
 }
 
 function inferEnemyRoles(enemyHeroes: HeroEntry[]): EnemyInference {
