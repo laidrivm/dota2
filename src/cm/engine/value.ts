@@ -87,13 +87,17 @@ export function rankWeight(
 	return Math.min(WEIGHT_MAX, Math.max(WEIGHT_MIN, weight));
 }
 
+/** A signature hero's lift for the player holding its slot, before the weight. */
+export const comfort = (player: Player | null, hero: HeroId): number =>
+	player?.signatures.includes(hero) ? SIGNATURE_BONUS : 0;
+
 /**
  * The snapshot's meta at `position`, or the off-role cost where it rarely
  * plays. A position the hero is played at but too thin to judge is neutral
  * (model-spec §0), not off-role — `share()` reads it as 0, which would
  * otherwise land it on the cost.
  */
-function metaAt(hero: HeroEntry, position: Role): number {
+export function metaAt(hero: HeroEntry, position: Role): number {
 	if (hero.positions[`${position}`]?.sufficient === false) return 0;
 	return share(hero, position) >= PLAYABLE_SHARE
 		? meta(hero, position)
@@ -131,9 +135,8 @@ export function teamValue(
 	};
 	for (const { entry, position, player, order } of picked) {
 		const weight = rankWeight(player, team.players);
-		const signature = player?.signatures.includes(entry.id) ?? false;
 		parts.meta += weight * metaAt(entry, position);
-		parts.comfort += weight * (signature ? SIGNATURE_BONUS : 0);
+		parts.comfort += weight * comfort(player, entry.id);
 		parts.side += sideDelta(entry, team.side);
 		parts.phase += phaseDelta(entry, cmPhase(order));
 		parts.matchups += laneMatchup(bundle, entry, position, enemies);

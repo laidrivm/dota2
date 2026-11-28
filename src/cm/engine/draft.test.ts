@@ -87,3 +87,23 @@ test("the draft's picks split into the two teams by the order, each assigned", (
 	expect(theirs.slots.map((slot) => slot.hero)).toEqual([9]);
 	expect([ours.side, theirs.side]).toEqual(["dire", "radiant"]);
 });
+
+test("an equal worth goes to the first placement, and a lost hero is placed too", () => {
+	const b = bundle([hero(1, { "2": 1, "3": 1 })]);
+	expect(assignTeam(b, [1], roster())[0]?.position).toBe(2);
+	const slots = assignTeam(b, [9, 1], roster());
+	expect(slots.map((slot) => slot.hero)).toEqual([9, 1]);
+	expect(slots[1]?.position).toBe(2);
+});
+
+test("the enemy plays the other side", () => {
+	const state: DraftState = {
+		side: "radiant",
+		pickOrder: "second",
+		steps: [],
+		ours: roster(),
+		theirs: roster(),
+	};
+	const { ours, theirs } = teamsOf(bundle([]), state);
+	expect([ours.side, theirs.side]).toEqual(["radiant", "dire"]);
+});
