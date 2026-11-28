@@ -11,16 +11,9 @@ export type Team = "ours" | "theirs";
 /** Herald (1) to Immortal (8). */
 export type RankTier = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
 
-export const RANKS: Record<RankTier, string> = {
-	1: "Herald",
-	2: "Guardian",
-	3: "Crusader",
-	4: "Archon",
-	5: "Legend",
-	6: "Ancient",
-	7: "Divine",
-	8: "Immortal",
-};
+/** Medal names by tier: `RANK_NAMES[tier - 1]`. */
+export const RANK_NAMES =
+	"Herald Guardian Crusader Archon Legend Ancient Divine Immortal".split(" ");
 
 /** cm-draft: *Rosters describe both teams*. */
 export const SIGNATURE_LIMIT = 10;

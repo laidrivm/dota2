@@ -9,7 +9,7 @@ import {
 	type CmSession,
 	NICKNAME_MAX,
 	positionsComplete,
-	RANKS,
+	RANK_NAMES,
 	type RankTier,
 	SIGNATURE_LIMIT,
 	type Team,
@@ -156,7 +156,7 @@ function Roster({
 								<option value="">unknown</option>
 								{([1, 2, 3, 4, 5, 6, 7, 8] as const).map((rank) => (
 									<option key={rank} value={rank}>
-										{RANKS[rank]}
+										{RANK_NAMES[rank - 1]}
 									</option>
 								))}
 							</select>
