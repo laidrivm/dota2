@@ -35,7 +35,7 @@ One fact lives in exactly one file; everything else links to it.
 | `src/app/` | the client: components, their stylesheets, and the state they read |
 | `src/cm/` | the Captains Mode page's entry point, served at `/cm`, and the search worker the same bundle runs as |
 | `src/cm/ui/` | the Captains Mode page: its screens, their stylesheets, and its calls to `/api/cm/` |
-| `src/cm/engine/` | the Captains Mode draft rules the page and its search share: the draft order and a team's value |
+| `src/cm/engine/` | the Captains Mode draft rules the page and its search share: the draft order, a team's value, the assignment, and the search |
 | `src/fixtures/` | the snapshot the client is served until the pipeline publishes one |
 | `src/job/` | the nightly job's shared edge — the database connection and the schema it applies |
 | `src/job/ingest/` | the pulls, the transport that paces them, and the staging write |

@@ -3,10 +3,8 @@ import { HeroTile } from "../../app/board/hero-tile.tsx";
 import { focusAfterPick } from "../../app/picker/picker.tsx";
 import type { HeroEntry, SnapshotBundle } from "../../types.ts";
 import type { DraftState } from "../engine/draft.ts";
-import type {
-	Suggestion,
-	Suggestions as SuggestionsResult,
-} from "../engine/suggest.ts";
+import type { SearchResult as SuggestionsResult } from "../engine/search.ts";
+import type { Suggestion } from "../engine/suggest.ts";
 import b from "./board.module.css";
 import s from "./cm.module.css";
 import { SearchClient } from "./search-client.ts";
@@ -85,7 +83,13 @@ export function Suggestions({
 					Searching…
 				</p>
 			) : (
-				<Ranked result={result} byId={byId} apply={apply} />
+				<>
+					<p class={s.note} role="status">
+						Searched {result.depth} {result.depth === 1 ? "step" : "steps"}{" "}
+						ahead
+					</p>
+					<Ranked result={result} byId={byId} apply={apply} />
+				</>
 			)}
 		</section>
 	);

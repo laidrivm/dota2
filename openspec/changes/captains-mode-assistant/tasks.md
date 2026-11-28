@@ -179,12 +179,12 @@ Closes `cm-model/entering-two-steps-quickly`.
 Closes `cm-model/a-ban-that-would-hand-the-enemy-a-better-pick`,
 `cm-model/the-search-answers-within-its-budget`.
 
-- [ ] 11.1 Failing cases first in `src/cm/engine/search.test.ts` (ZOMBIES
+- [x] 11.1 Failing cases first in `src/cm/engine/search.test.ts` (ZOMBIES
       37, 42, 43): the constructed ban fixture ranks Y above X; deepening
       returns the last completed depth when the budget ends mid-iteration
       (clock injected); depth ≥ 2 within 1700 ms on the full snapshot
       fixture.
-- [ ] 11.2 Implement alpha-beta with the beam, greedy completion and
+- [x] 11.2 Implement alpha-beta with the beam, greedy completion and
       iterative deepening (design D8) behind the worker; the board shows the
       depth reached.
 

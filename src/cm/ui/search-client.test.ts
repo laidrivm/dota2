@@ -6,7 +6,7 @@
 import { expect, test } from "bun:test";
 import type { SnapshotBundle } from "../../types.ts";
 import type { DraftState } from "../engine/draft.ts";
-import type { Suggestions } from "../engine/suggest.ts";
+import type { SearchResult } from "../engine/search.ts";
 import { SearchClient, type SearchWorker } from "./search-client.ts";
 
 /** A worker that records what it is sent and answers only when told to. */
@@ -20,7 +20,7 @@ class FakeWorker implements SearchWorker {
 	terminate() {
 		this.terminated = true;
 	}
-	answer(stateId: number, result: Suggestions | null) {
+	answer(stateId: number, result: SearchResult | null) {
 		this.onmessage?.({ data: { stateId, result } } as MessageEvent);
 	}
 }
@@ -29,11 +29,18 @@ const bundle = { heroes: [] } as unknown as SnapshotBundle;
 const state = (steps: number[]) =>
 	({ steps, side: "radiant", pickOrder: "first" }) as unknown as DraftState;
 const result = (step: number) =>
-	({ step, action: "ban", team: "ours", entries: [] }) as Suggestions;
+	({
+		step,
+		action: "ban",
+		team: "ours",
+		entries: [],
+		depth: 1,
+		nodes: 0,
+	}) as SearchResult;
 
 function client() {
 	const workers: FakeWorker[] = [];
-	const shown: (Suggestions | null)[] = [];
+	const shown: (SearchResult | null)[] = [];
 	const search = new SearchClient(
 		() => {
 			const worker = new FakeWorker();
