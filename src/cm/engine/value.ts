@@ -87,13 +87,17 @@ export function rankWeight(
 	return Math.min(WEIGHT_MAX, Math.max(WEIGHT_MIN, weight));
 }
 
+/** A signature hero's lift for the player holding its slot, before the weight. */
+export const comfort = (player: Player | null, hero: HeroId): number =>
+	player?.signatures.includes(hero) ? SIGNATURE_BONUS : 0;
+
 /**
  * The snapshot's meta at `position`, or the off-role cost where it rarely
  * plays. A position the hero is played at but too thin to judge is neutral
  * (model-spec §0), not off-role — `share()` reads it as 0, which would
  * otherwise land it on the cost.
  */
-function metaAt(hero: HeroEntry, position: Role): number {
+export function metaAt(hero: HeroEntry, position: Role): number {
 	if (hero.positions[`${position}`]?.sufficient === false) return 0;
 	return share(hero, position) >= PLAYABLE_SHARE
 		? meta(hero, position)
@@ -106,6 +110,76 @@ export function teamValue(
 	team: Team,
 	enemy: readonly Slot[],
 ): { total: number; parts: ValueParts } {
+	const { picked, enemies } = read(bundle, team, enemy);
+	const parts: ValueParts = {
+		meta: 0,
+		comfort: 0,
+		side: 0,
+		phase: 0,
+		synergy: 0,
+		matchups: 0,
+	};
+	for (const pick of picked) {
+		const own = slotParts(bundle, team, enemies, pick);
+		parts.meta += own.meta;
+		parts.comfort += own.comfort;
+		parts.side += own.side;
+		parts.phase += own.phase;
+		parts.matchups += own.matchups;
+	}
+	for (const [i, a] of picked.entries())
+		for (const b of picked.slice(i + 1))
+			parts.synergy += syn(bundle, a.entry, b.entry);
+
+	const total = Object.values(parts).reduce((sum, part) => sum + part, 0);
+	return { total, parts };
+}
+
+/**
+ * What `hero` alone brings `team` at the position it holds there: its own
+ * slot's parts, and its synergy with each teammate. Zero for a hero the team
+ * does not hold or the snapshot does not carry.
+ */
+export function ownParts(
+	bundle: SnapshotBundle,
+	team: Team,
+	enemy: readonly Slot[],
+	hero: HeroId,
+): ValueParts {
+	const { picked, enemies } = read(bundle, team, enemy);
+	const pick = picked.find((p) => p.entry.id === hero);
+	if (pick === undefined)
+		return { meta: 0, comfort: 0, side: 0, phase: 0, synergy: 0, matchups: 0 };
+	let synergy = 0;
+	for (const other of picked)
+		if (other !== pick) synergy += syn(bundle, pick.entry, other.entry);
+	return { ...slotParts(bundle, team, enemies, pick), synergy };
+}
+
+interface Pick extends Slot {
+	entry: HeroEntry;
+	order: number;
+}
+
+/** One pick's parts other than synergy, which belongs to a pair. */
+function slotParts(
+	bundle: SnapshotBundle,
+	team: Team,
+	enemies: EnemyMarginal[],
+	{ entry, position, player, order }: Pick,
+): Omit<ValueParts, "synergy"> {
+	const weight = rankWeight(player, team.players);
+	return {
+		meta: weight * metaAt(entry, position),
+		comfort: weight * comfort(player, entry.id),
+		side: sideDelta(entry, team.side),
+		phase: phaseDelta(entry, cmPhase(order)),
+		matchups: laneMatchup(bundle, entry, position, enemies),
+	};
+}
+
+/** `team`'s picks the snapshot carries, and `enemy`'s as matchup marginals. */
+function read(bundle: SnapshotBundle, team: Team, enemy: readonly Slot[]) {
 	const byId = new Map(bundle.heroes.map((h) => [h.id, h]));
 	// `order` is the pick's place among all the team's picks, a lost hero's included,
 	// so a pick after one still reads its own phase.
@@ -120,30 +194,7 @@ export function teamValue(
 			? []
 			: [{ hero, marginal: new Map([[slot.position, 1]]) }];
 	});
-
-	const parts: ValueParts = {
-		meta: 0,
-		comfort: 0,
-		side: 0,
-		phase: 0,
-		synergy: 0,
-		matchups: 0,
-	};
-	for (const { entry, position, player, order } of picked) {
-		const weight = rankWeight(player, team.players);
-		const signature = player?.signatures.includes(entry.id) ?? false;
-		parts.meta += weight * metaAt(entry, position);
-		parts.comfort += weight * (signature ? SIGNATURE_BONUS : 0);
-		parts.side += sideDelta(entry, team.side);
-		parts.phase += phaseDelta(entry, cmPhase(order));
-		parts.matchups += laneMatchup(bundle, entry, position, enemies);
-	}
-	for (const [i, a] of picked.entries())
-		for (const b of picked.slice(i + 1))
-			parts.synergy += syn(bundle, a.entry, b.entry);
-
-	const total = Object.values(parts).reduce((sum, part) => sum + part, 0);
-	return { total, parts };
+	return { picked, enemies };
 }
 
 /** E: the captain's team's value minus the enemy's, each against the other. */

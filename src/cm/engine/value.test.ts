@@ -16,6 +16,7 @@ import {
 import {
 	cmPhase,
 	evaluate,
+	ownParts,
 	rankWeight,
 	SIGNATURE_BONUS,
 	teamValue,
@@ -199,4 +200,27 @@ test("a position played but too thin to judge is neutral, and one never played i
 	expect(metaAt(1)).toBe(2);
 	expect(metaAt(3)).toBe(0);
 	expect(metaAt(5)).toBe(-10);
+});
+
+test("a hero's own parts are its slot and its synergy with each teammate, never itself", () => {
+	const b = bundle([hero(1, { "1": 2 }), hero(2, { "2": 0 })], {
+		synergies: { "1": { "1": 9, "2": 0.5 }, "2": { "1": 0.5 } },
+	});
+	const slots = [
+		{ hero: 1, position: 1 as Role, player: null },
+		{ hero: 2, position: 2 as Role, player: null },
+	];
+	expect(ownParts(b, team({ slots }), [], 1)).toMatchObject({
+		meta: 2,
+		synergy: 0.5,
+	});
+	// A hero the team does not hold brings it nothing.
+	expect(ownParts(b, team({ slots }), [], 7)).toEqual({
+		meta: 0,
+		comfort: 0,
+		side: 0,
+		phase: 0,
+		synergy: 0,
+		matchups: 0,
+	});
 });
