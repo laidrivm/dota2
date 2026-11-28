@@ -58,11 +58,9 @@ export type CmAction =
 	| { type: "addSignature"; team: Team; index: number; hero: HeroId }
 	| { type: "removeSignature"; team: Team; index: number; hero: HeroId };
 
-const isRank = (value: unknown): value is RankTier =>
-	Number.isInteger(value) && (value as number) >= 1 && (value as number) <= 8;
-
-const isRole = (value: unknown): value is Role =>
-	Number.isInteger(value) && (value as number) >= 1 && (value as number) <= 5;
+/** A whole number 1 to `max`: a position (5) or a rank tier (8). */
+const isTier = (value: unknown, max: 5 | 8) =>
+	Number.isInteger(value) && (value as number) >= 1 && (value as number) <= max;
 
 /** `session` with player `index` of `team` replaced by `edit` of it. */
 function editPlayer(
@@ -95,7 +93,7 @@ export function reduce(session: CmSession, action: CmAction): CmSession {
 		}
 		case "position": {
 			const { team, index, position } = action;
-			if (position !== null && !isRole(position)) return session;
+			if (position !== null && !isTier(position, 5)) return session;
 			// A position held twice moves: the earlier holder becomes unknown, so
 			// the team's known positions stay distinct at every step.
 			const roster = session[team].map((p, i) =>
@@ -108,7 +106,7 @@ export function reduce(session: CmSession, action: CmAction): CmSession {
 			return { ...session, [team]: roster };
 		}
 		case "rank":
-			if (action.rank !== null && !isRank(action.rank)) return session;
+			if (action.rank !== null && !isTier(action.rank, 8)) return session;
 			return editPlayer(session, action.team, action.index, (p) => ({
 				...p,
 				rank: action.rank,
@@ -141,8 +139,8 @@ const isPlayer = (value: unknown): value is Player => {
 		typeof p.nickname === "string" &&
 		p.nickname.trim() !== "" &&
 		p.nickname.length <= NICKNAME_MAX &&
-		(p.position === null || isRole(p.position)) &&
-		(p.rank === null || isRank(p.rank)) &&
+		(p.position === null || isTier(p.position, 5)) &&
+		(p.rank === null || isTier(p.rank, 8)) &&
 		Array.isArray(p.signatures) &&
 		p.signatures.length <= SIGNATURE_LIMIT &&
 		p.signatures.every((hero) => Number.isInteger(hero))
