@@ -73,6 +73,13 @@ test("a hero banned at step 2 is shown taken at step 8, and choosing it changes 
 	await enter(page, 1, "Pudge");
 	await enter(page, 5);
 	await expect(draft(page).getByText("Step 8 · your pick")).toBeVisible();
+	// Each entered hero is named to assistive technology, in its row and the strip.
+	await expect(
+		page.getByLabel("Your bans").getByRole("img", { name: "Pudge" }),
+	).toBeVisible();
+	await expect(
+		page.getByLabel("Draft order").getByRole("img", { name: "Pudge" }),
+	).toBeVisible();
 
 	await draft(page).getByRole("button", { name: "Enter your pick" }).click();
 	await page.getByLabel("Search heroes").fill("Pudge");

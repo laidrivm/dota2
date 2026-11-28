@@ -17,6 +17,10 @@ import {
 const WHOSE: Record<Team, string> = { ours: "your", theirs: "enemy" };
 const ROW_NAME: Record<Team, string> = { ours: "Your", theirs: "Enemy" };
 
+/** A tile's accessible name: the hero, or what stands in for one the snapshot lost. */
+const nameOf = (byId: Map<number, HeroEntry>, hero: HeroId): string =>
+	byId.get(hero)?.name ?? "a hero this snapshot does not carry";
+
 /**
  * The draft: the step in progress, the order as a strip of 24 cells, each
  * team's bans and picks, and the controls entering a hero and undoing one.
@@ -91,7 +95,11 @@ export function DraftBoard({
 								{step} {action}
 							</span>
 							{hero !== undefined && (
-								<HeroTile hero={byId.get(hero)} size="sm" />
+								<HeroTile
+									hero={byId.get(hero)}
+									size="sm"
+									label={nameOf(byId, hero)}
+								/>
 							)}
 						</li>
 					);
@@ -141,7 +149,11 @@ function HeroRow({
 		<ul class={s.signatures} aria-label={name}>
 			{heroes.map((hero) => (
 				<li key={hero}>
-					<HeroTile hero={byId.get(hero)} size="sm" />
+					<HeroTile
+						hero={byId.get(hero)}
+						size="sm"
+						label={nameOf(byId, hero)}
+					/>
 				</li>
 			))}
 		</ul>
