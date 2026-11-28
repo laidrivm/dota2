@@ -52,7 +52,7 @@ Closes `cm-access/repeated-wrong-passwords`,
       `/api/cm/` path is 404 `not-found`.
 - [x] 2.2 Implement the limiter (in-memory sliding window, design D2) and the
       origin middleware; the cases pass.
-- [ ] 2.3 Pass `CM_PASSWORD` to the application service in
+- [x] 2.3 Pass `CM_PASSWORD` to the application service in
       `docker-compose.yml` and name it in `.env.example`; extend
       `checks/deployment-topology.test.ts` for it. Name setting it on the
       host in the pull request body's preflight list.
