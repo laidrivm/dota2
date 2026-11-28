@@ -94,3 +94,26 @@ export function laneMatchup(
 	const lbar = lbarNum / enemies.length;
 	return lbar === 0 ? 0 : num / lbar;
 }
+
+/** All injective assignments of `count` enemies to the 5 roles. */
+export function roleAssignments(count: number): Role[][] {
+	const out: Role[][] = [];
+	const used = new Set<Role>();
+	const cur: Role[] = [];
+	const recurse = (i: number) => {
+		if (i === count) {
+			out.push([...cur]);
+			return;
+		}
+		for (const r of ROLES) {
+			if (used.has(r)) continue;
+			used.add(r);
+			cur.push(r);
+			recurse(i + 1);
+			cur.pop();
+			used.delete(r);
+		}
+	};
+	recurse(0);
+	return out;
+}
