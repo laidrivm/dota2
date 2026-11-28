@@ -147,6 +147,15 @@ describe("an upload that is not the meta file leaves the store as it was", () =>
 			() => metaFile(rows(ids, 60).map(({ position, ...row }) => row)),
 		],
 		[
+			"a pos 4 row nested inside a pos 3 row",
+			() =>
+				metaFile(
+					rows(ids, 60).map((row, i) =>
+						i === 0 ? { ...row, alt: rows(ids.slice(70), 1, "pos 4")[0] } : row,
+					),
+				),
+		],
+		[
 			"one hero fifty times",
 			() =>
 				metaFile(

@@ -88,10 +88,9 @@ function collect(root: unknown, found: Found): boolean {
 		if (found.patch === null && typeof record.patch === "string")
 			found.patch = record.patch;
 		const here = positionOf(record.position) ?? inherited;
-		if (isRow(record)) {
-			found.rows.push({ row: record, position: here });
-			continue;
-		}
+		// A row is recorded and still walked into: a row nested under it at
+		// another position has to be seen for the file to read as mixed.
+		if (isRow(record)) found.rows.push({ row: record, position: here });
 		for (const child of Object.values(record).reverse())
 			stack.push([child, here]);
 	}
