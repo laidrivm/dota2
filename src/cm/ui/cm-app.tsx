@@ -32,9 +32,20 @@ function Draft() {
 	const [meta, setMeta] = useState<MetaPositions>(NO_META);
 	const [session, apply] = useReducer(reduce, undefined, restoreSession);
 
+	// Only the latest read lands: the first one finishing after an upload's
+	// reread would put the older meta back. One that fails keeps what is shown —
+	// nothing yet on load, and after an upload the meta that went through.
+	const reads = useRef(0);
+	const reread = () => {
+		const mine = ++reads.current;
+		readMeta().then((read) => {
+			if (read !== null && mine === reads.current) setMeta(read);
+		});
+	};
+
 	useEffect(() => {
 		loadSnapshot().then(setSnapshot);
-		readMeta().then((read) => setMeta(read ?? NO_META));
+		reread();
 	}, []);
 
 	// The snapshot as the model reads it: uploaded positions take their meta
@@ -63,12 +74,7 @@ function Draft() {
 	return (
 		<>
 			<Setup session={session} apply={apply} />
-			<MetaPanel
-				positions={meta}
-				// A reread that fails keeps what the panel shows: the upload went
-				// through, and blanking it would read as the meta lost.
-				onUploaded={() => readMeta().then((read) => read && setMeta(read))}
-			/>
+			<MetaPanel positions={meta} onUploaded={reread} />
 			{ready && (
 				<>
 					<DraftBoard bundle={bundle} session={session} apply={apply} />
