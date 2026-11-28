@@ -88,6 +88,20 @@ describe("build output", () => {
 		},
 	);
 
+	test("each document links a stylesheet of its own", async () => {
+		const linkedBy = async (page: string) =>
+			(await Bun.file(`${dist}/${page}`).text()).match(
+				/<link[^>]+rel="stylesheet"[^>]+href="\.\/([^"]+\.css)"/,
+			)?.[1];
+		const [allPick, cm] = [
+			await linkedBy("index.html"),
+			await linkedBy("cm.html"),
+		];
+		expect(allPick).toBeDefined();
+		expect(cm).toBeDefined();
+		expect(cm).not.toBe(allPick);
+	});
+
 	test("leaves no font inlined as a data URI", async () => {
 		for (const css of new Bun.Glob("*.css").scanSync(dist)) {
 			const text = await Bun.file(`${dist}/${css}`).text();

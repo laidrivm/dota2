@@ -114,4 +114,14 @@ describe("signing out", () => {
 	])("%s leaves the page signed out", async (_, answer) => {
 		expect(await signOut(answering(answer))).toEqual({ kind: "signed-out" });
 	});
+
+	test.each([
+		["a network failure", new TypeError("offline")],
+		["a server error", problem(500, "internal")],
+	])("%s keeps the page signed in and says so", async (_, answer) => {
+		expect(await signOut(answering(answer))).toEqual({
+			kind: "error",
+			message: "Signing out failed. Try again.",
+		});
+	});
 });

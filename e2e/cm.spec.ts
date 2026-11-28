@@ -8,7 +8,6 @@ import { CM_TEST_PASSWORD } from "../playwright.config.ts";
  * server, so the suite spends one wrong password per run and no more.
  */
 
-// spec: cm-draft/signing-in-from-the-page
 // spec: cm-access/signing-out
 test("a wrong then the right password reaches the page, and sign-out returns", async ({
 	page,
@@ -30,6 +29,10 @@ test("a wrong then the right password reaches the page, and sign-out returns", a
 	expect(new URL(page.url()).pathname).toBe("/cm");
 
 	await signOut.click();
+	await expect(page.getByLabel("CM password")).toBeVisible();
+	// The form again after a reload is what says the cookie is gone, not only
+	// that the screen changed.
+	await page.reload();
 	await expect(page.getByLabel("CM password")).toBeVisible();
 });
 

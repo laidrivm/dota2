@@ -62,6 +62,8 @@ const rebuild = () => {
 };
 
 watch(`${root}src`, { recursive: true }, rebuild);
+// Both entry points, as `build` above bundles them.
 watch(`${root}index.html`, rebuild);
+watch(`${root}cm.html`, rebuild);
 
 await import("../src/server/server.ts");

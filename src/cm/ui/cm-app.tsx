@@ -1,4 +1,4 @@
-import { useEffect, useState } from "preact/hooks";
+import { useEffect, useRef, useState } from "preact/hooks";
 import { readSession, type SessionState, signOut } from "./api.ts";
 import s from "./cm.module.css";
 import { SignIn } from "./sign-in.tsx";
@@ -10,10 +10,31 @@ import { SignIn } from "./sign-in.tsx";
  */
 export function CmApp() {
 	const [state, setState] = useState<SessionState | null>(null);
+	const [signOutError, setSignOutError] = useState<string | null>(null);
+	const signOutButton = useRef<HTMLButtonElement>(null);
 
 	useEffect(() => {
 		readSession().then(setState);
 	}, []);
+
+	const afterSignIn = async () => {
+		const next = await readSession();
+		setState(next);
+		// The form, and the field that held focus, unmount with this render; the
+		// way out is where focus lands, in a macrotask so the button exists.
+		if (next.kind === "signed-in")
+			setTimeout(() => signOutButton.current?.focus(), 0);
+	};
+
+	const doSignOut = async () => {
+		const result = await signOut();
+		if (result.kind === "error") {
+			setSignOutError(result.message);
+			return;
+		}
+		setSignOutError(null);
+		setState(result);
+	};
 
 	const content = (() => {
 		switch (state?.kind) {
@@ -23,9 +44,7 @@ export function CmApp() {
 				return (
 					<SignIn
 						onResult={(result) =>
-							result.kind === "signed-in"
-								? readSession().then(setState)
-								: setState(result)
+							result.kind === "signed-in" ? afterSignIn() : setState(result)
 						}
 					/>
 				);
@@ -54,14 +73,20 @@ export function CmApp() {
 				<h1 class={s.title}>Captains Mode</h1>
 				{state?.kind === "signed-in" && (
 					<button
+						ref={signOutButton}
 						class={s.button}
 						type="button"
-						onClick={() => signOut().then(setState)}
+						onClick={doSignOut}
 					>
 						Sign out
 					</button>
 				)}
 			</header>
+			{signOutError !== null && (
+				<p class={s.error} role="alert">
+					{signOutError}
+				</p>
+			)}
 			{content}
 		</main>
 	);

@@ -48,7 +48,11 @@ export function SignIn({
 				autocomplete="current-password"
 				required
 				value={password}
-				onInput={(event) => setPassword(event.currentTarget.value)}
+				onInput={(event) => {
+					setPassword(event.currentTarget.value);
+					// A message about the previous attempt says nothing about this one.
+					setError(null);
+				}}
 				aria-describedby={error === null ? undefined : "cm-sign-in-error"}
 			/>
 			<button class={s.button} type="submit" disabled={busy}>

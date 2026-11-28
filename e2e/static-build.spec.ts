@@ -224,3 +224,17 @@ test("dist carries no icons, so the board is palette squares throughout", async 
 			drew: 0,
 		});
 });
+
+// spec: app-shell/the-cm-page-on-a-static-host
+test("the CM page on a static host says its service is unavailable", async ({
+	page,
+}) => {
+	// The static server answers `/api/cm/session` with its own 404 page, which
+	// is the state the page has to name rather than show a form that can never
+	// sign anyone in.
+	await page.goto(`${origin}/cm.html`);
+	await expect(page.getByRole("status")).toHaveText(
+		"The CM service is unavailable.",
+	);
+	await expect(page.getByLabel("CM password")).toHaveCount(0);
+});

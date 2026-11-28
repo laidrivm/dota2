@@ -75,10 +75,16 @@ export async function signIn(
 	}
 }
 
-/** Signed out either way: a 401 means the session was already gone. */
+/**
+ * Signed out only once the server confirms it: a 204, or a 401 for a session
+ * already gone. Anything else leaves the cookie where it was, so the page must
+ * not show the sign-in form over a session a reload would restore.
+ */
 export async function signOut(
 	fetcher: Fetcher = fetch,
-): Promise<{ kind: "signed-out" }> {
-	await call(fetcher, { method: "DELETE" });
-	return { kind: "signed-out" };
+): Promise<{ kind: "signed-out" } | { kind: "error"; message: string }> {
+	const response = await call(fetcher, { method: "DELETE" });
+	if (response?.status === 204 || response?.status === 401)
+		return { kind: "signed-out" };
+	return { kind: "error", message: "Signing out failed. Try again." };
 }

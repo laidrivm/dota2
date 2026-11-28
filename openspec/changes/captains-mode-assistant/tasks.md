@@ -59,8 +59,9 @@ Closes `cm-access/repeated-wrong-passwords`,
 
 ## 3. The CM page and its sign-in screen
 
-Closes `cm-draft/signing-in-from-the-page`, `cm-access/signing-out`,
-`app-shell/the-all-pick-page-never-reaches-the-cm-api`.
+Closes `cm-access/signing-out`,
+`app-shell/the-all-pick-page-never-reaches-the-cm-api`,
+`app-shell/the-cm-page-on-a-static-host`.
 
 - [x] 3.1 Add `cm.html` and `src/cm/main.tsx`; the build script and
       `scripts/dev.ts` take both entry points; `distFile` maps `/cm` to
@@ -74,12 +75,17 @@ Closes `cm-draft/signing-in-from-the-page`, `cm-access/signing-out`,
       test `CM_PASSWORD`; e2e `e2e/cm.spec.ts`: wrong then right password
       reaches the page on `/cm`, sign-out returns to the form; `/` makes no
       `/api/cm/` request; the axe scan covers the sign-in state.
+- [x] 3.4 An unreachable API shows "unavailable" instead of the form;
+      `e2e/static-build.spec.ts` covers `cm.html` on the static server.
+      (Moved from step 4: this step ships the state, and the criterion it
+      closes in its place, signing in from the page, needs the setup step 4
+      adds.)
 
 ## 4. Setup and rosters
 
 Closes `cm-draft/setup-collapses-into-the-board`,
 `cm-draft/editing-the-captain-s-roster`,
-`app-shell/the-cm-page-on-a-static-host`.
+`cm-draft/signing-in-from-the-page`.
 
 - [ ] 4.1 Failing cases first in `src/cm/ui/session.test.ts` (ZOMBIES 16, 17,
       21, 22): the `CmSession` reducer — side and pick order independent;
@@ -89,8 +95,9 @@ Closes `cm-draft/setup-collapses-into-the-board`,
 - [ ] 4.2 Implement the session type and reducer, the setup block and both
       roster panels (signature heroes through the existing picker); the
       board appears once side and pick order are set with step 1 marked.
-- [ ] 4.3 An unreachable API shows "unavailable" instead of the form;
-      `e2e/static-build.spec.ts` covers `cm.html` on the static server.
+- [ ] 4.3 E2e: a wrong password on `/cm` is announced and keeps focus, and
+      the right one replaces the form with the setup, on `/cm` and without a
+      page load. (Task 4.3's old content moved to 3.4.)
 
 ## 5. The draft order
 
