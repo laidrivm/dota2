@@ -3,8 +3,14 @@
  * can give, mapped to what the page shows. The network is a stub that answers
  * one fixed response, so each case names the server state it stands for.
  */
-import { describe, expect, test } from "bun:test";
-import { type Fetcher, readSession, signIn, signOut } from "./api.ts";
+import { describe, expect, spyOn, test } from "bun:test";
+import {
+	type Fetcher,
+	REQUEST_TIMEOUT_MS,
+	readSession,
+	signIn,
+	signOut,
+} from "./api.ts";
 
 const problem = (status: number, code: string, headers = {}) =>
 	new Response(JSON.stringify({ status, code }), {
@@ -107,20 +113,27 @@ describe("signing in", () => {
 	});
 });
 
-test("every request carries a timeout, so a hung one ends as unavailable", async () => {
-	let signal: AbortSignal | null | undefined;
-	const hanging: Fetcher = (_, init) => {
-		signal = init?.signal;
-		return new Promise((_, reject) =>
-			init?.signal?.addEventListener("abort", () =>
-				reject(new Error("aborted")),
-			),
-		);
-	};
-	const pending = readSession(hanging);
-	expect(signal).toBeInstanceOf(AbortSignal);
-	(signal as AbortSignal).dispatchEvent(new Event("abort"));
-	expect(await pending).toEqual({ kind: "unavailable" });
+test("every request carries a deadline, so a hung one ends as unavailable", async () => {
+	// The deadline's own timer stands in for ten seconds of waiting: the spy
+	// hands back a signal this case aborts, and records the deadline asked for.
+	const deadline = new AbortController();
+	const timeout = spyOn(AbortSignal, "timeout").mockReturnValue(
+		deadline.signal,
+	);
+	try {
+		const hanging: Fetcher = (_, init) =>
+			new Promise((_, reject) =>
+				init?.signal?.addEventListener("abort", () =>
+					reject(new Error("aborted")),
+				),
+			);
+		const pending = readSession(hanging);
+		expect(timeout).toHaveBeenCalledWith(REQUEST_TIMEOUT_MS);
+		deadline.abort();
+		expect(await pending).toEqual({ kind: "unavailable" });
+	} finally {
+		timeout.mockRestore();
+	}
 });
 
 describe("signing out", () => {
