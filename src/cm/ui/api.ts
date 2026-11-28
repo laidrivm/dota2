@@ -15,11 +15,14 @@ export type SignInResult =
 	| { kind: "not-configured" }
 	| { kind: "error"; message: string };
 
+/** The slice of `fetch` the calls use, so a test can stand in for it. */
+export type Fetcher = (input: string, init?: RequestInit) => Promise<Response>;
+
 const SESSION = "/api/cm/session";
 const UNAVAILABLE = "The CM service is unavailable. Try again shortly.";
 
 /** The response, or `null` when the request never got one. */
-async function call(fetcher: typeof fetch, init?: RequestInit) {
+async function call(fetcher: Fetcher, init?: RequestInit) {
 	try {
 		return await fetcher(SESSION, { credentials: "same-origin", ...init });
 	} catch {
@@ -28,7 +31,7 @@ async function call(fetcher: typeof fetch, init?: RequestInit) {
 }
 
 export async function readSession(
-	fetcher: typeof fetch = fetch,
+	fetcher: Fetcher = fetch,
 ): Promise<SessionState> {
 	const response = await call(fetcher);
 	if (response?.status === 401) return { kind: "signed-out" };
@@ -44,7 +47,7 @@ export async function readSession(
 
 export async function signIn(
 	password: string,
-	fetcher: typeof fetch = fetch,
+	fetcher: Fetcher = fetch,
 ): Promise<SignInResult> {
 	const response = await call(fetcher, {
 		method: "POST",
@@ -72,7 +75,7 @@ export async function signIn(
 
 /** Signed out either way: a 401 means the session was already gone. */
 export async function signOut(
-	fetcher: typeof fetch = fetch,
+	fetcher: Fetcher = fetch,
 ): Promise<{ kind: "signed-out" }> {
 	await call(fetcher, { method: "DELETE" });
 	return { kind: "signed-out" };

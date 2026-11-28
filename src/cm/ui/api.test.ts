@@ -4,7 +4,7 @@
  * one fixed response, so each case names the server state it stands for.
  */
 import { describe, expect, test } from "bun:test";
-import { readSession, signIn, signOut } from "./api.ts";
+import { type Fetcher, readSession, signIn, signOut } from "./api.ts";
 
 const problem = (status: number, code: string, headers = {}) =>
 	new Response(JSON.stringify({ status, code }), {
@@ -13,7 +13,7 @@ const problem = (status: number, code: string, headers = {}) =>
 	});
 
 const answering =
-	(response: Response | Error): typeof fetch =>
+	(response: Response | Error): Fetcher =>
 	async () => {
 		if (response instanceof Error) throw response;
 		return response;
