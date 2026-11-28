@@ -169,11 +169,20 @@ const revalidates = (header: string | null, etag: string): boolean =>
  * holding the current bytes is told so in a header rather than sent them
  * again.
  */
+/**
+ * The file `/snapshot.json` answers from now: the published bundle if there
+ * is one, the committed fixture otherwise. The CM API reads its hero ids from
+ * the same file, so an upload is checked against the snapshot the page has.
+ */
+export async function servedSnapshot(dir: URL = snapshotDir): Promise<string> {
+	const bundle = fileURLToPath(new URL(PUBLISHED, dir));
+	return (await Bun.file(bundle).exists()) ? bundle : snapshotFile;
+}
+
 const snapshotRoute =
 	(dir: URL) =>
 	async (request: Request): Promise<Response> => {
-		const bundle = fileURLToPath(new URL(PUBLISHED, dir));
-		const file = (await Bun.file(bundle).exists()) ? bundle : snapshotFile;
+		const file = await servedSnapshot(dir);
 		// Read once, and the same bytes answer both halves. `Bun.file` reads the
 		// path when the response is sent, not when it is constructed, so a
 		// publication landing between the two — and one lands by renaming a new

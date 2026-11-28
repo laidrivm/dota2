@@ -46,7 +46,9 @@ export const workdir = (() => {
 	// Every stage's, and they have to agree: a production stage working
 	// somewhere else would be mounted at the build stage's path.
 	if (new Set(found).size !== 1)
-		throw new Error(`the Dockerfile's stages work from ${found.length} directories`);
+		throw new Error(
+			`the Dockerfile's stages work from ${found.length} directories`,
+		);
 	return found[0] as string;
 })();
 

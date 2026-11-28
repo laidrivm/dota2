@@ -17,7 +17,7 @@
 import { serve } from "bun";
 import { cmApi } from "./cm/api.ts";
 import { distDir, distFile } from "./dist-routes.ts";
-import { staticRoutes } from "./static-routes.ts";
+import { servedSnapshot, staticRoutes } from "./static-routes.ts";
 
 // Nothing to serve otherwise, and an empty page is a worse answer than this.
 if (!(await Bun.file(new URL("index.html", distDir)).exists())) {
@@ -26,8 +26,19 @@ if (!(await Bun.file(new URL("index.html", distDir)).exists())) {
 	);
 }
 
-// Read once: the environment does not change under a running process.
-const api = cmApi({ password: process.env.CM_PASSWORD });
+// Read once: the environment does not change under a running process. The
+// snapshot does — an export publishes over it — so its hero ids are read per
+// upload.
+const api = cmApi({
+	password: process.env.CM_PASSWORD,
+	dataDir: process.env.CM_DATA_DIR || "cm-data",
+	knownHeroes: async () => {
+		const bundle = (await Bun.file(await servedSnapshot()).json()) as {
+			heroes: { id: number }[];
+		};
+		return new Set(bundle.heroes.map((hero) => hero.id));
+	},
+});
 
 const server = serve({
 	routes: staticRoutes(),

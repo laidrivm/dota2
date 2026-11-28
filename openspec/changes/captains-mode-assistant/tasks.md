@@ -195,22 +195,25 @@ Closes `cm-meta-import/a-valid-upload-for-one-position`,
 `deployment-topology/the-store-in-the-compose-file`.
 
 - [ ] 12.1 Add `devalue` exact-pinned and run `/warm`; commit a trimmed real
-      d2pt data file as `src/fixtures/d2pt-meta-pos3.json`.
-- [ ] 12.2 Mount the `cm` volume on the application alone at
+      d2pt data file as `src/fixtures/d2pt-meta-pos3.json`. (`devalue` was
+      pinned with the other planned dependencies; the real file waits on a
+      captain's browser — the reader is tested on a synthetic file meanwhile,
+      `src/server/cm/d2pt.fixture.ts`.)
+- [x] 12.2 Mount the `cm` volume on the application alone at
       `/app/cm-data`, set `CM_DATA_DIR: /app/cm-data` literally in its
       compose environment (as the job's `BUNDLE_DIR` is), create the
       directory owned by the runtime user in the `Dockerfile`, and extend
       `checks/deployment-topology.test.ts` to pin the mount and the variable
       to one path — in this step, so no upload it accepts lives in a
       container's writable layer.
-- [ ] 12.3 Failing cases first in `src/server/cm-meta.test.ts` (ZOMBIES 45,
+- [x] 12.3 Failing cases first in `src/server/cm-meta.test.ts` (ZOMBIES 45,
       46, 47, 48, 49, 50): 5 MB accepted for parsing and 5 MB + 1 refused
       413; 50 known rated heroes accepted, 49 refused, 50 known heroes with
       null ratings refused; ratings 0, 100, null valid, 100.1 refused,
       all-equal refused; mixed positions refused with the store unchanged;
       every hero field present; a write interrupted before its rename leaves
       the previous upload.
-- [ ] 12.4 Implement `POST` and `GET /api/cm/meta` (design D4, D5) with the
+- [x] 12.4 Implement `POST` and `GET /api/cm/meta` (design D4, D5) with the
       atomic per-position store under `CM_DATA_DIR`.
 
 ## 13. The model reads the upload

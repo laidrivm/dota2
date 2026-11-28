@@ -7,7 +7,6 @@ import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import { mkdtemp, readdir, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { bundle } from "../model.fixture.ts";
 import { cmApi } from "./cm/api.ts";
 import { metaFile, rows } from "./cm/d2pt.fixture.ts";
 import { readStore, writePosition } from "./cm/meta-store.ts";
@@ -19,7 +18,8 @@ import {
 	T0,
 } from "./cm-access.fixture.ts";
 
-const ids = bundle.heroes.map((hero) => hero.id);
+// The ids the served snapshot would know: more than the 50 an upload needs.
+const ids = Array.from({ length: 130 }, (_, i) => i + 1);
 const known = new Set(ids);
 let dir: string;
 

@@ -15,6 +15,7 @@
  */
 import { describe, expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
+import { envFile } from "./compose.fixture.ts";
 import {
 	app,
 	CM_STORE,
@@ -26,7 +27,6 @@ import {
 	services,
 	workdir,
 } from "./compose-file.fixture.ts";
-import { envFile } from "./compose.fixture.ts";
 import { only } from "./readme.fixture.ts";
 import { root } from "./root.ts";
 
@@ -46,7 +46,6 @@ test("the file declares one shared network and one of its own", () => {
 	expect(shared).toHaveLength(1);
 	expect(private_).toHaveLength(1);
 });
-
 
 test("the file declares the three services these cases are about", () => {
 	expect(Object.keys(services).sort()).toEqual(["app", "db", "job"]);
@@ -242,4 +241,3 @@ test("the job is not brought up with the project, and the other two restart", ()
 	expect(app.restart).toBe("always");
 	expect(db.restart).toBe("always");
 });
-

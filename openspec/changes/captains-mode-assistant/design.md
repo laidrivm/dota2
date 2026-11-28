@@ -120,6 +120,16 @@ reads the meta rows, validates them (cm-meta-import) and writes
 `<CM_DATA_DIR>/meta-pos-<n>.json` atomically (write to a temporary name,
 then rename). The patch label is the data file's `patch` field.
 
+The reader finds the rows by their fields rather than by a path into the
+file: every array of objects carrying `hero_id` and `d2pt_rating` is rows,
+the nearest `position` string (`pos 1`–`pos 5`) on a row or above it is its
+position, and the first `patch` string is the label. The rows' fields were
+recorded in a browser; where in SvelteKit's nodes they sit, and where the
+position and the patch label are, were not, and a reader keyed to a guessed
+path would refuse every real file the guess got wrong. Until a real file is
+committed as the fixture, the cases run on a synthetic one built in this
+shape (`src/server/cm/d2pt.fixture.ts`).
+
 Nothing on the server requests d2pt. A server-side fetch would have to
 defeat a bot check placed there to stop exactly that, and this project does
 not build that. A link the captain follows is navigation, not a request the

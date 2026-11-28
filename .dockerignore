@@ -44,3 +44,7 @@ dist
 # export can replace.
 snapshot
 icons
+
+# The CM meta a captain uploaded to a developer's own server, and mounted over
+# in the image: a file shipped there would be an upload nobody made.
+cm-data
