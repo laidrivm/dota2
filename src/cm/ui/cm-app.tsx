@@ -9,12 +9,14 @@ import {
 import { loadSnapshot } from "../../app/snapshot.ts";
 import type { SnapshotBundle } from "../../types.ts";
 import { withUploads } from "../engine/meta.ts";
+import { ORDER } from "../engine/order.ts";
 import { readSession, type SessionState, signOut } from "./api.ts";
 import { DraftBoard } from "./board.tsx";
 import s from "./cm.module.css";
 import { persistSession, restoreSession } from "./cm-storage.ts";
 import { type MetaPositions, NO_META, readMeta } from "./meta-api.ts";
 import { MetaPanel } from "./meta-panel.tsx";
+import { Report } from "./report.tsx";
 import { Rosters } from "./rosters.tsx";
 import { reduce } from "./session.ts";
 import { Setup } from "./setup.tsx";
@@ -79,6 +81,9 @@ function Draft() {
 				<>
 					<DraftBoard bundle={bundle} session={session} apply={apply} />
 					<Suggestions bundle={bundle} session={session} apply={apply} />
+					{session.steps.length === ORDER.length && (
+						<Report session={session} bundle={bundle} />
+					)}
 					<Rosters bundle={bundle} session={session} apply={apply} />
 				</>
 			)}
