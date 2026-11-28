@@ -40,32 +40,32 @@ export function withUploads(
 
 	let heroes: HeroEntry[] = bundle.heroes;
 	for (const k of uploaded) {
-		const rated = uploads[k]?.heroes ?? {};
+		// The filter above leaves only positions with an upload.
+		const rated = (uploads[k] as NonNullable<Uploads[Key]>).heroes;
 		const ratingOf = (hero: HeroEntry) =>
 			rated[String(hero.id)]?.rating ?? null;
 		const snapshotMeta = bundle.heroes.flatMap((hero) => {
 			const at = hero.positions[k];
 			return hero.sufficient && at?.sufficient ? [at.meta] : [];
 		});
-		const units = bundle.heroes.flatMap((hero) => {
+		const ratings = bundle.heroes.flatMap((hero) => {
 			const rating = ratingOf(hero);
-			return rating === null ? [] : [(rating - 50) / 50];
+			return rating === null ? [] : [rating];
 		});
-		const unitSpread = spread(units);
+		// The spread of (rating − 50) / 50, which a shift does not move.
+		const unitSpread = spread(ratings) / 50;
 		const scale = unitSpread === 0 ? 0 : spread(snapshotMeta) / unitSpread;
 		heroes = heroes.map((hero) => {
 			const rating = ratingOf(hero);
-			const at = hero.positions[k];
-			const position =
-				rating === null
-					? // No share is what unplayable means to the engine.
-						{ share: 0, meta: 0, sufficient: true }
-					: {
-							share: Math.max(at?.share ?? 0, PLAYABLE_SHARE),
-							meta: (scale * (rating - 50)) / 50,
-							sufficient: true,
-						};
-			return { ...hero, positions: { ...hero.positions, [k]: position } };
+			const { [k]: at, ...others } = hero.positions;
+			// No entry at `k` is what unplayable means to the engine.
+			if (rating === null) return { ...hero, positions: others };
+			const position = {
+				share: Math.max(at?.share ?? 0, PLAYABLE_SHARE),
+				meta: (scale * (rating - 50)) / 50,
+				sufficient: true,
+			};
+			return { ...hero, positions: { ...others, [k]: position } };
 		});
 	}
 	return { ...bundle, heroes };

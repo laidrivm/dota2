@@ -75,3 +75,62 @@ test("a hero unrated at an uploaded position cannot play it", () => {
 		PLAYABLE_SHARE,
 	);
 });
+
+test("each position reads its own upload", () => {
+	const all = (["1", "2", "3", "4", "5"] as const).map((k) => [
+		k,
+		{ heroes: { "1": { rating: 30 }, "2": { rating: 70 } } },
+	]);
+	const read = withUploads(snapshot(), Object.fromEntries(all) as Uploads);
+	const one = read.heroes.find((h) => h.id === 1);
+	const two = read.heroes.find((h) => h.id === 2);
+	for (const k of [1, 2, 3, 4, 5] as Role[]) {
+		expect(metaAt(two as never, k)).toBeGreaterThanOrEqual(
+			metaAt(one as never, k),
+		);
+		// Rated there, both play every position, the snapshot's or not.
+		expect(metaAt(one as never, k)).toBeGreaterThan(-10);
+		expect(metaAt(two as never, k)).toBeGreaterThan(-10);
+		// Unrated there, hero 3 cannot play any uploaded position.
+		expect(metaAt(read.heroes.find((h) => h.id === 3) as never, k)).toBe(-10);
+	}
+});
+
+test("two rated heroes spread to a snapshot of two, and an unrated one leaves the spread alone", () => {
+	const two = bundle([
+		hero(1, { "3": -1 }),
+		hero(2, { "3": 1 }),
+		hero(3, { "3": 0.2 }),
+	]);
+	const read = withUploads(two, {
+		"3": {
+			heroes: {
+				"1": { rating: 40 },
+				"2": { rating: 60 },
+				"3": { rating: null },
+			},
+		},
+	});
+	const at = (id: number) =>
+		metaAt(read.heroes.find((h) => h.id === id) as never, 3);
+	// The snapshot's spread over heroes 1–3 is that of −1, 1 and 0.2.
+	expect(std([at(1), at(2)])).toBeCloseTo(std([-1, 1, 0.2]), 10);
+	expect(at(1)).toBeCloseTo(-at(2), 10);
+});
+
+test("one rated hero, or a position the snapshot never filled, maps to 0", () => {
+	const lone = withUploads(snapshot(), {
+		"1": { heroes: { "3": { rating: 80 } } },
+	});
+	expect(metaAt(lone.heroes.find((h) => h.id === 3) as never, 1)).toBeCloseTo(
+		0,
+		10,
+	);
+	const empty = withUploads(snapshot(), {
+		"4": { heroes: { "1": { rating: 20 }, "2": { rating: 90 } } },
+	});
+	expect(metaAt(empty.heroes.find((h) => h.id === 1) as never, 4)).toBeCloseTo(
+		0,
+		10,
+	);
+});
