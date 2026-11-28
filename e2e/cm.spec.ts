@@ -36,6 +36,24 @@ test("a wrong then the right password reaches the page, and sign-out returns", a
 	await expect(page.getByLabel("CM password")).toBeVisible();
 });
 
+// spec: cm-draft/setup-collapses-into-the-board
+test("setting the side and the pick order opens the board at step 1", async ({
+	page,
+}) => {
+	await page.goto("/cm");
+	const field = page.getByLabel("CM password");
+	await field.fill(CM_TEST_PASSWORD);
+	await field.press("Enter");
+
+	await page.getByRole("radio", { name: "Dire" }).check();
+	await expect(page.getByText("Step 1")).toHaveCount(0);
+	await page.getByRole("radio", { name: "First pick" }).check();
+	await expect(page.getByText("Step 1 · your ban")).toBeVisible();
+	await expect(page.getByRole("region", { name: "Your team" })).toBeVisible();
+	await expect(page.getByRole("region", { name: "Enemy team" })).toBeVisible();
+	expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+});
+
 // spec: app-shell/the-all-pick-page-never-reaches-the-cm-api
 test("the All Pick page makes no request to the CM API", async ({ page }) => {
 	const reached: string[] = [];
