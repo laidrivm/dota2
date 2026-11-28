@@ -25,6 +25,27 @@ const PART_LABEL: Record<keyof Suggestion["components"], string> = {
 const pp = (value: number) =>
 	`${value < 0 ? "−" : "+"}${Math.abs(value).toFixed(1)}`;
 
+/** A value as shown: to one decimal. */
+const tenth = (value: number) => Math.round(value * 10) / 10;
+
+type Part = keyof Suggestion["components"];
+
+/**
+ * A suggestion's parts as shown: each rounded to one decimal and left out
+ * when that is zero, with `lookahead` taking up whatever the rounding leaves,
+ * so the parts shown add up to the score shown (cm-model, *Components add up
+ * to the score*) — rounding each part alone can drift a tenth per part.
+ */
+export function shownParts(entry: Suggestion): [Part, number][] {
+	const own = (Object.entries(entry.components) as [Part, number][])
+		.filter(([part]) => part !== "lookahead")
+		.map(([part, value]): [Part, number] => [part, tenth(value)])
+		.filter(([, value]) => value !== 0);
+	const counted = own.reduce((sum, [, value]) => sum + value, 0);
+	const rest = tenth(tenth(entry.score) - counted);
+	return rest === 0 ? own : [...own, ["lookahead", rest]];
+}
+
 /**
  * The ranked heroes for the step in progress, each with its score and the
  * parts it is made of. On the captain's steps a suggestion enters its hero;
@@ -68,15 +89,11 @@ export function Suggestions({
 							</div>
 						)}
 						<ul class={b.parts} aria-label="Score parts">
-							{Object.entries(entry.components)
-								// What rounds to nothing at one decimal is left out.
-								.filter(([, value]) => Math.abs(value) >= 0.05)
-								.map(([part, value]) => (
-									<li key={part} class={b.part}>
-										{PART_LABEL[part as keyof Suggestion["components"]]}{" "}
-										{pp(value)}
-									</li>
-								))}
+							{shownParts(entry).map(([part, value]) => (
+								<li key={part} class={b.part}>
+									{PART_LABEL[part]} {pp(value)}
+								</li>
+							))}
 						</ul>
 					</li>
 				))}
@@ -92,12 +109,13 @@ function Entry({
 	hero: HeroEntry | undefined;
 	entry: Suggestion;
 }) {
+	const name = hero?.name ?? "a hero this snapshot does not carry";
 	return (
 		<>
-			<HeroTile hero={hero} size="sm" />
-			<span>{hero?.name ?? "a hero this snapshot does not carry"}</span>
+			<HeroTile hero={hero} size="sm" label={name} />
+			<span>{name}</span>
 			<span class={entry.score < 0 ? b.scoreAgainst : b.score}>
-				{pp(entry.score)}
+				{pp(tenth(entry.score))}
 			</span>
 		</>
 	);

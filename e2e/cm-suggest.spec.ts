@@ -28,11 +28,12 @@ test("a captain's step lists five heroes with their parts, and one enters its he
 	await expect(entries.first().getByLabel("Score parts")).toContainText("meta");
 
 	const first = entries.first().getByRole("button");
-	const name = (await first.innerText()).split("\n")[0]?.trim() ?? "";
+	// The tile is named for its hero; its text is the abbreviation.
+	const name = (await first.getByRole("img").getAttribute("aria-label")) ?? "";
 	await first.click();
 	await expect(draft(page).getByText("Step 2 · your ban")).toBeVisible();
 	await expect(
-		page.getByLabel("Your bans").getByRole("img", { name }),
+		page.getByLabel("Your bans").getByRole("img", { name, exact: true }),
 	).toBeVisible();
 	await expect(
 		draft(page).getByRole("button", { name: /^Enter / }),
@@ -47,6 +48,20 @@ test("an enemy step lists what the enemy is expected to take, and enters nothing
 	const expected = page.getByRole("region", { name: "Enemy's expected bans" });
 	await expect(expected.getByRole("listitem").first()).toBeVisible();
 	await expect(expected.getByRole("button")).toHaveCount(0);
+
+	// Picking second, step 8 is the enemy's first pick.
+	for (let n = 0; n < 7; n++) {
+		await draft(page)
+			.getByRole("button", { name: /^Enter / })
+			.click();
+		await expect(page.getByRole("dialog")).toBeVisible();
+		await page.keyboard.press("Enter");
+		await expect(page.getByRole("dialog")).toBeHidden();
+	}
+	await expect(draft(page).getByText("Step 8 · enemy pick")).toBeVisible();
+	const picks = page.getByRole("region", { name: "Enemy's expected picks" });
+	await expect(picks.getByRole("listitem").first()).toBeVisible();
+	await expect(picks.getByRole("button")).toHaveCount(0);
 });
 
 // spec: cm-model/the-assignment-is-shown
