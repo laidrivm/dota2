@@ -147,14 +147,16 @@ Closes `cm-model/valuing-a-team`,
 Closes `cm-model/a-flexible-hero-takes-the-open-slot`,
 `cm-model/the-assignment-is-shown`, `cm-model/components-add-up-to-the-score`.
 
-- [ ] 8.1 Failing cases first (ZOMBIES 32, 33, 35, 36, 38, 39, 40): the best
+- [x] 8.1 Failing cases first (ZOMBIES 32, 33, 35, 36, 38, 39, 40): the best
       of 120 assignments beats a greedy one on a constructed five; share 0.05
       playable and 0.049 not; off-role −10 keeps the assignment defined;
       components sum to the score within 0.05; ban components are the
       enemy's; fewer than five eligible heroes return that many.
-- [ ] 8.2 Implement the assignment and the immediate ranking (depth 1,
-      computed synchronously for now); the board shows each pick's position
-      and player and the top five with their components.
+- [x] 8.2 Implement the assignment and the immediate ranking (depth 1,
+      computed synchronously for now) under `src/cm/engine/`.
+- [ ] 8.3 The board shows each pick's position and player and the top five
+      with their components (its own pull request: step 8 together stood at
+      998 lines of an 800-line budget).
 
 ## 9. Off the main thread
 
