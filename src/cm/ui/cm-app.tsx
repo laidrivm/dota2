@@ -1,7 +1,52 @@
-import { useEffect, useRef, useState } from "preact/hooks";
+import { useEffect, useReducer, useRef, useState } from "preact/hooks";
+import { loadSnapshot } from "../../app/snapshot.ts";
+import type { SnapshotBundle } from "../../types.ts";
 import { readSession, type SessionState, signOut } from "./api.ts";
 import s from "./cm.module.css";
+import { Rosters } from "./rosters.tsx";
+import { emptySession, reduce } from "./session.ts";
+import { Setup } from "./setup.tsx";
 import { SignIn } from "./sign-in.tsx";
+
+/**
+ * The signed-in screen: setup until the side and pick order are both set, then
+ * the board — the step in progress and both rosters — with setup still above
+ * it, editable until a step is entered.
+ */
+function Draft() {
+	const [bundle, setBundle] = useState<SnapshotBundle | null | undefined>();
+	const [session, apply] = useReducer(reduce, undefined, emptySession);
+
+	useEffect(() => {
+		loadSnapshot().then(setBundle);
+	}, []);
+
+	if (bundle === undefined) return <p class={s.note}>Loading heroes…</p>;
+	if (bundle === null)
+		return (
+			<p class={s.note} role="status">
+				The hero snapshot could not be loaded.
+			</p>
+		);
+
+	const ready = session.side !== null && session.pickOrder !== null;
+	// Step 1 is always the first-pick team's ban (cm-draft's order table); the
+	// whole table arrives with the draft-order step and replaces this line.
+	const firstIsOurs = session.pickOrder === "first";
+	return (
+		<>
+			<Setup session={session} apply={apply} />
+			{ready && (
+				<>
+					<p class={s.step} aria-live="polite">
+						Step 1 · {firstIsOurs ? "your ban" : "enemy ban"}
+					</p>
+					<Rosters bundle={bundle} session={session} apply={apply} />
+				</>
+			)}
+		</>
+	);
+}
 
 /**
  * The Captains Mode page: one screen whose content follows the session the
@@ -67,9 +112,7 @@ export function CmApp() {
 					</p>
 				);
 			case "signed-in":
-				// The draft board arrives with the setup step; until then a
-				// signed-in captain sees the frame and the way out.
-				return <p class={s.note}>Signed in.</p>;
+				return <Draft />;
 		}
 	})();
 

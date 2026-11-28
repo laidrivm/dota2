@@ -92,7 +92,7 @@ Closes `cm-draft/setup-collapses-into-the-board`,
       nickname 24 accepted, 25 and whitespace-only refused; a duplicate
       position on either team unsets the first; the 10-signature
       limit; a stored session that fails to parse falls back to empty.
-- [ ] 4.2 Implement the session type and reducer, the setup block and both
+- [x] 4.2 Implement the session type and reducer, the setup block and both
       roster panels (signature heroes through the existing picker); the
       board appears once side and pick order are set with step 1 marked.
 - [ ] 4.3 E2e: a wrong password on `/cm` is announced and keeps focus, and
