@@ -1,0 +1,43 @@
+/* The CM draft board. Every value is a token reference — literals belong in
+   tokens/ only. */
+
+.draft {
+	display: flex;
+	flex-direction: column;
+	gap: var(--sp-3);
+	margin-bottom: var(--sp-6);
+}
+
+.actions {
+	display: flex;
+	gap: var(--sp-3);
+}
+
+.strip {
+	display: grid;
+	grid-template-columns: repeat(12, 1fr);
+	gap: var(--sp-1);
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.cell {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: var(--sp-1);
+	padding: var(--sp-1);
+	border: 1px solid var(--border-1);
+	border-radius: var(--r-panel);
+	color: var(--text-4);
+}
+
+.ours {
+	color: var(--text-1);
+	background: var(--bg-2);
+}
+
+.cell[aria-current="step"] {
+	border-color: var(--accent);
+}

@@ -18,10 +18,13 @@ const TABLE = [
 ] as const;
 
 /** Every step in order, `ORDER[0]` being step 1. */
-export const ORDER: readonly { action: StepAction; first: boolean }[] =
-	TABLE.flatMap(([action, teams]) =>
-		teams.split(" ").map((slot) => ({ action, first: slot === "A" })),
-	);
+export const ORDER: readonly {
+	step: number;
+	action: StepAction;
+	first: boolean;
+}[] = TABLE.flatMap(([action, teams]) =>
+	teams.split(" ").map((slot) => ({ action, first: slot === "A" })),
+).map((entry, index) => ({ step: index + 1, ...entry }));
 
 /** Step `index` (0-based) as the captain sees it: whose it is, and what. */
 export function stepAt(

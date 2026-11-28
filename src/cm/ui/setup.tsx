@@ -11,7 +11,7 @@ const ORDER_LABEL: Record<PickOrder, string> = {
 /**
  * The two choices the board waits for: the side, and whether the captain's
  * team picks first. Independent of each other (cm-draft, *Setup takes the
- * side and the pick order*).
+ * side and the pick order*), and fixed while any step is entered.
  */
 export function Setup({
 	session,
@@ -22,7 +22,7 @@ export function Setup({
 }) {
 	return (
 		<div class={s.setup}>
-			<fieldset class={s.choice}>
+			<fieldset class={s.choice} disabled={session.steps.length > 0}>
 				<legend class={s.label}>Side</legend>
 				{(["radiant", "dire"] as const satisfies Side[]).map((side) => (
 					<label key={side} class={s.option}>
@@ -36,7 +36,7 @@ export function Setup({
 					</label>
 				))}
 			</fieldset>
-			<fieldset class={s.choice}>
+			<fieldset class={s.choice} disabled={session.steps.length > 0}>
 				<legend class={s.label}>Pick order</legend>
 				{(["first", "second"] as const).map((pickOrder) => (
 					<label key={pickOrder} class={s.option}>

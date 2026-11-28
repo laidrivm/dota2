@@ -1,6 +1,6 @@
 import { useState } from "preact/hooks";
 import { HeroTile } from "../../app/board/hero-tile.tsx";
-import { Picker } from "../../app/picker/picker.tsx";
+import { focusAfterPick, Picker } from "../../app/picker/picker.tsx";
 import { ROLE_UI } from "../../app/session-controls.tsx";
 import type { HeroEntry, Role, SnapshotBundle } from "../../types.ts";
 import s from "./cm.module.css";
@@ -60,6 +60,7 @@ export function Rosters({
 					onPick={(hero) => {
 						apply({ type: "addSignature", ...choosing, hero });
 						setChoosing(null);
+						focusAfterPick(`cm-${choosing.team}-${choosing.index}`);
 					}}
 					onClose={() => setChoosing(null)}
 				/>
@@ -169,6 +170,7 @@ function Roster({
 									<button
 										type="button"
 										class={s.signature}
+										data-remove={id}
 										aria-label={`Remove ${byId.get(hero)?.name ?? "hero"}`}
 										onClick={() =>
 											apply({ type: "removeSignature", team, index, hero })
@@ -183,6 +185,7 @@ function Roster({
 							type="button"
 							class={s.button}
 							disabled={full}
+							data-pick={id}
 							onClick={() => onAddSignature(index)}
 						>
 							{full
