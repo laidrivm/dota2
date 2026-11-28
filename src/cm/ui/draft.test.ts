@@ -21,12 +21,12 @@ const setUp = (pickOrder: "first" | "second" = "first"): CmSession =>
 		pickOrder,
 	});
 
-/** `session` after entering heroes 1, 2, … `count`. */
+/** `session` after entering `count` more heroes, each new to the draft. */
 const entered = (session: CmSession, count: number): CmSession =>
-	Array.from({ length: count }, (_, i) => 101 + i).reduce(
-		(s, hero) => reduce(s, { type: "enter", hero }),
-		session,
-	);
+	Array.from(
+		{ length: count },
+		(_, i) => 101 + session.steps.length + i,
+	).reduce((s, hero) => reduce(s, { type: "enter", hero }), session);
 
 describe("entering heroes", () => {
 	test("a hero fills the step in progress and moves it on", () => {

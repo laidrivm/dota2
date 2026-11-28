@@ -1,13 +1,19 @@
 /**
- * The CM page's own state: the setup a captain enters and both rosters. The
- * draft's steps join it with the draft order; persistence comes after that.
+ * The CM page's own state: the setup a captain enters, both rosters, and the
+ * heroes entered at each step of the draft order; persistence comes next.
  * A reducer, so every edit is a value in, a value out, and a test is a list
  * of actions.
  */
 import type { HeroId, Role, Side } from "../../types.ts";
+import {
+	ORDER,
+	type PickOrder,
+	type StepAction,
+	stepAt,
+	type Team,
+} from "../engine/order.ts";
 
-export type PickOrder = "first" | "second";
-export type Team = "ours" | "theirs";
+export type { PickOrder, Team };
 /** Herald (1) to Immortal (8). */
 export type RankTier = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
 
@@ -32,6 +38,8 @@ export interface CmSession {
 	pickOrder: PickOrder | null;
 	ours: Player[];
 	theirs: Player[];
+	/** The hero entered at each step so far, `steps[0]` being step 1's. */
+	steps: HeroId[];
 }
 
 const player = (prefix: string, index: number): Player => ({
@@ -47,6 +55,7 @@ export const emptySession = (): CmSession => ({
 	pickOrder: null,
 	ours: [0, 1, 2, 3, 4].map((i) => player("Player", i)),
 	theirs: [0, 1, 2, 3, 4].map((i) => player("Enemy", i)),
+	steps: [],
 });
 
 export type CmAction =
@@ -56,7 +65,24 @@ export type CmAction =
 	| { type: "position"; team: Team; index: number; position: Role | null }
 	| { type: "rank"; team: Team; index: number; rank: RankTier | null }
 	| { type: "addSignature"; team: Team; index: number; hero: HeroId }
-	| { type: "removeSignature"; team: Team; index: number; hero: HeroId };
+	| { type: "removeSignature"; team: Team; index: number; hero: HeroId }
+	| { type: "enter"; hero: HeroId }
+	| { type: "undo" };
+
+/** The step a hero was entered at (1-based), or `null` while it is free. */
+export const takenAt = (session: CmSession, hero: HeroId): number | null => {
+	const index = session.steps.indexOf(hero);
+	return index === -1 ? null : index + 1;
+};
+
+/** The step being entered, `null` before setup is done and after step 24. */
+export function stepInProgress(
+	session: CmSession,
+): { step: number; action: StepAction; team: Team } | null {
+	if (session.side === null || session.pickOrder === null) return null;
+	const at = stepAt(session.steps.length, session.pickOrder);
+	return at && { step: session.steps.length + 1, ...at };
+}
 
 /** A whole number 1 to `max`: a position (5) or a rank tier (8). */
 const isTier = (value: unknown, max: 5 | 8) =>
@@ -79,10 +105,21 @@ function editPlayer(
 
 export function reduce(session: CmSession, action: CmAction): CmSession {
 	switch (action.type) {
+		// The setup decides whose every entered step is, so it is fixed from
+		// step 1 on; undoing back to no step frees it again.
 		case "side":
+			if (session.steps.length > 0) return session;
 			return { ...session, side: action.side };
 		case "pickOrder":
+			if (session.steps.length > 0) return session;
 			return { ...session, pickOrder: action.pickOrder };
+		case "enter":
+			if (stepInProgress(session) === null) return session;
+			if (takenAt(session, action.hero) !== null) return session;
+			return { ...session, steps: [...session.steps, action.hero] };
+		case "undo":
+			if (session.steps.length === 0) return session;
+			return { ...session, steps: session.steps.slice(0, -1) };
 		case "nickname": {
 			const name = action.name.trim();
 			if (name === "" || name.length > NICKNAME_MAX) return session;
@@ -148,6 +185,14 @@ const isPlayer = (value: unknown): value is Player => {
 	);
 };
 
+/** Distinct heroes, no more than the order has steps, and none before setup. */
+const isSteps = (value: unknown, setUp: boolean): value is HeroId[] =>
+	Array.isArray(value) &&
+	value.length <= ORDER.length &&
+	(setUp || value.length === 0) &&
+	value.every((hero) => Number.isInteger(hero)) &&
+	new Set(value).size === value.length;
+
 const isRoster = (value: unknown): value is Player[] =>
 	Array.isArray(value) && value.length === 5 && value.every(isPlayer);
 
@@ -166,6 +211,7 @@ export function parseSession(stored: unknown): CmSession {
 			s.pickOrder === "first" ||
 			s.pickOrder === "second") &&
 		isRoster(s.ours) &&
-		isRoster(s.theirs);
+		isRoster(s.theirs) &&
+		isSteps(s.steps, s.side !== null && s.pickOrder !== null);
 	return valid ? (stored as CmSession) : emptySession();
 }
