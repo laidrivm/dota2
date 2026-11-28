@@ -38,7 +38,12 @@ const MIN_PASSWORD = 12;
 const MAX_FAILURES = 10;
 const WINDOW_MS = 15 * 60_000;
 
-/** Whether `origin` names the host `url` was requested on; a malformed one does not. */
+/**
+ * Whether `origin` names the host `url` was requested on; a malformed one does
+ * not. Hosts only, not whole origins, and on purpose: the proxy terminates TLS,
+ * so the request arrives as `http://` while the browser's Origin says
+ * `https://`, and a full-origin compare would refuse every sign-in.
+ */
 function sameHost(origin: string, url: string) {
 	try {
 		return new URL(origin).host === new URL(url).host;
