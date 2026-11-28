@@ -1,5 +1,6 @@
 /**
- * The Captains Mode API under `/api/cm/`: signing in and reading the session.
+ * The Captains Mode API under `/api/cm/`: signing in, reading the session, and
+ * the d2pt meta the captain uploads.
  * The checks run in the order the cm-access spec fixes — origin, then
  * configuration, then session, then the route — so a closed API answers
  * nothing else.
@@ -8,6 +9,9 @@ import { Hono } from "hono";
 import { bodyLimit } from "hono/body-limit";
 import { getCookie, setCookie } from "hono/cookie";
 import { z } from "zod";
+import { readMeta } from "./d2pt.ts";
+import { Positions, Uploaded } from "./meta-schema.ts";
+import { readStore, writePosition } from "./meta-store.ts";
 import { problem } from "./problem.ts";
 import {
 	COOKIE,
@@ -22,7 +26,14 @@ export interface CmOptions {
 	password: string | undefined;
 	/** Milliseconds since the epoch; injected so a test owns the clock. */
 	now?: () => number;
+	/** `CM_DATA_DIR`: where uploaded meta is kept (design D11). */
+	dataDir?: string;
+	/** The hero ids the served snapshot carries, read when an upload arrives. */
+	knownHeroes?: () => Promise<ReadonlySet<number>>;
 }
+
+/** An upload's cap (cm-meta-import): d2pt's data file is well under it. */
+const META_LIMIT = 5 * 1024 * 1024;
 
 const SignIn = z.object({ password: z.string() });
 
@@ -52,7 +63,12 @@ function sameHost(origin: string, url: string) {
 	}
 }
 
-export function cmApi({ password, now = Date.now }: CmOptions) {
+export function cmApi({
+	password,
+	now = Date.now,
+	dataDir = "cm-data",
+	knownHeroes = async () => new Set<number>(),
+}: CmOptions) {
 	const usable =
 		password !== undefined &&
 		password.trim() !== "" &&
@@ -173,6 +189,33 @@ export function cmApi({ password, now = Date.now }: CmOptions) {
 		});
 		return c.body(null, 204);
 	});
+
+	app.post(
+		"/meta",
+		bodyLimit({ maxSize: META_LIMIT, onError: () => problem("too-large") }),
+		async (c) => {
+			const upload = readMeta(await c.req.text(), await knownHeroes());
+			if (upload === null) return problem("not-d2pt-meta");
+			const uploadedAt = new Date(now()).toISOString();
+			await writePosition(dataDir, upload, uploadedAt);
+			return c.json(
+				Uploaded.parse({
+					position: upload.position,
+					heroes: Object.keys(upload.heroes).length,
+					patch: upload.patch,
+					uploadedAt,
+				}),
+			);
+		},
+	);
+
+	app.get("/meta", async (c) =>
+		c.json(
+			z
+				.object({ positions: Positions })
+				.parse({ positions: await readStore(dataDir) }),
+		),
+	);
 
 	return app;
 }

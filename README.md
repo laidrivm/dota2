@@ -42,7 +42,7 @@ One fact lives in exactly one file; everything else links to it.
 | `src/job/build/` | turning staging into a snapshot: the arithmetic, and the lifecycle around it |
 | `src/job/export/` | rendering that snapshot as the bundle the client fetches, and publishing it |
 | `src/server/` | the HTTP server, its two route modules, and what they serve |
-| `src/server/cm/` | the Captains Mode API under `/api/cm/`: its password, session and error shape |
+| `src/server/cm/` | the Captains Mode API under `/api/cm/`: its password, session, error shape and the d2pt meta it stores |
 | `checks/` | assertions about this repository's own artefacts — the rules, the permission policy, the commit gates |
 | `scripts/` | executable gates and the dev entry point, each with its tests beside it |
 | `e2e/` | the Playwright specs, which Bun's runner is configured to skip |

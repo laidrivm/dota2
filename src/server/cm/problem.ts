@@ -55,6 +55,14 @@ const PROBLEMS = {
 		detail: 'The body must be JSON of the form {"password": string}.',
 		action: null,
 	},
+	"not-d2pt-meta": {
+		status: 422,
+		title: "Not a d2pt meta file",
+		detail:
+			"The body is not dota2protracker's meta data file for one position: at least 50 rated heroes the snapshot knows, ratings 0–100 and not all equal.",
+		action:
+			"Save the position's data file from the link the CM page gives, and upload that file.",
+	},
 	"wrong-password": {
 		status: 401,
 		title: "Wrong password",

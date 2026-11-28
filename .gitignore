@@ -16,6 +16,9 @@ icons/
 # The bundle the export publishes; the job writes it, no build does
 snapshot/
 
+# CM meta uploaded to a local server (CM_DATA_DIR's default)
+cm-data/
+
 # Playwright run output
 test-results/
 playwright-report/
