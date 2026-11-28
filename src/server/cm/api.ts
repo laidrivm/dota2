@@ -43,6 +43,13 @@ export function cmApi({ password, now = Date.now }: CmOptions) {
 
 	const app = new Hono<{ Variables: { expiry: number } }>().basePath("/api/cm");
 
+	// Hono's defaults are plain text; the contract is problem details throughout.
+	app.notFound(() => problem("not-found"));
+	app.onError((error) => {
+		console.error("cm api:", error);
+		return problem("internal");
+	});
+
 	// Nothing this API answers may be stored by a shared cache: every response
 	// is either about a session or sets one.
 	app.use("*", async (c, next) => {

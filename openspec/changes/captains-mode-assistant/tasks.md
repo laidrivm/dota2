@@ -33,8 +33,9 @@ Closes `cm-access/signing-in-with-the-password`,
       `invalid-body` for non-JSON and a missing `password`; every problem
       body carrying all six fields.
 - [x] 1.3 Implement the Hono app under `src/server/cm/` (configuration,
-      session cookie per design D2, problem responses per D4) and mount it
-      for `/api/*` in `server.ts`'s `fetch` ahead of `distFile`; the 1.2
+      session cookie per design D2, problem responses per D4, the sign-in
+      body limit and `no-store` per D4) and mount it for `/api/cm` and
+      `/api/cm/*` in `server.ts`'s `fetch` ahead of `distFile`; the 1.2
       cases pass.
 ## 2. Hardening the sign-in
 

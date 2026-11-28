@@ -175,6 +175,35 @@ describe("a request without a valid session", () => {
 	});
 });
 
+describe("errors outside the routes", () => {
+	test("an unknown path, signed in, is a 404 problem", async () => {
+		const app = api();
+		const cookie = cookieOf(await signIn(app));
+		const response = await app.request("/api/cm/nope", { headers: { cookie } });
+		expect(response.status).toBe(404);
+		expect((await problem(response)).code).toBe("not-found");
+	});
+
+	test("a handler that throws is a 500 problem, not plain text", async () => {
+		const app = api();
+		app.get("/boom", () => {
+			throw new Error("boom");
+		});
+		const cookie = cookieOf(await signIn(app));
+		const logged = console.error;
+		console.error = () => {};
+		try {
+			const response = await app.request("/api/cm/boom", {
+				headers: { cookie },
+			});
+			expect(response.status).toBe(500);
+			expect((await problem(response)).code).toBe("internal");
+		} finally {
+			console.error = logged;
+		}
+	});
+});
+
 describe("no usable password configured", () => {
 	// spec: cm-access/no-password-configured
 	test.each([

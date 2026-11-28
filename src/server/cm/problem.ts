@@ -18,6 +18,18 @@ export type Problem = z.infer<typeof Problem>;
 
 /** Every problem the CM API answers with, by its `code`. */
 const PROBLEMS = {
+	"not-found": {
+		status: 404,
+		title: "Not found",
+		detail: "No CM API route answers this path and method.",
+		action: null,
+	},
+	internal: {
+		status: 500,
+		title: "Internal error",
+		detail: "The CM API failed while answering this request.",
+		action: "Try again; if it repeats, the server log names the failure.",
+	},
 	"too-large": {
 		status: 413,
 		title: "Request body too large",

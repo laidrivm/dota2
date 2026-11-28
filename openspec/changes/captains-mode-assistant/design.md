@@ -65,8 +65,8 @@ for one user's cookie, and the server has no database connection to keep.
 
 ### D3. Hono for the API, mounted beside the existing routes
 
-`Bun.serve` keeps `routes` for the static paths; its `fetch` hands `/api/*`
-to a Hono app and everything else to `distFile` as now. Hono brings the
+`Bun.serve` keeps `routes` for the static paths; its `fetch` hands `/api/cm`
+and `/api/cm/*` to a Hono app and everything else to `distFile` as now. Hono brings the
 middleware order the API needs (origin check, then configuration, then
 session), typed handlers, and the SSE helper the report delivery will use.
 `zod` provides the request and response schemas `harness/api-design.md`
@@ -84,7 +84,14 @@ All errors are `application/problem+json`:
 "code":<string>,"action":<string|null>}`. No `/api/cm/` response sets CORS
 headers; an `Origin` other than the request's own host answers 403
 `cross-origin` first (D2's cookie is `SameSite=Strict`; this is the second
-line).
+line). Every response carries `Cache-Control: no-store`, since each is about
+a session or sets one. The sign-in body, the one open to anyone, is capped
+at 1 KB and answers 413 `too-large` past it, so an unauthenticated caller
+cannot make the server buffer Bun's 128 MB default. Unmatched paths, once
+signed in, answer 404 `not-found`, and a thrown error 500 `internal`, logged.
+These came out of step 1's review; they protect the routes the specs name
+without adding behaviour a client relies on, so they sit here rather than
+in the delta specs, which apply does not edit.
 
 | Route | Body | 2xx | Codes |
 | --- | --- | --- | --- |
