@@ -119,11 +119,11 @@ Closes `cm-draft/the-order-from-the-second-pick`,
 
 Closes `cm-draft/reloading-mid-draft`, `cm-draft/resetting-the-draft`.
 
-- [ ] 6.1 Failing cases first (ZOMBIES 28, 29): `cm.session` round-trips;
+- [x] 6.1 Failing cases first (ZOMBIES 28, 29): `cm.session` round-trips;
       reset keeps setup and rosters; the All Pick key is untouched; e2e:
       sign in, set up, enter ten steps, reload, resume at step 11, keyboard
       alone (ZOMBIES 26).
-- [ ] 6.2 Implement persistence and reset.
+- [x] 6.2 Implement persistence and reset.
 
 ## 7. Valuing a team
 

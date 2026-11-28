@@ -67,7 +67,8 @@ export type CmAction =
 	| { type: "addSignature"; team: Team; index: number; hero: HeroId }
 	| { type: "removeSignature"; team: Team; index: number; hero: HeroId }
 	| { type: "enter"; hero: HeroId }
-	| { type: "undo" };
+	| { type: "undo" }
+	| { type: "reset" };
 
 /** The step a hero was entered at (1-based), or `null` while it is free. */
 export const takenAt = (session: CmSession, hero: HeroId): number | null => {
@@ -120,6 +121,11 @@ export function reduce(session: CmSession, action: CmAction): CmSession {
 		case "undo":
 			if (session.steps.length === 0) return session;
 			return { ...session, steps: session.steps.slice(0, -1) };
+		// The setup and rosters outlive a draft: the next one is often the
+		// same two teams.
+		case "reset":
+			if (session.steps.length === 0) return session;
+			return { ...session, steps: [] };
 		case "nickname": {
 			const name = action.name.trim();
 			if (name === "" || name.length > NICKNAME_MAX) return session;

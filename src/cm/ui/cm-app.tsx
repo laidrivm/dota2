@@ -1,26 +1,40 @@
-import { useEffect, useReducer, useRef, useState } from "preact/hooks";
+import {
+	useEffect,
+	useLayoutEffect,
+	useReducer,
+	useRef,
+	useState,
+} from "preact/hooks";
 import { loadSnapshot } from "../../app/snapshot.ts";
 import type { SnapshotBundle } from "../../types.ts";
 import { readSession, type SessionState, signOut } from "./api.ts";
 import { DraftBoard } from "./board.tsx";
 import s from "./cm.module.css";
+import { persistSession, restoreSession } from "./cm-storage.ts";
 import { Rosters } from "./rosters.tsx";
-import { emptySession, reduce } from "./session.ts";
+import { reduce } from "./session.ts";
 import { Setup } from "./setup.tsx";
 import { SignIn } from "./sign-in.tsx";
 
 /**
  * The signed-in screen: setup until the side and pick order are both set, then
  * the board — the step in progress and both rosters — with setup still above
- * it, editable until a step is entered.
+ * it, editable until a step is entered. Every change is kept in the browser
+ * and read back on the next load.
  */
 function Draft() {
 	const [bundle, setBundle] = useState<SnapshotBundle | null | undefined>();
-	const [session, apply] = useReducer(reduce, undefined, emptySession);
+	const [session, apply] = useReducer(reduce, undefined, restoreSession);
 
 	useEffect(() => {
 		loadSnapshot().then(setBundle);
 	}, []);
+
+	// Before paint, so a change the screen shows is already stored when a
+	// reload reads it back — a reset confirmed then reloaded stays reset.
+	useLayoutEffect(() => {
+		persistSession(session);
+	}, [session]);
 
 	if (bundle === undefined) return <p class={s.note}>Loading heroes…</p>;
 	if (bundle === null)

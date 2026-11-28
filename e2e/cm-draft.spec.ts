@@ -145,3 +145,61 @@ test("a pick hands focus back, a signature leaves by its tile, and ten is the li
 		player.getByRole("button", { name: /^Remove / }).last(),
 	).toBeFocused();
 });
+
+// spec: cm-draft/reloading-mid-draft
+test("ten steps entered by keyboard alone come back after a reload, at step 11", async ({
+	page,
+}) => {
+	await page.goto("/");
+	await page.evaluate(() => localStorage.setItem("draft.session", "all-pick"));
+	await signedInAt(page, "First pick");
+	const entry = draft(page).getByRole("button", { name: /^Enter / });
+	await entry.focus();
+	for (let n = 0; n < 10; n++) {
+		// Focus comes back after the picker closes; nothing but keys moves it.
+		await expect(entry).toBeFocused();
+		await page.keyboard.press("Enter");
+		await expect(page.getByRole("dialog")).toBeVisible();
+		await page.keyboard.press("Enter");
+		await expect(page.getByRole("dialog")).toBeHidden();
+	}
+	await expect(draft(page).getByText("Step 11 · your ban")).toBeVisible();
+
+	await page.reload();
+	await expect(draft(page).getByText("Step 11 · your ban")).toBeVisible();
+	await expect(page.getByLabel("Your bans").getByRole("listitem")).toHaveCount(
+		4,
+	);
+	await expect(page.getByRole("radio", { name: "First pick" })).toBeChecked();
+	const allPick = await page.evaluate(() =>
+		localStorage.getItem("draft.session"),
+	);
+	expect(allPick).toBe("all-pick");
+});
+
+// spec: cm-draft/resetting-the-draft
+test("resetting clears the steps and keeps the setup and rosters", async ({
+	page,
+}) => {
+	await signedInAt(page, "Second pick");
+	const nickname = page.getByLabel("Nickname").first();
+	await nickname.fill("Kept");
+	await nickname.blur();
+	await enter(page, 3);
+
+	// Declining the browser's confirmation keeps every step.
+	page.once("dialog", (dialog) => dialog.dismiss());
+	await draft(page).getByRole("button", { name: "Reset draft" }).click();
+	await expect(draft(page).getByText("Step 4 · your ban")).toBeVisible();
+
+	page.once("dialog", (dialog) => dialog.accept());
+	await draft(page).getByRole("button", { name: "Reset draft" }).click();
+	await expect(draft(page).getByText("Step 1 · enemy ban")).toBeVisible();
+	await expect(page.getByLabel("Draft order").getByRole("img")).toHaveCount(0);
+	await expect(page.getByRole("radio", { name: "Second pick" })).toBeChecked();
+	await expect(page.getByRole("radio", { name: "Radiant" })).toBeChecked();
+	await expect(nickname).toHaveValue("Kept");
+	await expect(
+		draft(page).getByRole("button", { name: /^Enter / }),
+	).toBeFocused();
+});
