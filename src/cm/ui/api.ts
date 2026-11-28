@@ -1,0 +1,79 @@
+/**
+ * The CM page's calls to `/api/cm/`, each answer mapped to what the page
+ * shows. Nothing here throws: a static host, a dropped connection and an
+ * unexpected body all land on a state the page can render.
+ */
+
+export type SessionState =
+	| { kind: "signed-in"; expiresAt: string }
+	| { kind: "signed-out" }
+	| { kind: "not-configured" }
+	| { kind: "unavailable" };
+
+export type SignInResult =
+	| { kind: "signed-in" }
+	| { kind: "not-configured" }
+	| { kind: "error"; message: string };
+
+const SESSION = "/api/cm/session";
+const UNAVAILABLE = "The CM service is unavailable. Try again shortly.";
+
+/** The response, or `null` when the request never got one. */
+async function call(fetcher: typeof fetch, init?: RequestInit) {
+	try {
+		return await fetcher(SESSION, { credentials: "same-origin", ...init });
+	} catch {
+		return null;
+	}
+}
+
+export async function readSession(
+	fetcher: typeof fetch = fetch,
+): Promise<SessionState> {
+	const response = await call(fetcher);
+	if (response?.status === 401) return { kind: "signed-out" };
+	if (response?.status === 503) return { kind: "not-configured" };
+	if (response?.status === 200) {
+		const body = await response.json().catch(() => null);
+		if (body?.signedIn === true && typeof body.expiresAt === "string")
+			return { kind: "signed-in", expiresAt: body.expiresAt };
+	}
+	// A static host answers its own 404 page, which is this same case.
+	return { kind: "unavailable" };
+}
+
+export async function signIn(
+	password: string,
+	fetcher: typeof fetch = fetch,
+): Promise<SignInResult> {
+	const response = await call(fetcher, {
+		method: "POST",
+		headers: { "content-type": "application/json" },
+		body: JSON.stringify({ password }),
+	});
+	switch (response?.status) {
+		case 204:
+			return { kind: "signed-in" };
+		case 401:
+			return { kind: "error", message: "Wrong password." };
+		case 429: {
+			const wait = response.headers.get("retry-after") ?? "a few";
+			return {
+				kind: "error",
+				message: `Too many attempts. Try again in ${wait} seconds.`,
+			};
+		}
+		case 503:
+			return { kind: "not-configured" };
+		default:
+			return { kind: "error", message: UNAVAILABLE };
+	}
+}
+
+/** Signed out either way: a 401 means the session was already gone. */
+export async function signOut(
+	fetcher: typeof fetch = fetch,
+): Promise<{ kind: "signed-out" }> {
+	await call(fetcher, { method: "DELETE" });
+	return { kind: "signed-out" };
+}

@@ -60,6 +60,7 @@
 			"CLAUDE.md": "always-on agent rules, read at the start of every session",
 			"README.md": "the front door, where a reader arrives before any directory",
 			"index.html": "the bundler entry point `bun build ./index.html` expects here",
+			"cm.html": "the Captains Mode page's entry point, built beside index.html for the same reason",
 			"package.json": "the manifest bun resolves from the root and nowhere else",
 			"bun.lock": "the lockfile bun writes beside the manifest",
 			"bunfig.toml": "bun's own configuration, read from the root",

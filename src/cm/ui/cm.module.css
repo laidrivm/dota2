@@ -1,0 +1,76 @@
+/* The Captains Mode page's frame and its sign-in screen. Every value is a
+   token reference — literals belong in tokens/ only. */
+
+.page {
+	max-width: 1280px;
+	margin: 0 auto;
+	padding: var(--sp-6) var(--sp-7);
+}
+
+.header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--sp-6);
+	min-height: var(--row-h);
+	border-bottom: 1px solid var(--border-0);
+}
+
+.title {
+	margin: 0;
+	font-size: var(--fs-control);
+	font-weight: 600;
+}
+
+.button {
+	padding: var(--sp-2) var(--sp-6);
+	border: 1px solid var(--border-3);
+	border-radius: var(--r-control);
+	background: var(--bg-2);
+	color: var(--text-1);
+	font: inherit;
+	cursor: pointer;
+}
+
+.button:hover {
+	border-color: var(--border-hover);
+}
+
+.panel {
+	display: flex;
+	flex-direction: column;
+	gap: var(--sp-4);
+	max-width: 360px;
+	margin: var(--sp-8) auto;
+	padding: var(--sp-6);
+	border: 1px solid var(--border-2);
+	border-radius: var(--r-panel);
+	background: var(--bg-1);
+}
+
+.label {
+	font-size: var(--fs-label);
+	font-weight: 600;
+	letter-spacing: var(--ls-label);
+	text-transform: uppercase;
+	color: var(--text-5);
+}
+
+.input {
+	padding: var(--sp-3) var(--sp-4);
+	border: 1px solid var(--border-3);
+	border-radius: var(--r-control);
+	background: var(--bg-0);
+	color: var(--text-1);
+	font: inherit;
+}
+
+.error {
+	margin: 0;
+	color: var(--dire);
+}
+
+.note {
+	margin: 0;
+	color: var(--text-3);
+}
