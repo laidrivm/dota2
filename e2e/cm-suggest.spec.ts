@@ -121,44 +121,27 @@ test("two steps entered 100 ms apart only ever show the ranking of the step in p
 		});
 	});
 	// Step 1 by its suggestion, then 100 ms later step 2 through the picker,
-	// both committed inside the page on a clock the case owns: the gap is
-	// exactly 100 ms of page time, whatever the machine is doing.
+	// on a clock the case owns and holds paused: the clicks cost the page no
+	// time, so the gap between the two entries is the 100 ms run between them.
 	await page.clock.install();
-	// Paused before the first entry, so no time passes that the case does not run.
 	await page.clock.pauseAt(Date.now() + 1000);
-	const entered = page.evaluate(
-		() =>
-			new Promise<number>((done) => {
-				const first = document.querySelector<HTMLButtonElement>(
-					"ol[aria-label^='Ranked for step '] button",
-				);
-				first?.click();
-				const start = Date.now();
-				setTimeout(() => {
-					document
-						.querySelector<HTMLButtonElement>('button[data-pick="cm-step"]')
-						?.click();
-					// The picker renders on the next turn; its first free tile enters
-					// step 2.
-					const pick = () => {
-						const tile = document.querySelector<HTMLButtonElement>(
-							'dialog [aria-disabled="false"]',
-						);
-						if (tile === null) return setTimeout(pick, 0);
-						tile.click();
-						done(Date.now() - start);
-					};
-					pick();
-				}, 100);
-			}),
-	);
-	// One run covers the 100 ms and the turns the picker takes to render, each
-	// a timer this clock fires in order; nothing advances it in between.
-	await page.clock.runFor(120);
-	// A turn the picker takes to render is a 1 ms timer on this clock.
-	const gap = await entered;
-	expect(gap).toBeGreaterThanOrEqual(100);
-	expect(gap).toBeLessThanOrEqual(102);
+	const pageNow = () => page.evaluate(() => Date.now());
+	await page
+		.getByRole("region", { name: "Suggested bans, step 1" })
+		.getByRole("button")
+		.first()
+		.click();
+	const start = await pageNow();
+	// The picker opens in an effect, which runs on a frame of this clock: it
+	// is opened 60 ms in, and the 40 ms left let it render before the pick.
+	await page.clock.runFor(60);
+	await draft(page)
+		.getByRole("button", { name: /^Enter / })
+		.click();
+	await page.clock.runFor(40);
+	// Enter in the search field takes the first free hero: step 2.
+	await page.getByLabel("Search heroes").press("Enter");
+	expect((await pageNow()) - start).toBe(100);
 	await page.clock.resume();
 	await expect(
 		page
