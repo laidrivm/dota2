@@ -69,7 +69,7 @@ Closes `cm-draft/signing-in-from-the-page`, `cm-access/signing-out`,
       password through `role="alert"` and keeps focus; 503 and 429 are shown
       from their `code`; `DELETE /api/cm/session` answers 204 and clears the
       cookie, and sign-in, read, sign-out work in sequence.
-- [ ] 3.3 Implement `DELETE /api/cm/session`, the sign-in screen under
+- [x] 3.3 Implement `DELETE /api/cm/session`, the sign-in screen under
       `src/cm/ui/` and a sign-out control; Playwright's `webServer` gets a
       test `CM_PASSWORD`; e2e `e2e/cm.spec.ts`: wrong then right password
       reaches the page on `/cm`, sign-out returns to the form; `/` makes no

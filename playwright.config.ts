@@ -12,6 +12,9 @@ import { defineConfig, devices } from "@playwright/test";
  * the suite and the server on the same port instead of probing a stranger.
  */
 const port = process.env.BUN_PORT ?? process.env.PORT ?? "3000";
+
+/** The CM password the suite's server runs with; `e2e/cm.spec.ts` imports it. */
+export const CM_TEST_PASSWORD = "e2e-only-cm-password";
 const baseURL = `http://localhost:${port}`;
 
 export default defineConfig({
@@ -30,5 +33,8 @@ export default defineConfig({
 		url: baseURL,
 		// Locally the running dev server is reused; CI always starts its own.
 		reuseExistingServer: !process.env.CI,
+		// The CM API stays closed without one; this value exists for the suite
+		// alone, and `e2e/cm.spec.ts` signs in with it.
+		env: { CM_PASSWORD: CM_TEST_PASSWORD },
 	},
 });
