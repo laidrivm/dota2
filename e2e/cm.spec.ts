@@ -58,13 +58,13 @@ test("setting the side and the pick order opens the board at step 1", async ({
 	await expect(page.getByRole("region", { name: "Enemy team" })).toBeVisible();
 	expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
 
-	// The roster: a position held twice moves, and a blank name is refused.
 	const ours = page.getByRole("region", { name: "Your team" });
 	const first = ours.getByLabel("Position").first();
 	const second = ours.getByLabel("Position").nth(1);
 	await first.selectOption("3");
 	await second.selectOption("3");
 	await expect(first).toHaveValue("");
+	await expect(second).toHaveValue("3");
 	await expect(ours.getByText("Give each of positions 1–5")).toBeVisible();
 	await ours.getByLabel("Nickname").first().fill("");
 	await ours.getByLabel("Nickname").first().blur();

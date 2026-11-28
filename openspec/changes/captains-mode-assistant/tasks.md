@@ -111,8 +111,9 @@ Closes `cm-draft/the-order-from-the-second-pick`,
       step in progress names its team and action accessibly.
 - [ ] 5.2 Implement the order as one data table under `src/cm/engine/`, the
       board's step strip, bans and picks rows, and undo.
-- [ ] 5.3 E2e from step 4 (its diff at the cap): a signature added in the
-      picker shows, its tile removes it; at ten, adding is disabled and says so.
+- [ ] 5.3 From step 4 (its diff at the cap): lift `focusAfterPick` into the
+      picker module and focus a signature pick's add control, or its new tile
+      at ten; e2e: the pick shows, its tile removes it, ten disables adding.
 
 ## 6. Keeping the draft
 

@@ -51,20 +51,14 @@ describe("positions", () => {
 	test.each(["ours", "theirs"] as const)(
 		"a position given twice on %s unsets the first holder",
 		(team) => {
-			const first = reduce(start(), {
-				type: "position",
-				team,
-				index: 0,
-				position: 3,
-			});
-			const second = reduce(first, {
-				type: "position",
-				team,
-				index: 1,
-				position: 3,
-			});
+			const three = (index: number) =>
+				({ type: "position", team, index, position: 3 }) as const;
+			const first = reduce(start(), three(0));
+			const second = reduce(first, three(1));
 			expect(second[team][0]?.position).toBeNull();
 			expect(second[team][1]?.position).toBe(3);
+			// A sixth player holds nothing, so the holder keeps the position.
+			expect(reduce(first, three(5))).toBe(first);
 		},
 	);
 

@@ -94,6 +94,7 @@ export function reduce(session: CmSession, action: CmAction): CmSession {
 		case "position": {
 			const { team, index, position } = action;
 			if (position !== null && !isTier(position, 5)) return session;
+			if (session[team][index] === undefined) return session;
 			// A position held twice moves: the earlier holder becomes unknown, so
 			// the team's known positions stay distinct at every step.
 			const roster = session[team].map((p, i) =>

@@ -96,7 +96,6 @@
 	gap: var(--sp-2);
 }
 
-/* The step in progress, above the rosters. */
 .step {
 	margin: var(--sp-4) 0;
 	font-size: var(--fs-control);
@@ -150,7 +149,6 @@
 	cursor: pointer;
 }
 
-/* Named for assistive technology, drawn for nobody. */
 .visuallyHidden {
 	position: absolute;
 	width: 1px;
