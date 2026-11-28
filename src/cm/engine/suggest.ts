@@ -15,7 +15,7 @@ import { share } from "../../model-terms.ts";
 import type { HeroId, Role, SnapshotBundle } from "../../types.ts";
 import { type DraftState, picksOf, teamsOf, valued } from "./draft.ts";
 import { type StepAction, stepAt, type Team } from "./order.ts";
-import { PLAYABLE_SHARE, type ValueParts } from "./value.ts";
+import { ownParts, PLAYABLE_SHARE, type ValueParts } from "./value.ts";
 
 export const SUGGESTIONS = 5;
 
@@ -23,9 +23,10 @@ export interface Suggestion {
 	hero: HeroId;
 	score: number;
 	/**
-	 * The hero's own contribution by part, for whichever team would pick it,
-	 * signed as it moves the score; `lookahead` is the rest of the score — at
-	 * one step deep, how the other team's value moves.
+	 * The hero's own contribution by part at the position it lands on, for
+	 * whichever team would pick it, signed as it moves the score; `lookahead`
+	 * is the rest — at one step deep, how the other team's value moves, and
+	 * what a teammate the hero displaces gains or loses.
 	 */
 	components: ValueParts & { lookahead: number };
 }
@@ -72,9 +73,16 @@ export function suggest(
 		)
 		.map((hero): Suggestion => {
 			const next = { ...picks, [picker]: [...picks[picker], hero.id] };
-			const after = valued(bundle, teamsOf(bundle, state, next));
-			const own = after[picker].parts;
-			const was = now[picker].parts;
+			const afterTeams = teamsOf(bundle, state, next);
+			const after = valued(bundle, afterTeams);
+			// The hero's own parts at the position it lands on; a teammate it moves
+			// is in the lookahead with everything else.
+			const own = ownParts(
+				bundle,
+				afterTeams[picker],
+				afterTeams[rest].slots,
+				hero.id,
+			);
 			const change =
 				sign *
 				(after[picker].total -
@@ -82,12 +90,12 @@ export function suggest(
 					(after[rest].total - now[rest].total));
 			const score = at.action === "pick" ? change : -change;
 			const parts: ValueParts = {
-				meta: signed * (own.meta - was.meta),
-				comfort: signed * (own.comfort - was.comfort),
-				side: signed * (own.side - was.side),
-				phase: signed * (own.phase - was.phase),
-				synergy: signed * (own.synergy - was.synergy),
-				matchups: signed * (own.matchups - was.matchups),
+				meta: signed * own.meta,
+				comfort: signed * own.comfort,
+				side: signed * own.side,
+				phase: signed * own.phase,
+				synergy: signed * own.synergy,
+				matchups: signed * own.matchups,
 			};
 			const counted = Object.values(parts).reduce((a, b) => a + b, 0);
 			return {

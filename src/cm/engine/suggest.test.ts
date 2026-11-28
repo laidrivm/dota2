@@ -134,7 +134,12 @@ test("mid-draft, a pick's parts are what it adds to the team, and the enemy's ch
 			at(30, "2", 2.0),
 		],
 		{
-			synergies: { "8": { "14": 0.5, "30": 0.6 }, "14": { "8": 0.5 } },
+			// Symmetric, as the snapshot's synergy matrix is.
+			synergies: {
+				"8": { "14": 0.5, "30": 0.6 },
+				"14": { "8": 0.5 },
+				"30": { "8": 0.6 },
+			},
 			matchups: { "8": { "9": 1.0 }, "9": { "30": 0.8 } },
 		},
 	);
@@ -184,4 +189,23 @@ test("a share of exactly 0.05 at an open position is eligible", () => {
 		);
 	const result = suggest(bundle([edge(1, 0.05), edge(2, 0.049)]), state([]));
 	expect(result?.entries.map((e) => e.hero)).toEqual([1]);
+});
+
+test("a teammate the pick displaces is in the lookahead, not in the pick's own parts", () => {
+	// Ours holds hero 8 (5 at position 1, 4 at 2). Hero 9 is 6 at position 1:
+	// taking it moves 8 to position 2. The score gains 6 − 1 = 5; hero 9's
+	// own meta is its 6, and hero 8's loss of 1 is the lookahead.
+	const fillers = Array.from({ length: 12 }, (_, i) =>
+		hero(20 + i, { "5": 0 }),
+	);
+	const b = bundle([
+		hero(8, { "1": 5, "2": 4 }),
+		hero(9, { "1": 6, "2": 0 }),
+		...fillers,
+	]);
+	const steps = [20, 21, 22, 23, 24, 25, 26, 8, 27, 28, 29, 30, 31];
+	const entry = suggest(b, state(steps))?.entries.find((e) => e.hero === 9);
+	expect(entry?.score).toBeCloseTo(5, 10);
+	expect(entry?.components.meta).toBeCloseTo(6, 10);
+	expect(entry?.components.lookahead).toBeCloseTo(-1, 10);
 });

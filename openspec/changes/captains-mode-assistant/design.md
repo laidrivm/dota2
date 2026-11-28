@@ -165,7 +165,13 @@ E = V(captain) − V(enemy)
   rank tier, clamped to [0.75, 1.25] — the brief's "the higher the rank, the
   more impact", bounded so one strong player cannot dominate the draft.
 - `σ` is the best of every assignment of the team's heroes to its open
-  positions (at most 5! = 120), players' known positions fixed. A hero
+  positions (at most 5! = 120), players' known positions fixed, judged by
+  the position-dependent terms `ρ · (meta + comfort)` alone. Side, phase and
+  synergy do not move with positions. Matchups do, but each team's would then
+  depend on the other's placement, so they are valued at the chosen `σ`
+  rather than searched over. A position's player is the one whose known
+  position it is; a position nobody holds is valued with no player (ρ = 1,
+  no comfort). A hero
   counts as playable where its snapshot share is ≥ 0.05 — or, at a position
   with uploaded meta, where the upload rates it (D9); elsewhere it costs
   −10 pp meta, which keeps an assignment defined when a captain enters an

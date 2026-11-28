@@ -46,8 +46,12 @@ and 1 for a player of unknown rank.
 ### Requirement: Heroes are assigned to the positions that maximise the team
 
 A team's picked heroes SHALL be assigned to its positions — its players'
-known positions held fixed — by the assignment of greatest team value among
-all of them. A hero SHALL count as able to play a position when its snapshot
+known positions held fixed — by the assignment of greatest positional value
+among all of them: the sum over its picks of `ρ(p) · (meta(h, k) +
+comfort(p, h))` at the position `k` each is given and the player `p` holding
+it. The matchup component SHALL be valued at that assignment rather than
+maximised over, since each team's assignment would otherwise depend on the
+other's. A hero SHALL count as able to play a position when its snapshot
 share there is at least 0.05, or, at a position with uploaded meta, when the
 upload rates it there (cm-meta-import); a hero assigned elsewhere SHALL
 contribute a meta of −10 at that position.

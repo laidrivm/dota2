@@ -1,6 +1,6 @@
 # captains-mode-assistant — tasks
 
-Twelve steps, twelve pull requests, in this order, each on
+Thirteen steps, thirteen pull requests, in this order, each on
 `feat/captains-mode-assistant-<n>`. Each names the criteria it closes by their
 `<capability>/<scenario-slug>` identifiers. Tests come first in every step;
 the ZOMBIES numbers refer to the proposal-stage run recorded in the body of
@@ -145,7 +145,7 @@ Closes `cm-model/valuing-a-team`,
 ## 8. Assignment and first suggestions
 
 Closes `cm-model/a-flexible-hero-takes-the-open-slot`,
-`cm-model/the-assignment-is-shown`, `cm-model/components-add-up-to-the-score`.
+`cm-model/components-add-up-to-the-score`.
 
 - [x] 8.1 Failing cases first (ZOMBIES 32, 33, 35, 36, 38, 39, 40): the best
       of 120 assignments beats a greedy one on a constructed five; share 0.05
@@ -154,72 +154,77 @@ Closes `cm-model/a-flexible-hero-takes-the-open-slot`,
       enemy's; fewer than five eligible heroes return that many.
 - [x] 8.2 Implement the assignment and the immediate ranking (depth 1,
       computed synchronously for now) under `src/cm/engine/`.
-- [ ] 8.3 The board shows each pick's position and player and the top five
-      with their components (its own pull request: step 8 together stood at
-      998 lines of an 800-line budget).
+## 9. The board reads the draft
 
-## 9. Off the main thread
+Split from step 8, which together stood at 998 lines of the 800-line budget.
 
-Closes `cm-model/an-enemy-step`, `cm-model/entering-two-steps-quickly`.
+Closes `cm-model/the-assignment-is-shown`, `cm-model/an-enemy-step`.
 
-- [ ] 9.1 Failing cases first (ZOMBIES 41): a result for an older `stateId`
-      is dropped; on an enemy step the list is headed as expected picks with
-      no enter control.
-- [ ] 9.2 Move the ranking into a Web Worker with `stateId` messages and
+- [ ] 9.1 The board shows each pick's position and player, and the top five
+      for the step in progress with their components; on an enemy step the
+      list is headed as the enemy's expected choices with no enter control.
+
+## 10. Off the main thread
+
+Closes `cm-model/entering-two-steps-quickly`.
+
+- [ ] 10.1 Failing cases first (ZOMBIES 41): a result for an older `stateId`
+      is dropped.
+- [ ] 10.2 Move the ranking into a Web Worker with `stateId` messages and
       restart-on-newer (design D6); e2e: two steps 100 ms apart show only the
       second state's suggestions.
 
-## 10. Looking ahead
+## 11. Looking ahead
 
 Closes `cm-model/a-ban-that-would-hand-the-enemy-a-better-pick`,
 `cm-model/the-search-answers-within-its-budget`.
 
-- [ ] 10.1 Failing cases first in `src/cm/engine/search.test.ts` (ZOMBIES
+- [ ] 11.1 Failing cases first in `src/cm/engine/search.test.ts` (ZOMBIES
       37, 42, 43): the constructed ban fixture ranks Y above X; deepening
       returns the last completed depth when the budget ends mid-iteration
       (clock injected); depth ≥ 2 within 1700 ms on the full snapshot
       fixture.
-- [ ] 10.2 Implement alpha-beta with the beam, greedy completion and
+- [ ] 11.2 Implement alpha-beta with the beam, greedy completion and
       iterative deepening (design D8) behind the worker; the board shows the
       depth reached.
 
-## 11. Uploading d2pt meta
+## 12. Uploading d2pt meta
 
 Closes `cm-meta-import/a-valid-upload-for-one-position`,
 `cm-meta-import/an-upload-that-is-not-the-meta-file`,
 `deployment-topology/the-store-in-the-compose-file`.
 
-- [ ] 11.1 Add `devalue` exact-pinned and run `/warm`; commit a trimmed real
+- [ ] 12.1 Add `devalue` exact-pinned and run `/warm`; commit a trimmed real
       d2pt data file as `src/fixtures/d2pt-meta-pos3.json`.
-- [ ] 11.2 Mount the `cm` volume on the application alone at
+- [ ] 12.2 Mount the `cm` volume on the application alone at
       `/app/cm-data`, set `CM_DATA_DIR: /app/cm-data` literally in its
       compose environment (as the job's `BUNDLE_DIR` is), create the
       directory owned by the runtime user in the `Dockerfile`, and extend
       `checks/deployment-topology.test.ts` to pin the mount and the variable
       to one path — in this step, so no upload it accepts lives in a
       container's writable layer.
-- [ ] 11.3 Failing cases first in `src/server/cm-meta.test.ts` (ZOMBIES 45,
+- [ ] 12.3 Failing cases first in `src/server/cm-meta.test.ts` (ZOMBIES 45,
       46, 47, 48, 49, 50): 5 MB accepted for parsing and 5 MB + 1 refused
       413; 50 known rated heroes accepted, 49 refused, 50 known heroes with
       null ratings refused; ratings 0, 100, null valid, 100.1 refused,
       all-equal refused; mixed positions refused with the store unchanged;
       every hero field present; a write interrupted before its rename leaves
       the previous upload.
-- [ ] 11.4 Implement `POST` and `GET /api/cm/meta` (design D4, D5) with the
+- [ ] 12.4 Implement `POST` and `GET /api/cm/meta` (design D4, D5) with the
       atomic per-position store under `CM_DATA_DIR`.
 
-## 12. The model reads the upload
+## 13. The model reads the upload
 
 Closes `cm-meta-import/nothing-uploaded-yet`,
 `cm-meta-import/one-position-uploaded`,
 `cm-meta-import/the-page-names-where-its-meta-comes-from`.
 
-- [ ] 12.1 Failing cases first (ZOMBIES 44, 51): `GET /api/cm/meta` with an
+- [ ] 13.1 Failing cases first (ZOMBIES 44, 51): `GET /api/cm/meta` with an
       empty store answers all five positions `null`, and the page then shows
       the snapshot as every position's source; position 1 uploaded maps
       rating 50 to 0 with the std-matched scale and positions 2–5 equal the
       snapshot's; a null rating makes the hero unplayable there.
-- [ ] 12.2 Implement the mapping (design D9), the page's meta panel with the
+- [ ] 13.2 Implement the mapping (design D9), the page's meta panel with the
       five d2pt links and the multi-file upload, and the fetch of
       `/api/cm/meta` after sign-in.
-- [ ] 12.3 Move the D2ASS card to `applied` once this pull request merges.
+- [ ] 13.3 Move the D2ASS card to `applied` once this pull request merges.

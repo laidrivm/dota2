@@ -49,8 +49,8 @@
 		"board": "D2ASS",
 		"mutationFloor": {
 			"module": "src/model.ts and src/cm/engine/",
-			"surviving": 46,
-			"why": "was 49: the CM assignment and suggestion cases kill 3 more of model-terms.ts's, and none of src/cm/engine/'s own survive; two of draft.ts's are exempt as equivalent at their lines"
+			"surviving": 45,
+			"why": "was 46: the case for a suggestion's own parts kills one more of model-terms.ts's; none of src/cm/engine/'s own survive, two of draft.ts's being exempt as equivalent at their lines"
 		},
 		"uncitedFloor": {
 			"count": 195,
