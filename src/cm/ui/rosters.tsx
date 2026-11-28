@@ -105,14 +105,13 @@ function Roster({
 								class={s.input}
 								value={player.nickname}
 								maxLength={NICKNAME_MAX}
-								onChange={(event) =>
-									apply({
-										type: "nickname",
-										team,
-										index,
-										name: event.currentTarget.value,
-									})
-								}
+								onChange={(event) => {
+									const name = event.currentTarget.value;
+									// Back to the stored name: an accepted one re-renders over it,
+									// and a refused one (blank) renders nothing to restore it.
+									event.currentTarget.value = player.nickname;
+									apply({ type: "nickname", team, index, name });
+								}}
 							/>
 						</label>
 						<label class={s.field}>
