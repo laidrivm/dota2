@@ -1,11 +1,12 @@
 /**
  * The search worker's side (design D6). The page's own bundle, started as a
  * worker, runs this instead of rendering (`main.tsx`): it keeps the snapshot
- * it is sent and answers each search with the ranking for that state, tagged
+ * it is sent and answers each search with the deepest ranking the budget
+ * allows for that state (design D8), tagged
  * with the state's id so the page can drop anything it no longer wants.
  */
 import type { SnapshotBundle } from "../types.ts";
-import { suggest } from "./engine/suggest.ts";
+import { search } from "./engine/search.ts";
 import type { SearchReply, SearchRequest } from "./ui/search-client.ts";
 
 /** The slice of a worker's global scope the search uses. */
@@ -26,7 +27,7 @@ export function serveSearch(scope: SearchScope): void {
 		if (bundle === null) return;
 		scope.postMessage({
 			stateId: data.stateId,
-			result: suggest(bundle, data.state),
+			result: search(bundle, data.state),
 		});
 	};
 }

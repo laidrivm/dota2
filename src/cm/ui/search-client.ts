@@ -6,7 +6,7 @@
  */
 import type { SnapshotBundle } from "../../types.ts";
 import type { DraftState } from "../engine/draft.ts";
-import type { Suggestions } from "../engine/suggest.ts";
+import type { SearchResult } from "../engine/search.ts";
 
 /** The slice of `Worker` the client uses, so a test can stand in for it. */
 export interface SearchWorker {
@@ -21,7 +21,7 @@ export type SearchRequest =
 
 export interface SearchReply {
 	stateId: number;
-	result: Suggestions | null;
+	result: SearchResult | null;
 }
 
 export class SearchClient {
@@ -32,7 +32,7 @@ export class SearchClient {
 	constructor(
 		private readonly spawn: () => SearchWorker,
 		private readonly bundle: SnapshotBundle,
-		private readonly onResult: (result: Suggestions | null) => void,
+		private readonly onResult: (result: SearchResult | null) => void,
 	) {}
 
 	request(state: DraftState): void {

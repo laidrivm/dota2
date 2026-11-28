@@ -204,7 +204,12 @@ top K by an immediate score — for a pick, the team's value gain; for a ban,
 the value the other team would gain picking that hero next — with K = 8 at
 the root and 5 below. At the depth limit, the remaining picks are completed
 greedily in draft order, each by its team's best immediate pick, and bans
-past the limit are skipped. Alpha-beta pruning on that tree; iterative
+past the limit are skipped. "Best immediate" there is read cheaply: the
+hero worth most in one slot — `ρ · (meta + comfort)` at the best position
+the team still has open, plus its side and phase deltas — since a full
+re-evaluation per hero, which a leaf would need hundreds of, would spend the
+budget at depth 2. Synergy and matchups are left to the full evaluation of
+the finished draft, and to the searched moves above the limit. Alpha-beta pruning on that tree; iterative
 deepening from depth 1, keeping the last fully completed depth's ranking,
 until 1500 ms or the end of the draft. The top five root candidates are the
 suggestions. A suggestion's score is the evaluation the search reaches after

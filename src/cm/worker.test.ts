@@ -2,7 +2,7 @@
 import { expect, test } from "bun:test";
 import type { DraftState } from "./engine/draft.ts";
 import { bundle, everywhere, hero } from "./engine/engine.fixture.ts";
-import { suggest } from "./engine/suggest.ts";
+import { search } from "./engine/search.ts";
 import type { SearchReply, SearchRequest } from "./ui/search-client.ts";
 import { type SearchScope, serveSearch } from "./worker.ts";
 
@@ -32,7 +32,15 @@ test("a search after the snapshot is answered with its ranking and its id", () =
 	const { replies, send } = scope();
 	send({ type: "bundle", bundle: b });
 	send({ type: "search", stateId: 7, state });
-	expect(replies).toEqual([{ stateId: 7, result: suggest(b, state) }]);
+	const result = search(b, state, { budgetMs: 0 });
+	expect(replies).toHaveLength(1);
+	expect(replies[0]).toMatchObject({
+		stateId: 7,
+		result: { step: 1, team: "ours" },
+	});
+	expect(replies[0]?.result?.entries.map((e) => e.hero)).toEqual(
+		result?.entries.map((e) => e.hero),
+	);
 });
 
 test("a search before any snapshot goes unanswered", () => {

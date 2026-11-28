@@ -49,8 +49,8 @@
 		"board": "D2ASS",
 		"mutationFloor": {
 			"module": "src/model.ts and src/cm/engine/",
-			"surviving": 45,
-			"why": "was 46: the case for a suggestion's own parts kills one more of model-terms.ts's; none of src/cm/engine/'s own survive, two of draft.ts's being exempt as equivalent at their lines"
+			"surviving": 48,
+			"why": "was 45: search.ts joins the engine with three equivalent survivors — completing a finished draft leaves it as it is, a search that never prunes returns the same values, and a draft with no step left yields no result either way — none exemptable, since each line's mutator also makes a mutant the cases kill"
 		},
 		"uncitedFloor": {
 			"count": 195,
