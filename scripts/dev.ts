@@ -62,8 +62,12 @@ const rebuild = () => {
 };
 
 watch(`${root}src`, { recursive: true }, rebuild);
-// Both entry points, as `build` above bundles them.
-watch(`${root}index.html`, rebuild);
-watch(`${root}cm.html`, rebuild);
+// Both entry points, as `build` above bundles them. The root directory rather
+// than the two files: an editor that saves by renaming a new file over the old
+// one leaves a watch on the file itself reporting nothing afterwards.
+const pages = new Set(["index.html", "cm.html"]);
+watch(root, (_, name) => {
+	if (name !== null && pages.has(name)) rebuild();
+});
 
 await import("../src/server/server.ts");

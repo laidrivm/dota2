@@ -12,6 +12,7 @@ export function CmApp() {
 	const [state, setState] = useState<SessionState | null>(null);
 	const [signOutError, setSignOutError] = useState<string | null>(null);
 	const signOutButton = useRef<HTMLButtonElement>(null);
+	const [signingOut, setSigningOut] = useState(false);
 
 	useEffect(() => {
 		readSession().then(setState);
@@ -27,7 +28,12 @@ export function CmApp() {
 	};
 
 	const doSignOut = async () => {
+		// One request at a time: a second one finishing after the first could
+		// report a failure over a sign-out that went through.
+		if (signingOut) return;
+		setSigningOut(true);
 		const result = await signOut();
+		setSigningOut(false);
 		if (result.kind === "error") {
 			setSignOutError(result.message);
 			return;
@@ -76,6 +82,7 @@ export function CmApp() {
 						ref={signOutButton}
 						class={s.button}
 						type="button"
+						disabled={signingOut}
 						onClick={doSignOut}
 					>
 						Sign out
@@ -83,7 +90,7 @@ export function CmApp() {
 				)}
 			</header>
 			{signOutError !== null && (
-				<p class={s.error} role="alert">
+				<p class={s.error} role="status">
 					{signOutError}
 				</p>
 			)}
