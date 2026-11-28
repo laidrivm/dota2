@@ -33,6 +33,8 @@ export interface SearchOptions {
 export interface SearchResult extends Suggestions {
 	/** The deepest depth the search completed. */
 	depth: number;
+	/** The nodes that depth visited, below its root moves. */
+	nodes: number;
 }
 
 /** Thrown inside a depth the budget ran out on, so that depth is discarded. */
@@ -215,12 +217,13 @@ export function search(
 		// budget; a deeper one is thrown away as soon as the budget runs out in
 		// it — its first node checks, so a spent budget costs no more than that.
 		const over = () => now() - start >= budgetMs;
-		const deadline =
-			depth === 1
-				? () => {}
-				: () => {
-						if (over()) throw new OutOfTime();
-					};
+		// Called once per node, so it counts them too: how much the pruning
+		// saved is then a number a case can pin.
+		let nodes = 0;
+		const deadline = () => {
+			nodes += 1;
+			if (depth > 1 && over()) throw new OutOfTime();
+		};
 		try {
 			const entries = ranked(
 				bundle,
@@ -234,6 +237,7 @@ export function search(
 				...root,
 				entries: entries.slice(0, SUGGESTIONS),
 				depth,
+				nodes,
 			};
 		} catch (error) {
 			if (error instanceof OutOfTime) break;

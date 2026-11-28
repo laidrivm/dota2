@@ -35,6 +35,7 @@ const result = (step: number) =>
 		team: "ours",
 		entries: [],
 		depth: 1,
+		nodes: 0,
 	}) as SearchResult;
 
 function client() {

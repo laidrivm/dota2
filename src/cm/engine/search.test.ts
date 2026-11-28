@@ -210,3 +210,14 @@ test("a clock that stands still lets the deeper depth finish", () => {
 	const result = search(b, at, { budgetMs: 10, now: () => 1000, maxDepth: 2 });
 	expect(result?.depth).toBe(2);
 });
+
+test("the pruning saves nodes: 144 at depth 3 here, where a search that prunes nothing visits 248", () => {
+	// Measured once, both ways: pinned because a search that prunes less
+	// returns the same ranking, and only the work it did tells them apart.
+	const { b } = counterCase();
+	const result = search(b, state([901, 902, 903, 904, 905, 906]), {
+		...forever,
+		maxDepth: 3,
+	});
+	expect(result?.nodes).toBe(144);
+});

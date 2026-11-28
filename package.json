@@ -49,8 +49,8 @@
 		"board": "D2ASS",
 		"mutationFloor": {
 			"module": "src/model.ts and src/cm/engine/",
-			"surviving": 49,
-			"why": "was 45: search.ts joins the engine with four equivalent survivors — completing a finished draft leaves it as it is, a search that never prunes or prunes only past equal bounds returns the same values, and a draft with no step left yields no result either way — none exemptable, since each line's mutator also makes a mutant the cases kill"
+			"surviving": 47,
+			"why": "was 45: search.ts joins the engine with two equivalent survivors — completing a finished draft leaves it as it is, and a draft with no step left yields no result either way — none exemptable, since each line's mutator also makes a mutant the cases kill; the pruning mutants, which survived here and timed out on CI, are killed by the node count"
 		},
 		"uncitedFloor": {
 			"count": 195,
