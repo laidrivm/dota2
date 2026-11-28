@@ -39,6 +39,7 @@ test("a captain's step lists five heroes with their parts, and one enters its he
 	).toBeFocused();
 });
 
+// spec: cm-model/an-enemy-step
 test("an enemy step lists what the enemy is expected to take, and enters nothing", async ({
 	page,
 }) => {
