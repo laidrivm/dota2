@@ -104,14 +104,14 @@ Closes `cm-draft/setup-collapses-into-the-board`,
 Closes `cm-draft/the-order-from-the-second-pick`,
 `cm-draft/a-banned-hero-offered-again`, `cm-draft/undoing-a-pick`.
 
-- [ ] 5.1 Failing cases first (ZOMBIES 18, 19, 20, 25, 27): the order table
+- [x] 5.1 Failing cases first (ZOMBIES 18, 19, 20, 25, 27): the order table
       holds 7 bans and 5 picks per team as the spec's table gives; a hero
       fills only the step in progress; a taken hero is refused; undo from 24
       back to 1 restores each state; nothing is entered after step 24; the
       step in progress names its team and action accessibly.
-- [ ] 5.2 Implement the order as one data table under `src/cm/engine/`, the
+- [x] 5.2 Implement the order as one data table under `src/cm/engine/`, the
       board's step strip, bans and picks rows, and undo.
-- [ ] 5.3 From step 4 (its diff at the cap): lift `focusAfterPick` into the
+- [x] 5.3 From step 4 (its diff at the cap): lift `focusAfterPick` into the
       picker module and focus a signature pick's add control, or its new tile
       at ten; e2e: the pick shows, its tile removes it, ten disables adding.
 

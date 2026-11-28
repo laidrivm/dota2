@@ -9,7 +9,7 @@ import { Board } from "./board/board.tsx";
 import header from "./header.module.css";
 import { Header } from "./header.tsx";
 import { closesEditor } from "./hotkeys.ts";
-import { Picker, targetLabel } from "./picker/picker.tsx";
+import { focusAfterPick, Picker, targetLabel } from "./picker/picker.tsx";
 import {
 	type Action,
 	confirmsReset,
@@ -167,7 +167,7 @@ export function App() {
 					onPick={(hero) => {
 						apply(pickAction(pickTarget, hero));
 						setPickTarget(null);
-						focusAfterPick(pickTarget);
+						focusAfterPick(positionOf(pickTarget));
 					}}
 					onClose={() => setPickTarget(null)}
 				/>
@@ -182,26 +182,6 @@ const pickAction = (target: PickTarget, hero: HeroId): Action =>
 		: target.kind === "enemy"
 			? { kind: "enemyAdd", hero }
 			: { kind: "teamSet", role: target.role, hero };
-
-/**
- * The dialog hands focus back to the trigger that opened it, and a filled slot
- * no longer has one. The replacement is focused after Preact commits — a
- * macrotask, because `rAF` runs before the commit and never fires in a hidden
- * tab — preferring the trigger where it survives (bans and enemies keep one)
- * and the new entry's removal control where it does not.
- */
-function focusAfterPick(target: PickTarget): void {
-	const position = positionOf(target);
-	setTimeout(() => {
-		// The last removal control of the position is the entry just added — the
-		// first would hand a keyboard user the ✕ of somebody else's hero.
-		const removals = document.querySelectorAll(`[data-remove="${position}"]`);
-		const next =
-			document.querySelector(`[data-pick="${position}"]:not(:disabled)`) ??
-			removals[removals.length - 1];
-		if (next instanceof HTMLElement) next.focus();
-	}, 0);
-}
 
 /**
  * `Reset draft?` (screens-spec §4). A `form method="dialog"` closes the dialog

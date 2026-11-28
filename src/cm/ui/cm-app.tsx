@@ -2,6 +2,7 @@ import { useEffect, useReducer, useRef, useState } from "preact/hooks";
 import { loadSnapshot } from "../../app/snapshot.ts";
 import type { SnapshotBundle } from "../../types.ts";
 import { readSession, type SessionState, signOut } from "./api.ts";
+import { DraftBoard } from "./board.tsx";
 import s from "./cm.module.css";
 import { Rosters } from "./rosters.tsx";
 import { emptySession, reduce } from "./session.ts";
@@ -30,17 +31,12 @@ function Draft() {
 		);
 
 	const ready = session.side !== null && session.pickOrder !== null;
-	// Step 1 is always the first-pick team's ban (cm-draft's order table); the
-	// whole table arrives with the draft-order step and replaces this line.
-	const firstIsOurs = session.pickOrder === "first";
 	return (
 		<>
 			<Setup session={session} apply={apply} />
 			{ready && (
 				<>
-					<p class={s.step} aria-live="polite">
-						Step 1 · {firstIsOurs ? "your ban" : "enemy ban"}
-					</p>
+					<DraftBoard bundle={bundle} session={session} apply={apply} />
 					<Rosters bundle={bundle} session={session} apply={apply} />
 				</>
 			)}

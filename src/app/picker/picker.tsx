@@ -15,6 +15,26 @@ import { ROLE_UI } from "../session-controls.tsx";
 import s from "./picker.module.css";
 import { matchHeroes } from "./search.ts";
 
+/**
+ * Picking unmounts the dialog, which hands focus back to nothing, and a filled
+ * slot no longer has its trigger. The replacement is focused after Preact
+ * commits — a macrotask, because `rAF` runs before the commit and never fires
+ * in a hidden tab — preferring the `data-pick` trigger of `position` where it
+ * survives enabled, and the new entry's `data-remove` control where it does
+ * not. Both pages mark their controls with these attributes.
+ */
+export function focusAfterPick(position: string): void {
+	setTimeout(() => {
+		// The last removal control of the position is the entry just added — the
+		// first would hand a keyboard user the ✕ of somebody else's hero.
+		const removals = document.querySelectorAll(`[data-remove="${position}"]`);
+		const next =
+			document.querySelector(`[data-pick="${position}"]:not(:disabled)`) ??
+			removals[removals.length - 1];
+		if (next instanceof HTMLElement) next.focus();
+	}, 0);
+}
+
 /** What the All Pick header says it is picking for; the CM page names its own. */
 export function targetLabel(target: PickTarget): string {
 	if (target.kind === "ban") return "ban";
