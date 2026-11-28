@@ -149,11 +149,9 @@ function reach(
 		);
 		if (maximising) {
 			best = Math.max(best, value);
-			// Stryker disable next-line MethodExpression: a bound that never tightens only stops pruning, which changes how long the search takes, not what it returns
 			alpha = Math.max(alpha, value);
 		} else {
 			best = Math.min(best, value);
-			// Stryker disable next-line MethodExpression: a bound that never tightens only stops pruning, which changes how long the search takes, not what it returns
 			beta = Math.min(beta, value);
 		}
 		if (alpha >= beta) break;
