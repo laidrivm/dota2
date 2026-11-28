@@ -187,6 +187,11 @@ test("resetting clears the steps and keeps the setup and rosters", async ({
 	await nickname.blur();
 	await enter(page, 3);
 
+	// Declining the browser's confirmation keeps every step.
+	page.once("dialog", (dialog) => dialog.dismiss());
+	await draft(page).getByRole("button", { name: "Reset draft" }).click();
+	await expect(draft(page).getByText("Step 4 · your ban")).toBeVisible();
+
 	page.once("dialog", (dialog) => dialog.accept());
 	await draft(page).getByRole("button", { name: "Reset draft" }).click();
 	await expect(draft(page).getByText("Step 1 · enemy ban")).toBeVisible();
