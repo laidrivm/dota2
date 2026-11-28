@@ -95,7 +95,7 @@ Closes `cm-draft/setup-collapses-into-the-board`,
 - [x] 4.2 Implement the session type and reducer, the setup block and both
       roster panels (signature heroes through the existing picker); the
       board appears once side and pick order are set with step 1 marked.
-- [ ] 4.3 E2e: a wrong password on `/cm` is announced and keeps focus, and
+- [x] 4.3 E2e: a wrong password on `/cm` is announced and keeps focus, and
       the right one replaces the form with the setup, on `/cm` and without a
       page load. (Task 4.3's old content moved to 3.4.)
 

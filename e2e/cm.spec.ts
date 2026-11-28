@@ -36,6 +36,28 @@ test("a wrong then the right password reaches the page, and sign-out returns", a
 	await expect(page.getByLabel("CM password")).toBeVisible();
 });
 
+// spec: cm-draft/signing-in-from-the-page
+test("a wrong password is announced, and the right one opens the setup in place", async ({
+	page,
+}) => {
+	let loads = 0;
+	page.on("load", () => loads++);
+	await page.goto("/cm");
+	const field = page.getByLabel("CM password");
+
+	await field.fill("not the password at all");
+	await field.press("Enter");
+	await expect(page.getByRole("alert")).toHaveText("Wrong password.");
+	await expect(field).toBeFocused();
+
+	await field.fill(CM_TEST_PASSWORD);
+	await field.press("Enter");
+	await expect(page.getByRole("group", { name: "Side" })).toBeVisible();
+	await expect(page.getByLabel("CM password")).toHaveCount(0);
+	expect(new URL(page.url()).pathname).toBe("/cm");
+	expect(loads).toBe(1);
+});
+
 // spec: cm-draft/setup-collapses-into-the-board
 test("setting the side and the pick order opens the board at step 1", async ({
 	page,
