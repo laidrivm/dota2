@@ -91,18 +91,25 @@ function directory(): string {
 	// file it is given, so a command that names no env file — the schedule's
 	// crontab entry, which `checks/snapshot-schedule.test.ts` runs against this
 	// project — resolves the same values `compose()` below passes explicitly.
-	writeFileSync(
-		join(dir, ".env"),
-		[
-			`D2ASS_IMAGE=${image()}`,
-			// Values this run chose, and nothing reads them anywhere else.
-			"POSTGRES_PASSWORD=checks-only",
-			"STRATZ_API_KEY=checks-only",
-			"",
-		].join("\n"),
-	);
+	writeFileSync(join(dir, ".env"), envFile(image()));
 	return dir;
 }
+
+/**
+ * The `.env` this run's project reads. Every variable the compose file
+ * interpolates is set, which `deployment-topology.test.ts` holds it to:
+ * compose warns on stderr for one that is not, and the cases here read
+ * stderr's first line.
+ */
+export const envFile = (imageRef: string) =>
+	[
+		`D2ASS_IMAGE=${imageRef}`,
+		// Values this run chose, and nothing reads them anywhere else.
+		"POSTGRES_PASSWORD=checks-only",
+		"STRATZ_API_KEY=checks-only",
+		"CM_PASSWORD=checks-only-cm-password",
+		"",
+	].join("\n");
 
 /**
  * The project file this run's copy lives at, for a command that addresses the

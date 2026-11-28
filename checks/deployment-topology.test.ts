@@ -15,6 +15,7 @@
  */
 import { describe, expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
+import { envFile } from "./compose.fixture.ts";
 import { only } from "./readme.fixture.ts";
 import { root } from "./root.ts";
 
@@ -245,6 +246,21 @@ test("every variable the compose file reads is in .env.example", () => {
 	const documented = readFileSync(`${root}/.env.example`, "utf8");
 	for (const name of read)
 		expect(documented).toMatch(new RegExp(`^${name}=`, "m"));
+});
+
+// Cited by no criterion: the docker-backed suites run a copy of this project
+// against the fixture's `.env`, and compose warns on stderr for a variable it
+// interpolates that the file leaves unset — the warning then stands where the
+// cases read the job's own first line, which is how CM_PASSWORD broke them.
+test("every variable the compose file reads is set in the checks' .env", () => {
+	const raw = readFileSync(`${root}/docker-compose.yml`, "utf8");
+	const read = [...raw.matchAll(/\$\{([A-Z0-9_]+)\}/g)].map(
+		(match) => match[1] as string,
+	);
+	const set = envFile("image:tag")
+		.split("\n")
+		.map((line) => line.slice(0, line.indexOf("=")));
+	expect(read.filter((name) => !set.includes(name))).toEqual([]);
 });
 
 // spec: snapshot-schedule/the-job-is-not-kept-running
