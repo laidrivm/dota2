@@ -97,9 +97,11 @@ export function teamValue(
 	enemy: readonly Slot[],
 ): { total: number; parts: ValueParts } {
 	const byId = new Map(bundle.heroes.map((h) => [h.id, h]));
-	const picked = team.slots.flatMap((slot) => {
+	// `order` is the pick's place among all the team's picks, a lost hero's included,
+	// so a pick after one still reads its own phase.
+	const picked = team.slots.flatMap((slot, order) => {
 		const hero = byId.get(slot.hero);
-		return hero === undefined ? [] : [{ ...slot, entry: hero }];
+		return hero === undefined ? [] : [{ ...slot, entry: hero, order }];
 	});
 	// Each enemy's position is known from its assignment: a marginal of 1.
 	const enemies: EnemyMarginal[] = enemy.flatMap((slot) => {
@@ -117,15 +119,15 @@ export function teamValue(
 		synergy: 0,
 		matchups: 0,
 	};
-	picked.forEach(({ entry, position, player }, index) => {
+	for (const { entry, position, player, order } of picked) {
 		const weight = rankWeight(player, team.players);
 		const signature = player?.signatures.includes(entry.id) ?? false;
 		parts.meta += weight * metaAt(entry, position);
 		parts.comfort += weight * (signature ? SIGNATURE_BONUS : 0);
 		parts.side += sideDelta(entry, team.side);
-		parts.phase += phaseDelta(entry, cmPhase(index));
+		parts.phase += phaseDelta(entry, cmPhase(order));
 		parts.matchups += laneMatchup(bundle, entry, position, enemies);
-	});
+	}
 	for (const [i, a] of picked.entries())
 		for (const b of picked.slice(i + 1))
 			parts.synergy += syn(bundle, a.entry, b.entry);

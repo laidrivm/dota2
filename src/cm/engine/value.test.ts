@@ -207,3 +207,14 @@ test("a hero the snapshot no longer carries adds nothing, on either side", () =>
 	const ours = team({ slots: [{ hero: 1, position: 1, player: null }] });
 	expect(teamValue(b, ours, lost).parts.matchups).toBe(0);
 });
+
+test("a pick after a lost hero still reads its own phase", () => {
+	const b = bundle([hero(1, everywhere, { phase: PHASES })]);
+	const slots = [9, 1].map((id, i) => ({
+		hero: id,
+		position: (i + 1) as Role,
+		player: null,
+	}));
+	// Hero 1 is the team's second pick: p2, not the p1 of the first found.
+	expect(teamValue(b, team({ slots }), []).parts.phase).toBe(PHASES.p2);
+});
