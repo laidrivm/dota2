@@ -81,11 +81,15 @@ describe("signing in", () => {
 		expect((await problem(response)).code).toBe("invalid-body");
 	});
 
-	test("a JSON body without a password is 422", async () => {
+	test.each([
+		["without a password", { secret: PASSWORD }],
+		["with a numeric password", { password: 123456789012 }],
+		["of null", null],
+	])("a JSON body %s is 422", async (_, body) => {
 		const response = await api().request("/api/cm/session", {
 			method: "POST",
 			headers: { "content-type": "application/json" },
-			body: JSON.stringify({ secret: PASSWORD }),
+			body: JSON.stringify(body),
 		});
 		expect(response.status).toBe(422);
 		expect((await problem(response)).code).toBe("invalid-body");
