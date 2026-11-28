@@ -260,7 +260,8 @@ test("the job is not brought up with the project, and the other two restart", ()
 
 // spec: deployment-topology/the-password-in-the-compose-file
 test("the CM password reaches the application and no other service", () => {
-	expect(app.environment?.CM_PASSWORD).toBe("${CM_PASSWORD}");
+	// Interpolated from the host's `.env`, never a literal written here.
+	expect(app.environment?.CM_PASSWORD).toMatch(/^\$\{CM_PASSWORD\}$/);
 	const others = Object.entries(services).filter(([name]) => name !== "app");
 	for (const [, service] of others)
 		expect(Object.keys(service.environment ?? {})).not.toContain("CM_PASSWORD");

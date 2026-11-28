@@ -50,7 +50,7 @@ Closes `cm-access/repeated-wrong-passwords`,
       a foreign `Origin` is 403 before the limiter counts
       it; no response carries `Access-Control-Allow-Origin`; an unknown
       `/api/cm/` path is 404 `not-found`.
-- [ ] 2.2 Implement the limiter (in-memory sliding window, design D2) and the
+- [x] 2.2 Implement the limiter (in-memory sliding window, design D2) and the
       origin middleware; the cases pass.
 - [ ] 2.3 Pass `CM_PASSWORD` to the application service in
       `docker-compose.yml` and name it in `.env.example`; extend
