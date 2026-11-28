@@ -55,14 +55,17 @@ COPY --from=build /app/dist ./dist
 # export can replace. `.dockerignore` is what keeps a developer's own out of
 # the context; this line is what makes the directories exist regardless.
 #
-# `chown` covers these two and nothing else, which is the whole of what the
+# `chown` covers these three and nothing else, which is the whole of what the
 # container needs to write. Everything else `COPY` and the install left is
 # root-owned and world-readable, and reading is all the server and the job do
 # with it — measured by building the image both ways, the narrow one serving
 # the page, the fonts, the job's own startup check and a write through a
 # mounted volume alike. `chown -R /app` would additionally let the running
 # container rewrite its own source.
-RUN mkdir -p snapshot icons && chown bun:bun snapshot icons
+#
+# `cm-data` is the CM API's store of uploaded meta, mounted on the application
+# alone; created here so a fresh volume takes the runtime user's ownership.
+RUN mkdir -p snapshot icons cm-data && chown bun:bun snapshot icons cm-data
 
 # The base image provides `bun` and defaults to root all the same. Nothing here
 # needs to write outside `/app`, and the deploy hands this image a database

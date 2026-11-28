@@ -27,7 +27,13 @@ services:
     volumes:
       - bundle:/app/snapshot
       - icons:/app/icons
+      # The Captains Mode meta the captain uploads, which has to outlive a
+      # redeploy. The application's alone: no other service reads or writes it.
+      - cm:/app/cm-data
     environment:
+      # Where the CM API keeps that meta: the mount above, set literally as
+      # the job's BUNDLE_DIR is, so the two cannot name different paths.
+      CM_DATA_DIR: /app/cm-data
       # The Captains Mode API's one password. The application alone reads it:
       # the job has no use for it, and a secret passed where nothing reads it
       # is one more place it can leak from.
@@ -113,6 +119,8 @@ volumes:
   # above. This is what the deployment exists to arrange.
   bundle:
   icons:
+  # The application's own: uploaded CM meta (see the app service).
+  cm:
   database:
 
 networks:

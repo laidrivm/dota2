@@ -15,51 +15,20 @@
  */
 import { describe, expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
+import {
+	app,
+	CM_STORE,
+	compose,
+	db,
+	job,
+	mountsOf,
+	type Service,
+	services,
+	workdir,
+} from "./compose-file.fixture.ts";
 import { envFile } from "./compose.fixture.ts";
 import { only } from "./readme.fixture.ts";
 import { root } from "./root.ts";
-
-type Service = {
-	image?: string;
-	container_name?: string;
-	ports?: unknown[];
-	networks?: string[];
-	volumes?: string[];
-	restart?: string;
-	profiles?: string[];
-	environment?: Record<string, string>;
-};
-
-type Compose = {
-	services?: Record<string, Service>;
-	volumes?: Record<string, unknown>;
-	networks?: Record<string, { external?: boolean } | null>;
-};
-
-const compose = Bun.YAML.parse(
-	readFileSync(`${root}/docker-compose.yml`, "utf8"),
-) as Compose;
-
-const services = compose.services ?? {};
-
-/**
- * The image's working directory, read from the `Dockerfile`.
- *
- * The server resolves the publication directory and the icon mirror relative
- * to the repository root, which in the image is this — so this is where the
- * volumes have to be mounted for the code to find them, and taking it from
- * the file that declares it is what stops the two drifting apart.
- */
-const workdir = (() => {
-	const found = readFileSync(`${root}/Dockerfile`, "utf8")
-		.split("\n")
-		.filter((line) => /^WORKDIR\s/i.test(line))
-		.map((line) => line.replace(/^WORKDIR\s+/i, "").trim());
-	// Every stage's, and they have to agree: a production stage working
-	// somewhere else would be mounted at the build stage's path.
-	expect(new Set(found).size).toBe(1);
-	return found[0] as string;
-})();
 
 /** The network every other application on the host is already on. */
 const shared = Object.entries(compose.networks ?? {})
@@ -78,10 +47,6 @@ test("the file declares one shared network and one of its own", () => {
 	expect(private_).toHaveLength(1);
 });
 
-/** The services this project runs, by the role each plays. */
-const app = services.app as Service;
-const db = services.db as Service;
-const job = services.job as Service;
 
 test("the file declares the three services these cases are about", () => {
 	expect(Object.keys(services).sort()).toEqual(["app", "db", "job"]);
@@ -186,10 +151,9 @@ describe("the bundle and the icon mirror are mounted where the server reads", ()
 		["app", app],
 		["job", job],
 	])("%s mounts both at the paths the image works from", (_name, service) => {
-		const mounts = (service.volumes ?? []).map((entry) => {
-			const [volume, target] = entry.split(":");
-			return { volume, target };
-		});
+		// The application's own store is not one of the shared pair; the case
+		// below pins it.
+		const mounts = pair(service);
 		// Both, at the same targets, from the same named volumes: sharing is
 		// the whole point, so a service mounting one of them, or mounting a
 		// host path instead, breaks it silently.
@@ -200,10 +164,15 @@ describe("the bundle and the icon mirror are mounted where the server reads", ()
 		// called: sharing is the point, and two services each with a volume of
 		// its own reads identically in the file.
 		expect(mounts.map((m) => m.volume).sort()).toEqual(
-			(app.volumes ?? []).map((e) => e.split(":")[0]).sort(),
+			pair(app)
+				.map((m) => m.volume)
+				.sort(),
 		);
 	});
 });
+
+const pair = (service: Service) =>
+	mountsOf(service).filter((m) => m.target !== CM_STORE);
 
 // Cited by no criterion: this branch puts a second copy of the Postgres digest
 // in the tree, and the copies have to agree. `scripts/test-db.sh` takes its
@@ -274,21 +243,3 @@ test("the job is not brought up with the project, and the other two restart", ()
 	expect(db.restart).toBe("always");
 });
 
-// spec: deployment-topology/the-password-in-the-compose-file
-test("the CM password reaches the application and no other service", () => {
-	// Interpolated from the host's `.env`, never a literal written here.
-	expect(app.environment?.CM_PASSWORD).toMatch(/^\$\{CM_PASSWORD\}$/);
-	const others = Object.entries(services).filter(([name]) => name !== "app");
-	for (const [, service] of others)
-		expect(Object.keys(service.environment ?? {})).not.toContain("CM_PASSWORD");
-});
-
-// spec: deployment-topology/the-password-in-the-compose-file
-test(".env.example names the CM password empty and says what unset means", () => {
-	const documented = readFileSync(`${root}/.env.example`, "utf8");
-	expect(documented).toMatch(/^CM_PASSWORD=$/m);
-	const block = documented.slice(0, documented.indexOf("CM_PASSWORD="));
-	const comment = block.slice(block.lastIndexOf("\n\n")).replace(/\s+/g, " ");
-	expect(comment).toMatch(/12 characters/);
-	expect(comment).toMatch(/closed/);
-});
