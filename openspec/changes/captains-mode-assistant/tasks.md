@@ -111,6 +111,10 @@ Closes `cm-draft/the-order-from-the-second-pick`,
       step in progress names its team and action accessibly.
 - [ ] 5.2 Implement the order as one data table under `src/cm/engine/`, the
       board's step strip, bans and picks rows, and undo.
+- [ ] 5.3 E2e, carried from step 4 (its diff stood at 799 of 800 lines): a
+      signature added through the picker shows on the player and is removed
+      by its tile; at ten signatures the add control is disabled and names
+      the limit.
 
 ## 6. Keeping the draft
 
