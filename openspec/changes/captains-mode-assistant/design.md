@@ -169,7 +169,9 @@ E = V(captain) − V(enemy)
   counts as playable where its snapshot share is ≥ 0.05 — or, at a position
   with uploaded meta, where the upload rates it (D9); elsewhere it costs
   −10 pp meta, which keeps an assignment defined when a captain enters an
-  off-role pick. The enemy is assigned the same way — modelling it as
+  off-role pick. A position the hero is played at but whose data is too thin
+  to judge is neutral (0), as the All Pick model treats insufficient data,
+  not off-role. The enemy is assigned the same way — modelling it as
   rational is the brief's assumption — with ρ = 1 and no comfort for
   unknown players.
 - `matchups` reuses the All Pick model's lane-weighted sum with the enemy's

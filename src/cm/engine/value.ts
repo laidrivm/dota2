@@ -79,16 +79,26 @@ export function rankWeight(
 ): number {
 	if (player === null || player.rank === null) return 1;
 	const known = players.flatMap((p) => (p.rank === null ? [] : [p.rank]));
+	// A player outside `players` with no known rank among them has no mean
+	// to stand against; 0/0 would carry NaN into every total.
+	if (known.length === 0) return 1;
 	const mean = known.reduce((sum, rank) => sum + rank, 0) / known.length;
 	const weight = 1 + RANK_STEP * (player.rank - mean);
 	return Math.min(WEIGHT_MAX, Math.max(WEIGHT_MIN, weight));
 }
 
-/** The snapshot's meta at `position`, or the off-role cost where it rarely plays. */
-const metaAt = (hero: HeroEntry, position: Role): number =>
-	share(hero, position) >= PLAYABLE_SHARE
+/**
+ * The snapshot's meta at `position`, or the off-role cost where it rarely
+ * plays. A position the hero is played at but too thin to judge is neutral
+ * (model-spec §0), not off-role — `share()` reads it as 0, which would
+ * otherwise land it on the cost.
+ */
+function metaAt(hero: HeroEntry, position: Role): number {
+	if (hero.positions[`${position}`]?.sufficient === false) return 0;
+	return share(hero, position) >= PLAYABLE_SHARE
 		? meta(hero, position)
 		: OFF_ROLE_META;
+}
 
 /** `team`'s value against `enemy`'s slots, in parts and in total. */
 export function teamValue(

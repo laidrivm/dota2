@@ -129,6 +129,8 @@ describe("rank weight", () => {
 		expect(rankWeight(players[0] ?? nobody, players)).toBe(1);
 		expect(rankWeight(players[1] ?? nobody, players)).toBeCloseTo(1.1, 10);
 		expect(rankWeight(null, players)).toBe(1);
+		// A ranked player against a team with no known rank weighs 1, not NaN.
+		expect(rankWeight({ rank: 7, signatures: [] }, ranked(null, null))).toBe(1);
 	});
 });
 
@@ -217,4 +219,26 @@ test("a pick after a lost hero still reads its own phase", () => {
 	}));
 	// Hero 1 is the team's second pick: p2, not the p1 of the first found.
 	expect(teamValue(b, team({ slots }), []).parts.phase).toBe(PHASES.p2);
+});
+
+test("a position played but too thin to judge is neutral, and one never played is off-role", () => {
+	const thin = hero(
+		1,
+		{ "1": 1 },
+		{
+			positions: {
+				"1": { share: 0.6, meta: 2, sufficient: true },
+				"3": { share: 0.4, meta: 0, sufficient: false },
+			},
+		},
+	);
+	const metaAt = (position: Role) =>
+		teamValue(
+			bundle([thin]),
+			team({ slots: [{ hero: 1, position, player: null }] }),
+			[],
+		).parts.meta;
+	expect(metaAt(1)).toBe(2);
+	expect(metaAt(3)).toBe(0);
+	expect(metaAt(5)).toBe(-10);
 });
