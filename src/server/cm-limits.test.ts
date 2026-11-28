@@ -73,7 +73,10 @@ describe("wrong passwords are limited", () => {
 		const { clock, app } = clocked();
 		for (let i = 0; i < 10; i++) await signIn(app, "wrong password!");
 		clock.now += 899_999;
-		expect((await signIn(app)).status).toBe(429);
+		const last = await signIn(app);
+		expect(last.status).toBe(429);
+		// One millisecond left still rounds up to a whole second, never 0.
+		expect(last.headers.get("retry-after")).toBe("1");
 		clock.now += 1;
 		expect((await signIn(app)).status).toBe(204);
 	});
@@ -113,6 +116,13 @@ describe("the API serves its own origin only", () => {
 		expect(response.status).toBe(403);
 		expect(response.headers.get("set-cookie")).toBeNull();
 		expect((await problem(response)).code).toBe("cross-origin");
+	});
+
+	test.each([
+		["an opaque `null` origin", "null"],
+		["another port on the same host", "https://d2ass.example:8443"],
+	])("%s is refused too", async (_, origin) => {
+		expect((await fromOrigin(origin)).status).toBe(403);
 	});
 
 	// spec: cm-access/a-request-from-another-origin
