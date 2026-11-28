@@ -87,7 +87,7 @@ Closes `cm-draft/setup-collapses-into-the-board`,
 `cm-draft/editing-the-captain-s-roster`,
 `cm-draft/signing-in-from-the-page`.
 
-- [ ] 4.1 Failing cases first in `src/cm/ui/session.test.ts` (ZOMBIES 16, 17,
+- [x] 4.1 Failing cases first in `src/cm/ui/session.test.ts` (ZOMBIES 16, 17,
       21, 22): the `CmSession` reducer — side and pick order independent;
       nickname 24 accepted, 25 and whitespace-only refused; a duplicate
       position on either team unsets the first; the 10-signature
