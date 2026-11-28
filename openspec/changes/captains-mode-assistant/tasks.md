@@ -196,13 +196,15 @@ Closes `cm-meta-import/a-valid-upload-for-one-position`,
 
 - [ ] 12.1 Add `devalue` exact-pinned and run `/warm`; commit a trimmed real
       d2pt data file as `src/fixtures/d2pt-meta-pos3.json`.
-- [ ] 12.2 Mount the `cm` volume on the application alone at
+- [x] 12.2 Mount the `cm` volume on the application alone at
       `/app/cm-data`, set `CM_DATA_DIR: /app/cm-data` literally in its
       compose environment (as the job's `BUNDLE_DIR` is), create the
       directory owned by the runtime user in the `Dockerfile`, and extend
       `checks/deployment-topology.test.ts` to pin the mount and the variable
       to one path — in this step, so no upload it accepts lives in a
-      container's writable layer.
+      container's writable layer. (Its own pull request, ahead of the upload's:
+      the two together passed the 800-line budget once review hardened the
+      reader.)
 - [ ] 12.3 Failing cases first in `src/server/cm-meta.test.ts` (ZOMBIES 45,
       46, 47, 48, 49, 50): 5 MB accepted for parsing and 5 MB + 1 refused
       413; 50 known rated heroes accepted, 49 refused, 50 known heroes with
