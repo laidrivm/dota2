@@ -4,6 +4,7 @@
  * session, then the route — so a closed API answers nothing else.
  */
 import { Hono } from "hono";
+import { bodyLimit } from "hono/body-limit";
 import { getCookie, setCookie } from "hono/cookie";
 import { z } from "zod";
 import { problem } from "./problem.ts";
@@ -42,12 +43,26 @@ export function cmApi({ password, now = Date.now }: CmOptions) {
 
 	const app = new Hono<{ Variables: { expiry: number } }>().basePath("/api/cm");
 
+	// Nothing this API answers may be stored by a shared cache: every response
+	// is either about a session or sets one.
+	app.use("*", async (c, next) => {
+		await next();
+		c.res.headers.set("cache-control", "no-store");
+	});
+
 	if (usable === null) {
 		app.all("*", () => problem("cm-not-configured"));
 		return app;
 	}
 
-	app.post("/session", async (c) => {
+	// The one route open to anyone, so the one whose body is bounded before it
+	// is read: Bun's own cap is 128 MB.
+	const signInLimit = bodyLimit({
+		maxSize: 1024,
+		onError: () => problem("too-large"),
+	});
+
+	app.post("/session", signInLimit, async (c) => {
 		const parsed = SignIn.safeParse(await c.req.json().catch(() => null));
 		if (!parsed.success) return problem("invalid-body");
 		if (!passwordMatches(parsed.data.password, usable))

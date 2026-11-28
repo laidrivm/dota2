@@ -33,7 +33,8 @@ const server = serve({
 	routes: staticRoutes(),
 	fetch: (request) => {
 		const { pathname } = new URL(request.url);
-		if (pathname.startsWith("/api/")) return api.fetch(request);
+		if (pathname === "/api/cm" || pathname.startsWith("/api/cm/"))
+			return api.fetch(request);
 		return distFile(pathname) ?? new Response("Not found", { status: 404 });
 	},
 });

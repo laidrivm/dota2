@@ -95,6 +95,28 @@ describe("signing in", () => {
 		expect((await problem(response)).code).toBe("invalid-body");
 	});
 
+	test("a sign-in body over 1 KB is refused before it is parsed", async () => {
+		const response = await api().request("/api/cm/session", {
+			method: "POST",
+			headers: { "content-type": "application/json" },
+			body: JSON.stringify({ password: "x".repeat(1024) }),
+		});
+		expect(response.status).toBe(413);
+		expect((await problem(response)).code).toBe("too-large");
+	});
+
+	test.each([
+		["a sign-in", (app: ReturnType<typeof cmApi>) => signIn(app)],
+		["a session read", (app: ReturnType<typeof cmApi>) => readSession(app)],
+		[
+			"a closed API",
+			() => readSession(cmApi({ password: undefined, now: () => T0 })),
+		],
+	])("%s is never cached", async (_, send) => {
+		const response = await send(api());
+		expect(response.headers.get("cache-control")).toBe("no-store");
+	});
+
 	test("a wrong password signs nobody in", async () => {
 		const response = await signIn(api(), "correct horse batterY");
 		expect(response.status).toBe(401);

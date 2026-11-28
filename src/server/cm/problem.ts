@@ -18,6 +18,12 @@ export type Problem = z.infer<typeof Problem>;
 
 /** Every problem the CM API answers with, by its `code`. */
 const PROBLEMS = {
+	"too-large": {
+		status: 413,
+		title: "Request body too large",
+		detail: "The request body is larger than this route accepts.",
+		action: null,
+	},
 	"invalid-body": {
 		status: 422,
 		title: "Invalid request body",
