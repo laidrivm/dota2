@@ -32,7 +32,8 @@ test("a search after the snapshot is answered with its ranking and its id", () =
 	const { replies, send } = scope();
 	send({ type: "bundle", bundle: b });
 	send({ type: "search", stateId: 7, state });
-	const result = search(b, state, { budgetMs: 0 });
+	// The call the worker makes: the default budget, its deepest depth.
+	const result = search(b, state);
 	expect(replies).toHaveLength(1);
 	expect(replies[0]).toMatchObject({
 		stateId: 7,

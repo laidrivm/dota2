@@ -154,7 +154,6 @@ function reach(
 			// Stryker disable next-line MethodExpression: a bound that never tightens only stops pruning, which changes how long the search takes, not what it returns
 			beta = Math.min(beta, value);
 		}
-		// Stryker disable next-line EqualityOperator: pruning on equal bounds or only past them skips branches that cannot change the value returned
 		if (alpha >= beta) break;
 	}
 	return best;
