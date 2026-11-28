@@ -44,13 +44,19 @@ export async function importProfile(
 	fetcher: Fetcher = fetch,
 ): Promise<Imported | null> {
 	try {
-		const [profile, heroes] = await Promise.all([
-			fetcher(`${OPENDOTA}/${id}`).then((r) => (r.ok ? r.json() : null)),
-			fetcher(`${OPENDOTA}/${id}/heroes?date=180`).then((r) =>
-				r.ok ? r.json() : null,
-			),
+		const read = (path: string) =>
+			fetcher(`${OPENDOTA}/${id}${path}`).then((r) => (r.ok ? r.json() : null));
+		const [profile, recent] = await Promise.all([
+			read(""),
+			read("/heroes?date=180"),
 		]);
-		if (profile === null || !Array.isArray(heroes)) return null;
+		if (profile === null || !Array.isArray(recent)) return null;
+		// A player away for half a year has no recent games at all: their
+		// all-time heroes are still the best guess at what they play.
+		const played = (list: unknown[]) =>
+			list.some((h) => Number((h as { games?: unknown })?.games) > 0);
+		const heroes = played(recent) ? recent : await read("/heroes");
+		if (!Array.isArray(heroes)) return null;
 		const name = profile?.profile?.personaname;
 		const nickname =
 			typeof name === "string" && name.trim() !== ""

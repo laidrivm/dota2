@@ -46,6 +46,19 @@ test("a profile brings its name, medal and five most played known heroes", async
 	});
 });
 
+test("a player away for half a year brings their all-time heroes", async () => {
+	const fetcher: Fetcher = async (url) =>
+		Response.json(
+			url.endsWith("?date=180")
+				? [{ hero_id: 1, games: 0 }]
+				: url.endsWith("/heroes")
+					? [{ hero_id: 2, games: 300 }]
+					: { profile: { personaname: "Away" }, rank_tier: 80 },
+		);
+	const found = await importProfile("1", new Set([1, 2]), fetcher);
+	expect(found?.signatures).toEqual([2]);
+});
+
 test("an unknown account reads as nothing", async () => {
 	const failing: Fetcher = async () => new Response(null, { status: 404 });
 	expect(await importProfile("1", new Set(), failing)).toBeNull();
