@@ -25,9 +25,13 @@ const UNAVAILABLE = "The CM service is unavailable. Try again shortly.";
 export const REQUEST_TIMEOUT_MS = 10_000;
 
 /** The response, or `null` when the request never got one or took too long. */
-async function call(fetcher: Fetcher, init?: RequestInit) {
+export async function call(
+	fetcher: Fetcher,
+	init?: RequestInit,
+	path = SESSION,
+) {
 	try {
-		return await fetcher(SESSION, {
+		return await fetcher(path, {
 			credentials: "same-origin",
 			signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
 			...init,

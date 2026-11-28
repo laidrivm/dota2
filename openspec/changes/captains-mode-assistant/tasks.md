@@ -224,12 +224,12 @@ Closes `cm-meta-import/nothing-uploaded-yet`,
 `cm-meta-import/one-position-uploaded`,
 `cm-meta-import/the-page-names-where-its-meta-comes-from`.
 
-- [ ] 13.1 Failing cases first (ZOMBIES 44, 51): `GET /api/cm/meta` with an
+- [x] 13.1 Failing cases first (ZOMBIES 44, 51): `GET /api/cm/meta` with an
       empty store answers all five positions `null`, and the page then shows
       the snapshot as every position's source; position 1 uploaded maps
       rating 50 to 0 with the std-matched scale and positions 2–5 equal the
       snapshot's; a null rating makes the hero unplayable there.
-- [ ] 13.2 Implement the mapping (design D9), the page's meta panel with the
+- [x] 13.2 Implement the mapping (design D9), the page's meta panel with the
       five d2pt links and the multi-file upload, and the fetch of
       `/api/cm/meta` after sign-in.
 - [ ] 13.3 Move the D2ASS card to `applied` once this pull request merges.

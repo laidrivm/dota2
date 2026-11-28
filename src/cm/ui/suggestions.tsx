@@ -110,21 +110,32 @@ function useSearch(
 	const client = useRef<SearchClient | null>(null);
 	const asked = useRef<string | null>(null);
 
+	// The draft as a value: a new session object with the same draft in it
+	// (a renamed player, say) is still a new search, a re-render is not.
+	const key = JSON.stringify(state);
+	const latest = useRef(key);
+	latest.current = key;
+
+	// A new snapshot — the uploaded meta arriving, say — is a new worker, and
+	// the draft on screen has to be asked of it: the effect below runs only
+	// when the draft changes. What the old worker answered is not shown.
 	useEffect(() => {
 		const search = new SearchClient(spawnSearch, bundle, (result) => {
 			// The client hands on the latest request's result alone.
 			if (asked.current !== null) setShown({ key: asked.current, result });
 		});
 		client.current = search;
+		setShown(null);
+		asked.current = latest.current;
+		const draft = JSON.parse(latest.current) as DraftState | null;
+		if (draft !== null) search.request(draft);
 		return () => search.dispose();
 	}, [bundle]);
 
-	// The draft as a value: a new session object with the same draft in it
-	// (a renamed player, say) is still a new search, a re-render is not.
 	// The effect reads the draft back out of its key, so the key is all it
-	// depends on.
-	const key = JSON.stringify(state);
+	// depends on; the draft the effect above just asked for is not asked twice.
 	useEffect(() => {
+		if (asked.current === key) return;
 		asked.current = key;
 		const draft = JSON.parse(key) as DraftState | null;
 		if (draft !== null) client.current?.request(draft);

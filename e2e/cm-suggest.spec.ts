@@ -158,3 +158,28 @@ test("two steps entered 100 ms apart only ever show the ranking of the step in p
 	}
 	expect(seen.some(([list]) => list.endsWith("step 3"))).toBe(true);
 });
+
+// spec: cm-meta-import/the-page-names-where-its-meta-comes-from
+test("the page names each position's meta source, links its d2pt file, and says what an upload got", async ({
+	page,
+}) => {
+	await signedInAt(page, "First pick");
+	const meta = page.getByRole("region", { name: "Hero meta" });
+	for (const position of [1, 2, 3, 4, 5])
+		await expect(meta.getByText(`pos ${position}: the snapshot`)).toBeVisible();
+	const links = meta.getByRole("link", { name: "d2pt data file" });
+	await expect(links).toHaveCount(5);
+	await expect(links.nth(2)).toHaveAttribute(
+		"href",
+		"https://dota2protracker.com/meta/__data.json?mmr=7000&position=pos+3&period=patch&meta_period=patch",
+	);
+	await meta.getByLabel("Upload saved d2pt files").setInputFiles({
+		name: "not-meta.json",
+		mimeType: "application/json",
+		buffer: Buffer.from('{"type":"data","nodes":[]}'),
+	});
+	await expect(meta.getByRole("status")).toHaveText(
+		"not-meta.json: That file is not a d2pt meta file for one position.",
+	);
+	await expect(meta.getByText("pos 3: the snapshot")).toBeVisible();
+});
