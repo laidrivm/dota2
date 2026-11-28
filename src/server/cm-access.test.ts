@@ -6,40 +6,16 @@
  */
 import { describe, expect, test } from "bun:test";
 import { cmApi } from "./cm/api.ts";
-
-const PASSWORD = "correct horse battery";
-const DAY = 86_400;
-/** 2026-11-28T00:00:00Z, in milliseconds. */
-const T0 = Date.UTC(2026, 10, 28);
-
-const api = (password: string | undefined = PASSWORD, now = () => T0) =>
-	cmApi({ password, now });
-
-const signIn = (app: ReturnType<typeof cmApi>, password = PASSWORD) =>
-	app.request("/api/cm/session", {
-		method: "POST",
-		headers: { "content-type": "application/json" },
-		body: JSON.stringify({ password }),
-	});
-
-/** The `cm_session` value a sign-in set, without its attributes. */
-const cookieOf = (response: Response) =>
-	(response.headers.get("set-cookie") ?? "").split(";")[0] ?? "";
-
-const readSession = (app: ReturnType<typeof cmApi>, cookie?: string) =>
-	app.request("/api/cm/session", {
-		headers: cookie === undefined ? {} : { cookie },
-	});
-
-const PROBLEM_KEYS = ["action", "code", "detail", "status", "title", "type"];
-
-async function problem(response: Response) {
-	expect(response.headers.get("content-type")).toBe("application/problem+json");
-	const body = (await response.json()) as Record<string, unknown>;
-	expect(Object.keys(body).sort()).toEqual(PROBLEM_KEYS);
-	expect(body.status).toBe(response.status);
-	return body;
-}
+import {
+	api,
+	cookieOf,
+	DAY,
+	PASSWORD,
+	problem,
+	readSession,
+	signIn,
+	T0,
+} from "./cm-access.fixture.ts";
 
 describe("signing in", () => {
 	// spec: cm-access/signing-in-with-the-password
@@ -172,35 +148,6 @@ describe("a request without a valid session", () => {
 		const response = await readSession(rotated, cookie);
 		expect(response.status).toBe(401);
 		expect((await problem(response)).code).toBe("not-signed-in");
-	});
-});
-
-describe("errors outside the routes", () => {
-	test("an unknown path, signed in, is a 404 problem", async () => {
-		const app = api();
-		const cookie = cookieOf(await signIn(app));
-		const response = await app.request("/api/cm/nope", { headers: { cookie } });
-		expect(response.status).toBe(404);
-		expect((await problem(response)).code).toBe("not-found");
-	});
-
-	test("a handler that throws is a 500 problem, not plain text", async () => {
-		const app = api();
-		app.get("/boom", () => {
-			throw new Error("boom");
-		});
-		const cookie = cookieOf(await signIn(app));
-		const logged = console.error;
-		console.error = () => {};
-		try {
-			const response = await app.request("/api/cm/boom", {
-				headers: { cookie },
-			});
-			expect(response.status).toBe(500);
-			expect((await problem(response)).code).toBe("internal");
-		} finally {
-			console.error = logged;
-		}
 	});
 });
 

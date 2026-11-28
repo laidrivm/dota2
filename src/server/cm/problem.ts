@@ -18,6 +18,19 @@ export type Problem = z.infer<typeof Problem>;
 
 /** Every problem the CM API answers with, by its `code`. */
 const PROBLEMS = {
+	"cross-origin": {
+		status: 403,
+		title: "Cross-origin request",
+		detail: "The CM API answers its own origin only.",
+		action: null,
+	},
+	"too-many-attempts": {
+		status: 429,
+		title: "Too many sign-in attempts",
+		detail:
+			"Ten wrong passwords arrived within fifteen minutes, so sign-in is paused.",
+		action: "Wait the seconds Retry-After names, then sign in again.",
+	},
 	"not-found": {
 		status: 404,
 		title: "Not found",

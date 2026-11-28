@@ -43,16 +43,16 @@ Closes `cm-access/repeated-wrong-passwords`,
 `cm-access/a-request-from-another-origin`,
 `deployment-topology/the-password-in-the-compose-file`.
 
-- [ ] 2.1 Failing cases first (ZOMBIES 4, 5, 9, 10, 14): the tenth wrong
+- [x] 2.1 Failing cases first (ZOMBIES 4, 5, 9, 10, 14): the tenth wrong
       password is 401 and the eleventh 429 with `Retry-After` in 1–900, the
       right password included; a failure exactly 900 s old no longer counts
       (clock injected); a session signed in before the ten stays signed in;
       a foreign `Origin` is 403 before the limiter counts
       it; no response carries `Access-Control-Allow-Origin`; an unknown
       `/api/cm/` path is 404 `not-found`.
-- [ ] 2.2 Implement the limiter (in-memory sliding window, design D2) and the
+- [x] 2.2 Implement the limiter (in-memory sliding window, design D2) and the
       origin middleware; the cases pass.
-- [ ] 2.3 Pass `CM_PASSWORD` to the application service in
+- [x] 2.3 Pass `CM_PASSWORD` to the application service in
       `docker-compose.yml` and name it in `.env.example`; extend
       `checks/deployment-topology.test.ts` for it. Name setting it on the
       host in the pull request body's preflight list.

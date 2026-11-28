@@ -27,6 +27,11 @@ services:
     volumes:
       - bundle:/app/snapshot
       - icons:/app/icons
+    environment:
+      # The Captains Mode API's one password. The application alone reads it:
+      # the job has no use for it, and a secret passed where nothing reads it
+      # is one more place it can leak from.
+      CM_PASSWORD: ${CM_PASSWORD}
     # No `depends_on` on the database, and not an omission: the server opens no
     # connection at all. It answers from `dist/`, from the two volumes above and
     # from files in the image, so it serves correctly while the database is

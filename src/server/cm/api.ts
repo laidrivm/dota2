@@ -1,7 +1,8 @@
 /**
  * The Captains Mode API under `/api/cm/`: signing in and reading the session.
- * The checks run in the order the cm-access spec fixes — configuration, then
- * session, then the route — so a closed API answers nothing else.
+ * The checks run in the order the cm-access spec fixes — origin, then
+ * configuration, then session, then the route — so a closed API answers
+ * nothing else.
  */
 import { Hono } from "hono";
 import { bodyLimit } from "hono/body-limit";
@@ -33,6 +34,24 @@ const Session = z.object({
 /** Shorter than this, or whitespace alone, counts as no password at all. */
 const MIN_PASSWORD = 12;
 
+/** Ten wrong passwords within fifteen minutes close sign-in (cm-access). */
+const MAX_FAILURES = 10;
+const WINDOW_MS = 15 * 60_000;
+
+/**
+ * Whether `origin` names the host `url` was requested on; a malformed one does
+ * not. Hosts only, not whole origins, and on purpose: the proxy terminates TLS,
+ * so the request arrives as `http://` while the browser's Origin says
+ * `https://`, and a full-origin compare would refuse every sign-in.
+ */
+function sameHost(origin: string, url: string) {
+	try {
+		return new URL(origin).host === new URL(url).host;
+	} catch {
+		return false;
+	}
+}
+
 export function cmApi({ password, now = Date.now }: CmOptions) {
 	const usable =
 		password !== undefined &&
@@ -57,10 +76,31 @@ export function cmApi({ password, now = Date.now }: CmOptions) {
 		c.res.headers.set("cache-control", "no-store");
 	});
 
+	// Before any other check, so a closed API and the wrong-password budget are
+	// both out of a foreign page's reach. The host behind the proxy is the one
+	// the browser asked for, since the proxy forwards `Host`.
+	app.use("*", async (c, next) => {
+		const origin = c.req.header("origin");
+		if (origin !== undefined && !sameHost(origin, c.req.url))
+			return problem("cross-origin");
+		await next();
+	});
+
 	if (usable === null) {
 		app.all("*", () => problem("cm-not-configured"));
 		return app;
 	}
+
+	// Shared by every caller (design D2): a caller's address behind the proxy
+	// cannot be trusted, so the budget bounds guessing by anyone at the cost of
+	// letting a stranger delay new sign-ins.
+	const failures: number[] = [];
+	const lockedFor = (at: number) => {
+		while (failures.length > 0 && at - (failures[0] ?? at) >= WINDOW_MS)
+			failures.shift();
+		if (failures.length < MAX_FAILURES) return 0;
+		return Math.ceil(((failures[0] ?? at) + WINDOW_MS - at) / 1000);
+	};
 
 	// The one route open to anyone, so the one whose body is bounded before it
 	// is read: Bun's own cap is 128 MB.
@@ -69,11 +109,31 @@ export function cmApi({ password, now = Date.now }: CmOptions) {
 		onError: () => problem("too-large"),
 	});
 
+	const locked = (wait: number) => {
+		const response = problem("too-many-attempts");
+		response.headers.set("retry-after", String(wait));
+		return response;
+	};
+
 	app.post("/session", signInLimit, async (c) => {
+		// Checked early so a lockout skips reading the body at all…
+		const early = lockedFor(now());
+		if (early > 0) return locked(early);
 		const parsed = SignIn.safeParse(await c.req.json().catch(() => null));
 		if (!parsed.success) return problem("invalid-body");
-		if (!passwordMatches(parsed.data.password, usable))
+		// …and again after the read, which can suspend: requests that all passed
+		// the early check would otherwise each add a failure past the tenth. No
+		// `await` may stand between this check and the push below.
+		const at = now();
+		const wait = lockedFor(at);
+		if (wait > 0) return locked(wait);
+		if (!passwordMatches(parsed.data.password, usable)) {
+			failures.push(at);
+			// Kept in time order, which `lockedFor` prunes by: a clock that steps
+			// back would otherwise leave an expired failure behind a live one.
+			failures.sort((a, b) => a - b);
 			return problem("wrong-password");
+		}
 		setCookie(c, COOKIE, mint(usable, now()).value, {
 			httpOnly: true,
 			secure: true,
