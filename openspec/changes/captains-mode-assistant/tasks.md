@@ -23,7 +23,7 @@ Closes `cm-access/signing-in-with-the-password`,
 
 - [x] 1.1 Add `hono`, `zod` as exact-pinned dependencies and run `/warm` on
       them; `bun audit` stays clean.
-- [ ] 1.2 Write the failing cases first in `src/server/cm-access.test.ts`
+- [x] 1.2 Write the failing cases first in `src/server/cm-access.test.ts`
       (ZOMBIES 1, 2, 3, 6, 7, 8, 11, 12, 13): sign-in 204 with the five cookie
       attributes; `GET /api/cm/session` shape with `expiresAt` 30 days on;
       401 for no cookie, empty cookie, tampered signature, a non-numeric
