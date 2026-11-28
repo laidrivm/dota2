@@ -48,6 +48,16 @@ export function DraftBoard({
 		apply({ type: "undo" });
 	};
 
+	// A reset loses every step at once and undo cannot bring them back, so it
+	// asks first — the browser's own dialog, which keyboard and screen readers
+	// already handle. Its button disables itself; focus moves to entry.
+	const reset = () => {
+		if (!confirm("Reset the draft? The setup and rosters stay.")) return;
+		if (reduce(session, { type: "reset" }) !== session)
+			focusAfterPick("cm-step");
+		apply({ type: "reset" });
+	};
+
 	const heroesOf = (team: Team, action: StepAction): HeroId[] =>
 		session.steps.filter((_, index) => {
 			const at = stepAt(index, pickOrder);
@@ -77,6 +87,14 @@ export function DraftBoard({
 					onClick={undo}
 				>
 					Undo
+				</button>
+				<button
+					type="button"
+					class={s.button}
+					disabled={session.steps.length === 0}
+					onClick={reset}
+				>
+					Reset draft
 				</button>
 			</div>
 			<ol class={b.strip} aria-label="Draft order">

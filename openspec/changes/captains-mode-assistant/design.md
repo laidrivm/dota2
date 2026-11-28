@@ -222,7 +222,12 @@ fill that component.
 `cm.html` loads `src/cm/main.tsx`. The page reuses `src/app/picker/`,
 `HeroTile` and the design tokens; it owns its session type under
 `src/cm/ui/` stored at `localStorage` key `cm.session` (v: 1). The All Pick
-page's key is untouched. Hotkeys are not part of v1's criteria; the picker's
+page's key is untouched. The session is written on every change and read
+back whole on load, or not at all. Resetting the draft asks first through
+the browser's own `confirm()` — undo cannot bring the steps back, and the
+native dialog is already keyboard- and screen-reader-operable — and keeps the
+setup and rosters, since the next draft is often the same two teams.
+Hotkeys are not part of v1's criteria; the picker's
 own keyboard operation comes with it. Desktop layout only.
 
 ### D11. The CM store
