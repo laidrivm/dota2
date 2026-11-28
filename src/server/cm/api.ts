@@ -109,18 +109,29 @@ export function cmApi({ password, now = Date.now }: CmOptions) {
 		onError: () => problem("too-large"),
 	});
 
+	const locked = (wait: number) => {
+		const response = problem("too-many-attempts");
+		response.headers.set("retry-after", String(wait));
+		return response;
+	};
+
 	app.post("/session", signInLimit, async (c) => {
-		const at = now();
-		const wait = lockedFor(at);
-		if (wait > 0) {
-			const response = problem("too-many-attempts");
-			response.headers.set("retry-after", String(wait));
-			return response;
-		}
+		// Checked early so a lockout skips reading the body at all…
+		const early = lockedFor(now());
+		if (early > 0) return locked(early);
 		const parsed = SignIn.safeParse(await c.req.json().catch(() => null));
 		if (!parsed.success) return problem("invalid-body");
+		// …and again after the read, which can suspend: requests that all passed
+		// the early check would otherwise each add a failure past the tenth. No
+		// `await` may stand between this check and the push below.
+		const at = now();
+		const wait = lockedFor(at);
+		if (wait > 0) return locked(wait);
 		if (!passwordMatches(parsed.data.password, usable)) {
 			failures.push(at);
+			// Kept in time order, which `lockedFor` prunes by: a clock that steps
+			// back would otherwise leave an expired failure behind a live one.
+			failures.sort((a, b) => a - b);
 			return problem("wrong-password");
 		}
 		setCookie(c, COOKIE, mint(usable, now()).value, {

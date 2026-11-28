@@ -97,6 +97,62 @@ describe("wrong passwords are limited", () => {
 		clock.now += 300_000;
 		expect((await signIn(app)).status).toBe(204);
 	});
+
+	/**
+	 * A wrong sign-in whose body arrives only when `release` is called, so
+	 * the case controls when it passes the early budget check and when it
+	 * reaches the password comparison.
+	 */
+	const heldWrongSignIn = (app: ReturnType<typeof cmApi>) => {
+		let release = () => {};
+		const body = new ReadableStream<Uint8Array>({
+			start(controller) {
+				release = () => {
+					controller.enqueue(
+						new TextEncoder().encode(
+							JSON.stringify({ password: "wrong password!" }),
+						),
+					);
+					controller.close();
+				};
+			},
+		});
+		const response = app.request("/api/cm/session", {
+			method: "POST",
+			headers: { "content-type": "application/json" },
+			body,
+			// Node's fetch types require it for a stream body; Bun accepts it.
+			duplex: "half",
+		} as RequestInit);
+		return { response, release: () => release() };
+	};
+
+	// spec: cm-access/repeated-wrong-passwords
+	test("wrong passwords racing past the early check still stop at ten", async () => {
+		const { app } = clocked();
+		for (let i = 0; i < 9; i++) await signIn(app, "wrong password!");
+		const first = heldWrongSignIn(app);
+		const second = heldWrongSignIn(app);
+		first.release();
+		second.release();
+		const statuses = [
+			(await first.response).status,
+			(await second.response).status,
+		].sort();
+		expect(statuses).toEqual([401, 429]);
+		expect((await signIn(app)).status).toBe(429);
+	});
+
+	test("failures stay ordered by time when the clock steps back", async () => {
+		const { clock, app } = clocked();
+		clock.now = T0 + 10_000;
+		await signIn(app, "wrong password!");
+		clock.now = T0;
+		for (let i = 0; i < 9; i++) await signIn(app, "wrong password!");
+		// The nine at T0 have left the window; only the one at T0 + 10 s is in it.
+		clock.now = T0 + 900_000;
+		expect((await signIn(app)).status).toBe(204);
+	});
 });
 
 describe("the API serves its own origin only", () => {
@@ -141,9 +197,22 @@ describe("the API serves its own origin only", () => {
 		expect((await fromOrigin("https://evil.example", closed)).status).toBe(403);
 	});
 
-	test("refused origins do not count toward the wrong-password limit", async () => {
+	test("wrong passwords from another origin do not count toward the limit", async () => {
 		const app = api();
-		for (let i = 0; i < 12; i++) await fromOrigin("https://evil.example", app);
+		for (let i = 0; i < 12; i++) {
+			const response = await app.request(
+				"http://d2ass.example/api/cm/session",
+				{
+					method: "POST",
+					headers: {
+						"content-type": "application/json",
+						origin: "https://evil.example",
+					},
+					body: JSON.stringify({ password: "wrong password!" }),
+				},
+			);
+			expect(response.status).toBe(403);
+		}
 		expect((await signIn(app)).status).toBe(204);
 	});
 
