@@ -93,6 +93,11 @@ describe("signing in", () => {
 		expect(result).toEqual({ kind: "not-configured" });
 	});
 
+	test("a refused body says what to enter, not that the service is down", async () => {
+		const result = await signIn("", answering(problem(422, "invalid-body")));
+		expect(result).toEqual({ kind: "error", message: "Enter the password." });
+	});
+
 	test("anything else is reported as unavailable, not thrown", async () => {
 		const result = await signIn("x", answering(new TypeError("offline")));
 		expect(result).toEqual({

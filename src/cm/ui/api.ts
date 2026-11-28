@@ -66,6 +66,8 @@ export async function signIn(
 				message: `Too many attempts. Try again in ${wait} seconds.`,
 			};
 		}
+		case 422:
+			return { kind: "error", message: "Enter the password." };
 		case 503:
 			return { kind: "not-configured" };
 		default:
