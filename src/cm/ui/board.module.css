@@ -111,3 +111,9 @@
 	color: var(--text-3);
 	font-size: var(--fs-label);
 }
+
+/* A score against the captain: the enemy's expected gain. */
+.scoreAgainst {
+	color: var(--text-3);
+	font-weight: 600;
+}

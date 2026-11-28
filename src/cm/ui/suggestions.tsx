@@ -96,7 +96,9 @@ function Entry({
 		<>
 			<HeroTile hero={hero} size="sm" />
 			<span>{hero?.name ?? "a hero this snapshot does not carry"}</span>
-			<span class={b.score}>{pp(entry.score)}</span>
+			<span class={entry.score < 0 ? b.scoreAgainst : b.score}>
+				{pp(entry.score)}
+			</span>
 		</>
 	);
 }
