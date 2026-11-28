@@ -67,7 +67,9 @@ watch(`${root}src`, { recursive: true }, rebuild);
 // one leaves a watch on the file itself reporting nothing afterwards.
 const pages = new Set(["index.html", "cm.html"]);
 watch(root, (_, name) => {
-	if (name !== null && pages.has(name)) rebuild();
+	// A platform may report a change without its file name; that could be a
+	// page, and a rebuild too many costs less than a stale one.
+	if (name === null || pages.has(name)) rebuild();
 });
 
 await import("../src/server/server.ts");

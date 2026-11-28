@@ -107,6 +107,22 @@ describe("signing in", () => {
 	});
 });
 
+test("every request carries a timeout, so a hung one ends as unavailable", async () => {
+	let signal: AbortSignal | null | undefined;
+	const hanging: Fetcher = (_, init) => {
+		signal = init?.signal;
+		return new Promise((_, reject) =>
+			init?.signal?.addEventListener("abort", () =>
+				reject(new Error("aborted")),
+			),
+		);
+	};
+	const pending = readSession(hanging);
+	expect(signal).toBeInstanceOf(AbortSignal);
+	(signal as AbortSignal).dispatchEvent(new Event("abort"));
+	expect(await pending).toEqual({ kind: "unavailable" });
+});
+
 describe("signing out", () => {
 	test.each([
 		["a 204", new Response(null, { status: 204 })],

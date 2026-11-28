@@ -21,10 +21,17 @@ export type Fetcher = (input: string, init?: RequestInit) => Promise<Response>;
 const SESSION = "/api/cm/session";
 const UNAVAILABLE = "The CM service is unavailable. Try again shortly.";
 
-/** The response, or `null` when the request never got one. */
+/** How long a request may hang before the page gives up on it. */
+export const REQUEST_TIMEOUT_MS = 10_000;
+
+/** The response, or `null` when the request never got one or took too long. */
 async function call(fetcher: Fetcher, init?: RequestInit) {
 	try {
-		return await fetcher(SESSION, { credentials: "same-origin", ...init });
+		return await fetcher(SESSION, {
+			credentials: "same-origin",
+			signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+			...init,
+		});
 	} catch {
 		return null;
 	}

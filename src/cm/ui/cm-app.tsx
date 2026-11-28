@@ -82,7 +82,9 @@ export function CmApp() {
 						ref={signOutButton}
 						class={s.button}
 						type="button"
-						disabled={signingOut}
+						// Not disabled while signing out: disabling the focused button
+						// drops focus, and the guard in doSignOut already stops a repeat.
+						aria-busy={signingOut}
 						onClick={doSignOut}
 					>
 						Sign out
