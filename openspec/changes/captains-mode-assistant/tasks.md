@@ -62,7 +62,7 @@ Closes `cm-access/repeated-wrong-passwords`,
 Closes `cm-draft/signing-in-from-the-page`, `cm-access/signing-out`,
 `app-shell/the-all-pick-page-never-reaches-the-cm-api`.
 
-- [ ] 3.1 Add `cm.html` and `src/cm/main.tsx`; the build script and
+- [x] 3.1 Add `cm.html` and `src/cm/main.tsx`; the build script and
       `scripts/dev.ts` take both entry points; `distFile` maps `/cm` to
       `cm.html`; `src/server/build.test.ts` asserts both are emitted.
 - [x] 3.2 Failing cases first (ZOMBIES 15, 24): the form announces a wrong

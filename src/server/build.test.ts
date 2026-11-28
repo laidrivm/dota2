@@ -68,29 +68,48 @@ describe("build output", () => {
 	// Styles reach the page through the entry point now, so nothing in the
 	// source `index.html` names them: a stylesheet that stopped being bundled
 	// is a missing import rather than a 404, and this is what would notice.
-	test("emits one stylesheet and links it from the document", async () => {
-		const sheets = [...new Bun.Glob("*.css").scanSync(dist)];
-		const html = await Bun.file(`${dist}/index.html`).text();
+	// One stylesheet per page, each linked from its own document: the two
+	// entry points share the token files but are bundled apart.
+	test.each(["index.html", "cm.html"])(
+		"emits a stylesheet for %s and links it from the document",
+		async (page) => {
+			const sheets = [...new Bun.Glob("*.css").scanSync(dist)];
+			const html = await Bun.file(`${dist}/${page}`).text();
+			const linked = sheets.filter((sheet) =>
+				// The element, not the string: an `href` anywhere in the document
+				// would satisfy a substring match without the browser loading it.
+				new RegExp(`<link[^>]+rel="stylesheet"[^>]+href="\\./${sheet}"`).test(
+					html,
+				),
+			);
 
-		expect(sheets).toHaveLength(1);
-		// The element, not the string: an `href` anywhere in the document would
-		// satisfy a substring match without the browser loading anything.
-		expect(html).toMatch(
-			new RegExp(`<link[^>]+rel="stylesheet"[^>]+href="\\./${sheets[0]}"`),
-		);
-	});
+			expect(sheets).toHaveLength(2);
+			expect(linked).toHaveLength(1);
+		},
+	);
 
 	test("leaves no font inlined as a data URI", async () => {
-		const [css] = [...new Bun.Glob("*.css").scanSync(dist)];
-		const text = await Bun.file(`${dist}/${css}`).text();
+		for (const css of new Bun.Glob("*.css").scanSync(dist)) {
+			const text = await Bun.file(`${dist}/${css}`).text();
+			expect(text).not.toContain("data:font");
+		}
+	});
 
-		expect(text).not.toContain("data:font");
+	test("keeps the inline font @import in the CM page too", async () => {
+		const html = await Bun.file(`${dist}/cm.html`).text();
+		expect(html).toContain('@import url("/fonts/fonts.css")');
 	});
 });
 
 describe("serving the build output", () => {
 	test("hands back the document at the root", async () => {
 		expect(await distFile("/")?.text()).toContain('<div id="app">');
+	});
+
+	test("hands back the CM document at /cm", async () => {
+		const html = await distFile("/cm")?.text();
+		expect(html).toContain("<title>Captains Mode");
+		expect(html).not.toContain("<title>Dota 2 Pick Assistant");
 	});
 
 	// A module script served as text/html is refused by the browser, and a
