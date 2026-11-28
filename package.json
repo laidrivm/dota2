@@ -33,7 +33,9 @@
 	},
 	"dependencies": {
 		"harness": "github:laidrivm/harness#022196a8c8e2cd05536463f0b878191f6653f5d6",
-		"preact": "11.0.1"
+		"hono": "4.13.19",
+		"preact": "11.0.1",
+		"zod": "4.6.7"
 	},
 	"overrides": {
 		"fast-uri": "3.1.9",

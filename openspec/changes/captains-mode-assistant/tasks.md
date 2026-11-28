@@ -21,9 +21,9 @@ Closes `cm-access/signing-in-with-the-password`,
 `cm-access/a-request-without-a-valid-session`,
 `cm-access/no-password-configured`.
 
-- [ ] 1.1 Add `hono`, `zod` as exact-pinned dependencies and run `/warm` on
+- [x] 1.1 Add `hono`, `zod` as exact-pinned dependencies and run `/warm` on
       them; `bun audit` stays clean.
-- [ ] 1.2 Write the failing cases first in `src/server/cm-access.test.ts`
+- [x] 1.2 Write the failing cases first in `src/server/cm-access.test.ts`
       (ZOMBIES 1, 2, 3, 6, 7, 8, 11, 12, 13): sign-in 204 with the five cookie
       attributes; `GET /api/cm/session` shape with `expiresAt` 30 days on;
       401 for no cookie, empty cookie, tampered signature, a non-numeric
@@ -32,9 +32,10 @@ Closes `cm-access/signing-in-with-the-password`,
       empty, 12 spaces and 11 characters, 12 characters configuring it; 422
       `invalid-body` for non-JSON and a missing `password`; every problem
       body carrying all six fields.
-- [ ] 1.3 Implement the Hono app under `src/server/cm/` (configuration,
-      session cookie per design D2, problem responses per D4) and mount it
-      for `/api/*` in `server.ts`'s `fetch` ahead of `distFile`; the 1.2
+- [x] 1.3 Implement the Hono app under `src/server/cm/` (configuration,
+      session cookie per design D2, problem responses per D4, the sign-in
+      body limit and `no-store` per D4) and mount it for `/api/cm` and
+      `/api/cm/*` in `server.ts`'s `fetch` ahead of `distFile`; the 1.2
       cases pass.
 ## 2. Hardening the sign-in
 
