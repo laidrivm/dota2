@@ -3,12 +3,14 @@ import { HeroTile } from "../../app/board/hero-tile.tsx";
 import { cx } from "../../app/cx.ts";
 import { focusAfterPick, Picker } from "../../app/picker/picker.tsx";
 import type { HeroEntry, HeroId, SnapshotBundle } from "../../types.ts";
+import { teamsOf } from "../engine/draft.ts";
 import { ORDER, type StepAction, stepAt, type Team } from "../engine/order.ts";
 import b from "./board.module.css";
 import s from "./cm.module.css";
 import {
 	type CmAction,
 	type CmSession,
+	draftState,
 	reduce,
 	stepInProgress,
 	takenAt,
@@ -57,6 +59,18 @@ export function DraftBoard({
 			focusAfterPick("cm-step");
 		apply({ type: "reset" });
 	};
+
+	// Each pick's position as the assignment places it, and who holds it.
+	const state = draftState(session);
+	const teams = state && teamsOf(bundle, state);
+	const captionsOf = (team: Team) =>
+		new Map(
+			(teams?.[team].slots ?? []).map((slot) => {
+				const holder = session[team].find((p) => p === slot.player);
+				const who = holder?.nickname ?? "no player";
+				return [slot.hero, `pos ${slot.position} · ${who}`];
+			}),
+		);
 
 	const heroesOf = (team: Team, action: StepAction): HeroId[] =>
 		session.steps.filter((_, index) => {
@@ -132,6 +146,7 @@ export function DraftBoard({
 								name={`${ROW_NAME[team]} ${action}s`}
 								heroes={heroesOf(team, action)}
 								byId={byId}
+								captions={action === "pick" ? captionsOf(team) : undefined}
 							/>
 						))}
 					</div>
@@ -158,20 +173,26 @@ function HeroRow({
 	name,
 	heroes,
 	byId,
+	captions,
 }: {
 	name: string;
 	heroes: HeroId[];
 	byId: Map<number, HeroEntry>;
+	/** A pick's position and player, read under its tile. */
+	captions?: Map<HeroId, string>;
 }) {
 	return (
 		<ul class={s.signatures} aria-label={name}>
 			{heroes.map((hero) => (
-				<li key={hero}>
+				<li key={hero} class={b.pick}>
 					<HeroTile
 						hero={byId.get(hero)}
 						size="sm"
 						label={nameOf(byId, hero)}
 					/>
+					{captions?.has(hero) && (
+						<span class={b.caption}>{captions.get(hero)}</span>
+					)}
 				</li>
 			))}
 		</ul>

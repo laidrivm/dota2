@@ -5,6 +5,7 @@
  * of actions.
  */
 import type { HeroId, Role, Side } from "../../types.ts";
+import type { DraftState } from "../engine/draft.ts";
 import {
 	ORDER,
 	type PickOrder,
@@ -69,6 +70,12 @@ export type CmAction =
 	| { type: "enter"; hero: HeroId }
 	| { type: "undo" }
 	| { type: "reset" };
+
+/** The engine's view of the session, once the setup gives one. */
+export const draftState = (session: CmSession): DraftState | null =>
+	session.side === null || session.pickOrder === null
+		? null
+		: { ...session, side: session.side, pickOrder: session.pickOrder };
 
 /** The step a hero was entered at (1-based), or `null` while it is free. */
 export const takenAt = (session: CmSession, hero: HeroId): number | null => {

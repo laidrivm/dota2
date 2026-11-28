@@ -160,7 +160,7 @@ Split from step 8, which together stood at 998 lines of the 800-line budget.
 
 Closes `cm-model/the-assignment-is-shown`, `cm-model/an-enemy-step`.
 
-- [ ] 9.1 The board shows each pick's position and player, and the top five
+- [x] 9.1 The board shows each pick's position and player, and the top five
       for the step in progress with their components; on an enemy step the
       list is headed as the enemy's expected choices with no enter control.
 
