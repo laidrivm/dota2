@@ -16,8 +16,10 @@ import { join } from "node:path";
 import config from "../stryker.config.json";
 import { root } from "./root.ts";
 
-/** The operand of `bun test …`, which Stryker hands to Bun as a path filter. */
-const filter = config.commandRunner.command.replace(/^bun test /, "");
+/** The operands of `bun test …`, which Stryker hands to Bun as path filters. */
+const filters = config.commandRunner.command
+	.replace(/^bun test /, "")
+	.split(" ");
 
 /**
  * Every test file under `src`, as a repository path. Read recursively and
@@ -31,14 +33,19 @@ const tests = readdirSync(join(root, "src"), {
 	.map((name) => `src/${name}`)
 	.filter((path) => path.endsWith(".test.ts"));
 
-/** The model's own unit tests — the killing set the requirement names. */
-const own = tests.filter((path) => /^src\/model[.-]/.test(path));
+/**
+ * The killing set: the model's own unit tests, and the CM engine's, which
+ * reuses the model's accessors and is mutated beside it.
+ */
+const own = tests.filter((path) => /^src\/(model[.-]|cm\/engine\/)/.test(path));
 
 /**
- * What Bun would run for the filter. A positional filter is a substring of the
- * path, not a prefix: `bun test model-est` runs `src/model-estimate.test.ts`.
+ * What Bun would run for the filters. A positional filter is a substring of
+ * the path, not a prefix: `bun test model-est` runs `src/model-estimate.test.ts`.
  */
-const matching = tests.filter((path) => path.includes(filter));
+const matching = tests.filter((path) =>
+	filters.some((filter) => path.includes(filter)),
+);
 
 describe("the killing command", () => {
 	// spec: mutation-floor/the-model-s-tests-move-to-another-file
@@ -52,7 +59,12 @@ describe("the killing command", () => {
 		expect(own.length).toBeGreaterThan(1);
 	});
 
-	test("mutates the one file the floor is measured over", () => {
-		expect(config.mutate).toEqual(["src/model.ts"]);
+	test("mutates the model, its shared terms and the CM engine, never the engine's tests", () => {
+		expect(config.mutate).toEqual([
+			"src/model.ts",
+			"src/model-terms.ts",
+			"src/cm/engine/**/*.ts",
+			"!src/cm/engine/**/*.test.ts",
+		]);
 	});
 });

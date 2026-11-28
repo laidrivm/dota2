@@ -29,4 +29,5 @@ test("picking second, step 3 is the captain's ban and 1, 2 and 5 the enemy's", (
 test("there is no step after the 24th", () => {
 	expect(stepAt(23, "first")).toEqual({ action: "pick", team: "theirs" });
 	expect(stepAt(24, "first")).toBeNull();
+	expect([ORDER[0]?.step, ORDER[23]?.step]).toEqual([1, 24]);
 });

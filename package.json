@@ -48,9 +48,9 @@
 	"harness": {
 		"board": "D2ASS",
 		"mutationFloor": {
-			"module": "src/model.ts",
-			"surviving": 66,
-			"why": "was 67: an injectivity case kills the role guard too"
+			"module": "src/model.ts and src/cm/engine/",
+			"surviving": 49,
+			"why": "was 66: src/cm/engine/ joined the run with none surviving, and its value cases, reading the model's accessors and lane-weighted matchup, kill 17 of the model's"
 		},
 		"uncitedFloor": {
 			"count": 195,

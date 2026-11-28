@@ -7,8 +7,9 @@ d2ass has.
 
 ## The mutation floor
 
-- The harness's `mutation-floor.ts` counts the mutants surviving in
-  `src/model.ts` — those Stryker reports as `Survived` or `NoCoverage` — and
+- The harness's `mutation-floor.ts` counts the mutants surviving in every file
+  `stryker.config.json` mutates — `src/model.ts`, `src/model-terms.ts` and
+  `src/cm/engine/` — those Stryker reports as `Survived` or `NoCoverage` — and
   compares that count against `package.json`'s `harness.mutationFloor`. A count
   above the floor fails, and so does one below it: the floor is a measurement,
   not an upper bound.
