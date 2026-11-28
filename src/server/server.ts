@@ -16,6 +16,7 @@
 
 import { serve } from "bun";
 import { cmApi } from "./cm/api.ts";
+import { claudeAsk } from "./cm/report.ts";
 import { distDir, distFile } from "./dist-routes.ts";
 import { servedSnapshot, staticRoutes } from "./static-routes.ts";
 
@@ -32,6 +33,7 @@ if (!(await Bun.file(new URL("index.html", distDir)).exists())) {
 const api = cmApi({
 	password: process.env.CM_PASSWORD,
 	dataDir: process.env.CM_DATA_DIR || "cm-data",
+	ask: claudeAsk(process.env.ANTHROPIC_API_KEY),
 	knownHeroes: async () => {
 		const bundle = (await Bun.file(await servedSnapshot()).json()) as {
 			heroes: { id: number }[];

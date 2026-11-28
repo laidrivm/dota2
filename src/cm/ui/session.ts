@@ -67,6 +67,14 @@ export type CmAction =
 	| { type: "rank"; team: Team; index: number; rank: RankTier | null }
 	| { type: "addSignature"; team: Team; index: number; hero: HeroId }
 	| { type: "removeSignature"; team: Team; index: number; hero: HeroId }
+	| {
+			type: "import";
+			team: Team;
+			index: number;
+			nickname: string | null;
+			rank: RankTier | null;
+			signatures: HeroId[];
+	  }
 	| { type: "enter"; hero: HeroId }
 	| { type: "undo" }
 	| { type: "reset" };
@@ -169,6 +177,23 @@ export function reduce(session: CmSession, action: CmAction): CmSession {
 					? p
 					: { ...p, signatures: [...p.signatures, action.hero] },
 			);
+		// A profile read from OpenDota: what it says replaces what was typed,
+		// and what it leaves out (a hidden medal, say) stays as it was.
+		case "import": {
+			const name = action.nickname?.trim() ?? "";
+			const rank =
+				action.rank !== null && isTier(action.rank, 8) ? action.rank : null;
+			const signatures = [...new Set(action.signatures)]
+				.filter((hero) => Number.isInteger(hero))
+				.slice(0, SIGNATURE_LIMIT);
+			return editPlayer(session, action.team, action.index, (p) => ({
+				...p,
+				nickname:
+					name !== "" && name.length <= NICKNAME_MAX ? name : p.nickname,
+				rank: rank ?? p.rank,
+				signatures: signatures.length > 0 ? signatures : p.signatures,
+			}));
+		}
 		case "removeSignature":
 			return editPlayer(session, action.team, action.index, (p) => ({
 				...p,

@@ -83,6 +83,20 @@ const PROBLEMS = {
 		action:
 			"Set CM_PASSWORD, 12 characters or more, in the deployment's environment and restart the application.",
 	},
+	"report-not-configured": {
+		status: 503,
+		title: "The draft report is not configured",
+		detail:
+			"The deployment sets no ANTHROPIC_API_KEY, so no report can be written.",
+		action:
+			"Set ANTHROPIC_API_KEY in the deployment's environment and restart the application.",
+	},
+	"report-failed": {
+		status: 502,
+		title: "The draft report failed",
+		detail: "The model did not answer this request.",
+		action: "Try again shortly.",
+	},
 } as const satisfies Record<string, Omit<Problem, "type" | "code">>;
 
 export type ProblemCode = keyof typeof PROBLEMS;

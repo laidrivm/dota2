@@ -4,6 +4,7 @@ import { focusAfterPick, Picker } from "../../app/picker/picker.tsx";
 import { ROLE_UI } from "../../app/session-controls.tsx";
 import type { HeroEntry, Role, SnapshotBundle } from "../../types.ts";
 import s from "./cm.module.css";
+import { accountId, type Imported, importProfile } from "./profile-import.ts";
 import {
 	type CmAction,
 	type CmSession,
@@ -69,6 +70,65 @@ export function Rosters({
 	);
 }
 
+/** An account id or profile link, read from OpenDota into the player (v2). */
+function ProfileImport({
+	known,
+	onImported,
+}: {
+	known: Map<number, HeroEntry>;
+	onImported: (found: Imported) => void;
+}) {
+	const [text, setText] = useState("");
+	const [said, setSaid] = useState<string | null>(null);
+	const [busy, setBusy] = useState(false);
+
+	const run = async () => {
+		const id = accountId(text);
+		if (id === null) {
+			setSaid("Give an account id or a Dotabuff, STRATZ or OpenDota link.");
+			return;
+		}
+		setBusy(true);
+		const found = await importProfile(id, new Set(known.keys()));
+		setBusy(false);
+		if (found === null) {
+			setSaid("OpenDota did not answer for that account.");
+			return;
+		}
+		onImported(found);
+		setSaid(
+			`Imported ${found.nickname ?? "the profile"}: ${found.signatures.length} heroes${found.rank === null ? ", medal hidden" : ""}.`,
+		);
+	};
+
+	return (
+		<div class={s.field}>
+			<label class={s.field}>
+				<span class={s.label}>Account id or profile link</span>
+				<input
+					class={s.input}
+					value={text}
+					onInput={(event) => setText(event.currentTarget.value)}
+					onKeyDown={(event) => {
+						if (event.key === "Enter") {
+							event.preventDefault();
+							run();
+						}
+					}}
+				/>
+			</label>
+			<button type="button" class={s.button} disabled={busy} onClick={run}>
+				{busy ? "Importing…" : "Import from OpenDota"}
+			</button>
+			{said !== null && (
+				<p class={s.note} role="status">
+					{said}
+				</p>
+			)}
+		</div>
+	);
+}
+
 function Roster({
 	team,
 	session,
@@ -100,6 +160,12 @@ function Roster({
 				return (
 					<fieldset key={id} class={s.player}>
 						<legend class={s.visuallyHidden}>{player.nickname}</legend>
+						<ProfileImport
+							known={byId}
+							onImported={(found) =>
+								apply({ type: "import", team, index, ...found })
+							}
+						/>
 						<label class={s.field}>
 							<span class={s.label}>Nickname</span>
 							<input

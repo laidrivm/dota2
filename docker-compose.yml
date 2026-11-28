@@ -38,6 +38,8 @@ services:
       # the job has no use for it, and a secret passed where nothing reads it
       # is one more place it can leak from.
       CM_PASSWORD: ${CM_PASSWORD}
+      # The draft report (v3) calls Claude with it; unset, the report answers 503.
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
     # No `depends_on` on the database, and not an omission: the server opens no
     # connection at all. It answers from `dist/`, from the two volumes above and
     # from files in the image, so it serves correctly while the database is

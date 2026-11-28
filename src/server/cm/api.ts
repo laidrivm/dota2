@@ -13,6 +13,7 @@ import { readMeta } from "./d2pt.ts";
 import { Positions, Uploaded } from "./meta-schema.ts";
 import { readStore, writePosition } from "./meta-store.ts";
 import { problem } from "./problem.ts";
+import { type Ask, ReportRequest } from "./report.ts";
 import {
 	COOKIE,
 	LIFETIME_SECONDS,
@@ -30,6 +31,8 @@ export interface CmOptions {
 	dataDir?: string;
 	/** The hero ids the served snapshot carries, read when an upload arrives. */
 	knownHeroes?: () => Promise<ReadonlySet<number>>;
+	/** Writes the draft report and answers the chat; `null` with no API key. */
+	ask?: Ask | null;
 }
 
 /** An upload's cap (cm-meta-import): d2pt's data file is well under it. */
@@ -68,6 +71,7 @@ export function cmApi({
 	now = Date.now,
 	dataDir = "cm-data",
 	knownHeroes = async () => new Set<number>(),
+	ask = null,
 }: CmOptions) {
 	const usable =
 		password !== undefined &&
@@ -215,6 +219,24 @@ export function cmApi({
 				.object({ positions: Positions })
 				.parse({ positions: await readStore(dataDir) }),
 		),
+	);
+
+	app.post(
+		"/report",
+		bodyLimit({ maxSize: 512 * 1024, onError: () => problem("too-large") }),
+		async (c) => {
+			if (ask === null) return problem("report-not-configured");
+			const parsed = ReportRequest.safeParse(
+				await c.req.json().catch(() => null),
+			);
+			if (!parsed.success) return problem("invalid-body");
+			const text = await ask(parsed.data).catch((error) => {
+				console.error("cm report:", error);
+				return null;
+			});
+			if (text === null) return problem("report-failed");
+			return c.json(z.object({ text: z.string() }).parse({ text }));
+		},
 	);
 
 	return app;
