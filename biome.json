@@ -41,6 +41,26 @@
 					}
 				}
 			}
+		},
+		{
+			"includes": ["src/cm/engine/**"],
+			"linter": {
+				"rules": {
+					"style": {
+						"noRestrictedImports": {
+							"level": "error",
+							"options": {
+								"patterns": [
+									{
+										"group": ["**/app/**", "../ui/**", "**/cm/ui/**"],
+										"message": "The CM engine owns no page state: src/cm/engine/** never imports from src/app/** or src/cm/ui/**, so the search can run in a worker and be tested on its own."
+									}
+								]
+							}
+						}
+					}
+				}
+			}
 		}
 	],
 	"javascript": {

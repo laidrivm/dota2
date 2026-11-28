@@ -131,7 +131,7 @@ Closes `cm-model/valuing-a-team`,
 `cm-model/a-signature-hero-outranks-an-equal-one`,
 `module-boundaries/the-cm-engine-reaches-into-its-page`.
 
-- [ ] 7.1 Extend `biome.json`'s restricted imports to `src/cm/engine/**`
+- [x] 7.1 Extend `biome.json`'s restricted imports to `src/cm/engine/**`
       (no `src/app/**`, no `src/cm/ui/**`); a lint fixture case shows the
       restriction fires and that `src/model.ts` imports pass.
 - [ ] 7.2 Failing cases first in `src/cm/engine/value.test.ts` (ZOMBIES 23,
