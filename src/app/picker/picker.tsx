@@ -10,13 +10,13 @@ import { useEffect, useRef, useState } from "preact/hooks";
 import type { HeroEntry, HeroId, SnapshotBundle } from "../../types.ts";
 import { HeroTile } from "../board/hero-tile.tsx";
 import { cx } from "../cx.ts";
-import type { PickTarget, Used } from "../session.ts";
+import type { PickTarget } from "../session.ts";
 import { ROLE_UI } from "../session-controls.tsx";
 import s from "./picker.module.css";
 import { matchHeroes } from "./search.ts";
 
-/** What the header says we are picking for. */
-function targetLabel(target: PickTarget): string {
+/** What the All Pick header says it is picking for; the CM page names its own. */
+export function targetLabel(target: PickTarget): string {
 	if (target.kind === "ban") return "ban";
 	if (target.kind === "enemy") return "enemy";
 	return `${ROLE_UI[target.role].label} (my team)`;
@@ -30,14 +30,16 @@ function columns(grid: HTMLElement): number {
 
 export function Picker({
 	bundle,
-	target,
+	label,
 	usedOf,
 	onPick,
 	onClose,
 }: {
 	bundle: SnapshotBundle;
-	target: PickTarget;
-	usedOf: (hero: HeroId) => Used;
+	/** What the header says is being picked for: "ban", "Mid (my team)". */
+	label: string;
+	/** Why a hero cannot be chosen, shown on its tile; `null` when it can. */
+	usedOf: (hero: HeroId) => string | null;
 	onPick: (hero: HeroId) => void;
 	onClose: () => void;
 }) {
@@ -133,7 +135,7 @@ export function Picker({
 		>
 			<div class={s.pickerHead}>
 				<h2 class={s.pickerTitle} id="picker-title">
-					Pick for: {targetLabel(target)}
+					Pick for: {label}
 				</h2>
 				<button
 					type="button"
