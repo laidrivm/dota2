@@ -15,6 +15,7 @@
  */
 
 import { serve } from "bun";
+import { cmApi } from "./cm/api.ts";
 import { distDir, distFile } from "./dist-routes.ts";
 import { staticRoutes } from "./static-routes.ts";
 
@@ -25,11 +26,16 @@ if (!(await Bun.file(new URL("index.html", distDir)).exists())) {
 	);
 }
 
+// Read once: the environment does not change under a running process.
+const api = cmApi({ password: process.env.CM_PASSWORD });
+
 const server = serve({
 	routes: staticRoutes(),
-	fetch: (request) =>
-		distFile(new URL(request.url).pathname) ??
-		new Response("Not found", { status: 404 }),
+	fetch: (request) => {
+		const { pathname } = new URL(request.url);
+		if (pathname.startsWith("/api/")) return api.fetch(request);
+		return distFile(pathname) ?? new Response("Not found", { status: 404 });
+	},
 });
 
 console.log(`listening on ${server.url}`);

@@ -32,7 +32,7 @@ Closes `cm-access/signing-in-with-the-password`,
       empty, 12 spaces and 11 characters, 12 characters configuring it; 422
       `invalid-body` for non-JSON and a missing `password`; every problem
       body carrying all six fields.
-- [ ] 1.3 Implement the Hono app under `src/server/cm/` (configuration,
+- [x] 1.3 Implement the Hono app under `src/server/cm/` (configuration,
       session cookie per design D2, problem responses per D4) and mount it
       for `/api/*` in `server.ts`'s `fetch` ahead of `distFile`; the 1.2
       cases pass.
