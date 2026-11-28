@@ -121,15 +121,17 @@ test("two steps entered 100 ms apart only ever show the ranking of the step in p
 		});
 	});
 	// Step 1 by its suggestion, then 100 ms later step 2 through the picker,
-	// both committed inside the page so no round trip stretches the gap.
-	const gap = await page.evaluate(
+	// both committed inside the page on a clock the case owns: the gap is
+	// exactly 100 ms of page time, whatever the machine is doing.
+	await page.clock.install();
+	const entered = page.evaluate(
 		() =>
 			new Promise<number>((done) => {
 				const first = document.querySelector<HTMLButtonElement>(
 					"ol[aria-label^='Ranked for step '] button",
 				);
 				first?.click();
-				const start = performance.now();
+				const start = Date.now();
 				setTimeout(() => {
 					document
 						.querySelector<HTMLButtonElement>('button[data-pick="cm-step"]')
@@ -142,14 +144,20 @@ test("two steps entered 100 ms apart only ever show the ranking of the step in p
 						);
 						if (tile === null) return setTimeout(pick, 0);
 						tile.click();
-						done(performance.now() - start);
+						done(Date.now() - start);
 					};
 					pick();
 				}, 100);
 			}),
 	);
+	await page.clock.runFor(100);
+	// Each turn the picker might take to render is a timer the clock runs.
+	await page.clock.runFor(20);
+	// A turn the picker takes to render is a 1 ms timer on this clock.
+	const gap = await entered;
 	expect(gap).toBeGreaterThanOrEqual(100);
-	expect(gap).toBeLessThan(150);
+	expect(gap).toBeLessThanOrEqual(102);
+	await page.clock.resume();
 	await expect(
 		page
 			.getByRole("region", { name: "Enemy's expected bans, step 3" })
