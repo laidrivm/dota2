@@ -89,6 +89,8 @@ test("a team's picks 1, 2, 4 and 5 read the p1, p2, p2 and last deltas", () => {
 	}));
 	const { parts } = teamValue(bundle(heroes), team({ slots }), []);
 	expect(parts.phase).toBeCloseTo(0.1 + 0.2 + 0.2 + 0.2 + 0.4, 10);
+	// No player holds these slots, so no signature lifts them.
+	expect(parts.comfort).toBe(0);
 });
 
 describe("rank weight", () => {
@@ -155,6 +157,10 @@ test("a synergy pair is counted once, and the side delta per hero", () => {
 	}));
 	const { parts } = teamValue(b, team({ slots }), []);
 	expect(parts.synergy).toBe(1.5);
+	// Two picks hold one pair: neither the pair twice nor a hero with itself.
+	expect(
+		teamValue(b, team({ slots: slots.slice(0, 2) }), []).parts.synergy,
+	).toBe(1.5);
 	expect(parts.side).toBeCloseTo(1.5, 10);
 });
 
@@ -170,4 +176,34 @@ test("matchups read the enemy's assigned position, and the evaluation is the dif
 	// Mid against mid weighs 1.75 of a mean 1.75: the advantage as it stands.
 	expect(teamValue(b, ours, theirs.slots).parts.matchups).toBeCloseTo(2, 10);
 	expect(evaluate(b, ours, theirs)).toBeCloseTo(4, 10);
+});
+
+test("a share of exactly 0.05 is playable, and just under it is off-role", () => {
+	const b = bundle([
+		hero(
+			1,
+			{ "1": 1 },
+			{ positions: { "1": { share: 0.05, meta: 1, sufficient: true } } },
+		),
+		hero(
+			2,
+			{ "1": 1 },
+			{ positions: { "1": { share: 0.049, meta: 1, sufficient: true } } },
+		),
+	]);
+	const metaOf = (id: number) =>
+		teamValue(b, team({ slots: [{ hero: id, position: 1, player: null }] }), [])
+			.parts.meta;
+	expect(metaOf(1)).toBe(1);
+	expect(metaOf(2)).toBe(-10);
+});
+
+test("a hero the snapshot no longer carries adds nothing, on either side", () => {
+	const b = bundle([hero(1, everywhere)], {
+		matchups: { "1": { "9": 3 } },
+	});
+	const lost = [{ hero: 9, position: 1 as Role, player: null }];
+	expect(teamValue(b, team({ slots: lost }), []).total).toBe(0);
+	const ours = team({ slots: [{ hero: 1, position: 1, player: null }] });
+	expect(teamValue(b, ours, lost).parts.matchups).toBe(0);
 });

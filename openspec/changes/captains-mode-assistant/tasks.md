@@ -134,11 +134,11 @@ Closes `cm-model/valuing-a-team`,
 - [x] 7.1 Extend `biome.json`'s restricted imports to `src/cm/engine/**`
       (no `src/app/**`, no `src/cm/ui/**`); a lint fixture case shows the
       restriction fires and that `src/model.ts` imports pass.
-- [ ] 7.2 Failing cases first in `src/cm/engine/value.test.ts` (ZOMBIES 23,
+- [x] 7.2 Failing cases first in `src/cm/engine/value.test.ts` (ZOMBIES 23,
       30, 31, 34): empty draft 0; CM phases `p1`/`p2`/`p2`/`last`; signature
       +3.0 × ρ, 3.3 at rank 6 of mean 5; clamp 0.75 and 1.25; unknown ranks
       weigh 1; a synergy pair counted once.
-- [ ] 7.3 Implement the team value (design D7) reusing `src/model.ts`'s
+- [x] 7.3 Implement the team value (design D7) reusing `src/model.ts`'s
       lane-weighted matchup; add `src/cm/engine/` to Stryker's `mutate`
       with its stored result and floor.
 

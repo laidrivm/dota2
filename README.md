@@ -9,7 +9,7 @@
 | `harness/code-style.md` | the ponytail ladder, dependency safety, accessibility | before adding code or a dependency |
 | `harness/api-design.md` | endpoint response contract | when an endpoint changes |
 | `harness/testing.md` | what tests assert, how a test cites the criterion it closes | when tests change |
-| `docs/testing.md` | the mutation floor over `src/model.ts`, and the e2e rules | when tests change |
+| `docs/testing.md` | the mutation floor over the model and the CM engine, and the e2e rules | when tests change |
 | `harness/feature-workflow.md` | the four OpenSpec stages and their gates, and the boards that hold the work | on any feature, new tooling, or gate change, and when choosing the next card |
 | `harness/git-and-prs.md` | branch and commit shape, PR description, and the git mechanics that protect the history | before branching, committing or opening a PR |
 | `harness/review-toolkit.md` | which review skill to run, and the pre-PR sequence | before every PR |
@@ -35,7 +35,7 @@ One fact lives in exactly one file; everything else links to it.
 | `src/app/` | the client: components, their stylesheets, and the state they read |
 | `src/cm/` | the Captains Mode page's entry point, served at `/cm` |
 | `src/cm/ui/` | the Captains Mode page: its screens, their stylesheets, and its calls to `/api/cm/` |
-| `src/cm/engine/` | the Captains Mode draft rules the page and its search share: the draft order |
+| `src/cm/engine/` | the Captains Mode draft rules the page and its search share: the draft order and a team's value |
 | `src/fixtures/` | the snapshot the client is served until the pipeline publishes one |
 | `src/job/` | the nightly job's shared edge — the database connection and the schema it applies |
 | `src/job/ingest/` | the pulls, the transport that paces them, and the staging write |
@@ -55,8 +55,9 @@ client, the model and the job already shared it and splitting them would
 rewrite the import rule `biome.json` enforces to buy nothing but a shorter
 `COPY` line.
 
-Three things the table cannot state. The prediction model — `src/model.ts` and
-`src/types.ts` with their tests — sits directly in `src/`, being neither
+Three things the table cannot state. The prediction model — `src/model.ts`,
+the terms it shares with the CM engine in `src/model-terms.ts`, and
+`src/types.ts`, with their tests — sits directly in `src/`, being neither
 client nor job but read by both. `src/job/main.ts` will be the job's entry
 point: a row asserts a tracked file *under* a path, which cannot express a
 path that is itself the file. And `icons/` and `snapshot/` are where the job

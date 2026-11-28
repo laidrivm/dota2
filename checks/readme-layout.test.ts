@@ -34,6 +34,8 @@ const UNPLACED: Record<string, string> = {
 	"src/app/":
 		"the client's own internal layout — components, their styles and\n\t\ttheir tokens — is not this section's subject, the row above being the answer",
 	"src/model.ts": "the prediction model — prose beside the table, not a row",
+	"src/model-terms.ts":
+		"the snapshot terms the model and the CM engine share — prose beside the table",
 	"src/types.ts": "the bundle's shape, read by the client and the job alike",
 	"src/css.d.ts": "the CSS-module declaration the bundler resolves from `src/`",
 	"src/model.test.ts": "the model's own tests, which sit beside it",
