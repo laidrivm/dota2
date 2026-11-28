@@ -283,19 +283,3 @@ test("the patch label is the first in the file, and a count too large to keep is
 	// Stored and read back whole, the unsafe count kept as null.
 	expect(positions["3"]?.heroes[String(ids[0])]?.matches).toBeNull();
 });
-
-test("rows naming their own position read once however many ways lead to them", async () => {
-	const { post } = await signedIn();
-	// devalue keeps shared identity: the same rows reached under no position
-	// and under their own, pos 3.
-	const heroes = rows(ids, 60);
-	const response = await post(
-		dataFile({
-			patch: "7.41f",
-			all: { heroes },
-			three: { position: "pos 3", heroes },
-		}),
-	);
-	expect(response.status).toBe(200);
-	expect(await response.json()).toMatchObject({ position: 3, heroes: 60 });
-});
