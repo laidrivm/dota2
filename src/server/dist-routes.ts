@@ -69,7 +69,13 @@ function listed(): Set<string> {
 export function distFile(pathname: string): Response | null {
 	if (owned.has(pathname)) return null;
 
-	const name = pathname === "/" ? "index.html" : pathname.slice(1);
+	// The two documents by their paths; everything else by its own name.
+	const name =
+		pathname === "/"
+			? "index.html"
+			: pathname === "/cm"
+				? "cm.html"
+				: pathname.slice(1);
 
 	return listed().has(name)
 		? new Response(Bun.file(new URL(name, distDir)))

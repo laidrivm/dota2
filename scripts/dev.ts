@@ -27,7 +27,11 @@ let building: Promise<unknown> = Promise.resolve();
 let emitted = new Set<string>();
 
 const build = () => {
-	building = Bun.build({ entrypoints: [`${root}index.html`], outdir: dist })
+	building = Bun.build({
+		// Both pages, as `bun run build` emits them.
+		entrypoints: [`${root}index.html`, `${root}cm.html`],
+		outdir: dist,
+	})
 		.then(async (result) => {
 			// Every rebuild names its assets by content, so the previous ones
 			// would otherwise pile up for the whole session — and go on being
