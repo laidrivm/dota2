@@ -1,4 +1,10 @@
-import { useEffect, useReducer, useRef, useState } from "preact/hooks";
+import {
+	useEffect,
+	useLayoutEffect,
+	useReducer,
+	useRef,
+	useState,
+} from "preact/hooks";
 import { loadSnapshot } from "../../app/snapshot.ts";
 import type { SnapshotBundle } from "../../types.ts";
 import { readSession, type SessionState, signOut } from "./api.ts";
@@ -24,7 +30,9 @@ function Draft() {
 		loadSnapshot().then(setBundle);
 	}, []);
 
-	useEffect(() => {
+	// Before paint, so a change the screen shows is already stored when a
+	// reload reads it back — a reset confirmed then reloaded stays reset.
+	useLayoutEffect(() => {
 		persistSession(session);
 	}, [session]);
 
