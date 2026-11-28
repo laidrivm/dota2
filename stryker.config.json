@@ -4,7 +4,8 @@
 		"src/model.ts",
 		"src/model-terms.ts",
 		"src/cm/engine/**/*.ts",
-		"!src/cm/engine/**/*.test.ts"
+		"!src/cm/engine/**/*.test.ts",
+		"!src/cm/engine/**/*.fixture.ts"
 	],
 	"commandRunner": {
 		"command": "bun test src/model src/cm/engine"

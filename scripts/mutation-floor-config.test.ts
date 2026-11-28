@@ -59,12 +59,13 @@ describe("the killing command", () => {
 		expect(own.length).toBeGreaterThan(1);
 	});
 
-	test("mutates the model, its shared terms and the CM engine, never the engine's tests", () => {
+	test("mutates the model, its shared terms and the CM engine, never its tests or fixtures", () => {
 		expect(config.mutate).toEqual([
 			"src/model.ts",
 			"src/model-terms.ts",
 			"src/cm/engine/**/*.ts",
 			"!src/cm/engine/**/*.test.ts",
+			"!src/cm/engine/**/*.fixture.ts",
 		]);
 	});
 });
