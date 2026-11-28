@@ -172,9 +172,12 @@ function Roster({
 										class={s.signature}
 										data-remove={id}
 										aria-label={`Remove ${byId.get(hero)?.name ?? "hero"}`}
-										onClick={() =>
-											apply({ type: "removeSignature", team, index, hero })
-										}
+										onClick={() => {
+											// The tile unmounts with the focus it holds; the add
+											// control, enabled again below ten, takes it.
+											apply({ type: "removeSignature", team, index, hero });
+											focusAfterPick(id);
+										}}
 									>
 										<HeroTile hero={byId.get(hero)} size="sm" />
 									</button>

@@ -125,6 +125,7 @@ test("a pick hands focus back, a signature leaves by its tile, and ten is the li
 	await expect(add).toBeFocused();
 	await player.getByRole("button", { name: /^Remove / }).click();
 	await expect(signatures).toHaveCount(0);
+	await expect(add).toBeFocused();
 
 	for (let n = 0; n < 10; n++) {
 		await add.click();

@@ -66,6 +66,8 @@ describe("entering heroes", () => {
 		const once = reduce(setUp(), { type: "enter", hero: PUDGE });
 		expect(reduce(once, { type: "side", side: "dire" })).toBe(once);
 		expect(reduce(once, { type: "pickOrder", pickOrder: "second" })).toBe(once);
+		const undone = reduce(once, { type: "undo" });
+		expect(reduce(undone, { type: "side", side: "dire" }).side).toBe("dire");
 	});
 });
 
