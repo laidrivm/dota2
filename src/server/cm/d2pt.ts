@@ -69,25 +69,28 @@ function collect(root: unknown, found: Found): boolean {
 	while (stack.length > 0) {
 		const [value, inherited] = stack.pop() as [unknown, Position | null];
 		if (typeof value !== "object" || value === null) continue;
+		// The position the object stands at, its own or the one above it: a
+		// row naming its own position reads once however many ways lead to it.
+		const record = Array.isArray(value) ? null : (value as Row);
+		const here =
+			record === null ? inherited : (positionOf(record.position) ?? inherited);
 		const under = seen.get(value) ?? new Set();
-		if (under.has(inherited)) continue;
-		under.add(inherited);
+		if (under.has(here)) continue;
+		under.add(here);
 		seen.set(value, under);
 		if (++visited > MAX_NODES) return false;
 
-		if (Array.isArray(value)) {
+		if (record === null) {
 			// Populated indices only: a hole is not an entry, and a sparse
 			// array's length is not a count of anything.
 			// Pushed last-first so they pop in document order, which "the
 			// first `patch` string" is read in.
 			for (const index of Object.keys(value).reverse())
-				stack.push([value[Number(index)], inherited]);
+				stack.push([(value as unknown[])[Number(index)], here]);
 			continue;
 		}
-		const record = value as Row;
 		if (found.patch === null && typeof record.patch === "string")
 			found.patch = record.patch;
-		const here = positionOf(record.position) ?? inherited;
 		// A row is recorded and still walked into: a row nested under it at
 		// another position has to be seen for the file to read as mixed.
 		if (isRow(record)) found.rows.push({ row: record, position: here });
