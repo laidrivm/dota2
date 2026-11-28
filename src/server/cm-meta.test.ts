@@ -8,7 +8,12 @@ import { mkdtemp, readdir, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { cmApi } from "./cm/api.ts";
-import { metaFile, rows } from "./cm/d2pt.fixture.ts";
+import {
+	dataFile,
+	type FixtureRow,
+	metaFile,
+	rows,
+} from "./cm/d2pt.fixture.ts";
 import { readStore, writePosition } from "./cm/meta-store.ts";
 import {
 	cookieOf,
@@ -81,44 +86,86 @@ test("nothing uploaded yet reads as five empty positions", async () => {
 
 // spec: cm-meta-import/an-upload-that-is-not-the-meta-file
 describe("an upload that is not the meta file leaves the store as it was", () => {
-	const ratedWith = (...ratings: (number | null)[]) =>
-		rows(ids, 60).map((row, i) => ({
-			...row,
-			d2pt_rating: ratings[i] ?? row.d2pt_rating,
-		}));
-	test.each([
-		["text that is not JSON", "{not json"],
-		["JSON of another page", JSON.stringify({ type: "data", nodes: [] })],
-		["49 known rated heroes", metaFile(rows(ids, 49))],
-		[
-			"50 known heroes with null ratings",
-			metaFile(
-				rows(ids, 60)
-					.map((row, i) => (i < 10 ? { ...row, d2pt_rating: null } : row))
-					.slice(0, 59),
+	// Factories, so each body is built inside its own case.
+	const rated = (rating: number) => () =>
+		metaFile(
+			rows(ids, 60).map((row, i) =>
+				i === 0 ? { ...row, d2pt_rating: rating } : row,
 			),
+		);
+	const nested = (depth: number) => () =>
+		JSON.stringify({
+			type: "data",
+			nodes: [
+				{
+					type: "data",
+					// devalue's flat form: each array holds the index of the next.
+					data: Array.from({ length: depth }, (_, i) => [i + 1]).concat([[]]),
+				},
+			],
+		});
+	test.each<[string, () => string]>([
+		["text that is not JSON", () => "{not json"],
+		["JSON of another page", () => JSON.stringify({ type: "data", nodes: [] })],
+		["49 known rated heroes", () => metaFile(rows(ids, 49))],
+		[
+			"50 known heroes, 10 of them unrated",
+			() =>
+				metaFile(
+					rows(ids, 50).map((row, i) =>
+						i < 10 ? { ...row, d2pt_rating: null } : row,
+					),
+				),
 		],
-		["a rating of 100.1", metaFile(ratedWith(100.1))],
+		["a rating of 100.1", rated(100.1)],
+		["a rating that is not a number", rated(Number.NaN)],
 		[
 			"every rating equal",
-			metaFile(rows(ids, 60).map((row) => ({ ...row, d2pt_rating: 70 }))),
+			() => metaFile(rows(ids, 60).map((row) => ({ ...row, d2pt_rating: 70 }))),
 		],
 		[
 			"rows at two positions",
-			metaFile([
-				...rows(ids, 30, "pos 3"),
-				...rows(ids.slice(30), 30, "pos 4"),
-			]),
+			() =>
+				metaFile([
+					...rows(ids, 30, "pos 3"),
+					...rows(ids.slice(30), 30, "pos 4"),
+				]),
+		],
+		[
+			"one set of rows under two positions",
+			() => {
+				const heroes = rows(ids, 60).map(({ position, ...row }) => row);
+				return dataFile({
+					patch: "7.41f",
+					three: { position: "pos 3", heroes },
+					four: { position: "pos 4", heroes },
+				});
+			},
 		],
 		[
 			"rows naming no position",
-			metaFile(rows(ids, 60).map(({ position, ...row }) => row)),
+			() => metaFile(rows(ids, 60).map(({ position, ...row }) => row)),
 		],
+		[
+			"one hero fifty times",
+			() =>
+				metaFile(
+					Array.from({ length: 50 }, (_, i) => ({
+						...(rows(ids, 1)[0] as FixtureRow),
+						d2pt_rating: 40 + (i % 2),
+					})),
+				),
+		],
+		[
+			"a sparse array four billion long",
+			() => JSON.stringify({ nodes: [{ data: [[-7, 4294967295]] }] }),
+		],
+		["nesting a hundred thousand deep", nested(100_000)],
 	])("%s answers 422 not-d2pt-meta", async (_, body) => {
 		const { post, get } = await signedIn();
 		await post(metaFile(rows(ids, 60)));
 		const before = await (await get()).json();
-		const response = await post(body);
+		const response = await post(body());
 		expect(response.status).toBe(422);
 		expect((await problem(response)).code).toBe("not-d2pt-meta");
 		expect(await (await get()).json()).toEqual(before);
@@ -190,4 +237,23 @@ test("the meta routes need a session", async () => {
 	expect(
 		(await app.request("/api/cm/meta", { method: "POST", body: "{}" })).status,
 	).toBe(401);
+});
+
+test("a statistic the file leaves out is stored as null, not as zero", async () => {
+	const { post, get } = await signedIn();
+	const body = rows(ids, 60).map((row, i) => {
+		if (i > 0) return row;
+		const { matches, win_rate, ...rest } = row;
+		return rest;
+	});
+	expect((await post(metaFile(body))).status).toBe(200);
+	const { positions } = (await (await get()).json()) as {
+		positions: {
+			"3": { heroes: Record<string, { matches: unknown; winRate: unknown }> };
+		};
+	};
+	expect(positions["3"].heroes[String(ids[0])]).toMatchObject({
+		matches: null,
+		winRate: null,
+	});
 });

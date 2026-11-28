@@ -10,6 +10,7 @@ import { bodyLimit } from "hono/body-limit";
 import { getCookie, setCookie } from "hono/cookie";
 import { z } from "zod";
 import { readMeta } from "./d2pt.ts";
+import { Positions, Uploaded } from "./meta-schema.ts";
 import { readStore, writePosition } from "./meta-store.ts";
 import { problem } from "./problem.ts";
 import {
@@ -197,17 +198,23 @@ export function cmApi({
 			if (upload === null) return problem("not-d2pt-meta");
 			const uploadedAt = new Date(now()).toISOString();
 			await writePosition(dataDir, upload, uploadedAt);
-			return c.json({
-				position: upload.position,
-				heroes: Object.keys(upload.heroes).length,
-				patch: upload.patch,
-				uploadedAt,
-			});
+			return c.json(
+				Uploaded.parse({
+					position: upload.position,
+					heroes: Object.keys(upload.heroes).length,
+					patch: upload.patch,
+					uploadedAt,
+				}),
+			);
 		},
 	);
 
 	app.get("/meta", async (c) =>
-		c.json({ positions: await readStore(dataDir) }),
+		c.json(
+			z
+				.object({ positions: Positions })
+				.parse({ positions: await readStore(dataDir) }),
+		),
 	);
 
 	return app;

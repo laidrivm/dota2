@@ -6,15 +6,8 @@
  */
 import { mkdir, readFile, rename, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import type { MetaHero, MetaUpload } from "./d2pt.ts";
-
-export interface StoredMeta {
-	patch: string;
-	uploadedAt: string;
-	heroes: Record<string, MetaHero>;
-}
-
-export type Positions = Record<"1" | "2" | "3" | "4" | "5", StoredMeta | null>;
+import type { MetaUpload } from "./d2pt.ts";
+import { type Positions, StoredMeta } from "./meta-schema.ts";
 
 const fileOf = (dir: string, position: number) =>
 	join(dir, `meta-pos-${position}.json`);
@@ -23,9 +16,12 @@ const fileOf = (dir: string, position: number) =>
 export async function readStore(dir: string): Promise<Positions> {
 	const read = async (position: number) => {
 		try {
-			return JSON.parse(
-				await readFile(fileOf(dir, position), "utf8"),
-			) as StoredMeta;
+			// Parsed through the contract: a file this code did not write, or
+			// one from before a schema change, reads as nothing stored.
+			const parsed = StoredMeta.safeParse(
+				JSON.parse(await readFile(fileOf(dir, position), "utf8")),
+			);
+			return parsed.success ? parsed.data : null;
 		} catch {
 			return null;
 		}
@@ -58,8 +54,10 @@ export async function writePosition(
 	await mkdir(dir, { recursive: true });
 	const target = fileOf(dir, upload.position);
 	const temporary = `${target}.${crypto.randomUUID()}.tmp`;
-	await writeFile(temporary, JSON.stringify(stored));
+	// The write as well as the rename: a disk that fills part-way through
+	// leaves a temporary file behind otherwise, one per attempt.
 	try {
+		await writeFile(temporary, JSON.stringify(stored));
 		await commit(temporary, target);
 	} catch (error) {
 		await rm(temporary, { force: true });

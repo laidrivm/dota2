@@ -47,16 +47,20 @@ export function rows(
 	}));
 }
 
-/** The data file's text, the rows under a `meta` key beside the patch label. */
-export const metaFile = (heroes: FixtureRow[], patch = "7.41f") =>
+/** A SvelteKit data file whose one node holds `payload`, devalue-flattened. */
+export const dataFile = (payload: unknown) =>
 	JSON.stringify({
 		type: "data",
 		nodes: [
 			null,
 			{
 				type: "data",
-				data: JSON.parse(stringify({ patch, meta: { heroes } })),
+				data: JSON.parse(stringify(payload)),
 				uses: { search_params: ["position", "mmr"] },
 			},
 		],
 	});
+
+/** The data file's text, the rows under a `meta` key beside the patch label. */
+export const metaFile = (heroes: FixtureRow[], patch = "7.41f") =>
+	dataFile({ patch, meta: { heroes } });

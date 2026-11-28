@@ -8,32 +8,31 @@
  * `d2pt_rating`, `matches`, `win_rate` and `phase_1_matches`/`_wins` …
  * `phase_3_*`. Where in a node they sit was not, nor where the position and
  * the patch label are, so the reader finds them by name rather than by path:
- * every array of objects carrying `hero_id` and `d2pt_rating` is rows, a
- * `position` string beside a row or above it is its position, and the first
- * `patch` string is the label. A file of another page carries no such rows.
+ * every object carrying `hero_id` and `d2pt_rating` is a row, a `position`
+ * string on a row or above it is its position, and the first `patch` string
+ * is the label. A file of another page carries no such rows.
+ *
+ * The decoded value is the caller's, and bounded only by the body's 5 MB: a
+ * few bytes decode to a sparse array four billion long, or to nesting deep
+ * enough to exhaust a recursive walk. So the walk is iterative, visits only
+ * the entries an array actually holds, and stops past `MAX_NODES`.
  */
 import { unflatten } from "devalue";
+import type { MetaHero } from "./meta-schema.ts";
 
-export interface MetaHero {
-	rating: number | null;
-	tier: string | null;
-	matches: number;
-	winRate: number;
-	phaseWinRates: {
-		first: number | null;
-		second: number | null;
-		last: number | null;
-	};
-}
+type Position = 1 | 2 | 3 | 4 | 5;
 
 export interface MetaUpload {
-	position: 1 | 2 | 3 | 4 | 5;
+	position: Position;
 	patch: string;
 	heroes: Record<string, MetaHero>;
 }
 
 /** A position, rated: fewer known rated heroes than this is not the meta. */
 export const MIN_RATED = 50;
+
+/** More objects than any meta file holds; past it the walk gives up. */
+export const MAX_NODES = 200_000;
 
 type Row = Record<string, unknown>;
 
@@ -44,47 +43,74 @@ const isRow = (value: unknown): value is Row =>
 	isRecord(value) && Number.isInteger(value.hero_id) && "d2pt_rating" in value;
 
 /** `pos 3` as 3; anything else as null. */
-function positionOf(value: unknown): MetaUpload["position"] | null {
+function positionOf(value: unknown): Position | null {
 	const match = typeof value === "string" ? /^pos ([1-5])$/.exec(value) : null;
-	return match ? (Number(match[1]) as MetaUpload["position"]) : null;
+	return match ? (Number(match[1]) as Position) : null;
 }
 
-/** Every row under `value`, each with the nearest position above or beside it. */
-function collect(
-	value: unknown,
-	inherited: MetaUpload["position"] | null,
-	rows: { row: Row; position: MetaUpload["position"] | null }[],
-	patch: { label: string | null },
-	seen: Set<object>,
-): void {
-	if (typeof value !== "object" || value === null || seen.has(value)) return;
-	seen.add(value);
-	if (Array.isArray(value)) {
-		for (const item of value) collect(item, inherited, rows, patch, seen);
-		return;
+interface Found {
+	rows: { row: Row; position: Position | null }[];
+	patch: string | null;
+}
+
+/**
+ * Every row under `root` with the nearest position above or on it, into
+ * `found`; `false` when the walk exceeds its budget. An object reached again
+ * under the same position is not walked twice — devalue keeps shared
+ * identity, and a cycle would otherwise never end — but one reached under a
+ * different position is, so a row shared by two positions reads as both.
+ */
+function collect(root: unknown, found: Found): boolean {
+	const seen = new Map<object, Set<Position | null>>();
+	const stack: [unknown, Position | null][] = [[root, null]];
+	let visited = 0;
+	while (stack.length > 0) {
+		const [value, inherited] = stack.pop() as [unknown, Position | null];
+		if (typeof value !== "object" || value === null) continue;
+		const under = seen.get(value) ?? new Set();
+		if (under.has(inherited)) continue;
+		under.add(inherited);
+		seen.set(value, under);
+		if (++visited > MAX_NODES) return false;
+
+		if (Array.isArray(value)) {
+			// Populated indices only: a hole is not an entry, and a sparse
+			// array's length is not a count of anything.
+			for (const index of Object.keys(value))
+				stack.push([value[Number(index)], inherited]);
+			continue;
+		}
+		const record = value as Row;
+		if (found.patch === null && typeof record.patch === "string")
+			found.patch = record.patch;
+		const here = positionOf(record.position) ?? inherited;
+		if (isRow(record)) {
+			found.rows.push({ row: record, position: here });
+			continue;
+		}
+		for (const child of Object.values(record)) stack.push([child, here]);
 	}
-	const record = value as Row;
-	if (patch.label === null && typeof record.patch === "string")
-		patch.label = record.patch;
-	const here = positionOf(record.position) ?? inherited;
-	if (isRow(value)) {
-		rows.push({ row: value, position: here });
-		return;
-	}
-	for (const child of Object.values(value))
-		collect(child, here, rows, patch, seen);
+	return true;
 }
 
 const rate = (wins: unknown, matches: unknown): number | null =>
-	typeof wins === "number" && typeof matches === "number" && matches > 0
+	typeof wins === "number" &&
+	typeof matches === "number" &&
+	matches > 0 &&
+	wins >= 0 &&
+	wins <= matches
 		? wins / matches
 		: null;
+
+const finite = (value: unknown): number | null =>
+	typeof value === "number" && Number.isFinite(value) ? value : null;
 
 /**
  * The upload `text` holds, keeping only heroes `known` has, or `null` for any
  * file that is not one position of the meta: unparseable, of another page,
- * rows at two positions or none named, fewer than `MIN_RATED` known heroes
- * rated, a rating outside 0–100, or every rating the same.
+ * rows at two positions or none named, a hero twice, fewer than `MIN_RATED`
+ * known heroes rated, a rating that is not a number from 0 to 100, every
+ * rating the same, or more to walk than a meta file could hold.
  */
 export function readMeta(
 	text: string,
@@ -98,8 +124,7 @@ export function readMeta(
 	}
 	if (!isRecord(file) || !Array.isArray(file.nodes)) return null;
 
-	const rows: { row: Row; position: MetaUpload["position"] | null }[] = [];
-	const patch = { label: null as string | null };
+	const found: Found = { rows: [], patch: null };
 	for (const node of file.nodes) {
 		if (!isRecord(node) || !Array.isArray(node.data)) continue;
 		let data: unknown;
@@ -108,32 +133,34 @@ export function readMeta(
 		} catch {
 			return null;
 		}
-		collect(data, null, rows, patch, new Set());
+		if (!collect(data, found)) return null;
 	}
 
-	const positions = new Set(rows.map((r) => r.position));
+	const positions = new Set(found.rows.map((r) => r.position));
 	const [position] = positions;
 	if (positions.size !== 1 || position === null || position === undefined)
 		return null;
-	if (patch.label === null) return null;
+	if (found.patch === null) return null;
 
 	const heroes: Record<string, MetaHero> = {};
-	const ratings: number[] = [];
-	for (const { row } of rows) {
+	for (const { row } of found.rows) {
 		const id = row.hero_id as number;
 		if (!known.has(id)) continue;
+		// A hero twice is two answers to one question, and the count below
+		// would take both.
+		if (String(id) in heroes) return null;
 		const rating = row.d2pt_rating;
-		if (
-			rating !== null &&
-			(typeof rating !== "number" || rating < 0 || rating > 100)
-		)
+		const value = finite(rating);
+		if (rating !== null && (value === null || value < 0 || value > 100))
 			return null;
-		if (typeof rating === "number") ratings.push(rating);
 		heroes[String(id)] = {
-			rating: rating as number | null,
+			rating: value,
 			tier: typeof row.tier === "string" ? row.tier : null,
-			matches: Number.isInteger(row.matches) ? (row.matches as number) : 0,
-			winRate: typeof row.win_rate === "number" ? row.win_rate : 0,
+			matches:
+				Number.isInteger(row.matches) && (row.matches as number) >= 0
+					? (row.matches as number)
+					: null,
+			winRate: finite(row.win_rate),
 			phaseWinRates: {
 				first: rate(row.phase_1_wins, row.phase_1_matches),
 				second: rate(row.phase_2_wins, row.phase_2_matches),
@@ -141,7 +168,10 @@ export function readMeta(
 			},
 		};
 	}
+	const ratings = Object.values(heroes).flatMap((hero) =>
+		hero.rating === null ? [] : [hero.rating],
+	);
 	if (ratings.length < MIN_RATED) return null;
 	if (new Set(ratings).size === 1) return null;
-	return { position, patch: patch.label, heroes };
+	return { position, patch: found.patch, heroes };
 }
