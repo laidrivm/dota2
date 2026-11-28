@@ -152,6 +152,17 @@ when a newer state arrives mid-search (cm-model, *A newer draft state
 replaces the search*). Player profiles in the second delivery live on the
 server; the search can move there then if they make it heavier.
 
+The worker is the page's own bundle started a second time —
+`new Worker(import.meta.url, { type: "module" })` — and `src/cm/main.tsx`
+serves searches instead of rendering when it finds no `document`. Bun's
+bundler does not follow `new Worker(…)` into a chunk of its own, and a
+separate entrypoint lands in a subdirectory of `dist/` the server does not
+list and under a name no hash invalidates. The same bundle needs neither: it
+is served, and cached, exactly as the page is. The snapshot crosses to a
+worker once; each search sends the draft alone. While the worker searches,
+the page shows "Searching…" rather than the last ranking, which was computed
+for an earlier draft.
+
 ### D7. Value and assignment
 
 Units are percentage points, the snapshot's own, so every component reads

@@ -89,3 +89,72 @@ test("each of the captain's picks shows its position and the player holding it",
 	await expect(pick).toHaveCount(1);
 	await expect(pick).toContainText("pos 1 · Carry");
 });
+
+// spec: cm-model/entering-two-steps-quickly
+test("two steps entered 100 ms apart only ever show the ranking of the step in progress", async ({
+	page,
+}) => {
+	await signedInAt(page, "First pick");
+	const first = page
+		.getByRole("region", { name: "Suggested bans, step 1" })
+		.getByRole("button");
+	await expect(first).toHaveCount(5);
+
+	// Every time a ranked list is on screen, note which step it is for and
+	// which step the marker says is in progress at that moment.
+	await page.evaluate(() => {
+		const seen: [string, string][] = [];
+		(window as unknown as { seen: typeof seen }).seen = seen;
+		new MutationObserver(() => {
+			const marker = document.querySelector('[aria-live="polite"]');
+			for (const list of document.querySelectorAll(
+				"ol[aria-label^='Ranked for step ']",
+			))
+				seen.push([
+					list.getAttribute("aria-label") ?? "",
+					marker?.textContent ?? "",
+				]);
+		}).observe(document.body, {
+			subtree: true,
+			childList: true,
+			characterData: true,
+		});
+	});
+	// Step 1 by its suggestion, then 100 ms later step 2 through the picker,
+	// on a clock the case owns and holds paused: the clicks cost the page no
+	// time, so the gap between the two entries is the 100 ms run between them.
+	await page.clock.install();
+	await page.clock.pauseAt(Date.now() + 1000);
+	const pageNow = () => page.evaluate(() => Date.now());
+	await page
+		.getByRole("region", { name: "Suggested bans, step 1" })
+		.getByRole("button")
+		.first()
+		.click();
+	const start = await pageNow();
+	// The picker opens in an effect, which runs on a frame of this clock: it
+	// is opened 60 ms in, and the 40 ms left let it render before the pick.
+	await page.clock.runFor(60);
+	await draft(page)
+		.getByRole("button", { name: /^Enter / })
+		.click();
+	await page.clock.runFor(40);
+	// Enter in the search field takes the first free hero: step 2.
+	await page.getByLabel("Search heroes").press("Enter");
+	expect((await pageNow()) - start).toBe(100);
+	await page.clock.resume();
+	await expect(
+		page
+			.getByRole("region", { name: "Enemy's expected bans, step 3" })
+			.getByRole("listitem"),
+	).not.toHaveCount(0);
+
+	const seen = await page.evaluate(
+		() => (window as unknown as { seen: [string, string][] }).seen,
+	);
+	for (const [list, marker] of seen) {
+		const step = marker.match(/^Step (\d+)/)?.[1];
+		expect(list).toMatch(new RegExp(`step ${step}$`));
+	}
+	expect(seen.some(([list]) => list.endsWith("step 3"))).toBe(true);
+});

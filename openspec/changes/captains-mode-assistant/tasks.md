@@ -168,9 +168,9 @@ Closes `cm-model/the-assignment-is-shown`, `cm-model/an-enemy-step`.
 
 Closes `cm-model/entering-two-steps-quickly`.
 
-- [ ] 10.1 Failing cases first (ZOMBIES 41): a result for an older `stateId`
+- [x] 10.1 Failing cases first (ZOMBIES 41): a result for an older `stateId`
       is dropped.
-- [ ] 10.2 Move the ranking into a Web Worker with `stateId` messages and
+- [x] 10.2 Move the ranking into a Web Worker with `stateId` messages and
       restart-on-newer (design D6); e2e: two steps 100 ms apart show only the
       second state's suggestions.
 
