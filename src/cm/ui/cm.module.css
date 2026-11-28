@@ -157,3 +157,18 @@
 	clip-path: inset(50%);
 	white-space: nowrap;
 }
+
+/* Where each position's hero strength comes from, and the upload. */
+.meta {
+	display: flex;
+	flex-direction: column;
+	gap: var(--sp-2);
+	margin-bottom: var(--sp-5);
+}
+
+.metaList {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	color: var(--text-3);
+}

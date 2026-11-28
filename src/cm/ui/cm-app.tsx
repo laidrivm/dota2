@@ -1,16 +1,20 @@
 import {
 	useEffect,
 	useLayoutEffect,
+	useMemo,
 	useReducer,
 	useRef,
 	useState,
 } from "preact/hooks";
 import { loadSnapshot } from "../../app/snapshot.ts";
 import type { SnapshotBundle } from "../../types.ts";
+import { withUploads } from "../engine/meta.ts";
 import { readSession, type SessionState, signOut } from "./api.ts";
 import { DraftBoard } from "./board.tsx";
 import s from "./cm.module.css";
 import { persistSession, restoreSession } from "./cm-storage.ts";
+import { type MetaPositions, NO_META, readMeta } from "./meta-api.ts";
+import { MetaPanel } from "./meta-panel.tsx";
 import { Rosters } from "./rosters.tsx";
 import { reduce } from "./session.ts";
 import { Setup } from "./setup.tsx";
@@ -24,12 +28,33 @@ import { Suggestions } from "./suggestions.tsx";
  * and read back on the next load.
  */
 function Draft() {
-	const [bundle, setBundle] = useState<SnapshotBundle | null | undefined>();
+	const [snapshot, setSnapshot] = useState<SnapshotBundle | null | undefined>();
+	const [meta, setMeta] = useState<MetaPositions>(NO_META);
 	const [session, apply] = useReducer(reduce, undefined, restoreSession);
 
+	// Only the latest read lands: the first one finishing after an upload's
+	// reread would put the older meta back. One that fails keeps what is shown —
+	// nothing yet on load, and after an upload the meta that went through.
+	const reads = useRef(0);
+	const reread = () => {
+		const mine = ++reads.current;
+		readMeta().then((read) => {
+			if (read !== null && mine === reads.current) setMeta(read);
+		});
+	};
+
 	useEffect(() => {
-		loadSnapshot().then(setBundle);
+		loadSnapshot().then(setSnapshot);
+		reread();
 	}, []);
+
+	// The snapshot as the model reads it: uploaded positions take their meta
+	// from d2pt (design D9). Kept by reference while neither changes, since a
+	// new bundle is a new search worker.
+	const bundle = useMemo(
+		() => (snapshot ? withUploads(snapshot, meta) : snapshot),
+		[snapshot, meta],
+	);
 
 	// Before paint, so a change the screen shows is already stored when a
 	// reload reads it back — a reset confirmed then reloaded stays reset.
@@ -49,6 +74,7 @@ function Draft() {
 	return (
 		<>
 			<Setup session={session} apply={apply} />
+			<MetaPanel positions={meta} onUploaded={reread} />
 			{ready && (
 				<>
 					<DraftBoard bundle={bundle} session={session} apply={apply} />
